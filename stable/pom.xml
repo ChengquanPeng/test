@@ -21,7 +21,7 @@
 	</properties>
 
 	<dependencies>
-	
+
 		<!-- base -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -35,13 +35,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
-		
+
 		<!-- elasticsearch -->
 		<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
-        </dependency>
-		
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+		</dependency>
+
 
 		<!-- jdbc -->
 		<dependency>
@@ -58,19 +58,19 @@
 			<artifactId>druid-spring-boot-starter</artifactId>
 			<version>1.1.18</version>
 		</dependency>
-		
+
 		<!-- kafka -->
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
 		</dependency>
-		
+
 		<!-- cache -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
-		
+
 		<!-- util -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -86,12 +86,18 @@
 			<artifactId>fastjson</artifactId>
 			<version>1.2.58</version>
 		</dependency>
-		
+
 		<!-- test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<!-- job -->
+		<dependency>
+			<groupId>com.dangdang</groupId>
+			<artifactId>elastic-job-lite-spring</artifactId>
+			<version>2.1.5</version>
 		</dependency>
 	</dependencies>
 

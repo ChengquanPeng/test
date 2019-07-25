@@ -60,22 +60,22 @@ public class UserService {
     @PostConstruct
     private void esTest() {
     	EsUser user = new EsUser();
-    	user.setId(10);
+    	user.setId("10");
     	user.setUsername("username中午");
     	user.setAge("10");
     	user.setCtm(new Date());
     	esUserDao.save(user);
     	
-    	user.setId(11);
+    	user.setId("11");
     	user.setUsername("username中午2");
     	user.setAge("10");
     	user.setCtm(new Date());
     	esUserDao.save(user);
     	
-    	Optional<EsUser> db = esUserDao.findById(10l);
+    	Optional<EsUser> db = esUserDao.findById("10");
     	System.err.println(db.isPresent()?db.get():"null");
     	
-    	SearchQuery searchQuery = new NativeSearchQueryBuilder().withQuery(QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("id", "10"))).build();
+    	SearchQuery searchQuery = new NativeSearchQueryBuilder().withQuery(QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("age", "10"))).build();
     	Page<EsUser> page = esUserDao.search(searchQuery);
     	System.err.println(page.getContent());
     	//esTemplate.qu

@@ -17,7 +17,7 @@ public class EsUser extends EsBase {
 	private static final long serialVersionUID = 3102074407008461165L;
 
 	@Id
-	private int id;
+	private String id;
 	@Field
 	private String username;
 	@Field
