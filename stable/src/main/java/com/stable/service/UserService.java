@@ -59,6 +59,7 @@ public class UserService {
     
     @PostConstruct
     private void esTest() {
+    	esUserDao.deleteAll();
     	EsUser user = new EsUser();
     	user.setId("10");
     	user.setUsername("username中午");

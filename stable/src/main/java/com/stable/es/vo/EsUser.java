@@ -5,6 +5,7 @@ import java.util.Date;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import lombok.Data;
 
@@ -18,10 +19,10 @@ public class EsUser extends EsBase {
 
 	@Id
 	private String id;
-	@Field
+	@Field(type = FieldType.Text)
 	private String username;
-	@Field
+	@Field(type = FieldType.Text)
 	private String age;
-	@Field
+	@Field(type = FieldType.Long)
 	private Date ctm;
 }
