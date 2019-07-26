@@ -5,7 +5,7 @@ import org.springframework.data.redis.serializer.SerializationException;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.stable.Constant;
+import com.stable.constant.Constant;
  
 /**
  * 说明:自定义redis序列化方式
