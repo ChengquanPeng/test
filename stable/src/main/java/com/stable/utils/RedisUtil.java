@@ -17,6 +17,7 @@ import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 @Component
 public class RedisUtil {
@@ -169,7 +170,11 @@ public class RedisUtil {
 		redisTemplate.opsForValue().set(key, value);
 	}
 	public void set(String key, Object value) {
-		this.set(key, JSON.toJSONString(value));
+		this.set(key, getjsonstirng(value));
+	}
+	
+	private String getjsonstirng(Object value) {
+		return JSON.toJSONString(value,SerializerFeature.WriteDateUseDateFormat);
 	}
 
 	/**
@@ -251,7 +256,7 @@ public class RedisUtil {
 		redisTemplate.opsForValue().set(key, value, timeout, unit);
 	}
 	public void setEx(String key, Object value, long timeout, TimeUnit unit) {
-		this.setEx(key, JSON.toJSONString(value), timeout, unit);
+		this.setEx(key, getjsonstirng(value), timeout, unit);
 	}
 
 	/**

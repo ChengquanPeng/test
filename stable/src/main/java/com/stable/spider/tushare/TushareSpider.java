@@ -1,4 +1,4 @@
-package com.stable.spider;
+package com.stable.spider.tushare;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,13 +43,17 @@ public class TushareSpider  {
         }
         return null;
     }
+   
+   public static void main(String[] args) {
+	System.err.println(formatCode("600001"));
+}
 
     /**
      * post 方式提交
      * @param params
      * @return
      */
-    String post(JSONObject params){
+    public String post(JSONObject params){
         HttpHeaders headers = new HttpHeaders();
         //定义请求参数类型，这里用json所以是MediaType.APPLICATION_JSON
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -70,7 +74,7 @@ public class TushareSpider  {
         json.put("api_name","stock_basic");
         //只取上市的
         json.put("params",JSON.parse("{'list_status':'L'}"));
-        json.put("fields","ts_code,symbol,name,area,industry,fullname,market,list_status,list_date");
+        json.put("fields","ts_code,symbol,name,area,industry,fullname,enname,market,exchange,curr_type,list_status,list_date,delist_date,is_hs");
         String result = post(json);
         JSONObject datas= JSON.parseObject(result);
         JSONArray items =datas.getJSONObject("data").getJSONArray("items");

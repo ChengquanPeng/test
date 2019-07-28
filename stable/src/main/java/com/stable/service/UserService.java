@@ -57,7 +57,7 @@ public class UserService {
         return userDao.delete(id);
     }
     
-    @PostConstruct
+    //@PostConstruct
     private void esTest() {
     	esUserDao.deleteAll();
     	EsUser user = new EsUser();
