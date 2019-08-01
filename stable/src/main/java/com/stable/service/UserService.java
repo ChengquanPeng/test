@@ -29,7 +29,10 @@ public class UserService {
 	@Autowired
 	private EsUserDao esUserDao;
 	
-	
+	@PostConstruct
+	private void atest() {
+		System.err.println(this.getUserById(1));
+	}
 	
 	@Cacheable(value = "userinfo", key = "#id", unless="#result == null")
     public UserVo getUserById(Integer id) {
@@ -39,6 +42,7 @@ public class UserService {
     		System.err.println("from cache..");
     		return JSON.parseObject(value, UserVo.class);
     	}*/
+		System.err.println("db...");
     	UserVo vo = userDao.getUserById(id);
     	//redisUtil.set(key, vo);
     	//vo.setCtm(null);
@@ -57,7 +61,7 @@ public class UserService {
         return userDao.delete(id);
     }
     
-    //@PostConstruct
+    @PostConstruct
     private void esTest() {
     	esUserDao.deleteAll();
     	EsUser user = new EsUser();

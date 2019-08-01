@@ -10,6 +10,9 @@ public class Constant {
         ParserConfig.getGlobalInstance().addAccept("com.stable.vo");
     }
 	public static final String EMPTY_STRING = "";
+	public static final String EMPTY_STRING2 = "''";
 	public static final String UTF_8 = "UTF-8";
 	public static final Charset DEFAULT_CHARSET = Charset.forName(UTF_8);
+	public static final String NULL = "null";
+	public static final String FALSE = "false";
 }

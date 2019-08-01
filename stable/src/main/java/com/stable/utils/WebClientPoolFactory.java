@@ -1,5 +1,8 @@
 package com.stable.utils;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -8,7 +11,10 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
+import com.gargoylesoftware.htmlunit.ScriptException;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.javascript.JavaScriptErrorListener;
 
 public class WebClientPoolFactory {
 	/**
@@ -89,6 +95,27 @@ class MyBeanPooledFactory extends BasePooledObjectFactory<WebClient> {
 		webClient.setAjaxController(new NicelyResynchronizingAjaxController());// 很重要，设置支持AJAX
 		webClient.getOptions().setTimeout(30000);
 		webClient.waitForBackgroundJavaScript(3000);
+		webClient.setJavaScriptErrorListener(new JavaScriptErrorListener() {
+			@Override
+			public void warn(String message, String sourceName, int line, String lineSource, int lineOffset) {
+			}
+			
+			@Override
+			public void timeoutError(HtmlPage page, long allowedTime, long executionTime) {
+			}
+			
+			@Override
+			public void scriptException(HtmlPage page, ScriptException scriptException) {
+			}
+			
+			@Override
+			public void malformedScriptURL(HtmlPage page, String url, MalformedURLException malformedURLException) {
+			}
+			
+			@Override
+			public void loadScriptError(HtmlPage page, URL scriptUrl, Exception exception) {
+			}
+		});
 		return webClient;
 	}
 

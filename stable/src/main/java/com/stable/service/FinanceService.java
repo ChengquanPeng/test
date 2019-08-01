@@ -30,8 +30,5 @@ public class FinanceService {
         System.err.println(items);
 	}
 	
-	@PostConstruct
-	private void test() {
-		getFinaceHistoryInfo("600000");
-	}
+	
 }

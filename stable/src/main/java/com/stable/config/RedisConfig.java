@@ -28,8 +28,9 @@ public class RedisConfig {
 	public CacheManager cacheManager(RedisConnectionFactory factory) {
 		FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
 		RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
-				.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(fastJsonRedisSerializer))
-				.entryTtl(Duration.ofHours(1));// 设置缓存有效期一小时
+				.serializeValuesWith(
+						RedisSerializationContext.SerializationPair.fromSerializer(fastJsonRedisSerializer));
+		redisCacheConfiguration = redisCacheConfiguration.entryTtl(Duration.ofHours(1));// 设置缓存有效期一小时
 		return RedisCacheManager.builder(RedisCacheWriter.nonLockingRedisCacheWriter(factory))
 				.cacheDefaults(redisCacheConfiguration).build();
 	}

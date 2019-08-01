@@ -44,10 +44,6 @@ public class TushareSpider  {
         return null;
     }
    
-   public static void main(String[] args) {
-	System.err.println(formatCode("600001"));
-}
-
     /**
      * post 方式提交
      * @param params
