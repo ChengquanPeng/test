@@ -31,6 +31,15 @@ public class DbStockBaseInfoDao {
             return null;
         }
     }
+    
+    public List<StockBaseInfo> getListWithOnStauts() {
+        List<StockBaseInfo> list = jdbcTemplate.query("select * from stock_base_info where list_status='L' ", new Object[]{}, new BeanPropertyRowMapper<StockBaseInfo>(StockBaseInfo.class));
+        if(list!=null && list.size()>0){
+            return list;
+        }else{
+            return null;
+        }
+    }
  
     public int insert(StockBaseInfo b) {
         return jdbcTemplate.update("INSERT INTO stock_base_info (code, ts_code, name, area, industry, fullname, enname, market, exchange, curr_type, list_status, list_date, delist_date, is_hs,udp_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,NOW())",

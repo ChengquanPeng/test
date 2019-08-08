@@ -13,10 +13,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 /**
- *
  * 用挖地免的接口
- * @author chenguoxiang
- * @create 2018-10-30 9:31
  **/
 @Component("TushareSpider")
 public class TushareSpider  {

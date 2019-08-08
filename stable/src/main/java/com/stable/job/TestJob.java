@@ -7,7 +7,7 @@ import com.dangdang.ddframe.job.api.ShardingContext;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
 import com.stable.service.UserService;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 这是我们的测试job类
@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
  * @date 2018/10/25.
  */
 @Component
-@Slf4j
+@Log4j2
 public class TestJob implements SimpleJob {
 
 	@Autowired

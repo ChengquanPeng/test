@@ -1,9 +1,8 @@
 package com.stable.service;
 
-import javax.annotation.PostConstruct;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -39,5 +38,9 @@ public class StockBasicService {
 		esStockBaseInfoDao.save(base);
 		redisUtil.set(base.getCode(), base);
 		dbStockBaseInfoDao.saveOrUpdate(base);
+	}
+	
+	public List<StockBaseInfo> getAllOnStatusList(){
+		return dbStockBaseInfoDao.getListWithOnStauts();
 	}
 }
