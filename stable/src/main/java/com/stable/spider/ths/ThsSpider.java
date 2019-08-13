@@ -28,8 +28,14 @@ public class ThsSpider {
 	private static final String FIN_RPT_URL = "http://basic.10jqka.com.cn/%s/finance.html";
 
 	public List<FinanceBaseInfo> getBaseFinance(String code) {
-		HtmlPage page = htmlunitSpider.getHtmlPageFromUrl(String.format(FIN_RPT_URL, code));
-		String text = page.getElementById("main").getTextContent();
+		String text;
+		try {
+			HtmlPage page = htmlunitSpider.getHtmlPageFromUrl(String.format(FIN_RPT_URL, code));
+			text = page.getElementById("main").getTextContent();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 		text = text.replace(Constant.FALSE, Constant.EMPTY_STRING2);
 		JSONObject jo = JSONObject.parseObject(text);
 		JSONArray report = jo.getJSONArray("report");
@@ -41,9 +47,16 @@ public class ThsSpider {
 		List<FinanceBaseInfo> res = new LinkedList<FinanceBaseInfo>();
 		for (int j = 0; j < list.get(0).size(); j++) {
 			FinanceBaseInfo finbase = new FinanceBaseInfo();
-			finbase.setValue(code, j, list);
-			log.debug(finbase.toString());
-			res.add(finbase);
+			try {
+				finbase.setValue(code, j, list);
+				log.debug(finbase.toString());
+				res.add(finbase);
+			} catch (Exception e) {
+				e.printStackTrace();
+				log.error(list.get(0).getString(j));
+				log.error(finbase.toString());
+				return null;
+			}
 		}
 		log.debug("HtmlunitSpider for code={}", code);
 		return res;

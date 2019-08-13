@@ -77,7 +77,6 @@ public class FinanceBaseInfo {
 		this.code = code;
 		int indexlist = 0;
 		String datestr = list.get(indexlist++).getString(index);
-		getYearMonth(datestr);
 		this.earningsPerShare = list.get(indexlist++).getString(index);
 		this.retainedProfits = CurrencyUitl.covertToLong(list.get(indexlist++).getString(index));
 		this.retainedProfitsTbRate = list.get(indexlist++).getString(index);
@@ -94,6 +93,9 @@ public class FinanceBaseInfo {
 		this.cashPerShare = list.get(indexlist++).getString(index);
 		this.profitOnSales = list.get(indexlist++).getString(index);
 		this.updateDate = new Date();
+		
+		//
+		getYearMonth(datestr);
 		this.id = this.code + "_" + this.reportDate;
 	}
 

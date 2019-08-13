@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -17,9 +18,11 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.RedisConstant;
 import com.stable.es.dao.EsFinanceBaseInfoDao;
 import com.stable.spider.ths.ThsSpider;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.utils.RedisUtil;
 import com.stable.vo.bus.FinanceBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -35,8 +38,11 @@ public class FinanceService {
 	@Autowired
 	private EsFinanceBaseInfoDao esFinanceBaseInfoDao;
 
-	public void spiderFinaceHistoryInfo(String code) {
+	public boolean spiderFinaceHistoryInfo(String code) {
 		List<FinanceBaseInfo> list = thsSpider.getBaseFinance(code);
+		if (list == null || list.size() <= 0) {
+			return false;
+		}
 		FinanceBaseInfo last = getLastFinaceReport(code);
 
 		for (FinanceBaseInfo f : list) {
@@ -45,6 +51,7 @@ public class FinanceService {
 				log.info("saved code={},date={}", code, f.getReportDate());
 			}
 		}
+		return true;
 	}
 
 	public FinanceBaseInfo getLastFinaceReport(String code) {
@@ -59,14 +66,15 @@ public class FinanceService {
 		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			FinanceBaseInfo f = page.getContent().get(0);
-			log.info("page size={},last report fince code={},date={}", page.getContent().size(),code, f.getReportDate());
+			log.info("page size={},last report fince code={},date={}", page.getContent().size(), code,
+					f.getReportDate());
 			return f;
 		}
 		log.info("no last report fince code={}", code);
 		return null;
 	}
 
-	@PostConstruct
+	//@PostConstruct
 	private void test() {
 		spiderFinaceHistoryInfo("600000");
 	}

@@ -1,5 +1,6 @@
 package com.stable.utils;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +25,7 @@ public class RedisUtil {
 
 	@Autowired
 	private StringRedisTemplate redisTemplate;
+
 	/*
 	 * @param key
 	 * 
@@ -169,12 +171,21 @@ public class RedisUtil {
 	public void set(String key, String value) {
 		redisTemplate.opsForValue().set(key, value);
 	}
+
 	public void set(String key, Object value) {
 		this.set(key, getjsonstirng(value));
 	}
-	
+
+	public void set(String key, Object value, Duration timeout) {
+		this.set(key, getjsonstirng(value), timeout);
+	}
+
+	public void set(String key, String value, Duration timeout) {
+		redisTemplate.opsForValue().set(key, value, timeout);
+	}
+
 	private String getjsonstirng(Object value) {
-		return JSON.toJSONString(value,SerializerFeature.WriteDateUseDateFormat);
+		return JSON.toJSONString(value, SerializerFeature.WriteDateUseDateFormat);
 	}
 
 	/**
@@ -255,6 +266,7 @@ public class RedisUtil {
 	public void setEx(String key, String value, long timeout, TimeUnit unit) {
 		redisTemplate.opsForValue().set(key, value, timeout, unit);
 	}
+
 	public void setEx(String key, Object value, long timeout, TimeUnit unit) {
 		this.setEx(key, getjsonstirng(value), timeout, unit);
 	}
