@@ -26,7 +26,7 @@ public class TushareSpider {
 	private String tuToken;
 	@Autowired
 	private RestTemplate restTemplate;
-	//private final String api = "http://api.tushare.pro";
+	// private final String api = "http://api.tushare.pro";
 	private final String api = "http://api.waditu.com";
 
 	/**
@@ -37,13 +37,18 @@ public class TushareSpider {
 	 */
 	public static String formatCode(String code) {
 		// 5开头，沪市基金或权证 60开头上证
-		if (code.matches("^60.*|^5.*")) {
+		if (code.startsWith("6")) {
+			return String.format("%s.SH", code);
+		} else if (code.startsWith("0")) {
+			return String.format("%s.SZ", code);
+		} else if (code.matches("^60.*|^5.*")) {
 			return String.format("%s.SH", code);
 		}
 		// 1开头的，是深市基金 00开头是深圳
 		else if (code.matches("^1.*|^00.*|^300...")) {
 			return String.format("%s.SZ", code);
 		}
+
 		return null;
 	}
 
@@ -138,50 +143,25 @@ public class TushareSpider {
 	}
 
 	/**
-	 * 通用行情接口
+	 * 日线行情
 	 * 
 	 * @param ts_code    ts代码
 	 * @param start_date 开始日期 (格式：YYYYMMDD)
 	 * @param end_date   结束日期 (格式：YYYYMMDD)
-	 * @param adj        复权类型(只针对股票)：None未复权 qfq前复权 hfq后复权 , 默认None
-	 * @param freq       数据频度
-	 *                   ：支持分钟(min)/日(D)/周(W)/月(M)K线，其中1min表示1分钟（类推1/5/15/30/60分钟）
-	 *                   ，默认D。
-	 * @param ma         均线，支持任意合理int数值
-	 * @param factors    股票因子（asset='E'有效）支持 tor换手率 vr量比
-	 * @param adjfactor  复权因子，在复权数据是，如果此参数为True，返回的数据中则带复权因子，默认为False。
 	 * @return
 	 */
-	public JSONArray getStockDaliyTradeListDef(String ts_code, String start_date, String end_date) {
+	public JSONArray getStockDaliyTrade(String ts_code, String start_date, String end_date) {
 		StockDaliyReq req = new StockDaliyReq();
 		req.setTs_code(ts_code);
 		req.setStart_date(start_date);
 		req.setEnd_date(end_date);
-		return getStockDaliyTradeList(req);
-	}
 
-	/**
-	 * 通用行情接口
-	 * 
-	 * @param ts_code    ts代码
-	 * @param start_date 开始日期 (格式：YYYYMMDD)
-	 * @param end_date   结束日期 (格式：YYYYMMDD)
-	 * @param adj        复权类型(只针对股票)：None未复权 qfq前复权 hfq后复权 , 默认None
-	 * @param freq       数据频度
-	 *                   ：支持分钟(min)/日(D)/周(W)/月(M)K线，其中1min表示1分钟（类推1/5/15/30/60分钟）
-	 *                   ，默认D。
-	 * @param ma         均线，支持任意合理int数值
-	 * @param factors    股票因子（asset='E'有效）支持 tor换手率 vr量比
-	 * @param adjfactor  复权因子，在复权数据是，如果此参数为True，返回的数据中则带复权因子，默认为False。
-	 * @return
-	 */
-	public JSONArray getStockDaliyTradeList(StockDaliyReq req) {
 		JSONObject json = new JSONObject();
 		// 接口名称
 		json.put("api_name", "daily");
 		// 只取上市的
 		json.put("params", JSON.parse(JSON.toJSONString(req)));
-		
+
 		String result = post(json);
 		JSONObject datas = JSON.parseObject(result);
 		JSONArray items = datas.getJSONObject("data").getJSONArray("items");

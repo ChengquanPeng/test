@@ -7,6 +7,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.Constant;
 import com.stable.es.vo.EsBase;
 
@@ -58,7 +59,6 @@ public class TradeHistInfoDaliy extends EsBase {
 		String d = f[0];
 		this.date = Integer.valueOf(d.replaceAll(Constant.SYMBOL_, Constant.EMPTY_STRING));
 		this.code = code;
-		this.id = code + date;
 		this.open = Double.valueOf(f[1]);
 		this.high = Double.valueOf(f[2]);
 		this.closed = Double.valueOf(f[3]);
@@ -66,5 +66,28 @@ public class TradeHistInfoDaliy extends EsBase {
 		this.volume = Long.valueOf(f[5]);
 		this.amt = Long.valueOf(f[6]);
 		this.updDate = new Date();
+		setId();
+	}
+
+	public TradeHistInfoDaliy(String code, JSONArray arr) {
+		int i = 0;
+		arr.getString(i++);// ts_code
+		this.code = code;
+		this.date = Integer.valueOf(arr.getString(i++));
+		this.open = Double.valueOf(arr.getString(i++));
+		this.high = Double.valueOf(arr.getString(i++));
+		this.low = Double.valueOf(arr.getString(i++));
+		this.closed = Double.valueOf(arr.getString(i++));
+		arr.getString(i++);// pre_close
+		arr.getString(i++);// change
+		arr.getString(i++);// pct_chg
+		this.volume = Double.valueOf((Double.valueOf(arr.getString(i++)) * 100)).longValue();// 成交量 （手）
+		this.amt = Double.valueOf((Double.valueOf(arr.getString(i++)) * 1000)).longValue();// 成交额 （千元）
+		this.updDate = new Date();
+		setId();
+	}
+	
+	private void setId() {
+		this.id = code + date;
 	}
 }
