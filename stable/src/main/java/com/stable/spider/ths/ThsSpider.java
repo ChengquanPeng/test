@@ -62,7 +62,6 @@ public class ThsSpider {
 		return res;
 	}
 
-	// @PostConstruct
 	private void test() {
 		getBaseFinance("600000");
 	}

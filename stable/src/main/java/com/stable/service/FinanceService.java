@@ -74,7 +74,6 @@ public class FinanceService {
 		return null;
 	}
 
-	//@PostConstruct
 	private void test() {
 		spiderFinaceHistoryInfo("600000");
 	}

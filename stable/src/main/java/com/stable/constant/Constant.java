@@ -15,4 +15,7 @@ public class Constant {
 	public static final Charset DEFAULT_CHARSET = Charset.forName(UTF_8);
 	public static final String NULL = "null";
 	public static final String FALSE = "false";
+	public static final String DOU_HAO = ",";
+	public static final String NUM_ER = "2";
+	public static final String SYMBOL_ = "-";
 }

@@ -8,13 +8,14 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 
 import com.alibaba.fastjson.JSONArray;
+import com.stable.es.vo.EsBase;
 import com.stable.utils.CurrencyUitl;
 
 import lombok.Data;
 
 @Data
 @Document(indexName = "finance_base_info")
-public class FinanceBaseInfo {
+public class FinanceBaseInfo extends EsBase{
 	@Id
 	private String id;
 	@Field

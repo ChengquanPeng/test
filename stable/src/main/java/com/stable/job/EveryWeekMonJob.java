@@ -14,8 +14,8 @@ import com.dangdang.ddframe.job.api.simple.SimpleJob;
 import com.stable.constant.RedisConstant;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
-import com.stable.utils.MathUtil;
 import com.stable.utils.RedisUtil;
+import com.stable.utils.TheadUtil;
 import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -50,17 +50,12 @@ public class EveryWeekMonJob implements SimpleJob {
 			if (financeService.spiderFinaceHistoryInfo(s.getCode())) {
 				redisUtil.set(RedisConstant.RDS_FINACE_HIST_INFO_ + s.getCode(), "1", Duration.ofDays(1));
 			}
-			try {
-				// 随机休息5-15s
-				Thread.sleep(MathUtil.getRandomSecBetween5And15() * 1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			TheadUtil.sleepRandomSecBetween5And15();
 		}
 	}
 
 	@PostConstruct
 	public void teest() {
-		this.execute(null);
+	//	this.execute(null);
 	}
 }

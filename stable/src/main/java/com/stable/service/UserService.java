@@ -29,7 +29,6 @@ public class UserService {
 	@Autowired
 	private EsUserDao esUserDao;
 	
-	@PostConstruct
 	private void atest() {
 		System.err.println(this.getUserById(1));
 	}
@@ -61,7 +60,6 @@ public class UserService {
         return userDao.delete(id);
     }
     
-    @PostConstruct
     private void esTest() {
     	esUserDao.deleteAll();
     	EsUser user = new EsUser();

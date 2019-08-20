@@ -2,6 +2,8 @@ package com.stable.service;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +14,10 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.RedisUtil;
 import com.stable.vo.bus.StockBaseInfo;
 
+import lombok.extern.log4j.Log4j2;
+
 @Service
+@Log4j2
 public class StockBasicService {
 
 	@Autowired
@@ -24,7 +29,6 @@ public class StockBasicService {
 	@Autowired
 	private DbStockBaseInfoDao dbStockBaseInfoDao;
 
-	//@PostConstruct
 	public void synStockList() {
 		JSONArray array = tushareSpider.getStockCodeList();
 		// System.err.println(array.toJSONString());
@@ -38,6 +42,7 @@ public class StockBasicService {
 		esStockBaseInfoDao.save(base);
 		redisUtil.set(base.getCode(), base);
 		dbStockBaseInfoDao.saveOrUpdate(base);
+		log.info("syn stock code list:{}",base);
 	}
 	
 	public List<StockBaseInfo> getAllOnStatusList(){
