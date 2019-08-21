@@ -1,7 +1,5 @@
 package com.stable.job;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,12 +28,7 @@ public class EveryWeekMonJob implements SimpleJob {
 		log.info("每周1任务开始执行：");
 		log.info("1.同步股票列表");
 		log.info("2.同步股票报告");
-		stockBasicService.synStockList();
+		stockBasicService.jobSynStockList();
 		financeService.jobSpiderFinaceHistoryInfo();
-	}
-
-	@PostConstruct
-	public void teest() {
-	//	this.execute(null);
 	}
 }

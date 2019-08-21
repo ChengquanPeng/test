@@ -16,11 +16,15 @@
 
     <!-- 配置作业 下面的TestJob就是我们刚才新建的测试类-->
     <job:simple id="testJob" class="com.stable.job.TestJob"
-                registry-center-ref="regCenter" cron="0 * * * * ?"
+                registry-center-ref="regCenter" cron="0 1 1 * * ?"
                 sharding-item-parameters="0=a" description="这个一个定时任务" sharding-total-count="1"/>
                 
      <job:simple id="EveryWeekMonJob" class="com.stable.job.EveryWeekMonJob"
                 registry-center-ref="regCenter" cron="0 15 8 ? * MON"
+                sharding-item-parameters="0=a" description="每周一早上8点15执行任务" sharding-total-count="1"/>
+                
+     <job:simple id="EveryWeekMonJob" class="com.stable.job.EveryWorkingDayJob"
+                registry-center-ref="regCenter" cron="0 01 18 ? * 2,3,4,5,6 *"
                 sharding-item-parameters="0=a" description="每周一早上8点15执行任务" sharding-total-count="1"/>
 
 </beans>

@@ -85,7 +85,7 @@ public class TradeHistroyService {
 	/**
 	 * 每日*定时任务
 	 */
-	public void spiderAll() {
+	public void jobSpiderAll() {
 		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
 			public Object call() throws Exception {
 				List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();

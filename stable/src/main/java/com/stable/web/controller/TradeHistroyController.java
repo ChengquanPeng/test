@@ -45,7 +45,7 @@ public class TradeHistroyController {
 	public ResponseEntity<JsonResult> daliyall() {
 		JsonResult r = new JsonResult();
 		try {
-			tradeHistroyService.spiderAll();
+			tradeHistroyService.jobSpiderAll();
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
