@@ -10,9 +10,15 @@ public class MathUtil {
 		return (number + 5);
 	}
 	
+	public static final int getRandomSecBetween1And5() {
+		Random r = new Random();
+		int number = r.nextInt(5);
+		return (number+1);
+	}
+	
 	public static void main(String[] args) {
-		System.err.println(getRandomSecBetween5And15());
-		System.err.println(getRandomSecBetween5And15());
-		System.err.println(getRandomSecBetween5And15());
+		System.err.println(getRandomSecBetween1And5());
+		System.err.println(getRandomSecBetween1And5());
+		System.err.println(getRandomSecBetween1And5());
 	}
 }

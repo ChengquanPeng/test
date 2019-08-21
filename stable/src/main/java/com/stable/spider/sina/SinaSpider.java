@@ -3,8 +3,6 @@ package com.stable.spider.sina;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,10 +14,7 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.TheadUtil;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Component
-@Slf4j
 public class SinaSpider {
 
 	@Autowired

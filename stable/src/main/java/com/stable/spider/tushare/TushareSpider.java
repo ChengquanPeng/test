@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.stable.utils.TheadUtil;
 import com.stable.vo.spi.req.StockDaliyReq;
 
 import lombok.extern.log4j.Log4j2;
@@ -151,20 +152,24 @@ public class TushareSpider {
 	 * @return
 	 */
 	public JSONArray getStockDaliyTrade(String ts_code, String start_date, String end_date) {
-		StockDaliyReq req = new StockDaliyReq();
-		req.setTs_code(ts_code);
-		req.setStart_date(start_date);
-		req.setEnd_date(end_date);
+		try {
+			StockDaliyReq req = new StockDaliyReq();
+			req.setTs_code(ts_code);
+			req.setStart_date(start_date);
+			req.setEnd_date(end_date);
 
-		JSONObject json = new JSONObject();
-		// 接口名称
-		json.put("api_name", "daily");
-		// 只取上市的
-		json.put("params", JSON.parse(JSON.toJSONString(req)));
+			JSONObject json = new JSONObject();
+			// 接口名称
+			json.put("api_name", "daily");
+			// 只取上市的
+			json.put("params", JSON.parse(JSON.toJSONString(req)));
 
-		String result = post(json);
-		JSONObject datas = JSON.parseObject(result);
-		JSONArray items = datas.getJSONObject("data").getJSONArray("items");
-		return items;
+			String result = post(json);
+			JSONObject datas = JSON.parseObject(result);
+			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
+			return items;
+		} finally {
+			TheadUtil.sleepRandomSecBetween1And5();
+		}
 	}
 }

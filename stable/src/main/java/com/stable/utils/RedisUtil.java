@@ -187,6 +187,10 @@ public class RedisUtil {
 	private String getjsonstirng(Object value) {
 		return JSON.toJSONString(value, SerializerFeature.WriteDateUseDateFormat);
 	}
+	
+	public void del(String key) {
+		redisTemplate.delete(key);
+	}
 
 	/**
 	 * 获取指定 key 的值

@@ -1,8 +1,7 @@
 package com.stable.service;
 
+import java.time.Duration;
 import java.util.List;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -21,9 +20,9 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.EsFinanceBaseInfoDao;
 import com.stable.spider.ths.ThsSpider;
-import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.RedisUtil;
 import com.stable.vo.bus.FinanceBaseInfo;
+import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -32,15 +31,18 @@ import lombok.extern.log4j.Log4j2;
 public class FinanceService {
 
 	@Autowired
-	private TushareSpider tushareSpider;
-	@Autowired
 	private ThsSpider thsSpider;
 	@Autowired
 	private EsFinanceBaseInfoDao esFinanceBaseInfoDao;
+	@Autowired
+	private StockBasicService stockBasicService;
+	@Autowired
+	private RedisUtil redisUtil;
 
 	public boolean spiderFinaceHistoryInfo(String code) {
 		List<FinanceBaseInfo> list = thsSpider.getBaseFinance(code);
 		if (list == null || list.size() <= 0) {
+			log.warn("未抓取到Finane记录,code={}", code);
 			return false;
 		}
 		FinanceBaseInfo last = getLastFinaceReport(code);
@@ -54,7 +56,7 @@ public class FinanceService {
 		return true;
 	}
 
-	public FinanceBaseInfo getLastFinaceReport(String code) {
+	private FinanceBaseInfo getLastFinaceReport(String code) {
 		Pageable pageable = PageRequest.of(0, 1);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -74,7 +76,16 @@ public class FinanceService {
 		return null;
 	}
 
-	private void test() {
-		spiderFinaceHistoryInfo("600000");
+	public void jobSpiderFinaceHistoryInfo() {
+		List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+		for (StockBaseInfo s : list) {
+			String rv = redisUtil.get(RedisConstant.RDS_FINACE_HIST_INFO_ + s.getCode());
+			if (StringUtils.isNotBlank(rv)) {
+				continue;
+			}
+			if (this.spiderFinaceHistoryInfo(s.getCode())) {
+				redisUtil.set(RedisConstant.RDS_FINACE_HIST_INFO_ + s.getCode(), "1", Duration.ofDays(1));
+			}
+		}
 	}
 }
