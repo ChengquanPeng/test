@@ -14,13 +14,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.stable.utils.TheadUtil;
 import com.stable.vo.spi.req.StockDaliyReq;
 
-import lombok.extern.log4j.Log4j2;
-
 /**
  * 用挖地免的接口
  **/
 @Component("TushareSpider")
-@Log4j2
 public class TushareSpider {
 
 	@Value("${tushare.token}")
@@ -28,7 +25,8 @@ public class TushareSpider {
 	@Autowired
 	private RestTemplate restTemplate;
 	// private final String api = "http://api.tushare.pro";
-	private final String api = "http://api.waditu.com";
+	@Value("${tushare.api}")
+	private String api = "http://api.waditu.com";
 
 	/**
 	 * 格式化成tushare API所需格式

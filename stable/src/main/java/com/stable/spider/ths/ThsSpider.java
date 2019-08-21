@@ -15,10 +15,10 @@ import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.TheadUtil;
 import com.stable.vo.bus.FinanceBaseInfo;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 @Component
-@Slf4j
+@Log4j2
 public class ThsSpider {
 
 	@Autowired
