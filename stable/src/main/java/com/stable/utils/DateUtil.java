@@ -12,11 +12,17 @@ public class DateUtil {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
 		return format.format(new Date());
 	}
+
+	public static String getLastDayOfYearYYYYMMDD() {
+		int year = getCurYYYY();
+		return year + "1231";
+	}
+
 	public static int getCurYYYY() {
 		Calendar cal = Calendar.getInstance();
 		return cal.get(Calendar.YEAR);
 	}
-	
+
 	public static int getCurJidu() {
 		Calendar cal = Calendar.getInstance();
 		int month = cal.get(Calendar.MONTH) + 1;
@@ -34,7 +40,7 @@ public class DateUtil {
 		}
 		return 0;
 	}
-	
+
 	public static void main(String[] args) {
 		System.err.println(getCurYYYY());
 	}

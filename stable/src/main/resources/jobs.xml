@@ -23,8 +23,12 @@
                 registry-center-ref="regCenter" cron="0 15 8 ? * MON"
                 sharding-item-parameters="0=a" description="每周一早上8点15执行任务" sharding-total-count="1"/>
                 
-     <job:simple id="EveryWeekMonJob" class="com.stable.job.EveryWorkingDayJob"
+     <job:simple id="EveryWorkingDayJob" class="com.stable.job.EveryWorkingDayJob"
                 registry-center-ref="regCenter" cron="0 01 18 ? * 2,3,4,5,6 *"
-                sharding-item-parameters="0=a" description="每周一早上8点15执行任务" sharding-total-count="1"/>
+                sharding-item-parameters="0=a" description="每日晚上18点15执行任务" sharding-total-count="1"/>
+                
+	<job:simple id="EveryMonthJob" class="com.stable.job.EveryMonthJob"
+                registry-center-ref="regCenter" cron="1 1 1 1 * ?"
+                sharding-item-parameters="0=a" description="每月1日凌晨执行" sharding-total-count="1"/>
 
 </beans>

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.constant.RedisConstant;
-import com.stable.service.TradeHistroyService;
+import com.stable.service.DaliyTradeHistroyService;
 import com.stable.utils.RedisUtil;
 import com.stable.vo.http.JsonResult;
 
@@ -17,7 +17,7 @@ import com.stable.vo.http.JsonResult;
 public class TradeHistroyController {
 
 	@Autowired
-	private TradeHistroyService tradeHistroyService;
+	private DaliyTradeHistroyService tradeHistroyService;
 	@Autowired
 	private RedisUtil redisUtil;
 

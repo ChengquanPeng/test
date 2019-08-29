@@ -1,5 +1,6 @@
 package com.stable.spider.tushare;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -47,8 +48,13 @@ public class TushareSpider {
 		else if (code.matches("^1.*|^00.*|^300...")) {
 			return String.format("%s.SZ", code);
 		}
-
 		return null;
+	}
+	public static String removets(String tscode) {
+		return tscode.substring(0, tscode.indexOf('.'));
+	}
+	public static void main(String[] args) {
+		System.err.println(removets("300068.SZ"));
 	}
 
 	/**
@@ -149,12 +155,16 @@ public class TushareSpider {
 	 * @param end_date   结束日期 (格式：YYYYMMDD)
 	 * @return
 	 */
-	public JSONArray getStockDaliyTrade(String ts_code, String start_date, String end_date) {
+	public JSONArray getStockDaliyTrade(String ts_code,String trade_date,  String start_date, String end_date) {
 		try {
 			StockDaliyReq req = new StockDaliyReq();
-			req.setTs_code(ts_code);
-			req.setStart_date(start_date);
-			req.setEnd_date(end_date);
+			if (StringUtils.isNotBlank(trade_date)) {
+				req.setTrade_date(trade_date);
+			} else {
+				req.setTs_code(ts_code);
+				req.setStart_date(start_date);
+				req.setEnd_date(end_date);
+			}
 
 			JSONObject json = new JSONObject();
 			// 接口名称
@@ -162,6 +172,64 @@ public class TushareSpider {
 			// 只取上市的
 			json.put("params", JSON.parse(JSON.toJSONString(req)));
 
+			String result = post(json);
+			JSONObject datas = JSON.parseObject(result);
+			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
+			return items;
+		} finally {
+			TheadUtil.sleepRandomSecBetween1And5();
+		}
+	}
+
+	/**
+	 * 日线行情
+	 * 
+	 * @param ts_code    ts代码
+	 * @param start_date 开始日期 (格式：YYYYMMDD)
+	 * @param end_date   结束日期 (格式：YYYYMMDD)
+	 * @return
+	 */
+	public JSONArray getStockDaliyBasic(String ts_code, String trade_date, String start_date, String end_date) {
+		try {
+			StockDaliyReq req = new StockDaliyReq();
+			if (StringUtils.isNotBlank(trade_date)) {
+				req.setTrade_date(trade_date);
+			} else {
+				req.setTs_code(ts_code);
+				req.setStart_date(start_date);
+				req.setEnd_date(end_date);
+			}
+
+			JSONObject json = new JSONObject();
+			// 接口名称
+			json.put("api_name", "daily_basic");
+			// 只取上市的
+			json.put("params", JSON.parse(JSON.toJSONString(req)));
+
+			String result = post(json);
+			JSONObject datas = JSON.parseObject(result);
+			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
+			return items;
+		} finally {
+			TheadUtil.sleepRandomSecBetween1And5();
+		}
+	}
+	
+	/**
+	 * 日线行情
+	 * 
+	 * @param ts_code    ts代码
+	 * @param start_date 开始日期 (格式：YYYYMMDD)
+	 * @param end_date   结束日期 (格式：YYYYMMDD)
+	 * @return
+	 */
+	public JSONArray getTradeCal(String start_date, String end_date) {
+		try {
+			JSONObject json = new JSONObject();
+			json.put("api_name", "trade_cal");
+			json.put("params", JSON.parse("{'start_date':'"+start_date+"','end_date':'"+end_date+"','is_open':'1'}"));
+			json.put("fields", "cal_date,pretrade_date");
+			
 			String result = post(json);
 			JSONObject datas = JSON.parseObject(result);
 			JSONArray items = datas.getJSONObject("data").getJSONArray("items");

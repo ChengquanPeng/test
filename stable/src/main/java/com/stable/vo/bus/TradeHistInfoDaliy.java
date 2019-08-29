@@ -10,6 +10,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.Constant;
 import com.stable.es.vo.EsBase;
+import com.stable.spider.tushare.TushareSpider;
 
 import lombok.Data;
 
@@ -69,10 +70,10 @@ public class TradeHistInfoDaliy extends EsBase {
 		setId();
 	}
 
-	public TradeHistInfoDaliy(String code, JSONArray arr) {
+	public TradeHistInfoDaliy(JSONArray arr) {
 		int i = 0;
-		arr.getString(i++);// ts_code
-		this.code = code;
+		String tscode = arr.getString(i++);// ts_code
+		this.code = TushareSpider.removets(tscode);
 		this.date = Integer.valueOf(arr.getString(i++));
 		this.open = Double.valueOf(arr.getString(i++));
 		this.high = Double.valueOf(arr.getString(i++));

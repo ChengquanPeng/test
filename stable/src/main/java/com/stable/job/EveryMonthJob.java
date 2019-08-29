@@ -1,11 +1,13 @@
 package com.stable.job;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
-import com.stable.service.DaliyTradeHistroyService;
+import com.stable.service.TradeCalService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -15,14 +17,15 @@ import lombok.extern.log4j.Log4j2;
  */
 @Component
 @Log4j2
-public class EveryWorkingDayJob implements SimpleJob {
+public class EveryMonthJob implements SimpleJob {
 
 	@Autowired
-	private DaliyTradeHistroyService tradeHistroyService;
+	private TradeCalService tradeCalService;
 
 	@Override
+	@PostConstruct
 	public void execute(ShardingContext sc) {
-		log.info("日线数据任务开始执行：");
-		tradeHistroyService.jobSpiderAll();
+		log.info("开始同步日历");
+		tradeCalService.synTradeCal();
 	}
 }
