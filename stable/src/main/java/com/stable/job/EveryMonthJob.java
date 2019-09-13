@@ -23,7 +23,7 @@ public class EveryMonthJob implements SimpleJob {
 	private TradeCalService tradeCalService;
 
 	@Override
-	@PostConstruct
+	//@PostConstruct
 	public void execute(ShardingContext sc) {
 		log.info("开始同步日历");
 		tradeCalService.synTradeCal();

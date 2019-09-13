@@ -35,7 +35,7 @@ public class ThsSpider {
 			e.printStackTrace();
 			return null;
 		} finally {
-			TheadUtil.sleepRandomSecBetween1And5();
+			TheadUtil.thsSleepRandom();
 		}
 		text = text.replace(Constant.FALSE, Constant.EMPTY_STRING2);
 		JSONObject jo = JSONObject.parseObject(text);

@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.utils.TheadUtil;
+import com.stable.vo.spi.req.DividendReq;
 import com.stable.vo.spi.req.StockDaliyReq;
 
 /**
@@ -177,7 +178,7 @@ public class TushareSpider {
 			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
 			return items;
 		} finally {
-			TheadUtil.sleepRandomSecBetween1And5();
+			TheadUtil.tuShareSleepRandom();
 		}
 	}
 
@@ -211,7 +212,7 @@ public class TushareSpider {
 			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
 			return items;
 		} finally {
-			TheadUtil.sleepRandomSecBetween1And5();
+			TheadUtil.tuShareSleepRandom();
 		}
 	}
 	
@@ -235,7 +236,31 @@ public class TushareSpider {
 			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
 			return items;
 		} finally {
-			TheadUtil.sleepRandomSecBetween1And5();
+			TheadUtil.tuShareSleepRandom();
+		}
+	}
+	
+	/**
+	 * 日线行情
+	 * 
+	 * @param ts_code    ts代码
+	 * @param start_date 开始日期 (格式：YYYYMMDD)
+	 * @param end_date   结束日期 (格式：YYYYMMDD)
+	 * @return
+	 */
+	public JSONArray getDividend(DividendReq req) {
+		try {
+			JSONObject json = new JSONObject();
+			json.put("api_name", "dividend");
+			json.put("params", JSON.parse(JSON.toJSONString(req)));
+			json.put("fields", "ts_code,end_date,ann_date,div_proc,stk_div,stk_bo_rate,stk_co_rate,cash_div,cash_div_tax,record_date,ex_date,pay_date,div_listdate,imp_ann_date,base_date,base_share");
+			
+			String result = post(json);
+			JSONObject datas = JSON.parseObject(result);
+			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
+			return items;
+		} finally {
+			TheadUtil.tuShareSleepRandom();
 		}
 	}
 }

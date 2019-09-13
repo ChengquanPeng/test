@@ -89,7 +89,7 @@ public class SinaSpider {
 			e.printStackTrace();
 			return null;
 		} finally {
-			TheadUtil.sleepRandomSecBetween5And15();
+			TheadUtil.sinaSleepRandom();
 		}
 	}
 }

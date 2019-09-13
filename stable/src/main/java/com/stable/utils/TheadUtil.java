@@ -2,14 +2,21 @@ package com.stable.utils;
 
 public class TheadUtil {
 
-	public static void sleepRandomSecBetween5And15() {
-		try {
-			// 随机休息5-15s
-			Thread.sleep(MathUtil.getRandomSecBetween5And15() * 1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+	
+	
+	public static void tuShareSleepRandom() {
+		sleepRandomSecBetween1And5();
 	}
+	
+	public static void thsSleepRandom() {
+		sleepRandomSecBetween1And5();
+	}
+	
+	public static void sinaSleepRandom() {
+		sleepRandomSecBetween5And15();
+	}
+	
+	
 	
 	public static void sleepRandomSecBetween1And5() {
 		try {
@@ -19,4 +26,13 @@ public class TheadUtil {
 			e.printStackTrace();
 		}
 	}
+	public static void sleepRandomSecBetween5And15() {
+		try {
+			// 随机休息5-15s
+			Thread.sleep(MathUtil.getRandomSecBetween5And15() * 1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
 }
