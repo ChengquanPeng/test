@@ -1,0 +1,49 @@
+<html>
+<head>
+<style type="text/css">
+.bor{border:1px dashed #d8d8d8;font-size: 14px;}
+.hder{height: 40px;font:bold;font-size: 16px;}
+tr td{border:1px dashed #d8d8d8;vertical-align: bottom;}
+
+</style>
+<script type="text/javascript">
+	var houzui = "static";
+	var url = window.location.href;
+	var preUrl = "";
+	var i = url.indexOf(houzui);
+	if (i > 0) {
+		preUrl = url.substring(0, i-1);
+	}
+</script>
+</head>
+<body>
+<a target="blank" href="/static/code.html">个股详情页</a></br>
+<a target="blank" href="/static/strategy.html">策略功能页</a></br>
+<div align="center">
+<table class="bor" cellspacing="0" cellpadding="0" >
+	<tr><td width="50">类型</td><td>功能</td><td>URL</td></tr>
+	<tr><td class="hder" colspan="3">日交易：</td></tr>
+	<tr><td>爬虫</td><td>重新抓取日K历史记录（前复权），URL中带code：</td><td class="aurl"><script>document.write(preUrl);</script>/trade/hist/daliy/{code}</td></tr>
+	<tr><td>爬虫</td><td>重新抓取当日所有日交易：</td><td class="aurl"><script>document.write(preUrl);</script>/trade/hist/daliyall</td></tr>
+	<tr><td>爬虫</td><td>重新抓取所有code的全部历史日交易：</td><td class="aurl"><script>document.write(preUrl);</script>/trade/hist/daliyall/direct</td></tr>
+	
+	<tr><td class="hder" colspan="3">财务：</td></tr>
+	<tr><td>爬虫</td><td>根据code抓取财务信息：</td><td class="aurl"><script>document.write(preUrl);</script>/finance/hist/fetch/{code}</td></tr>
+	<tr><td>爬虫</td><td>抓取所有财务信息：</td><td class="aurl"><script>document.write(preUrl);</script>/finance/hist/fetchall</td></tr>
+	<tr><td>查询</td><td>查询code财务信息历史：</td><td class="aurl"><script>document.write(preUrl);</script>/finance/hist/list/{code}</td></tr>
+	
+	<tr><td class="hder" colspan="3">分红分股：</td></tr>
+	<tr><td>爬虫</td><td>根据code抓取分红信息：</td><td class="aurl"><script>document.write(preUrl);</script>/dividend/hist/fetch/{code}</td></tr>
+	<tr><td>查询</td><td>查询code分红信息历史：</td><td class="aurl"><script>document.write(preUrl);</script>/dividend/hist/list/{code}</td></tr>
+</table>
+</div>
+</body>
+<script type="text/javascript">
+var tds = document.getElementsByClassName("aurl");
+for(var i=0;i < tds.length; i++)
+{
+	var u = tds[i].innerText;
+	tds[i].innerHTML = "<a target='blank' href='"+u+"'>"+u+"</a>";
+}
+</script>
+</html>
