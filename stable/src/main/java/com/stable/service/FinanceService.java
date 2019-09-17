@@ -2,6 +2,7 @@ package com.stable.service;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -21,6 +22,7 @@ import com.stable.constant.RedisConstant;
 import com.stable.es.dao.EsFinanceBaseInfoDao;
 import com.stable.spider.ths.ThsSpider;
 import com.stable.utils.RedisUtil;
+import com.stable.utils.TasksWorker;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.StockBaseInfo;
 
@@ -56,6 +58,23 @@ public class FinanceService {
 		return true;
 	}
 
+	public List<FinanceBaseInfo> getFinaceReports(String code, int pageNum, int size) {
+		log.info("query code={},pageNum={},size={}", code, pageNum, size);
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		FieldSortBuilder sort = SortBuilders.fieldSort("reportDate").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		return null;
+	}
+
 	private FinanceBaseInfo getLastFinaceReport(String code) {
 		Pageable pageable = PageRequest.of(0, 1);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
@@ -77,15 +96,22 @@ public class FinanceService {
 	}
 
 	public void jobSpiderFinaceHistoryInfo() {
-		List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
-		for (StockBaseInfo s : list) {
-			String rv = redisUtil.get(RedisConstant.RDS_FINACE_HIST_INFO_ + s.getCode());
-			if (StringUtils.isNotBlank(rv)) {
-				continue;
+		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
+			public Object call() throws Exception {
+				log.info("同步股票报告[started]");
+				List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+				for (StockBaseInfo s : list) {
+					String rv = redisUtil.get(RedisConstant.RDS_FINACE_HIST_INFO_ + s.getCode());
+					if (StringUtils.isNotBlank(rv)) {
+						continue;
+					}
+					if (spiderFinaceHistoryInfo(s.getCode())) {
+						redisUtil.set(RedisConstant.RDS_FINACE_HIST_INFO_ + s.getCode(), "1", Duration.ofDays(1));
+					}
+				}
+				log.info("同步股票报告[end]");
+				return null;
 			}
-			if (this.spiderFinaceHistoryInfo(s.getCode())) {
-				redisUtil.set(RedisConstant.RDS_FINACE_HIST_INFO_ + s.getCode(), "1", Duration.ofDays(1));
-			}
-		}
+		});
 	}
 }

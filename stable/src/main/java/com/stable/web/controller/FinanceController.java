@@ -18,7 +18,7 @@ public class FinanceController {
 	private FinanceService financeService;
 
 	/**
-	 * 根据code 获取 财务信息
+	 * 根据code 抓取财务信息
 	 */
 	@RequestMapping(value = "/fetch/{code}", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> daliycode(@PathVariable(value = "code") String code) {
@@ -49,4 +49,25 @@ public class FinanceController {
 		return ResponseEntity.ok(r);
 	}
 
+	/**
+	 * 根据code查询财务信息
+	 */
+	@RequestMapping(value = "/list/{code}", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> listcode(@PathVariable(value = "code") String code, int pageNum, int size) {
+		JsonResult r = new JsonResult();
+		try {
+			if (pageNum <= 0) {
+				pageNum = 0;
+			}
+			if (size <= 0) {
+				size = 20;
+			}
+			r.setResult(financeService.getFinaceReports(code, pageNum, size));
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
 }

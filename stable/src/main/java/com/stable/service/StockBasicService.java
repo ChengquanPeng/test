@@ -32,12 +32,14 @@ public class StockBasicService {
 	public void jobSynStockList() {
 		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
 			public Object call() throws Exception {
+				log.info("同步股票列表[started]");
 				JSONArray array = tushareSpider.getStockCodeList();
 				// System.err.println(array.toJSONString());
 				for (int i = 0; i < array.size(); i++) {
 					StockBaseInfo base = new StockBaseInfo(array.getJSONArray(i));
 					synBaseStockInfo(base);
 				}
+				log.info("同步股票列表[end]");
 				return null;
 			}
 		});

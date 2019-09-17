@@ -34,7 +34,7 @@ public class DividendController {
 	}
 
 	/**
-	 * 获取所有分红信息
+	 * 获取分红信息
 	 */
 	@RequestMapping(value = "/list/{code}", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> daliyall(@PathVariable(value = "code") String code) {

@@ -27,8 +27,8 @@ public class EveryWeekMonJob implements SimpleJob {
 	public void execute(ShardingContext sc) {
 		log.info("每周1任务开始执行：");
 		log.info("1.同步股票列表");
-		log.info("2.同步股票报告");
 		stockBasicService.jobSynStockList();
+		log.info("2.同步股票报告");
 		financeService.jobSpiderFinaceHistoryInfo();
 	}
 }

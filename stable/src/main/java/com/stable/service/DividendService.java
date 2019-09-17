@@ -1,6 +1,7 @@
 package com.stable.service;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.es.dao.EsDividendHistoryDao;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.utils.DateUtil;
+import com.stable.utils.TasksWorker;
 import com.stable.vo.bus.DividendHistory;
 import com.stable.vo.spi.req.DividendReq;
 
@@ -86,5 +89,19 @@ public class DividendService {
 
 	public boolean spiderDividendByDate(String ann_date) {
 		return spiderDividend(null, ann_date);
+	}
+
+	/**
+	 * 每日*定时任务-日分红
+	 */
+	public void jobSpiderDividendByDate() {
+		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
+			public Object call() throws Exception {
+				log.info("每日*定时任务-日分红公告[started]");
+				spiderDividendByDate(DateUtil.getTodayYYYYMMDD());
+				log.info("每日*定时任务-日分红公告[end]");
+				return null;
+			}
+		});
 	}
 }

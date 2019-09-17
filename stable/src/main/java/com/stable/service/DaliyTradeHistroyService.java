@@ -153,7 +153,9 @@ public class DaliyTradeHistroyService {
 	public void jobSpiderAll() {
 		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
 			public Object call() throws Exception {
+				log.info("每日*定时任务-日交易[started]");
 				spiderTodayDaliyTrade();
+				log.info("每日*定时任务-日交易[end]");
 				return null;
 			}
 		});
@@ -165,25 +167,43 @@ public class DaliyTradeHistroyService {
 	public void spiderAllDirect() {
 		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
 			public Object call() throws Exception {
+				log.info("手动*全部历史,日交易[started]");
 				List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 				for (StockBaseInfo s : list) {
 					redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + s.getCode());
 				}
 				spiderTodayDaliyTrade();
+				log.info("手动*全部历史,日交易[end]");
 				return null;
 			}
 		});
 	}
 
 	/**
-	 * 每日*定时任务 daily_basic
+	 * 每日*定时任务-除权
 	 */
 	public void jobSpiderAllDailyBasic() {
 		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
 			public Object call() throws Exception {
+				log.info("每日*定时任务 daily_basic [started]");
 				spiderDaliyDailyBasic();
+				log.info("每日*定时任务 daily_basic [end]");
 				return null;
 			}
 		});
 	}
+	
+	/**
+	 * 每日*定时任务 
+	 
+	public void jobSpiderAllDailyBasic() {
+		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
+			public Object call() throws Exception {
+				log.info("每日*定时任务 daily_basic [started]");
+				spiderDaliyDailyBasic();
+				log.info("每日*定时任务 daily_basic [end]");
+				return null;
+			}
+		});
+	}*/
 }
