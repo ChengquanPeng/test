@@ -8,7 +8,6 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.alibaba.fastjson.JSONArray;
-import com.stable.es.vo.EsBase;
 import com.stable.spider.tushare.TushareSpider;
 
 import lombok.Data;
@@ -44,31 +43,31 @@ public class DividendHistory extends EsBase {
 	private String stk_div;
 	// 每股送股比例
 	@Field(type = FieldType.Double)
-	private double stk_bo_rate;
+	private double stk_bo_rate = 0d;
 	// 每股转增比例
 	@Field(type = FieldType.Double)
-	private double stk_co_rate;
+	private double stk_co_rate = 0d;
 	// 每股分红（税后）
 	@Field(type = FieldType.Double)
-	private double cash_div;
+	private double cash_div = 0d;
 	// 每股分红（税前）
 	@Field(type = FieldType.Double)
-	private double cash_div_tax;
+	private double cash_div_tax = 0d;
 	// 股权登记日
 	@Field(type = FieldType.Integer)
-	private int record_date;
+	private int record_date = 0;
 	// 除权除息日
 	@Field(type = FieldType.Integer)
-	private int ex_date;
+	private int ex_date = 0;
 	// 派息日
 	@Field(type = FieldType.Integer)
-	private int pay_date;
+	private int pay_date = 0;
 	// 红股上市日
 	@Field(type = FieldType.Integer)
-	private int div_listdate;
+	private int div_listdate = 0;
 	// 基准日
 	@Field(type = FieldType.Integer)
-	private int base_date;
+	private int base_date = 0;
 	// 基准股本（万）
 	@Field(type = FieldType.Text)
 	private String base_share;

@@ -16,6 +16,11 @@ import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 基本信息
+ * @author roy
+ *
+ */
 @Service
 @Log4j2
 public class StockBasicService {

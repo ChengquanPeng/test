@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 
 import com.stable.db.dao.UserDao;
 import com.stable.es.dao.EsUserDao;
-import com.stable.es.vo.EsUser;
 import com.stable.vo.UserVo;
+import com.stable.vo.bus.EsUser;
 
 @Service
 public class UserService {

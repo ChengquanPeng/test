@@ -24,7 +24,11 @@ import com.stable.vo.bus.DividendHistory;
 import com.stable.vo.spi.req.DividendReq;
 
 import lombok.extern.log4j.Log4j2;
-
+/**
+ * 描述：分红送股数据
+ * @author roy
+ *
+ */
 @Service
 @Log4j2
 public class DividendService {

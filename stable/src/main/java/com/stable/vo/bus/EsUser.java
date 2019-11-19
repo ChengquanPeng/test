@@ -1,4 +1,4 @@
-package com.stable.es.vo;
+package com.stable.vo.bus;
 
 import java.util.Date;
 

@@ -6,72 +6,92 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.alibaba.fastjson.JSONArray;
-import com.stable.es.vo.EsBase;
 import com.stable.utils.CurrencyUitl;
 
 import lombok.Data;
 
 @Data
 @Document(indexName = "finance_base_info")
-public class FinanceBaseInfo extends EsBase{
+public class FinanceBaseInfo extends EsBase {
 	@Id
 	private String id;
-	@Field
+	@Field(type = FieldType.Text)
 	private String code;
+
 	// 时间
-	@Field
+	@Field(type = FieldType.Integer)
 	private int reportDate;
-	@Field
+
+	@Field(type = FieldType.Integer)
 	private int year;
-	@Field
+
+	@Field(type = FieldType.Integer)
 	private int quarter;
-	@Field
+
 //  基本每股收益
+	@Field(type = FieldType.Text)
 	private String earningsPerShare;
-	@Field
+
 //	净利润(元)
+	@Field(type = FieldType.Long)
 	private Long retainedProfits;
-	@Field
+
 //	净利润同比增长率
+	@Field(type = FieldType.Text)
 	private String retainedProfitsTbRate;
-	@Field
+
 //	扣非净利润(元)
+	@Field(type = FieldType.Long)
 	private Long retainedProfitsReal;
-	@Field
+
 //	扣非净利润同比增长率
+	@Field(type = FieldType.Text)
 	private String retainedProfitsRealTbRate;
-	@Field
+
 //	营业总收入(元)
+	@Field(type = FieldType.Long)
 	private Long income;
+
 //	营业总收入同比增长率
+	@Field(type = FieldType.Text)
 	private String incomeTbRate;
-	@Field
+
 //	每股净资产
+	@Field(type = FieldType.Text)
 	private String assetPerShare;
-	@Field
+
 //	净资产收益率
+	@Field(type = FieldType.Text)
 	private String assetEarningseRate;
-	@Field
+
 //	净资产收益率-摊薄
+	@Field(type = FieldType.Text)
 	private String assetEarningseRateDilute;
-	@Field
+
 //	资产负债比率
+	@Field(type = FieldType.Text)
 	private String assetDebtRate;
-	@Field
+
 //	每股资本公积金(元)
+	@Field(type = FieldType.Text)
 	private String fundPerShare;
-	@Field
+
 //	每股未分配利润(元)
+	@Field(type = FieldType.Text)
 	private String unpaidProfitsPerShare;
-	@Field
+
 //	每股经营现金流
+	@Field(type = FieldType.Text)
 	private String cashPerShare;
-	@Field
+
 //	销售净利率 
+	@Field(type = FieldType.Text)
 	private String profitOnSales;
-	@Field
+
+	@Field(type = FieldType.Date)
 	private Date updateDate;
 
 	public void setValue(String code, int index, List<JSONArray> list) {
@@ -94,7 +114,7 @@ public class FinanceBaseInfo extends EsBase{
 		this.cashPerShare = list.get(indexlist++).getString(index);
 		this.profitOnSales = list.get(indexlist++).getString(index);
 		this.updateDate = new Date();
-		
+
 		//
 		getYearMonth(datestr);
 		this.id = this.code + "_" + this.reportDate;

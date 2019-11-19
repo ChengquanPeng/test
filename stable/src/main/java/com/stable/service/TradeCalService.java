@@ -15,6 +15,11 @@ import com.stable.utils.TasksWorker;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 交易日历
+ * @author roy
+ *
+ */
 @Service
 @Log4j2
 public class TradeCalService {

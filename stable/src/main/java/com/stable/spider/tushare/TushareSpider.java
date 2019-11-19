@@ -241,7 +241,7 @@ public class TushareSpider {
 	}
 	
 	/**
-	 * 日线行情
+	 * 分红
 	 * 
 	 * @param ts_code    ts代码
 	 * @param start_date 开始日期 (格式：YYYYMMDD)
@@ -254,6 +254,32 @@ public class TushareSpider {
 			json.put("api_name", "dividend");
 			json.put("params", JSON.parse(JSON.toJSONString(req)));
 			json.put("fields", "ts_code,end_date,ann_date,div_proc,stk_div,stk_bo_rate,stk_co_rate,cash_div,cash_div_tax,record_date,ex_date,pay_date,div_listdate,imp_ann_date,base_date,base_share");
+			
+			String result = post(json);
+			JSONObject datas = JSON.parseObject(result);
+			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
+			return items;
+		} finally {
+			TheadUtil.tuShareSleepRandom();
+		}
+	}
+	
+	/**
+	 * 日线行情
+	 * 
+	 * @param ts_code    ts代码
+	 * @param start_date 开始日期 (格式：YYYYMMDD)
+	 * @param end_date   结束日期 (格式：YYYYMMDD)
+	 * @return 如果都不填，单次默认返回2000条
+	 */
+	public JSONArray getBuyBackList(String start_date,String end_date) {
+		try {
+			JSONObject json = new JSONObject();
+			json.put("api_name", "repurchase");
+			if(StringUtils.isNotBlank(start_date) && StringUtils.isNotBlank(end_date)) {
+				json.put("params", JSON.parse("{'start_date':'"+start_date+"','end_date':'"+end_date+"'}"));
+			}
+			json.put("fields", "ts_code,ann_date,end_date,proc,exp_date,vol,amount,high_limit,low_limit");
 			
 			String result = post(json);
 			JSONObject datas = JSON.parseObject(result);

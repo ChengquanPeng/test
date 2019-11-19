@@ -9,7 +9,6 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.Constant;
-import com.stable.es.vo.EsBase;
 import com.stable.spider.tushare.TushareSpider;
 
 import lombok.Data;

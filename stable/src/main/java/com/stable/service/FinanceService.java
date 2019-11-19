@@ -28,6 +28,11 @@ import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 财务
+ * @author roy
+ *
+ */
 @Service
 @Log4j2
 public class FinanceService {

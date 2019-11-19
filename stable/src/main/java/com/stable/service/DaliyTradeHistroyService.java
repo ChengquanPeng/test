@@ -23,7 +23,11 @@ import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 
 import lombok.extern.log4j.Log4j2;
-
+/**
+ * 日交易历史
+ * @author roy
+ *
+ */
 @Service
 @Log4j2
 public class DaliyTradeHistroyService {
