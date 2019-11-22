@@ -38,8 +38,10 @@ public class BuyBackInfo extends EsBase {
 	@Field(type = FieldType.Text)
 	private String exp_date;
 
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Text, fielddata = true)
 	private String proc;
+	@Field(type = FieldType.Keyword, index = false)
+	private String proc2;
 	@Field(type = FieldType.Double)
 	private Double vol = 0d;
 	@Field(type = FieldType.Text)
@@ -64,6 +66,7 @@ public class BuyBackInfo extends EsBase {
 		ann_date = arr.getString(i++);
 		end_date = arr.getString(i++);
 		proc = arr.getString(i++);
+		proc2 = proc;
 		exp_date = arr.getString(i++);
 		try {
 			this.vol = Double.valueOf(arr.getString(i++));

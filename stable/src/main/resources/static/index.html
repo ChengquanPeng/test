@@ -6,6 +6,7 @@
 tr td{border:1px dashed #d8d8d8;vertical-align: bottom;}
 
 </style>
+<script type="text/javascript" src="./common.js"></script>
 <script type="text/javascript">
 	var houzui = "static";
 	var url = window.location.href;
@@ -14,6 +15,8 @@ tr td{border:1px dashed #d8d8d8;vertical-align: bottom;}
 	if (i > 0) {
 		preUrl = url.substring(0, i-1);
 	}
+	//date
+	endDate=formatData(new Date(), 'yyyyMMdd'))
 </script>
 </head>
 <body>
@@ -35,6 +38,11 @@ tr td{border:1px dashed #d8d8d8;vertical-align: bottom;}
 	<tr><td class="hder" colspan="3">分红分股：</td></tr>
 	<tr><td>爬虫</td><td>根据code抓取分红信息：</td><td class="aurl"><script>document.write(preUrl);</script>/dividend/hist/fetch/{code}</td></tr>
 	<tr><td>查询</td><td>查询code分红信息历史：</td><td class="aurl"><script>document.write(preUrl);</script>/dividend/hist/list/{code}</td></tr>
+	
+	<tr><td class="hder" colspan="3">回购：</td></tr>
+	<tr><td>爬虫</td><td>根据时间段抓取回购记录：</td><td class="aurl"><script>document.write(preUrl);</script>/buyback/fetch?startDate=20100101&endDate=<script>document.write(endDate);</script></td></tr>
+	<tr><td>查询</td><td>查询所有的分红回购历史：</td><td class="aurl"><script>document.write(preUrl);</script>/buyback/list?dtype=0&asc=0 0所有，1提议，2预案，3股东大会通过，4实施，5完成，6停止</td></tr>
+	<tr><td>查询</td><td>查询code分红回购历史：</td><td class="aurl"><script>document.write(preUrl);</script>/buyback/list/{code}?dtype=0&asc=0</td></tr>
 </table>
 </div>
 </body>
