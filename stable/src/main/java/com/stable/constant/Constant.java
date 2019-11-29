@@ -9,6 +9,7 @@ public class Constant {
 		// fast json 反序列化白名单
 		ParserConfig.getGlobalInstance().addAccept("com.stable.vo");
 	}
+	public static boolean NEED_LOGIN = true;
 	public static final String SESSION_USER = "USER";
 	public static final String EMPTY_STRING = "";
 	public static final String EMPTY_STRING2 = "''";
