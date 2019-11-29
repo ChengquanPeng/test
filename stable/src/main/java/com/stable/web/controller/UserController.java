@@ -1,8 +1,5 @@
 package com.stable.web.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,15 +7,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.stable.service.UserService;
 import com.stable.vo.UserVo;
 import com.stable.vo.http.JsonResult;
 
 @RestController
 public class UserController {
 
-	@Autowired
-	private UserService userService;
 
 	/**
 	 * 根据ID查询用户
@@ -31,8 +25,6 @@ public class UserController {
 		JsonResult r = new JsonResult();
 		try {
 
-			UserVo user = userService.getUserById(id);
-			r.setResult(user);
 			r.setStatus("ok");
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -51,8 +43,6 @@ public class UserController {
 	public ResponseEntity<JsonResult> getUserList() {
 		JsonResult r = new JsonResult();
 		try {
-			List<UserVo> users = userService.getUserList();
-			r.setResult(users);
 			r.setStatus("ok");
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -79,14 +69,6 @@ public class UserController {
 	public ResponseEntity<JsonResult> add(@RequestBody UserVo user) {
 		JsonResult r = new JsonResult();
 		try {
-			int orderId = userService.add(user);
-			if (orderId < 0) {
-				r.setResult(orderId);
-				r.setStatus("fail");
-			} else {
-				r.setResult(orderId);
-				r.setStatus("ok");
-			}
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus("error");
@@ -106,7 +88,7 @@ public class UserController {
 	public ResponseEntity<JsonResult> delete(@PathVariable(value = "id") Integer id) {
 		JsonResult r = new JsonResult();
 		try {
-			int ret = userService.delete(id);
+			int ret = 0;
 			if (ret < 0) {
 				r.setResult(ret);
 				r.setStatus("fail");
@@ -133,7 +115,7 @@ public class UserController {
 	public ResponseEntity<JsonResult> update(@PathVariable("id") Integer id, @RequestBody UserVo user) {
 		JsonResult r = new JsonResult();
 		try {
-			int ret = userService.update(id, user);
+			int ret = 0;
 			if (ret < 0) {
 				r.setResult(ret);
 				r.setStatus("fail");

@@ -1,4 +1,4 @@
-package com.stable.db.dao;
+/*package com.stable.db.dao;
 
 import java.util.Date;
 import java.util.List;
@@ -6,11 +6,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
 
 import com.stable.vo.UserVo;
 
-@Repository
+//@Repository
 public class UserDao {
 	@Autowired
     private JdbcTemplate jdbcTemplate;
@@ -47,3 +46,4 @@ public class UserDao {
         return jdbcTemplate.update("DELETE from tb_user where id = ? ",id);
     }
 }
+*/
