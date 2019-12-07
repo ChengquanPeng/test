@@ -30,6 +30,7 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * 财务
+ * 
  * @author roy
  *
  */
@@ -105,6 +106,7 @@ public class FinanceService {
 			public Object call() throws Exception {
 				log.info("同步股票报告[started]");
 				List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+				log.info("股票总数：" + list.size());
 				for (StockBaseInfo s : list) {
 					String rv = redisUtil.get(RedisConstant.RDS_FINACE_HIST_INFO_ + s.getCode());
 					if (StringUtils.isNotBlank(rv)) {

@@ -12,6 +12,11 @@ public class DateUtil {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
 		return format.format(new Date());
 	}
+	
+	public static String getYYYYMMDD(Date date) {
+		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
+		return format.format(date);
+	}
 
 	public static String getLastDayOfYearYYYYMMDD() {
 		int year = getCurYYYY();
