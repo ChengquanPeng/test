@@ -44,10 +44,19 @@ public class BuyBackService {
 	}
 
 	public void spiderBuyBackHistoryInfo(String start_date, String end_date) {
-		log.info("同步回购公告列表[started],start_date={},end_date={},", start_date, end_date);
 		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
 			public Object call() throws Exception {
-				JSONArray array = tushareSpider.getBuyBackList(start_date, end_date);
+				fetchHist(start_date, end_date);
+				return null;
+			}
+		});
+	}
+
+	public void jobFetchHist(String ann_date) {
+		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
+			public Object call() throws Exception {
+				log.info("同步回购公告列表[started],ann_date={},", ann_date);
+				JSONArray array = tushareSpider.getBuyBackList(null, null, ann_date);
 				// System.err.println(array.toJSONString());
 				for (int i = 0; i < array.size(); i++) {
 					BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
@@ -56,10 +65,24 @@ public class BuyBackService {
 					// }
 					// System.err.println(base);
 				}
-				log.info("同步回购公告列表[end]");
+				log.info("同步回购公告列表[end],ann_date={}", ann_date);
 				return null;
 			}
 		});
+	}
+
+	public void fetchHist(String start_date, String end_date) {
+		log.info("同步回购公告列表[started],start_date={},end_date={},", start_date, end_date);
+		JSONArray array = tushareSpider.getBuyBackList(start_date, end_date, null);
+		// System.err.println(array.toJSONString());
+		for (int i = 0; i < array.size(); i++) {
+			BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
+			// if(i==0) {
+			buyBackInfoDao.save(base);
+			// }
+			// System.err.println(base);
+		}
+		log.info("同步回购公告列表[end],start_date={},end_date={},", start_date, end_date);
 	}
 
 	public List<BuyBackInfo> getBuyBackInfo(String code, int dtype, int asc) {
@@ -68,7 +91,7 @@ public class BuyBackService {
 		Pageable pageable = null;
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		}else {
+		} else {
 			pageable = PageRequest.of(0, 100);
 		}
 		// 提议/预案/股东大会通过/实施/完成/停止

@@ -69,7 +69,7 @@ public class BuyBackController {
 						endDate = DateUtil.getYYYYMMDD(cal.getTime());
 
 						log.info("回购爬虫时间从{}到{}", startDate, endDate);
-						buyBackService.spiderBuyBackHistoryInfo(startDate, endDate);
+						buyBackService.fetchHist(startDate, endDate);
 
 						ife = Integer.valueOf(endDate);
 						cal.add(Calendar.MONTH, -1);

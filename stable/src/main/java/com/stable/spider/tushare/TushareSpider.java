@@ -272,12 +272,14 @@ public class TushareSpider {
 	 * @param end_date   结束日期 (格式：YYYYMMDD)
 	 * @return 如果都不填，单次默认返回2000条
 	 */
-	public JSONArray getBuyBackList(String start_date,String end_date) {
+	public JSONArray getBuyBackList(String start_date,String end_date,String ann_date) {
 		try {
 			JSONObject json = new JSONObject();
 			json.put("api_name", "repurchase");
 			if(StringUtils.isNotBlank(start_date) && StringUtils.isNotBlank(end_date)) {
 				json.put("params", JSON.parse("{'start_date':'"+start_date+"','end_date':'"+end_date+"'}"));
+			}else if(StringUtils.isNotBlank(ann_date)) {
+				json.put("params", JSON.parse("{'ann_date':'"+ann_date+"'}"));
 			}
 			json.put("fields", "ts_code,ann_date,end_date,proc,exp_date,vol,amount,high_limit,low_limit");
 			
