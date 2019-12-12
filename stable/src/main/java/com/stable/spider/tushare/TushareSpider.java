@@ -291,4 +291,25 @@ public class TushareSpider {
 			TheadUtil.tuShareSleepRandom();
 		}
 	}
+	
+	/**
+	 * 日线行情
+	 * 
+	 * @param ts_code    ts代码
+	 * @param start_date 开始日期 (格式：YYYYMMDD)
+	 * @param end_date   结束日期 (格式：YYYYMMDD)
+	 * @return 如果都不填，单次默认返回2000条
+	 */
+	public JSONObject getIncome(String ts_code) {
+		try {
+			JSONObject json = new JSONObject();
+			json.put("api_name", "income");
+			json.put("params", JSON.parse("{'ts_code':'"+ts_code+"'}"));
+			String result = post(json);
+			JSONObject datas = JSON.parseObject(result);
+			return datas.getJSONObject("data");
+		} finally {
+			TheadUtil.tuShareSleepRandom();
+		}
+	}
 }

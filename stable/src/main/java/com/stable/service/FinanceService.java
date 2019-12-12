@@ -1,6 +1,5 @@
 package com.stable.service;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -18,13 +17,16 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.EsFinanceBaseInfoDao;
-import com.stable.spider.ths.ThsSpider;
+import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.StockBaseInfo;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -39,7 +41,7 @@ import lombok.extern.log4j.Log4j2;
 public class FinanceService {
 
 	@Autowired
-	private ThsSpider thsSpider;
+	private TushareSpider tushareSpider;
 	@Autowired
 	private EsFinanceBaseInfoDao esFinanceBaseInfoDao;
 	@Autowired
@@ -47,29 +49,48 @@ public class FinanceService {
 	@Autowired
 	private RedisUtil redisUtil;
 
-	public boolean spiderFinaceHistoryInfo(String code) {
-		List<FinanceBaseInfo> list = thsSpider.getBaseFinance(code);
-		if (list == null || list.size() <= 0) {
+	/**
+	 * 删除redis，从头开始获取
+	 */
+	public boolean spiderFinaceHistoryInfoFromStart(String code) {
+		redisUtil.set(RedisConstant.RDS_FINACE_HIST_INFO_ + code, 0);
+		return spiderFinaceHistoryInfo(code);
+	}
+
+	private boolean spiderFinaceHistoryInfo(String code) {
+		JSONObject datas = tushareSpider.getIncome(TushareSpider.formatCode(code));
+		if (datas == null || datas.getJSONArray("items").size() <= 0) {
 			log.warn("未抓取到Finane记录,code={}", code);
 			return false;
 		}
-		FinanceBaseInfo last = getLastFinaceReport(code);
-
-		for (FinanceBaseInfo f : list) {
-			if (last == null || f.getReportDate() > last.getReportDate()) {
+		String yyyy = redisUtil.get(RedisConstant.RDS_FINACE_HIST_INFO_ + code);
+		int year = (StringUtils.isBlank(yyyy) ? 0 : Integer.valueOf(yyyy));
+		JSONArray fields = datas.getJSONArray("fields");
+		JSONArray items = datas.getJSONArray("items");
+		FinanceBaseInfo f = null;
+		for (int i = items.size(); i > 0; i--) {
+			f = new FinanceBaseInfo();
+			f.setValue(code, fields, items.getJSONArray(i - 1));
+			if (f.getYear() >= year) {
 				esFinanceBaseInfoDao.save(f);
-				log.info("saved code={},date={}", code, f.getReportDate());
+				log.info("Finace income saved code={},getAnn_date={}", code, f.getAnn_date());
+
 			}
+		}
+		if (f != null) {
+			redisUtil.set(RedisConstant.RDS_FINACE_HIST_INFO_ + code, f.getYear());
 		}
 		return true;
 	}
 
-	public List<FinanceBaseInfo> getFinaceReports(String code, int pageNum, int size) {
-		log.info("query code={},pageNum={},size={}", code, pageNum, size);
+	public List<FinanceBaseInfo> getFinaceReports(String code, EsQueryPageReq queryPage) {
+		int pageNum = queryPage.getPageNum();
+		int size = queryPage.getPageSize();
+		log.info("queryPage code={},pageNum={},size={}", code, pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		FieldSortBuilder sort = SortBuilders.fieldSort("reportDate").unmappedType("integer").order(SortOrder.DESC);
+		FieldSortBuilder sort = SortBuilders.fieldSort("end_date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
@@ -81,11 +102,11 @@ public class FinanceService {
 		return null;
 	}
 
-	private FinanceBaseInfo getLastFinaceReport(String code) {
+	public FinanceBaseInfo getLastFinaceReport(String code) {
 		Pageable pageable = PageRequest.of(0, 1);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		FieldSortBuilder sort = SortBuilders.fieldSort("reportDate").unmappedType("integer").order(SortOrder.DESC);
+		FieldSortBuilder sort = SortBuilders.fieldSort("end_date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
@@ -93,8 +114,7 @@ public class FinanceService {
 		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			FinanceBaseInfo f = page.getContent().get(0);
-			log.info("page size={},last report fince code={},date={}", page.getContent().size(), code,
-					f.getReportDate());
+			log.info("page size={},last report fince code={},date={}", page.getContent().size(), code, f.getEnd_date());
 			return f;
 		}
 		log.info("no last report fince code={}", code);
@@ -108,13 +128,7 @@ public class FinanceService {
 				List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 				log.info("股票总数：" + list.size());
 				for (StockBaseInfo s : list) {
-					String rv = redisUtil.get(RedisConstant.RDS_FINACE_HIST_INFO_ + s.getCode());
-					if (StringUtils.isNotBlank(rv)) {
-						continue;
-					}
-					if (spiderFinaceHistoryInfo(s.getCode())) {
-						redisUtil.set(RedisConstant.RDS_FINACE_HIST_INFO_ + s.getCode(), "1", Duration.ofDays(1));
-					}
+					spiderFinaceHistoryInfo(s.getCode());
 				}
 				log.info("同步股票报告[end]");
 				return null;

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.FinanceService;
 import com.stable.vo.http.JsonResult;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
 @RequestMapping("/finance/hist")
 @RestController
@@ -24,7 +25,7 @@ public class FinanceController {
 	public ResponseEntity<JsonResult> daliycode(@PathVariable(value = "code") String code) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(financeService.spiderFinaceHistoryInfo(code));
+			r.setResult(financeService.spiderFinaceHistoryInfoFromStart(code));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -54,16 +55,10 @@ public class FinanceController {
 	 * 根据code查询财务信息
 	 */
 	@RequestMapping(value = "/list/{code}", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> listcode(@PathVariable(value = "code") String code, int pageNum, int size) {
+	public ResponseEntity<JsonResult> listcode(@PathVariable(value = "code") String code, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
-			if (pageNum <= 0) {
-				pageNum = 0;
-			}
-			if (size <= 0) {
-				size = 20;
-			}
-			r.setResult(financeService.getFinaceReports(code, pageNum, size));
+			r.setResult(financeService.getFinaceReports(code, page));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

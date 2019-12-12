@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -17,7 +16,7 @@ import com.stable.vo.bus.FinanceBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
 
-@Component
+//@Component
 @Log4j2
 public class ThsSpider {
 
@@ -49,7 +48,7 @@ public class ThsSpider {
 		for (int j = 0; j < list.get(0).size(); j++) {
 			FinanceBaseInfo finbase = new FinanceBaseInfo();
 			try {
-				finbase.setValue(code, j, list);
+				//finbase.setValue(code, j, list);
 				log.debug(finbase.toString());
 				res.add(finbase);
 			} catch (Exception e) {
