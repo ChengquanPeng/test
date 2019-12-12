@@ -52,7 +52,7 @@ public class BuyBackService {
 		});
 	}
 
-	public void jobFetchHist(String ann_date) {
+	public void jobFetchHistEveryDay(String ann_date) {
 		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
 			public Object call() throws Exception {
 				log.info("同步回购公告列表[started],ann_date={},", ann_date);

@@ -37,6 +37,6 @@ public class EveryWorkingDayJob implements SimpleJob {
 		log.info("分红除权重新获取日交易");
 		tradeHistroyService.jobSpiderAll();
 		log.info("回购公告");
-		buyBackService.jobFetchHist(today);
+		buyBackService.jobFetchHistEveryDay(today);
 	}
 }

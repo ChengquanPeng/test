@@ -8,15 +8,9 @@ tr td{border:1px dashed #d8d8d8;vertical-align: bottom;}
 </style>
 <script type="text/javascript" src="./common.js"></script>
 <script type="text/javascript">
-	var houzui = "static";
-	var url = window.location.href;
-	var preUrl = "";
-	var i = url.indexOf(houzui);
-	if (i > 0) {
-		preUrl = url.substring(0, i-1);
-	}
 	//date
-	endDate=formatData(new Date(), 'yyyyMMdd'))
+	monthStarted = endDate = formatDate(new Date(), 'yyyyMM') + "01";
+	endDate = formatDate(new Date(), 'yyyyMMdd');
 </script>
 </head>
 <body>
@@ -26,32 +20,39 @@ tr td{border:1px dashed #d8d8d8;vertical-align: bottom;}
 <table class="bor" cellspacing="0" cellpadding="0" >
 	<tr><td width="50">类型</td><td>功能</td><td>URL</td></tr>
 	<tr><td class="hder" colspan="3">日交易：</td></tr>
-	<tr><td>爬虫</td><td>重新抓取日K历史记录（前复权），URL中带code：</td><td class="aurl"><script>document.write(preUrl);</script>/trade/hist/daliy/{code}</td></tr>
-	<tr><td>爬虫</td><td>重新抓取当日所有日交易：</td><td class="aurl"><script>document.write(preUrl);</script>/trade/hist/daliyall</td></tr>
-	<tr><td>爬虫</td><td>重新抓取所有code的全部历史日交易：</td><td class="aurl"><script>document.write(preUrl);</script>/trade/hist/daliyall/direct</td></tr>
+	<tr><td>爬虫</td><td>重新抓取日K历史记录（前复权），URL中带code：</td><td class="aurl">/trade/hist/daliy/{code}</td></tr>
+	<tr><td>爬虫</td><td>重新抓取当日所有日交易：</td><td class="aurl">/trade/hist/daliyall</td></tr>
+	<tr><td>爬虫</td><td>重新抓取所有code的全部历史日交易：</td><td class="aurl">/trade/hist/daliyall/direct</td></tr>
 	
 	<tr><td class="hder" colspan="3">财务：</td></tr>
-	<tr><td>爬虫</td><td>根据code抓取财务信息：</td><td class="aurl"><script>document.write(preUrl);</script>/finance/hist/fetch/{code}</td></tr>
-	<tr><td>爬虫</td><td>抓取所有财务信息：</td><td class="aurl"><script>document.write(preUrl);</script>/finance/hist/fetchall</td></tr>
-	<tr><td>查询</td><td>查询code财务信息历史：</td><td class="aurl"><script>document.write(preUrl);</script>/finance/hist/list/{code}</td></tr>
+	<tr><td>爬虫</td><td>根据code抓取财务信息：</td><td class="aurl">/finance/hist/fetch/{code}</td></tr>
+	<tr><td>爬虫</td><td>抓取所有财务信息：</td><td class="aurl">/finance/hist/fetchall</td></tr>
+	<tr><td>查询</td><td>查询code财务信息历史：</td><td class="aurl">/finance/hist/list/{code}</td></tr>
 	
 	<tr><td class="hder" colspan="3">分红分股：</td></tr>
-	<tr><td>爬虫</td><td>根据code抓取分红信息：</td><td class="aurl"><script>document.write(preUrl);</script>/dividend/hist/fetch/{code}</td></tr>
-	<tr><td>查询</td><td>查询code分红信息历史：</td><td class="aurl"><script>document.write(preUrl);</script>/dividend/hist/list/{code}</td></tr>
+	<tr><td>爬虫</td><td>根据code抓取分红信息：</td><td class="aurl">/dividend/hist/fetch/{code}</td></tr>
+	<tr><td>查询</td><td>查询code分红信息历史：</td><td class="aurl">/dividend/hist/list/{code}</td></tr>
 	
 	<tr><td class="hder" colspan="3">回购：</td></tr>
-	<tr><td>爬虫</td><td>根据时间段抓取回购记录：</td><td class="aurl"><script>document.write(preUrl);</script>/buyback/fetch?startDate=20100101&endDate=<script>document.write(endDate);</script></td></tr>
-	<tr><td>查询</td><td>查询所有的分红回购历史：</td><td class="aurl"><script>document.write(preUrl);</script>/buyback/list?dtype=0&asc=0 0所有，1提议，2预案，3股东大会通过，4实施，5完成，6停止</td></tr>
-	<tr><td>查询</td><td>查询code分红回购历史：</td><td class="aurl"><script>document.write(preUrl);</script>/buyback/list/{code}?dtype=0&asc=0</td></tr>
+	<tr><td>爬虫</td><td>根据时间段抓取回购记录：</td><td class="aurl">/buyback/fetch?startDate=<script>document.write(monthStarted);</script>&endDate=<script>document.write(endDate);</script></td></tr>
+	<tr><td>查询</td><td>查询所有的分红回购历史：</td><td class="aurl">/buyback/list?dtype=0&asc=0 0所有，1提议，2预案，3股东大会通过，4实施，5完成，6停止</td></tr>
+	<tr><td>查询</td><td>查询code分红回购历史：</td><td class="aurl">/buyback/list/{code}?dtype=0&asc=0</td></tr>
 </table>
 </div>
 </body>
 <script type="text/javascript">
-var tds = document.getElementsByClassName("aurl");
-for(var i=0;i < tds.length; i++)
-{
-	var u = tds[i].innerText;
-	tds[i].innerHTML = "<a target='blank' href='"+u+"'>"+u+"</a>";
-}
+	var houzui = "static";
+	var url = window.location.href;
+	var preUrl = url;
+	var i = url.indexOf(houzui);
+	if (i > 0) {
+		preUrl = url.substring(0, i - 1);
+	}
+	preUrl = preUrl.substring(0, preUrl.length - 1);
+	var tds = document.getElementsByClassName("aurl");
+	for (var i = 0; i < tds.length; i++) {
+		var u = tds[i].innerText;
+		tds[i].innerHTML = "<a target='blank' href='"+preUrl+u+"'>" + u + "</a>";
+	}
 </script>
 </html>
