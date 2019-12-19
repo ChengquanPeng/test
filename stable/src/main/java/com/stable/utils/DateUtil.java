@@ -8,6 +8,11 @@ public class DateUtil {
 	public static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
 	public static final String YYYY_MM_DD = "yyyyMMdd";
 
+	public static String getTodayYYYYMMDDHHMMSS() {
+		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
+		return format.format(new Date());
+	}
+	
 	public static String getTodayYYYYMMDD() {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
 		return format.format(new Date());

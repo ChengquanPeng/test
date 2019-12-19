@@ -1,5 +1,6 @@
 package com.stable.service;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -18,8 +19,12 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.stable.enums.RunCycleEnum;
+import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.EsBuyBackInfoDao;
+import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.utils.DateUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.vo.bus.BuyBackInfo;
 
@@ -53,8 +58,8 @@ public class BuyBackService {
 	}
 
 	public void jobFetchHistEveryDay(String ann_date) {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			public Object call() throws Exception {
+		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.BUY_BACK, RunCycleEnum.DAY) {
+			public Object mycall() {
 				log.info("同步回购公告列表[started],ann_date={},", ann_date);
 				JSONArray array = tushareSpider.getBuyBackList(null, null, ann_date);
 				// System.err.println(array.toJSONString());
@@ -66,6 +71,24 @@ public class BuyBackService {
 					// System.err.println(base);
 				}
 				log.info("同步回购公告列表[end],ann_date={}", ann_date);
+				return null;
+			}
+		});
+	}
+
+	public void jobFetchHist() {
+		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.BUY_BACK, RunCycleEnum.WEEK) {
+			public Object mycall() {
+				Calendar cal = Calendar.getInstance();
+				String startDate = "", endDate = "";
+				int first = 0, last = 0;
+				first = cal.getActualMinimum(Calendar.DAY_OF_MONTH);
+				cal.set(Calendar.DAY_OF_MONTH, first);
+				startDate = DateUtil.getYYYYMMDD(cal.getTime());
+				last = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+				cal.set(Calendar.DAY_OF_MONTH, last);
+				endDate = DateUtil.getYYYYMMDD(cal.getTime());
+				fetchHist(startDate, endDate);
 				return null;
 			}
 		});

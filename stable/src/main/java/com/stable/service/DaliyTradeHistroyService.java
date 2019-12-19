@@ -9,11 +9,14 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.stable.constant.Constant;
 import com.stable.constant.RedisConstant;
+import com.stable.enums.RunCycleEnum;
+import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.EsDaliyBasicInfoDao;
 import com.stable.es.dao.EsTradeHistInfoDaliyDao;
-import com.stable.spider.sina.SinaSpider;
+import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
@@ -38,15 +41,20 @@ public class DaliyTradeHistroyService {
 	@Autowired
 	private RedisUtil redisUtil;
 	@Autowired
-	private SinaSpider sinaSpider;
-	@Autowired
 	private EsTradeHistInfoDaliyDao tradeHistDaliy;
 	@Autowired
 	private EsDaliyBasicInfoDao esDaliyBasicInfoDao;
 
+	/**
+	 * 手动获取日交易记录（所有）
+	 */
+	public boolean manualSpiderDaliyTrade(String scode) {
+		redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + scode);
+		return this.spiderTodayDaliyTrade(scode);
+	}
 	// 全量获取历史记录（定时任务）-根据缓存是否需要重新获取，（除权得时候会重新获取）TODO
 	// 每日更新-job
-	public boolean spiderTodayDaliyTrade(String scode) {
+	private boolean spiderTodayDaliyTrade(String scode) {
 		String today = DateUtil.getTodayYYYYMMDD();
 		String preDate = redisUtil.get(RedisConstant.RDS_TRADE_CAL_ + today);
 		try {
@@ -69,6 +77,8 @@ public class DaliyTradeHistroyService {
 				if (StringUtils.isBlank(yyyymmdd)) {
 					spiderDaliyTradeHistoryInfo(code);
 				}
+				
+				
 				if (StringUtils.isNotBlank(yyyymmdd) && !preDate.equals(yyyymmdd)) {
 					// 补全缺失
 					JSONArray array2 = tushareSpider.getStockDaliyTrade(TushareSpider.formatCode(code), null, yyyymmdd,
@@ -117,7 +127,7 @@ public class DaliyTradeHistroyService {
 	private boolean spiderDaliyDailyBasic() {
 		String today = DateUtil.getTodayYYYYMMDD();
 		String preDate = redisUtil.get(RedisConstant.RDS_TRADE_CAL_ + today);
-		JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null);
+		JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
 		if (array == null || array.size() <= 0) {
 			log.warn("未获取到日交易daily_basic（每日指标）记录,tushare");
 			return false;
@@ -138,25 +148,38 @@ public class DaliyTradeHistroyService {
 			}
 			if (StringUtils.isNotBlank(date) && !preDate.equals(date)) {
 				// 补全缺失
-				JSONArray array2 = tushareSpider.getStockDaliyBasic(d.getTs_code(), null, date, today);
-				if (array2 != null && array2.size() <= 0) {
-					for (int ij = 0; ij < array2.size(); ij++) {
-						DaliyBasicInfo d2 = new DaliyBasicInfo(array2.getJSONArray(ij));
-						esDaliyBasicInfoDao.save(d2);
-					}
-				}
+				
 			}
-			redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), preDate);
+			
 		}
 		return true;
+	}
+	
+	private void spiderStockDaliyBasic(String code,String start_date,String end_date) {
+		boolean hasMore = true;
+		String lastDate = end_date;
+		do {
+			JSONObject data = tushareSpider.getStockDaliyBasic(code, null, start_date, lastDate);
+			JSONArray array2 = data.getJSONArray("items");
+			hasMore = data.getBoolean("has_more");
+			if (array2 != null && array2.size() <= 0) {
+				for (int ij = 0; ij < array2.size(); ij++) {
+					DaliyBasicInfo d2 = new DaliyBasicInfo(array2.getJSONArray(ij));
+					esDaliyBasicInfoDao.save(d2);
+					lastDate = d2.getTrade_date()+"";
+				}
+			}
+			log.info("getStockDaliyBasic code:{},start_date:{},start_date:{},hasMore:{}?",code,start_date,end_date);
+		}while(hasMore);
+		redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), preDate);
 	}
 
 	/**
 	 * 每日*定时任务-日交易
 	 */
 	public void jobSpiderAll() {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			public Object call() throws Exception {
+		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.DAY) {
+			public Object mycall() {
 				log.info("每日*定时任务-日交易[started]");
 				spiderTodayDaliyTrade();
 				log.info("每日*定时任务-日交易[end]");
@@ -164,6 +187,8 @@ public class DaliyTradeHistroyService {
 			}
 		});
 	}
+	
+	//TODO 分红除权后，需要重新获取日交易
 
 	/**
 	 * 手动*全部历史

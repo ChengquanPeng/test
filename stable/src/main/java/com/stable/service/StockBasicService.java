@@ -3,13 +3,15 @@ package com.stable.service;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.stable.enums.RunCycleEnum;
+import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.EsStockBaseInfoDao;
+import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
@@ -37,8 +39,8 @@ public class StockBasicService {
 	// private DbStockBaseInfoDao dbStockBaseInfoDao;
 
 	public void jobSynStockList() {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			public Object call() throws Exception {
+		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.STOCK_LIST, RunCycleEnum.WEEK) {
+			public Object mycall(){
 				log.info("同步股票列表[started]");
 				JSONArray array = tushareSpider.getStockCodeList();
 				// System.err.println(array.toJSONString());

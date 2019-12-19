@@ -28,8 +28,7 @@ public class TradeHistroyController {
 	public ResponseEntity<JsonResult> daliycode(@PathVariable(value = "code") String code) {
 		JsonResult r = new JsonResult();
 		try {
-			redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
-			r.setResult(tradeHistroyService.spiderTodayDaliyTrade(code));
+			r.setResult(tradeHistroyService.manualSpiderDaliyTrade(code));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

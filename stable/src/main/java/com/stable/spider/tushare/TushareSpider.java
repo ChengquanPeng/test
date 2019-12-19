@@ -190,7 +190,7 @@ public class TushareSpider {
 	 * @param end_date   结束日期 (格式：YYYYMMDD)
 	 * @return
 	 */
-	public JSONArray getStockDaliyBasic(String ts_code, String trade_date, String start_date, String end_date) {
+	public JSONObject getStockDaliyBasic(String ts_code, String trade_date, String start_date, String end_date) {
 		try {
 			StockDaliyReq req = new StockDaliyReq();
 			if (StringUtils.isNotBlank(trade_date)) {
@@ -209,7 +209,7 @@ public class TushareSpider {
 
 			String result = post(json);
 			JSONObject datas = JSON.parseObject(result);
-			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
+			JSONObject items = datas.getJSONObject("data");
 			return items;
 		} finally {
 			TheadUtil.tuShareSleepRandom();

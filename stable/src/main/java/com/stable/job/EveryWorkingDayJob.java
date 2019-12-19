@@ -30,8 +30,6 @@ public class EveryWorkingDayJob implements SimpleJob {
 	@Override
 	public void execute(ShardingContext sc) {
 		String today = DateUtil.getTodayYYYYMMDD();
-		log.info("日线数据任务开始执行：");
-		tradeHistroyService.jobSpiderAll();
 		log.info("每日分红实施公告任务开始执行：");
 		dividendService.jobSpiderDividendByDate();
 		log.info("分红除权重新获取日交易");

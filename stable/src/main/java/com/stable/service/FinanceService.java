@@ -1,7 +1,6 @@
 package com.stable.service;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -20,7 +19,10 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.constant.RedisConstant;
+import com.stable.enums.RunCycleEnum;
+import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.EsFinanceBaseInfoDao;
+import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
@@ -122,8 +124,8 @@ public class FinanceService {
 	}
 
 	public void jobSpiderFinaceHistoryInfo() {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			public Object call() throws Exception {
+		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.FINACE_HISTORY, RunCycleEnum.WEEK) {
+			public Object mycall() {
 				log.info("同步股票报告[started]");
 				List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 				log.info("股票总数：" + list.size());

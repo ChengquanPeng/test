@@ -1,13 +1,15 @@
 package com.stable.service;
 
 import java.time.Duration;
-import java.util.concurrent.Callable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.RedisConstant;
+import com.stable.enums.RunCycleEnum;
+import com.stable.enums.RunLogBizTypeEnum;
+import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
@@ -17,6 +19,7 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * 交易日历
+ * 
  * @author roy
  *
  */
@@ -29,9 +32,9 @@ public class TradeCalService {
 	@Autowired
 	private RedisUtil redisUtil;
 
-	public void synTradeCal() {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			public Object call() throws Exception {
+	public void josSynTradeCal() {
+		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.TRADE_CAL, RunCycleEnum.MONTH) {
+			public Object mycall() {
 				log.info("开始同步日历[started]");
 				String start_date = DateUtil.getTodayYYYYMMDD();
 				String end_date = DateUtil.getLastDayOfYearYYYYMMDD();

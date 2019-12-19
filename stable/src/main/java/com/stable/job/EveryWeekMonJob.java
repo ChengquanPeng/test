@@ -37,15 +37,6 @@ public class EveryWeekMonJob implements SimpleJob {
 		log.info("2.同步股票报告");
 		financeService.jobSpiderFinaceHistoryInfo();
 		log.info("3.同步回购报告");
-		Calendar cal = Calendar.getInstance();
-		String startDate = "", endDate = "";
-		int first = 0, last = 0;
-		first = cal.getActualMinimum(Calendar.DAY_OF_MONTH);
-		cal.set(Calendar.DAY_OF_MONTH, first);
-		startDate = DateUtil.getYYYYMMDD(cal.getTime());
-		last = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-		cal.set(Calendar.DAY_OF_MONTH, last);
-		endDate = DateUtil.getYYYYMMDD(cal.getTime());
-		buyBackService.fetchHist(startDate, endDate);
+		buyBackService.jobFetchHist();
 	}
 }
