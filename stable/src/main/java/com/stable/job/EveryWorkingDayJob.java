@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
 import com.stable.service.BuyBackService;
+import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.DividendService;
 import com.stable.utils.DateUtil;
@@ -26,6 +27,9 @@ public class EveryWorkingDayJob implements SimpleJob {
 	private DividendService dividendService;
 	@Autowired
 	private BuyBackService buyBackService;
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
+	
 
 	@Override
 	public void execute(ShardingContext sc) {
@@ -36,5 +40,7 @@ public class EveryWorkingDayJob implements SimpleJob {
 		tradeHistroyService.jobSpiderAll();
 		log.info("回购公告");
 		buyBackService.jobFetchHistEveryDay(today);
+		log.info("个股每日指标");
+		daliyBasicHistroyService.jobSpiderAllDailyBasic();
 	}
 }

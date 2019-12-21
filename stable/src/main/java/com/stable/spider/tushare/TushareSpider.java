@@ -228,8 +228,8 @@ public class TushareSpider {
 		try {
 			JSONObject json = new JSONObject();
 			json.put("api_name", "trade_cal");
-			json.put("params", JSON.parse("{'start_date':'"+start_date+"','end_date':'"+end_date+"','is_open':'1'}"));
-			json.put("fields", "cal_date,pretrade_date");
+			json.put("params", JSON.parse("{'start_date':'"+start_date+"','end_date':'"+end_date+"'}"));
+			json.put("fields", "cal_date,is_open,pretrade_date");
 			
 			String result = post(json);
 			JSONObject datas = JSON.parseObject(result);

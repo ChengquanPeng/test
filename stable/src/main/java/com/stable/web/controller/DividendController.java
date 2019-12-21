@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.DividendService;
 import com.stable.vo.http.JsonResult;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
 @RequestMapping("/dividend/hist")
 @RestController
@@ -20,11 +21,29 @@ public class DividendController {
 	/**
 	 * 根据code抓取分红信息
 	 */
-	@RequestMapping(value = "/fetch/{code}", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> daliycode(@PathVariable(value = "code") String code) {
+	@RequestMapping(value = "/fetchall", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> fetchall() {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(dividendService.spiderDividendByCode(code));
+			dividendService.spiderDividendAll();
+			r.setResult(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * 根据code抓取分红信息
+	 */
+	@RequestMapping(value = "/fetch/{code}", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> fetch(@PathVariable(value = "code") String code) {
+		JsonResult r = new JsonResult();
+		try {
+			dividendService.spiderDividendByCode(code);
+			r.setResult(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -37,10 +56,26 @@ public class DividendController {
 	 * 获取分红信息
 	 */
 	@RequestMapping(value = "/list/{code}", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> daliyall(@PathVariable(value = "code") String code) {
+	public ResponseEntity<JsonResult> list(@PathVariable(value = "code") String code, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(dividendService.getListByCode(code));
+			r.setResult(dividendService.getListByCode(code, page));
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * 获取分红信息
+	 */
+	@RequestMapping(value = "/listall", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> listall(EsQueryPageReq page) {
+		JsonResult r = new JsonResult();
+		try {
+			r.setResult(dividendService.getListByCode(null, page));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

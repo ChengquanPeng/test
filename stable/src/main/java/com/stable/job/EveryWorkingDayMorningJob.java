@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
-import com.stable.service.TradeCalService;
+import com.stable.service.DividendService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -15,14 +15,15 @@ import lombok.extern.log4j.Log4j2;
  */
 @Component
 @Log4j2
-public class EveryMonthJob implements SimpleJob {
+public class EveryWorkingDayMorningJob implements SimpleJob {
 
 	@Autowired
-	private TradeCalService tradeCalService;
+	private DividendService dividendService;
+	
 
 	@Override
 	public void execute(ShardingContext sc) {
-		log.info("开始同步日历");
-		tradeCalService.josSynTradeCal();
+		log.info("每日分红实施公告任务开始执行：");
+		dividendService.jobRespiderDaliyRecords();
 	}
 }

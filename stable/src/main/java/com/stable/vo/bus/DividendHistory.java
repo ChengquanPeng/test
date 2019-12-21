@@ -107,8 +107,14 @@ public class DividendHistory extends EsBase {
 			this.cash_div_tax = Double.valueOf(arr.getString(i++));
 		} catch (Exception e) {
 		}
-		this.record_date = Integer.valueOf(arr.getString(i++));
-		this.ex_date = Integer.valueOf(arr.getString(i++));
+		try {
+			this.record_date = Integer.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.ex_date = Integer.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
 		try {
 			this.pay_date = Integer.valueOf(arr.getString(i++));
 		} catch (Exception e) {
@@ -118,13 +124,11 @@ public class DividendHistory extends EsBase {
 		} catch (Exception e) {
 		}
 		arr.getString(i++);//// 实施公告日
-		this.base_date = Integer.valueOf(arr.getString(i++));
-		this.base_share = arr.getString(i++);
 		this.updDate = new Date();
 		setId();
 	}
 
 	private void setId() {
-		this.id = code + record_date;
+		this.id = code + ann_date + div_proc;
 	}
 }

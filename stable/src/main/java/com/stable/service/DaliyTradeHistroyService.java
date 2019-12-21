@@ -1,33 +1,45 @@
 package com.stable.service;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.stable.constant.Constant;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
-import com.stable.es.dao.EsDaliyBasicInfoDao;
 import com.stable.es.dao.EsTradeHistInfoDaliyDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
+import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
-import com.stable.vo.bus.DaliyBasicInfo;
+import com.stable.vo.MarketHistroyVo;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
+
 /**
  * 日交易历史
+ * 
  * @author roy
  *
  */
@@ -42,29 +54,46 @@ public class DaliyTradeHistroyService {
 	private RedisUtil redisUtil;
 	@Autowired
 	private EsTradeHistInfoDaliyDao tradeHistDaliy;
+	@Value("${python.file.market.hist.daily}")
+	private String pythonFileName;
 	@Autowired
-	private EsDaliyBasicInfoDao esDaliyBasicInfoDao;
+	private TradeCalService tradeCalService;
 
 	/**
 	 * 手动获取日交易记录（所有）
 	 */
-	public boolean manualSpiderDaliyTrade(String scode) {
-		redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + scode);
-		return this.spiderTodayDaliyTrade(scode);
+	public void manualSpiderDaliyTrade(String code) {
+		TasksWorker.getInstance().getService()
+				.submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.MANUAL, code) {
+					public Object mycall() {
+						String today = DateUtil.getTodayYYYYMMDD();
+						redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
+						log.info("日期前复权：{}重新获取记录", code);
+						String json = redisUtil.get(code);
+						if (StringUtils.isNotBlank(json)) {
+							StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
+							spiderDaliyTradeHistoryInfoFromIPO(code, base.getList_date(), today, 0);
+						}
+						redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+						return null;
+					}
+				});
 	}
-	// 全量获取历史记录（定时任务）-根据缓存是否需要重新获取，（除权得时候会重新获取）TODO
-	// 每日更新-job
-	private boolean spiderTodayDaliyTrade(String scode) {
-		String today = DateUtil.getTodayYYYYMMDD();
-		String preDate = redisUtil.get(RedisConstant.RDS_TRADE_CAL_ + today);
-		try {
-			JSONArray array = null;
-			if (StringUtils.isBlank(scode)) {
-				array = tushareSpider.getStockDaliyTrade(null, today, null, null);
-			} else {
-				array = tushareSpider.getStockDaliyTrade(TushareSpider.formatCode(scode), null, today, today);
-			}
 
+	/**
+	 * code除权
+	 */
+	public void removeCacheByChuQuan(String code) {
+		redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
+	}
+
+	// 全量获取历史记录（定时任务）-根据缓存是否需要重新获取，（除权得时候会重新获取）
+	// 每日更新-job
+	private boolean spiderTodayDaliyTrade() {
+		String today = DateUtil.getTodayYYYYMMDD();
+		String preDate = tradeCalService.getPretradeDate(today);
+		try {
+			JSONArray array = tushareSpider.getStockDaliyTrade(null, today, null, null);
 			if (array == null || array.size() <= 0) {
 				log.warn("未获取到日交易记录,tushare,code={}");
 				return false;
@@ -74,20 +103,13 @@ public class DaliyTradeHistroyService {
 				tradeHistDaliy.save(d);
 				String code = d.getCode();
 				String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
-				if (StringUtils.isBlank(yyyymmdd)) {
-					spiderDaliyTradeHistoryInfo(code);
-				}
-				
-				
-				if (StringUtils.isNotBlank(yyyymmdd) && !preDate.equals(yyyymmdd)) {
-					// 补全缺失
-					JSONArray array2 = tushareSpider.getStockDaliyTrade(TushareSpider.formatCode(code), null, yyyymmdd,
-							today);
-					if (array2 != null && array2.size() <= 0) {
-						for (int ij = 0; ij < array2.size(); ij++) {
-							TradeHistInfoDaliy d2 = new TradeHistInfoDaliy(array2.getJSONArray(ij));
-							tradeHistDaliy.save(d2);
-						}
+				// 第一次上市或者补全缺失
+				if (StringUtils.isBlank(yyyymmdd) || !preDate.equals(yyyymmdd)) {
+					log.info("日期前复权：{}重新获取记录", code);
+					String json = redisUtil.get(d.getCode());
+					if (StringUtils.isNotBlank(json)) {
+						StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
+						spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), base.getList_date(), today, 0);
 					}
 				}
 				redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
@@ -97,142 +119,113 @@ public class DaliyTradeHistroyService {
 			return false;
 		}
 		return true;
+
 	}
 
-	public boolean spiderTodayDaliyTrade() {
-		return spiderTodayDaliyTrade(null);
-	}
-
-	// 直接全量获取历史记录，不需要根据缓存来判断
-	private boolean spiderDaliyTradeHistoryInfo(String code) {
-		List<String> data = sinaSpider.getDaliyTradyHistory(code);
-		if (data.size() <= 0) {
-			log.warn("未获取到日交易记录,新浪,code={}", code);
+	private boolean spiderDaliyTradeHistoryInfoFromIPO(String code, String startDate, String endDate, int fortimes) {
+		if (fortimes >= 10) {
 			return false;
 		}
-		for (String line : data) {
-			if (line.startsWith(Constant.NUM_ER)) {
-				TradeHistInfoDaliy d = new TradeHistInfoDaliy(code, line);
-				tradeHistDaliy.save(d);
-			} else {
-				log.debug(line);
+		fortimes++;
+		MarketHistroyVo mh = new MarketHistroyVo();
+		mh.setTs_code(TushareSpider.formatCode(code));
+		mh.setAdj("qfq");
+		mh.setStart_date(startDate);
+		mh.setEnd_date(endDate);
+		mh.setFreq("D");
+
+		String params = JSONObject.toJSONString(mh);
+		params = params.replaceAll("\"", "\'");
+		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
+		if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
+			return false;
+		}
+		TradeHistInfoDaliy last = null;
+		for (String line : lines) {
+			TradeHistInfoDaliy d = this.getTradeHistInfoDaliy(line);
+			if (d != null) {
+				this.tradeHistDaliy.save(d);
+				last = d;
 			}
 		}
-		redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, DateUtil.getTodayYYYYMMDD());
-		data = null;
+		if (last != null && !startDate.equals(last.getDate() + "")) {
+			return spiderDaliyTradeHistoryInfoFromIPO(code, startDate, last.getDate() + "", fortimes);
+		}
 		return true;
 	}
 
-	// 直接全量获取历史记录，不需要根据缓存来判断
-	private boolean spiderDaliyDailyBasic() {
-		String today = DateUtil.getTodayYYYYMMDD();
-		String preDate = redisUtil.get(RedisConstant.RDS_TRADE_CAL_ + today);
-		JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
-		if (array == null || array.size() <= 0) {
-			log.warn("未获取到日交易daily_basic（每日指标）记录,tushare");
-			return false;
-		}
-		for (int i = 0; i < array.size(); i++) {
-			DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
-			esDaliyBasicInfoDao.save(d);
+	public List<TradeHistInfoDaliy> queryListByCode(String code, EsQueryPageReq queryPage) {
+		int pageNum = queryPage.getPageNum();
+		int size = queryPage.getPageSize();
+		log.info("queryPage code={},pageNum={},size={}", code, pageNum, size);
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 
-			String date = redisUtil.get(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode());
-			if (StringUtils.isBlank(date)) {
-				// 第一次
-				String json = redisUtil.get(d.getCode());
-				if (StringUtils.isNotBlank(json)) {
-					StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-					date = base.getList_date();
-				}
-				// else未更新新股
-			}
-			if (StringUtils.isNotBlank(date) && !preDate.equals(date)) {
-				// 补全缺失
-				
-			}
-			
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<TradeHistInfoDaliy> page = tradeHistDaliy.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
 		}
-		return true;
+		return null;
 	}
-	
-	private void spiderStockDaliyBasic(String code,String start_date,String end_date) {
-		boolean hasMore = true;
-		String lastDate = end_date;
-		do {
-			JSONObject data = tushareSpider.getStockDaliyBasic(code, null, start_date, lastDate);
-			JSONArray array2 = data.getJSONArray("items");
-			hasMore = data.getBoolean("has_more");
-			if (array2 != null && array2.size() <= 0) {
-				for (int ij = 0; ij < array2.size(); ij++) {
-					DaliyBasicInfo d2 = new DaliyBasicInfo(array2.getJSONArray(ij));
-					esDaliyBasicInfoDao.save(d2);
-					lastDate = d2.getTrade_date()+"";
-				}
-			}
-			log.info("getStockDaliyBasic code:{},start_date:{},start_date:{},hasMore:{}?",code,start_date,end_date);
-		}while(hasMore);
-		redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), preDate);
+
+	private TradeHistInfoDaliy getTradeHistInfoDaliy(String line) {
+		if (StringUtils.isBlank(line)) {
+			return null;
+		}
+		TradeHistInfoDaliy d = new TradeHistInfoDaliy();
+		String str = line.trim().substring(1);
+		String[] fv = str.split(",");
+		d.setCode(TushareSpider.removets(fv[0]));
+		d.setDate(Integer.valueOf(fv[1]));
+		d.setOpen(Double.valueOf(fv[2]));
+		d.setHigh(Double.valueOf(fv[3]));
+		d.setLow(Double.valueOf(fv[4]));
+		d.setClosed(Double.valueOf(fv[5]));
+		d.setYesterdayPrice(Double.valueOf(fv[6]));
+		d.setTodayChange(Double.valueOf(fv[7]));
+		d.setTodayChangeRate(Double.valueOf(fv[8]));
+		d.setVolume(Double.valueOf(fv[9]));
+		d.setAmt(Double.valueOf(fv[10]));
+		d.setId();
+		return d;
 	}
 
 	/**
 	 * 每日*定时任务-日交易
 	 */
 	public void jobSpiderAll() {
-		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.DAY) {
-			public Object mycall() {
-				log.info("每日*定时任务-日交易[started]");
-				spiderTodayDaliyTrade();
-				log.info("每日*定时任务-日交易[end]");
-				return null;
-			}
-		});
+		TasksWorker.getInstance().getService()
+				.submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.DAY) {
+					public Object mycall() {
+						log.info("每日*定时任务-日交易[started]");
+						spiderTodayDaliyTrade();
+						log.info("每日*定时任务-日交易[end]");
+						return null;
+					}
+				});
 	}
-	
-	//TODO 分红除权后，需要重新获取日交易
 
 	/**
 	 * 手动*全部历史
 	 */
 	public void spiderAllDirect() {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			public Object call() throws Exception {
-				log.info("手动*全部历史,日交易[started]");
-				List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
-				for (StockBaseInfo s : list) {
-					redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + s.getCode());
-				}
-				spiderTodayDaliyTrade();
-				log.info("手动*全部历史,日交易[end]");
-				return null;
-			}
-		});
+		TasksWorker.getInstance().getService()
+				.submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.MANUAL, "手动*全部历史,日交易") {
+					public Object mycall() {
+						log.info("手动*全部历史,日交易[started]");
+						List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+						for (StockBaseInfo s : list) {
+							redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + s.getCode());
+						}
+						spiderTodayDaliyTrade();
+						log.info("手动*全部历史,日交易[end]");
+						return null;
+					}
+				});
 	}
-
-	/**
-	 * 每日*定时任务-除权
-	 */
-	public void jobSpiderAllDailyBasic() {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			public Object call() throws Exception {
-				log.info("每日*定时任务 daily_basic [started]");
-				spiderDaliyDailyBasic();
-				log.info("每日*定时任务 daily_basic [end]");
-				return null;
-			}
-		});
-	}
-	
-	/**
-	 * 每日*定时任务 
-	 
-	public void jobSpiderAllDailyBasic() {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			public Object call() throws Exception {
-				log.info("每日*定时任务 daily_basic [started]");
-				spiderDaliyDailyBasic();
-				log.info("每日*定时任务 daily_basic [end]");
-				return null;
-			}
-		});
-	}*/
 }

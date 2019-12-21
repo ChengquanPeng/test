@@ -1,34 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:reg="http://www.dangdang.com/schema/ddframe/reg"
-       xmlns:job="http://www.dangdang.com/schema/ddframe/job"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:reg="http://www.dangdang.com/schema/ddframe/reg"
+	xmlns:job="http://www.dangdang.com/schema/ddframe/job"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
                         http://www.springframework.org/schema/beans/spring-beans.xsd
                         http://www.dangdang.com/schema/ddframe/reg
                         http://www.dangdang.com/schema/ddframe/reg/reg.xsd
                         http://www.dangdang.com/schema/ddframe/job
                         http://www.dangdang.com/schema/ddframe/job/job.xsd
                         ">
-    <!--配置作业注册中心 -->
-    <reg:zookeeper id="regCenter" server-lists="127.0.0.1:2181" namespace="job" base-sleep-time-milliseconds="1000"
-                   max-sleep-time-milliseconds="3000" max-retries="3" />
+	<!--配置作业注册中心 -->
+	<reg:zookeeper id="regCenter"
+		server-lists="127.0.0.1:2181" namespace="job"
+		base-sleep-time-milliseconds="1000" max-sleep-time-milliseconds="3000"
+		max-retries="3" />
 
-    <!-- 配置作业 下面的TestJob就是我们刚才新建的测试类-->
-    <job:simple id="testJob" class="com.stable.job.TestJob"
-                registry-center-ref="regCenter" cron="0 1 1 * * ?"
-                sharding-item-parameters="0=a" description="这个一个定时任务" sharding-total-count="1" overwrite="true"/>
-                
-     <job:simple id="EveryWeekMonJob" class="com.stable.job.EveryWeekMonJob"
-                registry-center-ref="regCenter" cron="0 15 8 ? * MON"
-                sharding-item-parameters="0=a" description="每周一早上8点15执行任务" sharding-total-count="1" overwrite="true"/>
-                
-     <job:simple id="EveryWorkingDayJob" class="com.stable.job.EveryWorkingDayJob"
-                registry-center-ref="regCenter" cron="0 01 20 ? * 2,3,4,5,6 *"
-                sharding-item-parameters="0=a" description="每日晚上18点15执行任务" sharding-total-count="1" overwrite="true"/>
-             
-	<job:simple id="EveryMonthJob" class="com.stable.job.EveryMonthJob"
-                registry-center-ref="regCenter" cron="1 1 1 1 * ?"
-                sharding-item-parameters="0=a" description="每月1日凌晨执行" sharding-total-count="1" overwrite="true"/> 
+	<!-- 配置作业 下面的TestJob就是我们刚才新建的测试类 -->
+	<job:simple id="testJob" class="com.stable.job.TestJob"
+		registry-center-ref="regCenter" cron="0 1 1 * * ?"
+		sharding-item-parameters="0=a" description="这个一个定时任务"
+		sharding-total-count="1" overwrite="true" />
+
+	<job:simple id="EveryWorkingDayMorningJob"
+		class="com.stable.job.EveryWorkingDayMorningJob"
+		registry-center-ref="regCenter" cron="0 15 4 * * ?"
+		sharding-item-parameters="0=a" description="每日早上4点15执行任务"
+		sharding-total-count="1" overwrite="true" />
+		
+	<job:simple id="EveryWorkingDayJob"
+		class="com.stable.job.EveryWorkingDayJob"
+		registry-center-ref="regCenter" cron="0 01 20 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a" description="每日晚上20点15执行任务"
+		sharding-total-count="1" overwrite="true" />
+		
+	<job:simple id="EveryWeekMonJob"
+		class="com.stable.job.EveryWeekMonJob" registry-center-ref="regCenter"
+		cron="0 15 8 ? * MON" sharding-item-parameters="0=a"
+		description="每周一早上8点15执行任务" sharding-total-count="1" overwrite="true" />
+		
+	<job:simple id="EveryMonthJob"
+		class="com.stable.job.EveryMonthJob" registry-center-ref="regCenter"
+		cron="1 1 1 1 * ?" sharding-item-parameters="0=a"
+		description="每月1日凌晨执行" sharding-total-count="1" overwrite="true" />
 
 </beans>

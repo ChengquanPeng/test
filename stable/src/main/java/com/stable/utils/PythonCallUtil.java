@@ -6,11 +6,15 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.alibaba.fastjson.JSONObject;
+import com.stable.vo.MarketHistroyVo;
+
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class PythonCallUtil {
 
+	public static final String EXCEPT = "except";
 	private static final String CALL_FORMAT = "python %s %s";
 
 	public static List<String> callPythonScript(String pythonScriptPathAndFileName, String params) {
@@ -52,7 +56,15 @@ public class PythonCallUtil {
 
 	public static void main(String[] args) {
 		String pythonScriptPathAndFileName = "E:\\pythonworkspace\\tushareTickData.py";
-		String params = "600000.SH";
+		MarketHistroyVo mh = new MarketHistroyVo();
+		mh.setTs_code("000029.SZ");
+		mh.setAdj("qfq");
+		mh.setStart_date("20191220");
+		mh.setEnd_date("20191220");
+		mh.setFreq("D");
+		
+		String params = JSONObject.toJSONString(mh);
+		params = params.replaceAll("\"", "\'");
 		PythonCallUtil.callPythonScript(pythonScriptPathAndFileName, params).forEach(str -> {
 			System.out.println(str);
 		});

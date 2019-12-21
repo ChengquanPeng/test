@@ -21,18 +21,18 @@ public class RunlogController {
 	 * 根据code查询财务信息
 	 */
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> list(int btype, int date, EsQueryPageReq page) {
+	public ResponseEntity<JsonResult> list(Integer btype, Integer date, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
 			Integer p1 = null;
-			if (btype > 0) {
+			if (btype!=null && btype > 0) {
 				p1 = Integer.valueOf(btype);
 			}
 			Integer p2 = null;
-			if (date > 0) {
+			if (date!=null && date > 0) {
 				p2 = Integer.valueOf(date);
 			}
-			r.setResult(runLogService.queryRunlogs(p1, p2, page).getContent());
+			r.setResult(runLogService.queryRunlogs(p1, p2, page));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

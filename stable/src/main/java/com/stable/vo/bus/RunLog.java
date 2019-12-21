@@ -1,6 +1,6 @@
 package com.stable.vo.bus;
 
-import java.beans.Transient;
+import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.data.annotation.Id;
@@ -29,25 +29,9 @@ public class RunLog extends EsBase {
 	private String endTime;
 	@Field(type = FieldType.Text)
 	private String remark;
+	@Field(type = FieldType.Date)
+	private Date createDate;
 	
-	private String btypeName;
-	private String cycleName;
-	private String statusName;
-	
-
-	@Transient
-	public void setBtypeName(String btypeName) {
-		this.btypeName = btypeName;
-	}
-	@Transient
-	public void setCycleName(String cycleName) {
-		this.cycleName = cycleName;
-	}
-	@Transient
-	public void setStatusName(String statusName) {
-		this.statusName = statusName;
-	}
-
 	public RunLog() {
 		id = UUID.randomUUID().toString();
 	}

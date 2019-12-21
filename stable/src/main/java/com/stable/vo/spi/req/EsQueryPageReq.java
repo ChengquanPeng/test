@@ -6,7 +6,7 @@ import lombok.Data;
 public class EsQueryPageReq {
 	public Integer getPageNum() {
 		if (pageNum == null || pageNum <= 1) {
-			pageNum = 1;
+			pageNum = 0;
 		}
 		return pageNum;
 	}

@@ -1,7 +1,5 @@
 package com.stable.job;
 
-import java.util.Calendar;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +8,6 @@ import com.dangdang.ddframe.job.api.simple.SimpleJob;
 import com.stable.service.BuyBackService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
-import com.stable.utils.DateUtil;
 
 import lombok.extern.log4j.Log4j2;
 
