@@ -54,19 +54,18 @@ public class ErrorLogFileUitl {
 		}));
 	}
 
-	public static void writeError(Exception e) {
+	public static void writeError(Exception e, String p1, String p2, String p3) {
 		try {
 			StringBuffer s = new StringBuffer();
-
 			s.append("=========================");
 			s.append(LINE);
-			s.append(e.getMessage());
+			s.append(p1 + "|" + p2 + "|" + p3 + "|" + e.getMessage());
 			s.append(LINE);
 			for (StackTraceElement se : e.getStackTrace()) {
 				s.append(se.toString());
 				s.append(LINE);
 			}
-			//System.err.println(s.toString());
+			// System.err.println(s.toString());
 			ByteBuffer buf = ByteBuffer.wrap(s.toString().getBytes());
 			buf.put(s.toString().getBytes());
 			buf.flip();

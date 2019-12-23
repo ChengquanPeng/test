@@ -50,10 +50,11 @@ public abstract class MyCallable implements Callable<Object> {
 			return result;
 		} catch (Exception e) {
 			e.printStackTrace();
+			ErrorLogFileUitl.writeError(e, biz.getBtypeName(), cycle.getName(), remark);
+			log.info("执行任务异常：{},remark", biz.getBtypeName(), remark);
 			rl.setRemark(remark + e.getMessage());
 			rl.setStatus(2);
-			log.info("执行任务异常：{}", biz.getBtypeName());
-			ErrorLogFileUitl.writeError(e);
+
 		} finally {
 			rl.setEndTime(DateUtil.getTodayYYYYMMDDHHMMSS());
 			service.addLog(rl);
