@@ -7,6 +7,7 @@ import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.service.RunLogService;
 import com.stable.utils.DateUtil;
+import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.SpringUtil;
 import com.stable.vo.bus.RunLog;
 
@@ -52,6 +53,7 @@ public abstract class MyCallable implements Callable<Object> {
 			rl.setRemark(remark + e.getMessage());
 			rl.setStatus(2);
 			log.info("执行任务异常：{}", biz.getBtypeName());
+			ErrorLogFileUitl.writeError(e);
 		} finally {
 			rl.setEndTime(DateUtil.getTodayYYYYMMDDHHMMSS());
 			service.addLog(rl);

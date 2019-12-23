@@ -66,7 +66,7 @@ public class DividendService {
 				log.warn("未获取到日交易记录,tushare,code={}");
 				return false;
 			}
-			//System.err.println(array);
+			// System.err.println(array);
 			for (int i = 0; i < array.size(); i++) {
 				JSONArray arr = array.getJSONArray(i);
 				// if (SS.equals(arr.get(3))) {
@@ -129,9 +129,13 @@ public class DividendService {
 					@Override
 					public Object mycall() {
 						List<DividendHistory> list = getTodayListByCode();
-						for (DividendHistory d : list) {
-							log.info("今日分红除权相关信息{}", d);
-							daliydTradeHistroyService.removeCacheByChuQuan(d.getCode());
+						if (list != null) {
+							for (DividendHistory d : list) {
+								log.info("今日分红除权相关信息{}", d);
+								daliydTradeHistroyService.removeCacheByChuQuan(d.getCode());
+							}
+						}else {
+							log.info("今日无股票分红除权相关信息");
 						}
 						return null;
 					}
