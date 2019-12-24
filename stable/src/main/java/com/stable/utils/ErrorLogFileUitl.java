@@ -57,7 +57,8 @@ public class ErrorLogFileUitl {
 	public static void writeError(Exception e, String p1, String p2, String p3) {
 		try {
 			StringBuffer s = new StringBuffer();
-			s.append("=========================");
+			s.append("=========================:");
+			s.append(DateUtil.getTodayYYYYMMDDHHMMSS());
 			s.append(LINE);
 			s.append(p1 + "|" + p2 + "|" + p3 + "|" + e.getMessage());
 			s.append(LINE);

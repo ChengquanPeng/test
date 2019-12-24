@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>Dashboard Template for Bootstrap</title>
+
+<!-- Bootstrap core CSS -->
+<link href="/libs/bootstrap/4.0/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
+</head>
+
+<body>
+	<div id="header"></div>
+	<div class="container-fluid">
+		<div class="row">
+			<div id="menu"></div>
+
+			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
+			<div class="col-lg-2">
+				<div class="input-group">
+					<input type="text" class="form-control" id="queryCode"> <span
+						class="input-group-btn">
+						<button class="btn btn-default" type="button" id="queryAction">
+							Go!</button>
+					</span>
+				</div>
+			</div>
+			<div id="content1"  class="col-center-block"></div>
+			<div id="content2"></div>
+			</main>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="/libs/js/jquery-3.1.1.slim.min.js"
+		integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+		crossorigin="anonymous"></script>
+	<script src="/libs/js/tether.min.js"
+		integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+		crossorigin="anonymous"></script>
+	<script src="/libs/bootstrap/4.0/js/bootstrap.min.js"></script>
+	<script src="/libs/js/common.js"></script>
+	<script src="/libs/js/jquery.js"></script>
+	<script src="/libs/js/dashboard/index.js"></script>
+	<script type="text/javascript">
+		$("#header").load("/header.html")
+		$("#menu").load("/menu.html")
+		addActive("m_reports");
+		function removeAd(){
+			//alert(document.getElementById("iframeFinance"));
+			//$("#financediagn",document.frames('iframeFinance').document).hide();
+			//$("#r-go-top",document.frames('iframeFinance').document).hide();
+		}
+		$("#queryAction").click(
+			function() {
+				var code = $.trim($("#queryCode").val());
+				if(code==""){
+					alert("null code");
+				}
+				var url1 = "http://stockpage.10jqka.com.cn/realHead_v2.html#hs_"+code;
+				var url2 = "http://basic.10jqka.com.cn/"+code+"/finance.html#stockpage";
+				$("#content1").html("<iframe src='"+url1+"' width='100%' height='100%' marginheight='0' marginwidth='0' frameborder='0' scrolling='yes'></iframe>");
+				$("#content2").html("<iframe src='"+url2+"' style='width:100%;min-height:960px;border: 0 none' scrolling='yes' frameborder='0' ></iframe>");
+			}
+		);
+	</script>
+</body>
+</html>

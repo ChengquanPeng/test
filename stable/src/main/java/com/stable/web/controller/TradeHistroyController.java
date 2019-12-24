@@ -20,12 +20,12 @@ public class TradeHistroyController {
 	private DaliyTradeHistroyService tradeHistroyService;
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
-	
+
 	/**
 	 * 根据code重新获取历史记录（前复权）
 	 */
 	@RequestMapping(value = "/dailybasic/{code}", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> dailybasic(@PathVariable(value = "code") String code,EsQueryPageReq page) {
+	public ResponseEntity<JsonResult> dailybasic(@PathVariable(value = "code") String code, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
 			r.setResult(daliyBasicHistroyService.queryListByCode(code, page));
@@ -36,12 +36,29 @@ public class TradeHistroyController {
 		}
 		return ResponseEntity.ok(r);
 	}
-	
+
+	/**
+	 * 根据code重新获取历史记录（前复权）
+	 */
+	@RequestMapping(value = "/dailybasic/fetch/{date}", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> dailybasicfetch(@PathVariable(value = "date") String tradeDate) {
+		JsonResult r = new JsonResult();
+		try {
+			daliyBasicHistroyService.jobSpiderAllDailyBasic(tradeDate);
+			r.setResult(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
 	/**
 	 * 根据code重新获取历史记录（前复权）
 	 */
 	@RequestMapping(value = "/qfq/list/{code}", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> qfqlsit(@PathVariable(value = "code") String code,EsQueryPageReq page) {
+	public ResponseEntity<JsonResult> qfqlsit(@PathVariable(value = "code") String code, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
 			r.setResult(tradeHistroyService.queryListByCode(code, page));

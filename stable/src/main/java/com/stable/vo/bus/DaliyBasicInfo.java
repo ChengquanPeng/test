@@ -22,61 +22,104 @@ public class DaliyBasicInfo extends EsBase {
 	@Id
 	private String id;
 	@Field(type = FieldType.Text)
-	private String code;//股票代码
+	private String code;// 股票代码
 	@Field(type = FieldType.Text)
-	private String ts_code;//	str	TS股票代码
+	private String ts_code;// str TS股票代码
 	@Field(type = FieldType.Integer)
-	private int trade_date;//	str	交易日期
+	private int trade_date;// str 交易日期
 	@Field(type = FieldType.Double)
-	private double close;//	float	当日收盘价
+	private double close;// float 当日收盘价
 	@Field(type = FieldType.Double)
-	private double turnover_rate;//	float	换手率（%）
+	private double turnover_rate;// float 换手率（%）
 	@Field(type = FieldType.Double)
-	private double turnover_rate_f;//	float	换手率（自由流通股）
+	private double turnover_rate_f;// float 换手率（自由流通股）
 	@Field(type = FieldType.Double)
-	private double volume_ratio;//	float	量比
+	private double volume_ratio;// float 量比
 	@Field(type = FieldType.Double)
-	private double pe;//	float	市盈率（总市值/净利润）
+	private double pe;// float 市盈率（总市值/净利润）
 	@Field(type = FieldType.Double)
-	private double pe_ttm;//	float	市盈率（TTM）
+	private double pe_ttm;// float 市盈率（TTM）
 	@Field(type = FieldType.Double)
-	private double pb;//	float	市净率（总市值/净资产）
+	private double pb;// float 市净率（总市值/净资产）
 	@Field(type = FieldType.Double)
-	private double ps;//	float	市销率
+	private double ps;// float 市销率
 	@Field(type = FieldType.Double)
-	private double ps_ttm;//	float	市销率（TTM）
+	private double ps_ttm;// float 市销率（TTM）
 	@Field(type = FieldType.Double)
-	private double total_share;//	float	总股本 （万股）
+	private double total_share;// float 总股本 （万股）
 	@Field(type = FieldType.Double)
-	private double float_share;//	float	流通股本 （万股）
+	private double float_share;// float 流通股本 （万股）
 	@Field(type = FieldType.Double)
-	private double free_share;//	float	自由流通股本 （万）
+	private double free_share;// float 自由流通股本 （万）
 	@Field(type = FieldType.Double)
-	private double total_mv;//	float	总市值 （万元）
+	private double total_mv;// float 总市值 （万元）
 	@Field(type = FieldType.Double)
-	private double circ_mv;//	float	流通市值（万元）
-	
+	private double circ_mv;// float 流通市值（万元）
+
 	public DaliyBasicInfo(JSONArray arr) {
 		int i = 0;
 		this.ts_code = arr.getString(i++);// ts_code
 		this.code = TushareSpider.removets(ts_code);
 		this.trade_date = Integer.valueOf(arr.getString(i++));
-		this.turnover_rate = Double.valueOf(arr.getString(i++));
-		this.turnover_rate_f = Double.valueOf(arr.getString(i++));
-		this.volume_ratio = Double.valueOf(arr.getString(i++));
-		this.pe = Double.valueOf(arr.getString(i++));
-		this.pe_ttm = Double.valueOf(arr.getString(i++));
-		this.pb = Double.valueOf(arr.getString(i++));
-		this.ps = Double.valueOf(arr.getString(i++));
-		this.ps_ttm = Double.valueOf(arr.getString(i++));
-		this.total_share = Double.valueOf(arr.getString(i++));
-		this.float_share = Double.valueOf(arr.getString(i++));
-		this.free_share = Double.valueOf(arr.getString(i++));
-		this.total_mv = Double.valueOf(arr.getString(i++));
-		this.circ_mv = Double.valueOf(arr.getString(i++));
-		
+		try {
+			this.close = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.turnover_rate = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.turnover_rate_f = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.volume_ratio = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.pe = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.pe_ttm = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.pb = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.ps = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.ps_ttm = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.total_share = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.float_share = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.free_share = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.total_mv = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.circ_mv = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
 		setId();
 	}
+
 	private void setId() {
 		this.id = code + trade_date;
 	}

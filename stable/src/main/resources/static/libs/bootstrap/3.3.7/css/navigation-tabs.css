@@ -1,0 +1,10 @@
+.nav-container > .nav-content-container > .nav-content{
+	display: none;
+}
+.nav-container > .nav-content-container > .nav-content.active{
+	display: block;
+}
+
+.nav-container > .nav-content-container {
+	margin-top: 10px;
+}

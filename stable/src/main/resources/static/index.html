@@ -1,67 +1,16 @@
-<html>
-<head>
-<style type="text/css">
-.bor{border:1px dashed #d8d8d8;font-size: 14px;}
-.hder{height: 40px;font:bold;font-size: 16px;}
-tr td{border:1px dashed #d8d8d8;vertical-align: bottom;}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Signin Template for Bootstrap</title>
+    <script>
+    window.location = "/web/dashboard/index.html";
+    </script>
+  </head>
 
-</style>
-<script type="text/javascript" src="./common.js"></script>
-<script type="text/javascript">
-	//date
-	monthStarted = endDate = formatDate(new Date(), 'yyyyMM') + "01";
-	endDate = formatDate(new Date(), 'yyyyMMdd');
-</script>
-</head>
-<body>
-<a target="blank" href="/static/code.html">个股详情页</a></br>
-<a target="blank" href="/static/strategy.html">策略功能页</a></br>
-<div align="center">
-<table class="bor" cellspacing="0" cellpadding="0" >
-	<tr><td width="50">类型</td><td>功能</td><td>URL</td></tr>
-	<tr><td class="hder" colspan="3">基础功能：</td></tr>
-	<tr><td>爬虫</td><td>交易日历：</td><td class="aurl">/job/tradecal?startdate=&enddate=</script></td></tr>
-	
-	<tr><td class="hder" colspan="3">日交易：</td></tr>
-	<tr><td>查询</td><td>查询股票每日交易指标/记录</td><td class="aurl">/trade/hist/dailybasic/{code}</td></tr>
-	<tr><td>查询</td><td>查询股票每日交易记录（前复权）</td><td class="aurl">/trade/hist/qfq/list/{code}</td></tr>
-	<tr><td>爬虫</td><td>重新抓取日K历史记录（前复权）：</td><td class="aurl">/trade/hist/qfq/fetch/{code}</td></tr>
-	<tr><td>爬虫</td><td>重新抓取当日所有日交易（前复权）：</td><td class="aurl">/trade/hist/qfq/fetchall</td></tr>
-	<tr><td>爬虫</td><td>重新抓取所有code的全部历史日交易（前复权）：</td><td class="aurl">/trade/hist/qfq/fetchallDirect</td></tr>
-	
-	<tr><td class="hder" colspan="3">财务：</td></tr>
-	<tr><td>爬虫</td><td>根据code抓取财务信息：</td><td class="aurl">/finance/hist/fetch/{code}</td></tr>
-	<tr><td>爬虫</td><td>抓取所有财务信息：</td><td class="aurl">/finance/hist/fetchall</td></tr>
-	<tr><td>查询</td><td>查询code财务信息历史：</td><td class="aurl">/finance/hist/list/{code}</td></tr>
-	
-	<tr><td class="hder" colspan="3">分红分股：</td></tr>
-	<tr><td>查询</td><td>查询所有分红信息：</td><td class="aurl">/dividend/hist/listall</td></tr>
-	<tr><td>查询</td><td>查询code分红信息：</td><td class="aurl">/dividend/hist/list/{code}</td></tr>
-	<tr><td>爬虫</td><td>抓取所有分红信息：</td><td class="aurl">/dividend/hist/fetchall</td></tr>
-	<tr><td>爬虫</td><td>根据code抓取分红信息：</td><td class="aurl">/dividend/hist/fetch/{code}</td></tr>
-	
-	
-	<tr><td class="hder" colspan="3">回购：</td></tr>
-	<tr><td>爬虫</td><td>根据时间段抓取回购记录：</td><td class="aurl">/buyback/fetch?startDate=<script>document.write(monthStarted);</script>&endDate=<script>document.write(endDate);</script></td></tr>
-	<tr><td>查询</td><td>查询所有的分红回购历史：</td><td class="aurl">/buyback/list?dtype=0&asc=0 0所有，1提议，2预案，3股东大会通过，4实施，5完成，6停止</td></tr>
-	<tr><td>查询</td><td>查询code分红回购历史：</td><td class="aurl">/buyback/list/{code}?dtype=0&asc=0</td></tr>
-	
-</table>
-</div>
-</body>
-<script type="text/javascript">
-	var houzui = "static";
-	var url = window.location.href;
-	var preUrl = url;
-	var i = url.indexOf(houzui);
-	if (i > 0) {
-		preUrl = url.substring(0, i - 1);
-	}
-	preUrl = preUrl.substring(0, preUrl.length - 1);
-	var tds = document.getElementsByClassName("aurl");
-	for (var i = 0; i < tds.length; i++) {
-		var u = tds[i].innerText;
-		tds[i].innerHTML = "<a target='blank' href='"+preUrl+u+"'>" + u + "</a>";
-	}
-</script>
+  <body>
+  </body>
 </html>

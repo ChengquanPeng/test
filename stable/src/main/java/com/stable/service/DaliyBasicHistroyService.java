@@ -53,8 +53,7 @@ public class DaliyBasicHistroyService {
 	private TradeCalService tradeCalService;
 
 	// 直接全量获取历史记录，不需要根据缓存来判断
-	private boolean spiderDaliyDailyBasic() {
-		String today = DateUtil.getTodayYYYYMMDD();
+	private boolean spiderDaliyDailyBasic(String today) {
 		String preDate = tradeCalService.getPretradeDate(today);
 		JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
 		if (array == null || array.size() <= 0) {
@@ -62,9 +61,10 @@ public class DaliyBasicHistroyService {
 			return false;
 		}
 		for (int i = 0; i < array.size(); i++) {
+			//System.err.println(array.getJSONArray(i).toJSONString());
 			DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
 			esDaliyBasicInfoDao.save(d);
-
+			
 			String date = redisUtil.get(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode());
 			if (StringUtils.isBlank(date)) {
 				// 第一次
@@ -98,7 +98,7 @@ public class DaliyBasicHistroyService {
 					lastDate = d2.getTrade_date() + "";
 				}
 			}
-			log.info("getStockDaliyBasic code:{},start_date:{},start_date:{},hasMore:{}?", code, start_date, end_date);
+			log.info("getStockDaliyBasic code:{},start_date:{},start_date:{},hasMore:{}?", code, start_date, end_date,hasMore);
 		} while (hasMore);
 	}
 
@@ -109,13 +109,24 @@ public class DaliyBasicHistroyService {
 		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.DAILY_BASIC, RunCycleEnum.DAY) {
 			public Object mycall() {
 				log.info("每日*定时任务 daily_basic [started]");
-				spiderDaliyDailyBasic();
+				String today = DateUtil.getTodayYYYYMMDD();
+				spiderDaliyDailyBasic(today);
 				log.info("每日*定时任务 daily_basic [end]");
 				return null;
 			}
 		});
 	}
-	
+
+	public void jobSpiderAllDailyBasic(String tradeDate) {
+		TasksWorker.getInstance().getService()
+				.submit(new MyCallable(RunLogBizTypeEnum.DAILY_BASIC, RunCycleEnum.MANUAL) {
+					public Object mycall() {
+						spiderDaliyDailyBasic(tradeDate);
+						return null;
+					}
+				});
+	}
+
 	public List<DaliyBasicInfo> queryListByCode(String code, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
