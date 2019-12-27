@@ -40,7 +40,7 @@ public class DividendHistory extends EsBase {
 	private String div_proc;
 	// 每股送转
 	@Field(type = FieldType.Text)
-	private String stk_div;
+	private double stk_div;
 	// 每股送股比例
 	@Field(type = FieldType.Double)
 	private double stk_bo_rate = 0d;
@@ -78,9 +78,8 @@ public class DividendHistory extends EsBase {
 	public DividendHistory() {
 
 	}
-
+	
 	public DividendHistory(JSONArray arr) {
-
 		int i = 0;
 		this.ts_code = arr.getString(i++);// ts_code
 		this.code = TushareSpider.removets(ts_code);
@@ -90,7 +89,10 @@ public class DividendHistory extends EsBase {
 		} catch (Exception e) {
 		}
 		this.div_proc = arr.getString(i++);
-		this.stk_div = arr.getString(i++);
+		try {
+			this.stk_div = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
 		try {
 			this.stk_bo_rate = Double.valueOf(arr.getString(i++));
 		} catch (Exception e) {

@@ -55,11 +55,27 @@ public class DividendController {
 	/**
 	 * 获取分红信息
 	 */
+	@RequestMapping(value = "/query", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> query(String code, String proc, EsQueryPageReq page) {
+		JsonResult r = new JsonResult();
+		try {
+			r.setResult(dividendService.getListByCodeForWebPage(code, proc, page));
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * 获取分红信息
+	 */
 	@RequestMapping(value = "/list/{code}", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> list(@PathVariable(value = "code") String code, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(dividendService.getListByCode(code, page));
+			r.setResult(dividendService.getListByCodeForWebPage(code, null, page));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -75,7 +91,7 @@ public class DividendController {
 	public ResponseEntity<JsonResult> listall(EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(dividendService.getListByCode(null, page));
+			r.setResult(dividendService.getListByCodeForWebPage(null, null, page));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

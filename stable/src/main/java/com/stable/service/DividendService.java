@@ -1,5 +1,6 @@
 package com.stable.service;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -8,6 +9,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +28,7 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.vo.bus.DividendHistory;
 import com.stable.vo.bus.StockBaseInfo;
+import com.stable.vo.http.resp.DividendHistoryResp;
 import com.stable.vo.spi.req.DividendReq;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -83,10 +86,13 @@ public class DividendService {
 		return true;
 	}
 
-	public List<DividendHistory> getListByCode(String code, EsQueryPageReq querypage) {
+	public List<DividendHistory> getListByCode(String code, String proc, EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		}
+		if (StringUtils.isNotBlank(proc)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("div_proc", proc));
 		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("end_date").unmappedType("integer").order(SortOrder.DESC);
 
@@ -100,6 +106,21 @@ public class DividendService {
 		}
 		log.info("no DividendHistory for code={}", code);
 		return null;
+	}
+
+	public List<DividendHistoryResp> getListByCodeForWebPage(String code, String proc, EsQueryPageReq querypage) {
+		List<DividendHistoryResp> res = new LinkedList<DividendHistoryResp>();
+		List<DividendHistory> list = this.getListByCode(code, proc, querypage);
+		if (list != null) {
+			for (DividendHistory dh : list) {
+				DividendHistoryResp resp = new DividendHistoryResp();
+				BeanUtils.copyProperties(dh, resp);
+				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
+
+				res.add(resp);
+			}
+		}
+		return res;
 
 	}
 
@@ -134,7 +155,7 @@ public class DividendService {
 								log.info("今日分红除权相关信息{}", d);
 								daliydTradeHistroyService.removeCacheByChuQuan(d.getCode());
 							}
-						}else {
+						} else {
 							log.info("今日无股票分红除权相关信息");
 						}
 						return null;

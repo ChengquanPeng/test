@@ -61,10 +61,10 @@ public class DaliyBasicHistroyService {
 			return false;
 		}
 		for (int i = 0; i < array.size(); i++) {
-			//System.err.println(array.getJSONArray(i).toJSONString());
+			// System.err.println(array.getJSONArray(i).toJSONString());
 			DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
 			esDaliyBasicInfoDao.save(d);
-			
+
 			String date = redisUtil.get(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode());
 			if (StringUtils.isBlank(date)) {
 				// 第一次
@@ -88,17 +88,19 @@ public class DaliyBasicHistroyService {
 		boolean hasMore = true;
 		String lastDate = end_date;
 		do {
-			JSONObject data = tushareSpider.getStockDaliyBasic(code, null, start_date, lastDate);
+			JSONObject data = tushareSpider.getStockDaliyBasic(TushareSpider.formatCode(code), null, start_date,
+					lastDate);
 			JSONArray array2 = data.getJSONArray("items");
 			hasMore = data.getBoolean("has_more");
-			if (array2 != null && array2.size() <= 0) {
+			if (array2 != null && array2.size() > 0) {
 				for (int ij = 0; ij < array2.size(); ij++) {
 					DaliyBasicInfo d2 = new DaliyBasicInfo(array2.getJSONArray(ij));
 					esDaliyBasicInfoDao.save(d2);
 					lastDate = d2.getTrade_date() + "";
 				}
 			}
-			log.info("getStockDaliyBasic code:{},start_date:{},start_date:{},hasMore:{}?", code, start_date, end_date,hasMore);
+			log.info("getStockDaliyBasic code:{},start_date:{},start_date:{},hasMore:{}?", code, start_date, end_date,
+					hasMore);
 		} while (hasMore);
 	}
 
