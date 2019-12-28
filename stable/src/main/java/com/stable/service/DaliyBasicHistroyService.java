@@ -26,8 +26,10 @@ import com.stable.es.dao.EsDaliyBasicInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
+import com.stable.utils.MyRunnable;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
+import com.stable.utils.TasksWorker2nd;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -60,26 +62,43 @@ public class DaliyBasicHistroyService {
 			log.warn("未获取到日交易daily_basic（每日指标）记录,tushare");
 			return false;
 		}
-		for (int i = 0; i < array.size(); i++) {
-			// System.err.println(array.getJSONArray(i).toJSONString());
-			DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
-			esDaliyBasicInfoDao.save(d);
+		try {
+			for (int i = 0; i < array.size(); i++) {
+				// System.err.println(array.getJSONArray(i).toJSONString());
+				DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
+				esDaliyBasicInfoDao.save(d);
 
-			String date = redisUtil.get(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode());
-			if (StringUtils.isBlank(date)) {
-				// 第一次
-				String json = redisUtil.get(d.getCode());
-				if (StringUtils.isNotBlank(json)) {
-					StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-					date = base.getList_date();
+				String date = redisUtil.get(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode());
+				if (StringUtils.isBlank(date)) {
+					// 第一次
+					String json = redisUtil.get(d.getCode());
+					if (StringUtils.isNotBlank(json)) {
+						StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
+						date = base.getList_date();
+					}
+					// else未更新新股
 				}
-				// else未更新新股
+				final String datep = date;
+				if (StringUtils.isNotBlank(date) && !preDate.equals(date)) {
+
+					TasksWorker2nd.add(new MyRunnable() {
+						@Override
+						public void running() {
+							// 补全缺失
+							spiderStockDaliyBasic(d.getCode(), datep, today);
+							redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), d.getTrade_date());
+						}
+
+					});
+
+				} else {
+					redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), d.getTrade_date());
+				}
+
 			}
-			if (StringUtils.isNotBlank(date) && !preDate.equals(date)) {
-				// 补全缺失
-				spiderStockDaliyBasic(d.getCode(), date, today);
-			}
-			redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), d.getTrade_date());
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return false;
 		}
 		return true;
 	}

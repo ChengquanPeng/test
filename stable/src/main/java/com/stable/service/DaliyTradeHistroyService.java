@@ -124,6 +124,8 @@ public class DaliyTradeHistroyService {
 							}
 						});
 					}
+				}else {
+					redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 				}
 			}
 		} catch (Exception e) {
