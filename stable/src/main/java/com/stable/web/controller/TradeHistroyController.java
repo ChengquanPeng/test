@@ -62,6 +62,7 @@ public class TradeHistroyController {
 		JsonResult r = new JsonResult();
 		try {
 			r.setResult(tradeHistroyService.queryListByCode(code, page));
+			r.setResult(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -95,6 +96,7 @@ public class TradeHistroyController {
 		JsonResult r = new JsonResult();
 		try {
 			tradeHistroyService.jobSpiderAll();
+			r.setResult(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -107,10 +109,11 @@ public class TradeHistroyController {
 	 * 重新获取（前复权）日交易
 	 */
 	@RequestMapping(value = "/qfq/fetchallDirect", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> daliyalldirect() {
+	public ResponseEntity<JsonResult> fetchallDirect(String date) {
 		JsonResult r = new JsonResult();
 		try {
-			tradeHistroyService.spiderAllDirect();
+			tradeHistroyService.spiderAllDirect(date);
+			r.setResult(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

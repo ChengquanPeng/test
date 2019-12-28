@@ -27,9 +27,12 @@ import com.stable.es.dao.EsTradeHistInfoDaliyDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
+import com.stable.utils.MyRunnable;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
+import com.stable.utils.TasksWorker2nd;
+import com.stable.utils.TheadUtil;
 import com.stable.vo.MarketHistroyVo;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
@@ -91,6 +94,10 @@ public class DaliyTradeHistroyService {
 	// 每日更新-job
 	private boolean spiderTodayDaliyTrade() {
 		String today = DateUtil.getTodayYYYYMMDD();
+		return spiderTodayDaliyTrade(today);
+	}
+
+	private boolean spiderTodayDaliyTrade(String today) {
 		String preDate = tradeCalService.getPretradeDate(today);
 		try {
 			JSONArray array = tushareSpider.getStockDaliyTrade(null, today, null, null);
@@ -109,10 +116,15 @@ public class DaliyTradeHistroyService {
 					String json = redisUtil.get(d.getCode());
 					if (StringUtils.isNotBlank(json)) {
 						StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-						spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), base.getList_date(), today, 0);
+						TasksWorker2nd.add(new MyRunnable() {
+							@Override
+							public void running() {
+								spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), base.getList_date(), today, 0);
+								redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+							}
+						});
 					}
 				}
-				redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -124,9 +136,11 @@ public class DaliyTradeHistroyService {
 
 	private boolean spiderDaliyTradeHistoryInfoFromIPO(String code, String startDate, String endDate, int fortimes) {
 		if (fortimes >= 10) {
+			log.warn("超过最大次数：code：{}，startDate：{}，endDate：{}，fortimes：{}", code, startDate, endDate, fortimes);
 			return false;
 		}
 		fortimes++;
+		TheadUtil.sleepRandomSecBetween1And30();
 		MarketHistroyVo mh = new MarketHistroyVo();
 		mh.setTs_code(TushareSpider.formatCode(code));
 		mh.setAdj("qfq");
@@ -138,8 +152,10 @@ public class DaliyTradeHistroyService {
 		params = params.replaceAll("\"", "\'");
 		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
 		if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
+			log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，未获取到数据 params：{}，本批当前日期last：{}", code, params);
 			return false;
 		}
+		log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，获取到数据 条数：szie:{}，", code, lines.size());
 		TradeHistInfoDaliy last = null;
 		for (String line : lines) {
 			TradeHistInfoDaliy d = this.getTradeHistInfoDaliy(line);
@@ -148,6 +164,7 @@ public class DaliyTradeHistroyService {
 				last = d;
 			}
 		}
+		log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，上市日期startDate：{}，本批当前日期last：{}", code, startDate, last);
 		if (last != null && !startDate.equals(last.getDate() + "")) {
 			return spiderDaliyTradeHistoryInfoFromIPO(code, startDate, last.getDate() + "", fortimes);
 		}
@@ -213,16 +230,16 @@ public class DaliyTradeHistroyService {
 	/**
 	 * 手动*全部历史
 	 */
-	public void spiderAllDirect() {
-		TasksWorker.getInstance().getService()
-				.submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.MANUAL, "手动*全部历史,日交易") {
+	public void spiderAllDirect(String date) {
+		TasksWorker.getInstance().getService().submit(
+				new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.MANUAL, "手动*全部历史,日交易,date=" + date) {
 					public Object mycall() {
 						log.info("手动*全部历史,日交易[started]");
 						List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 						for (StockBaseInfo s : list) {
 							redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + s.getCode());
 						}
-						spiderTodayDaliyTrade();
+						spiderTodayDaliyTrade(date);
 						log.info("手动*全部历史,日交易[end]");
 						return null;
 					}
