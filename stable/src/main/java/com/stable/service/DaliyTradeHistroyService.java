@@ -114,8 +114,8 @@ public class DaliyTradeHistroyService {
 					String json = redisUtil.get(d.getCode());
 					if (StringUtils.isNotBlank(json)) {
 						StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-						spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), base.getList_date(), today, 0);
-						redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+						//spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), base.getList_date(), today, 0);
+						//redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 						TasksWorker2nd.add(new MyRunnable() {
 							@Override
 							public void running() {
