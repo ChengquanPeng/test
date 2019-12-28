@@ -14,6 +14,7 @@ import com.stable.service.BuyBackService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.vo.http.JsonResult;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -92,10 +93,10 @@ public class BuyBackController {
 	 * 根据code查询财务信息
 	 */
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> list(int dtype, int asc) {
+	public ResponseEntity<JsonResult> list(String code, int dtype, int asc, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(buyBackService.getBuyBackInfo(null, dtype, asc));
+			r.setResult(buyBackService.getListByCodeForWebPage(code, dtype, asc, page));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -106,10 +107,11 @@ public class BuyBackController {
 	}
 
 	@RequestMapping(value = "/list/{code}", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> listcode(@PathVariable(value = "code") String code, int dtype, int asc) {
+	public ResponseEntity<JsonResult> listcode(@PathVariable(value = "code") String code, int dtype, int asc,
+			EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(buyBackService.getBuyBackInfo(code, dtype, asc));
+			r.setResult(buyBackService.getListByCodeForWebPage(code, dtype, asc, page));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

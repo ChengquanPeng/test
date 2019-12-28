@@ -121,7 +121,6 @@ public class DividendService {
 			}
 		}
 		return res;
-
 	}
 
 	public List<DividendHistory> getTodayListByCode() {

@@ -1,6 +1,7 @@
 package com.stable.service;
 
 import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -10,6 +11,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +29,8 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.vo.bus.BuyBackInfo;
+import com.stable.vo.http.resp.BuyBackInfoResp;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -43,6 +47,8 @@ public class BuyBackService {
 	private TushareSpider tushareSpider;
 	@Autowired
 	private EsBuyBackInfoDao buyBackInfoDao;
+	@Autowired
+	private StockBasicService stockBasicService;
 
 	public void spiderBuyBackHistoryInfo() {
 		this.spiderBuyBackHistoryInfo(null, null);
@@ -108,19 +114,29 @@ public class BuyBackService {
 		log.info("同步回购公告列表[end],start_date={},end_date={},", start_date, end_date);
 	}
 
-	public List<BuyBackInfo> getBuyBackInfo(String code, int dtype, int asc) {
+	public List<BuyBackInfoResp> getListByCodeForWebPage(String code, int dtype, int asc, EsQueryPageReq querypage) {
+		List<BuyBackInfoResp> res = new LinkedList<BuyBackInfoResp>();
+		List<BuyBackInfo> list = this.getBuyBackInfo(code, dtype, asc, querypage);
+		if (list != null) {
+			for (BuyBackInfo dh : list) {
+				BuyBackInfoResp resp = new BuyBackInfoResp();
+				BeanUtils.copyProperties(dh, resp);
+				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
+				res.add(resp);
+			}
+		}
+		return res;
+	}
+
+	public List<BuyBackInfo> getBuyBackInfo(String code, int dtype, int asc, EsQueryPageReq querypage) {
 		log.info("query code={},dtype={},asc={}", code, dtype, asc);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		Pageable pageable = null;
+		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		} else {
-			pageable = PageRequest.of(0, 100);
 		}
 		// 提议/预案/股东大会通过/实施/完成/停止
-		if (dtype == 0) {// 全部
-
-		} else if (dtype == 1) {
+		if (dtype == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("proc", "提议"));
 		} else if (dtype == 2) {
 			bqb.must(QueryBuilders.matchPhraseQuery("proc", "预案"));
@@ -133,6 +149,7 @@ public class BuyBackService {
 		} else if (dtype == 6) {
 			bqb.must(QueryBuilders.matchPhraseQuery("proc", "停止"));
 		}
+		// 全部
 		SortOrder s = SortOrder.DESC;
 		if (asc == 1) {
 			s = SortOrder.ASC;
