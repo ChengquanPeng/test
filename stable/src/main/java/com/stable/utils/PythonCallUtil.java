@@ -15,7 +15,14 @@ import lombok.extern.log4j.Log4j2;
 public class PythonCallUtil {
 
 	public static final String EXCEPT = "except";
-	private static final String CALL_FORMAT = "python %s %s";
+	private static final String CALL_FORMAT;
+	static {
+		if (OSystemUtil.isWindows()) {
+			CALL_FORMAT = "python %s %s";
+		} else {
+			CALL_FORMAT = "/usr/local/bin/python3.8 %s %s";
+		}
+	}
 
 	public static List<String> callPythonScript(String pythonScriptPathAndFileName, String params) {
 		InputStreamReader ir = null;
@@ -33,7 +40,8 @@ public class PythonCallUtil {
 				// System.out.println(line);
 				sb.add(line);
 			}
-			proc.waitFor();
+			int r = proc.waitFor();
+			log.info("call Python Script Cmd:{}，proc.waitFor：{}", cmd, r);
 			return sb;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -62,7 +70,7 @@ public class PythonCallUtil {
 		mh.setStart_date("20191220");
 		mh.setEnd_date("20191220");
 		mh.setFreq("D");
-		
+
 		String params = JSONObject.toJSONString(mh);
 		params = params.replaceAll("\"", "\'");
 		PythonCallUtil.callPythonScript(pythonScriptPathAndFileName, params).forEach(str -> {

@@ -6,6 +6,9 @@ public abstract class MyRunnable implements Runnable {
 	public void run() {
 		try {
 			running();
+		} catch (Exception e) {
+			ErrorLogFileUitl.writeError(e, "", "", "");
+			e.printStackTrace();
 		} finally {
 			TasksWorker2nd.semp.release();
 		}

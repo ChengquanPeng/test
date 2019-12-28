@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
@@ -33,7 +32,6 @@ import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.TheadUtil;
-import com.stable.vo.MarketHistroyVo;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -116,6 +114,8 @@ public class DaliyTradeHistroyService {
 					String json = redisUtil.get(d.getCode());
 					if (StringUtils.isNotBlank(json)) {
 						StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
+						spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), base.getList_date(), today, 0);
+						redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 						TasksWorker2nd.add(new MyRunnable() {
 							@Override
 							public void running() {
@@ -124,7 +124,7 @@ public class DaliyTradeHistroyService {
 							}
 						});
 					}
-				}else {
+				} else {
 					redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 				}
 			}
@@ -143,18 +143,25 @@ public class DaliyTradeHistroyService {
 		}
 		fortimes++;
 		TheadUtil.sleepRandomSecBetween1And30();
-		MarketHistroyVo mh = new MarketHistroyVo();
-		mh.setTs_code(TushareSpider.formatCode(code));
-		mh.setAdj("qfq");
-		mh.setStart_date(startDate);
-		mh.setEnd_date(endDate);
-		mh.setFreq("D");
+//		MarketHistroyVo mh = new MarketHistroyVo();
+//		mh.setTs_code(TushareSpider.formatCode(code));
+//		mh.setAdj("qfq");
+//		mh.setStart_date(startDate);
+//		mh.setEnd_date(endDate);
+//		mh.setFreq("D");
 
-		String params = JSONObject.toJSONString(mh);
-		params = params.replaceAll("\"", "\'");
+//		code=sys.argv[1]
+//		sdate=sys.argv[2]
+//		edate=sys.argv[3]
+//		padj=sys.argv[4]
+//		pfreq=sys.argv[5]
+		String params = TushareSpider.formatCode(code) + " " + startDate + " " + endDate + " qfq D";
 		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
 		if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
-			log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，未获取到数据 params：{}，本批当前日期last：{}", code, params);
+			log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，未获取到数据 params：{}", code, params);
+			if (lines != null && !lines.isEmpty()) {
+				log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
+			}
 			return false;
 		}
 		log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，获取到数据 条数：szie:{}，", code, lines.size());
