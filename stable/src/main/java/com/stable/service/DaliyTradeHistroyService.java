@@ -1,5 +1,6 @@
 package com.stable.service;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -8,6 +9,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -26,6 +28,7 @@ import com.stable.es.dao.EsTradeHistInfoDaliyDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
+import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.MyRunnable;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
@@ -34,6 +37,7 @@ import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.TheadUtil;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
+import com.stable.vo.http.resp.DaliyTradeHistResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
@@ -114,8 +118,9 @@ public class DaliyTradeHistroyService {
 					String json = redisUtil.get(d.getCode());
 					if (StringUtils.isNotBlank(json)) {
 						StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-						//spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), base.getList_date(), today, 0);
-						//redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+						// spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), base.getList_date(), today,
+						// 0);
+						// redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 						TasksWorker2nd.add(new MyRunnable() {
 							@Override
 							public void running() {
@@ -180,13 +185,29 @@ public class DaliyTradeHistroyService {
 		return true;
 	}
 
+	public List<DaliyTradeHistResp> queryListByCodeByWebPage(String code, EsQueryPageReq queryPage) {
+		List<DaliyTradeHistResp> res = new LinkedList<DaliyTradeHistResp>();
+		List<TradeHistInfoDaliy> list = this.queryListByCode(code, queryPage);
+		if (list != null) {
+			for (TradeHistInfoDaliy dh : list) {
+				DaliyTradeHistResp resp = new DaliyTradeHistResp();
+				BeanUtils.copyProperties(dh, resp);
+				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
+				res.add(resp);
+			}
+		}
+		return res;
+	}
+
 	public List<TradeHistInfoDaliy> queryListByCode(String code, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
 		log.info("queryPage code={},pageNum={},size={}", code, pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		if (StringUtils.isNotBlank(code)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
@@ -203,22 +224,29 @@ public class DaliyTradeHistroyService {
 		if (StringUtils.isBlank(line)) {
 			return null;
 		}
-		TradeHistInfoDaliy d = new TradeHistInfoDaliy();
-		String str = line.trim().substring(1);
-		String[] fv = str.split(",");
-		d.setCode(TushareSpider.removets(fv[0]));
-		d.setDate(Integer.valueOf(fv[1]));
-		d.setOpen(Double.valueOf(fv[2]));
-		d.setHigh(Double.valueOf(fv[3]));
-		d.setLow(Double.valueOf(fv[4]));
-		d.setClosed(Double.valueOf(fv[5]));
-		d.setYesterdayPrice(Double.valueOf(fv[6]));
-		d.setTodayChange(Double.valueOf(fv[7]));
-		d.setTodayChangeRate(Double.valueOf(fv[8]));
-		d.setVolume(Double.valueOf(fv[9]));
-		d.setAmt(Double.valueOf(fv[10]));
-		d.setId();
-		return d;
+		try {
+			TradeHistInfoDaliy d = new TradeHistInfoDaliy();
+			String str = line.trim().substring(1);
+			String[] fv = str.split(",");
+			d.setCode(TushareSpider.removets(fv[0]));
+			d.setDate(Integer.valueOf(fv[1]));
+			d.setOpen(Double.valueOf(fv[2]));
+			d.setHigh(Double.valueOf(fv[3]));
+			d.setLow(Double.valueOf(fv[4]));
+			d.setClosed(Double.valueOf(fv[5]));
+			d.setYesterdayPrice(Double.valueOf(fv[6]));
+			d.setTodayChange(Double.valueOf(fv[7]));
+			d.setTodayChangeRate(Double.valueOf(fv[8]));
+			d.setVolume(Double.valueOf(fv[9]));
+			d.setAmt(Double.valueOf(fv[10]));
+			d.setId();
+			return d;
+		} catch (Exception e) {
+			ErrorLogFileUitl.writeError(e, "日K数据错误", "原始数据", line);
+			log.error(e.getMessage(), e);
+			throw new RuntimeException(e);
+		}
+//		return null;
 	}
 
 	/**

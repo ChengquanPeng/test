@@ -56,6 +56,9 @@ public class DaliyBasicInfo extends EsBase {
 	@Field(type = FieldType.Double)
 	private double circ_mv;// float 流通市值（万元）
 
+	public DaliyBasicInfo() {
+		
+	}
 	public DaliyBasicInfo(JSONArray arr) {
 		int i = 0;
 		this.ts_code = arr.getString(i++);// ts_code

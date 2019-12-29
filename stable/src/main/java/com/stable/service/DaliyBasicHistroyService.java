@@ -1,5 +1,6 @@
 package com.stable.service;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -8,6 +9,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +34,7 @@ import com.stable.utils.TasksWorker;
 import com.stable.utils.TasksWorker2nd;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockBaseInfo;
+import com.stable.vo.http.resp.DaliyBasicInfoResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
@@ -53,6 +56,8 @@ public class DaliyBasicHistroyService {
 	private EsDaliyBasicInfoDao esDaliyBasicInfoDao;
 	@Autowired
 	private TradeCalService tradeCalService;
+	@Autowired
+	private StockBasicService stockBasicService;
 
 	// 直接全量获取历史记录，不需要根据缓存来判断
 	private boolean spiderDaliyDailyBasic(String today) {
@@ -147,6 +152,20 @@ public class DaliyBasicHistroyService {
 					}
 				});
 	}
+	
+	public List<DaliyBasicInfoResp> queryListByCodeByWebPage(String code, EsQueryPageReq queryPage) {
+		List<DaliyBasicInfoResp> res = new LinkedList<DaliyBasicInfoResp>();
+		List<DaliyBasicInfo> list = this.queryListByCode(code, queryPage);
+		if (list != null) {
+			for (DaliyBasicInfo dh : list) {
+				DaliyBasicInfoResp resp = new DaliyBasicInfoResp();
+				BeanUtils.copyProperties(dh, resp);
+				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
+				res.add(resp);
+			}
+		}
+		return res;
+	}
 
 	public List<DaliyBasicInfo> queryListByCode(String code, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
@@ -154,7 +173,9 @@ public class DaliyBasicHistroyService {
 		log.info("queryPage code={},pageNum={},size={}", code, pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		if (StringUtils.isNotBlank(code)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();

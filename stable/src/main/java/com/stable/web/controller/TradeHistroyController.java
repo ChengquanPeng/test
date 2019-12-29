@@ -20,15 +20,16 @@ public class TradeHistroyController {
 	private DaliyTradeHistroyService tradeHistroyService;
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
+	
 
 	/**
 	 * 根据code重新获取历史记录（前复权）
 	 */
-	@RequestMapping(value = "/dailybasic/{code}", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> dailybasic(@PathVariable(value = "code") String code, EsQueryPageReq page) {
+	@RequestMapping(value = "/dailybasic/list", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> dailybasic(String code, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(daliyBasicHistroyService.queryListByCode(code, page));
+			r.setResult(daliyBasicHistroyService.queryListByCodeByWebPage(code, page));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -57,12 +58,12 @@ public class TradeHistroyController {
 	/**
 	 * 根据code重新获取历史记录（前复权）
 	 */
-	@RequestMapping(value = "/qfq/list/{code}", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> qfqlsit(@PathVariable(value = "code") String code, EsQueryPageReq page) {
+	@RequestMapping(value = "/qfq/list", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> qfqlsit(String code, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(tradeHistroyService.queryListByCode(code, page));
-			r.setResult(JsonResult.OK);
+			r.setResult(tradeHistroyService.queryListByCodeByWebPage(code, page));
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -79,7 +80,7 @@ public class TradeHistroyController {
 		JsonResult r = new JsonResult();
 		try {
 			tradeHistroyService.manualSpiderDaliyTrade(code);
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -96,7 +97,7 @@ public class TradeHistroyController {
 		JsonResult r = new JsonResult();
 		try {
 			tradeHistroyService.jobSpiderAll();
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
