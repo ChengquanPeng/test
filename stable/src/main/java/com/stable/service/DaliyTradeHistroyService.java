@@ -238,7 +238,11 @@ public class DaliyTradeHistroyService {
 			d.setTodayChange(Double.valueOf(fv[7]));
 			d.setTodayChangeRate(Double.valueOf(fv[8]));
 			d.setVolume(Double.valueOf(fv[9]));
-			d.setAmt(Double.valueOf(fv[10]));
+			try {
+				d.setAmt(Double.valueOf(fv[10]));
+			}catch (NumberFormatException e) {
+				d.setAmt(Double.valueOf(0));
+			}
 			d.setId();
 			return d;
 		} catch (Exception e) {
