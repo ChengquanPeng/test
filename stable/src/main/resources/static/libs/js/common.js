@@ -49,7 +49,12 @@ function excptionHandler(data) {
 		to_login();
 	}
 }
-
+function addActiveHeaderMen(id){
+	setTimeout("setHeaderMenuActive('"+id+"')", 800);
+}
+function setHeaderMenuActive(id){
+	$("#"+id).addClass("active");
+}
 function addActive(id){
 	setTimeout("setMenuActive('"+id+"')", 800);
 }

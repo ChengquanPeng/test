@@ -24,7 +24,16 @@
 			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
 			<div class="col-lg-5">
 					<div class="input-group">
-						股票代码：<input type="text" class="form-control" id="queryCode">
+						股票代码：<input type="text" class="form-control" id="queryCode"> 
+						进度：<select id="proc" class="form-control">
+							<option value="">全部</option>
+							<option value="实施" selected="selected">实施</option>
+							<option value="股东大会通过">股东大会通过</option>
+							<option value="预案">预案</option>
+							<option value="未通过">未通过</option>
+							<option value="预披露">预披露</option>
+							<option value="股东提议">股东提议</option>
+						</select>
 					<span lass="input-group-btn"> <button class="btn btn-default" type="button" id="queryAction"> Go!</button> </span>
 					</div>
 				</div>
@@ -51,18 +60,17 @@
 	<script src="/web/libs/js/jquery.js"></script>
 	<script src="/web/libs/js/dashboard/index.js"></script>
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
-
+	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
 		$("#header").load("/web/header.html")
-		$("#menu").load("/web/menu.html")
-		addActive("m_tradeBasicDaliy");
+		addActive("m_dividend");
 		$('#cusTable').bootstrapTable('destroy');
 		function loadData() {
 			$('#cusTable').bootstrapTable('destroy');
 			$("#cusTable").bootstrapTable(
 					{
 						method : "get", //使用get请求到服务器获取数据  
-						url : "/web/trade/hist/dailybasic/list", //获取数据的Servlet地址  
+						url : "/web/dividend/hist/query", //获取数据的Servlet地址  
 						striped : true, //表格显示条纹  
 						pagination : true, //启动分页
 						cache : false,
@@ -78,11 +86,13 @@
 						queryParamsType : "undefined",
 						queryParams : function queryParams(params) { //设置查询参数  
 							var code = $('#queryCode').val();
+							var proc = $('#proc').val();
 							var param = {
 								pageNum : params.pageNumber,
 								pageSize : params.pageSize,
 							};
 							param.code = code;
+							param.proc = proc;
 							return param;
 						},
 						columns : [ {
@@ -92,32 +102,35 @@
 							field : 'codeName',
 							title : '名称'
 						}, {
-							field : 'trade_date',
-							title : '交易日期'
+							field : 'end_date',
+							title : '分红年度'
 						}, {
-							field : 'close',
-							title : '收盘价'
+							field : 'ann_date',
+							title : '预案公告日'
 						}, {
-							field : 'turnover_rate',
-							title : '换手率'
+							field : 'div_proc',
+							title : '实施进度'
 						}, {
-							field : 'turnover_rate_f',
-							title : '换手率(流通)'
+							field : 'ex_date',
+							title : '除权除息'
 						}, {
-							field : 'volume_ratio',
-							title : '量比'
+							field : 'record_date',
+							title : '股权登记日'
 						}, {
-							field : 'pe',
-							title : '市盈率'
+							field : 'cash_div',
+							title : '每股分红'
 						}, {
-							field : 'pb',
-							title : '市净率'
+							field : 'cash_div_tax',
+							title : '税前分红'
 						}, {
-							field : 'total_mv',
-							title : '总市值[万]'
+							field : 'stk_div',
+							title : '每股送转'
 						}, {
-							field : 'circ_mv',
-							title : '流通市值[万]'
+							field : 'stk_bo_rate',
+							title : '送股比例'
+						}, {
+							field : 'stk_co_rate',
+							title : '转增比例'
 						}],
 						responseHandler : function responseHandler(res) {
 							

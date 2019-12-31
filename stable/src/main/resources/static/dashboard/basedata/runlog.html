@@ -24,7 +24,18 @@
 			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
 			<div class="col-lg-5">
 					<div class="input-group">
-						股票代码：<input type="text" class="form-control" id="queryCode">
+						日期：<input type="text" class="form-control" id="queryCode"> 
+						任务名称：<select id="jobName" class="form-control">
+							<option value="">全部</option>
+							<option value="1">交易日历同步</option>
+							<option value="2">股票列表同步</option>
+							<option value="3">股票报告同步</option>
+							<option value="4">回购同步</option>
+							<option value="5">日线数据同步</option>
+							<option value="6">分红除权信息同步</option>
+							<option value="7">个股每日指标</option>
+							<option value="8">分红除权-前复权-任务</option>
+						</select>
 					<span lass="input-group-btn"> <button class="btn btn-default" type="button" id="queryAction"> Go!</button> </span>
 					</div>
 				</div>
@@ -51,18 +62,17 @@
 	<script src="/web/libs/js/jquery.js"></script>
 	<script src="/web/libs/js/dashboard/index.js"></script>
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
-
+	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
 		$("#header").load("/web/header.html")
-		$("#menu").load("/web/menu.html")
-		addActive("m_tradeHistDaliy");
+		addActive("m_runlog");
 		$('#cusTable').bootstrapTable('destroy');
 		function loadData() {
 			$('#cusTable').bootstrapTable('destroy');
 			$("#cusTable").bootstrapTable(
 					{
 						method : "get", //使用get请求到服务器获取数据  
-						url : "/web/trade/hist/qfq/list", //获取数据的Servlet地址  
+						url : "/web/runlog/list", //获取数据的Servlet地址  
 						striped : true, //表格显示条纹  
 						pagination : true, //启动分页
 						cache : false,
@@ -77,50 +87,37 @@
 						//设置为limit可以获取limit, offset, search, sort, order  
 						queryParamsType : "undefined",
 						queryParams : function queryParams(params) { //设置查询参数  
-							var code = $('#queryCode').val();
+							var dates = $('#queryCode').val();
+							var btype = $('#jobName').val();
 							var param = {
 								pageNum : params.pageNumber,
 								pageSize : params.pageSize,
 							};
-							param.code = code;
+							param.date = dates;
+							param.btype = btype;
 							return param;
 						},
 						columns : [ {
-							field : 'code',
-							title : '代码'
-						}, {
-							field : 'codeName',
-							title : '名称'
-						}, {
 							field : 'date',
-							title : '交易日期'
+							title : '日期'
 						}, {
-							field : 'open',
-							title : '开盘价'
+							field : 'btypeName',
+							title : '任务名称'
 						}, {
-							field : 'high',
-							title : '最高价'
+							field : 'cycleName',
+							title : '运行方式'
 						}, {
-							field : 'low',
-							title : '最低价'
+							field : 'statusName',
+							title : '状态'
+						},{
+							field : 'startTime',
+							title : '开始时间'
+						},{
+							field : 'endTime',
+							title : '结束时间'
 						}, {
-							field : 'closed',
-							title : '收盘价'
-						}, {
-							field : 'volume',
-							title : '交易量(手)'
-						}, {
-							field : 'amt',
-							title : '交易金额(千元)'
-						}, {
-							field : 'yesterdayPrice',
-							title : '昨收'
-						}, {
-							field : 'todayChange',
-							title : '涨跌额'
-						}, {
-							field : 'todayChangeRate',
-							title : '涨跌幅'
+							field : 'remark',
+							title : '备注'
 						}],
 						responseHandler : function responseHandler(res) {
 							

@@ -52,6 +52,14 @@ public class CurrencyUitl {
 		} else if (l > 10000) {
 			BigDecimal b = new BigDecimal(l);
 			return b.divide(WAN_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + WAN;
+		} else if (l >= 0) {
+
+		} else if (-100000000 > l) {
+			BigDecimal b = new BigDecimal(Math.abs(l));
+			return "-" + b.divide(YI_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + YI;
+		} else if (-10000 > l) {
+			BigDecimal b = new BigDecimal(Math.abs(l));
+			return "-" + b.divide(WAN_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + WAN;
 		}
 		return String.valueOf(l);
 	}
@@ -59,6 +67,8 @@ public class CurrencyUitl {
 	public static void main(String[] args) {
 		System.err.println(CurrencyUitl.covertToLong("1.1万亿"));
 		System.err.println(CurrencyUitl.covertToString(997));
-		System.err.println(CurrencyUitl.covertToString(9978890000.0f));
+		System.err.println(CurrencyUitl.covertToString(-9978890000.0f));
+		System.err.println(CurrencyUitl.covertToString(-9970000.0f));
+		System.err.println(CurrencyUitl.covertToString(-88010f));
 	}
 }

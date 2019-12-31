@@ -103,7 +103,7 @@ public class FinanceService {
 		if (StringUtils.isNotBlank(quarter)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("quarter", quarter));
 		}
-		FieldSortBuilder sort = SortBuilders.fieldSort("end_date").unmappedType("integer").order(SortOrder.DESC);
+		FieldSortBuilder sort = SortBuilders.fieldSort("f_ann_date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
