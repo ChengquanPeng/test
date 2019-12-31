@@ -1,5 +1,6 @@
 package com.stable.service;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,10 +25,12 @@ import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.EsFinanceBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.StockBaseInfo;
+import com.stable.vo.http.resp.FinanceBaseInfoResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
@@ -85,13 +88,21 @@ public class FinanceService {
 		return true;
 	}
 
-	public List<FinanceBaseInfo> getFinaceReports(String code, EsQueryPageReq queryPage) {
+	public List<FinanceBaseInfo> getFinaceReports(String code, String year, String quarter, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
 		log.info("queryPage code={},pageNum={},size={}", code, pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		if (StringUtils.isNotBlank(code)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		}
+		if (StringUtils.isNotBlank(year)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("year", year));
+		}
+		if (StringUtils.isNotBlank(quarter)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("quarter", quarter));
+		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("end_date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
@@ -102,6 +113,31 @@ public class FinanceService {
 			return page.getContent();
 		}
 		return null;
+	}
+
+	public List<FinanceBaseInfoResp> getListByCodeForWebPage(String code, String year, String quarter,
+			EsQueryPageReq queryPage) {
+		List<FinanceBaseInfoResp> res = new LinkedList<FinanceBaseInfoResp>();
+		List<FinanceBaseInfo> list = this.getFinaceReports(code, year, quarter, queryPage);
+		if (list != null) {
+			for (FinanceBaseInfo dh : list) {
+				FinanceBaseInfoResp resp = new FinanceBaseInfoResp();
+				resp.setCode(dh.getCode());
+				resp.setAnnDate(String.valueOf(dh.getF_ann_date()));
+				resp.setEndDate(dh.getYear(), dh.getQuarter());
+				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
+				resp.setTotalRevenue(CurrencyUitl.covertToString(dh.getTotal_revenue()));
+				resp.setTotalCogs(CurrencyUitl.covertToString(dh.getTotal_cogs()));
+				resp.setTotalProfit(CurrencyUitl.covertToString(dh.getTotal_profit()));
+				resp.setOperateProfit(CurrencyUitl.covertToString(dh.getOperate_profit()));
+				resp.setIncomeTax(CurrencyUitl.covertToString(dh.getIncome_tax()));
+				resp.setIncome(CurrencyUitl.covertToString(dh.getN_income()));
+				resp.setFinExp(CurrencyUitl.covertToString(dh.getFin_exp()));
+				resp.setBasicEps(String.valueOf(dh.getBasic_eps()));
+				res.add(resp);
+			}
+		}
+		return res;
 	}
 
 	public FinanceBaseInfo getLastFinaceReport(String code) {
@@ -124,17 +160,18 @@ public class FinanceService {
 	}
 
 	public void jobSpiderFinaceHistoryInfo() {
-		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.FINACE_HISTORY, RunCycleEnum.WEEK) {
-			public Object mycall() {
-				log.info("同步股票报告[started]");
-				List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
-				log.info("股票总数：" + list.size());
-				for (StockBaseInfo s : list) {
-					spiderFinaceHistoryInfo(s.getCode());
-				}
-				log.info("同步股票报告[end]");
-				return null;
-			}
-		});
+		TasksWorker.getInstance().getService()
+				.submit(new MyCallable(RunLogBizTypeEnum.FINACE_HISTORY, RunCycleEnum.WEEK) {
+					public Object mycall() {
+						log.info("同步股票报告[started]");
+						List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+						log.info("股票总数：" + list.size());
+						for (StockBaseInfo s : list) {
+							spiderFinaceHistoryInfo(s.getCode());
+						}
+						log.info("同步股票报告[end]");
+						return null;
+					}
+				});
 	}
 }

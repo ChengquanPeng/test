@@ -54,11 +54,27 @@ public class FinanceController {
 	/**
 	 * 根据code查询财务信息
 	 */
-	@RequestMapping(value = "/list/{code}", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> listcode(@PathVariable(value = "code") String code, EsQueryPageReq page) {
+	@RequestMapping(value = "/query", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> query(String code, String year, String quarter, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(financeService.getFinaceReports(code, page));
+			r.setResult(financeService.getListByCodeForWebPage(code, year, quarter, page));
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * 根据code查询财务信息
+	 */
+	@RequestMapping(value = "/list/{code}", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> listcode(@PathVariable(value = "code") String code, EsQueryPageReq queryPage) {
+		JsonResult r = new JsonResult();
+		try {
+			r.setResult(financeService.getListByCodeForWebPage(code, null, null, queryPage));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

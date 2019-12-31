@@ -33,7 +33,32 @@ public class CurrencyUitl {
 		return Long.valueOf(b.multiply(s).toBigInteger().toString());
 	}
 
+	public final static String covertToString(Long l) {
+
+		if (l > 100000000) {
+			BigDecimal b = new BigDecimal(l);
+			return b.divide(YI_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + YI;
+		} else if (l > 10000) {
+			BigDecimal b = new BigDecimal(l);
+			return b.divide(WAN_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + WAN;
+		}
+		return l.toString();
+	}
+
+	public final static String covertToString(float l) {
+		if (l > 100000000) {
+			BigDecimal b = new BigDecimal(l);
+			return b.divide(YI_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + YI;
+		} else if (l > 10000) {
+			BigDecimal b = new BigDecimal(l);
+			return b.divide(WAN_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + WAN;
+		}
+		return String.valueOf(l);
+	}
+
 	public static void main(String[] args) {
 		System.err.println(CurrencyUitl.covertToLong("1.1万亿"));
+		System.err.println(CurrencyUitl.covertToString(997));
+		System.err.println(CurrencyUitl.covertToString(9978890000.0f));
 	}
 }
