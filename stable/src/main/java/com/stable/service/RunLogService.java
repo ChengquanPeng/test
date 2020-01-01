@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
-import com.stable.es.dao.EsRunLogDao;
+import com.stable.es.dao.base.EsRunLogDao;
 import com.stable.vo.bus.RunLog;
 import com.stable.vo.http.resp.RunLogResp;
 import com.stable.vo.spi.req.EsQueryPageReq;

@@ -24,7 +24,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
-import com.stable.es.dao.EsDaliyBasicInfoDao;
+import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;

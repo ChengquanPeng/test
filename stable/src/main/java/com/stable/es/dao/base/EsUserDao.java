@@ -1,11 +1,11 @@
-package com.stable.es.dao;
+package com.stable.es.dao.base;
 
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Repository;
 
-import com.stable.vo.bus.RunLog;
+import com.stable.vo.bus.EsUser;
 
 @Repository
-public interface EsRunLogDao extends ElasticsearchRepository<RunLog, String>{
+public interface EsUserDao extends ElasticsearchRepository<EsUser, String>{
 
 }

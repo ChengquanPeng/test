@@ -13,7 +13,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
-import com.stable.es.dao.EsStockBaseInfoDao;
+import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.RedisUtil;

@@ -22,7 +22,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
-import com.stable.es.dao.EsFinanceBaseInfoDao;
+import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
