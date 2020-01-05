@@ -8,7 +8,8 @@ public enum RunLogBizTypeEnum {
 	TRADE_HISTROY(5, "日线数据同步"), 
 	DIVIDEND(6, "分红除权信息同步"),
 	DAILY_BASIC(7, "个股每日指标"),
-	DIVIDEND_TRADE_HISTROY(8, "分红除权-前复权-任务"),;
+	DIVIDEND_TRADE_HISTROY(8, "分红除权-前复权-任务"),
+	RETRACE_SH_FIVEDAY(9100, "短线-5日反转");
 
 	public int bcode;
 	public String btypeName;

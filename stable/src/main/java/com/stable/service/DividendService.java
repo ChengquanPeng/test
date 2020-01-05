@@ -126,7 +126,9 @@ public class DividendService {
 	public List<DividendHistory> getTodayListByCode() {
 		Pageable pageable = PageRequest.of(0, 10000);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("ex_date", Integer.valueOf(DateUtil.getTodayYYYYMMDD())));
+		//7天左右需要除权的
+		bqb.must(QueryBuilders.rangeQuery("ex_date").gte(Integer.valueOf(DateUtil.getTodayBefor7DayYYYYMMDD())));
+		bqb.must(QueryBuilders.rangeQuery("ex_date").lte(Integer.valueOf(DateUtil.getTodayYYYYMMDD())));
 		bqb.must(QueryBuilders.matchPhraseQuery("div_proc", SS));
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();

@@ -1,6 +1,7 @@
 package com.stable.service;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -21,12 +22,14 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsBuyBackInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
+import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.http.resp.BuyBackInfoResp;
@@ -49,6 +52,8 @@ public class BuyBackService {
 	private EsBuyBackInfoDao buyBackInfoDao;
 	@Autowired
 	private StockBasicService stockBasicService;
+	@Autowired
+	private RedisUtil redisUtil;
 
 	public void spiderBuyBackHistoryInfo() {
 		this.spiderBuyBackHistoryInfo(null, null);
@@ -63,20 +68,38 @@ public class BuyBackService {
 		});
 	}
 
-	public void jobFetchHistEveryDay(String ann_date) {
+	public void jobFetchHistEveryDay() {
 		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.BUY_BACK, RunCycleEnum.DAY) {
 			public Object mycall() {
-				log.info("同步回购公告列表[started],ann_date={},", ann_date);
-				JSONArray array = tushareSpider.getBuyBackList(null, null, ann_date);
-				// System.err.println(array.toJSONString());
-				for (int i = 0; i < array.size(); i++) {
-					BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
-					// if(i==0) {
-					buyBackInfoDao.save(base);
-					// }
-					// System.err.println(base);
+				String rv = redisUtil.get(RedisConstant.RDS_BUY_BACK_LAST_DAY);
+				Date lastDate = null;
+				Date todayDate = new Date();
+				if (StringUtils.isBlank(rv)) {
+					lastDate = DateUtil.addDate(todayDate, -1);
+				} else {
+					lastDate = DateUtil.parseDate(rv);
 				}
-				log.info("同步回购公告列表[end],ann_date={}", ann_date);
+				int today = Integer.valueOf(DateUtil.getYYYYMMDD(todayDate));
+				do {
+					lastDate = DateUtil.addDate(lastDate, 1);// 加一天
+					int last = Integer.valueOf(DateUtil.getYYYYMMDD(lastDate));
+					if (last > today) {
+						break;
+					}
+					String ann_date = String.valueOf(last);
+					log.info("同步回购公告列表[started],ann_date={},", ann_date);
+					JSONArray array = tushareSpider.getBuyBackList(null, null, ann_date);
+					// System.err.println(array.toJSONString());
+					for (int i = 0; i < array.size(); i++) {
+						BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
+						// if(i==0) {
+						buyBackInfoDao.save(base);
+						// }
+						// System.err.println(base);
+					}
+					log.info("同步回购公告列表[end],ann_date={}", ann_date);
+					redisUtil.set(RedisConstant.RDS_BUY_BACK_LAST_DAY, last);
+				} while (true);
 				return null;
 			}
 		});

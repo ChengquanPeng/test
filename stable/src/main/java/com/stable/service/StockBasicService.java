@@ -1,9 +1,9 @@
 package com.stable.service;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Semaphore;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +42,7 @@ public class StockBasicService {
 	// private DbStockBaseInfoDao dbStockBaseInfoDao;
 
 	private ConcurrentHashMap<String, String> CODE_NAME_MAP_LOCAL_HASH = new ConcurrentHashMap<String, String>();
+	private List<StockBaseInfo> LOCAL_ALL_ONLINE_LIST = new CopyOnWriteArrayList<StockBaseInfo>();
 
 	public String getCodeName(String code) {
 		String name = CODE_NAME_MAP_LOCAL_HASH.get(code);
@@ -80,6 +81,7 @@ public class StockBasicService {
 								synBaseStockInfo(base);
 							}
 							log.info("同步股票列表[end]");
+							LOCAL_ALL_ONLINE_LIST.clear();// 清空缓存
 							return null;
 						} finally {
 							semap.release();
@@ -105,16 +107,19 @@ public class StockBasicService {
 	}
 
 	public List<StockBaseInfo> getAllOnStatusList() {
-		Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
-		List<StockBaseInfo> list = new LinkedList<StockBaseInfo>();
-		while (it.hasNext()) {
-			StockBaseInfo e = it.next();
-			// list_status='L'
-			if ("L".equals(e.getList_status())) {
-				list.add(e);
+		if (LOCAL_ALL_ONLINE_LIST.isEmpty()) {
+			Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
+			// List<StockBaseInfo> list = new LinkedList<StockBaseInfo>();
+			while (it.hasNext()) {
+				StockBaseInfo e = it.next();
+				// list_status='L'
+				if ("L".equals(e.getList_status())) {
+					// list.add(e);
+					LOCAL_ALL_ONLINE_LIST.add(e);
+				}
 			}
 		}
-		return list;
+		return LOCAL_ALL_ONLINE_LIST;
 		// return dbStockBaseInfoDao.getListWithOnStauts();
 	}
 }
