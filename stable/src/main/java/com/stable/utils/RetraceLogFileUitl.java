@@ -14,7 +14,11 @@ public class RetraceLogFileUitl {
 	private final String NEXT_LINE = "\n";
 
 	public RetraceLogFileUitl(String filename) {
-		file = new File("/my/free/retrace/" + filename);
+		String path = "/my/free/retrace/" + filename;
+		if (OSystemUtil.isWindows()) {
+			path = "E:\\server\\app\\" + filename;
+		}
+		file = new File(path);
 		if (!file.exists()) {
 			try {
 				file.createNewFile();

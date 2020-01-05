@@ -45,12 +45,14 @@ public class ShFiveDaysDownService {
 	/**
 	 * 历史回测
 	 */
+//	@PostConstruct
 	private void historyTrace() {
 		EsQueryPageReq page = new EsQueryPageReq();
 		page.setPageSize(10000);// 1年200多，10年2000多，20年，5000条
 		this.toworking(page);
 	}
 
+	RetraceLogFileUitl retracefile = new RetraceLogFileUitl("ShFiveDaysDown.log");
 	private List<ShFiveDaysDown> samples = null;
 
 	private void toworking(EsQueryPageReq page) {
@@ -64,18 +66,24 @@ public class ShFiveDaysDownService {
 			for (StockBaseInfo si : list) {
 				List<TradeHistInfoDaliy> listr = daliyTradeHistroyService.queryListByCode(si.getCode(), page,
 						SortOrder.ASC);
-				int size = listr.size();
-				log.info("代码code:{},查询到RK前复权记录records:{}", si.getCode(), size);
+				if (listr != null) {
+					LinkedList<TradeHistInfoDaliy> ll = new LinkedList<TradeHistInfoDaliy>();
+					ll.addAll(listr);
+					int size = ll.size();
+					log.info("代码code:{},查询到RK前复权记录records:{}", si.getCode(), size);
 
-				for (int i = 0; i < size; i++) {
-					ShFiveDaysDown record = this.retrace(listr);
-					if (record != null) {
-						// esShFiveDaysDownDao.save(record);
-						samples.add(record);
+					for (int i = 0; i < size; i++) {
+						ShFiveDaysDown record = this.retrace(ll);
+						if (record != null) {
+							// esShFiveDaysDownDao.save(record);
+							samples.add(record);
+						}
+						if (ll.size() > 0) {
+							ll.remove(0);
+						}
 					}
-					if (listr.size() > 0) {
-						listr.remove(0);
-					}
+				} else {
+					log.info("代码code:{},查询到RK前复权记录records:0", si.getCode());
 				}
 			}
 			getResult();
@@ -87,8 +95,6 @@ public class ShFiveDaysDownService {
 			semap.release();
 		}
 	}
-
-	RetraceLogFileUitl retracefile = new RetraceLogFileUitl("ShFiveDaysDown.log");
 
 	private void toFileLog(String str) {
 		retracefile.writeLine(str);

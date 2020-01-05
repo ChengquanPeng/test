@@ -17,7 +17,8 @@ public class DoubleUtil {
 			return 0.0;
 		}
 		BigDecimal b = new BigDecimal(Math.abs(up));
-		String s = b.divide(new BigDecimal(Math.abs(base))).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + "";
+		String s = b.divide(new BigDecimal(Math.abs(base)), 2, BigDecimal.ROUND_HALF_UP)
+				.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + "";
 		if (up < 0.0) {
 			s = "-" + s;
 		}
