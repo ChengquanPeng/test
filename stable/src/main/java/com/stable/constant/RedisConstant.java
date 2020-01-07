@@ -6,7 +6,7 @@ public class RedisConstant {
 	// 日交易
 	public static final String RDS_TRADE_HIST_LAST_DAY_ = "RDS_TRADE_HIST_LAST_DAY_";
 	// 日交易是否除权标识
-	public static final String RDS_TRADE_Dividend_IND_ = "RDS_TRADE_Dividend_IND_";
+	public static final String RDS_TRADE_DIVIDEND_IND_ = "RDS_TRADE_Dividend_IND_";
 	// 交易日历
 	public static final String RDS_TRADE_CAL_ = "RDS_TRADE_CAL_";
 	// 日交易-basic-

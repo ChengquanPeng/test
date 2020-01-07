@@ -154,7 +154,7 @@ public class DividendService {
 						if (list != null) {
 							for (DividendHistory d : list) {
 								log.info("今日分红除权相关信息{}", d);
-								daliydTradeHistroyService.removeCacheByChuQuan(d.getCode());
+								daliydTradeHistroyService.removeCacheByChuQuan(d.getCode(), d.getEx_date());
 							}
 						} else {
 							log.info("今日无股票分红除权相关信息");

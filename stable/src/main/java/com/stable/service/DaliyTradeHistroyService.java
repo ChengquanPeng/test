@@ -52,8 +52,6 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class DaliyTradeHistroyService {
-	private static final String NEED_RELOAD = "1";
-	private static final String RELOAD_OK = "0";
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -91,10 +89,10 @@ public class DaliyTradeHistroyService {
 	/**
 	 * code除权
 	 */
-	public void removeCacheByChuQuan(String code) {
-		String ind = redisUtil.get(RedisConstant.RDS_TRADE_Dividend_IND_ + code);
-		if (StringUtils.isBlank(ind)) {
-			redisUtil.set(RedisConstant.RDS_TRADE_Dividend_IND_ + code, NEED_RELOAD);
+	public void removeCacheByChuQuan(String code, int exDate) {
+		String date = redisUtil.get(RedisConstant.RDS_TRADE_DIVIDEND_IND_ + code);
+		if (StringUtils.isBlank(date) || exDate > Integer.valueOf(date)) {
+			redisUtil.set(RedisConstant.RDS_TRADE_DIVIDEND_IND_ + code, String.valueOf(exDate));
 		}
 	}
 
@@ -118,8 +116,8 @@ public class DaliyTradeHistroyService {
 				tradeHistDaliy.save(d);
 				String code = d.getCode();
 				String yyyymmdd = "";
-				String ind = redisUtil.get(RedisConstant.RDS_TRADE_Dividend_IND_ + code);
-				if (StringUtils.isNotBlank(ind) && NEED_RELOAD.equals(ind)) {
+				String exDate = redisUtil.get(RedisConstant.RDS_TRADE_DIVIDEND_IND_ + code);
+				if (StringUtils.isNotBlank(exDate)) {
 					// 需要除权
 				} else {
 					yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
@@ -139,10 +137,8 @@ public class DaliyTradeHistroyService {
 							public void running() {
 								spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), base.getList_date(), today, 0);
 								redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
-								if (StringUtils.isNotBlank(ind) && NEED_RELOAD.equals(ind)) {
-									redisUtil.set(RedisConstant.RDS_TRADE_Dividend_IND_ + code, RELOAD_OK,
-											Duration.ofDays(10));
-								}
+								redisUtil.set(RedisConstant.RDS_TRADE_DIVIDEND_IND_ + code, "9999",
+										Duration.ofDays(10));// 标识已除权
 							}
 						});
 					}
