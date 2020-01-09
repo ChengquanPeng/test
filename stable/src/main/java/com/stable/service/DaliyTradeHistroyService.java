@@ -52,6 +52,7 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class DaliyTradeHistroyService {
+	private static final String RE_LOAD_ED = "9999";
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -117,7 +118,7 @@ public class DaliyTradeHistroyService {
 				String code = d.getCode();
 				String yyyymmdd = "";
 				String exDate = redisUtil.get(RedisConstant.RDS_TRADE_DIVIDEND_IND_ + code);
-				if (StringUtils.isNotBlank(exDate)) {
+				if (StringUtils.isNotBlank(exDate) && !RE_LOAD_ED.equals(exDate)) {
 					// 需要除权
 				} else {
 					yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
@@ -125,7 +126,7 @@ public class DaliyTradeHistroyService {
 
 				// 第一次上市或者补全缺失
 				if (StringUtils.isBlank(yyyymmdd) || !preDate.equals(yyyymmdd)) {
-					log.info("日期前复权：{}重新获取记录", code);
+					log.info("日期前复权：{}重新获取记录,preDate:{},yyyymmdd:{},exDate:{}", code, preDate, yyyymmdd, exDate);
 					String json = redisUtil.get(d.getCode());
 					if (StringUtils.isNotBlank(json)) {
 						StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
@@ -137,7 +138,7 @@ public class DaliyTradeHistroyService {
 							public void running() {
 								spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), base.getList_date(), today, 0);
 								redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
-								redisUtil.set(RedisConstant.RDS_TRADE_DIVIDEND_IND_ + code, "9999",
+								redisUtil.set(RedisConstant.RDS_TRADE_DIVIDEND_IND_ + code, RE_LOAD_ED,
 										Duration.ofDays(10));// 标识已除权
 							}
 						});

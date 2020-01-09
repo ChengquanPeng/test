@@ -68,8 +68,8 @@ public class RunLogService {
 			for (RunLog rl : result) {
 				RunLogResp rlp = new RunLogResp();
 				BeanUtils.copyProperties(rl, rlp);
-				rlp.setBtypeName(RunLogBizTypeEnum.BUY_BACK.getRunLogBizTypeEnum(rl.getBtype()).getBtypeName());
-				rlp.setCycleName(RunCycleEnum.DAY.getRunCycleEnum(rl.getRunCycle()).getName());
+				rlp.setBtypeName(RunLogBizTypeEnum.getRunLogBizTypeEnum(rl.getBtype()).getBtypeName());
+				rlp.setCycleName(RunCycleEnum.getRunCycleEnum(rl.getRunCycle()).getName());
 				if (rl.getStatus() == 1) {
 					rlp.setStatusName("已完成");
 				} else if (rl.getStatus() == 2) {

@@ -2,8 +2,6 @@ package com.stable.service;
 
 import java.time.Duration;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
@@ -41,7 +39,7 @@ public class TradeCalService {
 	@Autowired
 	private EsTradeCalDao calDao;
 
-	@PostConstruct
+//	@PostConstruct
 	public void josSynTradeCal() {
 		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.TRADE_CAL, RunCycleEnum.MONTH) {
 			public Object mycall() {

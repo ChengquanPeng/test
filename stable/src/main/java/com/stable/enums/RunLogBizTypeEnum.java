@@ -35,7 +35,7 @@ public enum RunLogBizTypeEnum {
 		this.btypeName = btypeName;
 	}
 
-	public RunLogBizTypeEnum getRunLogBizTypeEnum(int code) {
+	public static RunLogBizTypeEnum getRunLogBizTypeEnum(int code) {
 		for (RunLogBizTypeEnum rb : RunLogBizTypeEnum.values()) {
 			if (rb.getBcode() == code) {
 				return rb;
