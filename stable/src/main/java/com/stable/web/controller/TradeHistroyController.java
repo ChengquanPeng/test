@@ -46,7 +46,7 @@ public class TradeHistroyController {
 		JsonResult r = new JsonResult();
 		try {
 			daliyBasicHistroyService.jobSpiderAllDailyBasic(tradeDate);
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

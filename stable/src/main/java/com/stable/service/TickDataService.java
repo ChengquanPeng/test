@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.utils.DateUtil;
+import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.LogFileUitl;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.TheadUtil;
@@ -24,21 +27,26 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class TickDataService {
 
-	// 买卖分钟，量分组，取最大50%，时间分组
-	@Value("${python.file.market.date.tick}") // TODO
+	@Value("${python.file.market.date.tick}")
 	private String pythonFileName;
 
-	@Value("${program.html.folder}") // TODO
+	@Value("${program.html.folder}")
 	private String programHtmlFolder;
 
-	public TickDataBuySellInfo sumTickData(DaliyBasicInfo base) {
+	@Autowired
+	private EsTickDataBuySellInfoDao esTickDataBuySellInfoDao;
+
+	public void sumTickData(DaliyBasicInfo base) {
 		String code = base.getCode();
 		int date = base.getTrade_date();
 		List<String> lines = this.getTickData(code, DateUtil.convertDate(date + ""));
 		if (lines != null && lines.size() > 0) {
-			return this.sumTickData(base, lines);
+			TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines);
+			esTickDataBuySellInfoDao.save(tickdatasum);
+			log.info(tickdatasum.toString());
+		} else {
+			ErrorLogFileUitl.writeError(new RuntimeException("没用找到分笔数据"), "base 信息:", base.toString(), "");
 		}
-		return null;
 	}
 
 	private List<String> getTickData(String code, String date) {
@@ -100,7 +108,9 @@ public class TickDataService {
 	}
 
 	private boolean needChkProgam(DaliyBasicInfo base) {
-//		base.getCirc_mv()
+		if (base.getCirc_mv() > 1500000) {
+			return true;
+		}
 		return false;
 	}
 
@@ -109,8 +119,8 @@ public class TickDataService {
 		int date = base.getTrade_date();
 		TickDataBuySellInfo result = new TickDataBuySellInfo();
 
-		boolean needChkProgam = false;// TODO
-		// 程序单
+		// 程序单check
+		boolean needChkProgam = needChkProgam(base);
 
 		Map<String, TickData> bm = new HashMap<String, TickData>();
 		Map<String, TickData> sm = new HashMap<String, TickData>();
@@ -163,7 +173,7 @@ public class TickDataService {
 		result.setTotalAmt(ba + sa + na);
 		result.setTotalVol(bv + sv + nv);
 		result.setKey();
-		log.info("买入量:{},卖出量:{},中性量:{},总量:{}", bv, sv, nv, result.getTotalVol());
+		// log.info("买入量:{},卖出量:{},中性量:{},总量:{}", bv, sv, nv, result.getTotalVol());
 
 		int rate = 0;// -1:不需要检查，0：未检查到，>0可信度
 		if (needChkProgam) {

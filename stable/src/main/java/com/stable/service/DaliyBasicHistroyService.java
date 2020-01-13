@@ -58,9 +58,11 @@ public class DaliyBasicHistroyService {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private StockBasicService stockBasicService;
+	@Autowired
+	private TickDataService tickDataService;
 
 	// 直接全量获取历史记录，不需要根据缓存来判断
-	private boolean spiderDaliyDailyBasic(String today) {
+	private synchronized boolean spiderDaliyDailyBasic(String today) {
 		String preDate = tradeCalService.getPretradeDate(today);
 		JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
 		if (array == null || array.size() <= 0) {
@@ -73,6 +75,7 @@ public class DaliyBasicHistroyService {
 				// System.err.println(array.getJSONArray(i).toJSONString());
 				DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
 				esDaliyBasicInfoDao.save(d);
+				tickDataService.sumTickData(d);
 
 				String date = redisUtil.get(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode());
 				if (StringUtils.isBlank(date)) {
@@ -86,7 +89,7 @@ public class DaliyBasicHistroyService {
 				}
 				final String datep = date;
 				if (StringUtils.isNotBlank(date) && !preDate.equals(date)) {
-
+					log.info("获取到每日指标记录重新获取code={},date={},preDate={}", d.getCode(), date, preDate);
 					TasksWorker2nd.add(new MyRunnable() {
 						@Override
 						public void running() {
@@ -94,9 +97,7 @@ public class DaliyBasicHistroyService {
 							spiderStockDaliyBasic(d.getCode(), datep, today);
 							redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), d.getTrade_date());
 						}
-
 					});
-
 				} else {
 					redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), d.getTrade_date());
 				}
@@ -121,6 +122,7 @@ public class DaliyBasicHistroyService {
 				for (int ij = 0; ij < array2.size(); ij++) {
 					DaliyBasicInfo d2 = new DaliyBasicInfo(array2.getJSONArray(ij));
 					esDaliyBasicInfoDao.save(d2);
+					tickDataService.sumTickData(d2);
 					lastDate = d2.getTrade_date() + "";
 				}
 			}
