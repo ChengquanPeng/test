@@ -54,7 +54,7 @@ public class DividendService {
 	private DaliyTradeHistroyService daliydTradeHistroyService;
 
 	private boolean spiderDividend(String ts_code, String ann_date) {
-		log.warn("Dividend,tushare,ts_code={},ann_date={}", ts_code, ann_date);
+		log.info("Dividend,tushare,ts_code={},ann_date={}", ts_code, ann_date);
 		try {
 			DividendReq req = new DividendReq();
 			if (StringUtils.isNotBlank(ts_code)) {
@@ -66,9 +66,10 @@ public class DividendService {
 			JSONArray array = tushareSpider.getDividend(req);
 
 			if (array == null || array.size() <= 0) {
-				log.warn("未获取到日交易记录,tushare,code={}");
+				log.warn("未获取到分红送股数据交易记录,tushare,req={}", req.toString());
 				return false;
 			}
+			log.info("获取到分红送股数据交易记录条数={}", array.size());
 			// System.err.println(array);
 			for (int i = 0; i < array.size(); i++) {
 				JSONArray arr = array.getJSONArray(i);
@@ -126,7 +127,7 @@ public class DividendService {
 	public List<DividendHistory> getTodayListByCode() {
 		Pageable pageable = PageRequest.of(0, 10000);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		//7天左右需要除权的
+		// 7天左右需要除权的
 		bqb.must(QueryBuilders.rangeQuery("ex_date").gte(Integer.valueOf(DateUtil.getTodayBefor7DayYYYYMMDD())));
 		bqb.must(QueryBuilders.rangeQuery("ex_date").lte(Integer.valueOf(DateUtil.getTodayYYYYMMDD())));
 		bqb.must(QueryBuilders.matchPhraseQuery("div_proc", SS));

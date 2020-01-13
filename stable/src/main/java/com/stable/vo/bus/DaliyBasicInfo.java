@@ -56,10 +56,17 @@ public class DaliyBasicInfo extends EsBase {
 	@Field(type = FieldType.Double)
 	private double circ_mv;// float 流通市值（万元）
 
+	@Field(type = FieldType.Double)
+	private double dv_ratio;// 股息率 （%）
+	@Field(type = FieldType.Double)
+	private double dv_ttm;// 股息率（TTM）（%）
+
 	public DaliyBasicInfo() {
-		
+
 	}
+
 	public DaliyBasicInfo(JSONArray arr) {
+
 		int i = 0;
 		this.ts_code = arr.getString(i++);// ts_code
 		this.code = TushareSpider.removets(ts_code);
@@ -98,6 +105,14 @@ public class DaliyBasicInfo extends EsBase {
 		}
 		try {
 			this.ps_ttm = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.dv_ratio = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			this.dv_ttm = Double.valueOf(arr.getString(i++));
 		} catch (Exception e) {
 		}
 		try {

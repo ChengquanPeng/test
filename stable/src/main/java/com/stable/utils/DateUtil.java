@@ -8,6 +8,18 @@ import java.util.Date;
 public class DateUtil {
 	public static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
 	public static final String YYYY_MM_DD = "yyyyMMdd";
+	public static final String YYYY_MM_DD2 = "yyyy-MM-dd";
+
+	public static String convertDate(String yyyyMMdd) {
+		try {
+			SimpleDateFormat format1 = new SimpleDateFormat(YYYY_MM_DD);
+			SimpleDateFormat format2 = new SimpleDateFormat(YYYY_MM_DD2);
+			return format2.format(format1.parse(yyyyMMdd));
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new RuntimeException("ParseException:yyyyMMdd:" + yyyyMMdd);
+		}
+	}
 
 	public static Date parseDate(String yyyyMMdd) {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);

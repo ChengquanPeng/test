@@ -112,6 +112,7 @@ public class DaliyTradeHistroyService {
 				log.warn("未获取到日交易记录,tushare,code={}");
 				return false;
 			}
+			log.info("获取到日交易记录条数={}", array.size());
 			for (int i = 0; i < array.size(); i++) {
 				TradeHistInfoDaliy d = new TradeHistInfoDaliy(array.getJSONArray(i));
 				tradeHistDaliy.save(d);

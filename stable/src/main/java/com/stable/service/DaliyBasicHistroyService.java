@@ -67,6 +67,7 @@ public class DaliyBasicHistroyService {
 			log.warn("未获取到日交易daily_basic（每日指标）记录,tushare");
 			return false;
 		}
+		log.info("获取到每日指标记录条数={}", array.size());
 		try {
 			for (int i = 0; i < array.size(); i++) {
 				// System.err.println(array.getJSONArray(i).toJSONString());
@@ -152,7 +153,7 @@ public class DaliyBasicHistroyService {
 					}
 				});
 	}
-	
+
 	public List<DaliyBasicInfoResp> queryListByCodeByWebPage(String code, EsQueryPageReq queryPage) {
 		List<DaliyBasicInfoResp> res = new LinkedList<DaliyBasicInfoResp>();
 		List<DaliyBasicInfo> list = this.queryListByCode(code, queryPage);

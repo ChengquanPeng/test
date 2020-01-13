@@ -90,15 +90,21 @@ public class BuyBackService {
 					log.info("同步回购公告列表[started],ann_date={},", ann_date);
 					JSONArray array = tushareSpider.getBuyBackList(null, null, ann_date);
 					// System.err.println(array.toJSONString());
-					for (int i = 0; i < array.size(); i++) {
-						BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
-						// if(i==0) {
-						buyBackInfoDao.save(base);
-						// }
-						// System.err.println(base);
+					if (array != null) {
+						log.info("获取到回购公告记录条数={}", array.size());
+						for (int i = 0; i < array.size(); i++) {
+							BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
+							// if(i==0) {
+							buyBackInfoDao.save(base);
+							// }
+							// System.err.println(base);
+						}
+						redisUtil.set(RedisConstant.RDS_BUY_BACK_LAST_DAY, last);
+					} else {
+						log.info("未获取到回购公告");
 					}
 					log.info("同步回购公告列表[end],ann_date={}", ann_date);
-					redisUtil.set(RedisConstant.RDS_BUY_BACK_LAST_DAY, last);
+
 				} while (true);
 				return null;
 			}

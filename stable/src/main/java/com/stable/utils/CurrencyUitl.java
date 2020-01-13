@@ -45,7 +45,7 @@ public class CurrencyUitl {
 		return l.toString();
 	}
 
-	public final static String covertToString(float l) {
+	public final static String covertToString(double l) {
 		if (l > 100000000) {
 			BigDecimal b = new BigDecimal(l);
 			return b.divide(YI_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + YI;

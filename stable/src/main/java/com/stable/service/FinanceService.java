@@ -70,16 +70,17 @@ public class FinanceService {
 		}
 		String yyyy = redisUtil.get(RedisConstant.RDS_FINACE_HIST_INFO_ + code);
 		int year = (StringUtils.isBlank(yyyy) ? 0 : Integer.valueOf(yyyy));
-		JSONArray fields = datas.getJSONArray("fields");
+		// JSONArray fields = datas.getJSONArray("fields");
 		JSONArray items = datas.getJSONArray("items");
 		FinanceBaseInfo f = null;
+		int index = 0;
 		for (int i = items.size(); i > 0; i--) {
 			f = new FinanceBaseInfo();
-			f.setValue(code, fields, items.getJSONArray(i - 1));
+			index = i - 1;
+			f.setValue(code, items.getJSONArray(index));
 			if (f.getYear() >= year) {
 				esFinanceBaseInfoDao.save(f);
 				log.info("Finace income saved code={},getAnn_date={}", code, f.getAnn_date());
-
 			}
 		}
 		if (f != null) {
