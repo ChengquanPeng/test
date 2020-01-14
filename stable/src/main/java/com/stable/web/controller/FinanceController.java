@@ -42,7 +42,7 @@ public class FinanceController {
 		JsonResult r = new JsonResult();
 		try {
 			financeService.jobSpiderFinaceHistoryInfo();
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

@@ -36,7 +36,7 @@ public class JobController {
 		JsonResult r = new JsonResult();
 		try {
 			everyWorkingDayMorningJob.execute(null);
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -53,7 +53,7 @@ public class JobController {
 		JsonResult r = new JsonResult();
 		try {
 			everyWorkingDayJob.execute(null);
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -70,7 +70,7 @@ public class JobController {
 		JsonResult r = new JsonResult();
 		try {
 			everyWeekMonJob.execute(null);
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -87,7 +87,7 @@ public class JobController {
 		JsonResult r = new JsonResult();
 		try {
 			everyMonthJob.execute(null);
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -104,7 +104,7 @@ public class JobController {
 		JsonResult r = new JsonResult();
 		try {
 			tradeCalService.josSynTradeCal2(startdate + "", enddate + "");
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

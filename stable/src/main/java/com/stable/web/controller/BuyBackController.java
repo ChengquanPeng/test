@@ -40,7 +40,7 @@ public class BuyBackController {
 			Integer.parseInt(startDate);
 			Integer.parseInt(endDate);
 			buyBackService.spiderBuyBackHistoryInfo(startDate, endDate);
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -80,7 +80,7 @@ public class BuyBackController {
 
 			});
 
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

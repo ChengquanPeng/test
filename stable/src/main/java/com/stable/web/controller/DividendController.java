@@ -26,7 +26,7 @@ public class DividendController {
 		JsonResult r = new JsonResult();
 		try {
 			dividendService.spiderDividendAll();
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -43,7 +43,7 @@ public class DividendController {
 		JsonResult r = new JsonResult();
 		try {
 			dividendService.spiderDividendByCode(code);
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

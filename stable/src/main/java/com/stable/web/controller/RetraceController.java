@@ -24,7 +24,7 @@ public class RetraceController {
 		JsonResult r = new JsonResult();
 		try {
 			shFiveDaysDownService.manualHistory();
-			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
