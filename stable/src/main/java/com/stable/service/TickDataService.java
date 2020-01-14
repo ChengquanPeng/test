@@ -15,6 +15,7 @@ import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.LogFileUitl;
+import com.stable.utils.NoTickDataLogFileUitl;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.TheadUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
@@ -45,7 +46,8 @@ public class TickDataService {
 			esTickDataBuySellInfoDao.save(tickdatasum);
 			log.info(tickdatasum.toString());
 		} else {
-			ErrorLogFileUitl.writeError(new RuntimeException("没用找到分笔数据"), "base 信息:", base.toString(), "");
+			ErrorLogFileUitl.writeError(null, "没用找到分笔数据", "base 信息:", base.toString());
+			NoTickDataLogFileUitl.writeLog(date + "", code + " " + date);
 		}
 	}
 
