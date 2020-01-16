@@ -60,6 +60,8 @@ public class DaliyBasicInfo extends EsBase {
 	private double dv_ratio;// 股息率 （%）
 	@Field(type = FieldType.Double)
 	private double dv_ttm;// 股息率（TTM）（%）
+	@Field(type = FieldType.Integer)
+	private int fetchTickData = -1;// 是否有fetch tick Data
 
 	public DaliyBasicInfo() {
 

@@ -33,7 +33,7 @@ public final class NoTickDataLogFileUitl {
 
 		// then create
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
-		String filepath = efc.getFilepath() + date + ".log";
+		String filepath = efc.getNotickdata() + date + ".log";
 		log.info("Log File Path:{}", filepath);
 		file = new File(filepath);
 		if (!file.exists()) {
@@ -64,11 +64,11 @@ public final class NoTickDataLogFileUitl {
 	private final static void close() {
 		try {
 			channel.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 		}
 		try {
 			fos.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 		}
 	}
 

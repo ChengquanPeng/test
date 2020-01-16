@@ -28,8 +28,10 @@ import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
+import com.stable.utils.MyRunnable;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
+import com.stable.utils.TasksWorker2nd;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.resp.DaliyBasicInfoResp;
@@ -72,8 +74,12 @@ public class DaliyBasicHistroyService {
 			for (int i = 0; i < array.size(); i++) {
 				// System.err.println(array.getJSONArray(i).toJSONString());
 				DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
+				if (tickDataService.sumTickData(d) != null) {
+					d.setFetchTickData(1);
+				} else {
+					d.setFetchTickData(0);
+				}
 				esDaliyBasicInfoDao.save(d);
-				tickDataService.sumTickData(d);
 
 				String date = redisUtil.get(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode());
 				if (StringUtils.isBlank(date)) {
@@ -87,9 +93,14 @@ public class DaliyBasicHistroyService {
 				}
 				if (StringUtils.isNotBlank(date) && !preDate.equals(date)) {
 					log.info("获取到每日指标记录重新获取code={},date={},preDate={}", d.getCode(), date, preDate);
-					// 补全缺失
-					spiderStockDaliyBasic(d.getCode(), date, today);
-					redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), d.getTrade_date());
+					final String datep = date;
+					TasksWorker2nd.add(new MyRunnable() {
+						public void running() {
+							// 补全缺失
+							spiderStockDaliyBasic(d.getCode(), datep, today);
+							redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), d.getTrade_date());
+						}
+					});
 				} else {
 					redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), d.getTrade_date());
 				}
@@ -114,7 +125,7 @@ public class DaliyBasicHistroyService {
 				for (int ij = 0; ij < array2.size(); ij++) {
 					DaliyBasicInfo d2 = new DaliyBasicInfo(array2.getJSONArray(ij));
 					esDaliyBasicInfoDao.save(d2);
-					tickDataService.sumTickData(d2);
+					// tickDataService.sumTickData(d2);
 					lastDate = d2.getTrade_date() + "";
 				}
 			}

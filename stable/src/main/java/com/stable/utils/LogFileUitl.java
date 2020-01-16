@@ -30,7 +30,7 @@ public class LogFileUitl {
 			}
 
 			try {
-				fos = new FileOutputStream(file, true);
+				fos = new FileOutputStream(file, false);
 				channel = fos.getChannel();
 			} catch (IOException e) {
 				e.printStackTrace();

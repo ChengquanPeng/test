@@ -11,11 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.utils.DateUtil;
-import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.LogFileUitl;
-import com.stable.utils.NoTickDataLogFileUitl;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.TheadUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
@@ -37,7 +36,13 @@ public class TickDataService {
 	@Autowired
 	private EsTickDataBuySellInfoDao esTickDataBuySellInfoDao;
 
-	public void sumTickData(DaliyBasicInfo base) {
+	@Autowired
+	private EsDaliyBasicInfoDao esDaliyBasicInfoDao;
+
+	/**
+	 * 统计每天
+	 */
+	public TickDataBuySellInfo sumTickData(DaliyBasicInfo base) {
 		String code = base.getCode();
 		int date = base.getTrade_date();
 		List<String> lines = this.getTickData(code, DateUtil.convertDate(date + ""));
@@ -45,10 +50,12 @@ public class TickDataService {
 			TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines);
 			esTickDataBuySellInfoDao.save(tickdatasum);
 			log.info(tickdatasum.toString());
+			return tickdatasum;
 		} else {
-			ErrorLogFileUitl.writeError(null, "没用找到分笔数据", "base 信息:", base.toString());
-			NoTickDataLogFileUitl.writeLog(date + "", code + " " + date);
+			// ErrorLogFileUitl.writeError(null, "没用找到分笔数据", "base 信息:", base.toString());
+			// NoTickDataLogFileUitl.writeLog(date + "", code + " " + date);
 		}
+		return null;
 	}
 
 	private List<String> getTickData(String code, String date) {
@@ -231,6 +238,7 @@ public class TickDataService {
 			for (TickData t : l) {
 				sb.append(t).append(htmlNextLine).append(systemNextLine);
 			}
+			sb.append("=================================").append(htmlNextLine).append(systemNextLine);
 		}
 		sb.append("=================================").append(htmlNextLine).append(systemNextLine);
 		sb.append("===========    SELL  ============").append(htmlNextLine).append(systemNextLine);
@@ -239,6 +247,7 @@ public class TickDataService {
 			for (TickData t : l) {
 				sb.append(t).append(htmlNextLine).append(systemNextLine);
 			}
+			sb.append("=================================").append(htmlNextLine).append(systemNextLine);
 		}
 		sb.append("=================================").append(htmlNextLine).append(systemNextLine);
 		sb.append("===========    Buy   ============").append(htmlNextLine).append(systemNextLine);
@@ -247,6 +256,7 @@ public class TickDataService {
 			for (TickData t : l) {
 				sb.append(t).append(htmlNextLine).append(systemNextLine);
 			}
+			sb.append("=================================").append(htmlNextLine).append(systemNextLine);
 		}
 		LogFileUitl.writeLog(programHtmlFolder + "/" + code + "/" + date + ".html", sb.toString());
 	}
