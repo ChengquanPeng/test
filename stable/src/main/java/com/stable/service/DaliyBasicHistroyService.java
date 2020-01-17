@@ -161,9 +161,9 @@ public class DaliyBasicHistroyService {
 
 	public List<DaliyBasicInfoResp> queryListByCodeByWebPage(String code, EsQueryPageReq queryPage) {
 		List<DaliyBasicInfoResp> res = new LinkedList<DaliyBasicInfoResp>();
-		List<DaliyBasicInfo> list = this.queryListByCode(code, queryPage);
-		if (list != null) {
-			for (DaliyBasicInfo dh : list) {
+		Page<DaliyBasicInfo> page = this.queryListByCode(code, null, null, queryPage);
+		if (page != null && !page.isEmpty()) {
+			for (DaliyBasicInfo dh : page.getContent()) {
 				DaliyBasicInfoResp resp = new DaliyBasicInfoResp();
 				BeanUtils.copyProperties(dh, resp);
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
@@ -173,24 +173,26 @@ public class DaliyBasicHistroyService {
 		return res;
 	}
 
-	public List<DaliyBasicInfo> queryListByCode(String code, EsQueryPageReq queryPage) {
+	public Page<DaliyBasicInfo> queryListByCode(String code, String date, String fetchTickData,
+			EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
-		log.info("queryPage code={},pageNum={},size={}", code, pageNum, size);
+		log.info("queryPage code={},trade_date={},pageNum={},size={}", code, date, pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		}
+		if (StringUtils.isNotBlank(date)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("trade_date", Integer.valueOf(date)));
+		}
+		if (StringUtils.isNotBlank(fetchTickData)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("fetchTickData", Integer.valueOf(date)));
+		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
-
-		Page<DaliyBasicInfo> page = esDaliyBasicInfoDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent();
-		}
-		return null;
+		return esDaliyBasicInfoDao.search(sq);
 	}
 }

@@ -7,18 +7,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.enums.RunCycleEnum;
+import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
+import com.stable.job.MyCallable;
 import com.stable.utils.DateUtil;
 import com.stable.utils.LogFileUitl;
 import com.stable.utils.PythonCallUtil;
+import com.stable.utils.TasksWorker;
 import com.stable.utils.TheadUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TickDataBuySellInfo;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
@@ -32,12 +48,95 @@ public class TickDataService {
 
 	@Value("${program.html.folder}")
 	private String programHtmlFolder;
-
-	@Autowired
-	private EsTickDataBuySellInfoDao esTickDataBuySellInfoDao;
-
 	@Autowired
 	private EsDaliyBasicInfoDao esDaliyBasicInfoDao;
+	@Autowired
+	private EsTickDataBuySellInfoDao esTickDataBuySellInfoDao;
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
+
+	public void fetch(String code, String date, String all) {
+		if (StringUtils.isBlank(code) && StringUtils.isBlank(date)) {
+			return;
+		}
+
+		TasksWorker.getInstance().getService()
+				.submit(new MyCallable(RunLogBizTypeEnum.TICK_DATA, RunCycleEnum.MANUAL, code + " " + date) {
+					public Object mycall() {
+						boolean condition = true;
+						int totalPage = 0;
+						int currPage = 0;
+						EsQueryPageReq queryPage = new EsQueryPageReq();
+						queryPage.setPageSize(10000);
+						String fetchTickData = null;
+						if (StringUtils.isNotBlank(all) && "1".equals(all)) {
+
+						} else {
+							fetchTickData = "-1";// 剩余
+						}
+						int fetchResult = -1;
+						do {
+							queryPage.setPageNum(currPage);
+							Page<DaliyBasicInfo> page = daliyBasicHistroyService.queryListByCode(code, date,
+									fetchTickData, queryPage);
+							if (page != null && !page.isEmpty()) {
+								totalPage = page.getTotalPages();
+								List<DaliyBasicInfo> list = page.getContent();
+								for (DaliyBasicInfo d : list) {
+									if (sumTickData(d) != null) {
+										fetchResult = 1;
+									} else {
+										fetchResult = 0;
+									}
+									if (d.getFetchTickData() != fetchResult) {
+										d.setFetchTickData(fetchResult);
+										esDaliyBasicInfoDao.save(d);
+									}
+									log.info("esDaliyBasicInfoDao update:{}", d.toString());
+								}
+							} else {
+								log.info("page isEmpty ");
+								condition = false;
+							}
+							if ((totalPage - 1) >= currPage) {
+								condition = false;
+							} else {
+								currPage++;
+							}
+							log.info("PageSize=10000,currPage={},condition={}", currPage, condition);
+						} while (condition);
+						return null;
+					}
+				});
+	}
+
+	public List<TickDataBuySellInfo> list(String code, String date, EsQueryPageReq queryPage) {
+		int pageNum = queryPage.getPageNum();
+		int size = queryPage.getPageSize();
+		log.info("queryPage code={},date={},pageNum={},size={}", code, date, pageNum, size);
+		Pageable pageable = PageRequest.of(pageNum, size);
+		FieldSortBuilder sort = null;
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		if (StringUtils.isNotBlank(code)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+			sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		}
+		if (StringUtils.isNotBlank(date)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("date", Integer.valueOf(date)));
+			sort = SortBuilders.fieldSort("programRate").unmappedType("integer").order(SortOrder.DESC);
+		}
+
+		if (sort != null) {
+			NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+			SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+			Page<TickDataBuySellInfo> page = esTickDataBuySellInfoDao.search(sq);
+			if (page != null && !page.isEmpty()) {
+				return page.getContent();
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * 统计每天

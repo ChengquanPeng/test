@@ -10,6 +10,7 @@ import com.stable.job.EveryMonthJob;
 import com.stable.job.EveryWeekMonJob;
 import com.stable.job.EveryWorkingDayJob;
 import com.stable.job.EveryWorkingDayMorningJob;
+import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.vo.http.JsonResult;
 
@@ -27,6 +28,8 @@ public class JobController {
 	private EveryWorkingDayMorningJob everyWorkingDayMorningJob;
 	@Autowired
 	private TradeCalService tradeCalService;
+	@Autowired
+	private StockBasicService stockBasicService;
 
 	/**
 	 * 每天早上任务
@@ -104,6 +107,23 @@ public class JobController {
 		JsonResult r = new JsonResult();
 		try {
 			tradeCalService.josSynTradeCal2(startdate + "", enddate + "");
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * 手动同步交易日历
+	 */
+	@RequestMapping(value = "/stocklist", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> stocklist() {
+		JsonResult r = new JsonResult();
+		try {
+			stockBasicService.jobSynStockList();
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
