@@ -1,6 +1,5 @@
 package com.stable.service;
 
-import java.time.Duration;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -90,11 +89,8 @@ public class DaliyTradeHistroyService {
 	/**
 	 * code除权
 	 */
-	public void removeCacheByChuQuan(String code, int exDate) {
-		String date = redisUtil.get(RedisConstant.RDS_TRADE_DIVIDEND_IND_ + code);
-		if (StringUtils.isBlank(date) || exDate > Integer.valueOf(date)) {
-			redisUtil.set(RedisConstant.RDS_TRADE_DIVIDEND_IND_ + code, String.valueOf(exDate));
-		}
+	public void removeCacheByChuQuan(String code) {
+		redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
 	}
 
 	// 全量获取历史记录（定时任务）-根据缓存是否需要重新获取，（除权得时候会重新获取）
@@ -117,17 +113,10 @@ public class DaliyTradeHistroyService {
 				TradeHistInfoDaliy d = new TradeHistInfoDaliy(array.getJSONArray(i));
 				tradeHistDaliy.save(d);
 				String code = d.getCode();
-				String yyyymmdd = "";
-				String exDate = redisUtil.get(RedisConstant.RDS_TRADE_DIVIDEND_IND_ + code);
-				if (StringUtils.isNotBlank(exDate) && !RE_LOAD_ED.equals(exDate)) {
-					// 需要除权
-				} else {
-					yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
-				}
-
+				String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
 				// 第一次上市或者补全缺失
 				if (StringUtils.isBlank(yyyymmdd) || !preDate.equals(yyyymmdd)) {
-					log.info("日期前复权：{}重新获取记录,preDate:{},yyyymmdd:{},exDate:{}", code, preDate, yyyymmdd, exDate);
+					log.info("日期前复权：{}重新获取记录,preDate:{},yyyymmdd:{}", code, preDate, yyyymmdd);
 					String json = redisUtil.get(d.getCode());
 					if (StringUtils.isNotBlank(json)) {
 						StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
@@ -139,8 +128,6 @@ public class DaliyTradeHistroyService {
 							public void running() {
 								spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), base.getList_date(), today, 0);
 								redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
-								redisUtil.set(RedisConstant.RDS_TRADE_DIVIDEND_IND_ + code, RE_LOAD_ED,
-										Duration.ofDays(10));// 标识已除权
 							}
 						});
 					}
