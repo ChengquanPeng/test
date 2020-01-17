@@ -51,7 +51,6 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class DaliyTradeHistroyService {
-	private static final String RE_LOAD_ED = "9999";
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -100,7 +99,7 @@ public class DaliyTradeHistroyService {
 		return spiderTodayDaliyTrade(today);
 	}
 
-	private boolean spiderTodayDaliyTrade(String today) {
+	private synchronized boolean spiderTodayDaliyTrade(String today) {
 		String preDate = tradeCalService.getPretradeDate(today);
 		try {
 			JSONArray array = tushareSpider.getStockDaliyTrade(null, today, null, null);
@@ -268,6 +267,21 @@ public class DaliyTradeHistroyService {
 					public Object mycall() {
 						log.info("每日*定时任务-日交易[started]");
 						spiderTodayDaliyTrade();
+						log.info("每日*定时任务-日交易[end]");
+						return null;
+					}
+				});
+	}
+	
+	/**
+	 * 每日*定时任务-日交易
+	 */
+	public void jobSpiderAll(String date) {
+		TasksWorker.getInstance().getService()
+				.submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.DAY) {
+					public Object mycall() {
+						log.info("每日*定时任务-日交易[started]");
+						spiderTodayDaliyTrade(date);
 						log.info("每日*定时任务-日交易[end]");
 						return null;
 					}

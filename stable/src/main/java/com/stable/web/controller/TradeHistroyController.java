@@ -93,10 +93,10 @@ public class TradeHistroyController {
 	 * 获取（前复权）日交易(任务job缓存)
 	 */
 	@RequestMapping(value = "/qfq/fetchall", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> fetchall() {
+	public ResponseEntity<JsonResult> fetchall(String date) {
 		JsonResult r = new JsonResult();
 		try {
-			tradeHistroyService.jobSpiderAll();
+			tradeHistroyService.jobSpiderAll(date);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
