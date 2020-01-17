@@ -14,4 +14,10 @@ public class SpringConfig {
 
 	@Value("${no.tickdata.log.folder}")
 	private String notickdata = "/my/free/notickdata/";
+	
+	@Value("${wx.push.app.token.system}")
+	private String appToken;
+	
+	@Value("${wx.push.myuid}")
+	private String myUid;
 }

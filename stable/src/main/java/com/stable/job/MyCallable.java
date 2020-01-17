@@ -9,6 +9,7 @@ import com.stable.service.RunLogService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.SpringUtil;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.RunLog;
 
 import lombok.extern.log4j.Log4j2;
@@ -54,12 +55,21 @@ public abstract class MyCallable implements Callable<Object> {
 			log.info("执行任务异常：{},remark", biz.getBtypeName(), remark);
 			rl.setRemark(remark + e.getMessage());
 			rl.setStatus(2);
-
 		} finally {
 			rl.setEndTime(DateUtil.getTodayYYYYMMDDHHMMSS());
 			service.addLog(rl);
+
+			pushWx(rl.getStatus());
 		}
 		return null;
+	}
+
+	private void pushWx(int status) {
+		if (status == 1) {
+			WxPushUtil.pushSystem1(cycle.getName() + " " + biz.getBtypeName() + " =>执行正常！");
+		} else if (status == 2) {
+			WxPushUtil.pushSystem1(cycle.getName() + " " + biz.getBtypeName() + " =>执行异常！");
+		}
 	}
 
 	public abstract Object mycall();

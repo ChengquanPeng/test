@@ -177,7 +177,8 @@ public class DaliyBasicHistroyService {
 			EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
-		log.info("queryPage code={},trade_date={},pageNum={},size={}", code, date, pageNum, size);
+		log.info("queryPage code={},trade_date={},fetchTickData={},pageNum={},size={}", code, date, fetchTickData,
+				pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {

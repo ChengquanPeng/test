@@ -56,7 +56,8 @@ public class TickDataService {
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 
 	public void fetch(String code, String date, String all) {
-		if (StringUtils.isBlank(code) && StringUtils.isBlank(date)) {
+		if (StringUtils.isBlank(code) && StringUtils.isBlank(date) && StringUtils.isBlank(all)) {
+			log.warn("参数为空");
 			return;
 		}
 
@@ -103,7 +104,8 @@ public class TickDataService {
 							} else {
 								currPage++;
 							}
-							log.info("PageSize=10000,currPage={},condition={}", currPage, condition);
+							log.info("PageSize=10000,currPage={},condition={},fetchTickData={}", currPage, condition,
+									fetchTickData);
 						} while (condition);
 						return null;
 					}
