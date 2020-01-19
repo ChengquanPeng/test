@@ -13,6 +13,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,7 @@ import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.job.MyCallable;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.LogFileUitl;
 import com.stable.utils.PythonCallUtil;
@@ -34,6 +36,7 @@ import com.stable.utils.TasksWorker;
 import com.stable.utils.TheadUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TickDataBuySellInfo;
+import com.stable.vo.http.resp.TickDataBuySellInfoResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.Data;
@@ -54,6 +57,8 @@ public class TickDataService {
 	private EsTickDataBuySellInfoDao esTickDataBuySellInfoDao;
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
+	@Autowired
+	private StockBasicService stockBasicService;
 
 	public void fetch(String code, String date, String all) {
 		if (StringUtils.isBlank(code) && StringUtils.isBlank(date) && StringUtils.isBlank(all)) {
@@ -112,10 +117,28 @@ public class TickDataService {
 				});
 	}
 
-	public List<TickDataBuySellInfo> list(String code, String date, EsQueryPageReq queryPage) {
+	public List<TickDataBuySellInfoResp> listForWebPage(String code, String date, String programRate,
+			EsQueryPageReq queryPage) {
+		List<TickDataBuySellInfoResp> res = new LinkedList<TickDataBuySellInfoResp>();
+		List<TickDataBuySellInfo> list = this.list(code, date, programRate, queryPage);
+		if (list != null) {
+			for (TickDataBuySellInfo dh : list) {
+				TickDataBuySellInfoResp resp = new TickDataBuySellInfoResp();
+				BeanUtils.copyProperties(dh, resp);
+				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
+				resp.setBuyTotalAmt1(CurrencyUitl.covertToString(dh.getBuyTotalAmt()));
+				resp.setSellTotalAmt1(CurrencyUitl.covertToString(dh.getSellTotalAmt()));
+				resp.setTotalAmt1(CurrencyUitl.covertToString(dh.getTotalAmt()));
+				res.add(resp);
+			}
+		}
+		return res;
+	}
+
+	public List<TickDataBuySellInfo> list(String code, String date, String programRate, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
-		log.info("queryPage code={},date={},pageNum={},size={}", code, date, pageNum, size);
+		log.info("queryPage code={},date={},programRate={},pageNum={},size={}", code, date, programRate, pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		FieldSortBuilder sort = null;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
@@ -126,6 +149,10 @@ public class TickDataService {
 		if (StringUtils.isNotBlank(date)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("date", Integer.valueOf(date)));
 			sort = SortBuilders.fieldSort("programRate").unmappedType("integer").order(SortOrder.DESC);
+		}
+
+		if (StringUtils.isNotBlank(programRate)) {
+			bqb.must(QueryBuilders.rangeQuery("programRate").gt(Integer.valueOf(0)));
 		}
 
 		if (sort != null) {
@@ -181,6 +208,12 @@ public class TickDataService {
 	}
 
 	@Data
+	class BatchList {
+		private int sec;
+		private List<TickData> list;
+	}
+
+	@Data
 	class TickData {
 		private String time;
 		private double price;
@@ -217,8 +250,9 @@ public class TickDataService {
 		return size + "";
 	}
 
+	// 流通市值小于500亿
 	private boolean needChkProgam(DaliyBasicInfo base) {
-		if (base.getCirc_mv() > 1500000) {
+		if (base.getCirc_mv() < 5000000) {
 			return true;
 		}
 		return false;
@@ -288,7 +322,7 @@ public class TickDataService {
 		int rate = 0;// -1:不需要检查，0：未检查到，>0可信度
 		if (needChkProgam) {
 			// all
-			Set<List<TickData>> setListsa = new HashSet<List<TickData>>();
+			Set<BatchList> setListsa = new HashSet<BatchList>();
 			for (TickData td : al) {
 				SecFrom2to60(td, am, al, setListsa);
 			}
@@ -297,7 +331,7 @@ public class TickDataService {
 			}
 
 			// SELL
-			Set<List<TickData>> setListss = new HashSet<List<TickData>>();
+			Set<BatchList> setListss = new HashSet<BatchList>();
 			for (TickData td : sl) {
 				SecFrom2to60(td, sm, sl, setListss);
 			}
@@ -306,7 +340,7 @@ public class TickDataService {
 			}
 
 			// Buy
-			Set<List<TickData>> setListsb = new HashSet<List<TickData>>();
+			Set<BatchList> setListsb = new HashSet<BatchList>();
 			for (TickData td : bl) {
 				SecFrom2to60(td, bm, bl, setListsb);
 			}
@@ -329,35 +363,38 @@ public class TickDataService {
 	private final String systemNextLine = System.getProperty("line.separator");
 	private final String htmlNextLine = "<br/>";
 
-	private void printDetailToHtml(String code, int date, Set<List<TickData>> setListsa, Set<List<TickData>> setListss,
-			Set<List<TickData>> setListsb) {
+	private void printDetailToHtml(String code, int date, Set<BatchList> setListsa, Set<BatchList> setListss,
+			Set<BatchList> setListsb) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("=================================").append(htmlNextLine).append(systemNextLine);
 		sb.append("===========    ALL  =============").append(htmlNextLine).append(systemNextLine);
 		sb.append("=================================").append(htmlNextLine).append(systemNextLine);
-		for (List<TickData> l : setListsa) {
-			for (TickData t : l) {
+		for (BatchList l : setListsa) {
+			sb.append("=================================").append(l.getSec()).append(htmlNextLine)
+					.append(systemNextLine);
+			for (TickData t : l.getList()) {
 				sb.append(t).append(htmlNextLine).append(systemNextLine);
 			}
-			sb.append("=================================").append(htmlNextLine).append(systemNextLine);
 		}
 		sb.append("=================================").append(htmlNextLine).append(systemNextLine);
 		sb.append("===========    SELL  ============").append(htmlNextLine).append(systemNextLine);
 		sb.append("=================================").append(htmlNextLine).append(systemNextLine);
-		for (List<TickData> l : setListss) {
-			for (TickData t : l) {
+		for (BatchList l : setListss) {
+			sb.append("=================================").append(l.getSec()).append(htmlNextLine)
+					.append(systemNextLine);
+			for (TickData t : l.getList()) {
 				sb.append(t).append(htmlNextLine).append(systemNextLine);
 			}
-			sb.append("=================================").append(htmlNextLine).append(systemNextLine);
 		}
 		sb.append("=================================").append(htmlNextLine).append(systemNextLine);
 		sb.append("===========    Buy   ============").append(htmlNextLine).append(systemNextLine);
 		sb.append("=================================").append(htmlNextLine).append(systemNextLine);
-		for (List<TickData> l : setListsb) {
-			for (TickData t : l) {
+		for (BatchList l : setListsb) {
+			sb.append("=================================").append(l.getSec()).append(htmlNextLine)
+					.append(systemNextLine);
+			for (TickData t : l.getList()) {
 				sb.append(t).append(htmlNextLine).append(systemNextLine);
 			}
-			sb.append("=================================").append(htmlNextLine).append(systemNextLine);
 		}
 		LogFileUitl.writeLog(programHtmlFolder + "/" + code + "/" + date + ".html", sb.toString());
 	}
@@ -366,7 +403,7 @@ public class TickDataService {
 	 * 每1秒，每2秒，每3秒，每4秒，每5秒****每60秒的的连续间隔 <br />
 	 * checkline：最多间断次数
 	 */
-	private void SecFrom2to60(TickData td, Map<String, TickData> m, List<TickData> all, Set<List<TickData>> setLists) {
+	private void SecFrom2to60(TickData td, Map<String, TickData> m, List<TickData> all, Set<BatchList> setLists) {
 		int checkline = 0;
 		for (int i = 1; i <= 60; i++) {
 			LinkedList<TickData> subl = new LinkedList<TickData>();
@@ -392,7 +429,10 @@ public class TickDataService {
 
 			if (isMatchCondition(subl)) {
 				if (!isRepeating(setLists, subl)) {
-					setLists.add(subl);
+					BatchList b = new BatchList();
+					b.setSec(i);
+					b.setList(subl);
+					setLists.add(b);
 				}
 			}
 		}
@@ -415,8 +455,9 @@ public class TickDataService {
 	 * 去重
 	 */
 	@SuppressWarnings("unchecked")
-	private boolean isRepeating(Set<List<TickData>> setLists, LinkedList<TickData> subl) {
-		for (List<TickData> slist : setLists) {
+	private boolean isRepeating(Set<BatchList> setLists, LinkedList<TickData> subl) {
+		for (BatchList b : setLists) {
+			List<TickData> slist = b.getList();
 			LinkedList<TickData> clone = (LinkedList<TickData>) subl.clone();
 			for (TickData td : slist) {
 				clone.remove(td);

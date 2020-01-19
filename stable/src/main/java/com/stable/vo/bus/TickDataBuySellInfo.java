@@ -15,7 +15,7 @@ public class TickDataBuySellInfo extends EsBase {
 	private String id;
 	@Field(type = FieldType.Text)
 	private String code;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Integer)
 	private int date;
 	@Field(type = FieldType.Long)
 	private Long buyTotalAmt;

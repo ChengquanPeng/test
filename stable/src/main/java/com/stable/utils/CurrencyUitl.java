@@ -45,7 +45,10 @@ public class CurrencyUitl {
 		return l.toString();
 	}
 
-	public final static String covertToString(double l) {
+	public final static String covertToString(Double l) {
+		if (l == null) {
+			return "0";
+		}
 		if (l > 100000000) {
 			BigDecimal b = new BigDecimal(l);
 			return b.divide(YI_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + YI;
@@ -66,9 +69,9 @@ public class CurrencyUitl {
 
 	public static void main(String[] args) {
 		System.err.println(CurrencyUitl.covertToLong("1.1万亿"));
-		System.err.println(CurrencyUitl.covertToString(997));
-		System.err.println(CurrencyUitl.covertToString(-9978890000.0f));
-		System.err.println(CurrencyUitl.covertToString(-9970000.0f));
-		System.err.println(CurrencyUitl.covertToString(-88010f));
+//		System.err.println(CurrencyUitl.covertToString(997));
+//		System.err.println(CurrencyUitl.covertToString(-9978890000.0f));
+//		System.err.println(CurrencyUitl.covertToString(-9970000.0f));
+//		System.err.println(CurrencyUitl.covertToString(-88010f));
 	}
 }

@@ -7,4 +7,5 @@ import lombok.Data;
 public class BuyBackInfoResp extends BuyBackInfo {
 
 	private String codeName;
+	private String amountStr;
 }

@@ -27,6 +27,7 @@ import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsBuyBackInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
@@ -184,6 +185,7 @@ public class BuyBackService {
 				BuyBackInfoResp resp = new BuyBackInfoResp();
 				BeanUtils.copyProperties(dh, resp);
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
+				resp.setAmountStr(CurrencyUitl.covertToString(dh.getAmount()));
 				res.add(resp);
 			}
 		}
