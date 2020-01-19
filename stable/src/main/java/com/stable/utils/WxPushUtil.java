@@ -38,6 +38,7 @@ public class WxPushUtil {
 			message.setUrl(null);
 			log.info("微信推送内容:{},状态:{}", content, WxPusher.send(message).getData().get(0).getStatus());
 		} catch (Exception e) {
+			ErrorLogFileUitl.writeError(e, "微信推送内容异常", content, "");
 			e.printStackTrace();
 		}
 	}
