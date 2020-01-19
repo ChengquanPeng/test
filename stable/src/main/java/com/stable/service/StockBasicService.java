@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Semaphore;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +45,9 @@ public class StockBasicService {
 	private ConcurrentHashMap<String, String> CODE_NAME_MAP_LOCAL_HASH = new ConcurrentHashMap<String, String>();
 	private List<StockBaseInfo> LOCAL_ALL_ONLINE_LIST = new CopyOnWriteArrayList<StockBaseInfo>();
 
+	// 只初始化一次，历史数据包含已下市股票
+	private boolean initedOneTime = true;
+
 	public String getCodeName(String code) {
 		String name = CODE_NAME_MAP_LOCAL_HASH.get(code);
 		if (name == null) {
@@ -51,11 +55,18 @@ public class StockBasicService {
 			name = CODE_NAME_MAP_LOCAL_HASH.get(code);
 			if (name == null) {
 				try {
-					this.jobSynStockList().get();
+					if (initedOneTime) {
+						this.jobSynStockList().get();
+						initedOneTime = false;
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				name = CODE_NAME_MAP_LOCAL_HASH.get(code);
+				if (StringUtils.isBlank(name)) {
+					log.warn("已下市股票,code：{}", code);
+					CODE_NAME_MAP_LOCAL_HASH.put(code, "已下市");
+				}
 			}
 		}
 		return name;
