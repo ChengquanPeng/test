@@ -70,9 +70,8 @@ public class TickDataService {
 				new MyCallable(RunLogBizTypeEnum.TICK_DATA, RunCycleEnum.MANUAL, code + " " + date + " " + all) {
 					public Object mycall() {
 						boolean condition = true;
-						int totalPage = 0;
-						int currPage = 0;
 						EsQueryPageReq queryPage = new EsQueryPageReq();
+						queryPage.setPageNum(0);
 						queryPage.setPageSize(10000);
 						String fetchTickData = null;
 						if (StringUtils.isNotBlank(all) && "1".equals(all)) {
@@ -82,11 +81,10 @@ public class TickDataService {
 						}
 						int fetchResult = -1;
 						do {
-							queryPage.setPageNum(currPage);
 							Page<DaliyBasicInfo> page = daliyBasicHistroyService.queryListByCode(code, date,
 									fetchTickData, queryPage);
 							if (page != null && !page.isEmpty()) {
-								totalPage = page.getTotalPages();
+								log.info("剩余数量:{}，次数:{}", page.getTotalElements(), (page.getTotalPages() - 1));
 								List<DaliyBasicInfo> list = page.getContent();
 								for (DaliyBasicInfo d : list) {
 									if (sumTickData(d) != null) {
@@ -104,13 +102,7 @@ public class TickDataService {
 								log.info("page isEmpty ");
 								condition = false;
 							}
-							if ((totalPage - 1) >= currPage) {
-								condition = false;
-							} else {
-								currPage++;
-							}
-							log.info("PageSize=10000,currPage={},condition={},fetchTickData={}", currPage, condition,
-									fetchTickData);
+							log.info("PageSize=10000,condition={},fetchTickData={}", condition, fetchTickData);
 						} while (condition);
 						return null;
 					}
