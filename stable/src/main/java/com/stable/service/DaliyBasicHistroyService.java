@@ -188,7 +188,7 @@ public class DaliyBasicHistroyService {
 			bqb.must(QueryBuilders.matchPhraseQuery("trade_date", Integer.valueOf(date)));
 		}
 		if (StringUtils.isNotBlank(fetchTickData)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("fetchTickData", Integer.valueOf(date)));
+			bqb.must(QueryBuilders.matchPhraseQuery("fetchTickData", Integer.valueOf(fetchTickData)));
 		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(SortOrder.DESC);
 
