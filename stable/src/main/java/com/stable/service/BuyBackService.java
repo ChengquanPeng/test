@@ -4,7 +4,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -55,17 +54,46 @@ public class BuyBackService {
 	@Autowired
 	private RedisUtil redisUtil;
 
-	public void spiderBuyBackHistoryInfo() {
-		this.spiderBuyBackHistoryInfo(null, null);
+	public void spiderBuyBackHistoryInfo(String start_date, String end_date) {
+		TasksWorker.getInstance().getService()
+				.submit(new MyCallable(RunLogBizTypeEnum.BUY_BACK, RunCycleEnum.MANUAL, start_date + " " + end_date) {
+					public Object mycall() {
+						fetchHist(start_date, end_date);
+						return null;
+					}
+				});
 	}
 
-	public void spiderBuyBackHistoryInfo(String start_date, String end_date) {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			public Object call() throws Exception {
-				fetchHist(start_date, end_date);
-				return null;
-			}
-		});
+	/**
+	 * 按月抓取回购信息，从当前月到19900101
+	 */
+	public void fetchAll() {
+		TasksWorker.getInstance().getService()
+				.submit(new MyCallable(RunLogBizTypeEnum.BUY_BACK, RunCycleEnum.MANUAL, "fetchAll from 19900101") {
+					public Object mycall() {
+						Calendar cal = Calendar.getInstance();
+						String startDate = "", endDate = "";
+						int ife = 0, first = 0, last = 0;
+						do {
+							// 当月第一天
+							first = cal.getActualMinimum(Calendar.DAY_OF_MONTH);
+							cal.set(Calendar.DAY_OF_MONTH, first);
+							startDate = DateUtil.getYYYYMMDD(cal.getTime());
+							// 当月最后一天
+							last = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+							cal.set(Calendar.DAY_OF_MONTH, last);
+							endDate = DateUtil.getYYYYMMDD(cal.getTime());
+
+							log.info("回购爬虫时间从{}到{}", startDate, endDate);
+							fetchHist(startDate, endDate);
+
+							ife = Integer.valueOf(endDate);
+							cal.add(Calendar.MONTH, -1);// 前一月
+						} while (ife >= 19900101);
+						return null;
+					}
+
+				});
 	}
 
 	public void jobFetchHistEveryDay() {
@@ -129,16 +157,21 @@ public class BuyBackService {
 		});
 	}
 
-	public void fetchHist(String start_date, String end_date) {
+	private void fetchHist(String start_date, String end_date) {
 		log.info("同步回购公告列表[started],start_date={},end_date={},", start_date, end_date);
 		JSONArray array = tushareSpider.getBuyBackList(start_date, end_date, null);
 		// System.err.println(array.toJSONString());
-		for (int i = 0; i < array.size(); i++) {
-			BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
-			// if(i==0) {
-			buyBackInfoDao.save(base);
-			// }
-			// System.err.println(base);
+		if (array != null) {
+			log.info("获取到回购公告记录条数={}", array.size());
+			for (int i = 0; i < array.size(); i++) {
+				BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
+				// if(i==0) {
+				buyBackInfoDao.save(base);
+				// }
+				// System.err.println(base);
+			}
+		} else {
+			log.info("未获取到回购公告");
 		}
 		log.info("同步回购公告列表[end],start_date={},end_date={},", start_date, end_date);
 	}

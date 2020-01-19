@@ -1,8 +1,5 @@
 package com.stable.web.controller;
 
-import java.util.Calendar;
-import java.util.concurrent.Callable;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,16 +8,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.BuyBackService;
-import com.stable.utils.DateUtil;
-import com.stable.utils.TasksWorker;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
-import lombok.extern.log4j.Log4j2;
-
 @RequestMapping("/buyback")
 @RestController
-@Log4j2
 public class BuyBackController {
 
 	@Autowired
@@ -53,33 +45,7 @@ public class BuyBackController {
 	public ResponseEntity<JsonResult> fetchall() {
 		JsonResult r = new JsonResult();
 		try {
-			TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-
-				@Override
-				public Object call() throws Exception {
-					Calendar cal = Calendar.getInstance();
-					String startDate = "", endDate = "";
-					int ife = 0, first = 0, last = 0;
-					do {
-						first = cal.getActualMinimum(Calendar.DAY_OF_MONTH);
-						cal.set(Calendar.DAY_OF_MONTH, first);
-						startDate = DateUtil.getYYYYMMDD(cal.getTime());
-
-						last = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-						cal.set(Calendar.DAY_OF_MONTH, last);
-						endDate = DateUtil.getYYYYMMDD(cal.getTime());
-
-						log.info("回购爬虫时间从{}到{}", startDate, endDate);
-						buyBackService.fetchHist(startDate, endDate);
-
-						ife = Integer.valueOf(endDate);
-						cal.add(Calendar.MONTH, -1);
-					} while (ife >= 20100101);
-					return null;
-				}
-
-			});
-
+			buyBackService.fetchAll();
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

@@ -29,14 +29,14 @@ public class WxPushUtil {
 			Message message = new Message();
 			message.setAppToken(appToken);
 			message.setContentType(Message.CONTENT_TYPE_TEXT);
-			message.setContent(content);
+			message.setContent(content + " 时间:" + DateUtil.getTodayYYYYMMDDHHMMSS());
 			if (isMyId) {
 				message.setUid(myUid);
 			} else {
 				message.setUids(uids);
 			}
 			message.setUrl(null);
-			log.info("内容:{},状态:{}", content, WxPusher.send(message).getData().get(0));
+			log.info("微信推送内容:{},状态:{}", content, WxPusher.send(message).getData().get(0).getStatus());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

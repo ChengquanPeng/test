@@ -61,8 +61,8 @@ public class TickDataService {
 			return;
 		}
 
-		TasksWorker.getInstance().getService()
-				.submit(new MyCallable(RunLogBizTypeEnum.TICK_DATA, RunCycleEnum.MANUAL, code + " " + date) {
+		TasksWorker.getInstance().getService().submit(
+				new MyCallable(RunLogBizTypeEnum.TICK_DATA, RunCycleEnum.MANUAL, code + " " + date + " " + all) {
 					public Object mycall() {
 						boolean condition = true;
 						int totalPage = 0;
