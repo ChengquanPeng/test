@@ -56,10 +56,9 @@ public abstract class MyCallable implements Callable<Object> {
 			rl.setRemark(remark + e.getMessage());
 			rl.setStatus(2);
 		} finally {
+			pushWx(rl.getStatus());
 			rl.setEndTime(DateUtil.getTodayYYYYMMDDHHMMSS());
 			service.addLog(rl);
-
-			pushWx(rl.getStatus());
 		}
 		return null;
 	}

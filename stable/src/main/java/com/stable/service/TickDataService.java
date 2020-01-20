@@ -72,7 +72,7 @@ public class TickDataService {
 						boolean condition = true;
 						EsQueryPageReq queryPage = new EsQueryPageReq();
 						queryPage.setPageNum(0);
-						queryPage.setPageSize(10000);
+						queryPage.setPageSize(1000);
 						String fetchTickData = null;
 						if (StringUtils.isNotBlank(all) && "1".equals(all)) {
 
@@ -86,6 +86,7 @@ public class TickDataService {
 							if (page != null && !page.isEmpty()) {
 								log.info("剩余数量:{}，次数:{}", page.getTotalElements(), (page.getTotalPages() - 1));
 								List<DaliyBasicInfo> list = page.getContent();
+								int index = 0;
 								for (DaliyBasicInfo d : list) {
 									if (sumTickData(d) != null) {
 										fetchResult = 1;
@@ -96,7 +97,8 @@ public class TickDataService {
 										d.setFetchTickData(fetchResult);
 										esDaliyBasicInfoDao.save(d);
 									}
-									log.info("esDaliyBasicInfoDao update:{}", d.toString());
+									index++;
+									log.info("esDaliyBasicInfoDao update,index:{},data:{}", index, d.toString());
 								}
 							} else {
 								log.info("page isEmpty ");
