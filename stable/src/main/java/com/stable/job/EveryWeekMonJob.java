@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
-import com.dangdang.ddframe.job.api.simple.SimpleJob;
 import com.stable.service.BuyBackService;
 import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
@@ -18,7 +17,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Component
 @Log4j2
-public class EveryWeekMonJob implements SimpleJob {
+public class EveryWeekMonJob extends MySimpleJob {
 
 	@Autowired
 	private FinanceService financeService;
@@ -30,7 +29,7 @@ public class EveryWeekMonJob implements SimpleJob {
 	private DividendService dividendService;
 
 	@Override
-	public void execute(ShardingContext sc) {
+	public void myexecute(ShardingContext sc) {
 		log.info("每周1任务开始执行：");
 		log.info("1.同步股票列表");
 		stockBasicService.jobSynStockList();
