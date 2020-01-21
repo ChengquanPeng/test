@@ -113,25 +113,27 @@ public class DaliyTradeHistroyService {
 				tradeHistDaliy.save(d);
 				String code = d.getCode();
 				String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
-				// 第一次上市或者补全缺失
-				if (StringUtils.isBlank(yyyymmdd) || !preDate.equals(yyyymmdd)) {
-					log.info("日期前复权：{}重新获取记录,preDate:{},yyyymmdd:{}", code, preDate, yyyymmdd);
+				if (StringUtils.isBlank(yyyymmdd)) {
 					String json = redisUtil.get(d.getCode());
+					// 第一次上市或者除权
 					if (StringUtils.isNotBlank(json)) {
 						StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-						// spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), base.getList_date(), today,
-						// 0);
-						// redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
-						TasksWorker2nd.add(new MyRunnable() {
-							@Override
-							public void running() {
-								spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), base.getList_date(), today, 0);
-								redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
-							}
-						});
+						yyyymmdd = base.getList_date();
+						log.info("代码code:{}重新获取记录", code);
 					}
+				}
+				// 第一次上市或者补全缺失
+				if (StringUtils.isNotBlank(yyyymmdd) && !preDate.equals(yyyymmdd)) {
+					log.info("代码:{},需要获取记录,上次交易日 preDate:{},开始时间:{},结束时间:{}", code, preDate, yyyymmdd, today);
+					String datep = yyyymmdd;
+					TasksWorker2nd.add(new MyRunnable() {
+						public void running() {
+							spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), datep, today, 0);
+							redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+						}
+					});
 				} else {
-					redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+					log.info("代码:{},不需要更新记录,上次交易日 preDate:{},上次更新日:{}", code, preDate, yyyymmdd);
 				}
 			}
 		} catch (Exception e) {
@@ -272,7 +274,7 @@ public class DaliyTradeHistroyService {
 					}
 				});
 	}
-	
+
 	/**
 	 * 每日*定时任务-日交易
 	 */
