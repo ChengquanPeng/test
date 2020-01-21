@@ -91,7 +91,7 @@ public class DaliyBasicHistroyService {
 					}
 					// else未更新新股
 				}
-				if (StringUtils.isNotBlank(date) && !preDate.equals(date)) {
+				if (StringUtils.isNotBlank(date) && !preDate.equals(date) && !date.equals(today)) {
 					log.info("获取到每日指标记录重新获取code={},date={},preDate={}", d.getCode(), date, preDate);
 					final String datep = date;
 					TasksWorker2nd.add(new MyRunnable() {

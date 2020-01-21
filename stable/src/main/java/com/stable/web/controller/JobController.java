@@ -1,17 +1,19 @@
 package com.stable.web.controller;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.stable.job.EveryMonthJob;
-import com.stable.job.EveryWeekMonJob;
-import com.stable.job.EveryWorkingDayJob;
-import com.stable.job.EveryWorkingDayMorningJob;
+import com.dangdang.ddframe.job.api.simple.SimpleJob;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
+import com.stable.utils.SpringUtil;
 import com.stable.vo.http.JsonResult;
 
 @RequestMapping("/job")
@@ -19,27 +21,17 @@ import com.stable.vo.http.JsonResult;
 public class JobController {
 
 	@Autowired
-	private EveryWeekMonJob everyWeekMonJob;
-	@Autowired
-	private EveryMonthJob everyMonthJob;
-	@Autowired
-	private EveryWorkingDayJob everyWorkingDayJob;
-	@Autowired
-	private EveryWorkingDayMorningJob everyWorkingDayMorningJob;
-	@Autowired
 	private TradeCalService tradeCalService;
 	@Autowired
 	private StockBasicService stockBasicService;
 
-	/**
-	 * 每天早上任务
-	 */
-	@RequestMapping(value = "/everyWorkingDayMorning", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> everyWorkingDayMorningJob() {
+	@RequestMapping(value = "/jobs", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> jobs() {
 		JsonResult r = new JsonResult();
 		try {
-			everyWorkingDayMorningJob.execute(null);
 			r.setStatus(JsonResult.OK);
+			String[] jobs = SpringUtil.getApplicationContext().getBeanDefinitionNames();
+			r.setResult(jobs);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -48,49 +40,18 @@ public class JobController {
 		return ResponseEntity.ok(r);
 	}
 
-	/**
-	 * 每天晚上任务
-	 */
-	@RequestMapping(value = "/everyWorkingDay", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> everyWorkingDayJob() {
+	@RequestMapping(value = "/executejob", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> executejob(String jobName) {
 		JsonResult r = new JsonResult();
 		try {
-			everyWorkingDayJob.execute(null);
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
+			Object job = SpringUtil.getBean(jobName);
+			if (job != null && job instanceof SimpleJob) {
+				((SimpleJob) job).execute(null);
+				r.setStatus(JsonResult.OK);
+			} else {
+				r.setStatus(JsonResult.FAIL);
+			}
 
-	/**
-	 * 每周1任务
-	 */
-	@RequestMapping(value = "/everyWeekMon", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> everyWeekMonJob() {
-		JsonResult r = new JsonResult();
-		try {
-			everyWeekMonJob.execute(null);
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
-
-	/**
-	 * 每月任务
-	 */
-	@RequestMapping(value = "/everyMonth", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> everyMonthJob() {
-		JsonResult r = new JsonResult();
-		try {
-			everyMonthJob.execute(null);
-			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -131,5 +92,46 @@ public class JobController {
 			e.printStackTrace();
 		}
 		return ResponseEntity.ok(r);
+	}
+
+	@RequestMapping(value = "/systemStatus", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> systemStatus() {
+		JsonResult r = new JsonResult();
+		InputStreamReader ir = null;
+		BufferedReader input = null;
+		StringBuffer sb = new StringBuffer("进程信息列表:");
+		try {
+			String cmd = "jps";
+			Process proc = Runtime.getRuntime().exec(cmd);
+			ir = new InputStreamReader(proc.getInputStream());
+			input = new BufferedReader(ir);
+
+			String line;
+			while ((line = input.readLine()) != null) {
+				// System.out.println(line);
+				sb.append(line).append(",");
+			}
+			proc.waitFor();
+			r.setStatus(JsonResult.OK);
+			r.setResult(sb.toString());
+			return ResponseEntity.ok(r);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+				}
+			}
+			if (ir != null) {
+				try {
+					ir.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+
 	}
 }

@@ -1,5 +1,7 @@
 package com.stable.service;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -191,6 +193,34 @@ public class DividendService {
 						return null;
 					}
 				});
+	}
+
+	/**
+	 * 每日*定时任务-日分红
+	 */
+	public void jobSpiderDividendByWeek() {
+		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.DIVIDEND, RunCycleEnum.WEEK) {
+			public Object mycall() {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(new Date());
+				int d = 0;
+				if (cal.get(Calendar.DAY_OF_WEEK) == 1) {
+					d = -6;
+				} else {
+					d = 2 - cal.get(Calendar.DAY_OF_WEEK);
+				}
+				cal.add(Calendar.DAY_OF_WEEK, d);
+				// 所在周开始日期
+				for (int i = 1; i <= 5; i++) {
+					String date = DateUtil.getYYYYMMDD(cal.getTime());
+					log.info("每日*定时任务-日分红公告[started]:date={}", date);
+					spiderDividend(null, date);
+					log.info("每日*定时任务-日分红公告[end]:date={}", date);
+					cal.add(Calendar.DAY_OF_WEEK, 1);
+				}
+				return null;
+			}
+		});
 	}
 
 	/**

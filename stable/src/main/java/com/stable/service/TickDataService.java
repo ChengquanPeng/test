@@ -104,7 +104,7 @@ public class TickDataService {
 								log.info("page isEmpty ");
 								condition = false;
 							}
-							log.info("PageSize=10000,condition={},fetchTickData={}", condition, fetchTickData);
+							log.info("PageSize=1000,condition={},fetchTickData={}", condition, fetchTickData);
 						} while (condition);
 						return null;
 					}

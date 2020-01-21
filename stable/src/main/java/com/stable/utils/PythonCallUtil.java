@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import com.alibaba.fastjson.JSONObject;
 import com.stable.vo.MarketHistroyVo;
@@ -23,12 +24,15 @@ public class PythonCallUtil {
 			CALL_FORMAT = "/usr/local/bin/python3.8 %s %s";
 		}
 	}
+	// 控制python的调用数量：python吃CPU导致ES异常退出
+	private static final Semaphore semp = new Semaphore(5);
 
 	public static List<String> callPythonScript(String pythonScriptPathAndFileName, String params) {
 		InputStreamReader ir = null;
 		BufferedReader input = null;
-		List<String> sb = new LinkedList<String>();
 		try {
+			semp.acquire();
+			List<String> sb = new LinkedList<String>();
 			String cmd = String.format(CALL_FORMAT, pythonScriptPathAndFileName, params);
 			log.info("call Python Script Cmd:{}", cmd);
 			Process proc = Runtime.getRuntime().exec(cmd);
@@ -59,6 +63,7 @@ public class PythonCallUtil {
 				} catch (IOException e) {
 				}
 			}
+			semp.release();
 		}
 	}
 

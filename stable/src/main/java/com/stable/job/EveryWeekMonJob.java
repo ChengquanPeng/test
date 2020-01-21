@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
 import com.stable.service.BuyBackService;
+import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
-import com.stable.service.TickDataService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -27,7 +27,7 @@ public class EveryWeekMonJob implements SimpleJob {
 	@Autowired
 	private BuyBackService buyBackService;
 	@Autowired
-	private TickDataService tickDataService;
+	private DividendService dividendService;
 
 	@Override
 	public void execute(ShardingContext sc) {
@@ -38,7 +38,7 @@ public class EveryWeekMonJob implements SimpleJob {
 		financeService.jobSpiderFinaceHistoryInfo();
 		log.info("3.同步回购报告");
 		buyBackService.jobFetchHist();
-		log.info("4.每周tick data 剩余fetch");
-		tickDataService.fetch("", "", "0");
+		log.info("4.分红送股除权信息同步");
+		dividendService.jobSpiderDividendByWeek();
 	}
 }
