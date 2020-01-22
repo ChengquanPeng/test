@@ -16,8 +16,11 @@ import com.stable.service.TradeCalService;
 import com.stable.utils.SpringUtil;
 import com.stable.vo.http.JsonResult;
 
+import lombok.extern.log4j.Log4j2;
+
 @RequestMapping("/job")
 @RestController
+@Log4j2
 public class JobController {
 
 	@Autowired
@@ -43,15 +46,17 @@ public class JobController {
 	@RequestMapping(value = "/executejob", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> executejob(String jobName) {
 		JsonResult r = new JsonResult();
+		log.info("jobName:[{}]", jobName);
 		try {
 			Object job = SpringUtil.getBean(jobName);
 			if (job != null && job instanceof SimpleJob) {
 				((SimpleJob) job).execute(null);
 				r.setStatus(JsonResult.OK);
+				r.setResult(job.getClass().getName());
 			} else {
 				r.setStatus(JsonResult.FAIL);
+				r.setResult(jobName);
 			}
-
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -132,6 +137,21 @@ public class JobController {
 				}
 			}
 		}
+	}
 
+	@RequestMapping(value = "/restart", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> restart() {
+		JsonResult r = new JsonResult();
+		StringBuffer sb = new StringBuffer("reboot");
+		try {
+			Runtime.getRuntime().exec("reboot");
+			r.setStatus(JsonResult.OK);
+			r.setResult(sb.toString());
+			return ResponseEntity.ok(r);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} finally {
+		}
 	}
 }
