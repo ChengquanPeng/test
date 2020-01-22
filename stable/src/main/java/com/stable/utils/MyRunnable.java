@@ -5,6 +5,7 @@ public abstract class MyRunnable implements Runnable {
 	@Override
 	public void run() {
 		try {
+			TasksWorker2nd.semp.acquire();
 			running();
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, "", "", "");

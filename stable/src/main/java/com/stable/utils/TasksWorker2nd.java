@@ -2,6 +2,7 @@ package com.stable.utils;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -13,8 +14,23 @@ public class TasksWorker2nd {
 			.listeningDecorator(Executors.newFixedThreadPool(WORKS_NUM));
 
 	public static void add(MyRunnable task) throws Exception {
-		semp.acquire();
-		service.submit(task);
+		if (getAvailablePermits()) {
+			service.submit(task);
+		}
+	}
+
+	private static boolean getAvailablePermits() {
+		if (semp.availablePermits() > 0) {
+			return true;
+		} else {
+			try {
+//				System.err.println(Thread.currentThread().getId() + ":waiting");
+				TimeUnit.SECONDS.sleep(20);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return getAvailablePermits();
+		}
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -27,16 +43,14 @@ public class TasksWorker2nd {
 				public void running() {
 					System.err.println(Thread.currentThread().getId() + ":" + (i));
 					try {
-						Thread.sleep(1 * 1000);
+						TimeUnit.SECONDS.sleep(10);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
 			});
 			index++;
-			if (index % 10 == 0) {
-				System.err.println("Index:" + index);
-			}
+			System.err.println(Thread.currentThread().getId() + ":Index:" + index);
 		}
 	}
 }

@@ -74,6 +74,7 @@ public class DaliyBasicHistroyService {
 			for (int i = 0; i < array.size(); i++) {
 				// System.err.println(array.getJSONArray(i).toJSONString());
 				DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
+				log.info("正在处理<每日指标记录>，重新获取code={}", d.getCode());
 				if (tickDataService.sumTickData(d) != null) {
 					d.setFetchTickData(1);
 				} else {
