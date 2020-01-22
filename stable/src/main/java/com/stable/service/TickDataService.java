@@ -23,6 +23,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
@@ -60,13 +61,12 @@ public class TickDataService {
 	@Autowired
 	private StockBasicService stockBasicService;
 
-	public void fetch(String code, String date, String all) {
+	public synchronized void fetch(String code, String date, String all) {
 		if (StringUtils.isBlank(code) && StringUtils.isBlank(date) && StringUtils.isBlank(all)) {
 			log.warn("参数为空");
 			return;
 		}
-
-		TasksWorker.getInstance().getService().submit(
+		ListenableFuture<Object> lis = TasksWorker.getInstance().getService().submit(
 				new MyCallable(RunLogBizTypeEnum.TICK_DATA, RunCycleEnum.MANUAL, code + " " + date + " " + all) {
 					public Object mycall() {
 						boolean condition = true;
@@ -109,6 +109,12 @@ public class TickDataService {
 						return null;
 					}
 				});
+		try {
+			log.info("等待任务执行完成");
+			lis.get();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public List<TickDataBuySellInfoResp> listForWebPage(String code, String date, String programRate,

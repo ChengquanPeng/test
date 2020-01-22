@@ -36,14 +36,14 @@
 		
 		<job:simple id="EveryWorkingDayJobTradeBaisc"
 		class="com.stable.job.EveryWorkingDayJobTradeBaisc"
-		registry-center-ref="regCenter" cron="0 31 19 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上19点31执行任务"
+		registry-center-ref="regCenter" cron="0 31 21 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a" description="每日晚上21点31执行任务"
 		sharding-total-count="1" overwrite="true" />
 		
 		<job:simple id="EveryWorkingDayJobTradeHistory"
 		class="com.stable.job.EveryWorkingDayJobTradeHistory"
-		registry-center-ref="regCenter" cron="0 25 21 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上21点25执行任务"
+		registry-center-ref="regCenter" cron="0 05 19 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a" description="每日晚上19点05执行任务"
 		sharding-total-count="1" overwrite="true" />
 		
 	<job:simple id="EveryWeekMonJob"
