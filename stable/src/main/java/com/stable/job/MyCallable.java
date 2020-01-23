@@ -56,18 +56,20 @@ public abstract class MyCallable implements Callable<Object> {
 			rl.setRemark(remark + e.getMessage());
 			rl.setStatus(2);
 		} finally {
-			pushWx(rl.getStatus());
 			rl.setEndTime(DateUtil.getTodayYYYYMMDDHHMMSS());
+			pushWx(rl.getStatus(), rl.getStartTime(), rl.getEndTime());
 			service.addLog(rl);
 		}
 		return null;
 	}
 
-	private void pushWx(int status) {
+	private void pushWx(int status, String startTime, String endTime) {
 		if (status == 1) {
-			WxPushUtil.pushSystem1(cycle.getName() + " " + biz.getBtypeName() + " =>执行正常！");
+			WxPushUtil.pushSystem1(
+					cycle.getName() + " " + biz.getBtypeName() + " =>执行正常！开始时间:" + startTime + " 结束时间：" + endTime);
 		} else if (status == 2) {
-			WxPushUtil.pushSystem1(cycle.getName() + " " + biz.getBtypeName() + " =>执行异常！");
+			WxPushUtil.pushSystem1(
+					cycle.getName() + " " + biz.getBtypeName() + " =>执行异常!!!!！开始时间:" + startTime + " 结束时间：" + endTime);
 		}
 	}
 

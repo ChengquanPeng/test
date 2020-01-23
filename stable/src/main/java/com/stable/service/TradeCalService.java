@@ -74,7 +74,7 @@ public class TradeCalService {
 		for (int i = 0; i < array.size(); i++) {
 			JSONArray arr = array.getJSONArray(i);
 			String cal_date = arr.getString(0);// 日历日期
-			String is_open = arr.getString(1);// 上一个交易日
+			String is_open = arr.getString(1);// 是否开市
 			String pretrade_date = arr.getString(2);// 上一个交易日
 			redisUtil.set(RedisConstant.RDS_TRADE_CAL_ + cal_date, pretrade_date, Duration.ofDays(92));
 

@@ -9,6 +9,9 @@ import lombok.Data;
 @Data
 public class SpringConfig {
 
+	@Value("${python.script.concurrency.num}")
+	private int pythonconcurrencynum;
+	
 	@Value("${error.log.file}")
 	private String filepath = "/my/free/error.log";
 

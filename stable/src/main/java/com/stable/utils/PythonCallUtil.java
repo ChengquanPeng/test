@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import com.alibaba.fastjson.JSONObject;
+import com.stable.config.SpringConfig;
 import com.stable.vo.MarketHistroyVo;
 
 import lombok.extern.log4j.Log4j2;
@@ -17,7 +18,11 @@ public class PythonCallUtil {
 
 	public static final String EXCEPT = "except";
 	private static final String CALL_FORMAT;
+	private static final int pythonSeqCnt;
 	static {
+		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
+		pythonSeqCnt = efc.getPythonconcurrencynum();
+		log.info("python.script.concurrency.num={}", pythonSeqCnt);
 		if (OSystemUtil.isWindows()) {
 			CALL_FORMAT = "python %s %s";
 		} else {
@@ -25,7 +30,7 @@ public class PythonCallUtil {
 		}
 	}
 	// 控制python的调用数量：python吃CPU导致ES异常退出
-	private static final Semaphore semp = new Semaphore(5);
+	private static final Semaphore semp = new Semaphore(pythonSeqCnt);
 
 	public static List<String> callPythonScript(String pythonScriptPathAndFileName, String params) {
 		InputStreamReader ir = null;
@@ -51,6 +56,7 @@ public class PythonCallUtil {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		} finally {
+			semp.release();
 			if (input != null) {
 				try {
 					input.close();
@@ -63,7 +69,7 @@ public class PythonCallUtil {
 				} catch (IOException e) {
 				}
 			}
-			semp.release();
+
 		}
 	}
 

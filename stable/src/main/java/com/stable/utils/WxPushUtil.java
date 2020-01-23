@@ -29,7 +29,7 @@ public class WxPushUtil {
 			Message message = new Message();
 			message.setAppToken(appToken);
 			message.setContentType(Message.CONTENT_TYPE_TEXT);
-			message.setContent(content + " 时间:" + DateUtil.getTodayYYYYMMDDHHMMSS());
+			message.setContent(content + " 微信推送时间:" + DateUtil.getTodayYYYYMMDDHHMMSS());
 			if (isMyId) {
 				message.setUid(myUid);
 			} else {

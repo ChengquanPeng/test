@@ -2,6 +2,7 @@ package com.stable.service;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -66,47 +67,66 @@ public class DaliyBasicHistroyService {
 		String preDate = tradeCalService.getPretradeDate(today);
 		JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
 		if (array == null || array.size() <= 0) {
-			log.warn("未获取到日交易daily_basic（每日指标）记录,tushare");
+			log.warn("未获取到日交易daily_basic（每日指标）记录,tushare,日期={}", today);
 			return false;
 		}
-		log.info("获取到每日指标记录条数={}", array.size());
+
 		try {
+			int size = array.size();
+			log.info("{}获取到每日指标记录条数={}", today, size);
+			CountDownLatch cnt = new CountDownLatch(size);
 			for (int i = 0; i < array.size(); i++) {
 				// System.err.println(array.getJSONArray(i).toJSONString());
 				DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
-				log.info("正在处理<每日指标记录>，重新获取code={}", d.getCode());
-				if (tickDataService.sumTickData(d) != null) {
-					d.setFetchTickData(1);
-				} else {
-					d.setFetchTickData(0);
-				}
-				esDaliyBasicInfoDao.save(d);
+				int index = i;
+				TasksWorker2nd.add(new MyRunnable() {
+					public void running() {
+						try {
+							log.info("<每日指标记录>正在处理code={}", d.getCode());
+							String date = redisUtil.get(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode());
+							if (String.valueOf(d.getTrade_date()).equals(date)) {
+								log.info("<每日指标记录>不需要处理,code={},lastDate={},index={}", d.getCode(), date, index);
+								return;
+							}
+							if (tickDataService.sumTickData(d) != null) {
+								d.setFetchTickData(1);
+							} else {
+								d.setFetchTickData(0);
+							}
+							esDaliyBasicInfoDao.save(d);
 
-				String date = redisUtil.get(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode());
-				if (StringUtils.isBlank(date)) {
-					// 第一次
-					String json = redisUtil.get(d.getCode());
-					if (StringUtils.isNotBlank(json)) {
-						StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-						date = base.getList_date();
-					}
-					// else未更新新股
-				}
-				if (StringUtils.isNotBlank(date) && !preDate.equals(date) && !date.equals(today)) {
-					log.info("获取到每日指标记录重新获取code={},date={},preDate={}", d.getCode(), date, preDate);
-					final String datep = date;
-					TasksWorker2nd.add(new MyRunnable() {
-						public void running() {
-							// 补全缺失
-							spiderStockDaliyBasic(d.getCode(), datep, today);
-							redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), d.getTrade_date());
+							if (StringUtils.isBlank(date)) {
+								// 第一次
+								String json = redisUtil.get(d.getCode());
+								if (StringUtils.isNotBlank(json)) {
+									StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
+									date = base.getList_date();
+								}
+								// else未更新新股
+							}
+
+							if (StringUtils.isNotBlank(date) && !preDate.equals(date) && !date.equals(today)) {
+								log.info("<每日指标记录>需要重新获取或者补全 code={},date={},preDate={},index={}", d.getCode(), date,
+										preDate, index);
+								final String datep = date;
+
+								// 补全缺失
+								spiderStockDaliyBasic(d.getCode(), datep, today);
+								redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), d.getTrade_date());
+
+							} else {
+								redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), d.getTrade_date());
+								log.info("<每日指标记录>code={}已完成,最后更新交易日={},index={}", d.getCode(), d.getTrade_date(),
+										index);
+							}
+
+						} finally {
+							cnt.countDown();
 						}
-					});
-				} else {
-					redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), d.getTrade_date());
-				}
-
+					}
+				});
 			}
+			cnt.await();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return false;

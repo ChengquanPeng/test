@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -31,9 +32,12 @@ import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
+import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.LogFileUitl;
+import com.stable.utils.MyRunnable;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.TasksWorker;
+import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.TheadUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TickDataBuySellInfo;
@@ -79,30 +83,48 @@ public class TickDataService {
 						} else {
 							fetchTickData = "-1";// 剩余
 						}
-						int fetchResult = -1;
+
 						do {
 							Page<DaliyBasicInfo> page = daliyBasicHistroyService.queryListByCode(code, date,
 									fetchTickData, queryPage);
 							if (page != null && !page.isEmpty()) {
 								log.info("剩余数量:{}，次数:{}", page.getTotalElements(), (page.getTotalPages() - 1));
 								List<DaliyBasicInfo> list = page.getContent();
-								int index = 0;
+								int i = 0;
 								for (DaliyBasicInfo d : list) {
-									if (sumTickData(d) != null) {
-										fetchResult = 1;
-									} else {
-										fetchResult = 0;
+									i++;
+									int index = i;
+									try {
+										TasksWorker2nd.add(new MyRunnable() {
+											@Override
+											public void running() {
+												int fetchResult = -1;
+												if (sumTickData(d) != null) {
+													fetchResult = 1;
+												} else {
+													fetchResult = 0;
+												}
+												if (d.getFetchTickData() != fetchResult) {
+													d.setFetchTickData(fetchResult);
+													esDaliyBasicInfoDao.save(d);
+												}
+												log.info("esDaliyBasicInfoDao update,index:{},data:{}", index,
+														d.toString());
+											}
+										});
+									} catch (Exception e) {
+										e.printStackTrace();
+										ErrorLogFileUitl.writeError(e, d.toString(), "", "");
 									}
-									if (d.getFetchTickData() != fetchResult) {
-										d.setFetchTickData(fetchResult);
-										esDaliyBasicInfoDao.save(d);
-									}
-									index++;
-									log.info("esDaliyBasicInfoDao update,index:{},data:{}", index, d.toString());
 								}
 							} else {
 								log.info("page isEmpty ");
 								condition = false;
+								try {
+									TimeUnit.SECONDS.sleep(30);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
 							}
 							log.info("PageSize=1000,condition={},fetchTickData={}", condition, fetchTickData);
 						} while (condition);

@@ -123,7 +123,8 @@ public class DaliyTradeHistroyService {
 					}
 				}
 				if (StringUtils.isNotBlank(yyyymmdd) && !preDate.equals(yyyymmdd) && !yyyymmdd.equals(today)) {
-					log.info("代码:{},需要获取记录,上次交易日 preDate:{},开始时间:{},结束时间:{}", code, preDate, yyyymmdd, today);
+					log.info("代码:{},需要重新获取记录,上个交易日期 preDate:{},开始时间:{},结束时间:{},index={}", code, preDate, yyyymmdd,
+							today, i);
 					String datep = yyyymmdd;
 					TasksWorker2nd.add(new MyRunnable() {
 						public void running() {
@@ -132,7 +133,8 @@ public class DaliyTradeHistroyService {
 						}
 					});
 				} else {
-					log.info("代码:{},不需要更新记录,上次交易日 preDate:{},上次更新日:{}", code, preDate, yyyymmdd);
+					log.info("代码:{},不需要重新更新记录,上个交易日期 preDate:{},上次更新日期:{},最后更新日期:{},index={}", code, preDate, yyyymmdd,
+							today, i);
 					redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 				}
 			}
