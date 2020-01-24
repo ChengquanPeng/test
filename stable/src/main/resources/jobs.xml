@@ -34,8 +34,8 @@
 		sharding-item-parameters="0=a" description="每日晚上20点15执行任务"
 		sharding-total-count="1" overwrite="true" />
 		
-		<job:simple id="EveryWorkingDayJobTradeBaisc"
-		class="com.stable.job.EveryWorkingDayJobTradeBaisc"
+		<job:simple id="EveryWorkingDayJobTradeBasic"
+		class="com.stable.job.EveryWorkingDayJobTradeBasic"
 		registry-center-ref="regCenter" cron="0 31 21 ? * 2,3,4,5,6 *"
 		sharding-item-parameters="0=a" description="每日晚上21点31执行任务"
 		sharding-total-count="1" overwrite="true" />

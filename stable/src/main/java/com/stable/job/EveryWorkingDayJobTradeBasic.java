@@ -10,7 +10,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Component
 @Log4j2
-public class EveryWorkingDayJobTradeBaisc extends MySimpleJob {
+public class EveryWorkingDayJobTradeBasic extends MySimpleJob {
 
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;

@@ -37,6 +37,7 @@ public class PythonCallUtil {
 		BufferedReader input = null;
 		try {
 			semp.acquire();
+			TheadUtil.sleepRandomSecBetween1And5();
 			List<String> sb = new LinkedList<String>();
 			String cmd = String.format(CALL_FORMAT, pythonScriptPathAndFileName, params);
 			log.info("call Python Script Cmd:{}", cmd);
