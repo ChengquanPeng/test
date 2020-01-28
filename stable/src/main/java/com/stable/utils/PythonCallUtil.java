@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSONObject;
 import com.stable.config.SpringConfig;
@@ -36,8 +37,8 @@ public class PythonCallUtil {
 		InputStreamReader ir = null;
 		BufferedReader input = null;
 		try {
-			semp.acquire();
-			TheadUtil.sleepRandomSecBetween1And5();
+//			semp.acquire();
+			TimeUnit.SECONDS.sleep(1);
 			List<String> sb = new LinkedList<String>();
 			String cmd = String.format(CALL_FORMAT, pythonScriptPathAndFileName, params);
 			log.info("call Python Script Cmd:{}", cmd);
@@ -57,7 +58,7 @@ public class PythonCallUtil {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		} finally {
-			semp.release();
+//			semp.release();
 			if (input != null) {
 				try {
 					input.close();

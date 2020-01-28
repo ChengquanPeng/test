@@ -13,7 +13,7 @@ public class TasksWorker2nd {
 	private static ListeningExecutorService service = MoreExecutors
 			.listeningDecorator(Executors.newFixedThreadPool(WORKS_NUM));
 
-	public static void add(MyRunnable task) throws Exception {
+	public static synchronized void add(MyRunnable task) throws Exception {
 		if (getAvailablePermits()) {
 			service.submit(task);
 		}

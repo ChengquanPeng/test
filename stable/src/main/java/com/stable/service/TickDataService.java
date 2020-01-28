@@ -34,10 +34,8 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.LogFileUitl;
-import com.stable.utils.MyRunnable;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.TasksWorker;
-import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.TheadUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TickDataBuySellInfo;
@@ -94,24 +92,19 @@ public class TickDataService {
 								for (DaliyBasicInfo d : list) {
 									i++;
 									int index = i;
+									log.info("running index:{}", index);
 									try {
-										TasksWorker2nd.add(new MyRunnable() {
-											@Override
-											public void running() {
-												int fetchResult = -1;
-												if (sumTickData(d) != null) {
-													fetchResult = 1;
-												} else {
-													fetchResult = 0;
-												}
-												if (d.getFetchTickData() != fetchResult) {
-													d.setFetchTickData(fetchResult);
-													esDaliyBasicInfoDao.save(d);
-												}
-												log.info("esDaliyBasicInfoDao update,index:{},data:{}", index,
-														d.toString());
-											}
-										});
+										int fetchResult = -1;
+										if (sumTickData(d) != null) {
+											fetchResult = 1;
+										} else {
+											fetchResult = 0;
+										}
+										if (d.getFetchTickData() != fetchResult) {
+											d.setFetchTickData(fetchResult);
+											esDaliyBasicInfoDao.save(d);
+										}
+										log.info("esDaliyBasicInfoDao update,index:{},data:{}", index, d.toString());
 									} catch (Exception e) {
 										e.printStackTrace();
 										ErrorLogFileUitl.writeError(e, d.toString(), "", "");
@@ -131,7 +124,9 @@ public class TickDataService {
 						return null;
 					}
 				});
-		try {
+		try
+
+		{
 			log.info("等待任务执行完成");
 			lis.get();
 		} catch (Exception e) {
