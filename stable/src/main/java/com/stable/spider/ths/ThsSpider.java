@@ -11,7 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.constant.Constant;
 import com.stable.utils.HtmlunitSpider;
-import com.stable.utils.TheadUtil;
+import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.FinanceBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -34,7 +34,7 @@ public class ThsSpider {
 			e.printStackTrace();
 			return null;
 		} finally {
-			TheadUtil.thsSleepRandom();
+			ThreadsUtil.thsSleepRandom();
 		}
 		text = text.replace(Constant.FALSE, Constant.EMPTY_STRING2);
 		JSONObject jo = JSONObject.parseObject(text);

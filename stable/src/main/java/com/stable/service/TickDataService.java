@@ -36,7 +36,7 @@ import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.LogFileUitl;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.TasksWorker;
-import com.stable.utils.TheadUtil;
+import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TickDataBuySellInfo;
 import com.stable.vo.http.resp.TickDataBuySellInfoResp;
@@ -204,7 +204,7 @@ public class TickDataService {
 	}
 
 	private List<String> getTickData(String code, String date) {
-		TheadUtil.sleepRandomSecBetween1And5();
+		ThreadsUtil.sleepRandomSecBetween1And5();
 		String params = code + " " + date;
 		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
 		if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {

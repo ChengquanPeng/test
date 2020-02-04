@@ -12,7 +12,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.constant.Constant;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
-import com.stable.utils.TheadUtil;
+import com.stable.utils.ThreadsUtil;
 
 @Component
 public class SinaSpider {
@@ -89,7 +89,7 @@ public class SinaSpider {
 			e.printStackTrace();
 			return null;
 		} finally {
-			TheadUtil.sinaSleepRandom();
+			ThreadsUtil.sinaSleepRandom();
 		}
 	}
 }

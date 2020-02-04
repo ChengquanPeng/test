@@ -5,11 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSONObject;
-import com.stable.config.SpringConfig;
 import com.stable.vo.MarketHistroyVo;
 
 import lombok.extern.log4j.Log4j2;
@@ -19,26 +16,20 @@ public class PythonCallUtil {
 
 	public static final String EXCEPT = "except";
 	private static final String CALL_FORMAT;
-	private static final int pythonSeqCnt;
 	static {
-		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
-		pythonSeqCnt = efc.getPythonconcurrencynum();
-		log.info("python.script.concurrency.num={}", pythonSeqCnt);
+		// SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 		if (OSystemUtil.isWindows()) {
 			CALL_FORMAT = "python %s %s";
 		} else {
 			CALL_FORMAT = "/usr/local/bin/python3.8 %s %s";
 		}
 	}
-	// 控制python的调用数量：python吃CPU导致ES异常退出
-	private static final Semaphore semp = new Semaphore(pythonSeqCnt);
+	// TODO 调用python脚本会CPU会瞬时100%，从而导致python吃CPU导致ES异常退出， 控制python的调用数量：
 
-	public static List<String> callPythonScript(String pythonScriptPathAndFileName, String params) {
+	public synchronized static List<String> callPythonScript(String pythonScriptPathAndFileName, String params) {
 		InputStreamReader ir = null;
 		BufferedReader input = null;
 		try {
-//			semp.acquire();
-			TimeUnit.SECONDS.sleep(1);
 			List<String> sb = new LinkedList<String>();
 			String cmd = String.format(CALL_FORMAT, pythonScriptPathAndFileName, params);
 			log.info("call Python Script Cmd:{}", cmd);
@@ -58,7 +49,6 @@ public class PythonCallUtil {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		} finally {
-//			semp.release();
 			if (input != null) {
 				try {
 					input.close();

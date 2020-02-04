@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.stable.utils.TheadUtil;
+import com.stable.utils.ThreadsUtil;
 import com.stable.vo.spi.req.DividendReq;
 import com.stable.vo.spi.req.StockDaliyReq;
 
@@ -175,7 +175,7 @@ public class TushareSpider {
 			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
 			return items;
 		} finally {
-			TheadUtil.tuShareSleepRandom();
+			ThreadsUtil.tuShareSleepRandom();
 		}
 	}
 
@@ -210,7 +210,7 @@ public class TushareSpider {
 			JSONObject items = datas.getJSONObject("data");
 			return items;
 		} finally {
-			TheadUtil.tuShareSleepRandom();
+			ThreadsUtil.tuShareSleepRandom();
 		}
 	}
 
@@ -236,7 +236,7 @@ public class TushareSpider {
 			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
 			return items;
 		} finally {
-			TheadUtil.tuShareSleepRandom();
+			ThreadsUtil.tuShareSleepRandom();
 		}
 	}
 
@@ -262,7 +262,7 @@ public class TushareSpider {
 			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
 			return items;
 		} finally {
-			TheadUtil.tuShareSleepRandom();
+			ThreadsUtil.tuShareSleepRandom();
 		}
 	}
 
@@ -292,7 +292,7 @@ public class TushareSpider {
 			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
 			return items;
 		} finally {
-			TheadUtil.tuShareSleepRandom();
+			ThreadsUtil.tuShareSleepRandom();
 		}
 	}
 
@@ -316,7 +316,7 @@ public class TushareSpider {
 			JSONObject datas = JSON.parseObject(result);
 			return datas.getJSONObject("data");
 		} finally {
-			TheadUtil.tuShareSleepRandom();
+			ThreadsUtil.tuShareSleepRandom();
 		}
 	}
 }

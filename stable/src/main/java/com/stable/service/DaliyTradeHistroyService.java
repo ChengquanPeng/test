@@ -34,7 +34,7 @@ import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.TasksWorker2nd;
-import com.stable.utils.TheadUtil;
+import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.http.resp.DaliyTradeHistResp;
@@ -152,7 +152,7 @@ public class DaliyTradeHistroyService {
 			return false;
 		}
 		fortimes++;
-		TheadUtil.sleepRandomSecBetween1And30();
+		ThreadsUtil.sleepRandomSecBetween1And30();
 //		MarketHistroyVo mh = new MarketHistroyVo();
 //		mh.setTs_code(TushareSpider.formatCode(code));
 //		mh.setAdj("qfq");

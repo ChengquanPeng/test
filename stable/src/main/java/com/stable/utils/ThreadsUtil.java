@@ -1,21 +1,43 @@
 package com.stable.utils;
 
-public class TheadUtil {
+import java.util.concurrent.TimeUnit;
 
-	
-	
+public class ThreadsUtil {
+
 	public static void tuShareSleepRandom() {
 		sleepRandomSecBetween1And5();
 	}
-	
+
 	public static void thsSleepRandom() {
 		sleepRandomSecBetween1And5();
 	}
-	
+
 	public static void sinaSleepRandom() {
 		sleepRandomSecBetween5And15();
 	}
-	
+
+	public static void sleepSleep1Seconds() {
+		try {
+			TimeUnit.SECONDS.sleep(1);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void sleepRandomSecBetween1And2() {
+		try {
+			// 随机休息1-2s
+			if (System.currentTimeMillis() % 2 == 0) {
+				TimeUnit.SECONDS.sleep(2);
+			} else {
+				TimeUnit.SECONDS.sleep(1);
+			}
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void sleepRandomSecBetween1And30() {
 		try {
 			// 随机休息5-15s
@@ -24,7 +46,7 @@ public class TheadUtil {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void sleepRandomSecBetween1And5() {
 		try {
 			// 随机休息5-15s
@@ -33,6 +55,7 @@ public class TheadUtil {
 			e.printStackTrace();
 		}
 	}
+
 	public static void sleepRandomSecBetween5And15() {
 		try {
 			// 随机休息5-15s
@@ -41,5 +64,5 @@ public class TheadUtil {
 			e.printStackTrace();
 		}
 	}
-	
+
 }
