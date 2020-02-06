@@ -124,9 +124,7 @@ public class TickDataService {
 						return null;
 					}
 				});
-		try
-
-		{
+		try {
 			log.info("等待任务执行完成");
 			lis.get();
 		} catch (Exception e) {
