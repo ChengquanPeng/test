@@ -282,7 +282,7 @@ public class DaliyTradeHistroyService {
 	 */
 	public void jobSpiderAll(String date) {
 		TasksWorker.getInstance().getService()
-				.submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.DAY) {
+				.submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.MANUAL) {
 					public Object mycall() {
 						log.info("每日*定时任务-日交易[started]");
 						spiderTodayDaliyTrade(date);

@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.alibaba.fastjson.JSONObject;
 import com.stable.vo.MarketHistroyVo;
 
@@ -26,10 +28,19 @@ public class PythonCallUtil {
 	}
 	// TODO 调用python脚本会CPU会瞬时100%，从而导致python吃CPU导致ES异常退出， 控制python的调用数量：
 
+	private static int cnt = 0;
+	private static int CHECK_LINE = 15;
+
 	public synchronized static List<String> callPythonScript(String pythonScriptPathAndFileName, String params) {
 		InputStreamReader ir = null;
 		BufferedReader input = null;
 		try {
+			cnt++;
+			if (cnt >= CHECK_LINE) {
+				cnt = 0;
+				ThreadsUtil.sleepRandomSecBetween5And15();
+			}
+
 			List<String> sb = new LinkedList<String>();
 			String cmd = String.format(CALL_FORMAT, pythonScriptPathAndFileName, params);
 			log.info("call Python Script Cmd:{}", cmd);
@@ -65,7 +76,50 @@ public class PythonCallUtil {
 		}
 	}
 
+	private static final String URL_TEMPLATE1 = "http://localhost:9090/tickdata?%s,%s";
+
+	public synchronized static List<String> callPythonScriptByServerTickData(String code, String date) {
+		return callPythonScriptByServer(String.format(URL_TEMPLATE1, code, date));
+	}
+
+	public synchronized static List<String> callPythonScriptByServer(String url) {
+		List<String> sb = new LinkedList<String>();
+		try {
+			cnt++;
+			if (cnt >= CHECK_LINE) {
+				cnt = 0;
+				ThreadsUtil.sleepRandomSecBetween5And15();
+			}
+			// System.err.println(url);
+			String line = HttpUtil.doGet2(url);
+			// System.err.println(line);
+			String[] strs = line.split("A");
+			for (int i = 0; i < strs.length; i++) {
+				String l = strs[i];
+				// System.err.println(l);
+				if (StringUtils.isNotBlank(l)) {
+					sb.add(l);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			sb.add(EXCEPT);
+		}
+		return sb;
+	}
+
 	public static void main(String[] args) {
+		test2();
+	}
+
+	public static void test2() {
+		for (int i = 0; i < 100; i++) {
+			callPythonScriptByServerTickData("600000", "2020-01-09");
+		}
+
+	}
+
+	public static void test1() {
 		String pythonScriptPathAndFileName = "E:\\pythonworkspace\\tushareTickData.py";
 		MarketHistroyVo mh = new MarketHistroyVo();
 		mh.setTs_code("000029.SZ");

@@ -203,10 +203,11 @@ public class TickDataService {
 
 	private List<String> getTickData(String code, String date) {
 		ThreadsUtil.sleepRandomSecBetween1And5();
-		String params = code + " " + date;
-		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
+		// String params = code + " " + date;
+		// List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
+		List<String> lines = PythonCallUtil.callPythonScriptByServerTickData(code, date);
 		if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
-			log.warn("getTickData：{}，未获取到数据 params：{}", code, params);
+			log.warn("getTickData：{}，未获取到数据 params：{}", code, code + " " + date);
 			if (lines != null && !lines.isEmpty()) {
 				log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
 			}

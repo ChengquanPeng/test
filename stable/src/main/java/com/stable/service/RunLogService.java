@@ -1,5 +1,6 @@
 package com.stable.service;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsRunLogDao;
+import com.stable.utils.DateUtil;
 import com.stable.vo.bus.RunLog;
 import com.stable.vo.http.resp.RunLogResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -38,8 +40,15 @@ public class RunLogService {
 	@Autowired
 	private EsRunLogDao runlogDao;
 
+	private Date createDate = DateUtil.parseDate("2099-12-31 23:23:59", DateUtil.YYYY_MM_DD_HH_MM_SS);
+
 	public void addLog(RunLog log) {
 		runlogDao.save(log);
+		if (log.getRunCycle() != RunCycleEnum.MANUAL.code) {
+			log.setId(String.valueOf(log.getBtype()));
+			log.setCreateDate(createDate);
+			runlogDao.save(log);
+		}
 	}
 
 	public List<RunLogResp> queryRunlogs(Integer btype, Integer date, EsQueryPageReq queryPage) {

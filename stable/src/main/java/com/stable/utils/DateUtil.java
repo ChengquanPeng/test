@@ -31,6 +31,16 @@ public class DateUtil {
 		}
 	}
 
+	public static Date parseDate(String str, String formatter) {
+		SimpleDateFormat format = new SimpleDateFormat(formatter);
+		try {
+			return format.parse(str);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new RuntimeException("ParseException:formatter:" + formatter);
+		}
+	}
+
 	public static String getTodayYYYYMMDDHHMMSS() {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
 		return format.format(new Date());

@@ -12,6 +12,7 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -61,6 +62,9 @@ public class DaliyBasicHistroyService {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private TickDataService tickDataService;
+	
+	@Value("${tick.data.start.date}")
+	private String startDate;
 
 	// 直接全量获取历史记录，不需要根据缓存来判断
 	private synchronized boolean spiderDaliyDailyBasic(String today) {
@@ -210,7 +214,7 @@ public class DaliyBasicHistroyService {
 		}
 		if (StringUtils.isNotBlank(fetchTickData)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("fetchTickData", Integer.valueOf(fetchTickData)));
-			bqb.must(QueryBuilders.rangeQuery("trade_date").from("20100101"));
+			bqb.must(QueryBuilders.rangeQuery("trade_date").from(startDate));
 		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(SortOrder.DESC);
 

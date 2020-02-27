@@ -259,17 +259,4 @@ public class LgBuyBackService {
 
 				});
 	}
-
-	public void manualHistory() {
-		TasksWorker.getInstance().getService()
-				.submit(new MyCallable(RunLogBizTypeEnum.RETRACE_SH_FIVEDAY, RunCycleEnum.MANUAL) {
-					@Override
-					public Object mycall() {
-						historyTrace();
-						return null;
-					}
-
-				});
-	}
-
 }
