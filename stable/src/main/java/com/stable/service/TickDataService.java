@@ -73,11 +73,16 @@ public class TickDataService {
 					public Object mycall() {
 						boolean condition = true;
 						EsQueryPageReq queryPage = new EsQueryPageReq();
-						queryPage.setPageNum(0);
+						int currPage = 0;
+						queryPage.setPageNum(currPage);
 						queryPage.setPageSize(1000);
 						String fetchTickData = null;
-						if (StringUtils.isNotBlank(all) && "1".equals(all)) {
 
+						// 查询模式：查询全部=需要翻页，查询剩余=就查询当前页
+						boolean nextPage = false;
+						if (StringUtils.isNotBlank(all) && "1".equals(all)) {
+							nextPage = true;
+							fetchTickData = null;
 						} else {
 							fetchTickData = "-1";// 剩余
 						}
@@ -110,14 +115,19 @@ public class TickDataService {
 										ErrorLogFileUitl.writeError(e, d.toString(), "", "");
 									}
 								}
+
+								if (nextPage) {
+									currPage++;
+									queryPage.setPageNum(currPage);
+								}
 							} else {
 								log.info("page isEmpty ");
 								condition = false;
-								try {
-									TimeUnit.SECONDS.sleep(30);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
-								}
+							}
+							try {
+								TimeUnit.SECONDS.sleep(30);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
 							}
 							log.info("PageSize=1000,condition={},fetchTickData={}", condition, fetchTickData);
 						} while (condition);
