@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
+import com.stable.utils.OSystemUtil;
 import com.stable.utils.SpringUtil;
 import com.stable.vo.http.JsonResult;
 
@@ -142,11 +143,10 @@ public class JobController {
 	@RequestMapping(value = "/restart", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> restart() {
 		JsonResult r = new JsonResult();
-		StringBuffer sb = new StringBuffer("reboot");
 		try {
-			Runtime.getRuntime().exec("reboot");
+			OSystemUtil.restart();
 			r.setStatus(JsonResult.OK);
-			r.setResult(sb.toString());
+			r.setResult("reboot");
 			return ResponseEntity.ok(r);
 		} catch (Exception e) {
 			e.printStackTrace();

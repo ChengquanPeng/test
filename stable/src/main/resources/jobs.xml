@@ -17,9 +17,9 @@
 		max-retries="3" />
 
 	<!-- 配置作业 下面的TestJob就是我们刚才新建的测试类 -->
-	<job:simple id="testJob" class="com.stable.job.TestJob"
-		registry-center-ref="regCenter" cron="0 1 1 * * ?"
-		sharding-item-parameters="0=a" description="这个一个定时任务"
+	<job:simple id="SysStatusJob" class="com.stable.job.SysStatusJob"
+		registry-center-ref="regCenter" cron="0 0/30 * * * ?"
+		sharding-item-parameters="0=a" description="系统状态检查和重启"
 		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryWorkingDayMorningJob"

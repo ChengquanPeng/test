@@ -4,6 +4,14 @@ import lombok.Data;
 
 @Data
 public class EsQueryPageReq {
+	public EsQueryPageReq() {
+
+	}
+
+	public EsQueryPageReq(int pageSize) {
+		this.pageSize = pageSize;
+	}
+
 	public Integer getPageNum() {
 		if (pageNum == null || pageNum <= 1) {
 			pageNum = 1;
