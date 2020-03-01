@@ -28,7 +28,7 @@ public class SysStatusJob implements SimpleJob {
 	@PostConstruct
 	public void dostart() {
 		WxPushUtil.pushSystem1("系统正常启动");
-		new RuntimeException().printStackTrace();
+		//new RuntimeException().printStackTrace();
 	}
 
 	@Override

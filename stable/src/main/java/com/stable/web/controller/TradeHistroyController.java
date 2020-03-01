@@ -12,15 +12,17 @@ import com.stable.service.DaliyTradeHistroyService;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
+import lombok.extern.log4j.Log4j2;
+
 @RequestMapping("/trade/hist")
 @RestController
+@Log4j2
 public class TradeHistroyController {
 
 	@Autowired
 	private DaliyTradeHistroyService tradeHistroyService;
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
-	
 
 	/**
 	 * 根据code重新获取历史记录（前复权）
@@ -46,6 +48,24 @@ public class TradeHistroyController {
 		JsonResult r = new JsonResult();
 		try {
 			daliyBasicHistroyService.jobSpiderAllDailyBasic(tradeDate);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * 根据code重新获取历史记录（前复权）
+	 */
+	@RequestMapping(value = "/dailybasic/fetchByCode", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> fetchByCode(String code, String startDate, String endDate) {
+		JsonResult r = new JsonResult();
+		try {
+			log.info("getStockDaliyBasic code:{},startDate:{},endDate:{}", code, startDate, endDate);
+			daliyBasicHistroyService.spiderStockDaliyBasic(code, startDate, endDate);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

@@ -144,7 +144,7 @@ public class DaliyBasicHistroyService {
 		d.daily(array.getJSONArray(0));
 	}
 
-	private void spiderStockDaliyBasic(String code, String start_date, String end_date) {
+	public void spiderStockDaliyBasic(String code, String start_date, String end_date) {
 		boolean hasMore = true;
 		String lastDate = end_date;
 		do {
@@ -160,7 +160,7 @@ public class DaliyBasicHistroyService {
 					lastDate = d2.getTrade_date() + "";
 				}
 			}
-			log.info("getStockDaliyBasic code:{},start_date:{},start_date:{},hasMore:{}?", code, start_date, end_date,
+			log.info("getStockDaliyBasic code:{},start_date:{},end_date:{},hasMore:{}?", code, start_date, end_date,
 					hasMore);
 		} while (hasMore);
 	}

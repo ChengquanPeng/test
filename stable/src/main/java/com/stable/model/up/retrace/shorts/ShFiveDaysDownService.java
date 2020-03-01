@@ -52,7 +52,7 @@ public class ShFiveDaysDownService {
 		this.toworking(page);
 	}
 
-	RetraceLogFileUitl retracefile = new RetraceLogFileUitl("ShFiveDaysDown.log");
+	//RetraceLogFileUitl retracefile = new RetraceLogFileUitl("ShFiveDaysDown.log");
 	private List<ShFiveDaysDown> samples = null;
 
 	private void toworking(EsQueryPageReq page) {
@@ -97,7 +97,7 @@ public class ShFiveDaysDownService {
 	}
 
 	private void toFileLog(String str) {
-		retracefile.writeLine(str);
+		//retracefile.writeLine(str);
 	}
 
 	private void getResult() {

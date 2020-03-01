@@ -31,7 +31,6 @@ import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.utils.CurrencyUitl;
-import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.LogFileUitl;
 import com.stable.utils.PythonCallUtil;
@@ -78,7 +77,7 @@ public class TickDataService {
 					public Object mycall() {
 						boolean condition = true;
 						EsQueryPageReq queryPage = new EsQueryPageReq();
-						int currPage = 0;
+						int currPage = 1;
 						queryPage.setPageNum(currPage);
 						queryPage.setPageSize(1000);
 						String fetchTickData = null;
@@ -105,7 +104,7 @@ public class TickDataService {
 									log.info("running index:{}", index);
 									try {
 										int fetchResult = -1;
-										if (sumTickData(d, html) != null) {
+										if (sumTickData(d, html) == 1) {
 											fetchResult = 1;
 										} else {
 											fetchResult = 0;
@@ -200,43 +199,28 @@ public class TickDataService {
 	/**
 	 * 统计每天
 	 */
-	public TickDataBuySellInfo sumTickData(DaliyBasicInfo base, boolean html) {
+	public int sumTickData(DaliyBasicInfo base, boolean html) {
 		ThreadsUtil.sleepRandomSecBetween1And5();
 		String code = base.getCode();
 		int date = base.getTrade_date();
-		List<String> lines = this.getTickData(code, DateUtil.convertDate(date + ""));
-		if (lines != null && lines.size() > 0) {
-			TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines, html);
-			esTickDataBuySellInfoDao.save(tickdatasum);
-			log.info(tickdatasum.toString());
-			return tickdatasum;
-		} else {
-			// ErrorLogFileUitl.writeError(null, "没用找到分笔数据", "base 信息:", base.toString());
-			// NoTickDataLogFileUitl.writeLog(date + "", code + " " + date);
-		}
-		return null;
-	}
 
-	private List<String> getTickData(String code, String date) {
 		ThreadsUtil.sleepRandomSecBetween1And5();
 		// String params = code + " " + date;
 		// List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
-		List<String> lines = PythonCallUtil.callPythonScriptByServerTickData(code, date);
+		List<String> lines = PythonCallUtil.callPythonScriptByServerTickData(code, date + "");
 		if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
 			log.warn("getTickData：{}，未获取到数据 params：{}", code, code + " " + date);
 			if (lines != null && !lines.isEmpty()) {
 				log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
+				return -1;
 			}
-			return null;
+			return 0;
 		}
 		log.info("getTickData：{}，获取到数据 date：{},数据条数:{}", code, date, lines.size());
-		return lines;
-	}
-
-	public List<String> test1() {
-		this.pythonFileName = "E:\\pythonworkspace\\tushareTickDataFb.py";
-		List<String> list = this.getTickData("002587", "2020-01-10");
-		return list;
+		TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines, html);
+		esTickDataBuySellInfoDao.save(tickdatasum);
+		log.info(tickdatasum.toString());
+		return 1;
 	}
 
 	@Data
@@ -341,7 +325,7 @@ public class TickDataService {
 				if (td.getPrice() <= lowPrice) {// 跌停：卖出盘多，买入算中性
 					ot++;
 				} else {
-					st++;
+					bt++;
 				}
 			} else {
 				sm.put(td.getTime(), td);
