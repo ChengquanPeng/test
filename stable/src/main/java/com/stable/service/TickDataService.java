@@ -196,6 +196,7 @@ public class TickDataService {
 	 * 统计每天
 	 */
 	public TickDataBuySellInfo sumTickData(DaliyBasicInfo base) {
+		ThreadsUtil.sleepRandomSecBetween1And5();
 		String code = base.getCode();
 		int date = base.getTrade_date();
 		List<String> lines = this.getTickData(code, DateUtil.convertDate(date + ""));
@@ -289,9 +290,6 @@ public class TickDataService {
 		int date = base.getTrade_date();
 		TickDataBuySellInfo result = new TickDataBuySellInfo();
 
-		// 程序单check
-		boolean needChkProgam = needChkProgam(base);
-
 		Map<String, TickData> bm = new HashMap<String, TickData>();
 		Map<String, TickData> sm = new HashMap<String, TickData>();
 		Map<String, TickData> am = new HashMap<String, TickData>();
@@ -305,6 +303,15 @@ public class TickDataService {
 		long sa = 0;
 		long ba = 0;
 		long na = 0;
+
+		long bt = 0;
+		long st = 0;
+		long ot = 0;
+		boolean isST = stockBasicService.getCodeName(code).contains("ST");
+		double topPrice = CurrencyUitl.topPrice(base.getYesterdayPrice(), isST);
+		double lowPrice = CurrencyUitl.lowestPrice(base.getYesterdayPrice(), isST);
+		// 涨停：买入盘多，卖出算中性
+		// 跌停：卖出盘多，买入算中性
 		for (String line : lines) {
 			TickData td = getDataObject(line);
 			if ("S".equals(td.getType())) {
@@ -313,12 +320,24 @@ public class TickDataService {
 
 				sv += Long.valueOf(td.getVolume());
 				sa += Long.valueOf(td.getAmount());
+
+				if (td.getPrice() >= topPrice) {// 涨停：买入盘多，卖出算中性
+					ot++;
+				} else {
+					st++;
+				}
 			} else if ("B".equals(td.getType())) {
 				bm.put(td.getTime(), td);
 				bl.add(td);
 
 				bv += Long.valueOf(td.getVolume());
 				ba += Long.valueOf(td.getAmount());
+
+				if (td.getPrice() <= lowPrice) {// 跌停：卖出盘多，买入算中性
+					ot++;
+				} else {
+					st++;
+				}
 			} else {
 				sm.put(td.getTime(), td);
 				bm.put(td.getTime(), td);
@@ -328,6 +347,7 @@ public class TickDataService {
 
 				nv += Long.valueOf(td.getVolume());
 				na += Long.valueOf(td.getAmount());
+				ot++;
 			}
 			am.put(td.getTime(), td);
 			al.add(td);
@@ -342,9 +362,14 @@ public class TickDataService {
 		result.setSellTotalVol(sv);
 		result.setTotalAmt(ba + sa + na);
 		result.setTotalVol(bv + sv + nv);
+		result.setSellTimes(st);
+		result.setBuyTimes(bt);
+		result.setOtherTimes(ot);
 		result.setKey();
 		// log.info("买入量:{},卖出量:{},中性量:{},总量:{}", bv, sv, nv, result.getTotalVol());
 
+		// 程序单check
+		boolean needChkProgam = needChkProgam(base);
 		int rate = 0;// -1:不需要检查，0：未检查到，>0可信度
 		if (needChkProgam) {
 			// all

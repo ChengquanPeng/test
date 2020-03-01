@@ -36,6 +36,13 @@ public class TickDataBuySellInfo extends EsBase {
 	private Long totalVol;
 	@Field(type = FieldType.Integer)
 	private int programRate;
+	
+	@Field(type = FieldType.Integer)
+	private Long sellTimes;
+	@Field(type = FieldType.Integer)
+	private Long buyTimes;
+	@Field(type = FieldType.Integer)
+	private Long otherTimes;
 
 	public TickDataBuySellInfo() {
 	}

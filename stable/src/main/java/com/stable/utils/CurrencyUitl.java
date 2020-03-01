@@ -67,8 +67,38 @@ public class CurrencyUitl {
 		return String.valueOf(l);
 	}
 
+	/**
+	 * 涨停价格
+	 */
+	public final static double topPrice(double preClosedPrice, boolean isST) {
+		if (isST) {
+			preClosedPrice = preClosedPrice * 1.05;
+		} else {
+			preClosedPrice = preClosedPrice * 1.1;
+		}
+		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
+				.doubleValue();
+		return result;
+	}
+
+	/**
+	 * 跌停价格
+	 */
+	public final static double lowestPrice(double preClosedPrice, boolean isST) {
+		if (isST) {
+			preClosedPrice = preClosedPrice - preClosedPrice * 0.05;
+		} else {
+			preClosedPrice = preClosedPrice - preClosedPrice * 0.1;
+		}
+		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
+				.doubleValue();
+		return result;
+	}
+
 	public static void main(String[] args) {
-		System.err.println(CurrencyUitl.covertToLong("1.1万亿"));
+		double s = 5.41;
+		System.err.println(topPrice(s, true) + " " + lowestPrice(s, true));
+//		System.err.println(CurrencyUitl.covertToLong("1.1万亿"));
 //		System.err.println(CurrencyUitl.covertToString(997));
 //		System.err.println(CurrencyUitl.covertToString(-9978890000.0f));
 //		System.err.println(CurrencyUitl.covertToString(-9970000.0f));
