@@ -1,5 +1,7 @@
 package com.stable.job;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
@@ -21,6 +23,7 @@ public class SysStatusJob implements SimpleJob {
 	private RunLogService runLogService;
 	EsQueryPageReq page = new EsQueryPageReq(1);
 
+	@PostConstruct
 	public void dostart() {
 		WxPushUtil.pushSystem1("系统正常启动");
 	}

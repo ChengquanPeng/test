@@ -43,10 +43,10 @@ public class TickDataController {
 	 * 根据code重新获取历史记录（前复权） all{1,0}
 	 */
 	@RequestMapping(value = "/fetch", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> fetch(String code, String date, String all) {
+	public ResponseEntity<JsonResult> fetch(String code, String date, String all, String html) {
 		JsonResult r = new JsonResult();
 		try {
-			tickDataService.fetch(code, date, all);
+			tickDataService.fetch(code, date, all, "1".equals(html));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

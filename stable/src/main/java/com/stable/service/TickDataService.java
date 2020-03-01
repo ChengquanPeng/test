@@ -63,7 +63,7 @@ public class TickDataService {
 	@Autowired
 	private StockBasicService stockBasicService;
 
-	public synchronized void fetch(String code, String date, String all) {
+	public synchronized void fetch(String code, String date, String all, boolean html) {
 		if (StringUtils.isBlank(code) && StringUtils.isBlank(date) && StringUtils.isBlank(all)) {
 			log.warn("参数为空");
 			return;
@@ -100,7 +100,7 @@ public class TickDataService {
 									log.info("running index:{}", index);
 									try {
 										int fetchResult = -1;
-										if (sumTickData(d) != null) {
+										if (sumTickData(d, html) != null) {
 											fetchResult = 1;
 										} else {
 											fetchResult = 0;
@@ -195,13 +195,13 @@ public class TickDataService {
 	/**
 	 * 统计每天
 	 */
-	public TickDataBuySellInfo sumTickData(DaliyBasicInfo base) {
+	public TickDataBuySellInfo sumTickData(DaliyBasicInfo base, boolean html) {
 		ThreadsUtil.sleepRandomSecBetween1And5();
 		String code = base.getCode();
 		int date = base.getTrade_date();
 		List<String> lines = this.getTickData(code, DateUtil.convertDate(date + ""));
 		if (lines != null && lines.size() > 0) {
-			TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines);
+			TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines, html);
 			esTickDataBuySellInfoDao.save(tickdatasum);
 			log.info(tickdatasum.toString());
 			return tickdatasum;
@@ -285,7 +285,7 @@ public class TickDataService {
 		return false;
 	}
 
-	private TickDataBuySellInfo sumTickData(DaliyBasicInfo base, List<String> lines) {
+	private TickDataBuySellInfo sumTickData(DaliyBasicInfo base, List<String> lines, boolean html) {
 		String code = base.getCode();
 		int date = base.getTrade_date();
 		TickDataBuySellInfo result = new TickDataBuySellInfo();
@@ -399,7 +399,7 @@ public class TickDataService {
 				rate = rate + Integer.valueOf("2" + getRateInt(setListsb.size()));
 			}
 
-			if (rate > 0) {
+			if (html && rate > 0) {
 				printDetailToHtml(code, date, setListsa, setListss, setListsb);
 			} else {
 				rate = 0;
