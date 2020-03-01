@@ -60,9 +60,7 @@ public class DaliyBasicHistroyService {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private StockBasicService stockBasicService;
-	@Autowired
-	private TickDataService tickDataService;
-	
+
 	@Value("${tick.data.start.date}")
 	private String startDate;
 
@@ -92,12 +90,7 @@ public class DaliyBasicHistroyService {
 								log.info("<每日指标记录>不需要处理,code={},lastDate={},index={}", d.getCode(), date, index);
 								return;
 							}
-							if (tickDataService.sumTickData(d) != null) {
-								d.setFetchTickData(1);
-							} else {
-								d.setFetchTickData(0);
-							}
-							esDaliyBasicInfoDao.save(d);
+							save(d);
 
 							if (StringUtils.isBlank(date)) {
 								// 第一次
@@ -138,6 +131,19 @@ public class DaliyBasicHistroyService {
 		return true;
 	}
 
+	private void save(DaliyBasicInfo d) {
+		getDailyData(d);
+		esDaliyBasicInfoDao.save(d);
+	}
+
+	/**
+	 * 日线行情：昨收，最高，开盘，最低，交易量，交易额
+	 */
+	private void getDailyData(DaliyBasicInfo d) {
+		JSONArray array = tushareSpider.getStockDaliyTrade(d.getTs_code(), d.getTrade_date() + "", null, null);
+		d.daily(array.getJSONArray(0));
+	}
+
 	private void spiderStockDaliyBasic(String code, String start_date, String end_date) {
 		boolean hasMore = true;
 		String lastDate = end_date;
@@ -149,7 +155,7 @@ public class DaliyBasicHistroyService {
 			if (array2 != null && array2.size() > 0) {
 				for (int ij = 0; ij < array2.size(); ij++) {
 					DaliyBasicInfo d2 = new DaliyBasicInfo(array2.getJSONArray(ij));
-					esDaliyBasicInfoDao.save(d2);
+					save(d2);
 					// tickDataService.sumTickData(d2);
 					lastDate = d2.getTrade_date() + "";
 				}

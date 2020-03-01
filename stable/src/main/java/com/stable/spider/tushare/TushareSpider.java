@@ -157,13 +157,10 @@ public class TushareSpider {
 	public JSONArray getStockDaliyTrade(String ts_code, String trade_date, String start_date, String end_date) {
 		try {
 			StockDaliyReq req = new StockDaliyReq();
-			if (StringUtils.isNotBlank(trade_date)) {
-				req.setTrade_date(trade_date);
-			} else {
-				req.setTs_code(ts_code);
-				req.setStart_date(start_date);
-				req.setEnd_date(end_date);
-			}
+			req.setTs_code(ts_code);
+			req.setStart_date(start_date);
+			req.setTrade_date(trade_date);
+			req.setEnd_date(end_date);
 
 			JSONObject json = new JSONObject();
 			json.put("api_name", "daily");
@@ -180,7 +177,7 @@ public class TushareSpider {
 	}
 
 	/**
-	 * 日线行情
+	 * 日线行情-每日指标
 	 * 
 	 * @param ts_code    ts代码
 	 * @param start_date 开始日期 (格式：YYYYMMDD)
@@ -215,7 +212,7 @@ public class TushareSpider {
 	}
 
 	/**
-	 * 日线行情
+	 * 交易日历
 	 * 
 	 * @param ts_code    ts代码
 	 * @param start_date 开始日期 (格式：YYYYMMDD)
@@ -267,7 +264,7 @@ public class TushareSpider {
 	}
 
 	/**
-	 * 日线行情
+	 * 回购
 	 * 
 	 * @param ts_code    ts代码
 	 * @param start_date 开始日期 (格式：YYYYMMDD)
@@ -297,7 +294,7 @@ public class TushareSpider {
 	}
 
 	/**
-	 * 日线行情
+	 * 利润表
 	 * 
 	 * @param ts_code    ts代码
 	 * @param start_date 开始日期 (格式：YYYYMMDD)

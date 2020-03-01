@@ -60,6 +60,24 @@ public class DaliyBasicInfo extends EsBase {
 	private double dv_ratio;// 股息率 （%）
 	@Field(type = FieldType.Double)
 	private double dv_ttm;// 股息率（TTM）（%）
+
+	@Field(type = FieldType.Double)
+	private double open;// 开盘价
+	@Field(type = FieldType.Double)
+	private double high;// 最高价
+	@Field(type = FieldType.Double)
+	private double low;// 最低价
+	@Field(type = FieldType.Double)
+	private double yesterdayPrice;// 昨收价
+	@Field(type = FieldType.Double)
+	private double todayChange;// 涨跌额
+	@Field(type = FieldType.Double)
+	private double todayChangeRate;// 涨跌幅 （未复权，如果是复权请用 通用行情接口 ）
+	@Field(type = FieldType.Double)
+	private double vol;// 成交量 （手）
+	@Field(type = FieldType.Double)
+	private double amt;
+
 	@Field(type = FieldType.Integer)
 	private int fetchTickData = -1;// 是否有fetch tick Data
 
@@ -142,5 +160,20 @@ public class DaliyBasicInfo extends EsBase {
 
 	private void setId() {
 		this.id = code + trade_date;
+	}
+
+	public void daily(JSONArray arr) {
+		int i = 0;
+		arr.getString(i++);// ts_code
+		arr.getString(i++);// date
+		this.open = Double.valueOf(arr.getString(i++));
+		this.high = Double.valueOf(arr.getString(i++));
+		this.low = Double.valueOf(arr.getString(i++));
+		arr.getString(i++);// close
+		this.yesterdayPrice = Double.valueOf(arr.getString(i++));// pre_close
+		this.todayChange = Double.valueOf(arr.getString(i++));// change
+		this.todayChangeRate = Double.valueOf(arr.getString(i++));// pct_chg
+		this.vol = Double.valueOf((Double.valueOf(arr.getString(i++)) * 100)).longValue();// 成交量 （手）
+		this.amt = Double.valueOf((Double.valueOf(arr.getString(i++)) * 1000)).longValue();// 成交额 （千元）
 	}
 }

@@ -25,19 +25,19 @@
 	<job:simple id="EveryWorkingDayMorningJob"
 		class="com.stable.job.EveryWorkingDayMorningJob"
 		registry-center-ref="regCenter" cron="0 15 4 * * ?"
-		sharding-item-parameters="0=a" description="每日早上4点15执行任务"
-		sharding-total-count="1" overwrite="true" />
-
-	<job:simple id="EveryWorkingDayJobTradeHistory"
-		class="com.stable.job.EveryWorkingDayJobTradeHistory"
-		registry-center-ref="regCenter" cron="0 05 19 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上19点05执行任务"
+		sharding-item-parameters="0=a" description="每日早上4点15执行任务(当日分红除权)"
 		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryWorkingDayJob"
 		class="com.stable.job.EveryWorkingDayJob"
+		registry-center-ref="regCenter" cron="0 05 19 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a" description="每日晚上19点05执行任务(回购公告、分红除权公告)"
+		sharding-total-count="1" overwrite="true" />
+		
+	<job:simple id="TradeHistoryJob"
+		class="com.stable.job.TradeHistoryJob"
 		registry-center-ref="regCenter" cron="0 15 19 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上19点15执行任务"
+		sharding-item-parameters="0=a" description="每日晚上19点15执行任务-获取日交易(分红除权)"
 		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryWorkingDayJobTradeBasic"
@@ -45,21 +45,23 @@
 		registry-center-ref="regCenter" cron="0 31 19 ? * 2,3,4,5,6 *"
 		sharding-item-parameters="0=a" description="每日晚上19点31执行任务"
 		sharding-total-count="1" overwrite="true" />
-
+	
+	<job:simple id="TickDataJob"
+		class="com.stable.job.TickDataJob"
+		registry-center-ref="regCenter" cron="0 01 20 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a" description="每日晚上20点01执行任务（分笔数据）"
+		sharding-total-count="1" overwrite="true" />
+		
 	<job:simple id="EveryWeekMonJob"
-		class="com.stable.job.EveryWeekMonJob" registry-center-ref="regCenter"
-		cron="0 15 5 ? * MON" sharding-item-parameters="0=a"
-		description="每周一早上5点15执行任务" sharding-total-count="1" overwrite="true" />
-
-	<job:simple id="EveryWeekMonJobTickData"
-		class="com.stable.job.EveryWeekMonJobTickData"
-		registry-center-ref="regCenter" cron="0 15 5 ? * SAT"
-		sharding-item-parameters="0=a" description="每周六早上5点15执行任务"
+		class="com.stable.job.EveryWeekMonJob" 
+		registry-center-ref="regCenter" cron="0 15 5 ? * MON" 
+		sharding-item-parameters="0=a" description="每周一早上5点15执行任务（股票列表，回购，分红除权，业绩）" 
 		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryMonthJob"
-		class="com.stable.job.EveryMonthJob" registry-center-ref="regCenter"
-		cron="1 1 1 1 * ?" sharding-item-parameters="0=a"
-		description="每月1日凌晨执行" sharding-total-count="1" overwrite="true" />
+		class="com.stable.job.EveryMonthJob" 
+		registry-center-ref="regCenter" cron="1 1 1 1 * ?" 
+		sharding-item-parameters="0=a" description="每月1日凌晨执行（日历同步）" 
+		sharding-total-count="1" overwrite="true" />
 
 </beans>
