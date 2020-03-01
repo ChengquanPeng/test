@@ -62,7 +62,7 @@ public class DaliyBasicHistroyService {
 	private StockBasicService stockBasicService;
 
 	@Value("${tick.data.start.date}")
-	private String startDate;
+	public String startDate;
 
 	// 直接全量获取历史记录，不需要根据缓存来判断
 	private synchronized boolean spiderDaliyDailyBasic(String today) {

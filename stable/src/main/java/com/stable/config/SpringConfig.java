@@ -23,4 +23,7 @@ public class SpringConfig {
 	
 	@Value("${wx.push.myuid}")
 	private String myUid;
+	
+	@Value("${worker2.num}")
+	private int worker2Num = 10;
 }

@@ -63,10 +63,15 @@ public class TickDataService {
 	@Autowired
 	private StockBasicService stockBasicService;
 
-	public synchronized void fetch(String code, String date, String all, boolean html) {
+	public synchronized void fetch(String code, String date, String all, boolean html, String startDate) {
 		if (StringUtils.isBlank(code) && StringUtils.isBlank(date) && StringUtils.isBlank(all)) {
 			log.warn("参数为空");
 			return;
+		}
+		if (StringUtils.isNotBlank(startDate)) {
+			String oldVal = daliyBasicHistroyService.startDate;
+			daliyBasicHistroyService.startDate = startDate;
+			log.info("startDate 从{}已经修改为:{}", oldVal, startDate);
 		}
 		ListenableFuture<Object> lis = TasksWorker.getInstance().getService().submit(
 				new MyCallable(RunLogBizTypeEnum.TICK_DATA, RunCycleEnum.MANUAL, code + " " + date + " " + all) {

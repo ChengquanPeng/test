@@ -6,9 +6,17 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.stable.config.SpringConfig;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 public class TasksWorker2nd {
-	public static final int WORKS_NUM = 20;
+	public static SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
+	public static final int WORKS_NUM = efc.getWorker2Num();
+	static {
+		log.info("TasksWorker2nd.WORKS_NUM:{}", WORKS_NUM);
+	}
 	public static final Semaphore semp = new Semaphore(WORKS_NUM);
 	private static ListeningExecutorService service = MoreExecutors
 			.listeningDecorator(Executors.newFixedThreadPool(WORKS_NUM));

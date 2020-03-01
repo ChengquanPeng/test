@@ -21,6 +21,6 @@ public class TickDataJob extends MySimpleJob {
 
 	public void myexecute(ShardingContext sc) {
 		log.info("5.每周tick data 剩余fetch");
-		tickDataService.fetch("", "", "0", false);
+		tickDataService.fetch("", "", "0", false, "");
 	}
 }
