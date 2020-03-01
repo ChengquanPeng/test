@@ -216,6 +216,8 @@ public class TickDataService {
 			}
 			return 0;
 		}
+		//..
+		daliyBasicHistroyService.getDailyData(base);
 		log.info("getTickData：{}，获取到数据 date：{},数据条数:{}", code, date, lines.size());
 		TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines, html);
 		esTickDataBuySellInfoDao.save(tickdatasum);

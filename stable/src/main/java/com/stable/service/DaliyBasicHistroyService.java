@@ -132,14 +132,14 @@ public class DaliyBasicHistroyService {
 	}
 
 	private void save(DaliyBasicInfo d) {
-		getDailyData(d);
+		//getDailyData(d);
 		esDaliyBasicInfoDao.save(d);
 	}
 
 	/**
 	 * 日线行情：昨收，最高，开盘，最低，交易量，交易额
 	 */
-	private void getDailyData(DaliyBasicInfo d) {
+	public void getDailyData(DaliyBasicInfo d) {
 		JSONArray array = tushareSpider.getStockDaliyTrade(d.getTs_code(), d.getTrade_date() + "", null, null);
 		d.daily(array.getJSONArray(0));
 	}
