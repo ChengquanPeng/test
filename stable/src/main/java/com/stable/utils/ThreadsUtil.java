@@ -40,7 +40,7 @@ public class ThreadsUtil {
 
 	public static void sleepRandomSecBetween1And30() {
 		try {
-			// 随机休息5-15s
+			// 随机休息1-30s
 			Thread.sleep(MathUtil.getRandomSecBetween1And30() * 1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -49,7 +49,7 @@ public class ThreadsUtil {
 
 	public static void sleepRandomSecBetween1And5() {
 		try {
-			// 随机休息5-15s
+			// 随机休息1-5s
 			Thread.sleep(MathUtil.getRandomSecBetween1And5() * 1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
