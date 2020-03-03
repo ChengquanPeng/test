@@ -63,6 +63,8 @@ public class DaliyTradeHistroyService {
 	private String pythonFileName;
 	@Autowired
 	private TradeCalService tradeCalService;
+	@Autowired
+	private PriceLifeService priceLifeService;
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -90,6 +92,7 @@ public class DaliyTradeHistroyService {
 	 */
 	public void removeCacheByChuQuan(String code) {
 		redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
+		priceLifeService.removePriceLifeCache(code);
 	}
 
 	// 全量获取历史记录（定时任务）-根据缓存是否需要重新获取，（除权得时候会重新获取）
@@ -109,8 +112,11 @@ public class DaliyTradeHistroyService {
 			}
 			log.info("获取到日交易记录条数={}", array.size());
 			for (int i = 0; i < array.size(); i++) {
+				// 1.保存记录
 				TradeHistInfoDaliy d = new TradeHistInfoDaliy(array.getJSONArray(i));
 				tradeHistDaliy.save(d);
+
+				// 2.是否需要更新缺失记录
 				String code = d.getCode();
 				String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
 				if (StringUtils.isBlank(yyyymmdd)) {
@@ -122,6 +128,8 @@ public class DaliyTradeHistroyService {
 						log.info("代码code:{}重新获取记录", code);
 					}
 				}
+
+				// 3.更新缺失记录
 				if (StringUtils.isNotBlank(yyyymmdd) && !preDate.equals(yyyymmdd) && !yyyymmdd.equals(today)) {
 					log.info("代码:{},需要重新获取记录,上个交易日期 preDate:{},开始时间:{},结束时间:{},index={}", code, preDate, yyyymmdd,
 							today, i);
@@ -136,6 +144,7 @@ public class DaliyTradeHistroyService {
 					log.info("代码:{},不需要重新更新记录,上个交易日期 preDate:{},上次更新日期:{},最后更新日期:{},index={}", code, preDate, yyyymmdd,
 							today, i);
 					redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+					priceLifeService.checkAndSetPrice(d);
 				}
 			}
 		} catch (Exception e) {
@@ -147,6 +156,7 @@ public class DaliyTradeHistroyService {
 	}
 
 	private boolean spiderDaliyTradeHistoryInfoFromIPO(String code, String startDate, String endDate, int fortimes) {
+		priceLifeService.removePriceLifeCache(code);
 		if (fortimes >= 10) {
 			log.warn("超过最大次数：code：{}，startDate：{}，endDate：{}，fortimes：{}", code, startDate, endDate, fortimes);
 			return false;
@@ -310,4 +320,5 @@ public class DaliyTradeHistroyService {
 					}
 				});
 	}
+
 }

@@ -1,7 +1,5 @@
 package com.stable.job;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,12 +22,6 @@ public class SysStatusJob implements SimpleJob {
 	@Autowired
 	private RunLogService runLogService;
 	EsQueryPageReq page = new EsQueryPageReq(1);
-
-	@PostConstruct
-	public void dostart() {
-		WxPushUtil.pushSystem1("系统正常启动");
-		//new RuntimeException().printStackTrace();
-	}
 
 	@Override
 	public void execute(ShardingContext sc) {

@@ -42,14 +42,14 @@
 
 	<job:simple id="EveryWorkingDayJobTradeBasic"
 		class="com.stable.job.EveryWorkingDayJobTradeBasic"
-		registry-center-ref="regCenter" cron="0 31 19 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上19点31执行任务"
+		registry-center-ref="regCenter" cron="0 35 19 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a" description="每日晚上19点35执行任务"
 		sharding-total-count="1" overwrite="true" />
 	
 	<job:simple id="TickDataJob"
 		class="com.stable.job.TickDataJob"
-		registry-center-ref="regCenter" cron="0 01 20 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上20点01执行任务（分笔数据）"
+		registry-center-ref="regCenter" cron="0 05 20 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a" description="每日晚上20点05执行任务（分笔数据）"
 		sharding-total-count="1" overwrite="true" />
 		
 	<job:simple id="EveryWeekMonJob"
@@ -60,7 +60,7 @@
 
 	<job:simple id="EveryMonthJob"
 		class="com.stable.job.EveryMonthJob" 
-		registry-center-ref="regCenter" cron="1 1 1 1 * ?" 
+		registry-center-ref="regCenter" cron="1 5 1 1 * ?" 
 		sharding-item-parameters="0=a" description="每月1日凌晨执行（日历同步）" 
 		sharding-total-count="1" overwrite="true" />
 
