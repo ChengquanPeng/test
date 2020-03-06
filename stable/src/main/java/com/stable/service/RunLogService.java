@@ -3,6 +3,7 @@ package com.stable.service;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -19,10 +20,12 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.dangdang.ddframe.job.api.simple.SimpleJob;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsRunLogDao;
 import com.stable.utils.DateUtil;
+import com.stable.utils.SpringUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.RunLog;
 import com.stable.vo.http.resp.RunLogResp;
@@ -32,8 +35,6 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * 日志
- * 
- * @author roy
  *
  */
 @Service("RunLogService")
@@ -43,6 +44,18 @@ public class RunLogService {
 	public void dostart() {
 		WxPushUtil.pushSystem1("系统正常启动");
 		// new RuntimeException().printStackTrace();
+
+		try {
+			TimeUnit.MINUTES.sleep(1);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		Object job = SpringUtil.getBean("tickDataJob");
+		if (job != null && job instanceof SimpleJob) {
+
+			((SimpleJob) job).execute(null);
+			WxPushUtil.pushSystem1("tickDataJob 已经运行");
+		}
 	}
 
 	@Autowired

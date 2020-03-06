@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -33,9 +34,11 @@ import com.stable.job.MyCallable;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.LogFileUitl;
+import com.stable.utils.OSystemUtil;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.ThreadsUtil;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TickDataBuySellInfo;
 import com.stable.vo.http.resp.TickDataBuySellInfoResp;
@@ -117,6 +120,10 @@ public class TickDataService {
 									} catch (Exception e) {
 										e.printStackTrace();
 										ErrorLogFileUitl.writeError(e, d.toString(), "", "");
+										if (e instanceof NoNodeAvailableException) {
+											WxPushUtil.pushSystem1("检测到ES系统异常，正在重启...");
+											OSystemUtil.restart();
+										}
 									}
 								}
 
@@ -206,7 +213,8 @@ public class TickDataService {
 		ThreadsUtil.sleepRandomSecBetween1And5();
 		String params = code + " " + date;
 		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
-		//List<String> lines = PythonCallUtil.callPythonScriptByServerTickData(code, date + "");
+		// List<String> lines = PythonCallUtil.callPythonScriptByServerTickData(code,
+		// date + "");
 		if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
 			log.warn("getTickData：{}，未获取到数据 params：{}", code, code + " " + date);
 			if (lines != null && !lines.isEmpty()) {
@@ -216,7 +224,7 @@ public class TickDataService {
 			return 0;
 		}
 		ThreadsUtil.sleepRandomSecBetween1And5();
-		//获取日线交易数据
+		// 获取日线交易数据
 		daliyBasicHistroyService.getDailyData(base);
 		log.info("getTickData：{}，获取到数据 date：{},数据条数:{}", code, date, lines.size());
 		TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines, html);
