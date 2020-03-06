@@ -50,12 +50,17 @@ public class RunLogService {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		Object job = SpringUtil.getBean("tickDataJob");
-		if (job != null && job instanceof SimpleJob) {
-			WxPushUtil.pushSystem1("tickDataJob 运行中..,");
-			((SimpleJob) job).execute(null);
-			
-		}
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Object job = SpringUtil.getBean("tickDataJob");
+				if (job != null && job instanceof SimpleJob) {
+					WxPushUtil.pushSystem1("tickDataJob 运行中..,");
+					((SimpleJob) job).execute(null);
+
+				}
+			}
+		}).start();
 	}
 
 	@Autowired
