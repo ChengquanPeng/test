@@ -52,9 +52,9 @@ public class RunLogService {
 		}
 		Object job = SpringUtil.getBean("tickDataJob");
 		if (job != null && job instanceof SimpleJob) {
-
+			WxPushUtil.pushSystem1("tickDataJob 运行中..,");
 			((SimpleJob) job).execute(null);
-			WxPushUtil.pushSystem1("tickDataJob 已经运行");
+			
 		}
 	}
 
