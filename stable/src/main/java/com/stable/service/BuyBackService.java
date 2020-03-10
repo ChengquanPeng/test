@@ -120,14 +120,14 @@ public class BuyBackService {
 					JSONArray array = tushareSpider.getBuyBackList(null, null, ann_date);
 					// System.err.println(array.toJSONString());
 					if (array != null) {
+						List<BuyBackInfo> list = new LinkedList<BuyBackInfo>();
 						log.info("获取到回购公告记录条数={}", array.size());
 						for (int i = 0; i < array.size(); i++) {
 							BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
-							// if(i==0) {
-							buyBackInfoDao.save(base);
-							// }
-							// System.err.println(base);
+							// buyBackInfoDao.save(base);
+							list.add(base);
 						}
+						buyBackInfoDao.saveAll(list);
 						redisUtil.set(RedisConstant.RDS_BUY_BACK_LAST_DAY, last);
 					} else {
 						log.info("未获取到回购公告");
@@ -183,13 +183,13 @@ public class BuyBackService {
 		// System.err.println(array.toJSONString());
 		if (array != null) {
 			log.info("获取到回购公告记录条数={}", array.size());
+			List<BuyBackInfo> list = new LinkedList<BuyBackInfo>();
 			for (int i = 0; i < array.size(); i++) {
 				BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
-				// if(i==0) {
-				buyBackInfoDao.save(base);
-				// }
-				// System.err.println(base);
+				// buyBackInfoDao.save(base);
+				list.add(base);
 			}
+			buyBackInfoDao.saveAll(list);
 		} else {
 			log.info("未获取到回购公告");
 		}

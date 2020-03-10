@@ -1,6 +1,8 @@
 package com.stable.service;
 
 import java.time.Duration;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +73,7 @@ public class TradeCalService {
 			log.warn("未获取到交易日历");
 			return;
 		}
+		List<TradeCal> list = new LinkedList<TradeCal>();
 		for (int i = 0; i < array.size(); i++) {
 			JSONArray arr = array.getJSONArray(i);
 			String cal_date = arr.getString(0);// 日历日期
@@ -82,8 +85,10 @@ public class TradeCalService {
 			tc.setCal_date(Integer.valueOf(cal_date));
 			tc.setIs_open(Integer.valueOf(is_open));
 			tc.setPretrade_date(Integer.valueOf(pretrade_date));
-			calDao.save(tc);
+			//calDao.save(tc);
+			list.add(tc);
 		}
+		calDao.saveAll(list);
 	}
 
 	public String getPretradeDate(String date) {

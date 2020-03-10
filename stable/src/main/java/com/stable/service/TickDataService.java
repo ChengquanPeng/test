@@ -93,8 +93,8 @@ public class TickDataService {
 						} else {
 							fetchTickData = "-1";// 剩余
 						}
-
 						do {
+							List<DaliyBasicInfo> batch = new LinkedList<DaliyBasicInfo>();
 							Page<DaliyBasicInfo> page = daliyBasicHistroyService.queryListByCode(code, date,
 									fetchTickData, queryPage);
 							if (page != null && !page.isEmpty()) {
@@ -114,9 +114,14 @@ public class TickDataService {
 										}
 										if (d.getFetchTickData() != fetchResult) {
 											d.setFetchTickData(fetchResult);
-											esDaliyBasicInfoDao.save(d);
+											// esDaliyBasicInfoDao.save(d);
+											batch.add(d);
 										}
 										log.info("esDaliyBasicInfoDao update,index:{},data:{}", index, d.toString());
+										if (batch.size() > 100) {
+											esDaliyBasicInfoDao.saveAll(batch);
+											batch = new LinkedList<DaliyBasicInfo>();
+										}
 									} catch (Exception e) {
 										e.printStackTrace();
 										ErrorLogFileUitl.writeError(e, d.toString(), "", "");
@@ -141,6 +146,9 @@ public class TickDataService {
 								e.printStackTrace();
 							}
 							log.info("PageSize=1000,condition={},fetchTickData={}", condition, fetchTickData);
+							if (batch.size() > 0) {
+								esDaliyBasicInfoDao.saveAll(batch);
+							}
 						} while (condition);
 						return null;
 					}

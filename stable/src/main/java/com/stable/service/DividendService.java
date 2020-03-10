@@ -72,16 +72,15 @@ public class DividendService {
 				return false;
 			}
 			log.info("获取到分红送股数据交易记录条数={}", array.size());
+			List<DividendHistory> list = new LinkedList<DividendHistory>();
 			// System.err.println(array);
 			for (int i = 0; i < array.size(); i++) {
 				JSONArray arr = array.getJSONArray(i);
-				// if (SS.equals(arr.get(3))) {
-				// System.err.println(arr);
 				DividendHistory d = new DividendHistory(arr);
-				// System.err.println(d);
-				esDividendHistoryDao.save(d);
-				// }
+				// esDividendHistoryDao.save(d);
+				list.add(d);
 			}
+			esDividendHistoryDao.saveAll(list);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return false;

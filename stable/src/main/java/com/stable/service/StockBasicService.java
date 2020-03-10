@@ -1,6 +1,7 @@
 package com.stable.service;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -88,9 +89,14 @@ public class StockBasicService {
 							log.info("同步股票列表[started]");
 							JSONArray array = tushareSpider.getStockCodeList();
 							// System.err.println(array.toJSONString());
+							List<StockBaseInfo> list = new LinkedList<StockBaseInfo>();
 							for (int i = 0; i < array.size(); i++) {
 								StockBaseInfo base = new StockBaseInfo(array.getJSONArray(i));
 								synBaseStockInfo(base);
+								list.add(base);
+							}
+							if (list != null) {
+								esStockBaseInfoDao.saveAll(list);
 							}
 							log.info("同步股票列表[end]");
 							LOCAL_ALL_ONLINE_LIST.clear();// 清空缓存
@@ -103,7 +109,7 @@ public class StockBasicService {
 	}
 
 	public void synBaseStockInfo(StockBaseInfo base) {
-		esStockBaseInfoDao.save(base);
+		// esStockBaseInfoDao.save(base);
 		redisUtil.set(base.getCode(), base);
 		// dbStockBaseInfoDao.saveOrUpdate(base);
 		CODE_NAME_MAP_LOCAL_HASH.put(base.getCode(), base.getName());

@@ -59,10 +59,15 @@ public class FinanceService {
 	 */
 	public boolean spiderFinaceHistoryInfoFromStart(String code) {
 		redisUtil.set(RedisConstant.RDS_FINACE_HIST_INFO_ + code, 0);
-		return spiderFinaceHistoryInfo(code);
+		List<FinanceBaseInfo> list = new LinkedList<FinanceBaseInfo>();
+		if (spiderFinaceHistoryInfo(code, list)) {
+			esFinanceBaseInfoDao.saveAll(list);
+			return true;
+		}
+		return false;
 	}
 
-	private boolean spiderFinaceHistoryInfo(String code) {
+	private boolean spiderFinaceHistoryInfo(String code, List<FinanceBaseInfo> list) {
 		JSONObject datas = tushareSpider.getIncome(TushareSpider.formatCode(code));
 		if (datas == null || datas.getJSONArray("items").size() <= 0) {
 			log.warn("未抓取到Finane记录,code={}", code);
@@ -79,7 +84,8 @@ public class FinanceService {
 			index = i - 1;
 			f.setValue(code, items.getJSONArray(index));
 			if (f.getYear() >= year) {
-				esFinanceBaseInfoDao.save(f);
+				// esFinanceBaseInfoDao.save(f);
+				list.add(f);
 				log.info("Finace income saved code={},getAnn_date={}", code, f.getAnn_date());
 			}
 		}
@@ -167,8 +173,16 @@ public class FinanceService {
 						log.info("同步股票报告[started]");
 						List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 						log.info("股票总数：" + list.size());
+						List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
 						for (StockBaseInfo s : list) {
-							spiderFinaceHistoryInfo(s.getCode());
+							spiderFinaceHistoryInfo(s.getCode(), rl);
+							if (rl.size() > 1000) {
+								esFinanceBaseInfoDao.saveAll(rl);
+								rl = new LinkedList<FinanceBaseInfo>();
+							}
+						}
+						if (rl.size() > 0) {
+							esFinanceBaseInfoDao.saveAll(rl);
 						}
 						log.info("同步股票报告[end]");
 						return null;

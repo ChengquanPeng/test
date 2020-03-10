@@ -111,10 +111,11 @@ public class DaliyTradeHistroyService {
 				return false;
 			}
 			log.info("获取到日交易记录条数={}", array.size());
+			List<TradeHistInfoDaliy> list = new LinkedList<TradeHistInfoDaliy>();
 			for (int i = 0; i < array.size(); i++) {
 				// 1.保存记录
 				TradeHistInfoDaliy d = new TradeHistInfoDaliy(array.getJSONArray(i));
-				tradeHistDaliy.save(d);
+				list.add(d);
 
 				// 2.是否需要更新缺失记录
 				String code = d.getCode();
@@ -147,6 +148,7 @@ public class DaliyTradeHistroyService {
 					priceLifeService.checkAndSetPrice(d);
 				}
 			}
+			tradeHistDaliy.saveAll(list);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return false;
@@ -186,12 +188,21 @@ public class DaliyTradeHistroyService {
 		}
 		log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，获取到数据 条数：szie:{}，", code, lines.size());
 		TradeHistInfoDaliy last = null;
+		List<TradeHistInfoDaliy> list = new LinkedList<TradeHistInfoDaliy>();
 		for (String line : lines) {
 			TradeHistInfoDaliy d = this.getTradeHistInfoDaliy(line);
 			if (d != null) {
-				this.tradeHistDaliy.save(d);
+				list.add(d);
+				// this.tradeHistDaliy.save(d);
 				last = d;
+				if (list.size() > 2000) {
+					tradeHistDaliy.saveAll(list);
+					list = new LinkedList<TradeHistInfoDaliy>();
+				}
 			}
+		}
+		if (list.size() > 0) {
+			tradeHistDaliy.saveAll(list);
 		}
 		log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，上市日期startDate：{}，本批当前日期last：{}", code, startDate, last);
 		if (last != null && !startDate.equals(last.getDate() + "")) {

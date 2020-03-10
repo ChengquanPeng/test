@@ -77,9 +77,12 @@ public class DaliyBasicHistroyService {
 			int size = array.size();
 			log.info("{}获取到每日指标记录条数={}", today, size);
 			CountDownLatch cnt = new CountDownLatch(size);
+			List<DaliyBasicInfo> list = new LinkedList<DaliyBasicInfo>();
 			for (int i = 0; i < array.size(); i++) {
 				// System.err.println(array.getJSONArray(i).toJSONString());
 				DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
+				list.add(d);
+
 				int index = i;
 				TasksWorker2nd.add(new MyRunnable() {
 					public void running() {
@@ -90,8 +93,6 @@ public class DaliyBasicHistroyService {
 								log.info("<每日指标记录>不需要处理,code={},lastDate={},index={}", d.getCode(), date, index);
 								return;
 							}
-							save(d);
-
 							if (StringUtils.isBlank(date)) {
 								// 第一次
 								String json = redisUtil.get(d.getCode());
@@ -123,17 +124,13 @@ public class DaliyBasicHistroyService {
 					}
 				});
 			}
+			esDaliyBasicInfoDao.saveAll(list);
 			cnt.await();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return false;
 		}
 		return true;
-	}
-
-	private void save(DaliyBasicInfo d) {
-		//getDailyData(d);
-		esDaliyBasicInfoDao.save(d);
 	}
 
 	/**
@@ -153,11 +150,20 @@ public class DaliyBasicHistroyService {
 			JSONArray array2 = data.getJSONArray("items");
 			hasMore = data.getBoolean("has_more");
 			if (array2 != null && array2.size() > 0) {
+				List<DaliyBasicInfo> list = new LinkedList<DaliyBasicInfo>();
 				for (int ij = 0; ij < array2.size(); ij++) {
 					DaliyBasicInfo d2 = new DaliyBasicInfo(array2.getJSONArray(ij));
-					save(d2);
+					list.add(d2);
 					// tickDataService.sumTickData(d2);
 					lastDate = d2.getTrade_date() + "";
+
+					if (list.size() > 2000) {
+						esDaliyBasicInfoDao.saveAll(list);
+						list = new LinkedList<DaliyBasicInfo>();
+					}
+				}
+				if (list.size() > 0) {
+					esDaliyBasicInfoDao.saveAll(list);
 				}
 			}
 			log.info("getStockDaliyBasic code:{},start_date:{},end_date:{},hasMore:{}?", code, start_date, end_date,
