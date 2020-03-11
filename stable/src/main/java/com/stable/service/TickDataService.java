@@ -119,6 +119,7 @@ public class TickDataService {
 										}
 										log.info("esDaliyBasicInfoDao update,index:{},data:{}", index, d.toString());
 										if (batch.size() > 100) {
+											saveTickdatasum();
 											esDaliyBasicInfoDao.saveAll(batch);
 											batch = new LinkedList<DaliyBasicInfo>();
 										}
@@ -147,6 +148,7 @@ public class TickDataService {
 							}
 							log.info("PageSize=1000,condition={},fetchTickData={}", condition, fetchTickData);
 							if (batch.size() > 0) {
+								saveTickdatasum();
 								esDaliyBasicInfoDao.saveAll(batch);
 							}
 						} while (condition);
@@ -234,11 +236,23 @@ public class TickDataService {
 		ThreadsUtil.sleepRandomSecBetween1And5();
 		// 获取日线交易数据
 		daliyBasicHistroyService.getDailyData(base);
+		lines.remove(lines.size() - 1);// 最后一条是空的
 		log.info("getTickData：{}，获取到数据 date：{},数据条数:{}", code, date, lines.size());
 		TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines, html);
-		esTickDataBuySellInfoDao.save(tickdatasum);
+
+		list.add(tickdatasum);
 		log.info(tickdatasum.toString());
 		return 1;
+	}
+
+	private List<TickDataBuySellInfo> list = new LinkedList<TickDataBuySellInfo>();
+
+	// 批量插入
+	private void saveTickdatasum() {
+		if (list.size() > 0) {
+			esTickDataBuySellInfoDao.saveAll(list);
+			list = new LinkedList<TickDataBuySellInfo>();
+		}
 	}
 
 	@Data
@@ -262,6 +276,9 @@ public class TickDataService {
 	}
 
 	private TickData getDataObject(String line) {
+		if (StringUtils.isBlank(line)) {
+			return null;
+		}
 		String str = line.trim().substring(1);
 		String[] fv = str.split(",");
 		TickData td = new TickData();
@@ -321,43 +338,45 @@ public class TickDataService {
 		// 跌停：卖出盘多，买入算中性
 		for (String line : lines) {
 			TickData td = getDataObject(line);
-			if ("S".equals(td.getType())) {
-				sm.put(td.getTime(), td);
-				sl.add(td);
+			if (td != null) {
+				if ("S".equals(td.getType())) {
+					sm.put(td.getTime(), td);
+					sl.add(td);
 
-				sv += Long.valueOf(td.getVolume());
-				sa += Long.valueOf(td.getAmount());
+					sv += Long.valueOf(td.getVolume());
+					sa += Long.valueOf(td.getAmount());
 
-				if (td.getPrice() >= topPrice) {// 涨停：买入盘多，卖出算中性
-					ot++;
+					if (td.getPrice() >= topPrice) {// 涨停：买入盘多，卖出算中性
+						ot++;
+					} else {
+						st++;
+					}
+				} else if ("B".equals(td.getType())) {
+					bm.put(td.getTime(), td);
+					bl.add(td);
+
+					bv += Long.valueOf(td.getVolume());
+					ba += Long.valueOf(td.getAmount());
+
+					if (td.getPrice() <= lowPrice) {// 跌停：卖出盘多，买入算中性
+						ot++;
+					} else {
+						bt++;
+					}
 				} else {
-					st++;
-				}
-			} else if ("B".equals(td.getType())) {
-				bm.put(td.getTime(), td);
-				bl.add(td);
+					sm.put(td.getTime(), td);
+					bm.put(td.getTime(), td);
 
-				bv += Long.valueOf(td.getVolume());
-				ba += Long.valueOf(td.getAmount());
+					sl.add(td);
+					bl.add(td);
 
-				if (td.getPrice() <= lowPrice) {// 跌停：卖出盘多，买入算中性
+					nv += Long.valueOf(td.getVolume());
+					na += Long.valueOf(td.getAmount());
 					ot++;
-				} else {
-					bt++;
 				}
-			} else {
-				sm.put(td.getTime(), td);
-				bm.put(td.getTime(), td);
-
-				sl.add(td);
-				bl.add(td);
-
-				nv += Long.valueOf(td.getVolume());
-				na += Long.valueOf(td.getAmount());
-				ot++;
+				am.put(td.getTime(), td);
+				al.add(td);
 			}
-			am.put(td.getTime(), td);
-			al.add(td);
 		}
 		result.setBuyTotalAmt(ba);
 		result.setBuyTotalVol(bv);
