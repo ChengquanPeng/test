@@ -120,9 +120,9 @@ public class TickDataService {
 										if (batch.size() > 100) {
 											saveTickdatasum();
 											esDaliyBasicInfoDao.saveAll(batch);
-											batch = new LinkedList<DaliyBasicInfo>();
-											log.info("for update,DaliyBasicInfo.size:{}, TickDataBuySellInfo.size",
+											log.info("for update,DaliyBasicInfo.size:{}, TickDataBuySellInfo.size:{}",
 													batch.size(), tickdataList.size());
+											batch = new LinkedList<DaliyBasicInfo>();
 										}
 									} catch (Exception e) {
 										e.printStackTrace();
@@ -223,7 +223,7 @@ public class TickDataService {
 		String code = base.getCode();
 		int date = base.getTrade_date();
 
-		ThreadsUtil.sleepRandomSecBetween1And5();
+		ThreadsUtil.sleepRandomSecBetween1And2();
 		String params = code + " " + date;
 		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
 		// List<String> lines = PythonCallUtil.callPythonScriptByServerTickData(code,
@@ -236,7 +236,7 @@ public class TickDataService {
 			}
 			return 0;
 		}
-		ThreadsUtil.sleepRandomSecBetween1And5();
+//		ThreadsUtil.sleepRandomSecBetween1And5();
 		// 获取日线交易数据
 		daliyBasicHistroyService.getDailyData(base);
 		lines.remove(lines.size() - 1);// 最后一条是空的
