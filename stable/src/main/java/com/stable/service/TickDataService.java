@@ -117,11 +117,12 @@ public class TickDataService {
 											// esDaliyBasicInfoDao.save(d);
 											batch.add(d);
 										}
-										log.info("esDaliyBasicInfoDao update,index:{},data:{}", index, d.toString());
 										if (batch.size() > 100) {
 											saveTickdatasum();
 											esDaliyBasicInfoDao.saveAll(batch);
 											batch = new LinkedList<DaliyBasicInfo>();
+											log.info("for update,DaliyBasicInfo.size:{}, TickDataBuySellInfo.size",
+													batch.size(), tickdataList.size());
 										}
 									} catch (Exception e) {
 										e.printStackTrace();
@@ -150,6 +151,8 @@ public class TickDataService {
 							if (batch.size() > 0) {
 								saveTickdatasum();
 								esDaliyBasicInfoDao.saveAll(batch);
+								log.info("Last update,DaliyBasicInfo.size:{}, TickDataBuySellInfo.size", batch.size(),
+										tickdataList.size());
 							}
 						} while (condition);
 						return null;
@@ -239,19 +242,18 @@ public class TickDataService {
 		lines.remove(lines.size() - 1);// 最后一条是空的
 		log.info("getTickData：{}，获取到数据 date：{},数据条数:{}", code, date, lines.size());
 		TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines, html);
-
-		list.add(tickdatasum);
+		tickdataList.add(tickdatasum);
 		log.info(tickdatasum.toString());
 		return 1;
 	}
 
-	private List<TickDataBuySellInfo> list = new LinkedList<TickDataBuySellInfo>();
+	private List<TickDataBuySellInfo> tickdataList = new LinkedList<TickDataBuySellInfo>();
 
 	// 批量插入
 	private void saveTickdatasum() {
-		if (list.size() > 0) {
-			esTickDataBuySellInfoDao.saveAll(list);
-			list = new LinkedList<TickDataBuySellInfo>();
+		if (tickdataList.size() > 0) {
+			esTickDataBuySellInfoDao.saveAll(tickdataList);
+			tickdataList = new LinkedList<TickDataBuySellInfo>();
 		}
 	}
 
