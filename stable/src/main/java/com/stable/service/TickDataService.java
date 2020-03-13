@@ -185,7 +185,7 @@ public class TickDataService {
 
 	private void saveData() {
 		if (batch.size() > 100) {
-			log.info("for update,DaliyBasicInfo.size:{}, TickDataBuySellInfo.size:{}", batch.size(),
+			log.info("saveData for update,DaliyBasicInfo.size:{}, TickDataBuySellInfo.size:{}", batch.size(),
 					tickdataList.size());
 			if (tickdataList.size() > 0) {
 				esTickDataBuySellInfoDao.saveAll(tickdataList);
