@@ -369,7 +369,7 @@ public class TickDataService {
 					sv += Long.valueOf(td.getVolume());
 					sa += Long.valueOf(td.getAmount());
 
-					if (td.getPrice() >= topPrice) {// 涨停：买入盘多，卖出算中性
+					if (topPrice > 0 && td.getPrice() >= topPrice) {// 涨停：买入盘多，卖出算中性
 						ot++;
 					} else {
 						st++;
@@ -381,7 +381,7 @@ public class TickDataService {
 					bv += Long.valueOf(td.getVolume());
 					ba += Long.valueOf(td.getAmount());
 
-					if (td.getPrice() <= lowPrice) {// 跌停：卖出盘多，买入算中性
+					if (lowPrice > 0 && td.getPrice() <= lowPrice) {// 跌停：卖出盘多，买入算中性
 						ot++;
 					} else {
 						bt++;

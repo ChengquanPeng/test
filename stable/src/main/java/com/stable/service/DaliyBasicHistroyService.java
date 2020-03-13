@@ -137,8 +137,12 @@ public class DaliyBasicHistroyService {
 	 * 日线行情：昨收，最高，开盘，最低，交易量，交易额
 	 */
 	public void getDailyData(DaliyBasicInfo d) {
-		JSONArray array = tushareSpider.getStockDaliyTrade(d.getTs_code(), d.getTrade_date() + "", null, null);
-		d.daily(array.getJSONArray(0));
+		try {
+			JSONArray array = tushareSpider.getStockDaliyTrade(d.getTs_code(), d.getTrade_date() + "", null, null);
+			d.daily(array.getJSONArray(0));
+		} catch (Exception e) {
+			log.warn("get exception:" + e.getMessage());
+		}
 	}
 
 	public void spiderStockDaliyBasic(String code, String start_date, String end_date) {
