@@ -34,7 +34,7 @@ public class PythonCallUtil {
 		try {
 			List<String> sb = new LinkedList<String>();
 			String cmd = String.format(CALL_FORMAT, pythonScriptPathAndFileName, params);
-			log.info("call Python Script Cmd:{}", cmd);
+			// log.info("call Python Script Cmd:{}", cmd);
 			Process proc = Runtime.getRuntime().exec(cmd);
 			ir = new InputStreamReader(proc.getInputStream());
 			input = new BufferedReader(ir);
@@ -45,7 +45,7 @@ public class PythonCallUtil {
 				sb.add(line);
 			}
 			int r = proc.waitFor();
-			log.info("call Python Script Cmd:{}，proc.waitFor：{}", cmd, r);
+			// log.info("call Python Script Cmd:{}，proc.waitFor：{}", cmd, r);
 			return sb;
 		} catch (Exception e) {
 			e.printStackTrace();

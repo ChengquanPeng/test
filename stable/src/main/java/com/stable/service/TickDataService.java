@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -116,13 +117,15 @@ public class TickDataService {
 							if (page != null && !page.isEmpty()) {
 								log.info("剩余数量:{}，次数:{}", page.getTotalElements(), (page.getTotalPages() - 1));
 								List<DaliyBasicInfo> list = page.getContent();
+								CountDownLatch cnt = new CountDownLatch(list.size());
 								int i = 0;
 								for (DaliyBasicInfo d : list) {
-									log.info("running index:{}", i++);
+									int index = i++;
 									try {
 										TasksWorker2nd.add(new MyRunnable() {
 											public void running() {
 												try {
+													log.info("running index:{}", index);
 													int fetchResult = -1;
 													if (sumTickData(d, html) == 1) {
 														fetchResult = 1;
@@ -141,6 +144,8 @@ public class TickDataService {
 														WxPushUtil.pushSystem1("检测到ES系统异常，正在重启...");
 														OSystemUtil.restart();
 													}
+												} finally {
+													cnt.countDown();
 												}
 											}
 										});
@@ -148,9 +153,12 @@ public class TickDataService {
 										e.printStackTrace();
 										ErrorLogFileUitl.writeError(e, d.toString(), "", "");
 									}
-
 								}
-
+								try {
+									cnt.await();
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
 								if (nextPage) {
 									currPage++;
 									queryPage.setPageNum(currPage);
@@ -183,7 +191,7 @@ public class TickDataService {
 	private List<DaliyBasicInfo> batch = Collections.synchronizedList(new ArrayList<DaliyBasicInfo>());
 	private List<TickDataBuySellInfo> tickdataList = Collections.synchronizedList(new ArrayList<TickDataBuySellInfo>());
 
-	private void saveData() {
+	private synchronized void saveData() {
 		if (batch.size() > 100) {
 			log.info("saveData for update,DaliyBasicInfo.size:{}, TickDataBuySellInfo.size:{}", batch.size(),
 					tickdataList.size());
@@ -273,7 +281,9 @@ public class TickDataService {
 		lines.remove(lines.size() - 1);// 最后一条是空的
 		log.info("getTickData：{}，获取到数据 date：{},数据条数:{}", code, date, lines.size());
 		TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines, html);
-		tickdataList.add(tickdatasum);
+		if (tickdatasum != null) {
+			tickdataList.add(tickdatasum);
+		}
 		// log.info(tickdatasum.toString());
 		return 1;
 	}
