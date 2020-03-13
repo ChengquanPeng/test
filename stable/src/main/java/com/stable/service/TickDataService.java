@@ -37,9 +37,11 @@ import com.stable.job.MyCallable;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.LogFileUitl;
+import com.stable.utils.MyRunnable;
 import com.stable.utils.OSystemUtil;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.TasksWorker;
+import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TickDataBuySellInfo;
@@ -118,26 +120,37 @@ public class TickDataService {
 								for (DaliyBasicInfo d : list) {
 									log.info("running index:{}", i++);
 									try {
-										int fetchResult = -1;
-										if (sumTickData(d, html) == 1) {
-											fetchResult = 1;
-										} else {
-											fetchResult = 0;
-										}
-										if (d.getFetchTickData() != fetchResult) {
-											d.setFetchTickData(fetchResult);
-											batch.add(d);
-										}
-										saveData();
+										TasksWorker2nd.add(new MyRunnable() {
+											public void running() {
+												try {
+													int fetchResult = -1;
+													if (sumTickData(d, html) == 1) {
+														fetchResult = 1;
+													} else {
+														fetchResult = 0;
+													}
+													if (d.getFetchTickData() != fetchResult) {
+														d.setFetchTickData(fetchResult);
+														batch.add(d);
+													}
+													saveData();
+												} catch (Exception e) {
+													e.printStackTrace();
+													ErrorLogFileUitl.writeError(e, d.toString(), "", "");
+													if (e instanceof NoNodeAvailableException) {
+														WxPushUtil.pushSystem1("检测到ES系统异常，正在重启...");
+														OSystemUtil.restart();
+													}
+												}
+											}
+										});
 									} catch (Exception e) {
 										e.printStackTrace();
 										ErrorLogFileUitl.writeError(e, d.toString(), "", "");
-										if (e instanceof NoNodeAvailableException) {
-											WxPushUtil.pushSystem1("检测到ES系统异常，正在重启...");
-											OSystemUtil.restart();
-										}
 									}
+
 								}
+
 								if (nextPage) {
 									currPage++;
 									queryPage.setPageNum(currPage);
