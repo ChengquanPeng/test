@@ -28,19 +28,10 @@ public class PythonCallUtil {
 	}
 	// TODO 调用python脚本会CPU会瞬时100%，从而导致python吃CPU导致ES异常退出， 控制python的调用数量：
 
-	private static int cnt = 0;
-	private static int CHECK_LINE = 15;
-
 	public synchronized static List<String> callPythonScript(String pythonScriptPathAndFileName, String params) {
 		InputStreamReader ir = null;
 		BufferedReader input = null;
 		try {
-			cnt++;
-			if (cnt >= CHECK_LINE) {
-				cnt = 0;
-				ThreadsUtil.sleepRandomSecBetween5And15();
-			}
-
 			List<String> sb = new LinkedList<String>();
 			String cmd = String.format(CALL_FORMAT, pythonScriptPathAndFileName, params);
 			log.info("call Python Script Cmd:{}", cmd);
@@ -85,11 +76,6 @@ public class PythonCallUtil {
 	public synchronized static List<String> callPythonScriptByServer(String url) {
 		List<String> sb = new LinkedList<String>();
 		try {
-			cnt++;
-			if (cnt >= CHECK_LINE) {
-				cnt = 0;
-				ThreadsUtil.sleepRandomSecBetween5And15();
-			}
 			// System.err.println(url);
 			String line = HttpUtil.doGet2(url);
 			// System.err.println(line);

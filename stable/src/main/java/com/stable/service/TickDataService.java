@@ -1,11 +1,14 @@
 package com.stable.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +40,6 @@ import com.stable.utils.LogFileUitl;
 import com.stable.utils.OSystemUtil;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.TasksWorker;
-import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TickDataBuySellInfo;
@@ -65,11 +67,24 @@ public class TickDataService {
 	@Autowired
 	private StockBasicService stockBasicService;
 
-	public synchronized void fetch(String code, String date, String all, boolean html, String startDate) {
+	public static final Semaphore semp = new Semaphore(1);
+
+	public void fetch(String code, String date, String all, boolean html, String startDate) {
 		if (StringUtils.isBlank(code) && StringUtils.isBlank(date) && StringUtils.isBlank(all)) {
 			log.warn("参数为空");
 			return;
 		}
+		try {
+			boolean getLock = semp.tryAcquire(1, TimeUnit.HOURS);
+			if (!getLock) {
+				log.warn("No Locked");
+				return;
+			}
+			log.info("Get Locked");
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+
 		if (StringUtils.isNotBlank(startDate)) {
 			String oldVal = daliyBasicHistroyService.startDate;
 			daliyBasicHistroyService.startDate = startDate;
@@ -94,7 +109,6 @@ public class TickDataService {
 							fetchTickData = "-1";// 剩余
 						}
 						do {
-							List<DaliyBasicInfo> batch = new LinkedList<DaliyBasicInfo>();
 							Page<DaliyBasicInfo> page = daliyBasicHistroyService.queryListByCode(code, date,
 									fetchTickData, queryPage);
 							if (page != null && !page.isEmpty()) {
@@ -102,9 +116,7 @@ public class TickDataService {
 								List<DaliyBasicInfo> list = page.getContent();
 								int i = 0;
 								for (DaliyBasicInfo d : list) {
-									i++;
-									int index = i;
-									log.info("running index:{}", index);
+									log.info("running index:{}", i++);
 									try {
 										int fetchResult = -1;
 										if (sumTickData(d, html) == 1) {
@@ -114,16 +126,9 @@ public class TickDataService {
 										}
 										if (d.getFetchTickData() != fetchResult) {
 											d.setFetchTickData(fetchResult);
-											// esDaliyBasicInfoDao.save(d);
 											batch.add(d);
 										}
-										if (batch.size() > 100) {
-											saveTickdatasum();
-											esDaliyBasicInfoDao.saveAll(batch);
-											log.info("for update,DaliyBasicInfo.size:{}, TickDataBuySellInfo.size:{}",
-													batch.size(), tickdataList.size());
-											batch = new LinkedList<DaliyBasicInfo>();
-										}
+										saveData();
 									} catch (Exception e) {
 										e.printStackTrace();
 										ErrorLogFileUitl.writeError(e, d.toString(), "", "");
@@ -133,7 +138,6 @@ public class TickDataService {
 										}
 									}
 								}
-
 								if (nextPage) {
 									currPage++;
 									queryPage.setPageNum(currPage);
@@ -148,12 +152,7 @@ public class TickDataService {
 								e.printStackTrace();
 							}
 							log.info("PageSize=1000,condition={},fetchTickData={}", condition, fetchTickData);
-							if (batch.size() > 0) {
-								saveTickdatasum();
-								esDaliyBasicInfoDao.saveAll(batch);
-								log.info("Last update,DaliyBasicInfo.size:{}, TickDataBuySellInfo.size", batch.size(),
-										tickdataList.size());
-							}
+							saveData();
 						} while (condition);
 						return null;
 					}
@@ -163,6 +162,24 @@ public class TickDataService {
 			lis.get();
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			semp.release();
+		}
+	}
+
+	private List<DaliyBasicInfo> batch = Collections.synchronizedList(new ArrayList<DaliyBasicInfo>());
+	private List<TickDataBuySellInfo> tickdataList = Collections.synchronizedList(new ArrayList<TickDataBuySellInfo>());
+
+	private void saveData() {
+		if (batch.size() > 100) {
+			log.info("for update,DaliyBasicInfo.size:{}, TickDataBuySellInfo.size:{}", batch.size(),
+					tickdataList.size());
+			if (tickdataList.size() > 0) {
+				esTickDataBuySellInfoDao.saveAll(tickdataList);
+				tickdataList = Collections.synchronizedList(new ArrayList<TickDataBuySellInfo>());
+			}
+			esDaliyBasicInfoDao.saveAll(batch);
+			batch = Collections.synchronizedList(new ArrayList<DaliyBasicInfo>());
 		}
 	}
 
@@ -223,7 +240,7 @@ public class TickDataService {
 		String code = base.getCode();
 		int date = base.getTrade_date();
 
-		ThreadsUtil.sleepRandomSecBetween1And2();
+		// ThreadsUtil.sleepRandomSecBetween1And2();
 		String params = code + " " + date;
 		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
 		// List<String> lines = PythonCallUtil.callPythonScriptByServerTickData(code,
@@ -237,24 +254,15 @@ public class TickDataService {
 			return 0;
 		}
 //		ThreadsUtil.sleepRandomSecBetween1And5();
+
 		// 获取日线交易数据
 		daliyBasicHistroyService.getDailyData(base);
 		lines.remove(lines.size() - 1);// 最后一条是空的
 		log.info("getTickData：{}，获取到数据 date：{},数据条数:{}", code, date, lines.size());
 		TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines, html);
 		tickdataList.add(tickdatasum);
-		log.info(tickdatasum.toString());
+		// log.info(tickdatasum.toString());
 		return 1;
-	}
-
-	private List<TickDataBuySellInfo> tickdataList = new LinkedList<TickDataBuySellInfo>();
-
-	// 批量插入
-	private void saveTickdatasum() {
-		if (tickdataList.size() > 0) {
-			esTickDataBuySellInfoDao.saveAll(tickdataList);
-			tickdataList = new LinkedList<TickDataBuySellInfo>();
-		}
 	}
 
 	@Data
