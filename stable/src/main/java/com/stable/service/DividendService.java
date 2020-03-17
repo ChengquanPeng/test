@@ -80,7 +80,9 @@ public class DividendService {
 				// esDividendHistoryDao.save(d);
 				list.add(d);
 			}
-			esDividendHistoryDao.saveAll(list);
+			if (list.size() > 0) {
+				esDividendHistoryDao.saveAll(list);
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return false;

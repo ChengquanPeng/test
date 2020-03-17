@@ -148,7 +148,9 @@ public class DaliyTradeHistroyService {
 					priceLifeService.checkAndSetPrice(d);
 				}
 			}
-			tradeHistDaliy.saveAll(list);
+			if (list.size() > 0) {
+				tradeHistDaliy.saveAll(list);
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return false;

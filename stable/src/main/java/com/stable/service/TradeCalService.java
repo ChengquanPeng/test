@@ -85,10 +85,12 @@ public class TradeCalService {
 			tc.setCal_date(Integer.valueOf(cal_date));
 			tc.setIs_open(Integer.valueOf(is_open));
 			tc.setPretrade_date(Integer.valueOf(pretrade_date));
-			//calDao.save(tc);
+			// calDao.save(tc);
 			list.add(tc);
 		}
-		calDao.saveAll(list);
+		if (list.size() > 0) {
+			calDao.saveAll(list);
+		}
 	}
 
 	public String getPretradeDate(String date) {

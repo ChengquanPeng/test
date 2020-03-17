@@ -119,7 +119,7 @@ public class BuyBackService {
 					log.info("同步回购公告列表[started],ann_date={},", ann_date);
 					JSONArray array = tushareSpider.getBuyBackList(null, null, ann_date);
 					// System.err.println(array.toJSONString());
-					if (array != null) {
+					if (array != null && array.size() > 0) {
 						List<BuyBackInfo> list = new LinkedList<BuyBackInfo>();
 						log.info("获取到回购公告记录条数={}", array.size());
 						for (int i = 0; i < array.size(); i++) {
@@ -181,7 +181,7 @@ public class BuyBackService {
 		log.info("同步回购公告列表[started],start_date={},end_date={},", start_date, end_date);
 		JSONArray array = tushareSpider.getBuyBackList(start_date, end_date, null);
 		// System.err.println(array.toJSONString());
-		if (array != null) {
+		if (array != null && array.size() > 0) {
 			log.info("获取到回购公告记录条数={}", array.size());
 			List<BuyBackInfo> list = new LinkedList<BuyBackInfo>();
 			for (int i = 0; i < array.size(); i++) {

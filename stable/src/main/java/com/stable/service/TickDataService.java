@@ -72,6 +72,43 @@ public class TickDataService {
 
 	public static final Semaphore semp = new Semaphore(1);
 
+	public String updateStartDateOnline(String startDate) {
+		if (StringUtils.isNotBlank(startDate)) {
+			String oldVal = daliyBasicHistroyService.startDate;
+			daliyBasicHistroyService.startDate = startDate;
+			log.info("startDate 从{}已经修改为:{}", oldVal, startDate);
+		}
+		return daliyBasicHistroyService.startDate;
+	}
+
+	public void reTickDataStatus() {
+		EsQueryPageReq queryPage = new EsQueryPageReq();
+		int currPage = 1;
+		queryPage.setPageNum(currPage);
+		queryPage.setPageSize(1000);
+		boolean condition = true;
+		do {
+			Page<DaliyBasicInfo> page = daliyBasicHistroyService.queryListByCode("", "", "0", queryPage);
+			if (page != null && !page.isEmpty()) {
+				List<DaliyBasicInfo> wlist = page.getContent();
+				List<DaliyBasicInfo> ulist = new LinkedList<DaliyBasicInfo>();
+				for (DaliyBasicInfo d : wlist) {
+					d.setFetchTickData(-1);
+					ulist.add(d);
+				}
+				if (ulist.size() > 0) {
+					esDaliyBasicInfoDao.saveAll(ulist);
+				}
+				log.info("Curr Page Num:{},ulist batch size:{}", currPage, ulist.size());
+				currPage++;
+				queryPage.setPageNum(currPage);
+			} else {
+				log.info("page isEmpty ");
+				condition = false;
+			}
+		} while (condition);
+	}
+
 	public void fetch(String code, String date, String all, boolean html, String startDate) {
 		if (StringUtils.isBlank(code) && StringUtils.isBlank(date) && StringUtils.isBlank(all)) {
 			log.warn("参数为空");
@@ -88,11 +125,8 @@ public class TickDataService {
 			e1.printStackTrace();
 		}
 
-		if (StringUtils.isNotBlank(startDate)) {
-			String oldVal = daliyBasicHistroyService.startDate;
-			daliyBasicHistroyService.startDate = startDate;
-			log.info("startDate 从{}已经修改为:{}", oldVal, startDate);
-		}
+		updateStartDateOnline(startDate);
+
 		ListenableFuture<Object> lis = TasksWorker.getInstance().getService().submit(
 				new MyCallable(RunLogBizTypeEnum.TICK_DATA, RunCycleEnum.MANUAL, code + " " + date + " " + all) {
 					public Object mycall() {
@@ -136,7 +170,7 @@ public class TickDataService {
 														d.setFetchTickData(fetchResult);
 														batch.add(d);
 													}
-													saveData();
+													saveData(false);
 												} catch (Exception e) {
 													e.printStackTrace();
 													ErrorLogFileUitl.writeError(e, d.toString(), "", "");
@@ -173,7 +207,7 @@ public class TickDataService {
 								e.printStackTrace();
 							}
 							log.info("PageSize=1000,condition={},fetchTickData={}", condition, fetchTickData);
-							saveData();
+							saveData(true);
 						} while (condition);
 						return null;
 					}
@@ -191,16 +225,18 @@ public class TickDataService {
 	private List<DaliyBasicInfo> batch = Collections.synchronizedList(new ArrayList<DaliyBasicInfo>());
 	private List<TickDataBuySellInfo> tickdataList = Collections.synchronizedList(new ArrayList<TickDataBuySellInfo>());
 
-	private synchronized void saveData() {
-		if (batch.size() > 100) {
-			log.info("saveData for update,DaliyBasicInfo.size:{}, TickDataBuySellInfo.size:{}", batch.size(),
-					tickdataList.size());
+	private synchronized void saveData(boolean isEnd) {
+		if (isEnd || (!isEnd && batch.size() >= 100)) {
+			log.info("isEnd? {},saveData for update,DaliyBasicInfo.size:{}, TickDataBuySellInfo.size:{}", isEnd,
+					batch.size(), tickdataList.size());
 			if (tickdataList.size() > 0) {
 				esTickDataBuySellInfoDao.saveAll(tickdataList);
 				tickdataList = Collections.synchronizedList(new ArrayList<TickDataBuySellInfo>());
 			}
-			esDaliyBasicInfoDao.saveAll(batch);
-			batch = Collections.synchronizedList(new ArrayList<DaliyBasicInfo>());
+			if (batch.size() > 0) {
+				esDaliyBasicInfoDao.saveAll(batch);
+				batch = Collections.synchronizedList(new ArrayList<DaliyBasicInfo>());
+			}
 		}
 	}
 

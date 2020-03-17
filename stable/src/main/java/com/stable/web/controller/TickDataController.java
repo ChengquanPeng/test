@@ -56,4 +56,37 @@ public class TickDataController {
 		return ResponseEntity.ok(r);
 	}
 
+	/**
+	 * 在线修改tick data 开始时间
+	 */
+	@RequestMapping(value = "/updateStartDate", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> fetch(String startDate) {
+		JsonResult r = new JsonResult();
+		try {
+			r.setResult(tickDataService.updateStartDateOnline(startDate));
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * 重置开始时间内的未获取的tick status
+	 */
+	@RequestMapping(value = "/reTickDataStatus", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> fetch() {
+		JsonResult r = new JsonResult();
+		try {
+			tickDataService.reTickDataStatus();
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
 }

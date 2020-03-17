@@ -61,7 +61,9 @@ public class FinanceService {
 		redisUtil.set(RedisConstant.RDS_FINACE_HIST_INFO_ + code, 0);
 		List<FinanceBaseInfo> list = new LinkedList<FinanceBaseInfo>();
 		if (spiderFinaceHistoryInfo(code, list)) {
-			esFinanceBaseInfoDao.saveAll(list);
+			if (list.size() > 0) {
+				esFinanceBaseInfoDao.saveAll(list);
+			}
 			return true;
 		}
 		return false;
