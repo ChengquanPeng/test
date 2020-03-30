@@ -316,4 +316,28 @@ public class TushareSpider {
 			ThreadsUtil.tuShareSleepRandom();
 		}
 	}
+
+	/**
+	 * 利润表
+	 * 
+	 * @param ts_code    ts代码
+	 * @param start_date 开始日期 (格式：YYYYMMDD)
+	 * @param end_date   结束日期 (格式：YYYYMMDD)
+	 * @return 如果都不填，单次默认返回2000条
+	 */
+	private final String index_daily_fields = "ts_code,trade_date,close,open,high,low,pre_close,change,pct_chg,vol,amount";
+
+	public JSONObject getIndexDaily(String ts_code) {
+		try {
+			JSONObject json = new JSONObject();
+			json.put("api_name", "index_daily");
+			json.put("params", JSON.parse("{'ts_code':'" + ts_code + "'}"));
+			json.put("fields", index_daily_fields);
+			String result = post(json);
+			JSONObject datas = JSON.parseObject(result);
+			return datas.getJSONObject("data");
+		} finally {
+			ThreadsUtil.tuShareSleepRandom();
+		}
+	}
 }
