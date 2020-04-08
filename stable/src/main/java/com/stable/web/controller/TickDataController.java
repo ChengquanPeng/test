@@ -80,7 +80,7 @@ public class TickDataController {
 	public ResponseEntity<JsonResult> fetch() {
 		JsonResult r = new JsonResult();
 		try {
-			tickDataService.reTickDataStatus();
+			tickDataService.resetTickDataStatus();
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

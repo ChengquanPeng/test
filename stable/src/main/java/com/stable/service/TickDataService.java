@@ -81,7 +81,7 @@ public class TickDataService {
 		return daliyBasicHistroyService.startDate;
 	}
 
-	public void reTickDataStatus() {
+	public void resetTickDataStatus() {
 		EsQueryPageReq queryPage = new EsQueryPageReq();
 		int currPage = 1;
 		queryPage.setPageNum(currPage);
@@ -274,6 +274,7 @@ public class TickDataService {
 			sort = SortBuilders.fieldSort("programRate").unmappedType("integer").order(SortOrder.DESC);
 		}
 
+		// 程序评分>0
 		if (StringUtils.isNotBlank(programRate)) {
 			bqb.must(QueryBuilders.rangeQuery("programRate").gt(Integer.valueOf(0)));
 		}
@@ -496,8 +497,6 @@ public class TickDataService {
 
 			if (html && rate > 0) {
 				printDetailToHtml(code, date, setListsa, setListss, setListsb);
-			} else {
-				rate = 0;
 			}
 		} else {
 			rate = -1;
@@ -680,5 +679,4 @@ public class TickDataService {
 			return s + "";
 		}
 	}
-
 }

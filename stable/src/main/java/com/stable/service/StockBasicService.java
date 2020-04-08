@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.stable.enums.RunCycleEnum;
@@ -18,6 +19,7 @@ import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.vo.bus.StockBaseInfo;
@@ -139,5 +141,19 @@ public class StockBasicService {
 		}
 		return LOCAL_ALL_ONLINE_LIST;
 		// return dbStockBaseInfoDao.getListWithOnStauts();
+	}
+
+	/**
+	 * 上市超一年
+	 */
+	public boolean online1Year(String code) {
+		StockBaseInfo base = JSON.parseObject(redisUtil.get(code), StockBaseInfo.class);
+		String listDate = base.getList_date();
+		Integer year = Integer.valueOf(listDate.substring(0, 4));
+		Integer end = Integer.valueOf((year + 1 + "") + listDate.substring(4));
+		if (end <= Integer.valueOf(DateUtil.getTodayYYYYMMDD())) {
+			return true;
+		}
+		return false;
 	}
 }

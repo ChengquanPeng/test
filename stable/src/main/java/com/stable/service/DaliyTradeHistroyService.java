@@ -28,7 +28,6 @@ import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
-import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.MyRunnable;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
@@ -278,9 +277,10 @@ public class DaliyTradeHistroyService {
 			d.setId();
 			return d;
 		} catch (Exception e) {
-			ErrorLogFileUitl.writeError(e, "日K数据错误", "原始数据", line);
-			log.error(e.getMessage(), e);
-			throw new RuntimeException(e);
+			// ErrorLogFileUitl.writeError(e, "日K数据错误", "原始数据", line);
+			log.error("日K数据错误,原始数据:" + line, e);
+			return null;
+//			throw new RuntimeException(e);
 		}
 //		return null;
 	}
