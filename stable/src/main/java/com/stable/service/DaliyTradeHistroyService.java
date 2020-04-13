@@ -278,7 +278,7 @@ public class DaliyTradeHistroyService {
 			return d;
 		} catch (Exception e) {
 			// ErrorLogFileUitl.writeError(e, "日K数据错误", "原始数据", line);
-			log.error("日K数据错误,原始数据:" + line, e);
+			log.info("日K数据错误,原始数据:" + line);
 			return null;
 //			throw new RuntimeException(e);
 		}
