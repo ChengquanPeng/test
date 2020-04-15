@@ -43,8 +43,6 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * 日交易历史
- * 
- * @author roy
  *
  */
 @Service
@@ -244,6 +242,23 @@ public class DaliyTradeHistroyService {
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 
+		Page<TradeHistInfoDaliy> page = tradeHistDaliy.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		return null;
+	}
+
+	public List<TradeHistInfoDaliy> queryListByCode(String code, int startDate, int endDate, SortOrder s) {
+		Pageable pageable = PageRequest.of(0, 10000);
+		log.info("queryPage code={},startDate={},endDate={}", code, startDate, endDate);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));
+		bqb.must(QueryBuilders.rangeQuery("date").lte(endDate));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(s);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 		Page<TradeHistInfoDaliy> page = tradeHistDaliy.search(sq);
 		if (page != null && !page.isEmpty()) {
 			return page.getContent();

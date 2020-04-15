@@ -215,7 +215,8 @@ public class DaliyBasicHistroyService {
 	}
 
 	public Page<DaliyBasicInfo> queryListByCode(String code, String date, String fetchTickData,
-			EsQueryPageReq queryPage) {
+			EsQueryPageReq queryPage, SortOrder order) {
+
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
 		log.info("queryPage code={},trade_date={},fetchTickData={},pageNum={},size={}", code, date, fetchTickData,
@@ -232,10 +233,28 @@ public class DaliyBasicHistroyService {
 			bqb.must(QueryBuilders.matchPhraseQuery("fetchTickData", Integer.valueOf(fetchTickData)));
 			bqb.must(QueryBuilders.rangeQuery("trade_date").from(startDate));
 		}
-		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(SortOrder.DESC);
+		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(order);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 		return esDaliyBasicInfoDao.search(sq);
+	}
+
+	public List<DaliyBasicInfo> queryListByCode(String code, int startDate, int endDate, SortOrder order) {
+		Pageable pageable = PageRequest.of(0, 10000);
+		log.info("queryPage code={},startDate={},endDate={}", code, startDate, endDate);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("trade_date").gte(startDate));
+		bqb.must(QueryBuilders.rangeQuery("trade_date").lte(endDate));
+		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(order);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		return esDaliyBasicInfoDao.search(sq).getContent();
+	}
+
+	public Page<DaliyBasicInfo> queryListByCode(String code, String date, String fetchTickData,
+			EsQueryPageReq queryPage) {
+		return this.queryListByCode(code, date, fetchTickData, queryPage, SortOrder.DESC);
 	}
 }

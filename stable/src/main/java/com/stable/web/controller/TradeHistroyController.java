@@ -31,6 +31,7 @@ public class TradeHistroyController {
 	public ResponseEntity<JsonResult> dailybasic(String code, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
+			r.setStatus(JsonResult.OK);
 			r.setResult(daliyBasicHistroyService.queryListByCodeByWebPage(code, page));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

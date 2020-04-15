@@ -21,6 +21,21 @@ public class DateUtil {
 		}
 	}
 
+	public static String formatYYYYMMDD(Date date) {
+		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
+		return format.format(date);
+	}
+
+	public static Date parseDate(int yyyyMMdd) {
+		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
+		try {
+			return format.parse(String.valueOf(yyyyMMdd));
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new RuntimeException("ParseException:yyyyMMdd:" + yyyyMMdd);
+		}
+	}
+
 	public static Date parseDate(String yyyyMMdd) {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
 		try {

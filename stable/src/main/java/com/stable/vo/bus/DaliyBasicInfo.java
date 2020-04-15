@@ -74,7 +74,7 @@ public class DaliyBasicInfo extends EsBase {
 	@Field(type = FieldType.Double)
 	private double todayChangeRate;// 涨跌幅 （未复权，如果是复权请用 通用行情接口 ）
 	@Field(type = FieldType.Double)
-	private double vol;// 成交量 （手）
+	private long vol;// 成交量 （手）
 	@Field(type = FieldType.Double)
 	private double amt;
 

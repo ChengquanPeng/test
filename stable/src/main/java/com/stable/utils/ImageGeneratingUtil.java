@@ -21,16 +21,16 @@ import org.jfree.data.xy.XYDataset;
 
 import com.stable.vo.ImageData;
 
-public class ImageUtil extends ApplicationFrame {
+public class ImageGeneratingUtil extends ApplicationFrame {
 	private static final long serialVersionUID = 1L;
 	private static final int width = 1024;
 	private static final int height = 512;
 
 	public static void generateImages(String filePath, List<ImageData> data) {
-		new ImageUtil(filePath, data);
+		new ImageGeneratingUtil(filePath, data);
 	}
 
-	private ImageUtil(String filePath, List<ImageData> data) {
+	private ImageGeneratingUtil(String filePath, List<ImageData> data) {
 		super("");
 		JFreeChart chart = createChart(data);
 		ChartPanel panel = new ChartPanel(chart, true, true, true, false, true);
@@ -38,6 +38,9 @@ public class ImageUtil extends ApplicationFrame {
 		setContentPane(panel);
 		File file = new File(filePath);
 		try {
+			if (file.exists()) {
+				file.delete();
+			}
 			ChartUtils.saveChartAsJPEG(file, chart, width, height);
 		} catch (IOException e) {
 			e.printStackTrace();

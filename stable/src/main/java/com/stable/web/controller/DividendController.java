@@ -59,6 +59,7 @@ public class DividendController {
 	public ResponseEntity<JsonResult> query(String code, String proc, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
+			r.setStatus(JsonResult.OK);
 			r.setResult(dividendService.getListByCodeForWebPage(code, proc, page));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -75,6 +76,7 @@ public class DividendController {
 	public ResponseEntity<JsonResult> list(@PathVariable(value = "code") String code, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
+			r.setStatus(JsonResult.OK);
 			r.setResult(dividendService.getListByCodeForWebPage(code, null, page));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -91,6 +93,7 @@ public class DividendController {
 	public ResponseEntity<JsonResult> listall(EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
+			r.setStatus(JsonResult.OK);
 			r.setResult(dividendService.getListByCodeForWebPage(null, null, page));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

@@ -25,6 +25,7 @@ public class FinanceController {
 	public ResponseEntity<JsonResult> daliycode(@PathVariable(value = "code") String code) {
 		JsonResult r = new JsonResult();
 		try {
+			r.setStatus(JsonResult.OK);
 			r.setResult(financeService.spiderFinaceHistoryInfoFromStart(code));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -58,6 +59,7 @@ public class FinanceController {
 	public ResponseEntity<JsonResult> query(String code, String year, String quarter, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
+			r.setStatus(JsonResult.OK);
 			r.setResult(financeService.getListByCodeForWebPage(code, year, quarter, page));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -74,6 +76,7 @@ public class FinanceController {
 	public ResponseEntity<JsonResult> listcode(@PathVariable(value = "code") String code, EsQueryPageReq queryPage) {
 		JsonResult r = new JsonResult();
 		try {
+			r.setStatus(JsonResult.OK);
 			r.setResult(financeService.getListByCodeForWebPage(code, null, null, queryPage));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

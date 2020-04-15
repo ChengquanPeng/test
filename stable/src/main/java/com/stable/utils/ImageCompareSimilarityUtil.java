@@ -11,23 +11,32 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class ImgSimilarity {
+public class ImageCompareSimilarityUtil {
 // 全流程
 	public static void main(String[] args) throws IOException {
 // 获取图像
 		File imageFile1 = new File("E:\\1.jpg");
-		File file2 = new File("E:\\1.jpg");
+		File file2 = new File("E:\\2.jpg");
 		System.err.println(getSimilarity(imageFile1, file2));
+//		System.err.println(String.format("%.2f", 12.7899099));
 	}
 
-	public static double getSimilarity(File imageFile1, File file2) throws IOException {
-		int[] pixels1 = getImgFinger(imageFile1);
+	public static double getSimilarity(String file1, String file2) {
+		try {
+			return getSimilarity(new File(file1), new File(file2));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static double getSimilarity(File file1, File file2) throws IOException {
+		int[] pixels1 = getImgFinger(file1);
 		int[] pixels2 = getImgFinger(file2);
 // 获取两个图的汉明距离（假设另一个图也已经按上面步骤得到灰度比较数组）
 		int hammingDistance = getHammingDistance(pixels1, pixels2);
 // 通过汉明距离计算相似度，取值范围 [0.0, 1.0]
 		double similarity = calSimilarity(hammingDistance) * 100;
-		System.out.println("相似度:" + similarity + "%");
+		// System.out.println("相似度:" + similarity + "%");
 		return similarity;
 	}
 
