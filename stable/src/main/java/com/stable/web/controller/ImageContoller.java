@@ -44,7 +44,42 @@ public class ImageContoller {
 		JsonResult r = new JsonResult();
 		try {
 			r.setStatus(JsonResult.OK);
-			r.setResult(imageService.compareImagee(image1, image2));
+			r.setResult(imageService.compareImage(image1, image2));
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * compare比较两张图片
+	 */
+	@RequestMapping(value = "/setparmt")
+	public ResponseEntity<JsonResult> setparmt(String standardImgp, String standardImgv, double checklinep,
+			double checklinev, int recordsSize) {
+		JsonResult r = new JsonResult();
+		try {
+			r.setStatus(JsonResult.OK);
+			r.setResult(imageService.setCheckParm(standardImgp, standardImgv, checklinep, checklinev, recordsSize));
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * checkCode比较两张图片
+	 */
+	@RequestMapping(value = "/checkCode")
+	public ResponseEntity<JsonResult> checkCode(String code, int startDate, int endDate) {
+		JsonResult r = new JsonResult();
+		try {
+			r.setStatus(JsonResult.OK);
+			r.setResult(imageService.checkImg(code, startDate, endDate));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

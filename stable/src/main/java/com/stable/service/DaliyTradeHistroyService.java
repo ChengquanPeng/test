@@ -225,10 +225,11 @@ public class DaliyTradeHistroyService {
 	}
 
 	public List<TradeHistInfoDaliy> queryListByCode(String code, EsQueryPageReq queryPage) {
-		return this.queryListByCode(code, queryPage, SortOrder.DESC);
+		return this.queryListByCode(code, 0, 0, queryPage, SortOrder.DESC);
 	}
 
-	public List<TradeHistInfoDaliy> queryListByCode(String code, EsQueryPageReq queryPage, SortOrder s) {
+	public List<TradeHistInfoDaliy> queryListByCode(String code, int startDate, int endDate, EsQueryPageReq queryPage,
+			SortOrder s) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
 		log.info("queryPage code={},pageNum={},size={}", code, pageNum, size);
@@ -237,28 +238,17 @@ public class DaliyTradeHistroyService {
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		}
-		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(s);
-
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
-
-		Page<TradeHistInfoDaliy> page = tradeHistDaliy.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent();
+		if (startDate > 0) {
+			bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));
 		}
-		return null;
-	}
-
-	public List<TradeHistInfoDaliy> queryListByCode(String code, int startDate, int endDate, SortOrder s) {
-		Pageable pageable = PageRequest.of(0, 10000);
-		log.info("queryPage code={},startDate={},endDate={}", code, startDate, endDate);
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));
-		bqb.must(QueryBuilders.rangeQuery("date").lte(endDate));
+		if (endDate > 0) {
+			bqb.must(QueryBuilders.rangeQuery("date").lte(endDate));
+		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(s);
+
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
 		Page<TradeHistInfoDaliy> page = tradeHistDaliy.search(sq);
 		if (page != null && !page.isEmpty()) {
 			return page.getContent();

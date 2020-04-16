@@ -7,7 +7,7 @@ public class ModelV1 {
 
 	private String code;
 	private int date;
-	private double close; 
+	private double close;
 
 	// L1
 	// 1强势:次数和差值:3/5/10/20/120/250天
@@ -49,8 +49,9 @@ public class ModelV1 {
 	private double avgIndex250;
 	// 价格底部指数
 	private int priceIndex;
+	// 建仓行为
+	private int imgIndex;
 	// L2
 	// 板块活跃度
-	// 建仓行为
 	// 回购/分红/业绩
 }
