@@ -3,6 +3,7 @@ package com.stable.utils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Component("SpringUtil")
@@ -29,6 +30,10 @@ public class SpringUtil implements ApplicationContextAware {
 	// 通过class获取Bean.
 	public static <T> T getBean(Class<T> clazz) {
 		return getApplicationContext().getBean(clazz);
+	}
+	
+	public static Environment getEnvironment() {
+		 return getApplicationContext().getEnvironment();
 	}
 
 	// 通过name,以及Clazz返回指定的Bean

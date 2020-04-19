@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.stable.service.ImageService;
+import com.stable.service.model.image.ImageService;
 import com.stable.vo.http.JsonResult;
 
 @RequestMapping("/image")
@@ -24,9 +24,9 @@ public class ImageContoller {
 		try {
 			r.setStatus(JsonResult.OK);
 			if (type == 1) {
-				r.setResult(imageService.genPriceImage(code, startDate, endDate));
+				r.setResult(imageService.genPriceImage(code, startDate, endDate, 0));
 			} else if (type == 2) {
-				r.setResult(imageService.genVolumeImage(code, startDate, endDate));
+				r.setResult(imageService.genVolumeImage(code, startDate, endDate, 0));
 			}
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -62,7 +62,25 @@ public class ImageContoller {
 		JsonResult r = new JsonResult();
 		try {
 			r.setStatus(JsonResult.OK);
-			r.setResult(imageService.setCheckParm(standardImgp, standardImgv, checklinep, checklinev, recordsSize));
+			// r.setResult(imageService.setCheckParm(standardImgp, standardImgv, checklinep,
+			// checklinev, recordsSize));
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * compare比较两张图片
+	 */
+	@RequestMapping(value = "/getsize")
+	public ResponseEntity<JsonResult> getTradeSize(String code, int startDate, int endDate) {
+		JsonResult r = new JsonResult();
+		try {
+			r.setStatus(JsonResult.OK);
+			r.setResult(imageService.getSize(code, startDate, endDate));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -79,7 +97,7 @@ public class ImageContoller {
 		JsonResult r = new JsonResult();
 		try {
 			r.setStatus(JsonResult.OK);
-			r.setResult(imageService.checkImg(code, startDate, endDate));
+			r.setResult(imageService.checkImgByUser(code, startDate, endDate));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

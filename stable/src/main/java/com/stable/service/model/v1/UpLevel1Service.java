@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.stable.service.AvgService;
-import com.stable.service.ImageService;
 import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.StrongService;
@@ -33,8 +32,6 @@ public class UpLevel1Service {
 	private PriceLifeService priceLifeService;
 	@Autowired
 	private AvgService avgService;
-	@Autowired
-	private ImageService imageService;
 
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 
@@ -48,7 +45,6 @@ public class UpLevel1Service {
 		this.tickDataCheck(mv1);
 		this.priceIndex(mv1);
 		avgService.checkAvg(mv1, lastDate.getTrade_date());
-		mv1.setImgIndex(imageService.checkImg(mv1.getCode()));
 	}
 
 	// 收盘价介于最高价和最低价的index

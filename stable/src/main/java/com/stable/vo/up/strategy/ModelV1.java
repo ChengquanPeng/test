@@ -49,8 +49,6 @@ public class ModelV1 {
 	private double avgIndex250;
 	// 价格底部指数
 	private int priceIndex;
-	// 建仓行为
-	private int imgIndex;
 	// L2
 	// 板块活跃度
 	// 回购/分红/业绩
