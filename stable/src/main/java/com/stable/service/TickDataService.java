@@ -36,6 +36,7 @@ import com.stable.enums.StockAType;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.job.MyCallable;
+import com.stable.service.model.v1.UpLevel1Service;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.LogFileUitl;
@@ -72,6 +73,8 @@ public class TickDataService {
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private StockBasicService stockBasicService;
+	@Autowired
+	private UpLevel1Service upLevel1Service;
 
 	public static final Semaphore semp = new Semaphore(1);
 
@@ -112,7 +115,7 @@ public class TickDataService {
 		} while (condition);
 	}
 
-	public void fetch(String code, String date, String all, boolean html, String startDate,boolean job) {
+	public void fetch(String code, String date, String all, boolean html, String startDate, boolean isJobSource) {
 		if (StringUtils.isBlank(code) && StringUtils.isBlank(date) && StringUtils.isBlank(all)) {
 			log.warn("参数为空");
 			return;
@@ -218,7 +221,11 @@ public class TickDataService {
 		try {
 			log.info("等待任务执行完成");
 			lis.get();
-			
+			if (isJobSource) {
+				log.info("等待执行模型。。");
+				upLevel1Service.runJob(0);
+				log.info("等待执行模型完成");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
