@@ -25,7 +25,7 @@ public class TradeHistroyController {
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 
 	/**
-	 * 根据code重新获取历史记录（前复权）
+	 * 根据code重新获取历史记录-每日指标
 	 */
 	@RequestMapping(value = "/dailybasic/list", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> dailybasic(String code, EsQueryPageReq page) {
@@ -42,7 +42,7 @@ public class TradeHistroyController {
 	}
 
 	/**
-	 * 根据code重新获取历史记录（前复权）
+	 * 根据code重新获取历史记录-每日指标
 	 */
 	@RequestMapping(value = "/dailybasic/fetch/{date}", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> dailybasicfetch(@PathVariable(value = "date") String tradeDate) {
@@ -59,7 +59,7 @@ public class TradeHistroyController {
 	}
 
 	/**
-	 * 根据code重新获取历史记录（前复权）
+	 * 根据code重新获取历史记录-每日指标
 	 */
 	@RequestMapping(value = "/dailybasic/fetchByCode", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> fetchByCode(String code, String startDate, String endDate) {

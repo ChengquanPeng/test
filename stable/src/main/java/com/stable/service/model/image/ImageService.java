@@ -1,5 +1,6 @@
 package com.stable.service.model.image;
 
+import java.io.File;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,10 +48,11 @@ public class ImageService {
 
 	public String checkImgByUser(String code, int startDate, int endDate) {
 		load();
-		return checkImg(code, startDate, endDate);
+		return checkImg(code, startDate, endDate, false);
 	}
 
-	public String checkImg(String code, int startDate, int endDate) {
+	// 返回格式： index1:1,index2:1,index3:2,
+	public String checkImg(String code, int startDate, int endDate, boolean delete) {
 		String str = "";
 		for (ImageChkGroup icg : list) {
 			int result = 0;
@@ -67,14 +69,22 @@ public class ImageService {
 					result = 2;
 				}
 				result = 1;
+
+				if (delete) {
+					deleteFile(img_v);
+				}
+
+				str += "index" + icg.getId() + ":" + result + ",";
 			}
-			str += icg.getId() + ":" + result;
+			if (delete) {
+				deleteFile(img_p);
+			}
 		}
 		return str;
 	}
 
-	public String checkImg(String code) {
-		return checkImg(code, 0, 0);
+	public String checkImg(String code, int endDate) {
+		return checkImg(code, 0, endDate, true);
 	}
 
 	/**
@@ -125,7 +135,7 @@ public class ImageService {
 		for (DaliyBasicInfo r : list) {
 			ImageData id = new ImageData();
 			id.setDate(DateUtil.parseDate(r.getTrade_date()));
-			id.setNum(r.getVol());
+			id.setNum(r.getTurnover_rate_f());
 			data.add(id);
 		}
 		return generateImages(code, Volume, data);
@@ -143,6 +153,10 @@ public class ImageService {
 		return this.getFileName(code, typeName, DateUtil.formatYYYYMMDD(date));
 	}
 
+	private void deleteFile(String fileName) {
+		new File(imageFolder + fileName).delete();
+	}
+
 	private String generateImages(String code, String typeName, List<ImageData> data) {
 		String filename = this.getFileName(code, typeName, data.get(data.size() - 1).getDate());
 		ImageGeneratingUtil.generateImages(imageFolder + filename, data);
@@ -152,5 +166,22 @@ public class ImageService {
 	public double compareImage(String image1, String image2) {
 		return Double.valueOf(String.format("%.2f",
 				ImageCompareSimilarityUtil.getSimilarity(imageFolder + image1, imageFolder + image2)));
+	}
+
+	public void deletePastDateFile() {
+		File file = new File(imageFolder);
+		log.info("文件夹：{}", imageFolder);
+		File[] filelist = file.listFiles();
+		long newtime = System.currentTimeMillis();
+		for (int i = 0; i < filelist.length; i++) {
+			long txttime = filelist[i].lastModified();// 遍历的度文件时间知
+			long time = newtime - txttime;
+			if ((time / (1000 * 60 * 60 * 24)) > 30) {
+				boolean b = filelist[i].delete();
+				if (b) {
+					log.info(filelist[i].getName() + "删除成功!");
+				}
+			}
+		}
 	}
 }

@@ -46,7 +46,7 @@ public class TickDataController {
 	public ResponseEntity<JsonResult> fetch(String code, String date, String all, String html, String startDate) {
 		JsonResult r = new JsonResult();
 		try {
-			tickDataService.fetch(code, date, all, "1".equals(html), startDate);
+			tickDataService.fetch(code, date, all, "1".equals(html), startDate, false);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

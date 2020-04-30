@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class DateUtil {
+	public static final String YYYY_MM_DD_HH_MM_SS_NO_SPIT = "yyyyMMddHHmmss";
 	public static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
 	public static final String YYYY_MM_DD = "yyyyMMdd";
 	public static final String YYYY_MM_DD2 = "yyyy-MM-dd";
@@ -61,6 +62,11 @@ public class DateUtil {
 		return format.format(new Date());
 	}
 
+	public static String getTodayYYYYMMDDHHMMSS_NOspit() {
+		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS_NO_SPIT);
+		return format.format(new Date());
+	}
+
 	public static String getTodayBefor7DayYYYYMMDD() {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
 		return format.format(addDate(new Date(), -7));
@@ -71,6 +77,19 @@ public class DateUtil {
 		cal.setTime(date);
 		cal.add(Calendar.DATE, days);
 		return cal.getTime();
+	}
+
+	public static Date addDate(String date, int days) {
+		try {
+			SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(format.parse(date));
+			cal.add(Calendar.DATE, days);
+			return cal.getTime();
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static String getTodayYYYYMMDD() {

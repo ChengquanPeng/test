@@ -3,6 +3,7 @@ package com.stable.service;
 import java.time.Duration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +92,14 @@ public class TradeCalService {
 		if (list.size() > 0) {
 			calDao.saveAll(list);
 		}
+	}
+
+	public boolean isOpen(int date) {
+		Optional<TradeCal> opt = calDao.findById(date);
+		if (opt.isPresent()) {
+			return opt.get().getIs_open() == 1;
+		}
+		return false;
 	}
 
 	public String getPretradeDate(String date) {

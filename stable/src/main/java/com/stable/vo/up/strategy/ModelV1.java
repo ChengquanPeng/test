@@ -1,54 +1,57 @@
 package com.stable.vo.up.strategy;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+
 import lombok.Data;
 
 @Data
+@Document(indexName = "modelv1")
 public class ModelV1 {
 
+	@Id
+	private String id;
+	@Field(type = FieldType.Text)
 	private String code;
+	@Field(type = FieldType.Integer)
 	private int date;
+	@Field(type = FieldType.Double)
 	private double close;
-
+	@Field(type = FieldType.Integer)
+	private int score = 0;
 	// L1
-	// 1强势:次数和差值:3/5/10/20/120/250天
-	private int strongTimes3;
-	private int strongDef3;// 3天个股涨幅是否大于大盘的涨幅,是否假强势（stock 3 day>base 3 day)
-	private int strongTimes5;
-	private int strongDef5;// 5天个股涨幅是否大于大盘的涨幅,是否假强势（stock 5 day>base 5 day)
-	private int strongTimes10;
-	private int strongTimes20;
-	private int strongTimes120;
-	private int strongTimes250;
+	// 1强势:短中长期强势=>次数和差值:3/5/10/20/120/250天
+	@Field(type = FieldType.Integer)
+	private int sortStrong = 0;
+	@Field(type = FieldType.Integer)
+	private int midStrong = 0;
+	@Field(type = FieldType.Integer)
+	private int lngStrong = 0;
 	// 2交易方向:次数和差值:3/5/10/20/120/250天
-	private int wayTimes3;
-	private Long wayDef3;
-	private int wayTimes5;
-	private Long wayDef5;
-	private int wayTimes10;
-	private Long wayDef10;
-	private int wayTimes20;
-	private Long wayDef20;
-	private int wayTimes120;
-	private Long wayDef120;
-	private int wayTimes250;
-	private Long wayDef250;
+	@Field(type = FieldType.Integer)
+	private int sortWay = 0;
+	@Field(type = FieldType.Integer)
+	private int midWay = 0;
+	@Field(type = FieldType.Integer)
+	private int lngWay = 0;
 	// 3程序单:次数:3/5/10/20/120/250天
-	private int pgmTimes3;
-	private int pgmTimes5;
-	private int pgmTimes10;
-	private int pgmTimes20;
-	private int pgmTimes120;
-	private int pgmTimes250;
+	@Field(type = FieldType.Integer)
+	private int sortPgm = 0;
+	@Field(type = FieldType.Integer)
+	private int midPgm = 0;
+	@Field(type = FieldType.Integer)
+	private int lngPgm = 0;
 	// 4均线:指数:3/5/10/20/120/250天
-	private double avgIndex3;
-	private double avgIndex5;
-	private double avgIndex10;
-	private double avgIndex20;
-	private double avgIndex30;
-	private double avgIndex120;
-	private double avgIndex250;
+	@Field(type = FieldType.Integer)
+	private int avgIndex = 0;
 	// 价格底部指数
-	private int priceIndex;
+	@Field(type = FieldType.Integer)
+	private int priceIndex = 0;
+	// 图形
+	@Field(type = FieldType.Integer)
+	private int imageIndex = 0;
 	// L2
 	// 板块活跃度
 	// 回购/分红/业绩

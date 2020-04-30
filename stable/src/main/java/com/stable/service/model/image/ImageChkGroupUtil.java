@@ -17,8 +17,9 @@ public class ImageChkGroupUtil {
 	private static final String ivk = "image.chk.v";
 	private static final String is = "image.records.size";
 
-	public static List<ImageChkGroup> getList(){
+	public static List<ImageChkGroup> getList() {
 		Properties env = PropertiesUtil.getProperties();
+		Integer indexEnd = Integer.valueOf(env.getProperty("image.index.end"));
 		int i = 1;
 		List<ImageChkGroup> list = new LinkedList<ImageChkGroup>();
 		while (true) {
@@ -33,6 +34,11 @@ public class ImageChkGroupUtil {
 				icg.setRecordsSize(Integer.valueOf(env.getProperty(is + i)));
 				log.info("图像参数:{}", icg);
 				list.add(icg);
+
+				if (i >= indexEnd) {
+					log.info("indexEnd:{},return list", indexEnd);
+					return list;
+				}
 				i++;
 			} catch (Exception e) {
 				return list;

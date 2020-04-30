@@ -95,6 +95,20 @@ public class CurrencyUitl {
 		return result;
 	}
 
+	public final static double topPrice20(double preClosedPrice) {
+		preClosedPrice = preClosedPrice * 1.2;
+		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
+				.doubleValue();
+		return result;
+	}
+
+	public final static double lowestPrice20(double preClosedPrice) {
+		preClosedPrice = preClosedPrice - preClosedPrice * 0.2;
+		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
+				.doubleValue();
+		return result;
+	}
+
 	public static void main(String[] args) {
 		double s = 5.41;
 		System.err.println(topPrice(s, true) + " " + lowestPrice(s, true));

@@ -13,4 +13,6 @@ public class RedisConstant {
 	public static final String RDS_BUY_BACK_LAST_DAY = "RDS_BUY_BACK_LAST_DAY";
 	// 价格
 	public static final String RDS_PRICE_LIFE = "RDS_PRICE_LIFE_";
+	// 价格
+	public static final String RDS_MODEL_V1_DATE = "RDS_MODEL_V1_DATE";
 }

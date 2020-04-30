@@ -27,6 +27,10 @@ public class ImageContoller {
 				r.setResult(imageService.genPriceImage(code, startDate, endDate, 0));
 			} else if (type == 2) {
 				r.setResult(imageService.genVolumeImage(code, startDate, endDate, 0));
+			} else {
+				String r1 = "PRICE:" + imageService.genPriceImage(code, startDate, endDate, 0);
+				String r2 = "VOL:" + imageService.genVolumeImage(code, startDate, endDate, 0);
+				r.setResult(r1 + "," + r2);
 			}
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.vo.StrongVo;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 import com.stable.vo.up.strategy.ModelV1;
@@ -90,7 +91,7 @@ public class StrongService {
 
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 
-	public DaliyBasicInfo checkStrong(ModelV1 mv1) {
+	public DaliyBasicInfo checkStrong(ModelV1 mv1, StrongVo sv) {
 		String code = mv1.getCode();
 		Map<Integer, Double> cache = this.getIndexMap(code, mv1.getDate());
 
@@ -112,8 +113,8 @@ public class StrongService {
 		if (stock > base) {
 			strongDef3 = 1;
 		}
-		mv1.setStrongTimes3(strongTimes3);
-		mv1.setStrongDef3(strongDef3);
+		sv.setStrongTimes3(strongTimes3);
+		sv.setStrongDef3(strongDef3);
 		// check-5
 		int strongTimes5 = 0;
 		index = 5;
@@ -131,8 +132,8 @@ public class StrongService {
 		if (stock > base) {
 			strongDef5 = 1;
 		}
-		mv1.setStrongTimes5(strongTimes5);
-		mv1.setStrongDef5(strongDef5);
+		sv.setStrongTimes5(strongTimes5);
+		sv.setStrongDef5(strongDef5);
 		// check-10
 		index = 10;
 		int strongTimes10 = 0;
@@ -142,7 +143,7 @@ public class StrongService {
 				strongTimes10++;
 			}
 		}
-		mv1.setStrongTimes10(strongTimes10);
+		sv.setStrongTimes10(strongTimes10);
 		// check-20
 		index = 20;
 		int strongTimes20 = 0;
@@ -152,7 +153,7 @@ public class StrongService {
 				strongTimes20++;
 			}
 		}
-		mv1.setStrongTimes20(strongTimes20);
+		sv.setStrongTimes20(strongTimes20);
 		// check-120
 		if (list.size() < 120) {
 			return list.get(list.size() - 1);
@@ -165,7 +166,7 @@ public class StrongService {
 				strongTimes120++;
 			}
 		}
-		mv1.setStrongTimes120(strongTimes120);
+		sv.setStrongTimes120(strongTimes120);
 		// check-250
 		index = list.size();
 		int strongTimes250 = 0;
@@ -175,7 +176,46 @@ public class StrongService {
 				strongTimes250++;
 			}
 		}
-		mv1.setStrongTimes250(strongTimes250);
+		sv.setStrongTimes250(strongTimes250);
+
+		getRes(mv1, sv);
 		return list.get(list.size() - 1);
+	}
+
+	private void getRes(ModelV1 mv1, StrongVo sv) {
+		// 短期强势
+		int sortStrong = 0;
+		boolean s3 = (sv.getStrongDef3() > 0 && sv.getStrongTimes3() > 0);
+		boolean s5 = (sv.getStrongDef5() > 0 && sv.getStrongTimes5() > 0);
+		if (s3 || s5) {
+			sortStrong = 1;
+		}
+		if (s3 && s5) {
+			sortStrong = 3;
+		}
+		// 中期强势
+		boolean s10 = (sv.getStrongTimes10() > 0);
+		boolean s20 = (sv.getStrongTimes20() > 0);
+		int midStrong = 0;
+		if (s10 || s20) {
+			midStrong = 1;
+		}
+		if (s10 && s20) {
+			midStrong = 3;
+		}
+		// 长期强势
+		boolean s120 = (sv.getStrongTimes120() > 0);
+		boolean s250 = (sv.getStrongTimes250() > 0);
+		int lngStrong = 0;
+		if (s120 || s250) {
+			lngStrong = 1;
+		}
+		if (s120 && s250) {
+			lngStrong = 3;
+		}
+
+		mv1.setSortStrong(sortStrong);
+		mv1.setMidStrong(midStrong);
+		mv1.setLngStrong(lngStrong);
 	}
 }

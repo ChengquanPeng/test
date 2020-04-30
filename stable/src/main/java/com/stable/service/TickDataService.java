@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
+import com.stable.enums.StockAType;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.job.MyCallable;
@@ -44,10 +45,12 @@ import com.stable.utils.PythonCallUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.TickDataV1Vo;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TickDataBuySellInfo;
 import com.stable.vo.http.resp.TickDataBuySellInfoResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
+import com.stable.vo.up.strategy.ModelV1;
 
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
@@ -109,7 +112,7 @@ public class TickDataService {
 		} while (condition);
 	}
 
-	public void fetch(String code, String date, String all, boolean html, String startDate) {
+	public void fetch(String code, String date, String all, boolean html, String startDate,boolean job) {
 		if (StringUtils.isBlank(code) && StringUtils.isBlank(date) && StringUtils.isBlank(all)) {
 			log.warn("参数为空");
 			return;
@@ -215,6 +218,7 @@ public class TickDataService {
 		try {
 			log.info("等待任务执行完成");
 			lis.get();
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -401,9 +405,17 @@ public class TickDataService {
 		long bt = 0;
 		long st = 0;
 		long ot = 0;
-		boolean isST = stockBasicService.getCodeName(code).contains("ST");
-		double topPrice = CurrencyUitl.topPrice(base.getYesterdayPrice(), isST);
-		double lowPrice = CurrencyUitl.lowestPrice(base.getYesterdayPrice(), isST);
+		double topPrice;
+		double lowPrice;
+		if (StockAType.KCB == StockAType.formatCode(code)) {// 科创板20%涨跌幅
+			topPrice = CurrencyUitl.topPrice20(base.getYesterdayPrice());
+			lowPrice = CurrencyUitl.lowestPrice20(base.getYesterdayPrice());
+		} else {
+			boolean isST = stockBasicService.getCodeName(code).contains("ST");
+			topPrice = CurrencyUitl.topPrice(base.getYesterdayPrice(), isST);
+			lowPrice = CurrencyUitl.lowestPrice(base.getYesterdayPrice(), isST);
+		}
+
 		// 涨停：买入盘多，卖出算中性
 		// 跌停：卖出盘多，买入算中性
 		for (String line : lines) {
@@ -678,5 +690,205 @@ public class TickDataService {
 			}
 			return s + "";
 		}
+	}
+
+	// 2交易方向:次数和差值:3/5/10/20/120/250天
+	// 3程序单:次数:3/5/10/20/120/250天
+	public void tickDataCheck(ModelV1 mv1, TickDataV1Vo wv, EsQueryPageReq queryPage) {
+		String code = mv1.getCode();
+		List<TickDataBuySellInfo> list = this.list(code, null, null, queryPage);
+
+		// check-3
+		int wayTimes3 = 0;
+		int index = 3;
+		long wayDef3 = 0;
+		int pgmTimes3 = 0;
+		for (int i = 0; i < index; i++) {
+			TickDataBuySellInfo db = list.get(i);
+			if (db.getBuyTimes() > db.getSellTimes()) {
+				wayTimes3++;
+			}
+			wayDef3 += (db.getBuyTimes() - db.getSellTimes());
+			if (db.getProgramRate() > 0) {
+				pgmTimes3++;
+			}
+		}
+		wv.setWayTimes3(wayTimes3);
+		wv.setWayDef3(wayDef3);
+		wv.setPgmTimes3(pgmTimes3);
+		// check-5
+		int wayTimes5 = 0;
+		index = 5;
+		long wayDef5 = 0;
+		int pgmTimes5 = 0;
+		for (int i = 0; i < index; i++) {
+			TickDataBuySellInfo db = list.get(i);
+			if (db.getBuyTimes() > db.getSellTimes()) {
+				wayTimes5++;
+			}
+			wayDef5 += (db.getBuyTimes() - db.getSellTimes());
+			if (db.getProgramRate() > 0) {
+				pgmTimes5++;
+			}
+		}
+		wv.setWayTimes5(wayTimes5);
+		wv.setWayDef5(wayDef5);
+		wv.setPgmTimes5(pgmTimes5);
+		// check-10
+		int wayTimes10 = 0;
+		index = 10;
+		long wayDef10 = 0;
+		int pgmTimes10 = 0;
+		for (int i = 0; i < index; i++) {
+			TickDataBuySellInfo db = list.get(i);
+			if (db.getBuyTimes() > db.getSellTimes()) {
+				wayTimes10++;
+			}
+			wayDef10 += (db.getBuyTimes() - db.getSellTimes());
+			if (db.getProgramRate() > 0) {
+				pgmTimes10++;
+			}
+		}
+		wv.setWayTimes10(wayTimes10);
+		wv.setWayDef10(wayDef10);
+		wv.setPgmTimes10(pgmTimes10);
+
+		// check-20
+		int wayTimes20 = 0;
+		index = 20;
+		long wayDef20 = 0;
+		int pgmTimes20 = 0;
+		for (int i = 0; i < index; i++) {
+			TickDataBuySellInfo db = list.get(i);
+			if (db.getBuyTimes() > db.getSellTimes()) {
+				wayTimes20++;
+			}
+			wayDef20 += (db.getBuyTimes() - db.getSellTimes());
+			if (db.getProgramRate() > 0) {
+				pgmTimes20++;
+			}
+		}
+		wv.setWayTimes20(wayTimes20);
+		wv.setWayDef20(wayDef20);
+		wv.setPgmTimes20(pgmTimes20);
+		// check-120
+
+		if (list.size() < 120) {
+			return;
+		}
+		index = 120;
+		int wayTimes120 = 0;
+		long wayDef120 = 0;
+		int pgmTimes120 = 0;
+		for (int i = 0; i < index; i++) {
+			TickDataBuySellInfo db = list.get(i);
+			if (db.getBuyTimes() > db.getSellTimes()) {
+				wayTimes120++;
+			}
+			wayDef120 += (db.getBuyTimes() - db.getSellTimes());
+			if (db.getProgramRate() > 0) {
+				pgmTimes120++;
+			}
+		}
+		wv.setWayTimes120(wayTimes120);
+		wv.setWayDef120(wayDef120);
+		wv.setPgmTimes120(pgmTimes120);
+		// check-250
+		int wayTimes250 = 0;
+		index = list.size();
+		long wayDef250 = 0;
+		int pgmTimes250 = 0;
+		for (int i = 0; i < index; i++) {
+			TickDataBuySellInfo db = list.get(i);
+			if (db.getBuyTimes() > db.getSellTimes()) {
+				wayTimes250++;
+			}
+			wayDef250 += (db.getBuyTimes() - db.getSellTimes());
+			if (db.getProgramRate() > 0) {
+				pgmTimes250++;
+			}
+		}
+		wv.setWayTimes250(wayTimes250);
+		wv.setWayDef250(wayDef250);
+		wv.setPgmTimes250(pgmTimes250);
+
+		getWayRes(mv1, wv);
+	}
+
+	private void getWayRes(ModelV1 mv1, TickDataV1Vo wv) {
+		// 短期强势
+		int sortWay = 0;
+		boolean s3 = (wv.getWayDef3() > 0 && wv.getWayTimes3() > 0);// TODO way def
+		boolean s5 = (wv.getWayDef5() > 0 && wv.getWayTimes5() > 0);
+		if (s3 || s5) {
+			sortWay = 1;
+		}
+		if (s3 && s5) {
+			sortWay = 3;
+		}
+		// 中期强势
+		int midWay = 0;
+		boolean m10 = (wv.getWayDef10() > 0 && wv.getWayTimes10() > 0);// TODO way def
+		boolean m20 = (wv.getWayDef20() > 0 && wv.getWayTimes20() > 0);
+		if (m10 || m20) {
+			midWay = 1;
+		}
+		if (m10 && m20) {
+			midWay = 3;
+		}
+		// 长期强势
+		int lngWay = 0;
+		boolean m120 = (wv.getWayDef120() > 0 && wv.getWayTimes120() > 0);// TODO way def
+		boolean m250 = (wv.getWayDef250() > 0 && wv.getWayTimes250() > 0);
+		if (m120 || m250) {
+			lngWay = 1;
+		}
+		if (m120 && m250) {
+			lngWay = 3;
+		}
+
+		mv1.setSortWay(sortWay);
+		mv1.setMidWay(midWay);
+		mv1.setLngWay(lngWay);
+
+		// 短期
+		int sortPgm = 0;
+		boolean p3 = (wv.getPgmTimes3() > 0);
+		boolean p5 = (wv.getPgmTimes5() > 0);
+
+		if (p3 || p5) {
+			sortPgm = 1;
+		}
+		if (p3 && p5) {
+			sortPgm = 3;
+		}
+
+		// 短期
+		int midPgm = 0;
+		boolean p10 = (wv.getPgmTimes10() > 0);
+		boolean p20 = (wv.getPgmTimes20() > 0);
+
+		if (p10 || p20) {
+			midPgm = 1;
+		}
+		if (p10 && p20) {
+			midPgm = 3;
+		}
+
+		// 短期
+		int lngPgm = 0;
+		boolean p120 = (wv.getPgmTimes120() > 0);
+		boolean p250 = (wv.getPgmTimes250() > 0);
+
+		if (p120 || p250) {
+			lngPgm = 1;
+		}
+		if (p120 && p250) {
+			lngPgm = 3;
+		}
+
+		mv1.setSortPgm(sortPgm);
+		mv1.setMidPgm(midPgm);
+		mv1.setLngPgm(lngPgm);
 	}
 }
