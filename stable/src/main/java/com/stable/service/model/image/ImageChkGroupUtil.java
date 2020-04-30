@@ -19,9 +19,13 @@ public class ImageChkGroupUtil {
 
 	public static List<ImageChkGroup> getList() {
 		Properties env = PropertiesUtil.getProperties();
-		Integer indexEnd = Integer.valueOf(env.getProperty("image.index.end"));
-		int i = 1;
 		List<ImageChkGroup> list = new LinkedList<ImageChkGroup>();
+		Integer indexEnd = Integer.valueOf(env.getProperty("image.index.end"));
+		if (indexEnd <= 0) {
+			log.info("indexEnd<=0,return null list");
+			return list;
+		}
+		int i = 1;
 		while (true) {
 			try {
 				ImageChkGroup icg = new ImageChkGroup();
