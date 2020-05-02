@@ -2,6 +2,7 @@ package com.stable.service;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang3.StringUtils;
@@ -60,6 +61,8 @@ public class DaliyBasicHistroyService {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private StockBasicService stockBasicService;
+	@Autowired
+	private TickDataService tickDataService;
 
 	@Value("${tick.data.start.date}")
 	public String startDate;
@@ -183,8 +186,25 @@ public class DaliyBasicHistroyService {
 			public Object mycall() {
 				log.info("每日*定时任务 daily_basic [started]");
 				String today = DateUtil.getTodayYYYYMMDD();
-				spiderDaliyDailyBasic(today);
-				log.info("每日*定时任务 daily_basic [end]");
+				boolean result = spiderDaliyDailyBasic(today);
+				log.info("每日*定时任务 daily_basic [end],result={}", result);
+
+				if (result) {
+					nextJob();
+				}
+				return null;
+			}
+		});
+	}
+
+	private void nextJob() {
+		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
+			@Override
+			public Object call() throws Exception {
+				log.info("resetTickDataStatus fetchTickData [0] -> [-1] ");
+				tickDataService.resetTickDataStatus();
+				log.info("Tick data 剩余fetch");
+				tickDataService.fetch("", "", "0", false, "", true);
 				return null;
 			}
 		});

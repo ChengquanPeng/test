@@ -7,7 +7,7 @@ public enum RunLogBizTypeEnum {
 	BUY_BACK(4, "回购同步"),
 	TRADE_HISTROY(5, "日线数据同步"), 
 	DIVIDEND(6, "分红除权信息同步"),
-	DAILY_BASIC(7, "个股每日指标"),
+	DAILY_BASIC(7, "个股每日指标-tickdata"),
 	DIVIDEND_TRADE_HISTROY(8, "分红除权-前复权-任务"),
 	TICK_DATA(9, "tickdata分笔数据"),
 	RETRACE_SH_FIVEDAY(9100, "短线-5日反转");

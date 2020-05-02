@@ -46,12 +46,6 @@
 		sharding-item-parameters="0=a" description="每日晚上19点35执行任务"
 		sharding-total-count="1" overwrite="true" />
 	
-	<job:simple id="TickDataJob"
-		class="com.stable.job.TickDataJob"
-		registry-center-ref="regCenter" cron="0 25 20 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上20点25执行任务（分笔数据）"
-		sharding-total-count="1" overwrite="true" />
-		
 	<job:simple id="EveryWeekMonJob"
 		class="com.stable.job.EveryWeekMonJob" 
 		registry-center-ref="regCenter" cron="0 15 5 ? * MON" 

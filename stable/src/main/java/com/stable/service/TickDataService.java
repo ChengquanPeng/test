@@ -87,12 +87,12 @@ public class TickDataService {
 		return daliyBasicHistroyService.startDate;
 	}
 
-	public void resetTickDataStatus() {
+ 	public void resetTickDataStatus() {
 		EsQueryPageReq queryPage = new EsQueryPageReq();
-		int currPage = 1;
-		queryPage.setPageNum(currPage);
+		queryPage.setPageNum(1);
 		queryPage.setPageSize(1000);
 		boolean condition = true;
+		int times = 1;
 		do {
 			Page<DaliyBasicInfo> page = daliyBasicHistroyService.queryListByCode("", "", "0", queryPage);
 			if (page != null && !page.isEmpty()) {
@@ -105,9 +105,8 @@ public class TickDataService {
 				if (ulist.size() > 0) {
 					esDaliyBasicInfoDao.saveAll(ulist);
 				}
-				log.info("Curr Page Num:{},ulist batch size:{}", currPage, ulist.size());
-				currPage++;
-				queryPage.setPageNum(currPage);
+				log.info("Curr Page Num:{},ulist batch size:{}", times, ulist.size());
+				times++;
 			} else {
 				log.info("page isEmpty ");
 				condition = false;
