@@ -1,11 +1,14 @@
 package com.stable.utils;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.stable.config.SpringConfig;
 import com.zjiecode.wxpusher.client.WxPusher;
 import com.zjiecode.wxpusher.client.bean.Message;
+import com.zjiecode.wxpusher.client.bean.MessageResult;
+import com.zjiecode.wxpusher.client.bean.Result;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -18,6 +21,7 @@ public class WxPushUtil {
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 		appToken = efc.getAppToken();
 		myUid = efc.getMyUid();
+		log.info("appToken={},myUid={}", appToken, myUid);
 	}
 
 	public final static void pushSystem1(String content) {
@@ -36,7 +40,11 @@ public class WxPushUtil {
 				message.setUids(uids);
 			}
 			message.setUrl(null);
-			log.info("微信推送内容:{},状态:{}", content, WxPusher.send(message).getData().get(0).getStatus());
+			Result<List<MessageResult>> result = WxPusher.send(message);
+			List<MessageResult> lresult = result.getData();
+			//log.info("result:{}", lresult);
+			MessageResult mr = lresult.get(0);
+			log.info("微信推送内容:{},状态:{}", content, mr.getStatus());
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, "微信推送内容异常", content, "");
 			e.printStackTrace();

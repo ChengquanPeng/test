@@ -111,6 +111,12 @@ class MyBeanPooledFactory extends BasePooledObjectFactory<WebClient> {
 			@Override
 			public void loadScriptError(HtmlPage page, URL scriptUrl, Exception exception) {
 			}
+
+			@Override
+			public void warn(String message, String sourceName, int line, String lineSource, int lineOffset) {
+				// TODO Auto-generated method stub
+				
+			}
 		});
 		return webClient;
 	}

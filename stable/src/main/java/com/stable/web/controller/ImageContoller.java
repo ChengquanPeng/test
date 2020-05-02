@@ -60,25 +60,6 @@ public class ImageContoller {
 	/**
 	 * compare比较两张图片
 	 */
-	@RequestMapping(value = "/setparmt")
-	public ResponseEntity<JsonResult> setparmt(String standardImgp, String standardImgv, double checklinep,
-			double checklinev, int recordsSize) {
-		JsonResult r = new JsonResult();
-		try {
-			r.setStatus(JsonResult.OK);
-			// r.setResult(imageService.setCheckParm(standardImgp, standardImgv, checklinep,
-			// checklinev, recordsSize));
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
-
-	/**
-	 * compare比较两张图片
-	 */
 	@RequestMapping(value = "/getsize")
 	public ResponseEntity<JsonResult> getTradeSize(String code, int startDate, int endDate) {
 		JsonResult r = new JsonResult();

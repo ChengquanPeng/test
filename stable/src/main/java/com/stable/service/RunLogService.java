@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -23,7 +21,6 @@ import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsRunLogDao;
 import com.stable.utils.DateUtil;
-import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.RunLog;
 import com.stable.vo.http.resp.RunLogResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -37,28 +34,6 @@ import lombok.extern.log4j.Log4j2;
 @Service("RunLogService")
 @Log4j2
 public class RunLogService {
-	@PostConstruct
-	public void dostart() {
-		WxPushUtil.pushSystem1("系统正常启动");
-		// new RuntimeException().printStackTrace();
-
-//		try {
-//			TimeUnit.MINUTES.sleep(1);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				Object job = SpringUtil.getBean("tickDataJob");
-//				if (job != null && job instanceof SimpleJob) {
-//					WxPushUtil.pushSystem1("tickDataJob 运行中..,");
-//					((SimpleJob) job).execute(null);
-//
-//				}
-//			}
-//		}).start();
-	}
 
 	@Autowired
 	private EsRunLogDao runlogDao;
