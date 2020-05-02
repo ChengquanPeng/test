@@ -36,7 +36,7 @@ import com.stable.enums.StockAType;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.job.MyCallable;
-import com.stable.service.model.v1.UpLevel1Service;
+import com.stable.service.model.v1.ModelV1UpService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.LogFileUitl;
@@ -74,7 +74,7 @@ public class TickDataService {
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
-	private UpLevel1Service upLevel1Service;
+	private ModelV1UpService upLevel1Service;
 
 	public static final Semaphore semp = new Semaphore(1);
 

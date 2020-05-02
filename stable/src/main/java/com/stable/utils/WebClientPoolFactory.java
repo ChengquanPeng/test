@@ -97,10 +97,6 @@ class MyBeanPooledFactory extends BasePooledObjectFactory<WebClient> {
 		webClient.waitForBackgroundJavaScript(3000);
 		webClient.setJavaScriptErrorListener(new JavaScriptErrorListener() {
 			@Override
-			public void warn(String message, String sourceName, int line, String lineSource, int lineOffset) {
-			}
-			
-			@Override
 			public void timeoutError(HtmlPage page, long allowedTime, long executionTime) {
 			}
 			

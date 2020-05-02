@@ -6,7 +6,17 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -35,7 +45,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
-public class UpLevel1Service {
+public class ModelV1UpService {
 
 	@Autowired
 	private StrongService strongService;
@@ -209,4 +219,31 @@ public class UpLevel1Service {
 		}
 	}
 
+	public List<ModelV1> getListByCode(String code, String date, String score,String imageIndex, EsQueryPageReq querypage) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		if (StringUtils.isNotBlank(code)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		}
+		if (StringUtils.isNotBlank(date)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("date", date));
+		}
+		if (StringUtils.isNotBlank(score)) {
+			bqb.must(QueryBuilders.rangeQuery("score").gte(score));
+		}
+		if (StringUtils.isNotBlank(imageIndex)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("imageIndex", 1));
+		}
+		FieldSortBuilder sort = SortBuilders.fieldSort("score").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).withSort(sort).build();
+
+		Page<ModelV1> page = esModelV1Dao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		log.info("no records BuyTrace");
+		return null;
+	}
 }
