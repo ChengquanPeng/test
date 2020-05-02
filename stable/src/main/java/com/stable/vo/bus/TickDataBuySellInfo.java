@@ -5,12 +5,18 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 @Document(indexName = "tick_data_buy_sell")
 public class TickDataBuySellInfo extends EsBase {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6579495705405954727L;
 	@Id
 	private String id;
 	@Field(type = FieldType.Text)

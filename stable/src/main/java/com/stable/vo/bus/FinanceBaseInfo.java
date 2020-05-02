@@ -9,12 +9,18 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.alibaba.fastjson.JSONArray;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 @Document(indexName = "finance_base_info")
 public class FinanceBaseInfo extends EsBase {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2763858886536567582L;
 	@Id
 	private String id;
 	@Field(type = FieldType.Text)

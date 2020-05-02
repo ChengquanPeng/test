@@ -10,15 +10,17 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.spider.tushare.TushareSpider;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 @Document(indexName = "dividend_history")
 public class DividendHistory extends EsBase {
 	/**
-	* 
-	*/
-	private static final long serialVersionUID = 1L;
+	 * 
+	 */
+	private static final long serialVersionUID = 4881034024969869338L;
 
 	// code+date
 	@Id
@@ -78,7 +80,7 @@ public class DividendHistory extends EsBase {
 	public DividendHistory() {
 
 	}
-	
+
 	public DividendHistory(JSONArray arr) {
 		int i = 0;
 		this.ts_code = arr.getString(i++);// ts_code

@@ -2,10 +2,17 @@ package com.stable.vo.http.resp;
 
 import com.stable.vo.bus.TickDataBuySellInfo;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 public class TickDataBuySellInfoResp extends TickDataBuySellInfo {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 14245721862668962L;
+
 	private String codeName;
 	
 	private String buyTotalAmt1;

@@ -2,10 +2,16 @@ package com.stable.vo.http.resp;
 
 import com.stable.vo.bus.RunLog;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 public class RunLogResp extends RunLog {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6389710226676237327L;
 	private String id;
 	private int date;
 	private int btype;

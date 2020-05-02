@@ -11,9 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.vo.MarketHistroyVo;
 
-import lombok.extern.log4j.Log4j2;
-
-@Log4j2
 public class PythonCallUtil {
 
 	public static final String EXCEPT = "except";
@@ -44,7 +41,8 @@ public class PythonCallUtil {
 				// System.out.println(line);
 				sb.add(line);
 			}
-			int r = proc.waitFor();
+			proc.waitFor();
+			//int r = proc.waitFor();
 			// log.info("call Python Script Cmd:{}，proc.waitFor：{}", cmd, r);
 			return sb;
 		} catch (Exception e) {

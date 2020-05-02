@@ -10,9 +10,11 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.spider.tushare.TushareSpider;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 @Document(indexName = "buy_back")
 public class BuyBackInfo extends EsBase {
 //ts_code	str	Y	TS代码
@@ -25,6 +27,13 @@ public class BuyBackInfo extends EsBase {
 //	high_limit	float	Y	回购最高价
 //	low_limit	float	Y	回购最低价
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3583785395111756892L;
+	/**
+	 * 
+	 */
 	@Id
 	private String id;
 	@Field(type = FieldType.Text)

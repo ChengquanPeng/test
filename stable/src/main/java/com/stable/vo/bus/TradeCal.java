@@ -5,12 +5,18 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 @Document(indexName = "trade_cal")
 public class TradeCal extends EsBase {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1332874838120670704L;
 	@Id
 	@Field(type = FieldType.Integer)
 	private int cal_date;

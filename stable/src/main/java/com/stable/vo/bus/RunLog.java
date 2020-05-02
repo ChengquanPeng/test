@@ -8,11 +8,17 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 @Document(indexName = "run_log")
 public class RunLog extends EsBase {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8451237855294191551L;
 	@Id
 	private String id;
 	@Field(type = FieldType.Integer)

@@ -9,9 +9,11 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.alibaba.fastjson.JSONArray;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 @Document(indexName = "stock_base_info")
 public class StockBaseInfo extends EsBase{
 //	ts_code	str	TS代码
@@ -29,6 +31,10 @@ public class StockBaseInfo extends EsBase{
 //	delist_date	str	退市日期
 //	is_hs	str	是否沪深港通标的，N否 H沪股通 S深股通
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4910896688001534666L;
 	@Id
 	private String code;
 	@Field(type = FieldType.Text)

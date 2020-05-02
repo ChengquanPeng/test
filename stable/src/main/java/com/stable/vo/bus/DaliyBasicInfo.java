@@ -8,15 +8,20 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.spider.tushare.TushareSpider;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 @Document(indexName = "daliy_basic_info")
 public class DaliyBasicInfo extends EsBase {
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4395882843414057294L;
+	/**
 	* 
 	*/
-	private static final long serialVersionUID = 1L;
 
 	// code+date
 	@Id
