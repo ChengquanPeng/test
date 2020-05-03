@@ -68,7 +68,7 @@ public class PythonCallUtil {
 	public synchronized static void callPythonScriptNoReturn(String pythonScriptPathAndFileName, String params) {
 		try {
 			String cmd = String.format(CALL_FORMAT, pythonScriptPathAndFileName, params);
-			System.err.println("call Python Script Cmd:" + cmd);
+			//System.err.println("call Python Script Cmd:" + cmd);
 			Process proc = Runtime.getRuntime().exec(cmd);
 			proc.waitFor();
 			// log.info("call Python Script Cmd:{}，proc.waitFor：{}", cmd, r);

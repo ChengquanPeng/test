@@ -148,7 +148,11 @@ public class ModelV1UpService {
 		if (getInputData(mv1, sv, wv, av)) {
 			String str = imageService.checkImg(mv1.getCode(), mv1.getDate());
 			if (StringUtils.isNotBlank(str)) {
-				mv1.setImageIndex(1);
+				if (str.contains(ImageService.MATCH_L2)) {
+					mv1.setImageIndex(2);
+				} else {
+					mv1.setImageIndex(1);
+				}
 			}
 			mv1.setScore(this.getSocre(mv1));
 			if (mv1.getScore() > 0) {
@@ -169,7 +173,10 @@ public class ModelV1UpService {
 		r += mv.getSortStrong();// 1,3
 		// 3.图形比较 1,0
 		if (mv.getImageIndex() > 0) {
-			r += 5;
+			r += 5;// L1
+			if (mv.getImageIndex() == 2) {
+				r += 10;// L2
+			}
 		}
 		if (r > 0) {
 			if (mv.getSortPgm() > 0) {// 3.程序单

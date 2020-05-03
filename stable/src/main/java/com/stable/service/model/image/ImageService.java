@@ -29,6 +29,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ImageService {
 
+	public static final String MATCH_L1 = "L1";
+	public static final String MATCH_L2 = "L2";
 	private static final String PIC = ".png";
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
@@ -62,7 +64,6 @@ public class ImageService {
 		String img_p = null;
 		String img_v = null;
 		for (ImageChkGroup icg : list) {
-			int result = 0;
 			if (StringUtils.isBlank(img_p)) {
 				img_p = this.genPriceImage(code, startDate, endDate, icg.getRecordsSize());
 			}
@@ -73,13 +74,14 @@ public class ImageService {
 				if (StringUtils.isBlank(img_v)) {
 					img_v = this.genVolumeImage(code, startDate, endDate, icg.getRecordsSize());
 				}
-				double vsimilarity = this.compareImage(img_p, icg.getPixels2v());
+				double vsimilarity = this.compareImage(imageFolder + img_v, icg.getPixels2v());
 				log.info("V标准std image id={}, code={},imgpurl={}, volume相似度得分={},是否OK={}", icg.getId(), code, img_v,
 						vsimilarity, (vsimilarity >= icg.getChecklinev()));
+
+				String result = MATCH_L1;
 				if (vsimilarity >= icg.getChecklinev()) {
-					result = 2;
+					result = MATCH_L2;
 				}
-				result = 1;
 
 				str += "index" + icg.getId() + ":" + result + ",";
 			}
