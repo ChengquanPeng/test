@@ -87,10 +87,10 @@ public class ImageService {
 			}
 		}
 		if (delete) {
-			if (StringUtils.isBlank(img_p)) {
+			if (StringUtils.isNotBlank(img_p)) {
 				deleteFile(img_p);
 			}
-			if (StringUtils.isBlank(img_v)) {
+			if (StringUtils.isNotBlank(img_v)) {
 				deleteFile(img_v);
 			}
 		}
