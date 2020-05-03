@@ -55,8 +55,7 @@ public class StrongService {
 	private Map<Integer, Double> M_SZ2 = new ConcurrentHashMap<Integer, Double>();
 	private Map<Integer, Double> M_SZ3 = new ConcurrentHashMap<Integer, Double>();
 
-	private synchronized Map<Integer, Double> getIndexMap(String code, int chkDate) {
-
+	private Map<Integer, Double> getIndexMap(String code, int chkDate) {
 		String index = this.getIndex(code);
 		Map<Integer, Double> cache = null;
 		switch (index) {
@@ -85,7 +84,7 @@ public class StrongService {
 			for (int i = 0; i < array.size(); i++) {
 				JSONArray arr = array.getJSONArray(i);
 				// KEY:trade_date,VAL:pct_chg
-				cache.put(Integer.valueOf(arr.getString(0)), Double.valueOf(arr.getString(0)));
+				cache.put(Integer.valueOf(arr.getString(0)), Double.valueOf(arr.getString(1)));
 			}
 			return cache;
 		}

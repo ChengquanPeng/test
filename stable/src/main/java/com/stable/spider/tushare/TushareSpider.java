@@ -323,7 +323,7 @@ public class TushareSpider {
 	 * @param ts_code    ts代码
 	 * @param start_date 开始日期 (格式：YYYYMMDD)
 	 * @param end_date   结束日期 (格式：YYYYMMDD)
-	 * @return 如果都不填，单次默认返回2000条
+	 * @return 如果都不填，单次默认返回2000条 //pct_chg 涨幅
 	 */
 	private final String index_daily_fields = "trade_date,pct_chg,vol,amount";
 
@@ -331,7 +331,7 @@ public class TushareSpider {
 		try {
 			JSONObject json = new JSONObject();
 			json.put("api_name", "index_daily");
-			json.put("params", JSON.parse("{'ts_code':'" + ts_code + "','start_date':'20150101'}"));//started 20150101
+			json.put("params", JSON.parse("{'ts_code':'" + ts_code + "','start_date':'20150101'}"));// started 20150101
 			json.put("fields", index_daily_fields);
 			String result = post(json);
 			JSONObject datas = JSON.parseObject(result);

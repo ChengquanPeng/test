@@ -70,7 +70,6 @@ public class ModelV1UpService {
 	private TushareSpider tushareSpider;
 
 	public synchronized void runJob(int date) {
-
 		if (date == 0) {
 			int today = Integer.valueOf(DateUtil.formatYYYYMMDD(new Date()));
 			String strDate = redisUtil.get(RedisConstant.RDS_MODEL_V1_DATE);
@@ -131,9 +130,6 @@ public class ModelV1UpService {
 			}
 			for (StrategyListener sl : list) {
 				sl.fulshToFile();
-			}
-			if (saveList.size() > 0) {
-				esModelV1Dao.saveAll(saveList);
 			}
 			log.info("saveList size:{}", saveList.size());
 			if (saveList.size() > 0) {
