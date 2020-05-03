@@ -165,16 +165,12 @@ public class TickDataService {
 											public void running() {
 												try {
 													log.info("running index:{}", index);
-													int fetchResult = -1;
-													if (sumTickData(d, html) == 1) {
+													int fetchResult = 0;
+													if (sumTickData(d, html)) {
 														fetchResult = 1;
-													} else {
-														fetchResult = 0;
 													}
-													if (d.getFetchTickData() != fetchResult) {
-														d.setFetchTickData(fetchResult);
-														batch.add(d);
-													}
+													d.setFetchTickData(fetchResult);
+													batch.add(d);
 													saveData(false);
 												} catch (Exception e) {
 													e.printStackTrace();
@@ -308,7 +304,9 @@ public class TickDataService {
 	/**
 	 * 统计每天
 	 */
-	public int sumTickData(DaliyBasicInfo base, boolean html) {
+	public boolean sumTickData(DaliyBasicInfo base, boolean html) {
+		daliyBasicHistroyService.getDailyData(base);
+
 		String code = base.getCode();
 		int date = base.getTrade_date();
 
@@ -321,14 +319,12 @@ public class TickDataService {
 			log.warn("getTickData：{}，未获取到数据 params：{}", code, code + " " + date);
 			if (lines != null && !lines.isEmpty()) {
 				log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
-				return -1;
 			}
-			return 0;
+			return false;
 		}
 //		ThreadsUtil.sleepRandomSecBetween1And5();
 
 		// 获取日线交易数据
-		daliyBasicHistroyService.getDailyData(base);
 		lines.remove(lines.size() - 1);// 最后一条是空的
 		log.info("getTickData：{}，获取到数据 date：{},数据条数:{}", code, date, lines.size());
 		TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines, html);
@@ -336,7 +332,7 @@ public class TickDataService {
 			tickdataList.add(tickdatasum);
 		}
 		// log.info(tickdatasum.toString());
-		return 1;
+		return true;
 	}
 
 	@Data
