@@ -48,7 +48,7 @@ public class ImageContoller {
 		JsonResult r = new JsonResult();
 		try {
 			r.setStatus(JsonResult.OK);
-			r.setResult(imageService.compareImage(image1, image2));
+			r.setResult(imageService.compareImageWithoutPath(image1, image2));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

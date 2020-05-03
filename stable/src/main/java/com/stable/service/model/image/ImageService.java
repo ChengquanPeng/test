@@ -61,7 +61,7 @@ public class ImageService {
 		for (ImageChkGroup icg : list) {
 			int result = 0;
 			String img_p = this.genPriceImage(code, startDate, endDate, icg.getRecordsSize());
-			double psimilarity = this.compareImage(img_p, icg.getStandardImgp());
+			double psimilarity = this.compareImage(imageFolder + img_p, icg.getStandardImgp());
 			log.info("code={},imgpurl={}, price相似度得分={},是否OK={}", code, img_p, psimilarity,
 					(psimilarity >= icg.getChecklinep()));
 			if (psimilarity >= icg.getChecklinep()) {
@@ -168,9 +168,12 @@ public class ImageService {
 		return filename;
 	}
 
+	public double compareImageWithoutPath(String image1, String image2) {
+		return compareImage(imageFolder + image1, imageFolder + image2);
+	}
+
 	public double compareImage(String image1, String image2) {
-		return Double.valueOf(String.format("%.2f",
-				ImageCompareSimilarityUtil.getSimilarity(imageFolder + image1, imageFolder + image2)));
+		return Double.valueOf(String.format("%.2f", ImageCompareSimilarityUtil.getSimilarity(image1, image2)));
 	}
 
 	public void deletePastDateFile() {
