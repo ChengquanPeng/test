@@ -1,6 +1,5 @@
 package com.stable;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ImportResource;
@@ -18,12 +17,11 @@ public class StableApplication {
 		System.setProperty("es.set.netty.runtime.available.processors", "false");
 		if (OSystemUtil.isWindows()) {
 			log.info("OS System is WINDOWS");
-			SpringApplicationBuilder builder = new SpringApplicationBuilder(StableApplication.class);
-			builder.headless(false).run(args);// 图形相关
 		} else {
 			log.info("OS System is LINUX");
-			SpringApplication.run(StableApplication.class, args);
 		}
+		new SpringApplicationBuilder(StableApplication.class).headless(false).run(args);
+		// SpringApplication.run(StableApplication.class, args);
 	}
 
 }

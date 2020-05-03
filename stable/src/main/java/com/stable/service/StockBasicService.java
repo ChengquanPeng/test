@@ -147,6 +147,7 @@ public class StockBasicService {
 	 * 上市超一年
 	 */
 	public boolean online1Year(String code) {
+		getCodeName(code);// 同步code
 		StockBaseInfo base = JSON.parseObject(redisUtil.get(code), StockBaseInfo.class);
 		String listDate = base.getList_date();
 		Integer year = Integer.valueOf(listDate.substring(0, 4));

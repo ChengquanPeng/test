@@ -42,7 +42,7 @@ public class PythonCallUtil {
 				sb.add(line);
 			}
 			proc.waitFor();
-			//int r = proc.waitFor();
+			// int r = proc.waitFor();
 			// log.info("call Python Script Cmd:{}，proc.waitFor：{}", cmd, r);
 			return sb;
 		} catch (Exception e) {
@@ -61,6 +61,21 @@ public class PythonCallUtil {
 				} catch (IOException e) {
 				}
 			}
+
+		}
+	}
+
+	public synchronized static void callPythonScriptNoReturn(String pythonScriptPathAndFileName, String params) {
+		try {
+			String cmd = String.format(CALL_FORMAT, pythonScriptPathAndFileName, params);
+			System.err.println("call Python Script Cmd:" + cmd);
+			Process proc = Runtime.getRuntime().exec(cmd);
+			proc.waitFor();
+			// log.info("call Python Script Cmd:{}，proc.waitFor：{}", cmd, r);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} finally {
 
 		}
 	}

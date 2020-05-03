@@ -69,7 +69,8 @@ public class ModelV1UpService {
 	@Autowired
 	private TushareSpider tushareSpider;
 
-	public void runJob(int date) {
+	public synchronized void runJob(int date) {
+
 		if (date == 0) {
 			int today = Integer.valueOf(DateUtil.formatYYYYMMDD(new Date()));
 			String strDate = redisUtil.get(RedisConstant.RDS_MODEL_V1_DATE);
@@ -81,6 +82,7 @@ public class ModelV1UpService {
 			}
 			while (true) {
 				if (tradeCalService.isOpen(date)) {
+					log.info("processing date={}", date);
 					run(date);
 				} else {
 					log.info("{}非交易日", date);
@@ -100,6 +102,7 @@ public class ModelV1UpService {
 				log.info("{}非交易日", date);
 				return;
 			}
+			log.info("processing date={}", date);
 			run(date);
 		}
 	}
@@ -189,9 +192,13 @@ public class ModelV1UpService {
 			return false;
 		}
 		String code = mv1.getCode();
-		log.info("model 1 processing for code:{}", code);
+		log.info("model V1 processing for code:{}", code);
 		// 1强势:次数和差值:3/5/10/20/120/250天
 		DaliyBasicInfo lastDate = strongService.checkStrong(mv1, sv);
+		if (lastDate == null) {
+			return false;
+		}
+
 		// 2交易方向:次数和差值:3/5/10/20/120/250天
 		// 3程序单:次数:3/5/10/20/120/250天
 		tickDataService.tickDataCheck(mv1, wv, queryPage);
@@ -219,7 +226,8 @@ public class ModelV1UpService {
 		}
 	}
 
-	public List<ModelV1> getListByCode(String code, String date, String score,String imageIndex, EsQueryPageReq querypage) {
+	public List<ModelV1> getListByCode(String code, String date, String score, String imageIndex,
+			EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));

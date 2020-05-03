@@ -16,7 +16,7 @@ import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ImageCompareSimilarityUtil;
-import com.stable.utils.ImageGeneratingUtil;
+import com.stable.utils.ImageGeneratingByPythonUtil;
 import com.stable.vo.ImageData;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
@@ -28,6 +28,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ImageService {
 
+	private static final String PIC = ".png";
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
@@ -40,6 +41,9 @@ public class ImageService {
 
 	private final EsQueryPageReq all = new EsQueryPageReq(10000);
 	List<ImageChkGroup> list = new LinkedList<ImageChkGroup>();
+
+	@Autowired
+	private ImageGeneratingByPythonUtil imageGeneratingByPythonUtil;
 
 	@PostConstruct
 	private void load() {
@@ -142,11 +146,11 @@ public class ImageService {
 	}
 
 	public String getFileName(String code, String typeName, String date) {
-		return code + "_" + date + "_" + typeName + ".jpg";
+		return code + "_" + date + "_" + typeName + PIC;
 	}
 
 	public String getFileName(String code, String typeName, int date) {
-		return code + "_" + date + "_" + typeName + ".jpg";
+		return code + "_" + date + "_" + typeName + PIC;
 	}
 
 	private String getFileName(String code, String typeName, Date date) {
@@ -159,7 +163,8 @@ public class ImageService {
 
 	private String generateImages(String code, String typeName, List<ImageData> data) {
 		String filename = this.getFileName(code, typeName, data.get(data.size() - 1).getDate());
-		ImageGeneratingUtil.generateImages(imageFolder + filename, data);
+//		ImageGeneratingUtil.generateImages(imageFolder + filename, data);
+		imageGeneratingByPythonUtil.generateImages(imageFolder + filename, data);
 		return filename;
 	}
 

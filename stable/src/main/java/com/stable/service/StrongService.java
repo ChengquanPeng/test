@@ -40,6 +40,8 @@ public class StrongService {
 			return INDEX_SH;
 		} else if (code.startsWith("000")) {
 			return INDEX_SZ1;
+		} else if (code.startsWith("001")) {
+			return INDEX_SZ1;
 		} else if (code.startsWith("002")) {
 			return INDEX_SZ2;
 		} else if (code.startsWith("3")) {
@@ -96,6 +98,10 @@ public class StrongService {
 		Map<Integer, Double> cache = this.getIndexMap(code, mv1.getDate());
 
 		List<DaliyBasicInfo> list = daliyBasicHistroyService.queryListByCode(code, null, null, queryPage).getContent();
+		if (list.size() < 5) {
+			log.warn("checkStrong get size<5");
+			return null;
+		}
 		// check-3
 		int strongTimes3 = 0;
 		int index = 3;
@@ -135,6 +141,9 @@ public class StrongService {
 		sv.setStrongTimes5(strongTimes5);
 		sv.setStrongDef5(strongDef5);
 		// check-10
+		if (list.size() < 10) {
+			return list.get(list.size() - 1);
+		}
 		index = 10;
 		int strongTimes10 = 0;
 		for (int i = 0; i < index; i++) {
@@ -145,6 +154,9 @@ public class StrongService {
 		}
 		sv.setStrongTimes10(strongTimes10);
 		// check-20
+		if (list.size() < 20) {
+			return list.get(list.size() - 1);
+		}
 		index = 20;
 		int strongTimes20 = 0;
 		for (int i = 0; i < index; i++) {

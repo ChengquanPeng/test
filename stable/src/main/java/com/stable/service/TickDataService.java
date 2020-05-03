@@ -87,7 +87,7 @@ public class TickDataService {
 		return daliyBasicHistroyService.startDate;
 	}
 
- 	public void resetTickDataStatus() {
+	public void resetTickDataStatus() {
 		EsQueryPageReq queryPage = new EsQueryPageReq();
 		queryPage.setPageNum(1);
 		queryPage.setPageSize(1000);
@@ -222,8 +222,12 @@ public class TickDataService {
 			lis.get();
 			if (isJobSource) {
 				log.info("等待执行模型。。");
-				upLevel1Service.runJob(0);
-				log.info("等待执行模型完成");
+				try {
+					upLevel1Service.runJob(0);
+					log.info("模型执行完成");
+				} catch (Exception e) {
+					WxPushUtil.pushSystem1("模型运行异常..");
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -703,7 +707,9 @@ public class TickDataService {
 	public void tickDataCheck(ModelV1 mv1, TickDataV1Vo wv, EsQueryPageReq queryPage) {
 		String code = mv1.getCode();
 		List<TickDataBuySellInfo> list = this.list(code, null, null, queryPage);
-
+		if (list.size() < 5) {
+			return;
+		}
 		// check-3
 		int wayTimes3 = 0;
 		int index = 3;
@@ -741,6 +747,9 @@ public class TickDataService {
 		wv.setWayDef5(wayDef5);
 		wv.setPgmTimes5(pgmTimes5);
 		// check-10
+		if (list.size() < 10) {
+			return;
+		}
 		int wayTimes10 = 0;
 		index = 10;
 		long wayDef10 = 0;
@@ -760,6 +769,9 @@ public class TickDataService {
 		wv.setPgmTimes10(pgmTimes10);
 
 		// check-20
+		if (list.size() < 20) {
+			return;
+		}
 		int wayTimes20 = 0;
 		index = 20;
 		long wayDef20 = 0;

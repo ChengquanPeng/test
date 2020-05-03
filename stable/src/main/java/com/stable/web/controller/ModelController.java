@@ -9,8 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stable.service.model.v1.ModelV1UpService;
 import com.stable.vo.http.JsonResult;
 
+import lombok.extern.log4j.Log4j2;
+
 @RequestMapping("/model")
 @RestController
+@Log4j2
 public class ModelController {
 
 	@Autowired
@@ -23,6 +26,7 @@ public class ModelController {
 	public ResponseEntity<JsonResult> run(String date) {
 		JsonResult r = new JsonResult();
 		try {
+			log.info("request date={}", date);
 			upLevel1Service.runJob(Integer.valueOf(date));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
