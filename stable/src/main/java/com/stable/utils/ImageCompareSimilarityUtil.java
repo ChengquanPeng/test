@@ -29,6 +29,24 @@ public class ImageCompareSimilarityUtil {
 		}
 	}
 
+	public static double getSimilarity(String file1, int[] pixels2) {
+		try {
+			return getSimilarity(new File(file1), pixels2);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static double getSimilarity(File file1, int[] pixels2) throws IOException {
+		int[] pixels1 = getImgFinger(file1);
+// 获取两个图的汉明距离（假设另一个图也已经按上面步骤得到灰度比较数组）
+		int hammingDistance = getHammingDistance(pixels1, pixels2);
+// 通过汉明距离计算相似度，取值范围 [0.0, 1.0]
+		double similarity = calSimilarity(hammingDistance) * 100;
+		// System.out.println("相似度:" + similarity + "%");
+		return similarity;
+	}
+
 	public static double getSimilarity(File file1, File file2) throws IOException {
 		int[] pixels1 = getImgFinger(file1);
 		int[] pixels2 = getImgFinger(file2);
@@ -40,7 +58,7 @@ public class ImageCompareSimilarityUtil {
 		return similarity;
 	}
 
-	private static int[] getImgFinger(File imageFile) throws IOException {
+	public static int[] getImgFinger(File imageFile) throws IOException {
 		Image image = ImageIO.read(imageFile);
 // 转换至灰度
 		image = toGrayscale(image);

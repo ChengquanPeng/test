@@ -11,5 +11,6 @@ public class ImageChkGroup {
 	private double checklinep = 99.0;
 	private double checklinev = 99.0;
 	private int recordsSize = 0;
-
+	private int[] pixels2p;
+	private int[] pixels2v;
 }

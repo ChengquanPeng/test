@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,30 +59,37 @@ public class ImageService {
 	// 返回格式： index1:1,index2:1,index3:2,
 	public String checkImg(String code, int startDate, int endDate, boolean delete) {
 		String str = "";
+		String img_p = null;
+		String img_v = null;
 		for (ImageChkGroup icg : list) {
 			int result = 0;
-			String img_p = this.genPriceImage(code, startDate, endDate, icg.getRecordsSize());
-			double psimilarity = this.compareImage(imageFolder + img_p, icg.getStandardImgp());
-			log.info("code={},imgpurl={}, price相似度得分={},是否OK={}", code, img_p, psimilarity,
-					(psimilarity >= icg.getChecklinep()));
+			if (StringUtils.isBlank(img_p)) {
+				img_p = this.genPriceImage(code, startDate, endDate, icg.getRecordsSize());
+			}
+			double psimilarity = this.compareImage(imageFolder + img_p, icg.getPixels2p());
+			log.info("P标准std image id={},code={},imgpurl={}, price相似度得分={},是否OK={}", icg.getId(), code, img_p,
+					psimilarity, (psimilarity >= icg.getChecklinep()));
 			if (psimilarity >= icg.getChecklinep()) {
-				String img_v = this.genVolumeImage(code, startDate, endDate, icg.getRecordsSize());
-				double vsimilarity = this.compareImage(img_p, icg.getStandardImgv());
-				log.info("code={},imgpurl={}, volume相似度得分={},是否OK={}", code, img_v, vsimilarity,
-						(vsimilarity >= icg.getChecklinev()));
+				if (StringUtils.isBlank(img_v)) {
+					img_v = this.genVolumeImage(code, startDate, endDate, icg.getRecordsSize());
+				}
+				double vsimilarity = this.compareImage(img_p, icg.getPixels2v());
+				log.info("V标准std image id={}, code={},imgpurl={}, volume相似度得分={},是否OK={}", icg.getId(), code, img_v,
+						vsimilarity, (vsimilarity >= icg.getChecklinev()));
 				if (vsimilarity >= icg.getChecklinev()) {
 					result = 2;
 				}
 				result = 1;
 
-				if (delete) {
-					deleteFile(img_v);
-				}
-
 				str += "index" + icg.getId() + ":" + result + ",";
 			}
-			if (delete) {
+		}
+		if (delete) {
+			if (StringUtils.isBlank(img_p)) {
 				deleteFile(img_p);
+			}
+			if (StringUtils.isBlank(img_v)) {
+				deleteFile(img_v);
 			}
 		}
 		return str;
@@ -170,6 +178,10 @@ public class ImageService {
 
 	public double compareImageWithoutPath(String image1, String image2) {
 		return compareImage(imageFolder + image1, imageFolder + image2);
+	}
+
+	public double compareImage(String image1, int[] pixels2) {
+		return Double.valueOf(String.format("%.2f", ImageCompareSimilarityUtil.getSimilarity(image1, pixels2)));
 	}
 
 	public double compareImage(String image1, String image2) {
