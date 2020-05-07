@@ -185,7 +185,7 @@ public class DaliyTradeHistroyService {
 			}
 			return false;
 		}
-		log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，获取到数据 条数：szie:{}，", code, lines.size());
+		log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，获取到数据 条数：szie:{}，", code, lines.size() - 1);
 		TradeHistInfoDaliy last = null;
 		List<TradeHistInfoDaliy> list = new LinkedList<TradeHistInfoDaliy>();
 		for (String line : lines) {

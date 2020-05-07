@@ -11,7 +11,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class FileWriteUitl {
 
-	public static final String LINE = "\n";
+	public static final String LINE_FILE = "\n";
+	public static final String LINE_HTML = "</br>";
 	private final File file;
 	private final FileOutputStream fos;
 	private final FileChannel channel;
@@ -40,7 +41,7 @@ public class FileWriteUitl {
 
 	public void writeLine(String s) {
 		try {
-			s += LINE;
+			s += LINE_FILE;
 			ByteBuffer buf = ByteBuffer.wrap(s.toString().getBytes());
 			buf.put(s.toString().getBytes());
 			buf.flip();

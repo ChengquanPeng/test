@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.stable.config.SpringConfig;
 import com.stable.service.model.StrategyListener;
-import com.stable.utils.DateUtil;
 import com.stable.utils.FileWriteUitl;
 import com.stable.utils.SpringUtil;
 import com.stable.vo.up.strategy.ModelV1;
@@ -16,6 +15,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class V1SortStrategyListener implements StrategyListener {
+	private String header = "<table><tr>";
 
 	private List<ModelV1> set = new LinkedList<ModelV1>();
 
@@ -27,25 +27,50 @@ public class V1SortStrategyListener implements StrategyListener {
 		}
 	}
 
+	public V1SortStrategyListener() {
+		String[] s = { "序号", "代码", "日期", "综合评分", "均线评分", "图形匹配成功", "短期强势评分", "程序单评分", "买卖评分", "价格指数", "详情ID" };
+		for (int i = 0; i < s.length; i++) {
+			header += this.getHTML(s[i]);
+		}
+		header += "</tr>";
+	}
+
 	public void fulshToFile() {
 		log.info("List<ModelV1> size:{}", set.size());
 		if (set.size() > 0) {
-			SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
-			String filepath = efc.getModelV1SortFloder() + "sort_v1_" + DateUtil.getTodayYYYYMMDDHHMMSS_NOspit()
-					+ ".txt";
-			FileWriteUitl fw = new FileWriteUitl(filepath, true);
-			StringBuffer sb = new StringBuffer();
 			sort();
+			SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
+			String filepath = efc.getModelV1SortFloder() + "sort_v1_" + set.get(0).getDate()
+					+ ".html";
+			FileWriteUitl fw = new FileWriteUitl(filepath, true);
+			StringBuffer sb = new StringBuffer(header);
+
+			int index = 1;
+
 			for (ModelV1 mv : set) {
-				sb.append(String.format(
-						"代码:%s,日期:%s,综合评分:%s,均线评分:%s,图形匹配成功:%s,短期强势评分:%s,程序单评分:%s,买卖评分:%s,价格指数:%s,详情ID:%s",
-						mv.getCode(), mv.getDate(), mv.getScore(), mv.getAvgIndex(),
-						(mv.getImageIndex() == 1 ? "Y" : "N"), mv.getSortStrong(), mv.getSortPgm(), mv.getSortWay(),
-						mv.getPriceIndex(), mv.getId())).append(FileWriteUitl.LINE);
+				sb.append("<tr>")
+				.append(getHTML(index))
+				.append(getHTML(mv.getCode()))
+				.append(getHTML(mv.getDate()))
+				.append(getHTML(mv.getScore()))
+				.append(getHTML(mv.getAvgIndex()))
+				.append(getHTML(mv.getImageIndex() == 1 ? "Y" : "N"))
+				.append(getHTML(mv.getSortStrong()))
+				.append(getHTML(mv.getSortPgm()))
+				.append(getHTML(mv.getSortWay()))
+				.append(getHTML(mv.getPriceIndex()))
+				.append(getHTML(mv.getId()))
+				.append("</tr>");
+				index++;
 			}
+			sb.append("</table>");
 			fw.writeLine(sb.toString());
 			fw.close();
 		}
+	}
+
+	private String getHTML(Object text) {
+		return "<td>" + text + "</td>";
 	}
 
 	private void sort() {

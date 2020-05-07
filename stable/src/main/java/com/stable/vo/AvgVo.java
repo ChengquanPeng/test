@@ -4,8 +4,6 @@ import lombok.Data;
 
 @Data
 public class AvgVo {
-	// 1强势:短中长期强势=>次数和差值:3/5/10/20/120/250天
-
 	private double avgIndex3;
 	private double avgIndex5;
 	private double avgIndex10;

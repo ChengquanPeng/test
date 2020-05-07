@@ -220,7 +220,8 @@ public class TickDataService {
 				log.info("等待执行模型。。");
 				try {
 					upLevel1Service.runJob(0);
-					log.info("模型执行完成");
+					log.info("MV1模型执行完成");
+					WxPushUtil.pushSystem1("MV1模型执行完成");
 				} catch (Exception e) {
 					WxPushUtil.pushSystem1("模型运行异常..");
 				}
@@ -305,6 +306,7 @@ public class TickDataService {
 	 * 统计每天
 	 */
 	public boolean sumTickData(DaliyBasicInfo base, boolean html) {
+		// 获取日线交易数据
 		daliyBasicHistroyService.getDailyData(base);
 
 		String code = base.getCode();
@@ -315,7 +317,7 @@ public class TickDataService {
 		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
 		// List<String> lines = PythonCallUtil.callPythonScriptByServerTickData(code,
 		// date + "");
-		if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
+		if (lines == null || lines.isEmpty() || lines.size() < 10 || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
 			log.warn("getTickData：{}，未获取到数据 params：{}", code, code + " " + date);
 			if (lines != null && !lines.isEmpty()) {
 				log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
@@ -324,8 +326,10 @@ public class TickDataService {
 		}
 //		ThreadsUtil.sleepRandomSecBetween1And5();
 
-		// 获取日线交易数据
 		lines.remove(lines.size() - 1);// 最后一条是空的
+		if (lines.get(0).startsWith("http")) {
+			lines.remove(0);// 第一条是：http://stock.gtimg.cn/data/index.php?appn=detail&action=download&c=sz002376&d=20200430
+		}
 		log.info("getTickData：{}，获取到数据 date：{},数据条数:{}", code, date, lines.size());
 		TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines, html);
 		if (tickdatasum != null) {
