@@ -44,7 +44,7 @@ public class V1SortStrategyListener implements StrategyListener {
 					+ ".html";
 			FileWriteUitl fw = new FileWriteUitl(filepath, true);
 			StringBuffer sb = new StringBuffer(header);
-
+			sb.append(FileWriteUitl.LINE_FILE);
 			int index = 1;
 
 			for (ModelV1 mv : set) {
@@ -60,7 +60,8 @@ public class V1SortStrategyListener implements StrategyListener {
 				.append(getHTML(mv.getSortWay()))
 				.append(getHTML(mv.getPriceIndex()))
 				.append(getHTML(mv.getId()))
-				.append("</tr>");
+				.append("</tr>")
+				.append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
 			sb.append("</table>");

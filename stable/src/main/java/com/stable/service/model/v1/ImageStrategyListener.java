@@ -37,7 +37,7 @@ public class ImageStrategyListener implements StrategyListener {
 			for (int i = 0; i < set.size(); i++) {
 				ModelV1 mv = set.get(i);
 				sb.append(String.format("代码:%s,日期:%s,匹配图形:%s", mv.getCode(), mv.getDate(), ress.get(i)))
-						.append(FileWriteUitl.LINE_HTML);
+						.append(FileWriteUitl.LINE_HTML).append(FileWriteUitl.LINE_FILE);
 			}
 			fw.writeLine(sb.toString());
 			fw.close();
