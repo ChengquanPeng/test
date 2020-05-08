@@ -107,6 +107,7 @@ public class StrongService {
 		int strongDef3 = 0;
 		double base = 0d;
 		double stock = 0d;
+
 		for (int i = 0; i < index; i++) {
 			DaliyBasicInfo db = list.get(i);
 			if (db.getTodayChangeRate() > cache.get(db.getTrade_date())) {
@@ -120,6 +121,36 @@ public class StrongService {
 		}
 		sv.setStrongTimes3(strongTimes3);
 		sv.setStrongDef3(strongDef3);
+		// ======= 短线交易量指标 =======
+		int volIndex = 0;
+		DaliyBasicInfo d3 = list.get(0);
+		DaliyBasicInfo d2 = list.get(1);
+		DaliyBasicInfo d1 = list.get(2);
+		// 3天连续放量
+		if (d3.getVol() > d2.getVol() && d2.getVol() > d1.getVol()) {
+			volIndex += 5;
+		}
+		// 突然放量
+		if (d3.getVol() > d2.getVol()) {
+			long half = d2.getVol() / 2;
+			if (d3.getVol() >= (d2.getVol() + half)) {
+				volIndex += 5;
+			}
+		}
+		// 流通市值50亿 && 流通换手率超过5%
+		if (d3.getCirc_mv() < 500000) {
+			if (d3.getTurnover_rate_f() >= 4.9) {
+				volIndex += 5;
+			}
+			// 流通市值100亿 && 流通换手率超过4%
+		} else if (d3.getCirc_mv() < 1000000) {
+			if (d3.getTurnover_rate_f() >= 3.9) {
+				volIndex += 5;
+			}
+		}
+		mv1.setVolIndex(volIndex);
+		// ======= 短线交易量指标 =======
+
 		// check-5
 		int strongTimes5 = 0;
 		index = 5;

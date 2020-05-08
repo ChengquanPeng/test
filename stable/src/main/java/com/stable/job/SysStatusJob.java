@@ -28,9 +28,9 @@ public class SysStatusJob implements SimpleJob {
 		try {
 			runLogService.queryRunlogs(null, null, page);
 		} catch (Exception e) {
+			e.printStackTrace();
 			WxPushUtil.pushSystem1("系统异常，正在重启...");
 			OSystemUtil.restart();
-			e.printStackTrace();
 		}
 	}
 }

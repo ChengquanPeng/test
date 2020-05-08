@@ -53,18 +53,18 @@ public class AvgService {
 							&& av.getAvgIndex10() >= av.getAvgIndex20() && av.getAvgIndex20() >= av.getAvgIndex30()
 							&& av.getAvgIndex30() >= av.getAvgIndex120()
 							&& av.getAvgIndex120() >= av.getAvgIndex250()) {
-						mv1.setAvgIndex(10);
+						mv1.setAvgIndex(15);
 						return;
 					}
 				}
 				if (av.getAvgIndex3() >= av.getAvgIndex5() && av.getAvgIndex5() >= av.getAvgIndex10()
 						&& av.getAvgIndex10() >= av.getAvgIndex20() && av.getAvgIndex20() >= av.getAvgIndex30()) {
-					mv1.setAvgIndex(9);
+					mv1.setAvgIndex(12);
 					return;
 				}
 				if (av.getAvgIndex3() >= av.getAvgIndex5() && av.getAvgIndex5() >= av.getAvgIndex10()
 						&& av.getAvgIndex10() >= av.getAvgIndex20()) {
-					mv1.setAvgIndex(8);
+					mv1.setAvgIndex(10);
 					return;
 				}
 
@@ -77,11 +77,11 @@ public class AvgService {
 				double max = Collections.max(list);
 				double min = Collections.min(list);
 				if (min >= CurrencyUitl.lowestPrice(max, true)) {// 最高价和最低价在5%以内的
-					mv1.setAvgIndex(2);
+					mv1.setAvgIndex(5);
 					return;
 				}
 				if (min >= CurrencyUitl.lowestPrice(max, false)) {// 最高价和最低价在10%以内的
-					mv1.setAvgIndex(1);
+					mv1.setAvgIndex(4);
 					return;
 				}
 			} catch (Exception e) {

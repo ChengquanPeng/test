@@ -145,7 +145,7 @@ public class ModelV1UpService {
 		StrongVo sv = new StrongVo();
 		TickDataV1Vo wv = new TickDataV1Vo();
 		AvgVo av = new AvgVo();
-		if (getInputData(mv1, sv, wv, av)) {
+		if (getDataAndRunIndexs(mv1, sv, wv, av)) {
 			String str = imageService.checkImg(mv1.getCode(), mv1.getDate());
 			if (StringUtils.isNotBlank(str)) {
 				if (str.contains(ImageService.MATCH_L2)) {
@@ -169,6 +169,7 @@ public class ModelV1UpService {
 		int r = 0;
 		// 1.均线指数排序
 		r += mv.getAvgIndex();// 10,9,8,2,1
+		r += mv.getVolIndex();// 短线量
 		// 2.强势指数排序
 		r += mv.getSortStrong();// 1,3
 		// 3.图形比较 1,0
@@ -181,15 +182,21 @@ public class ModelV1UpService {
 		if (r > 0) {
 			if (mv.getSortPgm() > 0) {// 3.程序单
 				r++;
+				if (mv.getSortPgm() > 1) {
+					r++;
+				}
 			}
 			if (mv.getSortWay() > 0) {// 4.交易方向
 				r++;
+				if (mv.getSortWay() > 1) {
+					r++;
+				}
 			}
 		}
 		return r;
 	}
 
-	private boolean getInputData(ModelV1 mv1, StrongVo sv, TickDataV1Vo wv, AvgVo av) {
+	private boolean getDataAndRunIndexs(ModelV1 mv1, StrongVo sv, TickDataV1Vo wv, AvgVo av) {
 		if (!stockBasicService.online1Year(mv1.getCode())) {
 			log.info("Online 不足1年，code={}", mv1.getCode());
 			return false;
@@ -206,7 +213,9 @@ public class ModelV1UpService {
 		// 3程序单:次数:3/5/10/20/120/250天
 		tickDataService.tickDataCheck(mv1, wv, queryPage);
 		this.priceIndex(mv1);
+		// 均价
 		avgService.checkAvg(mv1, lastDate.getTrade_date(), av);
+		// 量
 		mv1.setId(code + mv1.getDate());
 		log.info(sv);
 		log.info(wv);

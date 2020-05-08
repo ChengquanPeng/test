@@ -46,6 +46,8 @@ public class ModelV1 {
 	// 4均线:指数:3/5/10/20/120/250天
 	@Field(type = FieldType.Integer)
 	private int avgIndex = 0;
+	@Field(type = FieldType.Integer)
+	private int volIndex = 0;
 	// 价格底部指数
 	@Field(type = FieldType.Integer)
 	private int priceIndex = 0;

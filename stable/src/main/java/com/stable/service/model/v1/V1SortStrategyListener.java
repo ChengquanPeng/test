@@ -28,7 +28,8 @@ public class V1SortStrategyListener implements StrategyListener {
 	}
 
 	public V1SortStrategyListener() {
-		String[] s = { "序号", "代码", "日期", "综合评分", "均线评分", "图形匹配成功", "短期强势评分", "程序单评分", "买卖评分", "价格指数", "详情ID" };
+		String[] s = { "序号", "代码", "日期", "综合评分", "价格均线评分", "交易量评分", "图形匹配成功", "短期强势评分", "程序单评分", "买卖评分", "价格指数",
+				"详情ID" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTML(s[i]);
 		}
@@ -40,28 +41,19 @@ public class V1SortStrategyListener implements StrategyListener {
 		if (set.size() > 0) {
 			sort();
 			SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
-			String filepath = efc.getModelV1SortFloder() + "sort_v1_" + set.get(0).getDate()
-					+ ".html";
+			String filepath = efc.getModelV1SortFloder() + "sort_v1_" + set.get(0).getDate() + ".html";
 			FileWriteUitl fw = new FileWriteUitl(filepath, true);
 			StringBuffer sb = new StringBuffer(header);
 			sb.append(FileWriteUitl.LINE_FILE);
 			int index = 1;
 
 			for (ModelV1 mv : set) {
-				sb.append("<tr>")
-				.append(getHTML(index))
-				.append(getHTML(mv.getCode()))
-				.append(getHTML(mv.getDate()))
-				.append(getHTML(mv.getScore()))
-				.append(getHTML(mv.getAvgIndex()))
-				.append(getHTML(mv.getImageIndex() == 1 ? "Y" : "N"))
-				.append(getHTML(mv.getSortStrong()))
-				.append(getHTML(mv.getSortPgm()))
-				.append(getHTML(mv.getSortWay()))
-				.append(getHTML(mv.getPriceIndex()))
-				.append(getHTML(mv.getId()))
-				.append("</tr>")
-				.append(FileWriteUitl.LINE_FILE);
+				sb.append("<tr>").append(getHTML(index)).append(getHTML(mv.getCode())).append(getHTML(mv.getDate()))
+						.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgIndex()))
+						.append(getHTML(mv.getVolIndex())).append(getHTML(mv.getImageIndex() == 1 ? "Y" : "N"))
+						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
+						.append(getHTML(mv.getSortWay())).append(getHTML(mv.getPriceIndex()))
+						.append(getHTML(mv.getId())).append("</tr>").append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
 			sb.append("</table>");
