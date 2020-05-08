@@ -223,6 +223,8 @@ public class TickDataService {
 					log.info("MV1模型执行完成");
 					WxPushUtil.pushSystem1("MV1模型执行完成");
 				} catch (Exception e) {
+					e.printStackTrace();
+					ErrorLogFileUitl.writeError(e, "模型运行异常", "", "");
 					WxPushUtil.pushSystem1("模型运行异常..");
 				}
 			}
