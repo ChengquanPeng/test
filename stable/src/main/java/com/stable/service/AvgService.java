@@ -77,11 +77,19 @@ public class AvgService {
 				double max = Collections.max(list);
 				double min = Collections.min(list);
 				if (min >= CurrencyUitl.lowestPrice(max, true)) {// 最高价和最低价在5%以内的
-					mv1.setAvgIndex(5);
+					if (av.getAvgIndex3() >= av.getAvgIndex5() && av.getAvgIndex30() >= av.getAvgIndex3()
+							&& av.getAvgIndex30() >= av.getAvgIndex5() && av.getAvgIndex30() >= av.getAvgIndex10()
+							&& av.getAvgIndex30() >= av.getAvgIndex20()) {
+						mv1.setAvgIndex(5);
+					}
 					return;
 				}
 				if (min >= CurrencyUitl.lowestPrice(max, false)) {// 最高价和最低价在10%以内的
-					mv1.setAvgIndex(4);
+					if (av.getAvgIndex3() >= av.getAvgIndex5() && av.getAvgIndex30() >= av.getAvgIndex3()
+							&& av.getAvgIndex30() >= av.getAvgIndex5() && av.getAvgIndex30() >= av.getAvgIndex10()
+							&& av.getAvgIndex30() >= av.getAvgIndex20()) {
+						mv1.setAvgIndex(4);
+					}
 					return;
 				}
 			} catch (Exception e) {

@@ -22,7 +22,7 @@ public class V1SortStrategyListener implements StrategyListener {
 	public void condition(Object... obj) {
 		ModelV1 mv1 = (ModelV1) obj[0];
 		// 短期强势
-		if (mv1.getSortStrong() > 0) {
+		if (mv1.getSortStrong() > 0 && mv1.getAvgIndex() > 0 && mv1.getVolIndex() > 0) {
 			set.add(mv1);
 		}
 	}
@@ -33,7 +33,7 @@ public class V1SortStrategyListener implements StrategyListener {
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTML(s[i]);
 		}
-		header += "</tr>";
+		header += "</tr>" + FileWriteUitl.LINE_FILE;
 	}
 
 	public void fulshToFile() {
@@ -44,7 +44,6 @@ public class V1SortStrategyListener implements StrategyListener {
 			String filepath = efc.getModelV1SortFloder() + "sort_v1_" + set.get(0).getDate() + ".html";
 			FileWriteUitl fw = new FileWriteUitl(filepath, true);
 			StringBuffer sb = new StringBuffer(header);
-			sb.append(FileWriteUitl.LINE_FILE);
 			int index = 1;
 
 			for (ModelV1 mv : set) {
