@@ -32,7 +32,9 @@ import com.stable.service.model.StrategyListener;
 import com.stable.service.model.image.ImageService;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
+import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.AvgVo;
 import com.stable.vo.StrongVo;
 import com.stable.vo.TickDataV1Vo;
@@ -57,7 +59,6 @@ public class ModelV1UpService {
 	private PriceLifeService priceLifeService;
 	@Autowired
 	private AvgService avgService;
-	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 	@Autowired
 	private ImageService imageService;
 	@Autowired
@@ -70,40 +71,48 @@ public class ModelV1UpService {
 	private TushareSpider tushareSpider;
 
 	public synchronized void runJob(int date) {
-		if (date == 0) {
-			int today = Integer.valueOf(DateUtil.formatYYYYMMDD(new Date()));
-			String strDate = redisUtil.get(RedisConstant.RDS_MODEL_V1_DATE);
-			if (StringUtils.isBlank(strDate)) {// 无缓存，从当天开始
-				date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-			} else {// 缓存的日期是已经执行过，需要+1天
-				Date d = DateUtil.addDate(strDate, 1);
-				date = Integer.valueOf(DateUtil.formatYYYYMMDD(d));
-			}
-			while (true) {
-				if (tradeCalService.isOpen(date)) {
-					log.info("processing date={}", date);
-					run(date);
-				} else {
-					log.info("{}非交易日", date);
+		try {
+			if (date == 0) {
+				int today = Integer.valueOf(DateUtil.formatYYYYMMDD(new Date()));
+				String strDate = redisUtil.get(RedisConstant.RDS_MODEL_V1_DATE);
+				if (StringUtils.isBlank(strDate)) {// 无缓存，从当天开始
+					date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+				} else {// 缓存的日期是已经执行过，需要+1天
+					Date d = DateUtil.addDate(strDate, 1);
+					date = Integer.valueOf(DateUtil.formatYYYYMMDD(d));
 				}
-				// 缓存已经处理的日期
-				redisUtil.set(RedisConstant.RDS_MODEL_V1_DATE, date);
-				// 新增一天
-				Date d1 = DateUtil.addDate(date + "", 1);
-				date = Integer.valueOf(DateUtil.formatYYYYMMDD(d1));
-				if (date >= today) {
-					log.info("today:{},date:{} 循环结束", today, date);
+				while (true) {
+					if (tradeCalService.isOpen(date)) {
+						log.info("processing date={}", date);
+						run(date);
+					} else {
+						log.info("{}非交易日", date);
+					}
+					// 缓存已经处理的日期
+					redisUtil.set(RedisConstant.RDS_MODEL_V1_DATE, date);
+					// 新增一天
+					Date d1 = DateUtil.addDate(date + "", 1);
+					date = Integer.valueOf(DateUtil.formatYYYYMMDD(d1));
+					if (date >= today) {
+						log.info("today:{},date:{} 循环结束", today, date);
+						return;
+					}
+				}
+			} else {// 手动某一天
+				if (!tradeCalService.isOpen(date)) {
+					log.info("{}非交易日", date);
 					return;
 				}
+				log.info("processing date={}", date);
+				run(date);
 			}
-		} else {// 手动某一天
-			if (!tradeCalService.isOpen(date)) {
-				log.info("{}非交易日", date);
-				return;
-			}
-			log.info("processing date={}", date);
-			run(date);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ErrorLogFileUitl.writeError(e, "模型运行异常", "", "");
+			WxPushUtil.pushSystem1("模型运行异常..");
 		}
+		log.info("MV1模型执行完成");
+		WxPushUtil.pushSystem1("MV1模型执行完成");
 	}
 
 	private void run(int treadeDate) {
@@ -160,7 +169,10 @@ public class ModelV1UpService {
 					sl.condition(mv1, str, sv, wv, av);
 				}
 			}
-			saveList.add(mv1);
+			// 大于10分
+			if (mv1.getScore() >= 10) {
+				saveList.add(mv1);
+			}
 		}
 	}
 
@@ -172,6 +184,8 @@ public class ModelV1UpService {
 		r += mv.getVolIndex();// 短线量
 		// 2.强势指数排序
 		r += mv.getSortStrong();// 1,3
+		// 短期价格指数
+		r += mv.getSortPriceIndex();
 		// 3.图形比较 1,0
 		if (mv.getImageIndex() > 0) {
 			r += 5;// L1
@@ -179,19 +193,10 @@ public class ModelV1UpService {
 				r += 10;// L2
 			}
 		}
+
 		if (r > 0) {
-			if (mv.getSortPgm() > 0) {// 3.程序单
-				r++;
-				if (mv.getSortPgm() > 1) {
-					r++;
-				}
-			}
-			if (mv.getSortWay() > 0) {// 4.交易方向
-				r++;
-				if (mv.getSortWay() > 1) {
-					r++;
-				}
-			}
+			r += mv.getSortPgm();// 3.程序单
+			r += mv.getSortWay();// 4.交易方向
 		}
 		return r;
 	}
@@ -211,7 +216,7 @@ public class ModelV1UpService {
 
 		// 2交易方向:次数和差值:3/5/10/20/120/250天
 		// 3程序单:次数:3/5/10/20/120/250天
-		tickDataService.tickDataCheck(mv1, wv, queryPage);
+		tickDataService.tickDataCheck(mv1, wv);
 		this.priceIndex(mv1);
 		// 均价
 		avgService.checkAvg(mv1, lastDate.getTrade_date(), av);

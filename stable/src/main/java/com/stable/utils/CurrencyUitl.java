@@ -102,6 +102,20 @@ public class CurrencyUitl {
 		return result;
 	}
 
+	public final static double topPrice30(double preClosedPrice) {
+		preClosedPrice = preClosedPrice * 1.3;
+		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
+				.doubleValue();
+		return result;
+	}
+
+	public final static double topPrice50(double preClosedPrice) {
+		preClosedPrice = preClosedPrice * 1.5;
+		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
+				.doubleValue();
+		return result;
+	}
+
 	public final static double lowestPrice20(double preClosedPrice) {
 		preClosedPrice = preClosedPrice - preClosedPrice * 0.2;
 		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)

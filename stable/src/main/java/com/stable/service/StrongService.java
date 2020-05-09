@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.utils.CurrencyUitl;
 import com.stable.vo.StrongVo;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -95,8 +96,8 @@ public class StrongService {
 	public DaliyBasicInfo checkStrong(ModelV1 mv1, StrongVo sv) {
 		String code = mv1.getCode();
 		Map<Integer, Double> cache = this.getIndexMap(code, mv1.getDate());
-
-		List<DaliyBasicInfo> list = daliyBasicHistroyService.queryListByCode(code, null, null, queryPage).getContent();
+		List<DaliyBasicInfo> list = daliyBasicHistroyService.queryListByCodeForModel(code, mv1.getDate(), queryPage)
+				.getContent();
 		if (list.size() < 5) {
 			log.warn("checkStrong get size<5");
 			return null;
@@ -121,11 +122,12 @@ public class StrongService {
 		}
 		sv.setStrongTimes3(strongTimes3);
 		sv.setStrongDef3(strongDef3);
-		// ======= 短线交易量指标 =======
-		int volIndex = 0;
+
 		DaliyBasicInfo d3 = list.get(0);
 		DaliyBasicInfo d2 = list.get(1);
 		DaliyBasicInfo d1 = list.get(2);
+		// ======= 短线--交易量指标 =======
+		int volIndex = 0;
 		// 3天连续放量
 		if (d3.getVol() > d2.getVol() && d2.getVol() > d1.getVol()) {
 			volIndex += 5;
@@ -148,8 +150,35 @@ public class StrongService {
 				volIndex += 5;
 			}
 		}
+		//换手率高-过滤掉
+		if (d3.getTurnover_rate_f() >= 30.0) {
+			volIndex = -20;
+		}
 		mv1.setVolIndex(volIndex);
-		// ======= 短线交易量指标 =======
+		// ======= 短线--交易量指标 =======
+		// ======= 短线--价格指标 =======
+		int sortPriceIndex = 0;
+		double high = d3.getHigh();
+		double low = d1.getLow();
+		double chkLine20 = CurrencyUitl.topPrice20(low);
+		if (high < chkLine20) {// 振浮在20%以内
+			sortPriceIndex = 10;
+			if (high < CurrencyUitl.topPrice(low, false)) {// 振浮在10%以内
+				sortPriceIndex = 6;
+				if (high < CurrencyUitl.topPrice(low, true)) {// 振浮在5%以内
+					sortPriceIndex = 0;
+				}
+			}
+		} else {
+			if (high >= CurrencyUitl.topPrice30(low)) {
+				sortPriceIndex = -20;
+				if (high >= CurrencyUitl.topPrice50(low)) {
+					sortPriceIndex = -100;
+				}
+			}
+		}
+		mv1.setSortPriceIndex(sortPriceIndex);
+		// ======= 短线--交易量指标 =======
 
 		// check-5
 		int strongTimes5 = 0;
@@ -170,6 +199,7 @@ public class StrongService {
 		}
 		sv.setStrongTimes5(strongTimes5);
 		sv.setStrongDef5(strongDef5);
+		/*
 		// check-10
 		if (list.size() < 10) {
 			return list.get(list.size() - 1);
@@ -219,7 +249,7 @@ public class StrongService {
 			}
 		}
 		sv.setStrongTimes250(strongTimes250);
-
+		*/
 		getRes(mv1, sv);
 		return list.get(list.size() - 1);
 	}
@@ -235,6 +265,8 @@ public class StrongService {
 		if (s3 && s5) {
 			sortStrong = 3;
 		}
+		mv1.setSortStrong(sortStrong);
+		/*
 		// 中期强势
 		boolean s10 = (sv.getStrongTimes10() > 0);
 		boolean s20 = (sv.getStrongTimes20() > 0);
@@ -255,9 +287,12 @@ public class StrongService {
 		if (s120 && s250) {
 			lngStrong = 3;
 		}
-
-		mv1.setSortStrong(sortStrong);
+		
 		mv1.setMidStrong(midStrong);
 		mv1.setLngStrong(lngStrong);
+		*/
+
+		
+		
 	}
 }

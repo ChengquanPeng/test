@@ -218,15 +218,7 @@ public class TickDataService {
 			lis.get();
 			if (isJobSource) {
 				log.info("等待执行模型。。");
-				try {
-					upLevel1Service.runJob(0);
-					log.info("MV1模型执行完成");
-					WxPushUtil.pushSystem1("MV1模型执行完成");
-				} catch (Exception e) {
-					e.printStackTrace();
-					ErrorLogFileUitl.writeError(e, "模型运行异常", "", "");
-					WxPushUtil.pushSystem1("模型运行异常..");
-				}
+				upLevel1Service.runJob(0);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -269,6 +261,26 @@ public class TickDataService {
 			}
 		}
 		return res;
+	}
+	
+	public List<TickDataBuySellInfo> listForModel(String code, int date, EsQueryPageReq queryPage) {
+		int pageNum = queryPage.getPageNum();
+		int size = queryPage.getPageSize();
+		log.info("queryPage code={},date={},pageNum={},size={}", code, date, pageNum, size);
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("date").lte(date));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<TickDataBuySellInfo> page = esTickDataBuySellInfoDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		return null;
 	}
 
 	public List<TickDataBuySellInfo> list(String code, String date, String programRate, EsQueryPageReq queryPage) {
@@ -706,10 +718,12 @@ public class TickDataService {
 
 	// 2交易方向:次数和差值:3/5/10/20/120/250天
 	// 3程序单:次数:3/5/10/20/120/250天
-	public void tickDataCheck(ModelV1 mv1, TickDataV1Vo wv, EsQueryPageReq queryPage) {
+	private final EsQueryPageReq queryPage = new EsQueryPageReq(5);
+	public void tickDataCheck(ModelV1 mv1, TickDataV1Vo wv) {
 		String code = mv1.getCode();
-		List<TickDataBuySellInfo> list = this.list(code, null, null, queryPage);
+		List<TickDataBuySellInfo> list = this.listForModel(code, mv1.getDate(), queryPage);
 		if (list.size() < 5) {
+			log.error("size < 5");
 			return;
 		}
 		// check-3
@@ -748,6 +762,7 @@ public class TickDataService {
 		wv.setWayTimes5(wayTimes5);
 		wv.setWayDef5(wayDef5);
 		wv.setPgmTimes5(pgmTimes5);
+		/*
 		// check-10
 		if (list.size() < 10) {
 			return;
@@ -831,21 +846,22 @@ public class TickDataService {
 		wv.setWayTimes250(wayTimes250);
 		wv.setWayDef250(wayDef250);
 		wv.setPgmTimes250(pgmTimes250);
-
+		*/
 		getWayRes(mv1, wv);
 	}
 
 	private void getWayRes(ModelV1 mv1, TickDataV1Vo wv) {
 		// 短期强势
 		int sortWay = 0;
-		boolean s3 = (wv.getWayDef3() > 0 && wv.getWayTimes3() > 0);// TODO way def
+		boolean s3 = (wv.getWayDef3() > 0 && wv.getWayTimes3() > 0);
 		boolean s5 = (wv.getWayDef5() > 0 && wv.getWayTimes5() > 0);
 		if (s3 || s5) {
 			sortWay = 1;
 		}
 		if (s3 && s5) {
-			sortWay = 3;
+			sortWay = 2;
 		}
+		/*
 		// 中期强势
 		int midWay = 0;
 		boolean m10 = (wv.getWayDef10() > 0 && wv.getWayTimes10() > 0);// TODO way def
@@ -854,7 +870,7 @@ public class TickDataService {
 			midWay = 1;
 		}
 		if (m10 && m20) {
-			midWay = 3;
+			midWay = 2;
 		}
 		// 长期强势
 		int lngWay = 0;
@@ -864,12 +880,13 @@ public class TickDataService {
 			lngWay = 1;
 		}
 		if (m120 && m250) {
-			lngWay = 3;
+			lngWay = 2;
 		}
-
-		mv1.setSortWay(sortWay);
 		mv1.setMidWay(midWay);
 		mv1.setLngWay(lngWay);
+		*/
+		mv1.setSortWay(sortWay);
+		
 
 		// 短期
 		int sortPgm = 0;
@@ -883,7 +900,8 @@ public class TickDataService {
 			sortPgm = 3;
 		}
 
-		// 短期
+		/*
+		// 中期
 		int midPgm = 0;
 		boolean p10 = (wv.getPgmTimes10() > 0);
 		boolean p20 = (wv.getPgmTimes20() > 0);
@@ -895,7 +913,7 @@ public class TickDataService {
 			midPgm = 3;
 		}
 
-		// 短期
+		// 长期
 		int lngPgm = 0;
 		boolean p120 = (wv.getPgmTimes120() > 0);
 		boolean p250 = (wv.getPgmTimes250() > 0);
@@ -906,9 +924,10 @@ public class TickDataService {
 		if (p120 && p250) {
 			lngPgm = 3;
 		}
-
-		mv1.setSortPgm(sortPgm);
 		mv1.setMidPgm(midPgm);
 		mv1.setLngPgm(lngPgm);
+		*/
+		mv1.setSortPgm(sortPgm);
+		
 	}
 }
