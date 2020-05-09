@@ -71,6 +71,7 @@ public class ModelV1UpService {
 	private TushareSpider tushareSpider;
 
 	public synchronized void runJob(int date) {
+		String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
 		try {
 			if (date == 0) {
 				int today = Integer.valueOf(DateUtil.formatYYYYMMDD(new Date()));
@@ -112,7 +113,8 @@ public class ModelV1UpService {
 			WxPushUtil.pushSystem1("模型运行异常..");
 		}
 		log.info("MV1模型执行完成");
-		WxPushUtil.pushSystem1("MV1模型执行完成");
+
+		WxPushUtil.pushSystem1("MV1模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
 	}
 
 	private void run(int treadeDate) {
