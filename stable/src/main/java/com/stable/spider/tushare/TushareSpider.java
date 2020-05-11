@@ -327,11 +327,12 @@ public class TushareSpider {
 	 */
 	private final String index_daily_fields = "trade_date,pct_chg,vol,amount";
 
-	public JSONArray getIndexDaily(String ts_code) {
+	public JSONArray getIndexDaily(String ts_code, int startedDate) {
 		try {
 			JSONObject json = new JSONObject();
 			json.put("api_name", "index_daily");
-			json.put("params", JSON.parse("{'ts_code':'" + ts_code + "','start_date':'20150101'}"));// started 20150101
+			json.put("params", JSON.parse("{'ts_code':'" + ts_code + "','start_date':'" + startedDate + "'}"));
+			// started 20150101
 			json.put("fields", index_daily_fields);
 			String result = post(json);
 			JSONObject datas = JSON.parseObject(result);

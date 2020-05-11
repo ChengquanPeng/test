@@ -15,7 +15,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class V1SortStrategyListener implements StrategyListener {
-	private String header = "<table border='1' cellspacing='0' cellpadding='0'><tr>";
+	private String header = "<html><head><script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script></head><body><table border='1' cellspacing='0' cellpadding='0'><tr>";
 
 	private List<ModelV1> set = new LinkedList<ModelV1>();
 
@@ -28,8 +28,8 @@ public class V1SortStrategyListener implements StrategyListener {
 	}
 
 	public V1SortStrategyListener() {
-		String[] s = { "序号", "代码", "日期", "综合评分", "价格均线评分", "交易量评分", "短期价格评分", "图形匹配成功", "短期强势评分", "程序单评分", "买卖评分",
-				"价格指数", "详情ID" };
+		String[] s = { "序号", "代码", "日期", "综合评分", "均线价格", "短线交易量", "短线价格", "短期强势", "主力行为", "主动买入", "价格指数", "图形匹配",
+				"详情ID" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
 		}
@@ -50,13 +50,13 @@ public class V1SortStrategyListener implements StrategyListener {
 				sb.append("<tr>").append(getHTML(index)).append(getHTML(mv.getCode())).append(getHTML(mv.getDate()))
 						.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgIndex()))
 						.append(getHTML(mv.getVolIndex())).append(getHTML(mv.getSortPriceIndex()))
-						.append(getHTML(mv.getImageIndex() == 1 ? "Y" : "N")).append(getHTML(mv.getSortStrong()))
-						.append(getHTML(mv.getSortPgm())).append(getHTML(mv.getSortWay()))
-						.append(getHTML(mv.getPriceIndex())).append(getHTML(mv.getId())).append("</tr>")
-						.append(FileWriteUitl.LINE_FILE);
+						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
+						.append(getHTML(mv.getSortWay())).append(getHTML(mv.getPriceIndex()))
+						.append(getHTML(mv.getImageIndex() == 1 ? "Y" : "N")).append(getHTML(mv.getId()))
+						.append("</tr>").append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
-			sb.append("</table>");
+			sb.append("</body></table></html>");
 			fw.writeLine(sb.toString());
 			fw.close();
 		}

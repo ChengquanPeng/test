@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
-import com.stable.vo.StrongVo;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 import com.stable.vo.up.strategy.ModelV1;
@@ -56,7 +55,7 @@ public class StrongService {
 	private Map<Integer, Double> M_SZ2 = new ConcurrentHashMap<Integer, Double>();
 	private Map<Integer, Double> M_SZ3 = new ConcurrentHashMap<Integer, Double>();
 
-	private Map<Integer, Double> getIndexMap(String code, int chkDate) {
+	private Map<Integer, Double> getIndexMap(String code, int chkDate, int startedDate) {
 		String index = this.getIndex(code);
 		Map<Integer, Double> cache = null;
 		switch (index) {
@@ -77,7 +76,7 @@ public class StrongService {
 		if (id != null) {
 			return cache;
 		}
-		JSONArray array = tushareSpider.getIndexDaily(index);
+		JSONArray array = tushareSpider.getIndexDaily(index, startedDate);
 		if (array == null || array.size() <= 0) {
 			log.warn("未获取到tushareSpider.getIndexDaily(index)={}", index);
 			return null;
@@ -93,35 +92,20 @@ public class StrongService {
 
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 
-	public DaliyBasicInfo checkStrong(ModelV1 mv1, StrongVo sv) {
+	public DaliyBasicInfo checkStrong(ModelV1 mv1) {
 		String code = mv1.getCode();
-		Map<Integer, Double> cache = this.getIndexMap(code, mv1.getDate());
 		List<DaliyBasicInfo> list = daliyBasicHistroyService.queryListByCodeForModel(code, mv1.getDate(), queryPage)
 				.getContent();
 		if (list.size() < 5) {
 			log.warn("checkStrong get size<5");
 			return null;
 		}
+		DaliyBasicInfo last = list.get(list.size() - 1);
+		Map<Integer, Double> cache = this.getIndexMap(code, mv1.getDate(), last.getTrade_date());
 		// check-3
-		int strongTimes3 = 0;
 		int index = 3;
-		int strongDef3 = 0;
 		double base = 0d;
 		double stock = 0d;
-
-		for (int i = 0; i < index; i++) {
-			DaliyBasicInfo db = list.get(i);
-			if (db.getTodayChangeRate() > cache.get(db.getTrade_date())) {
-				strongTimes3++;
-			}
-			stock += db.getTodayChangeRate();
-			base += cache.get(db.getTrade_date());
-		}
-		if (stock > base) {
-			strongDef3 = 1;
-		}
-		sv.setStrongTimes3(strongTimes3);
-		sv.setStrongDef3(strongDef3);
 
 		DaliyBasicInfo d3 = list.get(0);
 		DaliyBasicInfo d2 = list.get(1);
@@ -150,7 +134,7 @@ public class StrongService {
 				volIndex += 5;
 			}
 		}
-		//换手率高-过滤掉
+		// 换手率高-过滤掉
 		if (d3.getTurnover_rate_f() >= 30.0) {
 			volIndex = -20;
 		}
@@ -177,122 +161,68 @@ public class StrongService {
 				}
 			}
 		}
+		// 大盘上涨:当日价格收跌或者收盘价较最高价跌5%，剔除短线资格; 大盘下跌: 收盘涨跌幅强于大盘涨跌幅可考虑观察。
+		if (cache.get(d3.getTrade_date()) >= 0.0) {
+			if (d3.getTodayChangeRate() < 0 || d3.getHigh() > CurrencyUitl.topPrice(d3.getClose(), true)) {
+				sortPriceIndex = -100;
+			}
+		}
 		mv1.setSortPriceIndex(sortPriceIndex);
-		// ======= 短线--交易量指标 =======
+		// ======= 短线--价格指标 =======
 
 		// check-5
-		int strongTimes5 = 0;
+		int sortStrong = 0;
 		index = 5;
-		int strongDef5 = 0;
 		base = 0d;
 		stock = 0d;
 		for (int i = 0; i < index; i++) {
 			DaliyBasicInfo db = list.get(i);
-			if (db.getTodayChangeRate() > cache.get(db.getTrade_date())) {
-				strongTimes5++;
+			double stdTodayChangeRate = cache.get(db.getTrade_date());
+			if (db.getTodayChangeRate() > stdTodayChangeRate) {
+				sortStrong++;
+				if (db.getTodayChangeRate() > 0 && stdTodayChangeRate < 0) {
+					// 2，大盘下跌时，个股强势基础分+1，个股翻红时：大盘下跌0-0.5%以内+2，大盘下跌0.5%-1%以内+3，大盘下跌1-2%之间+5，大盘下跌2%以上+7，
+					if (stdTodayChangeRate >= -0.5) {
+						sortStrong += 2;
+					} else if (stdTodayChangeRate >= -1.0) {
+						sortStrong += 3;
+					} else if (stdTodayChangeRate >= -2.0) {
+						sortStrong += 5;
+					} else {
+						sortStrong += 7;
+					}
+				}
 			}
 			stock += db.getTodayChangeRate();
 			base += cache.get(db.getTrade_date());
 		}
 		if (stock > base) {
-			strongDef5 = 1;
+			sortStrong++;
+		} else {
+			sortStrong--;
 		}
-		sv.setStrongTimes5(strongTimes5);
-		sv.setStrongDef5(strongDef5);
-		/*
-		// check-10
-		if (list.size() < 10) {
-			return list.get(list.size() - 1);
-		}
-		index = 10;
-		int strongTimes10 = 0;
-		for (int i = 0; i < index; i++) {
-			DaliyBasicInfo db = list.get(i);
-			if (db.getTodayChangeRate() > cache.get(db.getTrade_date())) {
-				strongTimes10++;
-			}
-		}
-		sv.setStrongTimes10(strongTimes10);
-		// check-20
-		if (list.size() < 20) {
-			return list.get(list.size() - 1);
-		}
-		index = 20;
-		int strongTimes20 = 0;
-		for (int i = 0; i < index; i++) {
-			DaliyBasicInfo db = list.get(i);
-			if (db.getTodayChangeRate() > cache.get(db.getTrade_date())) {
-				strongTimes20++;
-			}
-		}
-		sv.setStrongTimes20(strongTimes20);
-		// check-120
-		if (list.size() < 120) {
-			return list.get(list.size() - 1);
-		}
-		index = 120;
-		int strongTimes120 = 0;
-		for (int i = 0; i < index; i++) {
-			DaliyBasicInfo db = list.get(i);
-			if (db.getTodayChangeRate() > cache.get(db.getTrade_date())) {
-				strongTimes120++;
-			}
-		}
-		sv.setStrongTimes120(strongTimes120);
-		// check-250
-		index = list.size();
-		int strongTimes250 = 0;
-		for (int i = 0; i < index; i++) {
-			DaliyBasicInfo db = list.get(i);
-			if (db.getTodayChangeRate() > cache.get(db.getTrade_date())) {
-				strongTimes250++;
-			}
-		}
-		sv.setStrongTimes250(strongTimes250);
-		*/
-		getRes(mv1, sv);
-		return list.get(list.size() - 1);
-	}
-
-	private void getRes(ModelV1 mv1, StrongVo sv) {
-		// 短期强势
-		int sortStrong = 0;
-		boolean s3 = (sv.getStrongDef3() > 0 && sv.getStrongTimes3() > 0);
-		boolean s5 = (sv.getStrongDef5() > 0 && sv.getStrongTimes5() > 0);
-		if (s3 || s5) {
-			sortStrong = 1;
-		}
-		if (s3 && s5) {
-			sortStrong = 3;
+		if (sortStrong > 0) {
+			sortStrong += 5;// 提高权重
 		}
 		mv1.setSortStrong(sortStrong);
 		/*
-		// 中期强势
-		boolean s10 = (sv.getStrongTimes10() > 0);
-		boolean s20 = (sv.getStrongTimes20() > 0);
-		int midStrong = 0;
-		if (s10 || s20) {
-			midStrong = 1;
-		}
-		if (s10 && s20) {
-			midStrong = 3;
-		}
-		// 长期强势
-		boolean s120 = (sv.getStrongTimes120() > 0);
-		boolean s250 = (sv.getStrongTimes250() > 0);
-		int lngStrong = 0;
-		if (s120 || s250) {
-			lngStrong = 1;
-		}
-		if (s120 && s250) {
-			lngStrong = 3;
-		}
-		
-		mv1.setMidStrong(midStrong);
-		mv1.setLngStrong(lngStrong);
-		*/
-
-		
-		
+		 * // check-10 if (list.size() < 10) { return list.get(list.size() - 1); } index
+		 * = 10; int strongTimes10 = 0; for (int i = 0; i < index; i++) { DaliyBasicInfo
+		 * db = list.get(i); if (db.getTodayChangeRate() >
+		 * cache.get(db.getTrade_date())) { strongTimes10++; } }
+		 * sv.setStrongTimes10(strongTimes10); // check-20 if (list.size() < 20) {
+		 * return list.get(list.size() - 1); } index = 20; int strongTimes20 = 0; for
+		 * (int i = 0; i < index; i++) { DaliyBasicInfo db = list.get(i); if
+		 * (db.getTodayChangeRate() > cache.get(db.getTrade_date())) { strongTimes20++;
+		 * } } sv.setStrongTimes20(strongTimes20); // check-120 if (list.size() < 120) {
+		 * return list.get(list.size() - 1); } index = 120; int strongTimes120 = 0; for
+		 * (int i = 0; i < index; i++) { DaliyBasicInfo db = list.get(i); if
+		 * (db.getTodayChangeRate() > cache.get(db.getTrade_date())) { strongTimes120++;
+		 * } } sv.setStrongTimes120(strongTimes120); // check-250 index = list.size();
+		 * int strongTimes250 = 0; for (int i = 0; i < index; i++) { DaliyBasicInfo db =
+		 * list.get(i); if (db.getTodayChangeRate() > cache.get(db.getTrade_date())) {
+		 * strongTimes250++; } } sv.setStrongTimes250(strongTimes250);
+		 */
+		return last;
 	}
 }

@@ -36,7 +36,6 @@ import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.AvgVo;
-import com.stable.vo.StrongVo;
 import com.stable.vo.TickDataV1Vo;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.PriceLife;
@@ -153,10 +152,9 @@ public class ModelV1UpService {
 	}
 
 	private void runModel(ModelV1 mv1, List<StrategyListener> list, List<ModelV1> saveList) {
-		StrongVo sv = new StrongVo();
 		TickDataV1Vo wv = new TickDataV1Vo();
 		AvgVo av = new AvgVo();
-		if (getDataAndRunIndexs(mv1, sv, wv, av)) {
+		if (getDataAndRunIndexs(mv1, wv, av)) {
 			String str = imageService.checkImg(mv1.getCode(), mv1.getDate());
 			if (StringUtils.isNotBlank(str)) {
 				if (str.contains(ImageService.MATCH_L2)) {
@@ -168,7 +166,7 @@ public class ModelV1UpService {
 			mv1.setScore(this.getSocre(mv1));
 			if (mv1.getScore() > 0) {
 				for (StrategyListener sl : list) {
-					sl.condition(mv1, str, sv, wv, av);
+					sl.condition(mv1, str, wv, av);
 				}
 			}
 			// 大于10分
@@ -203,7 +201,7 @@ public class ModelV1UpService {
 		return r;
 	}
 
-	private boolean getDataAndRunIndexs(ModelV1 mv1, StrongVo sv, TickDataV1Vo wv, AvgVo av) {
+	private boolean getDataAndRunIndexs(ModelV1 mv1, TickDataV1Vo wv, AvgVo av) {
 		if (!stockBasicService.online1Year(mv1.getCode())) {
 			log.info("Online 不足1年，code={}", mv1.getCode());
 			return false;
@@ -211,7 +209,7 @@ public class ModelV1UpService {
 		String code = mv1.getCode();
 		log.info("model V1 processing for code:{}", code);
 		// 1强势:次数和差值:3/5/10/20/120/250天
-		DaliyBasicInfo lastDate = strongService.checkStrong(mv1, sv);
+		DaliyBasicInfo lastDate = strongService.checkStrong(mv1);
 		if (lastDate == null) {
 			return false;
 		}
@@ -224,7 +222,6 @@ public class ModelV1UpService {
 		avgService.checkAvg(mv1, lastDate.getTrade_date(), av);
 		// 量
 		mv1.setId(code + mv1.getDate());
-		log.info(sv);
 		log.info(wv);
 		log.info(av);
 		return true;
