@@ -57,6 +57,9 @@ public class ModelV1 {
 	// 图形
 	@Field(type = FieldType.Integer)
 	private int imageIndex = 0;
+	// 是否白马股
+	@Field(type = FieldType.Integer)
+	private int whiteHorse = 0;
 	// L2
 	// 板块活跃度
 	// 回购/分红/业绩

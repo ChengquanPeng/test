@@ -44,8 +44,6 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * 日交易历史
- * 
- * @author roy
  *
  */
 @Service

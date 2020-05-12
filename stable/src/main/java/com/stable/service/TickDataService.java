@@ -38,6 +38,7 @@ import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.v1.ModelV1UpService;
 import com.stable.utils.CurrencyUitl;
+import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.LogFileUitl;
 import com.stable.utils.MyRunnable;
@@ -75,6 +76,8 @@ public class TickDataService {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private ModelV1UpService upLevel1Service;
+	@Autowired
+	private TradeCalService tradeCalService;
 
 	public static final Semaphore semp = new Semaphore(1);
 
@@ -129,8 +132,19 @@ public class TickDataService {
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
+		if (isJobSource) {
+			String now = DateUtil.getTodayYYYYMMDD();
+			if (!tradeCalService.isOpen(Integer.valueOf(now))) {
+				log.info("now={}非工作日", now);
+				return;
+			}
 
-		updateStartDateOnline(startDate);
+			// 循环3次，拿到前3个交易日日期，动态更新starteDate
+			for (int i = 0; i < 3; i++) {
+				now = tradeCalService.getPretradeDate(now);
+			}
+			updateStartDateOnline(now);
+		}
 
 		ListenableFuture<Object> lis = TasksWorker.getInstance().getService().submit(
 				new MyCallable(RunLogBizTypeEnum.TICK_DATA, RunCycleEnum.MANUAL, code + " " + date + " " + all) {
@@ -262,7 +276,7 @@ public class TickDataService {
 		}
 		return res;
 	}
-	
+
 	public List<TickDataBuySellInfo> listForModel(String code, int date, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
@@ -719,6 +733,7 @@ public class TickDataService {
 	// 2交易方向:次数和差值:3/5/10/20/120/250天
 	// 3程序单:次数:3/5/10/20/120/250天
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(5);
+
 	public void tickDataCheck(ModelV1 mv1, TickDataV1Vo wv) {
 		String code = mv1.getCode();
 		List<TickDataBuySellInfo> list = this.listForModel(code, mv1.getDate(), queryPage);
@@ -763,90 +778,36 @@ public class TickDataService {
 		wv.setWayDef5(wayDef5);
 		wv.setPgmTimes5(pgmTimes5);
 		/*
-		// check-10
-		if (list.size() < 10) {
-			return;
-		}
-		int wayTimes10 = 0;
-		index = 10;
-		long wayDef10 = 0;
-		int pgmTimes10 = 0;
-		for (int i = 0; i < index; i++) {
-			TickDataBuySellInfo db = list.get(i);
-			if (db.getBuyTimes() > db.getSellTimes()) {
-				wayTimes10++;
-			}
-			wayDef10 += (db.getBuyTimes() - db.getSellTimes());
-			if (db.getProgramRate() > 0) {
-				pgmTimes10++;
-			}
-		}
-		wv.setWayTimes10(wayTimes10);
-		wv.setWayDef10(wayDef10);
-		wv.setPgmTimes10(pgmTimes10);
-
-		// check-20
-		if (list.size() < 20) {
-			return;
-		}
-		int wayTimes20 = 0;
-		index = 20;
-		long wayDef20 = 0;
-		int pgmTimes20 = 0;
-		for (int i = 0; i < index; i++) {
-			TickDataBuySellInfo db = list.get(i);
-			if (db.getBuyTimes() > db.getSellTimes()) {
-				wayTimes20++;
-			}
-			wayDef20 += (db.getBuyTimes() - db.getSellTimes());
-			if (db.getProgramRate() > 0) {
-				pgmTimes20++;
-			}
-		}
-		wv.setWayTimes20(wayTimes20);
-		wv.setWayDef20(wayDef20);
-		wv.setPgmTimes20(pgmTimes20);
-		// check-120
-
-		if (list.size() < 120) {
-			return;
-		}
-		index = 120;
-		int wayTimes120 = 0;
-		long wayDef120 = 0;
-		int pgmTimes120 = 0;
-		for (int i = 0; i < index; i++) {
-			TickDataBuySellInfo db = list.get(i);
-			if (db.getBuyTimes() > db.getSellTimes()) {
-				wayTimes120++;
-			}
-			wayDef120 += (db.getBuyTimes() - db.getSellTimes());
-			if (db.getProgramRate() > 0) {
-				pgmTimes120++;
-			}
-		}
-		wv.setWayTimes120(wayTimes120);
-		wv.setWayDef120(wayDef120);
-		wv.setPgmTimes120(pgmTimes120);
-		// check-250
-		int wayTimes250 = 0;
-		index = list.size();
-		long wayDef250 = 0;
-		int pgmTimes250 = 0;
-		for (int i = 0; i < index; i++) {
-			TickDataBuySellInfo db = list.get(i);
-			if (db.getBuyTimes() > db.getSellTimes()) {
-				wayTimes250++;
-			}
-			wayDef250 += (db.getBuyTimes() - db.getSellTimes());
-			if (db.getProgramRate() > 0) {
-				pgmTimes250++;
-			}
-		}
-		wv.setWayTimes250(wayTimes250);
-		wv.setWayDef250(wayDef250);
-		wv.setPgmTimes250(pgmTimes250);
-		*/
+		 * // check-10 if (list.size() < 10) { return; } int wayTimes10 = 0; index = 10;
+		 * long wayDef10 = 0; int pgmTimes10 = 0; for (int i = 0; i < index; i++) {
+		 * TickDataBuySellInfo db = list.get(i); if (db.getBuyTimes() >
+		 * db.getSellTimes()) { wayTimes10++; } wayDef10 += (db.getBuyTimes() -
+		 * db.getSellTimes()); if (db.getProgramRate() > 0) { pgmTimes10++; } }
+		 * wv.setWayTimes10(wayTimes10); wv.setWayDef10(wayDef10);
+		 * wv.setPgmTimes10(pgmTimes10);
+		 * 
+		 * // check-20 if (list.size() < 20) { return; } int wayTimes20 = 0; index = 20;
+		 * long wayDef20 = 0; int pgmTimes20 = 0; for (int i = 0; i < index; i++) {
+		 * TickDataBuySellInfo db = list.get(i); if (db.getBuyTimes() >
+		 * db.getSellTimes()) { wayTimes20++; } wayDef20 += (db.getBuyTimes() -
+		 * db.getSellTimes()); if (db.getProgramRate() > 0) { pgmTimes20++; } }
+		 * wv.setWayTimes20(wayTimes20); wv.setWayDef20(wayDef20);
+		 * wv.setPgmTimes20(pgmTimes20); // check-120
+		 * 
+		 * if (list.size() < 120) { return; } index = 120; int wayTimes120 = 0; long
+		 * wayDef120 = 0; int pgmTimes120 = 0; for (int i = 0; i < index; i++) {
+		 * TickDataBuySellInfo db = list.get(i); if (db.getBuyTimes() >
+		 * db.getSellTimes()) { wayTimes120++; } wayDef120 += (db.getBuyTimes() -
+		 * db.getSellTimes()); if (db.getProgramRate() > 0) { pgmTimes120++; } }
+		 * wv.setWayTimes120(wayTimes120); wv.setWayDef120(wayDef120);
+		 * wv.setPgmTimes120(pgmTimes120); // check-250 int wayTimes250 = 0; index =
+		 * list.size(); long wayDef250 = 0; int pgmTimes250 = 0; for (int i = 0; i <
+		 * index; i++) { TickDataBuySellInfo db = list.get(i); if (db.getBuyTimes() >
+		 * db.getSellTimes()) { wayTimes250++; } wayDef250 += (db.getBuyTimes() -
+		 * db.getSellTimes()); if (db.getProgramRate() > 0) { pgmTimes250++; } }
+		 * wv.setWayTimes250(wayTimes250); wv.setWayDef250(wayDef250);
+		 * wv.setPgmTimes250(pgmTimes250);
+		 */
 		getWayRes(mv1, wv);
 	}
 
@@ -862,31 +823,15 @@ public class TickDataService {
 			sortWay = 2;
 		}
 		/*
-		// 中期强势
-		int midWay = 0;
-		boolean m10 = (wv.getWayDef10() > 0 && wv.getWayTimes10() > 0);// TODO way def
-		boolean m20 = (wv.getWayDef20() > 0 && wv.getWayTimes20() > 0);
-		if (m10 || m20) {
-			midWay = 1;
-		}
-		if (m10 && m20) {
-			midWay = 2;
-		}
-		// 长期强势
-		int lngWay = 0;
-		boolean m120 = (wv.getWayDef120() > 0 && wv.getWayTimes120() > 0);// TODO way def
-		boolean m250 = (wv.getWayDef250() > 0 && wv.getWayTimes250() > 0);
-		if (m120 || m250) {
-			lngWay = 1;
-		}
-		if (m120 && m250) {
-			lngWay = 2;
-		}
-		mv1.setMidWay(midWay);
-		mv1.setLngWay(lngWay);
-		*/
+		 * // 中期强势 int midWay = 0; boolean m10 = (wv.getWayDef10() > 0 &&
+		 * wv.getWayTimes10() > 0);// TODO way def boolean m20 = (wv.getWayDef20() > 0
+		 * && wv.getWayTimes20() > 0); if (m10 || m20) { midWay = 1; } if (m10 && m20) {
+		 * midWay = 2; } // 长期强势 int lngWay = 0; boolean m120 = (wv.getWayDef120() > 0
+		 * && wv.getWayTimes120() > 0);// TODO way def boolean m250 = (wv.getWayDef250()
+		 * > 0 && wv.getWayTimes250() > 0); if (m120 || m250) { lngWay = 1; } if (m120
+		 * && m250) { lngWay = 2; } mv1.setMidWay(midWay); mv1.setLngWay(lngWay);
+		 */
 		mv1.setSortWay(sortWay);
-		
 
 		// 短期
 		int sortPgm = 0;
@@ -901,33 +846,18 @@ public class TickDataService {
 		}
 
 		/*
-		// 中期
-		int midPgm = 0;
-		boolean p10 = (wv.getPgmTimes10() > 0);
-		boolean p20 = (wv.getPgmTimes20() > 0);
-
-		if (p10 || p20) {
-			midPgm = 1;
-		}
-		if (p10 && p20) {
-			midPgm = 3;
-		}
-
-		// 长期
-		int lngPgm = 0;
-		boolean p120 = (wv.getPgmTimes120() > 0);
-		boolean p250 = (wv.getPgmTimes250() > 0);
-
-		if (p120 || p250) {
-			lngPgm = 1;
-		}
-		if (p120 && p250) {
-			lngPgm = 3;
-		}
-		mv1.setMidPgm(midPgm);
-		mv1.setLngPgm(lngPgm);
-		*/
+		 * // 中期 int midPgm = 0; boolean p10 = (wv.getPgmTimes10() > 0); boolean p20 =
+		 * (wv.getPgmTimes20() > 0);
+		 * 
+		 * if (p10 || p20) { midPgm = 1; } if (p10 && p20) { midPgm = 3; }
+		 * 
+		 * // 长期 int lngPgm = 0; boolean p120 = (wv.getPgmTimes120() > 0); boolean p250
+		 * = (wv.getPgmTimes250() > 0);
+		 * 
+		 * if (p120 || p250) { lngPgm = 1; } if (p120 && p250) { lngPgm = 3; }
+		 * mv1.setMidPgm(midPgm); mv1.setLngPgm(lngPgm);
+		 */
 		mv1.setSortPgm(sortPgm);
-		
+
 	}
 }

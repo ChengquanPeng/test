@@ -1,16 +1,33 @@
 package com.stable.service;
 
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.es.dao.base.EsStockAvgDao;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
+import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.PythonCallUtil;
-import com.stable.vo.AvgVo;
+import com.stable.vo.bus.DaliyBasicInfo;
+import com.stable.vo.bus.StockAvg;
+import com.stable.vo.spi.req.EsQueryPageReq;
 import com.stable.vo.up.strategy.ModelV1;
 
 import lombok.extern.log4j.Log4j2;
@@ -22,80 +39,212 @@ public class AvgService {
 	@Value("${python.file.daily.avg}")
 	private String pythonFileName;
 
-	public void checkAvg(ModelV1 mv1, int startDate, AvgVo av) {
-		String code = mv1.getCode();
-		String params = TushareSpider.formatCode(code) + " " + startDate + " " + mv1.getDate() + " qfq D";
+	@Autowired
+	private EsStockAvgDao stockAvgDao;
+
+	public void saveStockAvg(List<StockAvg> avgList) {
+		if (avgList.size() > 0) {
+			stockAvgDao.saveAll(avgList);
+		}
+	}
+
+	public void checkAvg(ModelV1 mv1, int startDate, StockAvg av, List<StockAvg> avgList,
+			List<DaliyBasicInfo> dailyList) {
+		try {
+			String code = mv1.getCode();
+			int endDate = mv1.getDate();
+			StockAvg r = getAvg(av, code, startDate, endDate, avgList, true);
+			if (r != null) {
+				mv1.setAvgIndex(0);
+				getAvgPriceIndex(mv1, av);
+				getAvgPriceType(mv1, startDate, av, avgList, dailyList);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			ErrorLogFileUitl.writeError(e, "均线执行异常", "", "");
+		}
+	}
+
+	private StockAvg getAvg(StockAvg av, String code, int startDate, int endDate, List<StockAvg> avgList,
+			boolean isFirstLevel) {
+		String params = TushareSpider.formatCode(code) + " " + startDate + " " + endDate + " qfq D";
 		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
 		if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
 			log.warn("pythonFileName：{}，未获取到数据 params：{}", pythonFileName, code, params);
 			if (lines != null && !lines.isEmpty()) {
 				log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
 			}
-			return;
+			return null;
 		}
-		// code,date,3,5,10,20,30,120,250
-		// 600408.SH,20200403,2.2933,2.302,2.282,2.3255,2.297,2.2712,2.4559
-		String[] strs = lines.get(0).split(",");
-		if (strs[1].equals(String.valueOf(mv1.getDate()))) {
-			try {
-				mv1.setAvgIndex(0);
-				av.setAvgIndex3(Double.valueOf(strs[2]));
-				av.setAvgIndex5(Double.valueOf(strs[3]));
-				av.setAvgIndex10(Double.valueOf(strs[4]));
-				av.setAvgIndex20(Double.valueOf(strs[5]));
-				av.setAvgIndex30(Double.valueOf(strs[6]));
-				av.setAvgIndex120(Double.valueOf(strs[7]));
-				av.setAvgIndex250(Double.valueOf(strs[8]));
+		try {
+			String[] strs = lines.get(0).split(",");
+			if (strs[1].equals(String.valueOf(endDate))) {
+				// code,date,3,5,10,20,30,120,250
+				// 600408.SH,20200403,2.2933,2.302,2.282,2.3255,2.297,2.2712,2.4559
+				if (!isFirstLevel) {
+					av = new StockAvg();
+				}
+				av.setCode(code);
+				av.setDate(endDate);
+				av.setId();
+				av.setAvgPriceIndex3(Double.valueOf(strs[2]));
+				av.setAvgPriceIndex5(Double.valueOf(strs[3]));
+				av.setAvgPriceIndex10(Double.valueOf(strs[4]));
+				av.setAvgPriceIndex20(Double.valueOf(strs[5]));
+				av.setAvgPriceIndex30(Double.valueOf(strs[6]));
+				if (isFirstLevel) {
+					av.setAvgPriceIndex120(Double.valueOf(strs[7]));
+					av.setAvgPriceIndex250(Double.valueOf(strs[8]));
+				}
+				avgList.add(av);
+				return av;
+			}
+		} catch (Exception e) {
+			String msg = "获取到的数据:" + lines.get(0);
+			log.error(msg);
+			throw new RuntimeException(msg, e);
+		}
+		return null;
+	}
 
-				// 计算AvgIndex
-				if (av.getAvgIndex250() > 0) {
-					if (av.getAvgIndex3() >= av.getAvgIndex5() && av.getAvgIndex5() >= av.getAvgIndex10()
-							&& av.getAvgIndex10() >= av.getAvgIndex20() && av.getAvgIndex20() >= av.getAvgIndex30()
-							&& av.getAvgIndex30() >= av.getAvgIndex120()
-							&& av.getAvgIndex120() >= av.getAvgIndex250()) {
-						mv1.setAvgIndex(15);
+	private final EsQueryPageReq queryPage = new EsQueryPageReq(30);
+
+	// 计算均线排列类型，1.V型反转,2.横盘突破，3.波浪上涨
+	private void getAvgPriceType(ModelV1 mv1, int startDate, StockAvg av, List<StockAvg> avgList,
+			List<DaliyBasicInfo> dailyList) {
+		if (mv1.getAvgIndex() >= 10) {
+			String code = av.getCode();
+			List<StockAvg> avglist = queryListByCodeForModel(code, av.getDate(), queryPage);
+			// 已有的map
+			Map<Integer, StockAvg> map = new HashMap<Integer, StockAvg>();
+			if (avglist != null && avglist.size() > 0) {
+				avglist.stream().forEach(item -> {
+					map.put(item.getDate(), item);
+				});
+			}
+			int end = 30;
+			if (dailyList.size() < 30) {
+				end = dailyList.size();
+			}
+			// 补全30天
+			List<StockAvg> clist = new LinkedList<StockAvg>();
+			for (int i = 0; i < end; i++) {
+				DaliyBasicInfo d = dailyList.get(i);
+				if (map.containsKey(d.getTrade_date())) {
+					clist.add(map.get(d.getTrade_date()));
+				} else {
+					StockAvg r = getAvg(null, code, startDate, d.getTrade_date(), avgList, false);
+					if (r == null) {
+						log.warn("数据不全code={},startDate={},enddate={}", code, startDate, d.getTrade_date());
 						return;
 					}
+					clist.add(r);
 				}
-				if (av.getAvgIndex3() >= av.getAvgIndex5() && av.getAvgIndex5() >= av.getAvgIndex10()
-						&& av.getAvgIndex10() >= av.getAvgIndex20() && av.getAvgIndex20() >= av.getAvgIndex30()) {
-					mv1.setAvgIndex(12);
-					return;
-				}
-				if (av.getAvgIndex3() >= av.getAvgIndex5() && av.getAvgIndex5() >= av.getAvgIndex10()
-						&& av.getAvgIndex10() >= av.getAvgIndex20()) {
-					mv1.setAvgIndex(10);
-					return;
-				}
+			}
 
-				List<Double> list = new LinkedList<Double>();
-				list.add(av.getAvgIndex3());
-				list.add(av.getAvgIndex5());
-				list.add(av.getAvgIndex10());
-				list.add(av.getAvgIndex20());
-				list.add(av.getAvgIndex30());
-				double max = Collections.max(list);
-				double min = Collections.min(list);
-				if (min >= CurrencyUitl.lowestPrice(max, true)) {// 最高价和最低价在5%以内的
-					if (av.getAvgIndex3() >= av.getAvgIndex5() && av.getAvgIndex30() >= av.getAvgIndex3()
-							&& av.getAvgIndex30() >= av.getAvgIndex5() && av.getAvgIndex30() >= av.getAvgIndex10()
-							&& av.getAvgIndex30() >= av.getAvgIndex20()) {
-						mv1.setAvgIndex(5);
-					}
-					return;
+			double max = clist.stream().max(Comparator.comparingDouble(StockAvg::getAvgPriceIndex30)).get()
+					.getAvgPriceIndex30();
+			double min = clist.stream().min(Comparator.comparingDouble(StockAvg::getAvgPriceIndex30)).get()
+					.getAvgPriceIndex30();
+
+			StockAvg firstDay = clist.get(clist.size() - 1);
+			StockAvg endDay = clist.get(0);
+			int avgPrice30 = 0;
+
+			if (CurrencyUitl.topPrice(min, true) <= max) {// 1.振幅在5%以内
+				// 往上走
+				if (firstDay.getAvgPriceIndex30() < endDay.getAvgPriceIndex30()) {
+					avgPrice30 += 20;
+				} else {
+					// 均线排列往上
+					avgPrice30 += 10;
 				}
-				if (min >= CurrencyUitl.lowestPrice(max, false)) {// 最高价和最低价在10%以内的
-					if (av.getAvgIndex3() >= av.getAvgIndex5() && av.getAvgIndex30() >= av.getAvgIndex3()
-							&& av.getAvgIndex30() >= av.getAvgIndex5() && av.getAvgIndex30() >= av.getAvgIndex10()
-							&& av.getAvgIndex30() >= av.getAvgIndex20()) {
-						mv1.setAvgIndex(4);
-					}
-					return;
+			} else if (CurrencyUitl.topPrice(min, false) <= max) {// 2.振幅在10%以内
+				// 往上走
+				if (firstDay.getAvgPriceIndex30() < endDay.getAvgPriceIndex30()) {
+					avgPrice30 += 15;
+				} else if (CurrencyUitl.topPrice(min, true) <= endDay.getAvgPriceIndex30()) {
+					avgPrice30 += 10;
 				}
-			} catch (Exception e) {
-				log.error("获取到的数据:" + lines.get(0));
-				e.printStackTrace();
+			} else {
+				// 往上走
+				if (firstDay.getAvgPriceIndex30() < endDay.getAvgPriceIndex30()) {
+					// 白马
+					avgPrice30 = 1;
+					mv1.setWhiteHorse(1);
+				} else {
+					// 剔除往下走或者振幅较大
+					avgPrice30 = -100;
+				}
+			}
+			mv1.setAvgIndex(mv1.getAvgIndex() + avgPrice30);
+		}
+	}
+
+	// 计算AvgPriceIndex-排列
+	private void getAvgPriceIndex(ModelV1 mv1, StockAvg av) {
+		if (av.getAvgPriceIndex250() > 0) {
+			if (av.getAvgPriceIndex3() >= av.getAvgPriceIndex5() && av.getAvgPriceIndex5() >= av.getAvgPriceIndex10()
+					&& av.getAvgPriceIndex10() >= av.getAvgPriceIndex20()
+					&& av.getAvgPriceIndex20() >= av.getAvgPriceIndex30()
+					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex120()
+					&& av.getAvgPriceIndex120() >= av.getAvgPriceIndex250()) {
+				mv1.setAvgIndex(15);
+				return;
 			}
 		}
+		if (av.getAvgPriceIndex3() >= av.getAvgPriceIndex5() && av.getAvgPriceIndex5() >= av.getAvgPriceIndex10()
+				&& av.getAvgPriceIndex10() >= av.getAvgPriceIndex20()
+				&& av.getAvgPriceIndex20() >= av.getAvgPriceIndex30()) {
+			mv1.setAvgIndex(12);
+			return;
+		}
+		if (av.getAvgPriceIndex3() >= av.getAvgPriceIndex5() && av.getAvgPriceIndex5() >= av.getAvgPriceIndex10()
+				&& av.getAvgPriceIndex10() >= av.getAvgPriceIndex20()) {
+			mv1.setAvgIndex(10);
+			return;
+		}
+
+		List<Double> list = new LinkedList<Double>();
+		list.add(av.getAvgPriceIndex3());
+		list.add(av.getAvgPriceIndex5());
+		list.add(av.getAvgPriceIndex10());
+		list.add(av.getAvgPriceIndex20());
+		list.add(av.getAvgPriceIndex30());
+		double max = Collections.max(list);
+		double min = Collections.min(list);
+		if (min >= CurrencyUitl.lowestPrice(max, true)) {// 最高价和最低价在5%以内的
+			if (av.getAvgPriceIndex3() >= av.getAvgPriceIndex5() && av.getAvgPriceIndex30() >= av.getAvgPriceIndex3()
+					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex5()
+					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex10()
+					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex20()) {
+				mv1.setAvgIndex(5);
+			}
+			return;
+		}
+		if (min >= CurrencyUitl.lowestPrice(max, false)) {// 最高价和最低价在10%以内的
+			if (av.getAvgPriceIndex3() >= av.getAvgPriceIndex5() && av.getAvgPriceIndex30() >= av.getAvgPriceIndex3()
+					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex5()
+					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex10()
+					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex20()) {
+				mv1.setAvgIndex(4);
+			}
+			return;
+		}
+	}
+
+	public List<StockAvg> queryListByCodeForModel(String code, int date, EsQueryPageReq queryPage) {
+		int pageNum = queryPage.getPageNum();
+		int size = queryPage.getPageSize();
+		log.info("queryPage code={},trade_date={},pageNum={},size={}", code, date, pageNum, size);
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("date").lte(date));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		return stockAvgDao.search(sq).getContent();
 	}
 }

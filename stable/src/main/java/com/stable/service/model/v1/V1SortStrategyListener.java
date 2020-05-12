@@ -15,7 +15,8 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class V1SortStrategyListener implements StrategyListener {
-	private String header = "<html><head><script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script></head><body><table border='1' cellspacing='0' cellpadding='0'><tr>";
+	private String header = "<table border='1' cellspacing='0' cellpadding='0'><tr>";
+	private String endder = "</table><script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script>";
 
 	private List<ModelV1> set = new LinkedList<ModelV1>();
 
@@ -47,7 +48,7 @@ public class V1SortStrategyListener implements StrategyListener {
 			int index = 1;
 
 			for (ModelV1 mv : set) {
-				sb.append("<tr>").append(getHTML(index)).append(getHTML(mv.getCode())).append(getHTML(mv.getDate()))
+				sb.append("<tr>").append(getHTML(index)).append(getHTML_SN(mv.getCode())).append(getHTML(mv.getDate()))
 						.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgIndex()))
 						.append(getHTML(mv.getVolIndex())).append(getHTML(mv.getSortPriceIndex()))
 						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
@@ -56,7 +57,7 @@ public class V1SortStrategyListener implements StrategyListener {
 						.append("</tr>").append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
-			sb.append("</body></table></html>");
+			sb.append(endder);
 			fw.writeLine(sb.toString());
 			fw.close();
 		}
@@ -64,6 +65,10 @@ public class V1SortStrategyListener implements StrategyListener {
 
 	private String getHTML(Object text) {
 		return "<td>" + text + "</td>";
+	}
+
+	private String getHTML_SN(Object text) {
+		return "<td class='sn'>" + text + "</td>";
 	}
 
 	private String getHTMLTH(Object text) {

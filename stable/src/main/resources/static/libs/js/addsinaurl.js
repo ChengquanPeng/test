@@ -1,7 +1,7 @@
 //https://finance.sina.com.cn/realstock/company/sh600793/nc.shtml
 var preUrl = "https://finance.sina.com.cn/realstock/company/";
 var endUrl = "/nc.shtml";
-var tds = document.getElementsByClassName("aurl");
+var tds = document.getElementsByClassName("sn");
 for (var i = 0; i < tds.length; i++) {
 	var u = tds[i].innerText;
 	var t = "sz";

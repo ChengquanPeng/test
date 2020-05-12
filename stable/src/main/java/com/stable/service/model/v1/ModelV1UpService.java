@@ -35,8 +35,8 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.AvgVo;
 import com.stable.vo.TickDataV1Vo;
+import com.stable.vo.bus.StockAvg;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.PriceLife;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -93,7 +93,7 @@ public class ModelV1UpService {
 					// 新增一天
 					Date d1 = DateUtil.addDate(date + "", 1);
 					date = Integer.valueOf(DateUtil.formatYYYYMMDD(d1));
-					if (date >= today) {
+					if (date > today) {
 						log.info("today:{},date:{} 循环结束", today, date);
 						return;
 					}
@@ -126,6 +126,7 @@ public class ModelV1UpService {
 			int size = array.size();
 			log.info("{}获取到每日指标记录条数={}", treadeDate, size);
 			List<ModelV1> saveList = new LinkedList<ModelV1>();
+			List<StockAvg> avgList = new LinkedList<StockAvg>();
 			List<StrategyListener> list = new ArrayList<StrategyListener>(2);
 			list.add(new ImageStrategyListener());
 			list.add(new V1SortStrategyListener());
@@ -136,7 +137,12 @@ public class ModelV1UpService {
 				mv.setDate(d.getTrade_date());
 				mv.setClose(d.getClose());
 
-				runModel(mv, list, saveList);
+				runModel(mv, list, saveList, avgList);
+
+				if (avgList.size() > 500) {
+					avgService.saveStockAvg(avgList);
+					avgList = new LinkedList<StockAvg>();
+				}
 			}
 			for (StrategyListener sl : list) {
 				sl.fulshToFile();
@@ -145,16 +151,19 @@ public class ModelV1UpService {
 			if (saveList.size() > 0) {
 				esModelV1Dao.saveAll(saveList);
 			}
+			if (avgList.size() > 0) {
+				avgService.saveStockAvg(avgList);
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw new RuntimeException("数据处理异常", e);
 		}
 	}
 
-	private void runModel(ModelV1 mv1, List<StrategyListener> list, List<ModelV1> saveList) {
+	private void runModel(ModelV1 mv1, List<StrategyListener> list, List<ModelV1> saveList, List<StockAvg> avgList) {
 		TickDataV1Vo wv = new TickDataV1Vo();
-		AvgVo av = new AvgVo();
-		if (getDataAndRunIndexs(mv1, wv, av)) {
+		StockAvg av = new StockAvg();
+		if (getDataAndRunIndexs(mv1, wv, av, avgList)) {
 			String str = imageService.checkImg(mv1.getCode(), mv1.getDate());
 			if (StringUtils.isNotBlank(str)) {
 				if (str.contains(ImageService.MATCH_L2)) {
@@ -201,7 +210,7 @@ public class ModelV1UpService {
 		return r;
 	}
 
-	private boolean getDataAndRunIndexs(ModelV1 mv1, TickDataV1Vo wv, AvgVo av) {
+	private boolean getDataAndRunIndexs(ModelV1 mv1, TickDataV1Vo wv, StockAvg av, List<StockAvg> avgList) {
 		if (!stockBasicService.online1Year(mv1.getCode())) {
 			log.info("Online 不足1年，code={}", mv1.getCode());
 			return false;
@@ -209,7 +218,8 @@ public class ModelV1UpService {
 		String code = mv1.getCode();
 		log.info("model V1 processing for code:{}", code);
 		// 1强势:次数和差值:3/5/10/20/120/250天
-		DaliyBasicInfo lastDate = strongService.checkStrong(mv1);
+		List<DaliyBasicInfo> dailyList = null;
+		DaliyBasicInfo lastDate = strongService.checkStrong(mv1, dailyList);
 		if (lastDate == null) {
 			return false;
 		}
@@ -219,7 +229,7 @@ public class ModelV1UpService {
 		tickDataService.tickDataCheck(mv1, wv);
 		this.priceIndex(mv1);
 		// 均价
-		avgService.checkAvg(mv1, lastDate.getTrade_date(), av);
+		avgService.checkAvg(mv1, lastDate.getTrade_date(), av, avgList, dailyList);
 		// 量
 		mv1.setId(code + mv1.getDate());
 		log.info(wv);

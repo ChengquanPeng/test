@@ -92,24 +92,23 @@ public class StrongService {
 
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 
-	public DaliyBasicInfo checkStrong(ModelV1 mv1) {
+	public DaliyBasicInfo checkStrong(ModelV1 mv1, List<DaliyBasicInfo> dailyList) {
 		String code = mv1.getCode();
-		List<DaliyBasicInfo> list = daliyBasicHistroyService.queryListByCodeForModel(code, mv1.getDate(), queryPage)
-				.getContent();
-		if (list.size() < 5) {
+		dailyList = daliyBasicHistroyService.queryListByCodeForModel(code, mv1.getDate(), queryPage).getContent();
+		if (dailyList.size() < 5) {
 			log.warn("checkStrong get size<5");
 			return null;
 		}
-		DaliyBasicInfo last = list.get(list.size() - 1);
+		DaliyBasicInfo last = dailyList.get(dailyList.size() - 1);
 		Map<Integer, Double> cache = this.getIndexMap(code, mv1.getDate(), last.getTrade_date());
 		// check-3
 		int index = 3;
 		double base = 0d;
 		double stock = 0d;
 
-		DaliyBasicInfo d3 = list.get(0);
-		DaliyBasicInfo d2 = list.get(1);
-		DaliyBasicInfo d1 = list.get(2);
+		DaliyBasicInfo d3 = dailyList.get(0);
+		DaliyBasicInfo d2 = dailyList.get(1);
+		DaliyBasicInfo d1 = dailyList.get(2);
 		// ======= 短线--交易量指标 =======
 		int volIndex = 0;
 		// 3天连续放量
@@ -176,7 +175,7 @@ public class StrongService {
 		base = 0d;
 		stock = 0d;
 		for (int i = 0; i < index; i++) {
-			DaliyBasicInfo db = list.get(i);
+			DaliyBasicInfo db = dailyList.get(i);
 			double stdTodayChangeRate = cache.get(db.getTrade_date());
 			if (db.getTodayChangeRate() > stdTodayChangeRate) {
 				sortStrong++;
