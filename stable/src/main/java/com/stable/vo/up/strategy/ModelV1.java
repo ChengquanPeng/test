@@ -48,9 +48,6 @@ public class ModelV1 {
 	private int avgIndex = 0;
 	@Field(type = FieldType.Integer)
 	private int volIndex = 0;
-	// 3天的价格振幅
-	@Field(type = FieldType.Integer)
-	private int sortPriceIndex = 0;
 	// 价格底部指数
 	@Field(type = FieldType.Integer)
 	private int priceIndex = 0;

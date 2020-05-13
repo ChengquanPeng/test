@@ -2,7 +2,6 @@ package com.stable.service.model.v1;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.jboss.netty.util.internal.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.spider.tushare.TushareSpider;
-import com.stable.utils.CurrencyUitl;
+import com.stable.vo.TickDataV1Vo;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 import com.stable.vo.up.strategy.ModelV1;
@@ -94,7 +93,7 @@ public class StrongService {
 
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 
-	public List<DaliyBasicInfo> checkStrong(ModelV1 mv1) {
+	public List<DaliyBasicInfo> checkStrong(ModelV1 mv1, TickDataV1Vo wv) {
 		String code = mv1.getCode();
 		List<DaliyBasicInfo> dailyList = daliyBasicHistroyService
 				.queryListByCodeForModel(code, mv1.getDate(), queryPage).getContent();
@@ -114,80 +113,62 @@ public class StrongService {
 		DaliyBasicInfo d2 = dailyList.get(1);
 		DaliyBasicInfo d1 = dailyList.get(2);
 		// ======= 短线--交易量指标 =======
-		int volIndex = 0;
-		// 3天连续放量
-		if (d3.getVol() > d2.getVol() && d2.getVol() > d1.getVol()) {
-			volIndex += 5;
+		// 换手率高-过滤掉
+		if (d3.getTurnover_rate_f() >= 30.0) {
+			mv1.setVolIndex(-100);
+			return dailyList;
 		}
-		// 突然放量
-		if (d3.getVol() > d2.getVol()) {
+		// 大盘上涨，但当日价格收跌剔除短线资格
+		if (cache.get(d3.getTrade_date()) >= 0.0 && d3.getTodayChangeRate() < 0) {
+			mv1.setVolIndex(-100);
+			return dailyList;
+		}
+
+		int volIndex = 0;
+		// 3天连续放量上涨
+		if (d3.getVol() > d2.getVol() && d2.getVol() > d1.getVol() && d3.getClose() > d2.getClose()
+				&& d2.getClose() > d1.getClose()) {
+			volIndex += 5;
+			wv.addDetailDesc("3天连续放量上涨");
+		}
+		// 突然放量上涨
+		if (d3.getClose() > d2.getClose() && d3.getVol() > d2.getVol()) {
 			long half = d2.getVol() / 2;
 			if (d3.getVol() >= (d2.getVol() + half)) {
 				volIndex += 5;
+				wv.addDetailDesc("突然放量上涨");
 			}
 		}
-		// 流通市值50亿 && 流通换手率超过5%
-		if (d3.getCirc_mv() < 500000) {
-			if (d3.getTurnover_rate_f() >= 4.9) {
-				volIndex += 5;
-			}
-			// 流通市值100亿 && 流通换手率超过4%
-		} else if (d3.getCirc_mv() < 1000000) {
-			if (d3.getTurnover_rate_f() >= 3.9) {
-				volIndex += 5;
-			}
-		}
-		// 换手率高-过滤掉
-		if (d3.getTurnover_rate_f() >= 30.0) {
-			volIndex = -100;
-			mv1.setVolIndex(volIndex);
-			return dailyList;
-		}
-		mv1.setVolIndex(volIndex);
-		// ======= 短线--交易量指标 =======
-		// ======= 短线--价格指标 =======
-		int sortPriceIndex = 0;
-		double high = Stream.of(d3.getHigh(), d2.getHigh(), d1.getHigh()).max(Double::compare).get();
-		double low = Stream.of(d3.getLow(), d2.getLow(), d1.getLow()).max(Double::compare).get();
-		double chkLine20 = CurrencyUitl.topPrice20(low);
-		log.info("3 days code={},date={},high={},low={},chkLine20={}", last.getCode(), last.getTrade_date(), high, low,
-				chkLine20);
-		if (chkLine20 > high) {// 振浮在20%以内
-			sortPriceIndex = 10;
-			if (high < CurrencyUitl.topPrice(low, false)) {// 振浮在10%以内
-				sortPriceIndex = 6;
-				if (high < CurrencyUitl.topPrice(low, true)) {// 振浮在5%以内
-					sortPriceIndex = 2;
+		if (volIndex > 0) {
+			// 流通市值50亿 && 流通换手率超过5%
+			if (d3.getCirc_mv() < 500000) {
+				if (d3.getTurnover_rate_f() >= 4.9) {
+					volIndex += 2;
+					wv.addDetailDesc("流值50亿-换手率超过5%");
+				}
+				// 流通市值100亿 && 流通换手率超过4%
+			} else if (d3.getCirc_mv() < 1000000) {
+				if (d3.getTurnover_rate_f() >= 3.9) {
+					volIndex += 2;
+					wv.addDetailDesc("流值100亿-换手率超过4%");
 				}
 			}
-		} else {
-			// 3天振幅超过30%
-			if (high >= CurrencyUitl.topPrice30(low)) {
-				sortPriceIndex = -100;
-				mv1.setSortPriceIndex(sortPriceIndex);
-				return dailyList;
-			}
 		}
-		// 大盘上涨:当日价格收跌或者收盘价较最高价跌5%，剔除短线资格; 大盘下跌: 收盘涨跌幅强于大盘涨跌幅可考虑观察。
-		if (cache.get(d3.getTrade_date()) >= 0.0) {
-			if (d3.getTodayChangeRate() < 0 || d3.getHigh() > CurrencyUitl.topPrice(d3.getClose(), true)) {
-				sortPriceIndex = -100;
-				mv1.setSortPriceIndex(sortPriceIndex);
-				return dailyList;
-			}
-		}
-		mv1.setSortPriceIndex(sortPriceIndex);
-		// ======= 短线--价格指标 =======
+
+		mv1.setVolIndex(volIndex);
+		// ======= 短线--交易量指标 =======
 
 		// check-5
 		int sortStrong = 0;
 		index = 5;
 		base = 0d;
 		stock = 0d;
+		int days = 0;
 		for (int i = 0; i < index; i++) {
 			DaliyBasicInfo db = dailyList.get(i);
 			double stdTodayChangeRate = cache.get(db.getTrade_date());
 			if (db.getTodayChangeRate() > stdTodayChangeRate) {
+				days++;
 				sortStrong++;
 				if (db.getTodayChangeRate() > 0 && stdTodayChangeRate < 0) {
 					// 2，大盘下跌时，个股强势基础分+1，个股翻红时：大盘下跌0-0.5%以内+2，大盘下跌0.5%-1%以内+3，大盘下跌1-2%之间+5，大盘下跌2%以上+7，
@@ -213,6 +194,7 @@ public class StrongService {
 		if (sortStrong > 0) {
 			sortStrong += 5;// 提高权重
 		}
+		wv.addDetailDesc("5天对比大盘强势次数:" + days);
 		mv1.setSortStrong(sortStrong);
 		/*
 		 * // check-10 if (list.size() < 10) { return list.get(list.size() - 1); } index

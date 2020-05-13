@@ -191,8 +191,6 @@ public class ModelV1UpService {
 		r += mv.getVolIndex();// 短线量
 		// 2.强势指数排序
 		r += mv.getSortStrong();// 1,3
-		// 短期价格指数
-		r += mv.getSortPriceIndex();
 		// 3.图形比较 1,0
 		if (mv.getImageIndex() > 0) {
 			r += 5;// L1
@@ -216,7 +214,7 @@ public class ModelV1UpService {
 		String code = mv1.getCode();
 		log.info("model V1 processing for code:{}", code);
 		// 1强势:次数和差值:3/5/10/20/120/250天
-		List<DaliyBasicInfo> dailyList = strongService.checkStrong(mv1);
+		List<DaliyBasicInfo> dailyList = strongService.checkStrong(mv1, wv);
 		if (dailyList == null) {
 			return false;
 		}
@@ -226,7 +224,7 @@ public class ModelV1UpService {
 		tickDataService.tickDataCheck(mv1, wv);
 		this.priceIndex(mv1);
 		// 均价
-		avgService.checkAvg(mv1, lastDate.getTrade_date(), av, avgList, dailyList);
+		avgService.checkAvg(mv1, lastDate.getTrade_date(), av, avgList, dailyList, wv);
 		// 量
 		mv1.setId(code + mv1.getDate());
 		log.info(wv);

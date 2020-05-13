@@ -1,11 +1,11 @@
 package com.stable.service.model.v1;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -25,6 +25,7 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.PythonCallUtil;
+import com.stable.vo.TickDataV1Vo;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockAvg;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -49,15 +50,15 @@ public class AvgService {
 	}
 
 	public void checkAvg(ModelV1 mv1, int startDate, StockAvg av, List<StockAvg> avgList,
-			List<DaliyBasicInfo> dailyList) {
+			List<DaliyBasicInfo> dailyList, TickDataV1Vo wv) {
 		try {
 			String code = mv1.getCode();
 			int endDate = mv1.getDate();
 			StockAvg r = getAvg(av, code, startDate, endDate, avgList, true);
 			if (r != null) {
 				mv1.setAvgIndex(0);
-				getAvgPriceIndex(mv1, av);
-				getAvgPriceType(mv1, startDate, av, avgList, dailyList);
+				getAvgPriceIndex(mv1, av, wv);
+				getAvgPriceType(mv1, startDate, av, avgList, dailyList, wv);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -111,7 +112,7 @@ public class AvgService {
 
 	// 计算均线排列类型，1.V型反转,2.横盘突破，3.波浪上涨
 	private void getAvgPriceType(ModelV1 mv1, int startDate, StockAvg av, List<StockAvg> avgList,
-			List<DaliyBasicInfo> dailyList) {
+			List<DaliyBasicInfo> dailyList, TickDataV1Vo wv) {
 		if (mv1.getAvgIndex() >= 10) {
 			List<DaliyBasicInfo> day20 = new LinkedList<DaliyBasicInfo>();
 			for (int i = 0; i < 20; i++) {
@@ -168,6 +169,7 @@ public class AvgService {
 				// 往上走
 				if (firstDay.getAvgPriceIndex30() < endDay.getAvgPriceIndex30()) {
 					avgPrice30 += 20;
+					wv.addDetailDesc("");
 				} else {
 					// 均线排列往上
 					avgPrice30 += 10;
@@ -195,7 +197,7 @@ public class AvgService {
 	}
 
 	// 计算AvgPriceIndex-排列
-	private void getAvgPriceIndex(ModelV1 mv1, StockAvg av) {
+	private void getAvgPriceIndex(ModelV1 mv1, StockAvg av, TickDataV1Vo wv) {
 		if (av.getAvgPriceIndex250() > 0) {
 			if (av.getAvgPriceIndex3() >= av.getAvgPriceIndex5() && av.getAvgPriceIndex5() >= av.getAvgPriceIndex10()
 					&& av.getAvgPriceIndex10() >= av.getAvgPriceIndex20()
@@ -203,6 +205,7 @@ public class AvgService {
 					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex120()
 					&& av.getAvgPriceIndex120() >= av.getAvgPriceIndex250()) {
 				mv1.setAvgIndex(15);
+				wv.addDetailDesc("各均线排列");
 				return;
 			}
 		}
@@ -210,28 +213,27 @@ public class AvgService {
 				&& av.getAvgPriceIndex10() >= av.getAvgPriceIndex20()
 				&& av.getAvgPriceIndex20() >= av.getAvgPriceIndex30()) {
 			mv1.setAvgIndex(12);
+			wv.addDetailDesc("30日均线排列");
 			return;
 		}
 		if (av.getAvgPriceIndex3() >= av.getAvgPriceIndex5() && av.getAvgPriceIndex5() >= av.getAvgPriceIndex10()
 				&& av.getAvgPriceIndex10() >= av.getAvgPriceIndex20()) {
 			mv1.setAvgIndex(10);
+			wv.addDetailDesc("20日均线排列");
 			return;
 		}
 
-		List<Double> list = new LinkedList<Double>();
-		list.add(av.getAvgPriceIndex3());
-		list.add(av.getAvgPriceIndex5());
-		list.add(av.getAvgPriceIndex10());
-		list.add(av.getAvgPriceIndex20());
-		list.add(av.getAvgPriceIndex30());
-		double max = Collections.max(list);
-		double min = Collections.min(list);
+		Stream<Double> stream = Stream.of(av.getAvgPriceIndex3(), av.getAvgPriceIndex5(), av.getAvgPriceIndex10(),
+				av.getAvgPriceIndex20(), av.getAvgPriceIndex30());
+		double max = stream.max(Double::compare).get();
+		double min = stream.min(Double::compare).get();
 		if (min >= CurrencyUitl.lowestPrice(max, true)) {// 最高价和最低价在5%以内的
 			if (av.getAvgPriceIndex3() >= av.getAvgPriceIndex5() && av.getAvgPriceIndex30() >= av.getAvgPriceIndex3()
 					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex5()
 					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex10()
 					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex20()) {
 				mv1.setAvgIndex(5);
+				wv.addDetailDesc("30日均线5%振幅");
 			}
 			return;
 		}
@@ -241,6 +243,7 @@ public class AvgService {
 					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex10()
 					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex20()) {
 				mv1.setAvgIndex(4);
+				wv.addDetailDesc("30日均线10%振幅");
 			}
 			return;
 		}
