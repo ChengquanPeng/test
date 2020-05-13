@@ -1,9 +1,11 @@
 package com.stable.service.model.image;
 
 import java.io.File;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -112,11 +114,12 @@ public class ImageService {
 		} else {
 			queryPage = new EsQueryPageReq(size);
 		}
-		list = daliyTradeHistroyService.queryListByCode(code, startDate, endDate, queryPage, SortOrder.ASC);
+		list = daliyTradeHistroyService.queryListByCode(code, startDate, endDate, queryPage, SortOrder.DESC);
 		if (list == null || list.size() <= 0) {
 			return null;
 		}
 		List<ImageData> data = new LinkedList<ImageData>();
+		list = list.stream().sorted(Comparator.comparing(TradeHistInfoDaliy::getDate)).collect(Collectors.toList());
 		for (TradeHistInfoDaliy r : list) {
 			ImageData id = new ImageData();
 			id.setDate(DateUtil.parseDate(r.getDate()));
@@ -127,7 +130,7 @@ public class ImageService {
 	}
 
 	public int getSize(String code, int startDate, int endDate) {
-		return daliyTradeHistroyService.queryListByCode(code, startDate, endDate, all, SortOrder.ASC).size();
+		return daliyTradeHistroyService.queryListByCode(code, startDate, endDate, all, SortOrder.DESC).size();
 	}
 
 	/**
@@ -141,10 +144,11 @@ public class ImageService {
 		} else {
 			queryPage = new EsQueryPageReq(size);
 		}
-		list = daliyBasicHistroyService.queryListByCode(code, startDate, endDate, queryPage, SortOrder.ASC);
+		list = daliyBasicHistroyService.queryListByCode(code, startDate, endDate, queryPage, SortOrder.DESC);
 		if (list == null || list.size() <= 0) {
 			return null;
 		}
+		list = list.stream().sorted(Comparator.comparing(DaliyBasicInfo::getTrade_date)).collect(Collectors.toList());
 		List<ImageData> data = new LinkedList<ImageData>();
 		for (DaliyBasicInfo r : list) {
 			ImageData id = new ImageData();

@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.stable.config.SpringConfig;
+import com.stable.service.StockBasicService;
 import com.stable.service.model.StrategyListener;
 import com.stable.utils.FileWriteUitl;
 import com.stable.utils.SpringUtil;
@@ -29,7 +30,7 @@ public class V1SortStrategyListener implements StrategyListener {
 	}
 
 	public V1SortStrategyListener() {
-		String[] s = { "序号", "代码", "日期", "综合评分", "均线价格", "短线交易量", "短线价格", "短期强势", "主力行为", "主动买入", "价格指数", "图形匹配",
+		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短线交易量", "短线价格", "短期强势", "主力行为", "主动买入", "价格指数", "图形匹配",
 				"详情ID" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
@@ -40,6 +41,7 @@ public class V1SortStrategyListener implements StrategyListener {
 	public void fulshToFile() {
 		log.info("List<ModelV1> size:{}", set.size());
 		if (set.size() > 0) {
+			StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
 			sort();
 			SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 			String filepath = efc.getModelV1SortFloder() + "sort_v1_" + set.get(0).getDate() + ".html";
@@ -48,7 +50,8 @@ public class V1SortStrategyListener implements StrategyListener {
 			int index = 1;
 
 			for (ModelV1 mv : set) {
-				sb.append("<tr>").append(getHTML(index)).append(getHTML_SN(mv.getCode())).append(getHTML(mv.getDate()))
+				sb.append("<tr>").append(getHTML(index)).append(getHTML_SN(mv.getCode()))
+						.append(getHTML_SN(sbs.getCodeName(mv.getCode()))).append(getHTML(mv.getDate()))
 						.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgIndex()))
 						.append(getHTML(mv.getVolIndex())).append(getHTML(mv.getSortPriceIndex()))
 						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))

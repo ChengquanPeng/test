@@ -1,4 +1,4 @@
-package com.stable.service;
+package com.stable.service.model.v1;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -113,6 +113,18 @@ public class AvgService {
 	private void getAvgPriceType(ModelV1 mv1, int startDate, StockAvg av, List<StockAvg> avgList,
 			List<DaliyBasicInfo> dailyList) {
 		if (mv1.getAvgIndex() >= 10) {
+			List<DaliyBasicInfo> day20 = new LinkedList<DaliyBasicInfo>();
+			for (int i = 0; i < 20; i++) {
+				day20.add(dailyList.get(i));
+			}
+			// 20天涨幅
+			double max20 = day20.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
+			double min20 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
+			log.info("20 days,max={},min={}", max20, min20);
+			if (max20 > CurrencyUitl.topPrice20(min20)) {
+				mv1.setAvgIndex(-100);
+				return;
+			}
 			String code = av.getCode();
 			List<StockAvg> avglist = queryListByCodeForModel(code, av.getDate(), queryPage);
 			// 已有的map
@@ -122,6 +134,7 @@ public class AvgService {
 					map.put(item.getDate(), item);
 				});
 			}
+			map.put(av.getDate(), av);
 			int end = 30;
 			if (dailyList.size() < 30) {
 				end = dailyList.size();
@@ -142,16 +155,16 @@ public class AvgService {
 				}
 			}
 
-			double max = clist.stream().max(Comparator.comparingDouble(StockAvg::getAvgPriceIndex30)).get()
+			double maxAvg30 = clist.stream().max(Comparator.comparingDouble(StockAvg::getAvgPriceIndex30)).get()
 					.getAvgPriceIndex30();
-			double min = clist.stream().min(Comparator.comparingDouble(StockAvg::getAvgPriceIndex30)).get()
+			double minAvg30 = clist.stream().min(Comparator.comparingDouble(StockAvg::getAvgPriceIndex30)).get()
 					.getAvgPriceIndex30();
 
 			StockAvg firstDay = clist.get(clist.size() - 1);
 			StockAvg endDay = clist.get(0);
 			int avgPrice30 = 0;
 
-			if (CurrencyUitl.topPrice(min, true) <= max) {// 1.振幅在5%以内
+			if (CurrencyUitl.topPrice(minAvg30, true) <= maxAvg30) {// 1.振幅在5%以内
 				// 往上走
 				if (firstDay.getAvgPriceIndex30() < endDay.getAvgPriceIndex30()) {
 					avgPrice30 += 20;
@@ -159,11 +172,11 @@ public class AvgService {
 					// 均线排列往上
 					avgPrice30 += 10;
 				}
-			} else if (CurrencyUitl.topPrice(min, false) <= max) {// 2.振幅在10%以内
+			} else if (CurrencyUitl.topPrice(minAvg30, false) <= maxAvg30) {// 2.振幅在10%以内
 				// 往上走
 				if (firstDay.getAvgPriceIndex30() < endDay.getAvgPriceIndex30()) {
 					avgPrice30 += 15;
-				} else if (CurrencyUitl.topPrice(min, true) <= endDay.getAvgPriceIndex30()) {
+				} else if (CurrencyUitl.topPrice(minAvg30, true) <= endDay.getAvgPriceIndex30()) {
 					avgPrice30 += 10;
 				}
 			} else {

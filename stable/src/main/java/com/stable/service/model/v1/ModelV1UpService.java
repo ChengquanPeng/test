@@ -22,10 +22,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsModelV1Dao;
-import com.stable.service.AvgService;
 import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
-import com.stable.service.StrongService;
 import com.stable.service.TickDataService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.StrategyListener;
@@ -218,12 +216,11 @@ public class ModelV1UpService {
 		String code = mv1.getCode();
 		log.info("model V1 processing for code:{}", code);
 		// 1强势:次数和差值:3/5/10/20/120/250天
-		List<DaliyBasicInfo> dailyList = null;
-		DaliyBasicInfo lastDate = strongService.checkStrong(mv1, dailyList);
-		if (lastDate == null) {
+		List<DaliyBasicInfo> dailyList = strongService.checkStrong(mv1);
+		if (dailyList == null) {
 			return false;
 		}
-
+		DaliyBasicInfo lastDate = dailyList.get(dailyList.size() - 1);
 		// 2交易方向:次数和差值:3/5/10/20/120/250天
 		// 3程序单:次数:3/5/10/20/120/250天
 		tickDataService.tickDataCheck(mv1, wv);

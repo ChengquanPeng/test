@@ -1,13 +1,15 @@
-package com.stable.service;
+package com.stable.service.model.v1;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.jboss.netty.util.internal.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.stable.service.DaliyBasicHistroyService;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.DaliyBasicInfo;
@@ -92,14 +94,16 @@ public class StrongService {
 
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 
-	public DaliyBasicInfo checkStrong(ModelV1 mv1, List<DaliyBasicInfo> dailyList) {
+	public List<DaliyBasicInfo> checkStrong(ModelV1 mv1) {
 		String code = mv1.getCode();
-		dailyList = daliyBasicHistroyService.queryListByCodeForModel(code, mv1.getDate(), queryPage).getContent();
+		List<DaliyBasicInfo> dailyList = daliyBasicHistroyService
+				.queryListByCodeForModel(code, mv1.getDate(), queryPage).getContent();
 		if (dailyList.size() < 5) {
 			log.warn("checkStrong get size<5");
 			return null;
 		}
 		DaliyBasicInfo last = dailyList.get(dailyList.size() - 1);
+		log.info("daliy last,code={},date={}", last.getCode(), last.getTrade_date());
 		Map<Integer, Double> cache = this.getIndexMap(code, mv1.getDate(), last.getTrade_date());
 		// check-3
 		int index = 3;
@@ -135,35 +139,41 @@ public class StrongService {
 		}
 		// 换手率高-过滤掉
 		if (d3.getTurnover_rate_f() >= 30.0) {
-			volIndex = -20;
+			volIndex = -100;
+			mv1.setVolIndex(volIndex);
+			return dailyList;
 		}
 		mv1.setVolIndex(volIndex);
 		// ======= 短线--交易量指标 =======
 		// ======= 短线--价格指标 =======
 		int sortPriceIndex = 0;
-		double high = d3.getHigh();
-		double low = d1.getLow();
+		double high = Stream.of(d3.getHigh(), d2.getHigh(), d1.getHigh()).max(Double::compare).get();
+		double low = Stream.of(d3.getLow(), d2.getLow(), d1.getLow()).max(Double::compare).get();
 		double chkLine20 = CurrencyUitl.topPrice20(low);
-		if (high < chkLine20) {// 振浮在20%以内
+		log.info("3 days code={},date={},high={},low={},chkLine20={}", last.getCode(), last.getTrade_date(), high, low,
+				chkLine20);
+		if (chkLine20 > high) {// 振浮在20%以内
 			sortPriceIndex = 10;
 			if (high < CurrencyUitl.topPrice(low, false)) {// 振浮在10%以内
 				sortPriceIndex = 6;
 				if (high < CurrencyUitl.topPrice(low, true)) {// 振浮在5%以内
-					sortPriceIndex = 0;
+					sortPriceIndex = 2;
 				}
 			}
 		} else {
+			// 3天振幅超过30%
 			if (high >= CurrencyUitl.topPrice30(low)) {
-				sortPriceIndex = -20;
-				if (high >= CurrencyUitl.topPrice50(low)) {
-					sortPriceIndex = -100;
-				}
+				sortPriceIndex = -100;
+				mv1.setSortPriceIndex(sortPriceIndex);
+				return dailyList;
 			}
 		}
 		// 大盘上涨:当日价格收跌或者收盘价较最高价跌5%，剔除短线资格; 大盘下跌: 收盘涨跌幅强于大盘涨跌幅可考虑观察。
 		if (cache.get(d3.getTrade_date()) >= 0.0) {
 			if (d3.getTodayChangeRate() < 0 || d3.getHigh() > CurrencyUitl.topPrice(d3.getClose(), true)) {
 				sortPriceIndex = -100;
+				mv1.setSortPriceIndex(sortPriceIndex);
+				return dailyList;
 			}
 		}
 		mv1.setSortPriceIndex(sortPriceIndex);
@@ -222,6 +232,6 @@ public class StrongService {
 		 * list.get(i); if (db.getTodayChangeRate() > cache.get(db.getTrade_date())) {
 		 * strongTimes250++; } } sv.setStrongTimes250(strongTimes250);
 		 */
-		return last;
+		return dailyList;
 	}
 }
