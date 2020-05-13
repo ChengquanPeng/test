@@ -223,10 +223,10 @@ public class AvgService {
 			return;
 		}
 
-		Stream<Double> stream = Stream.of(av.getAvgPriceIndex3(), av.getAvgPriceIndex5(), av.getAvgPriceIndex10(),
-				av.getAvgPriceIndex20(), av.getAvgPriceIndex30());
-		double max = stream.max(Double::compare).get();
-		double min = stream.min(Double::compare).get();
+		double max = Stream.of(av.getAvgPriceIndex3(), av.getAvgPriceIndex5(), av.getAvgPriceIndex10(),
+				av.getAvgPriceIndex20(), av.getAvgPriceIndex30()).max(Double::compare).get();
+		double min = Stream.of(av.getAvgPriceIndex3(), av.getAvgPriceIndex5(), av.getAvgPriceIndex10(),
+				av.getAvgPriceIndex20(), av.getAvgPriceIndex30()).min(Double::compare).get();
 		if (min >= CurrencyUitl.lowestPrice(max, true)) {// 最高价和最低价在5%以内的
 			if (av.getAvgPriceIndex3() >= av.getAvgPriceIndex5() && av.getAvgPriceIndex30() >= av.getAvgPriceIndex3()
 					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex5()

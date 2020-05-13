@@ -7,9 +7,11 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
+@ToString
 @Document(indexName = "stock_avg")
 public class StockAvg extends EsBase {
 	private static final long serialVersionUID = 107721876820773361L;
