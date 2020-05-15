@@ -93,7 +93,7 @@ public class ModelV1UpService {
 					date = Integer.valueOf(DateUtil.formatYYYYMMDD(d1));
 					if (date > today) {
 						log.info("today:{},date:{} 循环结束", today, date);
-						return;
+						break;
 					}
 				}
 			} else {// 手动某一天

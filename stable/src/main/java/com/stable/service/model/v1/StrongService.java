@@ -186,15 +186,15 @@ public class StrongService {
 			stock += db.getTodayChangeRate();
 			base += cache.get(db.getTrade_date());
 		}
-		if (stock > base) {
-			sortStrong++;
-		} else {
-			sortStrong--;
-		}
 		if (sortStrong > 0) {
-			sortStrong += 5;// 提高权重
+			if (stock > base) {
+				sortStrong++;
+				sortStrong += 5;// 提高权重
+				wv.addDetailDesc("5天对比大盘强势次数:" + days);
+			} else {
+				sortStrong = 0;
+			}
 		}
-		wv.addDetailDesc("5天对比大盘强势次数:" + days);
 		mv1.setSortStrong(sortStrong);
 		/*
 		 * // check-10 if (list.size() < 10) { return list.get(list.size() - 1); } index

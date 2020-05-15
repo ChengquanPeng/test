@@ -169,17 +169,20 @@ public class AvgService {
 				// 往上走
 				if (firstDay.getAvgPriceIndex30() < endDay.getAvgPriceIndex30()) {
 					avgPrice30 += 20;
-					wv.addDetailDesc("");
+					wv.addDetailDesc("30日均线突破往上-20");
 				} else {
 					// 均线排列往上
 					avgPrice30 += 10;
+					wv.addDetailDesc("30日均线粘合-10");
 				}
 			} else if (CurrencyUitl.topPrice(minAvg30, false) <= maxAvg30) {// 2.振幅在10%以内
 				// 往上走
 				if (firstDay.getAvgPriceIndex30() < endDay.getAvgPriceIndex30()) {
 					avgPrice30 += 15;
+					wv.addDetailDesc("30日均线突破往上-15");
 				} else if (CurrencyUitl.topPrice(minAvg30, true) <= endDay.getAvgPriceIndex30()) {
 					avgPrice30 += 10;
+					wv.addDetailDesc("30日均线粘合-10");
 				}
 			} else {
 				// 往上走
@@ -187,6 +190,7 @@ public class AvgService {
 					// 白马
 					avgPrice30 = 1;
 					mv1.setWhiteHorse(1);
+					wv.addDetailDesc("白马？");
 				} else {
 					// 剔除往下走或者振幅较大
 					avgPrice30 = -100;

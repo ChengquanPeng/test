@@ -28,7 +28,7 @@ public class V1SortStrategyListener implements StrategyListener {
 	public void condition(Object... obj) {
 		ModelV1 mv1 = (ModelV1) obj[0];
 		// 短期强势
-		if (mv1.getSortStrong() > 0 && mv1.getAvgIndex() > 0 && mv1.getVolIndex() > 0) {
+		if (mv1.getSortStrong() > 0 && mv1.getAvgIndex() >= 10 && mv1.getVolIndex() > 0) {
 			set.add(mv1);
 			TickDataV1Vo wv = (TickDataV1Vo) obj[2];
 			map.put(mv1.getCode(), wv.getDetailDesc().toString());
@@ -62,7 +62,7 @@ public class V1SortStrategyListener implements StrategyListener {
 						.append(getHTML(mv.getVolIndex())).append(getHTML(mv.getSortStrong()))
 						.append(getHTML(mv.getSortPgm())).append(getHTML(mv.getSortWay()))
 						.append(getHTML(mv.getPriceIndex())).append(getHTML(mv.getImageIndex() == 1 ? "Y" : "N"))
-						.append(getHTML(map.get(mv.getId()))).append(getHTML(mv.getId())).append("</tr>")
+						.append(getHTML(map.get(mv.getCode()))).append(getHTML(mv.getId())).append("</tr>")
 						.append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
