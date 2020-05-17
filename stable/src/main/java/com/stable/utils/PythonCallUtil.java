@@ -68,7 +68,7 @@ public class PythonCallUtil {
 	public synchronized static void callPythonScriptNoReturn(String pythonScriptPathAndFileName, String params) {
 		try {
 			String cmd = String.format(CALL_FORMAT, pythonScriptPathAndFileName, params);
-			//System.err.println("call Python Script Cmd:" + cmd);
+			// System.err.println("call Python Script Cmd:" + cmd);
 			Process proc = Runtime.getRuntime().exec(cmd);
 			proc.waitFor();
 			// log.info("call Python Script Cmd:{}，proc.waitFor：{}", cmd, r);
@@ -90,7 +90,7 @@ public class PythonCallUtil {
 		List<String> sb = new LinkedList<String>();
 		try {
 			// System.err.println(url);
-			String line = HttpUtil.doGet2(url);
+			String line = HttpUtil.doGet2(url, null);
 			// System.err.println(line);
 			String[] strs = line.split("A");
 			for (int i = 0; i < strs.length; i++) {

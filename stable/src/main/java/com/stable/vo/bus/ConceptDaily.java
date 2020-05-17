@@ -12,8 +12,8 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-@Document(indexName = "code_concept")
-public class CodeConcept extends EsBase {
+@Document(indexName = "concept_daily")
+public class ConceptDaily extends EsBase {
 	/**
 	 * 
 	 */
@@ -21,11 +21,26 @@ public class CodeConcept extends EsBase {
 	@Id
 	private String id;
 	@Field(type = FieldType.Text)
-	private String code;
-	@Field(type = FieldType.Text)
 	private String conceptId;
-	@Field(type = FieldType.Text)
-	private String conceptName;
 	@Field(type = FieldType.Integer)
-	private int type;
+	private int date;
+
+	@Field(type = FieldType.Double)
+	private double open;
+	@Field(type = FieldType.Double)
+	private double high;
+	@Field(type = FieldType.Double)
+	private double low;
+	@Field(type = FieldType.Double)
+	private double close;
+	@Field(type = FieldType.Long)
+	private long vol;
+	@Field(type = FieldType.Double)
+	private long amt;
+	@Field(type = FieldType.Double)
+	private double todayChange;
+
+	public void setId() {
+		id = this.conceptId + date;
+	}
 }

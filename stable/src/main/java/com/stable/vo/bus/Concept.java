@@ -7,9 +7,11 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
+@ToString
 @Document(indexName = "concept")
 public class Concept extends EsBase {
 	/**
@@ -19,7 +21,17 @@ public class Concept extends EsBase {
 	@Id
 	private String id;
 	@Field(type = FieldType.Text)
+	private String code;
+	@Field(type = FieldType.Text)
 	private String name;
 	@Field(type = FieldType.Integer)
-	private String date;
+	private int date;
+	@Field(type = FieldType.Integer)
+	private int type;
+	@Field(type = FieldType.Text)
+	private String href;
+	@Field(type = FieldType.Integer)
+	private int cnt;
+	@Field(type = FieldType.Text)
+	private String aliasCode;
 }
