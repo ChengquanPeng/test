@@ -32,7 +32,8 @@ public class ThsSpider {
 	private String START_THS = "THS";
 	private String SPIT = "/";
 
-	private String host = "http://127.0.0.1:8081";
+//	private String host = "http://127.0.0.1:8081";
+	private String host = "http://106.52.95.147:9999";
 	private String url0 = host + "/web/concept/allConcepts";
 	private String url1 = host + "/web/concept/addConcept";
 	private String url2 = host + "/web/concept/addCodeConcept";
@@ -150,6 +151,9 @@ public class ThsSpider {
 					}
 					if (list.size() >= 100) {
 						saveConcept(list);
+					}
+					if(index>=1) {
+						return;
 					}
 				}
 				index++;
