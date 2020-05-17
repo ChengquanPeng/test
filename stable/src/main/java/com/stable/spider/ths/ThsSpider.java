@@ -304,7 +304,7 @@ public class ThsSpider {
 		}
 	}
 
-	private void getConceptDailyHistory(Concept cp, String url) {
+	public void getConceptDailyHistory(Concept cp, String url) {
 		HtmlunitSpider hs = new HtmlunitSpider();
 		HtmlPage page = null;
 		try {
