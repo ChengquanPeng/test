@@ -64,7 +64,7 @@ public class ThsSpider {
 			JSONObject jm = jsonObj.getJSONObject("result");
 			if (jm != null) {
 				m = jm.toJavaObject(Map.class);
-				System.err.println(m);
+				// System.err.println(m);
 			}
 		}
 		System.err.println(m.size());
@@ -102,8 +102,9 @@ public class ThsSpider {
 	}
 
 	public void getGnList(List<Concept> list, List<CodeConcept> codelist, Map<String, String> map) {
-		int index = 1;
+		int index = 1;// TODO
 		int end = 0;
+		int trytime = 0;
 		do {
 			String url = String.format(GN_LIST, index);
 			DomElement table = null;
@@ -152,25 +153,28 @@ public class ThsSpider {
 					if (list.size() >= 100) {
 						saveConcept(list);
 					}
-					if(index>=1) {
-						return;
-					}
 				}
 				index++;
 				if (end == 0) {
 					String pageInfo = page.getElementById("m-page").getLastElementChild().asText();
 					end = Integer.valueOf(pageInfo.split(SPIT)[1]);
 				}
+				trytime = 0;
 			} catch (Exception e) {
-				e.printStackTrace();
-				WxPushUtil.pushSystem1("同花顺概念-列表抓包出错,url=" + url);
-				if (list.size() > 0) {
-					saveConcept(list);
+				trytime++;
+				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+				if (trytime >= 10) {
+					e.printStackTrace();
+					WxPushUtil.pushSystem1("同花顺概念-列表抓包出错,url=" + url);
+					if (list.size() > 0) {
+						saveConcept(list);
+					}
+					if (codelist.size() > 0) {
+						saveCodeConcept(codelist);
+					}
+					throw new RuntimeException(e);
 				}
-				if (codelist.size() > 0) {
-					saveCodeConcept(codelist);
-				}
-				throw new RuntimeException(e);
+
 			}
 		} while (index <= end);
 	}
@@ -203,6 +207,7 @@ public class ThsSpider {
 		int updateTime = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		int index = 1;
 		int end = 0;
+		int trytime = 0;
 		do {
 			ThreadsUtil.sleepRandomSecBetween5And15();
 
@@ -222,6 +227,9 @@ public class ThsSpider {
 
 			try {
 				DomElement tbody = table.getLastElementChild();
+				if (tbody.asText().contains("暂无成份股数据")) {
+					return;
+				}
 				Iterator<DomElement> trs = tbody.getChildElements().iterator();
 				while (trs.hasNext()) {
 					Iterator<DomElement> tr = trs.next().getChildElements().iterator();
@@ -242,11 +250,16 @@ public class ThsSpider {
 					String pageInfo = page.getElementById("m-page").getLastElementChild().asText();
 					end = Integer.valueOf(pageInfo.split(SPIT)[1]);
 				}
+				trytime = 0;
 			} catch (Exception e) {
-				e.printStackTrace();
-				System.err.println(page.asText());
-				WxPushUtil.pushSystem1("同花顺概念-成分股抓包出错,url=" + url);
-				throw new RuntimeException(e);
+				trytime++;
+				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+				if (trytime >= 10) {
+					e.printStackTrace();
+					System.err.println(page.asText());
+					WxPushUtil.pushSystem1("同花顺概念-成分股抓包出错,url=" + url);
+					throw new RuntimeException(e);
+				}
 			}
 		} while (index <= end);
 	}

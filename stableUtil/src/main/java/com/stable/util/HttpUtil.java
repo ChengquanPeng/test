@@ -122,6 +122,8 @@ public class HttpUtil {
 		HttpPost httpPost = new HttpPost(url);
 		JSONObject jsonObj = null;
 		try {
+			httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
+			httpPost.setHeader(AUTHORIZATION, AUTHORIZATION_VALUE);
 			HttpResponse response = httpclient.execute(httpPost);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {

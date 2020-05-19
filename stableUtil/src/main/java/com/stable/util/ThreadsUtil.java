@@ -47,6 +47,25 @@ public class ThreadsUtil {
 		}
 	}
 
+	public static void sleepRandomSecBetween15And30(int i) {
+		try {
+			i++;
+			// 随机休息1-30s
+			Thread.sleep(i * MathUtil.getRandomSecBetween15And30() * 1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void sleepRandomSecBetween15And30() {
+		try {
+			// 随机休息1-30s
+			Thread.sleep(MathUtil.getRandomSecBetween15And30() * 1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void sleepRandomSecBetween1And5() {
 		try {
 			// 随机休息1-5s
