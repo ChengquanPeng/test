@@ -28,7 +28,10 @@ public class SpringConfig {
 
 	@Value("${model.v1.sort.floder}")
 	private String modelV1SortFloder;
-	
+
+	@Value("${model.v1.sort.floder.desc}")
+	private String modelV1SortFloderDesc;
+
 	@Value("${model.image.floder}")
 	private String modelImageFloder;
 
@@ -88,4 +91,11 @@ public class SpringConfig {
 		this.modelImageFloder = modelImageFloder;
 	}
 
+	public String getModelV1SortFloderDesc() {
+		return modelV1SortFloderDesc;
+	}
+
+	public void setModelV1SortFloderDesc(String modelV1SortFloderDesc) {
+		this.modelV1SortFloderDesc = modelV1SortFloderDesc;
+	}
 }

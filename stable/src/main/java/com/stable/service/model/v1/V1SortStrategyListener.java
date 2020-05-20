@@ -50,13 +50,21 @@ public class V1SortStrategyListener implements StrategyListener {
 			StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
 			sort();
 			SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
-			String filepath = efc.getModelV1SortFloder() + "sort_v1_" + set.get(0).getDate() + ".html";
-			FileWriteUitl fw = new FileWriteUitl(filepath, true);
+
 			StringBuffer sb = new StringBuffer(header);
+			StringBuffer sb2 = new StringBuffer(header);
 			int index = 1;
 
 			for (ModelV1 mv : set) {
 				sb.append("<tr>").append(getHTML(index)).append(getHTML_SN(mv.getCode()))
+						.append(getHTML(sbs.getCodeName(mv.getCode()))).append(getHTML(mv.getDate()))
+						.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgIndex()))
+						.append(getHTML(mv.getVolIndex())).append(getHTML(mv.getSortStrong()))
+						.append(getHTML(mv.getSortPgm())).append(getHTML(mv.getSortWay()))
+						.append(getHTML(mv.getPriceIndex())).append(getHTML("")).append(getHTML(mv.getId()))
+						.append("</tr>").append(FileWriteUitl.LINE_FILE);
+
+				sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(mv.getCode()))
 						.append(getHTML(sbs.getCodeName(mv.getCode()))).append(getHTML(mv.getDate()))
 						.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgIndex()))
 						.append(getHTML(mv.getVolIndex())).append(getHTML(mv.getSortStrong()))
@@ -66,8 +74,16 @@ public class V1SortStrategyListener implements StrategyListener {
 				index++;
 			}
 			sb.append(endder);
+
+			String filepath = efc.getModelV1SortFloder() + "sort_v1_" + set.get(0).getDate() + ".html";
+			FileWriteUitl fw = new FileWriteUitl(filepath, true);
 			fw.writeLine(sb.toString());
 			fw.close();
+
+			String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v1_prv_" + set.get(0).getDate() + ".html";
+			FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);
+			fw2.writeLine(sb2.toString());
+			fw2.close();
 		}
 	}
 
