@@ -35,6 +35,7 @@ import com.stable.utils.MyRunnable;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.TasksWorker2nd;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.resp.DaliyBasicInfoResp;
@@ -61,7 +62,6 @@ public class DaliyBasicHistroyService {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private TickDataService tickDataService;
-
 	@Value("${tick.data.start.date}")
 	public String startDate;
 
@@ -71,6 +71,9 @@ public class DaliyBasicHistroyService {
 		JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
 		if (array == null || array.size() <= 0) {
 			log.warn("未获取到日交易daily_basic（每日指标）记录,tushare,日期={}", today);
+			if (tradeCalService.isOpen(Integer.valueOf(today))) {
+				WxPushUtil.pushSystem1("未获取到日交易daily_basic（每日指标）记录,tushare,日期=" + today);
+			}
 			return false;
 		}
 
