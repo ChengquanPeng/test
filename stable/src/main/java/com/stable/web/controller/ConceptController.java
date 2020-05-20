@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.es.dao.base.EsCodeConceptDao;
 import com.stable.es.dao.base.EsConceptDao;
+import com.stable.vo.bus.Concept;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.http.resp.CodeConceptAddReq;
 import com.stable.vo.http.resp.ConceptAddReq;
@@ -30,10 +31,10 @@ public class ConceptController {
 	public ResponseEntity<JsonResult> allConcepts() {
 		JsonResult r = new JsonResult();
 		try {
-			Map<String, String> m = new HashMap<String, String>();
+			Map<String, Concept> m = new HashMap<String, Concept>();
 			esConceptDao.findAll().forEach(x -> {
 				if (StringUtils.isNotBlank(x.getAliasCode()) && !"null".equals(x.getAliasCode())) {
-					m.put(x.getCode(), x.getAliasCode());
+					m.put(x.getCode(), x);
 				}
 			});
 			r.setResult(m);

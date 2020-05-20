@@ -1,6 +1,8 @@
 package com.stable.util;
 
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -32,8 +34,8 @@ public class ThsSpider {
 	private String START_THS = "THS";
 	private String SPIT = "/";
 
-//	private String host = "http://127.0.0.1:8081";
-	private String host = "http://106.52.95.147:9999";
+	private String host = "http://127.0.0.1:8081";
+//	private String host = "http://106.52.95.147:9999";
 	private String url0 = host + "/web/concept/allConcepts";
 	private String url1 = host + "/web/concept/addConcept";
 	private String url2 = host + "/web/concept/addCodeConcept";
@@ -57,8 +59,8 @@ public class ThsSpider {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map<String, String> getAllAliasCode() {
-		Map<String, String> m = new HashMap<String, String>();
+	private Map<String, Concept> getAllAliasCode() {
+		Map<String, Concept> m = new HashMap<String, Concept>();
 		JSONObject jsonObj = HttpUtil.doPost(url0);
 		if (jsonObj != null) {
 			JSONObject jm = jsonObj.getJSONObject("result");
@@ -82,11 +84,24 @@ public class ThsSpider {
 		}).start();
 	}
 
+	private void synchConceptDaliy() {
+		Map<String, Concept> m = this.getAllAliasCode();
+		
+	}
+
 	private void synchGnAndCode() {
+		Date today = new Date();
+		Calendar c = Calendar.getInstance();
+		c.setTime(today);
+		int weekday = c.get(Calendar.DAY_OF_WEEK);
+		if (weekday != 6) {
+			System.err.println("今日非周五");
+//			return;
+		}
 		try {
 			List<Concept> list = new LinkedList<Concept>();
 			List<CodeConcept> codelist = new LinkedList<CodeConcept>();
-			Map<String, String> map = getAllAliasCode();
+			Map<String, Concept> map = getAllAliasCode();
 			getGnList(list, codelist, map);
 			if (list.size() > 0) {
 				saveConcept(list);
@@ -101,7 +116,7 @@ public class ThsSpider {
 		}
 	}
 
-	public void getGnList(List<Concept> list, List<CodeConcept> codelist, Map<String, String> map) {
+	public void getGnList(List<Concept> list, List<CodeConcept> codelist, Map<String, Concept> map) {
 		int index = 1;// TODO
 		int end = 0;
 		int trytime = 0;
@@ -181,9 +196,9 @@ public class ThsSpider {
 
 	private String GN_CODE_LIST = "http://q.10jqka.com.cn/gn/detail/field/264648/order/desc/page/%s/ajax/1/code/%s";
 
-	private void getAliasCdoe(Concept cp, Map<String, String> map) {
+	private void getAliasCdoe(Concept cp, Map<String, Concept> map) {
 		if (map.containsKey(cp.getCode())) {
-			cp.setAliasCode(map.get(cp.getCode()));
+			cp.setAliasCode(map.get(cp.getCode()).getAliasCode());
 			return;
 		}
 		ThreadsUtil.sleepRandomSecBetween5And15();
@@ -194,7 +209,7 @@ public class ThsSpider {
 			String aliasCode = page.getElementById("clid").getAttribute("value");
 			if (StringUtils.isNotBlank(aliasCode) && !"null".equals(aliasCode)) {
 				cp.setAliasCode(aliasCode);
-				map.put(cp.getCode(), cp.getAliasCode());
+				map.put(cp.getCode(), cp);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -32,6 +32,7 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
+import com.stable.utils.TasksWorker;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.TickDataV1Vo;
 import com.stable.vo.bus.StockAvg;
@@ -125,8 +126,7 @@ public class ModelV1UpService {
 			log.info("{}获取到每日指标记录条数={}", treadeDate, size);
 			List<ModelV1> saveList = new LinkedList<ModelV1>();
 			List<StockAvg> avgList = new LinkedList<StockAvg>();
-			List<StrategyListener> list = new ArrayList<StrategyListener>(2);
-			list.add(new ImageStrategyListener());
+			List<StrategyListener> list = new ArrayList<StrategyListener>();
 			list.add(new V1SortStrategyListener());
 			for (int i = 0; i < array.size(); i++) {
 				DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
@@ -152,28 +152,59 @@ public class ModelV1UpService {
 			if (avgList.size() > 0) {
 				avgService.saveStockAvg(avgList);
 			}
+			imageCheck(array);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw new RuntimeException("数据处理异常", e);
 		}
 	}
 
+	public void imageCheck(JSONArray array) {
+		TasksWorker.getInstance().getService().submit(new Runnable() {
+			@Override
+			public void run() {
+				String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
+				try {
+					StrategyListener sl = new ImageStrategyListener();
+					for (int i = 0; i < array.size(); i++) {
+						DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
+						ModelV1 mv = new ModelV1();
+						mv.setCode(d.getCode());
+						mv.setDate(d.getTrade_date());
+						mv.setClose(d.getClose());
+						String str = imageService.checkImg(mv.getCode(), mv.getDate());
+						if (StringUtils.isNotBlank(str)) {
+							if (str.contains(ImageService.MATCH_L2)) {
+								mv.setImageIndex(2);
+							} else {
+								mv.setImageIndex(1);
+							}
+						}
+						// 条件
+						sl.condition(mv, str);
+					}
+					sl.fulshToFile();// 存盘
+					log.info("图片模型执行完成。");
+					WxPushUtil
+							.pushSystem1("图形模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
+				} catch (Exception e) {
+					ErrorLogFileUitl.writeError(e, e.getMessage(), "", "");
+					WxPushUtil.pushSystem1("图形模型执行异常！ 开始时间:" + startTime);
+				}
+			}
+		});
+
+	}
+
 	private void runModel(ModelV1 mv1, List<StrategyListener> list, List<ModelV1> saveList, List<StockAvg> avgList) {
 		TickDataV1Vo wv = new TickDataV1Vo();
 		StockAvg av = new StockAvg();
 		if (getDataAndRunIndexs(mv1, wv, av, avgList)) {
-			String str = imageService.checkImg(mv1.getCode(), mv1.getDate());
-			if (StringUtils.isNotBlank(str)) {
-				if (str.contains(ImageService.MATCH_L2)) {
-					mv1.setImageIndex(2);
-				} else {
-					mv1.setImageIndex(1);
-				}
-			}
+
 			mv1.setScore(this.getSocre(mv1));
 			if (mv1.getScore() > 0) {
 				for (StrategyListener sl : list) {
-					sl.condition(mv1, str, wv, av);
+					sl.condition(mv1, wv, av);
 				}
 			}
 			// 大于10分

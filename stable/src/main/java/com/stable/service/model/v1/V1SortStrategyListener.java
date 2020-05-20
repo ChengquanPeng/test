@@ -36,7 +36,7 @@ public class V1SortStrategyListener implements StrategyListener {
 	}
 
 	public V1SortStrategyListener() {
-		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短线交易量", "短期强势", "主力行为", "主动买入", "价格指数", "图形匹配", "评分详情",
+		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短线交易量", "短期强势", "主力行为", "主动买入", "价格指数", "评分详情",
 				"详情ID" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
@@ -61,9 +61,8 @@ public class V1SortStrategyListener implements StrategyListener {
 						.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgIndex()))
 						.append(getHTML(mv.getVolIndex())).append(getHTML(mv.getSortStrong()))
 						.append(getHTML(mv.getSortPgm())).append(getHTML(mv.getSortWay()))
-						.append(getHTML(mv.getPriceIndex())).append(getHTML(mv.getImageIndex() == 1 ? "Y" : "N"))
-						.append(getHTML(map.get(mv.getCode()))).append(getHTML(mv.getId())).append("</tr>")
-						.append(FileWriteUitl.LINE_FILE);
+						.append(getHTML(mv.getPriceIndex())).append(getHTML(map.get(mv.getCode())))
+						.append(getHTML(mv.getId())).append("</tr>").append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
 			sb.append(endder);
