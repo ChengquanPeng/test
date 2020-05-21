@@ -197,14 +197,14 @@ public class ModelV1UpService {
 	}
 
 	private void runModel(ModelV1 mv1, List<StrategyListener> list, List<ModelV1> saveList, List<StockAvg> avgList) {
-		TickDataV1Vo wv = new TickDataV1Vo();
+		TickDataV1Vo tdv = new TickDataV1Vo();
 		StockAvg av = new StockAvg();
-		if (getDataAndRunIndexs(mv1, wv, av, avgList)) {
+		if (getDataAndRunIndexs(mv1, tdv, av, avgList)) {
 
 			mv1.setScore(this.getSocre(mv1));
 			if (mv1.getScore() > 0) {
 				for (StrategyListener sl : list) {
-					sl.condition(mv1, wv, av);
+					sl.condition(mv1, tdv, av);
 				}
 			}
 			// 大于10分

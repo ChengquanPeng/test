@@ -30,7 +30,7 @@ public class V1SortStrategyListener implements StrategyListener {
 		// 短期强势
 		if (mv1.getSortStrong() > 0 && mv1.getAvgIndex() >= 10 && mv1.getVolIndex() > 0) {
 			set.add(mv1);
-			TickDataV1Vo wv = (TickDataV1Vo) obj[2];
+			TickDataV1Vo wv = (TickDataV1Vo) obj[1];
 			map.put(mv1.getCode(), wv.getDetailDesc().toString());
 		}
 	}
