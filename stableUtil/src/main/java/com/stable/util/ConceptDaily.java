@@ -1,4 +1,4 @@
-package com.stable.vo.bus;
+package com.stable.util;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -35,10 +35,10 @@ public class ConceptDaily extends EsBase {
 	private double low;
 	@Field(type = FieldType.Double)
 	private double close;
-	@Field(type = FieldType.Long)
-	private long vol;
 	@Field(type = FieldType.Double)
-	private long amt;
+	private double vol;
+	@Field(type = FieldType.Double)
+	private double amt;
 	@Field(type = FieldType.Double)
 	private double todayChange;
 	@Field(type = FieldType.Double)

@@ -172,16 +172,21 @@ public class ModelV1UpService {
 						mv.setCode(d.getCode());
 						mv.setDate(d.getTrade_date());
 						mv.setClose(d.getClose());
-						String str = imageService.checkImg(mv.getCode(), mv.getDate());
-						if (StringUtils.isNotBlank(str)) {
-							if (str.contains(ImageService.MATCH_L2)) {
-								mv.setImageIndex(2);
-							} else {
-								mv.setImageIndex(1);
+						if (stockBasicService.online1Year(mv.getCode())) {
+							String str = imageService.checkImg(mv.getCode(), mv.getDate());
+							if (StringUtils.isNotBlank(str)) {
+								if (str.contains(ImageService.MATCH_L2)) {
+									mv.setImageIndex(2);
+								} else {
+									mv.setImageIndex(1);
+								}
 							}
+							// 条件
+							sl.condition(mv, str);
+						} else {
+							log.info("Online 不足1年，code={}", mv.getCode());
 						}
-						// 条件
-						sl.condition(mv, str);
+
 					}
 					sl.fulshToFile();// 存盘
 					log.info("图片模型执行完成。");

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 @Component
@@ -34,11 +35,21 @@ public class ThsSpider {
 	private String START_THS = "THS";
 	private String SPIT = "/";
 
-	private String host = "http://127.0.0.1:8081";
-//	private String host = "http://106.52.95.147:9999";
+//	private String host = "http://127.0.0.1:8081";
+	private String host = "http://106.52.95.147:9999";
 	private String url0 = host + "/web/concept/allConcepts";
 	private String url1 = host + "/web/concept/addConcept";
 	private String url2 = host + "/web/concept/addCodeConcept";
+	private String url3 = host + "/web/concept/addConceptDaily";
+
+	private void saveConceptDaily(List<ConceptDaily> list) {
+		if (list.size() > 0) {
+			ConceptDaliyAddReq req = new ConceptDaliyAddReq();
+			req.setList(list);
+			System.err.println(HttpUtil.doPost(url3, JSON.toJSONString(req)));
+			list.clear();
+		}
+	}
 
 	private void saveConcept(List<Concept> list) {
 		if (list.size() > 0) {
@@ -65,7 +76,10 @@ public class ThsSpider {
 		if (jsonObj != null) {
 			JSONObject jm = jsonObj.getJSONObject("result");
 			if (jm != null) {
-				m = jm.toJavaObject(Map.class);
+				Map<String, JSONObject> t = jm.toJavaObject(Map.class);
+				t.keySet().forEach(key -> {
+					m.put(key, t.get(key).toJavaObject(Concept.class));
+				});
 				// System.err.println(m);
 			}
 		}
@@ -80,13 +94,66 @@ public class ThsSpider {
 			@Override
 			public void run() {
 				synchGnAndCode();
+				synchConceptDaliy();
 			}
 		}).start();
 	}
 
 	private void synchConceptDaliy() {
-		Map<String, Concept> m = this.getAllAliasCode();
-		
+		List<ConceptDaily> list = new LinkedList<ConceptDaily>();
+		try {
+			int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+			Map<String, Concept> m = this.getAllAliasCode();
+			m.keySet().forEach(key -> {
+				int trytime = 0;
+				Concept cp = m.get(key);
+				boolean fetched = false;
+				do {
+					ThreadsUtil.sleepRandomSecBetween5And15();
+					try {
+						System.err.println(cp.getHref());
+						HtmlElement body = htmlunitSpider.getHtmlPageFromUrl(cp.getHref()).getBody();
+						HtmlElement boardInfos = body.getElementsByAttribute("div", "class", "board-infos").get(0);
+						Iterator<DomElement> it = boardInfos.getChildElements().iterator();
+						ConceptDaily cd = new ConceptDaily();
+						cd.setOpen(Double.valueOf(it.next().getLastElementChild().asText()));// 今开
+						cd.setYesterday(Double.valueOf(it.next().getLastElementChild().asText()));// 昨收
+						cd.setLow(Double.valueOf(it.next().getLastElementChild().asText()));// 最低
+						cd.setHigh(Double.valueOf(it.next().getLastElementChild().asText()));// 最高
+						cd.setVol(Double.valueOf(it.next().getLastElementChild().asText()));// 成交量(万手)
+						cd.setTodayChange(Double.valueOf(it.next().getLastElementChild().asText().replace("%", "")));// 板块涨幅
+						cd.setRanking(Integer.valueOf(it.next().getLastElementChild().asText().split(SPIT)[0]));// 涨幅排名
+						cd.setUpdownNum(it.next().getLastElementChild().asText());// 涨跌家数
+						cd.setInComeMoney(Double.valueOf(it.next().getLastElementChild().asText()));// 资金净流入(亿)
+						cd.setAmt(Double.valueOf(it.next().getLastElementChild().asText()));// 成交额(亿)
+						Iterator<DomElement> it2 = body.getElementsByAttribute("div", "class", "board-hq").get(0)
+								.getChildElements().iterator();
+						it2.next();
+						cd.setClose(Double.valueOf(it2.next().asText()));// 收盘
+						fetched = true;
+						cd.setConceptId(cp.getId());
+						cd.setDate(date);
+						cd.setId();
+						System.err.println(cd);
+						list.add(cd);
+					} catch (Exception e2) {
+						e2.printStackTrace();
+						trytime++;
+						ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+						if (trytime >= 10) {
+							e2.printStackTrace();
+							WxPushUtil.pushSystem1("同花顺概念-每日交易出错,url=" + cp.getHref());
+						}
+					}
+				} while (!fetched);
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+			WxPushUtil.pushSystem1("同花顺概念-每日交易出错 end");
+			throw new RuntimeException(e);
+		} finally {
+			saveConceptDaily(list);
+		}
 	}
 
 	private void synchGnAndCode() {
@@ -96,7 +163,7 @@ public class ThsSpider {
 		int weekday = c.get(Calendar.DAY_OF_WEEK);
 		if (weekday != 6) {
 			System.err.println("今日非周五");
-//			return;
+			return;
 		}
 		try {
 			List<Concept> list = new LinkedList<Concept>();
