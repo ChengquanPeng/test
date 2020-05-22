@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -104,9 +105,14 @@ public class ThsSpider {
 		try {
 			int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 			Map<String, Concept> m = this.getAllAliasCode();
-			m.keySet().forEach(key -> {
+			Set<String> keys = m.keySet();
+			for (String key : keys) {
 				int trytime = 0;
 				Concept cp = m.get(key);
+				if ("THS301531".equals(cp.getId())) {
+					// 首发新股
+					continue;
+				}
 				boolean fetched = false;
 				do {
 					ThreadsUtil.sleepRandomSecBetween5And15();
@@ -140,13 +146,14 @@ public class ThsSpider {
 						e2.printStackTrace();
 						trytime++;
 						ThreadsUtil.sleepRandomSecBetween15And30(trytime);
-						if (trytime >= 10) {
+						if (trytime >= 5) {
+							fetched = true;
 							e2.printStackTrace();
-							WxPushUtil.pushSystem1("同花顺概念-每日交易出错,url=" + cp.getHref());
+							WxPushUtil.pushSystem1("同花顺概念-每日交易出错," + cp.getName() + ",url=" + cp.getHref());
 						}
 					}
 				} while (!fetched);
-			});
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1("同花顺概念-每日交易出错 end");

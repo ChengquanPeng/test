@@ -74,6 +74,7 @@ public class V1SortStrategyListener implements StrategyListener {
 				index++;
 			}
 			sb.append(endder);
+			sb2.append(endder);
 
 			String filepath = efc.getModelV1SortFloder() + "sort_v1_" + set.get(0).getDate() + ".html";
 			FileWriteUitl fw = new FileWriteUitl(filepath, true);
