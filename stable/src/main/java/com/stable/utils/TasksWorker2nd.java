@@ -4,6 +4,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.stable.config.SpringConfig;
@@ -21,10 +22,11 @@ public class TasksWorker2nd {
 	private static ListeningExecutorService service = MoreExecutors
 			.listeningDecorator(Executors.newFixedThreadPool(WORKS_NUM));
 
-	public static synchronized void add(MyRunnable task) throws Exception {
+	public static synchronized ListenableFuture<?> add(MyRunnable task) throws Exception {
 		if (getAvailablePermits()) {
-			service.submit(task);
+			return service.submit(task);
 		}
+		return null;
 	}
 
 	private static boolean getAvailablePermits() {

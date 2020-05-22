@@ -1,9 +1,11 @@
 package com.stable.service.model.v1;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -31,8 +33,10 @@ import com.stable.service.model.image.ImageService;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
+import com.stable.utils.MyRunnable;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
+import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.TickDataV1Vo;
 import com.stable.vo.bus.StockAvg;
@@ -124,10 +128,11 @@ public class ModelV1UpService {
 		try {
 			int size = array.size();
 			log.info("{}获取到每日指标记录条数={}", treadeDate, size);
-			List<ModelV1> saveList = new LinkedList<ModelV1>();
-			List<StockAvg> avgList = new LinkedList<StockAvg>();
+			List<ModelV1> saveList = Collections.synchronizedList(new LinkedList<ModelV1>());
+			List<StockAvg> avgList = Collections.synchronizedList(new LinkedList<StockAvg>());
 			List<StrategyListener> list = new ArrayList<StrategyListener>();
 			list.add(new V1SortStrategyListener());
+			CountDownLatch cunt = new CountDownLatch(array.size());
 			for (int i = 0; i < array.size(); i++) {
 				DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
 				ModelV1 mv = new ModelV1();
@@ -135,13 +140,14 @@ public class ModelV1UpService {
 				mv.setDate(d.getTrade_date());
 				mv.setClose(d.getClose());
 
-				runModel(mv, list, saveList, avgList);
-
-				if (avgList.size() > 500) {
-					avgService.saveStockAvg(avgList);
-					avgList = new LinkedList<StockAvg>();
-				}
+				TasksWorker2nd.add(new MyRunnable() {
+					@Override
+					public void running() {
+						runModel(mv, list, saveList, avgList, cunt);
+					}
+				});
 			}
+			cunt.await();// 等待执行完成
 			for (StrategyListener sl : list) {
 				sl.fulshToFile();
 			}
@@ -201,7 +207,8 @@ public class ModelV1UpService {
 
 	}
 
-	private void runModel(ModelV1 mv1, List<StrategyListener> list, List<ModelV1> saveList, List<StockAvg> avgList) {
+	private void runModel(ModelV1 mv1, List<StrategyListener> list, List<ModelV1> saveList, List<StockAvg> avgList,
+			CountDownLatch cunt) {
 		TickDataV1Vo tdv = new TickDataV1Vo();
 		StockAvg av = new StockAvg();
 		if (getDataAndRunIndexs(mv1, tdv, av, avgList)) {
@@ -217,6 +224,7 @@ public class ModelV1UpService {
 				saveList.add(mv1);
 			}
 		}
+		cunt.countDown();
 	}
 
 	// **评分
