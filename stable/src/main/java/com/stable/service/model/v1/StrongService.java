@@ -56,7 +56,7 @@ public class StrongService {
 	private Map<Integer, Double> M_SZ2 = new ConcurrentHashMap<Integer, Double>();
 	private Map<Integer, Double> M_SZ3 = new ConcurrentHashMap<Integer, Double>();
 
-	private Map<Integer, Double> getIndexMap(String code, int chkDate, int startedDate) {
+	private synchronized Map<Integer, Double> getIndexMap(String code, int chkDate, int startedDate) {
 		String index = this.getIndex(code);
 		Map<Integer, Double> cache = null;
 		switch (index) {

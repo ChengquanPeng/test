@@ -8,8 +8,8 @@ import org.springframework.core.annotation.Order;
 @Order(1)
 public class SpringConfig {
 
-	// @Value("${python.script.concurrency.num}")
-	// private int pythonconcurrencynum;
+	@Value("${python.script.concurrency.num}")
+	private int pythonconcurrencynum;
 
 	@Value("${error.log.file}")
 	private String filepath = "/my/free/error.log";
@@ -97,5 +97,13 @@ public class SpringConfig {
 
 	public void setModelV1SortFloderDesc(String modelV1SortFloderDesc) {
 		this.modelV1SortFloderDesc = modelV1SortFloderDesc;
+	}
+
+	public int getPythonconcurrencynum() {
+		return pythonconcurrencynum;
+	}
+
+	public void setPythonconcurrencynum(int pythonconcurrencynum) {
+		this.pythonconcurrencynum = pythonconcurrencynum;
 	}
 }

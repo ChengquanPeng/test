@@ -5,18 +5,22 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
+import com.stable.config.SpringConfig;
 import com.stable.vo.MarketHistroyVo;
 
 public class PythonCallUtil {
 
 	public static final String EXCEPT = "except";
 	private static final String CALL_FORMAT;
+	private static final Semaphore semp;
 	static {
-		// SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
+		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
+		semp = new Semaphore(efc.getPythonconcurrencynum());
 		if (OSystemUtil.isWindows()) {
 			CALL_FORMAT = "python %s %s";
 		} else {
@@ -26,6 +30,11 @@ public class PythonCallUtil {
 	// TODO 调用python脚本会CPU会瞬时100%，从而导致python吃CPU导致ES异常退出， 控制python的调用数量：
 
 	public synchronized static List<String> callPythonScript(String pythonScriptPathAndFileName, String params) {
+		try {
+			semp.acquire();
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
 		InputStreamReader ir = null;
 		BufferedReader input = null;
 		try {
@@ -61,7 +70,7 @@ public class PythonCallUtil {
 				} catch (IOException e) {
 				}
 			}
-
+			semp.release();
 		}
 	}
 
