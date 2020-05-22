@@ -28,4 +28,6 @@ public class CodeConcept extends EsBase {
 	private String conceptName;
 	@Field(type = FieldType.Integer)
 	private int type;
+	@Field(type = FieldType.Integer)
+	private int updateTime;
 }

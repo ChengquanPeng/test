@@ -16,10 +16,13 @@ import org.apache.http.util.EntityUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.stable.constant.Constant;
-import com.stable.vo.bus.ConceptDaily;
 
 public class HttpUtil {
+	private static final String APPLICATION_JSON = "application/json";
+	private static final String CONTENT_TYPE = "Content-Type";
+	private static final String AUTHORIZATION = "Authorization";
+	private static final String AUTHORIZATION_VALUE = "Basic bm9hdXRoOm5vYXV0aA==";
+	static final String UTF_8 = "UTF-8";
 
 	public static JSONObject doGet(String url) {
 		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
@@ -29,7 +32,7 @@ public class HttpUtil {
 			HttpResponse response = httpclient.execute(httpget);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
-				String result = EntityUtils.toString(entity, Constant.UTF_8);
+				String result = EntityUtils.toString(entity, UTF_8);
 				jsonObj = JSON.parseObject(result);
 			}
 		} catch (IOException e) {
@@ -50,7 +53,7 @@ public class HttpUtil {
 			HttpResponse response = httpclient.execute(httpget);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
-				return EntityUtils.toString(entity, Constant.UTF_8);
+				return EntityUtils.toString(entity, UTF_8);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -77,16 +80,16 @@ public class HttpUtil {
 		System.err.println(data);
 		String[] datas = data.split(";");
 		Arrays.asList(datas).forEach(x -> {
-			ConceptDaily cd = new ConceptDaily();
-			String[] dd = x.split(",");
-			cd.setDate(Integer.valueOf(dd[0]));
-			cd.setOpen(Double.valueOf(dd[1]));
-			cd.setHigh(Double.valueOf(dd[2]));
-			cd.setLow(Double.valueOf(dd[3]));
-			cd.setClose(Double.valueOf(dd[4]));
-			cd.setVol(Long.valueOf(dd[5]));
-			cd.setAmt(Double.valueOf(dd[6]).longValue());
-			System.err.println(cd);
+//			ConceptDaily cd = new ConceptDaily();
+//			String[] dd = x.split(",");
+//			cd.setDate(Integer.valueOf(dd[0]));
+//			cd.setOpen(Double.valueOf(dd[1]));
+//			cd.setHigh(Double.valueOf(dd[2]));
+//			cd.setLow(Double.valueOf(dd[3]));
+//			cd.setClose(Double.valueOf(dd[4]));
+//			cd.setVol(Long.valueOf(dd[5]));
+//			cd.setAmt(Double.valueOf(dd[6]).longValue());
+//			System.err.println(cd);
 		});
 
 	}
@@ -105,7 +108,26 @@ public class HttpUtil {
 			HttpResponse response = httpclient.execute(httpget);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
-				String result = EntityUtils.toString(entity, Constant.UTF_8);
+				String result = EntityUtils.toString(entity, UTF_8);
+				jsonObj = JSON.parseObject(result);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return jsonObj;
+	}
+
+	public static JSONObject doPost(String url) {
+		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+		HttpPost httpPost = new HttpPost(url);
+		JSONObject jsonObj = null;
+		try {
+			httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
+			httpPost.setHeader(AUTHORIZATION, AUTHORIZATION_VALUE);
+			HttpResponse response = httpclient.execute(httpPost);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				String result = EntityUtils.toString(entity, UTF_8);
 				jsonObj = JSON.parseObject(result);
 			}
 		} catch (IOException e) {
@@ -119,11 +141,13 @@ public class HttpUtil {
 		HttpPost httpPost = new HttpPost(url);
 		JSONObject jsonObj = null;
 		try {
-			httpPost.setEntity(new StringEntity(json, Constant.UTF_8));
+			httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
+			httpPost.setHeader(AUTHORIZATION, AUTHORIZATION_VALUE);
+			httpPost.setEntity(new StringEntity(json, UTF_8));
 			HttpResponse response = httpclient.execute(httpPost);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
-				String result = EntityUtils.toString(entity, Constant.UTF_8);
+				String result = EntityUtils.toString(entity, UTF_8);
 				jsonObj = JSON.parseObject(result);
 			}
 		} catch (IOException e) {
