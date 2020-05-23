@@ -29,7 +29,7 @@ public class PythonCallUtil {
 	}
 	// TODO 调用python脚本会CPU会瞬时100%，从而导致python吃CPU导致ES异常退出， 控制python的调用数量：
 
-	public synchronized static List<String> callPythonScript(String pythonScriptPathAndFileName, String params) {
+	public static List<String> callPythonScript(String pythonScriptPathAndFileName, String params) {
 		try {
 			semp.acquire();
 		} catch (InterruptedException e1) {

@@ -1,5 +1,6 @@
 package com.stable.spider.ths;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -8,7 +9,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,20 +99,24 @@ public class ThsSpider {
 		try {
 			int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 			Map<String, Concept> m = this.getAllAliasCode();
-			Set<String> keys = m.keySet();
-			for (String key : keys) {
+			List<String> keys = new ArrayList<String>(m.keySet());
+			for (int i = 0; i < keys.size(); i++) {
 				int trytime = 0;
-				Concept cp = m.get(key);
+				Concept cp = m.get(keys.get(i));
+				log.info("抓包：" + cp.getName());
 				if ("THS301531".equals(cp.getId())) {
+					log.info("跳过首发新股");
 					// 首发新股
 					continue;
 				}
 				boolean fetched = false;
 				do {
 					ThreadsUtil.sleepRandomSecBetween5And15();
+					HtmlPage page = null;
 					try {
 						log.info(cp.getHref());
-						HtmlElement body = htmlunitSpider.getHtmlPageFromUrl(cp.getHref()).getBody();
+						page = htmlunitSpider.getHtmlPageFromUrl(cp.getHref());
+						HtmlElement body = page.getBody();
 						HtmlElement boardInfos = body.getElementsByAttribute("div", "class", "board-infos").get(0);
 						Iterator<DomElement> it = boardInfos.getChildElements().iterator();
 						ConceptDaily cd = new ConceptDaily();
@@ -145,15 +149,17 @@ public class ThsSpider {
 							e2.printStackTrace();
 							WxPushUtil.pushSystem1("同花顺概念-每日交易出错," + cp.getName() + ",url=" + cp.getHref());
 						}
+					} finally {
+						htmlunitSpider.close();
 					}
 				} while (!fetched);
 			}
+			WxPushUtil.pushSystem1("同花顺板块交易记录同步成功");
 		} catch (Exception e) {
+			saveConceptDaily(list);
 			e.printStackTrace();
 			WxPushUtil.pushSystem1("同花顺概念-每日交易出错 end");
 			throw new RuntimeException(e);
-		} finally {
-			saveConceptDaily(list);
 		}
 	}
 
@@ -193,17 +199,11 @@ public class ThsSpider {
 			DomElement table = null;
 			HtmlPage page = null;
 			try {
+				ThreadsUtil.sleepRandomSecBetween5And15();
 //				header.put(REFERER, refer);
 				page = htmlunitSpider.getHtmlPageFromUrl(url);
 				table = page.getBody().getFirstElementChild();
-			} catch (Exception e) {
-				e.printStackTrace();
-				WxPushUtil.pushSystem1("同花顺概念-列表抓包出错,url=" + url);
-				throw new RuntimeException(e);
-			} finally {
-				ThreadsUtil.sleepRandomSecBetween5And15();
-			}
-			try {
+
 				DomElement tbody = table.getLastElementChild();
 				Iterator<DomElement> trs = tbody.getChildElements().iterator();
 				while (trs.hasNext()) {
@@ -258,6 +258,8 @@ public class ThsSpider {
 					throw new RuntimeException(e);
 				}
 
+			} finally {
+				htmlunitSpider.close();
 			}
 		} while (index <= end);
 	}
@@ -283,6 +285,8 @@ public class ThsSpider {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1("同花顺概念-成分股抓包出错,url=" + cp.getHref());
 			throw new RuntimeException(e);
+		} finally {
+			htmlunitSpider.close();
 		}
 	}
 
@@ -302,13 +306,6 @@ public class ThsSpider {
 //				header.put(REFERER, cp.getHref());
 				page = htmlunitSpider.getHtmlPageFromUrl(url);
 				table = page.getBody().getFirstElementChild();
-			} catch (Exception e) {
-				e.printStackTrace();
-				WxPushUtil.pushSystem1("同花顺概念-成分股抓包出错,url=" + url);
-				throw new RuntimeException(e);
-			}
-
-			try {
 				DomElement tbody = table.getLastElementChild();
 				if (tbody.asText().contains("暂无成份股数据")) {
 					return;
@@ -343,6 +340,8 @@ public class ThsSpider {
 					WxPushUtil.pushSystem1("同花顺概念-成分股抓包出错,url=" + url);
 					throw new RuntimeException(e);
 				}
+			} finally {
+				htmlunitSpider.close();
 			}
 		} while (index <= end);
 	}
