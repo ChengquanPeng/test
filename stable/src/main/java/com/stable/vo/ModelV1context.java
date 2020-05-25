@@ -5,9 +5,9 @@ import com.stable.constant.Constant;
 import lombok.Data;
 
 @Data
-public class TickDataV1Vo {
+public class ModelV1context {
 	// 1强势:短中长期买入=>次数和差值:3/5/10/20/120/250天
-	private StringBuffer detailDesc = new StringBuffer();
+	private StringBuffer detailDesc;
 
 	private int wayTimes3;
 	private Long wayDef3;
@@ -29,7 +29,33 @@ public class TickDataV1Vo {
 	private int pgmTimes120;
 	private int pgmTimes250;
 
+	private StringBuffer gn;
+
 	public void addDetailDesc(String desc) {
+		if (detailDesc == null) {
+			detailDesc = new StringBuffer();
+		}
 		detailDesc.append(desc).append(Constant.DOU_HAO);
+	}
+
+	public String getDetailDescStr() {
+		if (gn == null) {
+			return "";
+		}
+		return detailDesc.toString();
+	}
+
+	public void addGnStr(String str) {
+		if (gn == null) {
+			gn = new StringBuffer();
+		}
+		gn.append(Constant.FEN_HAO).append(str);
+	}
+
+	public String getGnStr() {
+		if (gn == null) {
+			return "";
+		}
+		return gn.toString().replaceFirst(Constant.FEN_HAO, "");
 	}
 }

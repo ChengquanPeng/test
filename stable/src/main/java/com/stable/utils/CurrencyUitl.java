@@ -14,6 +14,11 @@ public class CurrencyUitl {
 	private static final BigDecimal WAN_N = new BigDecimal(10000L);
 	private static final String YUAN = "元";
 
+	public final static double roundHalfUp(double price) {
+		double result = new BigDecimal(new Double(price).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
+				.doubleValue();
+		return result;
+	}
 	public final static Long covertToLong(String str) {
 		if (StringUtils.isBlank(str) || str.contains(Constant.NULL) || str.contains(Constant.FALSE)) {
 			return 0l;

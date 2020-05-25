@@ -47,7 +47,7 @@ import com.stable.utils.PythonCallUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.TickDataV1Vo;
+import com.stable.vo.ModelV1context;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TickDataBuySellInfo;
 import com.stable.vo.http.resp.TickDataBuySellInfoResp;
@@ -734,7 +734,7 @@ public class TickDataService {
 	// 3程序单:次数:3/5/10/20/120/250天
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(5);
 
-	public void tickDataCheck(ModelV1 mv1, TickDataV1Vo wv) {
+	public void tickDataCheck(ModelV1 mv1, ModelV1context wv) {
 		String code = mv1.getCode();
 		List<TickDataBuySellInfo> list = this.listForModel(code, mv1.getDate(), queryPage);
 		if (list.size() < 5) {
@@ -811,7 +811,7 @@ public class TickDataService {
 		getWayRes(mv1, wv);
 	}
 
-	private void getWayRes(ModelV1 mv1, TickDataV1Vo wv) {
+	private void getWayRes(ModelV1 mv1, ModelV1context wv) {
 		// 短期强势
 		int sortWay = 0;
 		boolean s3 = (wv.getWayDef3() > 0 && wv.getWayTimes3() > 0);

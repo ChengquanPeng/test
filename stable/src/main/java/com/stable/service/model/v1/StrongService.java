@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.spider.tushare.TushareSpider;
-import com.stable.vo.TickDataV1Vo;
+import com.stable.vo.ModelV1context;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 import com.stable.vo.up.strategy.ModelV1;
@@ -93,7 +93,7 @@ public class StrongService {
 
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 
-	public List<DaliyBasicInfo> checkStrong(ModelV1 mv1, TickDataV1Vo wv) {
+	public List<DaliyBasicInfo> checkStrong(ModelV1 mv1, ModelV1context wv) {
 		String code = mv1.getCode();
 		List<DaliyBasicInfo> dailyList = daliyBasicHistroyService
 				.queryListByCodeForModel(code, mv1.getDate(), queryPage).getContent();

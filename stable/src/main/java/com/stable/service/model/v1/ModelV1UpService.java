@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +25,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsModelV1Dao;
+import com.stable.service.ConceptService;
+import com.stable.service.ConceptService.ConceptInfo;
 import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TickDataService;
@@ -38,10 +41,10 @@ import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.TickDataV1Vo;
-import com.stable.vo.bus.StockAvg;
+import com.stable.vo.ModelV1context;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.PriceLife;
+import com.stable.vo.bus.StockAvg;
 import com.stable.vo.spi.req.EsQueryPageReq;
 import com.stable.vo.up.strategy.ModelV1;
 
@@ -71,6 +74,9 @@ public class ModelV1UpService {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private TushareSpider tushareSpider;
+
+	@Autowired
+	private ConceptService conceptService;
 
 	public synchronized void runJob(int date) {
 		String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
@@ -126,6 +132,7 @@ public class ModelV1UpService {
 			throw new RuntimeException("交易日但未获取到数据");
 		}
 		try {
+			Map<String, List<ConceptInfo>> gn = conceptService.getDailyMap(treadeDate);
 			int size = array.size();
 			log.info("{}获取到每日指标记录条数={}", treadeDate, size);
 			List<ModelV1> saveList = Collections.synchronizedList(new LinkedList<ModelV1>());
@@ -143,7 +150,7 @@ public class ModelV1UpService {
 				TasksWorker2nd.add(new MyRunnable() {
 					@Override
 					public void running() {
-						runModel(mv, list, saveList, avgList, cunt);
+						runModel(mv, list, saveList, avgList, gn, cunt);
 					}
 				});
 			}
@@ -208,13 +215,13 @@ public class ModelV1UpService {
 	}
 
 	private void runModel(ModelV1 mv1, List<StrategyListener> list, List<ModelV1> saveList, List<StockAvg> avgList,
-			CountDownLatch cunt) {
-		TickDataV1Vo tdv = new TickDataV1Vo();
+			Map<String, List<ConceptInfo>> gn, CountDownLatch cunt) {
+		ModelV1context tdv = new ModelV1context();
 		StockAvg av = new StockAvg();
 		if (getDataAndRunIndexs(mv1, tdv, av, avgList)) {
-
-			mv1.setScore(this.getSocre(mv1));
+			mv1.setScore(this.getSocre(mv1, tdv, gn));
 			if (mv1.getScore() > 0) {
+
 				for (StrategyListener sl : list) {
 					sl.condition(mv1, tdv, av);
 				}
@@ -228,7 +235,7 @@ public class ModelV1UpService {
 	}
 
 	// **评分
-	private int getSocre(ModelV1 mv) {
+	private int getSocre(ModelV1 mv, ModelV1context tdv, Map<String, List<ConceptInfo>> gn) {
 		int r = 0;
 		// 1.均线指数排序
 		r += mv.getAvgIndex();// 10,9,8,2,1
@@ -246,11 +253,23 @@ public class ModelV1UpService {
 		if (r > 0) {
 			r += mv.getSortPgm();// 3.程序单
 			r += mv.getSortWay();// 4.交易方向
+			// 概念板块
+			List<ConceptInfo> list = gn.get(mv.getCode());
+			if (list != null) {
+				int s = 0;
+				for (int i = 0; i < list.size(); i++) {
+					ConceptInfo x = list.get(i);
+					s += x.getRanking();
+					tdv.addGnStr(x.toString());
+				}
+				r += s;
+				mv.setConceptRanking(tdv.getGnStr());
+			}
 		}
 		return r;
 	}
 
-	private boolean getDataAndRunIndexs(ModelV1 mv1, TickDataV1Vo wv, StockAvg av, List<StockAvg> avgList) {
+	private boolean getDataAndRunIndexs(ModelV1 mv1, ModelV1context wv, StockAvg av, List<StockAvg> avgList) {
 		if (!stockBasicService.online1Year(mv1.getCode())) {
 			log.info("Online 不足1年，code={}", mv1.getCode());
 			return false;

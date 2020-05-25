@@ -59,5 +59,7 @@ public class ModelV1 {
 	private int whiteHorse = 0;
 	// L2
 	// 板块活跃度
+	@Field(type = FieldType.Text)
+	private String conceptRanking;
 	// 回购/分红/业绩
 }

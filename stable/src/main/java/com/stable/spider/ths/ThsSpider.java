@@ -20,6 +20,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsCodeConceptDao;
 import com.stable.es.dao.base.EsConceptDailyDao;
 import com.stable.es.dao.base.EsConceptDao;
+import com.stable.service.TradeCalService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
@@ -33,6 +34,8 @@ import lombok.extern.log4j.Log4j2;
 @Component
 @Log4j2
 public class ThsSpider {
+	@Autowired
+	private TradeCalService tradeCalService;
 	@Autowired
 	private EsConceptDao esConceptDao;
 	@Autowired
@@ -95,9 +98,13 @@ public class ThsSpider {
 	}
 
 	private void synchConceptDaliy() {
+		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+		if (!tradeCalService.isOpen(date)) {
+			log.info("非交易日");
+			return;
+		}
 		List<ConceptDaily> list = new LinkedList<ConceptDaily>();
 		try {
-			int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 			Map<String, Concept> m = this.getAllAliasCode();
 			List<String> keys = new ArrayList<String>(m.keySet());
 			for (int i = 0; i < keys.size(); i++) {
@@ -154,6 +161,7 @@ public class ThsSpider {
 					}
 				} while (!fetched);
 			}
+			saveConceptDaily(list);
 			WxPushUtil.pushSystem1("同花顺板块交易记录同步成功");
 		} catch (Exception e) {
 			saveConceptDaily(list);

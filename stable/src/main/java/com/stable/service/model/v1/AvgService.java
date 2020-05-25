@@ -25,7 +25,7 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.PythonCallUtil;
-import com.stable.vo.TickDataV1Vo;
+import com.stable.vo.ModelV1context;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockAvg;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -50,7 +50,7 @@ public class AvgService {
 	}
 
 	public void checkAvg(ModelV1 mv1, int startDate, StockAvg av, List<StockAvg> avgList,
-			List<DaliyBasicInfo> dailyList, TickDataV1Vo wv) {
+			List<DaliyBasicInfo> dailyList, ModelV1context wv) {
 		try {
 			String code = mv1.getCode();
 			int endDate = mv1.getDate();
@@ -112,7 +112,7 @@ public class AvgService {
 
 	// 计算均线排列类型，1.V型反转,2.横盘突破，3.波浪上涨
 	private void getAvgPriceType(ModelV1 mv1, int startDate, StockAvg av, List<StockAvg> avgList,
-			List<DaliyBasicInfo> dailyList, TickDataV1Vo wv) {
+			List<DaliyBasicInfo> dailyList, ModelV1context wv) {
 		if (mv1.getAvgIndex() >= 10) {
 			List<DaliyBasicInfo> day20 = new LinkedList<DaliyBasicInfo>();
 			for (int i = 0; i < 20; i++) {
@@ -201,7 +201,7 @@ public class AvgService {
 	}
 
 	// 计算AvgPriceIndex-排列
-	private void getAvgPriceIndex(ModelV1 mv1, StockAvg av, TickDataV1Vo wv) {
+	private void getAvgPriceIndex(ModelV1 mv1, StockAvg av, ModelV1context wv) {
 		if (av.getAvgPriceIndex250() > 0) {
 			if (av.getAvgPriceIndex3() >= av.getAvgPriceIndex5() && av.getAvgPriceIndex5() >= av.getAvgPriceIndex10()
 					&& av.getAvgPriceIndex10() >= av.getAvgPriceIndex20()
