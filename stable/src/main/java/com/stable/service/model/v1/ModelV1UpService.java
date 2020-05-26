@@ -22,7 +22,6 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsModelV1Dao;
 import com.stable.service.ConceptService;
@@ -31,14 +30,11 @@ import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TickDataService;
 import com.stable.service.TradeCalService;
-import com.stable.service.model.StrategyListener;
-import com.stable.service.model.image.ImageService;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.MyRunnable;
 import com.stable.utils.RedisUtil;
-import com.stable.utils.TasksWorker;
 import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.ModelV1context;
@@ -64,8 +60,7 @@ public class ModelV1UpService {
 	private PriceLifeService priceLifeService;
 	@Autowired
 	private AvgService avgService;
-	@Autowired
-	private ImageService imageService;
+
 	@Autowired
 	private EsModelV1Dao esModelV1Dao;
 	@Autowired
@@ -92,7 +87,7 @@ public class ModelV1UpService {
 				while (true) {
 					if (tradeCalService.isOpen(date)) {
 						log.info("processing date={}", date);
-						run(date, true);
+						run(date);
 					} else {
 						log.info("{}非交易日", date);
 					}
@@ -112,7 +107,7 @@ public class ModelV1UpService {
 					return;
 				}
 				log.info("processing date={}", date);
-				run(date, false);
+				run(date);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -121,7 +116,7 @@ public class ModelV1UpService {
 		}
 	}
 
-	private void run(int treadeDate, boolean isJob) {
+	private void run(int treadeDate) {
 		String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
 		JSONArray array = tushareSpider.getStockDaliyBasic(null, treadeDate + "", null, null).getJSONArray("items");
 		if (array == null || array.size() <= 0) {
@@ -130,7 +125,7 @@ public class ModelV1UpService {
 		}
 		List<ModelV1> saveList = Collections.synchronizedList(new LinkedList<ModelV1>());
 		List<StockAvg> avgList = Collections.synchronizedList(new LinkedList<StockAvg>());
-		List<ModelV1context> exts = Collections.synchronizedList(new LinkedList<ModelV1context>());
+		List<ModelV1context> cxts = Collections.synchronizedList(new LinkedList<ModelV1context>());
 		V1SortStrategyListener sort = new V1SortStrategyListener();
 		try {
 			Map<String, List<ConceptInfo>> gn = conceptService.getDailyMap(treadeDate);
@@ -144,14 +139,11 @@ public class ModelV1UpService {
 				mv.setCode(d.getCode());
 				mv.setDate(d.getTrade_date());
 				mv.setClose(d.getClose());
-				ModelV1context cxt = new ModelV1context();
-				cxt.setCode(d.getCode());
-				exts.add(cxt);
 
 				TasksWorker2nd.add(new MyRunnable() {
 					@Override
 					public void running() {
-						runModel(mv, sort, saveList, avgList, gn, cxt, cunt);
+						runModel(mv, sort, saveList, avgList, gn, cxts, cunt);
 					}
 				});
 			}
@@ -164,12 +156,9 @@ public class ModelV1UpService {
 				avgService.saveStockAvg(avgList);
 			}
 			sort.fulshToFile();
-			sort.fulshToFile(treadeDate, exts);
+			sort.fulshToFile(treadeDate, cxts);
 			log.info("MV1模型执行完成");
 			WxPushUtil.pushSystem1("MV1模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
-			if (isJob) {
-				imageCheck(array);
-			}
 		} catch (Exception e) {
 			if (saveList.size() > 0) {
 				esModelV1Dao.saveAll(saveList);
@@ -182,64 +171,23 @@ public class ModelV1UpService {
 		}
 	}
 
-	public void imageCheck(JSONArray array) {
-		ListenableFuture<?> l = TasksWorker.getInstance().getService().submit(new Runnable() {
-			@Override
-			public void run() {
-				String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
-				try {
-					StrategyListener sl = new ImageStrategyListener();
-					for (int i = 0; i < array.size(); i++) {
-						DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
-						ModelV1 mv = new ModelV1();
-						mv.setCode(d.getCode());
-						mv.setDate(d.getTrade_date());
-						mv.setClose(d.getClose());
-						if (stockBasicService.online1Year(mv.getCode())) {
-							String str = imageService.checkImg(mv.getCode(), mv.getDate());
-							if (StringUtils.isNotBlank(str)) {
-								if (str.contains(ImageService.MATCH_L2)) {
-									mv.setImageIndex(2);
-								} else {
-									mv.setImageIndex(1);
-								}
-							}
-							// 条件
-							sl.condition(mv, str);
-						} else {
-							log.info("Online 不足1年，code={}", mv.getCode());
-						}
-
-					}
-					sl.fulshToFile();// 存盘
-					log.info("图片模型执行完成。");
-					WxPushUtil
-							.pushSystem1("图形模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
-				} catch (Exception e) {
-					ErrorLogFileUitl.writeError(e, e.getMessage(), "", "");
-					WxPushUtil.pushSystem1("图形模型执行异常！ 开始时间:" + startTime);
-				}
-			}
-		});
-		try {
-			l.get();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	private void runModel(ModelV1 mv1, V1SortStrategyListener sort, List<ModelV1> saveList, List<StockAvg> avgList,
-			Map<String, List<ConceptInfo>> gn, ModelV1context cxt, CountDownLatch cunt) {
-		StockAvg av = new StockAvg();
-		if (getDataAndRunIndexs(mv1, cxt, av, avgList)) {
+			Map<String, List<ConceptInfo>> gn, List<ModelV1context> cxts, CountDownLatch cunt) {
+		ModelV1context cxt = new ModelV1context();
+		cxt.setCode(mv1.getCode());
+
+		boolean isOk = false;
+		if (getDataAndRunIndexs(mv1, cxt, avgList)) {
 			mv1.setScore(this.getSocre(mv1, cxt, gn));
 			if (mv1.getScore() > 0) {
-				sort.condition(mv1, cxt, av);
+				isOk = sort.condition(mv1, cxt);
 			}
-			// 大于10分
-			if (mv1.getScore() >= 10) {
-				saveList.add(mv1);
-			}
+		}
+
+		if (isOk) {
+			saveList.add(mv1);
+		} else {
+			cxts.add(cxt);
 		}
 		cxt.setScore(mv1.getScore());
 		cunt.countDown();
@@ -280,7 +228,7 @@ public class ModelV1UpService {
 		return r;
 	}
 
-	private boolean getDataAndRunIndexs(ModelV1 mv1, ModelV1context cxt, StockAvg av, List<StockAvg> avgList) {
+	private boolean getDataAndRunIndexs(ModelV1 mv1, ModelV1context cxt, List<StockAvg> avgList) {
 		String code = mv1.getCode();
 		log.info("model V1 processing for code:{}", code);
 		if (!stockBasicService.online1Year(code)) {
@@ -298,7 +246,7 @@ public class ModelV1UpService {
 		tickDataService.tickDataCheck(mv1, cxt);
 		this.priceIndex(mv1);
 		// 均价
-		avgService.checkAvg(mv1, lastDate.getTrade_date(), av, avgList, dailyList, cxt);
+		avgService.checkAvg(mv1, lastDate.getTrade_date(), avgList, dailyList, cxt);
 		// 量
 		mv1.setId(code + mv1.getDate());
 		// log.info(wv);

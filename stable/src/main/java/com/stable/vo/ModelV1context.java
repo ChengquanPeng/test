@@ -13,6 +13,7 @@ public class ModelV1context {
 	// 1强势:短中长期买入=>次数和差值:3/5/10/20/120/250天
 	private String code;
 	private int score;
+	private boolean base20Avg;
 	private StringBuffer detailDesc;
 
 	private int wayTimes3;

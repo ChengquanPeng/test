@@ -49,9 +49,10 @@ public class AvgService {
 		}
 	}
 
-	public void checkAvg(ModelV1 mv1, int startDate, StockAvg av, List<StockAvg> avgList,
+	public void checkAvg(ModelV1 mv1, int startDate, List<StockAvg> avgList,
 			List<DaliyBasicInfo> dailyList, ModelV1context cxt) {
 		try {
+			StockAvg av = null;//TODO
 			String code = mv1.getCode();
 			int endDate = mv1.getDate();
 			StockAvg r = getAvg(av, code, startDate, endDate, avgList, true);
@@ -106,7 +107,7 @@ public class AvgService {
 			}
 		} catch (Exception e) {
 			String msg = "获取到的数据:" + lines.get(0);
-			log.error(msg);
+//			log.error(msg);
 			throw new RuntimeException(msg, e);
 		}
 		return null;
@@ -118,6 +119,7 @@ public class AvgService {
 	private void getAvgPriceType(ModelV1 mv1, int startDate, StockAvg av, List<StockAvg> avgList,
 			List<DaliyBasicInfo> dailyList, ModelV1context cxt) {
 		if (mv1.getAvgIndex() >= 10) {
+			cxt.setBase20Avg(true);// 至少20日均线
 			List<DaliyBasicInfo> day20 = new LinkedList<DaliyBasicInfo>();
 			for (int i = 0; i < 20; i++) {
 				day20.add(dailyList.get(i));
@@ -125,7 +127,7 @@ public class AvgService {
 			// 20天涨幅
 			double max20 = day20.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
 			double min20 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
-			log.info("20 days,max={},min={}", max20, min20);
+//			log.info("20 days,max={},min={}", max20, min20);
 			if (max20 > CurrencyUitl.topPrice20(min20)) {
 				cxt.setDropOutMsg("20天涨幅超过20%");
 				mv1.setAvgIndex(-100);
@@ -276,7 +278,7 @@ public class AvgService {
 	public List<StockAvg> queryListByCodeForModel(String code, int date, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
-		log.info("queryPage code={},trade_date={},pageNum={},size={}", code, date, pageNum, size);
+//		log.info("queryPage code={},trade_date={},pageNum={},size={}", code, date, pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));

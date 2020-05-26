@@ -25,19 +25,20 @@ public class V1SortStrategyListener implements StrategyListener {
 	private List<ModelV1> set = new LinkedList<ModelV1>();
 	private Map<String, ModelV1context> map = new HashMap<String, ModelV1context>();
 
-	public void condition(Object... obj) {
+	public boolean condition(Object... obj) {
 		ModelV1 mv1 = (ModelV1) obj[0];
 		// 短期强势
 		if (mv1.getSortStrong() > 0 && mv1.getAvgIndex() >= 10 && mv1.getVolIndex() > 0) {
 			set.add(mv1);
 			ModelV1context wv = (ModelV1context) obj[1];
 			map.put(mv1.getCode(), wv);
+			return true;
 		}
+		return false;
 	}
 
 	public V1SortStrategyListener() {
-		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短线交易量", "短期强势", "主力行为", "主动买入", "价格指数", "概念详情", "评分详情",
-				"详情ID" };
+		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短线交易量", "短期强势", "主力行为", "主动买入", "价格指数", "概念详情", "评分详情" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
 		}
@@ -45,11 +46,12 @@ public class V1SortStrategyListener implements StrategyListener {
 	}
 
 	public void fulshToFile(int treadeDate, List<ModelV1context> cxts) {
+		sort2(cxts);
 		StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 		String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v1_dropout_" + treadeDate + ".html";
 		StringBuffer sb2 = new StringBuffer(
-				"<table border='1' cellspacing='0' cellpadding='0'><tr><th>seq</th><th>code</th><th>名称</th><th>分数</th><th>入围</th><th>原因</th></tr>"
+				"<table border='1' cellspacing='0' cellpadding='0'><tr><th>seq</th><th>code</th><th>名称</th><th>分数</th><th>入围</th><th>均线排列(20)</th><th>原因</th></tr>"
 						+ FileWriteUitl.LINE_FILE);
 		int index = 1;
 		for (ModelV1context cxt : cxts) {
@@ -58,6 +60,7 @@ public class V1SortStrategyListener implements StrategyListener {
 					.append(getHTML(sbs.getCodeName(code)))// 名称
 					.append(getHTML(cxt.getScore()))// 分数
 					.append(getHTML(map.containsKey(code)))// 入围
+					.append(getHTML(cxt.isBase20Avg()))// 至少20日均线排列
 					.append(getHTML(cxt.getDropOutMsg())).append("</tr>").append(FileWriteUitl.LINE_FILE);// 原因
 			index++;
 		}
@@ -71,7 +74,7 @@ public class V1SortStrategyListener implements StrategyListener {
 		log.info("List<ModelV1> size:{}", set.size());
 		if (set.size() > 0) {
 			StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
-			sort();
+			sort(set);
 			SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 
 			StringBuffer sb = new StringBuffer(header);
@@ -85,7 +88,7 @@ public class V1SortStrategyListener implements StrategyListener {
 						.append(getHTML(mv.getVolIndex())).append(getHTML(mv.getSortStrong()))
 						.append(getHTML(mv.getSortPgm())).append(getHTML(mv.getSortWay()))
 						.append(getHTML(mv.getPriceIndex())).append(getHTML(map.get(mv.getCode()).getGnStr()))
-						.append(getHTML("")).append(getHTML(mv.getId())).append("</tr>")
+						.append(getHTML("")).append("</tr>")
 						.append(FileWriteUitl.LINE_FILE);
 
 				sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(mv.getCode()))
@@ -94,7 +97,7 @@ public class V1SortStrategyListener implements StrategyListener {
 						.append(getHTML(mv.getVolIndex())).append(getHTML(mv.getSortStrong()))
 						.append(getHTML(mv.getSortPgm())).append(getHTML(mv.getSortWay()))
 						.append(getHTML(mv.getPriceIndex())).append(getHTML(map.get(mv.getCode()).getGnStr()))
-						.append(getHTML(map.get(mv.getCode()).getDetailDescStr())).append(getHTML(mv.getId()))
+						.append(getHTML(map.get(mv.getCode()).getDetailDescStr()))
 						.append("</tr>").append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
@@ -125,7 +128,7 @@ public class V1SortStrategyListener implements StrategyListener {
 		return "<th>" + text + "</th>";
 	}
 
-	private void sort() {
+	private void sort(List<ModelV1> set) {
 		Collections.sort(set, new Comparator<ModelV1>() {
 			@Override
 			public int compare(ModelV1 o1, ModelV1 o2) {
@@ -134,4 +137,12 @@ public class V1SortStrategyListener implements StrategyListener {
 		});
 	}
 
+	private void sort2(List<ModelV1context> set) {
+		Collections.sort(set, new Comparator<ModelV1context>() {
+			@Override
+			public int compare(ModelV1context o1, ModelV1context o2) {
+				return o2.getScore() - o1.getScore();
+			}
+		});
+	}
 }

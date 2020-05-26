@@ -21,23 +21,31 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.job.MyCallable;
+import com.stable.service.model.StrategyListener;
+import com.stable.service.model.image.ImageService;
+import com.stable.service.model.v1.ImageStrategyListener;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
+import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.MyRunnable;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.ThreadsUtil;
+import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.http.resp.DaliyTradeHistResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
+import com.stable.vo.up.strategy.ModelV1;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -62,6 +70,8 @@ public class DaliyTradeHistroyService {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private PriceLifeService priceLifeService;
+	@Autowired
+	private ImageService imageService;
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -96,7 +106,71 @@ public class DaliyTradeHistroyService {
 	// 每日更新-job
 	private boolean spiderTodayDaliyTrade() {
 		String today = DateUtil.getTodayYYYYMMDD();
-		return spiderTodayDaliyTrade(today);
+		int date = Integer.valueOf(today);
+		if (tradeCalService.isOpen(date)) {
+			if (spiderTodayDaliyTrade(today)) {
+
+				JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
+				if (array == null || array.size() <= 0) {
+					WxPushUtil.pushSystem1("图形指标：tushare获取记录StockDaliyBasic失败");
+				} else {
+					log.info("{}获取到每日指标记录条数={}", today, array.size());
+					imageCheck(array);
+				}
+				return true;
+			} else {
+				WxPushUtil.pushSystem1("日交易tushare获取记录失败");
+			}
+		} else {
+			log.info("非工作日。");
+		}
+		return false;
+	}
+
+	public void imageCheck(JSONArray array) {
+		ListenableFuture<?> l = TasksWorker.getInstance().getService().submit(new Runnable() {
+			@Override
+			public void run() {
+				String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
+				try {
+					StrategyListener sl = new ImageStrategyListener();
+					for (int i = 0; i < array.size(); i++) {
+						DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
+						ModelV1 mv = new ModelV1();
+						mv.setCode(d.getCode());
+						mv.setDate(d.getTrade_date());
+						mv.setClose(d.getClose());
+						if (stockBasicService.online1Year(mv.getCode())) {
+							String str = imageService.checkImg(mv.getCode(), mv.getDate());
+							if (StringUtils.isNotBlank(str)) {
+								if (str.contains(ImageService.MATCH_L2)) {
+									mv.setImageIndex(2);
+								} else {
+									mv.setImageIndex(1);
+								}
+							}
+							// 条件
+							sl.condition(mv, str);
+						} else {
+							log.info("Online 不足1年，code={}", mv.getCode());
+						}
+
+					}
+					sl.fulshToFile();// 存盘
+					log.info("图片模型执行完成。");
+					WxPushUtil
+							.pushSystem1("图形模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
+				} catch (Exception e) {
+					ErrorLogFileUitl.writeError(e, e.getMessage(), "", "");
+					WxPushUtil.pushSystem1("图形模型执行异常！ 开始时间:" + startTime);
+				}
+			}
+		});
+		try {
+			l.get();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private synchronized boolean spiderTodayDaliyTrade(String today) {

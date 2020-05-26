@@ -19,12 +19,14 @@ public class ImageStrategyListener implements StrategyListener {
 	private List<ModelV1> set = new LinkedList<ModelV1>();
 	private List<String> ress = new LinkedList<String>();
 
-	public void condition(Object... obj) {
+	public boolean condition(Object... obj) {
 		String imgResult = (String) obj[1];
 		if (StringUtils.isNotBlank(imgResult)) {
 			set.add((ModelV1) obj[0]);
 			ress.add(imgResult);
+			return true;
 		}
+		return false;
 	}
 
 	public void fulshToFile() {

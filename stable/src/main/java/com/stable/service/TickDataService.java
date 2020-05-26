@@ -280,7 +280,7 @@ public class TickDataService {
 	public List<TickDataBuySellInfo> listForModel(String code, int date, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
-		log.info("queryPage code={},date={},pageNum={},size={}", code, date, pageNum, size);
+		//log.info("queryPage code={},date={},pageNum={},size={}", code, date, pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
