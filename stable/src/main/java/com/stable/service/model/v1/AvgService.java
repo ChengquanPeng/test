@@ -75,10 +75,11 @@ public class AvgService {
 			if (lines != null && !lines.isEmpty()) {
 				log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
 			}
+			ErrorLogFileUitl.writeError(new RuntimeException(), code, "未获取到均价信息", startDate + " " + endDate);
 			return null;
 		}
 		try {
-			String[] strs = lines.get(0).split(",");
+			String[] strs = lines.get(0).replaceAll("nan", "0").split(",");
 			if (strs[1].equals(String.valueOf(endDate))) {
 				// code,date,3,5,10,20,30,120,250
 				// 600408.SH,20200403,2.2933,2.302,2.282,2.3255,2.297,2.2712,2.4559
@@ -195,6 +196,17 @@ public class AvgService {
 					// 剔除往下走或者振幅较大
 					avgPrice30 = -100;
 				}
+			}
+
+			// 排除下跌周期中，刚开始反转的均线
+			long count = clist.stream().filter(x -> {
+				return x.getAvgPriceIndex30() >= x.getAvgPriceIndex5();
+			}).count();
+
+			if (count > 15) {
+				log.warn("30个交易日中，超过15天30日均线大于5日均线code={}", code);
+				mv1.setAvgIndex(-100);
+				return;
 			}
 			mv1.setAvgIndex(mv1.getAvgIndex() + avgPrice30);
 		}

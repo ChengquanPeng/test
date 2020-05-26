@@ -2,9 +2,13 @@ package com.stable.vo;
 
 import com.stable.constant.Constant;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
+@Getter
+@Setter
+@ToString
 public class ModelV1context {
 	// 1强势:短中长期买入=>次数和差值:3/5/10/20/120/250天
 	private StringBuffer detailDesc;
@@ -39,7 +43,7 @@ public class ModelV1context {
 	}
 
 	public String getDetailDescStr() {
-		if (gn == null) {
+		if (detailDesc == null) {
 			return "";
 		}
 		return detailDesc.toString();
@@ -57,5 +61,21 @@ public class ModelV1context {
 			return "";
 		}
 		return gn.toString().replaceFirst(Constant.FEN_HAO, "");
+	}
+
+	public StringBuffer getDetailDesc() {
+		return detailDesc;
+	}
+
+	public void setDetailDesc(StringBuffer detailDesc) {
+		this.detailDesc = detailDesc;
+	}
+
+	public StringBuffer getGn() {
+		return gn;
+	}
+
+	public void setGn(StringBuffer gn) {
+		this.gn = gn;
 	}
 }

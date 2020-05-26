@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.utils.CurrencyUitl;
 import com.stable.vo.ModelV1context;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -112,6 +113,7 @@ public class StrongService {
 		DaliyBasicInfo d3 = dailyList.get(0);
 		DaliyBasicInfo d2 = dailyList.get(1);
 		DaliyBasicInfo d1 = dailyList.get(2);
+
 		// ======= 短线--交易量指标 =======
 		// 换手率高-过滤掉
 		if (d3.getTurnover_rate_f() >= 30.0) {
@@ -154,8 +156,10 @@ public class StrongService {
 				}
 			}
 		}
-
 		mv1.setVolIndex(volIndex);
+		if (volIndex <= 0) {
+			return dailyList;
+		}
 		// ======= 短线--交易量指标 =======
 
 		// check-5
@@ -196,6 +200,19 @@ public class StrongService {
 			}
 		}
 		mv1.setSortStrong(sortStrong);
+		if (sortStrong <= 0) {
+			return dailyList;
+		}
+
+		// 排除上影线
+		double diff = d3.getHigh() - d3.getLow();
+		double half = diff / 2;
+		double mid = CurrencyUitl.roundHalfUp(half) + d3.getLow();
+		if (d3.getClose() <= mid) {
+			mv1.setSortStrong(0);
+			return dailyList;
+		}
+
 		/*
 		 * // check-10 if (list.size() < 10) { return list.get(list.size() - 1); } index
 		 * = 10; int strongTimes10 = 0; for (int i = 0; i < index; i++) { DaliyBasicInfo

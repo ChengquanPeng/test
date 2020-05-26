@@ -23,6 +23,7 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsModelV1Dao;
 import com.stable.service.ConceptService;
@@ -79,7 +80,6 @@ public class ModelV1UpService {
 	private ConceptService conceptService;
 
 	public synchronized void runJob(int date) {
-		String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
 		try {
 			if (date == 0) {
 				int today = Integer.valueOf(DateUtil.formatYYYYMMDD(new Date()));
@@ -93,7 +93,7 @@ public class ModelV1UpService {
 				while (true) {
 					if (tradeCalService.isOpen(date)) {
 						log.info("processing date={}", date);
-						run(date);
+						run(date, true);
 					} else {
 						log.info("{}非交易日", date);
 					}
@@ -113,31 +113,29 @@ public class ModelV1UpService {
 					return;
 				}
 				log.info("processing date={}", date);
-				run(date);
+				run(date, false);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "模型运行异常", "", "");
 			WxPushUtil.pushSystem1("模型运行异常..");
 		}
-		log.info("MV1模型执行完成");
-
-		WxPushUtil.pushSystem1("MV1模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
 	}
 
-	private void run(int treadeDate) {
+	private void run(int treadeDate, boolean isJob) {
+		String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
 		JSONArray array = tushareSpider.getStockDaliyBasic(null, treadeDate + "", null, null).getJSONArray("items");
 		if (array == null || array.size() <= 0) {
 			log.warn("未获取到日交易daily_basic（每日指标）记录,tushare,日期={}", treadeDate);
 			throw new RuntimeException("交易日但未获取到数据");
 		}
+		List<ModelV1> saveList = Collections.synchronizedList(new LinkedList<ModelV1>());
+		List<StockAvg> avgList = Collections.synchronizedList(new LinkedList<StockAvg>());
+		List<StrategyListener> list = new ArrayList<StrategyListener>();
 		try {
 			Map<String, List<ConceptInfo>> gn = conceptService.getDailyMap(treadeDate);
 			int size = array.size();
 			log.info("{}获取到每日指标记录条数={}", treadeDate, size);
-			List<ModelV1> saveList = Collections.synchronizedList(new LinkedList<ModelV1>());
-			List<StockAvg> avgList = Collections.synchronizedList(new LinkedList<StockAvg>());
-			List<StrategyListener> list = new ArrayList<StrategyListener>();
 			list.add(new V1SortStrategyListener());
 			CountDownLatch cunt = new CountDownLatch(array.size());
 			for (int i = 0; i < array.size(); i++) {
@@ -165,15 +163,26 @@ public class ModelV1UpService {
 			if (avgList.size() > 0) {
 				avgService.saveStockAvg(avgList);
 			}
-			imageCheck(array);
+
+			log.info("MV1模型执行完成");
+			WxPushUtil.pushSystem1("MV1模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
+			if (isJob) {
+				imageCheck(array);
+			}
 		} catch (Exception e) {
+			if (saveList.size() > 0) {
+				esModelV1Dao.saveAll(saveList);
+			}
+			if (avgList.size() > 0) {
+				avgService.saveStockAvg(avgList);
+			}
 			log.error(e.getMessage(), e);
 			throw new RuntimeException("数据处理异常", e);
 		}
 	}
 
 	public void imageCheck(JSONArray array) {
-		TasksWorker.getInstance().getService().submit(new Runnable() {
+		ListenableFuture<?> l = TasksWorker.getInstance().getService().submit(new Runnable() {
 			@Override
 			public void run() {
 				String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
@@ -211,7 +220,11 @@ public class ModelV1UpService {
 				}
 			}
 		});
-
+		try {
+			l.get();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void runModel(ModelV1 mv1, List<StrategyListener> list, List<ModelV1> saveList, List<StockAvg> avgList,

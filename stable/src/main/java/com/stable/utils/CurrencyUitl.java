@@ -19,6 +19,7 @@ public class CurrencyUitl {
 				.doubleValue();
 		return result;
 	}
+
 	public final static Long covertToLong(String str) {
 		if (StringUtils.isBlank(str) || str.contains(Constant.NULL) || str.contains(Constant.FALSE)) {
 			return 0l;
@@ -127,7 +128,7 @@ public class CurrencyUitl {
 				.doubleValue();
 		return result;
 	}
-	
+
 	public static void main(String[] args) {
 		double s = 5.41;
 		System.err.println(topPrice(s, true) + " " + lowestPrice(s, true));

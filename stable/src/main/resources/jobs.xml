@@ -42,8 +42,8 @@
 		
 	<job:simple id="TradeHistoryJob"
 		class="com.stable.job.TradeHistoryJob"
-		registry-center-ref="regCenter" cron="0 15 19 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上19点15执行任务-获取日交易(分红除权)"
+		registry-center-ref="regCenter" cron="0 15 23 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a" description="每日晚上23点15执行任务-获取日交易(分红除权)"
 		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryWorkingDayJobTradeBasic"

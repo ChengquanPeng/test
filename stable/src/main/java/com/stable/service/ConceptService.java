@@ -26,11 +26,13 @@ import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 概念
  */
 @Service
+@Log4j2
 public class ConceptService {
 	@Autowired
 	private EsCodeConceptDao esCodeConceptDao;
@@ -70,6 +72,7 @@ public class ConceptService {
 	public Map<String, List<ConceptInfo>> getDailyMap(int date) {
 		Map<String, List<ConceptInfo>> m = new HashMap<String, List<ConceptInfo>>();
 		List<ConceptDaily> list = this.getTopConcepts(date);
+		log.info("获取概念数量：" + list.size());
 		if (list != null && list.size() > 0) {
 			list.forEach(daily -> {
 				String conceptId = daily.getConceptId();
@@ -79,7 +82,9 @@ public class ConceptService {
 					ci.setName(codes.get(0).getConceptName());
 					ci.setRanking(daily.getRanking());
 					ci.setTodayChange(daily.getTodayChange());
-
+					list.forEach(x -> {
+						log.info(ci.getName());
+					});
 					codes.forEach(c -> {
 						List<ConceptInfo> l = m.get(c.getCode());
 						if (l == null) {
@@ -91,6 +96,7 @@ public class ConceptService {
 				}
 			});
 		}
+		log.info("代码数量：" + m.keySet().size());
 		return m;
 	}
 
