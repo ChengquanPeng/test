@@ -44,6 +44,29 @@ public class V1SortStrategyListener implements StrategyListener {
 		header += "</tr>" + FileWriteUitl.LINE_FILE;
 	}
 
+	public void fulshToFile(int treadeDate, List<ModelV1context> cxts) {
+		StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
+		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
+		String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v1_dropout_" + treadeDate + ".html";
+		StringBuffer sb2 = new StringBuffer(
+				"<table border='1' cellspacing='0' cellpadding='0'><tr><th>seq</th><th>code</th><th>名称</th><th>分数</th><th>入围</th><th>原因</th></tr>"
+						+ FileWriteUitl.LINE_FILE);
+		int index = 1;
+		for (ModelV1context cxt : cxts) {
+			String code = cxt.getCode();
+			sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))// 代码
+					.append(getHTML(sbs.getCodeName(code)))// 名称
+					.append(getHTML(cxt.getScore()))// 分数
+					.append(getHTML(map.containsKey(code)))// 入围
+					.append(getHTML(cxt.getDropOutMsg())).append("</tr>").append(FileWriteUitl.LINE_FILE);// 原因
+			index++;
+		}
+		sb2.append(endder);
+		FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);
+		fw2.writeLine(sb2.toString());
+		fw2.close();
+	}
+
 	public void fulshToFile() {
 		log.info("List<ModelV1> size:{}", set.size());
 		if (set.size() > 0) {

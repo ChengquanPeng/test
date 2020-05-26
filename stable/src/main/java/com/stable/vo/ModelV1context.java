@@ -11,6 +11,8 @@ import lombok.ToString;
 @ToString
 public class ModelV1context {
 	// 1强势:短中长期买入=>次数和差值:3/5/10/20/120/250天
+	private String code;
+	private int score;
 	private StringBuffer detailDesc;
 
 	private int wayTimes3;
@@ -34,6 +36,8 @@ public class ModelV1context {
 	private int pgmTimes250;
 
 	private StringBuffer gn;
+
+	private String dropOutMsg;
 
 	public void addDetailDesc(String desc) {
 		if (detailDesc == null) {

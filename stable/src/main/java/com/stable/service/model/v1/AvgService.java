@@ -50,17 +50,20 @@ public class AvgService {
 	}
 
 	public void checkAvg(ModelV1 mv1, int startDate, StockAvg av, List<StockAvg> avgList,
-			List<DaliyBasicInfo> dailyList, ModelV1context wv) {
+			List<DaliyBasicInfo> dailyList, ModelV1context cxt) {
 		try {
 			String code = mv1.getCode();
 			int endDate = mv1.getDate();
 			StockAvg r = getAvg(av, code, startDate, endDate, avgList, true);
 			if (r != null) {
 				mv1.setAvgIndex(0);
-				getAvgPriceIndex(mv1, av, wv);
-				getAvgPriceType(mv1, startDate, av, avgList, dailyList, wv);
+				getAvgPriceIndex(mv1, av, cxt);
+				getAvgPriceType(mv1, startDate, av, avgList, dailyList, cxt);
+			} else {
+				cxt.setDropOutMsg("未获取到均价");
 			}
 		} catch (Exception e) {
+			cxt.setDropOutMsg("获取到均价异常");
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "均线执行异常", "", "");
 		}
@@ -113,7 +116,7 @@ public class AvgService {
 
 	// 计算均线排列类型，1.V型反转,2.横盘突破，3.波浪上涨
 	private void getAvgPriceType(ModelV1 mv1, int startDate, StockAvg av, List<StockAvg> avgList,
-			List<DaliyBasicInfo> dailyList, ModelV1context wv) {
+			List<DaliyBasicInfo> dailyList, ModelV1context cxt) {
 		if (mv1.getAvgIndex() >= 10) {
 			List<DaliyBasicInfo> day20 = new LinkedList<DaliyBasicInfo>();
 			for (int i = 0; i < 20; i++) {
@@ -124,6 +127,7 @@ public class AvgService {
 			double min20 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
 			log.info("20 days,max={},min={}", max20, min20);
 			if (max20 > CurrencyUitl.topPrice20(min20)) {
+				cxt.setDropOutMsg("20天涨幅超过20%");
 				mv1.setAvgIndex(-100);
 				return;
 			}
@@ -151,6 +155,7 @@ public class AvgService {
 					StockAvg r = getAvg(null, code, startDate, d.getTrade_date(), avgList, false);
 					if (r == null) {
 						log.warn("数据不全code={},startDate={},enddate={}", code, startDate, d.getTrade_date());
+						cxt.setDropOutMsg("均线数据不全，补充不到完整均线");
 						return;
 					}
 					clist.add(r);
@@ -170,20 +175,20 @@ public class AvgService {
 				// 往上走
 				if (firstDay.getAvgPriceIndex30() < endDay.getAvgPriceIndex30()) {
 					avgPrice30 += 20;
-					wv.addDetailDesc("30日均线突破往上-20");
+					cxt.addDetailDesc("30日均线突破往上-20");
 				} else {
 					// 均线排列往上
 					avgPrice30 += 10;
-					wv.addDetailDesc("30日均线粘合-10");
+					cxt.addDetailDesc("30日均线粘合-10");
 				}
 			} else if (CurrencyUitl.topPrice(minAvg30, false) <= maxAvg30) {// 2.振幅在10%以内
 				// 往上走
 				if (firstDay.getAvgPriceIndex30() < endDay.getAvgPriceIndex30()) {
 					avgPrice30 += 15;
-					wv.addDetailDesc("30日均线突破往上-15");
+					cxt.addDetailDesc("30日均线突破往上-15");
 				} else if (CurrencyUitl.topPrice(minAvg30, true) <= endDay.getAvgPriceIndex30()) {
 					avgPrice30 += 10;
-					wv.addDetailDesc("30日均线粘合-10");
+					cxt.addDetailDesc("30日均线粘合-10");
 				}
 			} else {
 				// 往上走
@@ -191,10 +196,12 @@ public class AvgService {
 					// 白马
 					avgPrice30 = 1;
 					mv1.setWhiteHorse(1);
-					wv.addDetailDesc("白马？");
+					cxt.addDetailDesc("白马？");
 				} else {
 					// 剔除往下走或者振幅较大
-					avgPrice30 = -100;
+					cxt.setDropOutMsg("均线往下走或者振幅超过10%");
+					mv1.setAvgIndex(-100);
+					return;
 				}
 			}
 
@@ -204,8 +211,8 @@ public class AvgService {
 			}).count();
 
 			if (count > 15) {
-				log.warn("30个交易日中，超过15天30日均线大于5日均线code={}", code);
 				mv1.setAvgIndex(-100);
+				cxt.setDropOutMsg("30个交易日中，超过15天30日均线大于5日均线");
 				return;
 			}
 			mv1.setAvgIndex(mv1.getAvgIndex() + avgPrice30);
@@ -213,7 +220,7 @@ public class AvgService {
 	}
 
 	// 计算AvgPriceIndex-排列
-	private void getAvgPriceIndex(ModelV1 mv1, StockAvg av, ModelV1context wv) {
+	private void getAvgPriceIndex(ModelV1 mv1, StockAvg av, ModelV1context cxt) {
 		if (av.getAvgPriceIndex250() > 0) {
 			if (av.getAvgPriceIndex3() >= av.getAvgPriceIndex5() && av.getAvgPriceIndex5() >= av.getAvgPriceIndex10()
 					&& av.getAvgPriceIndex10() >= av.getAvgPriceIndex20()
@@ -221,7 +228,7 @@ public class AvgService {
 					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex120()
 					&& av.getAvgPriceIndex120() >= av.getAvgPriceIndex250()) {
 				mv1.setAvgIndex(15);
-				wv.addDetailDesc("各均线排列");
+				cxt.addDetailDesc("各均线排列");
 				return;
 			}
 		}
@@ -229,13 +236,13 @@ public class AvgService {
 				&& av.getAvgPriceIndex10() >= av.getAvgPriceIndex20()
 				&& av.getAvgPriceIndex20() >= av.getAvgPriceIndex30()) {
 			mv1.setAvgIndex(12);
-			wv.addDetailDesc("30日均线排列");
+			cxt.addDetailDesc("30日均线排列");
 			return;
 		}
 		if (av.getAvgPriceIndex3() >= av.getAvgPriceIndex5() && av.getAvgPriceIndex5() >= av.getAvgPriceIndex10()
 				&& av.getAvgPriceIndex10() >= av.getAvgPriceIndex20()) {
 			mv1.setAvgIndex(10);
-			wv.addDetailDesc("20日均线排列");
+			cxt.addDetailDesc("20日均线排列");
 			return;
 		}
 
@@ -249,7 +256,7 @@ public class AvgService {
 					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex10()
 					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex20()) {
 				mv1.setAvgIndex(5);
-				wv.addDetailDesc("30日均线5%振幅");
+				cxt.addDetailDesc("30日均线5%振幅");
 			}
 			return;
 		}
@@ -259,10 +266,11 @@ public class AvgService {
 					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex10()
 					&& av.getAvgPriceIndex30() >= av.getAvgPriceIndex20()) {
 				mv1.setAvgIndex(4);
-				wv.addDetailDesc("30日均线10%振幅");
+				cxt.addDetailDesc("30日均线10%振幅");
 			}
 			return;
 		}
+		cxt.setDropOutMsg("均线不满要求");
 	}
 
 	public List<StockAvg> queryListByCodeForModel(String code, int date, EsQueryPageReq queryPage) {

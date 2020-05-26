@@ -1,6 +1,5 @@
 package com.stable.service.model.v1;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -131,31 +130,32 @@ public class ModelV1UpService {
 		}
 		List<ModelV1> saveList = Collections.synchronizedList(new LinkedList<ModelV1>());
 		List<StockAvg> avgList = Collections.synchronizedList(new LinkedList<StockAvg>());
-		List<StrategyListener> list = new ArrayList<StrategyListener>();
+		List<ModelV1context> exts = Collections.synchronizedList(new LinkedList<ModelV1context>());
+		V1SortStrategyListener sort = new V1SortStrategyListener();
 		try {
 			Map<String, List<ConceptInfo>> gn = conceptService.getDailyMap(treadeDate);
 			int size = array.size();
 			log.info("{}获取到每日指标记录条数={}", treadeDate, size);
-			list.add(new V1SortStrategyListener());
 			CountDownLatch cunt = new CountDownLatch(array.size());
 			for (int i = 0; i < array.size(); i++) {
 				DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
+
 				ModelV1 mv = new ModelV1();
 				mv.setCode(d.getCode());
 				mv.setDate(d.getTrade_date());
 				mv.setClose(d.getClose());
+				ModelV1context cxt = new ModelV1context();
+				cxt.setCode(d.getCode());
+				exts.add(cxt);
 
 				TasksWorker2nd.add(new MyRunnable() {
 					@Override
 					public void running() {
-						runModel(mv, list, saveList, avgList, gn, cunt);
+						runModel(mv, sort, saveList, avgList, gn, cxt, cunt);
 					}
 				});
 			}
 			cunt.await();// 等待执行完成
-			for (StrategyListener sl : list) {
-				sl.fulshToFile();
-			}
 			log.info("saveList size:{}", saveList.size());
 			if (saveList.size() > 0) {
 				esModelV1Dao.saveAll(saveList);
@@ -163,7 +163,8 @@ public class ModelV1UpService {
 			if (avgList.size() > 0) {
 				avgService.saveStockAvg(avgList);
 			}
-
+			sort.fulshToFile();
+			sort.fulshToFile(treadeDate, exts);
 			log.info("MV1模型执行完成");
 			WxPushUtil.pushSystem1("MV1模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
 			if (isJob) {
@@ -227,23 +228,20 @@ public class ModelV1UpService {
 		}
 	}
 
-	private void runModel(ModelV1 mv1, List<StrategyListener> list, List<ModelV1> saveList, List<StockAvg> avgList,
-			Map<String, List<ConceptInfo>> gn, CountDownLatch cunt) {
-		ModelV1context tdv = new ModelV1context();
+	private void runModel(ModelV1 mv1, V1SortStrategyListener sort, List<ModelV1> saveList, List<StockAvg> avgList,
+			Map<String, List<ConceptInfo>> gn, ModelV1context cxt, CountDownLatch cunt) {
 		StockAvg av = new StockAvg();
-		if (getDataAndRunIndexs(mv1, tdv, av, avgList)) {
-			mv1.setScore(this.getSocre(mv1, tdv, gn));
+		if (getDataAndRunIndexs(mv1, cxt, av, avgList)) {
+			mv1.setScore(this.getSocre(mv1, cxt, gn));
 			if (mv1.getScore() > 0) {
-
-				for (StrategyListener sl : list) {
-					sl.condition(mv1, tdv, av);
-				}
+				sort.condition(mv1, cxt, av);
 			}
 			// 大于10分
 			if (mv1.getScore() >= 10) {
 				saveList.add(mv1);
 			}
 		}
+		cxt.setScore(mv1.getScore());
 		cunt.countDown();
 	}
 
@@ -282,29 +280,29 @@ public class ModelV1UpService {
 		return r;
 	}
 
-	private boolean getDataAndRunIndexs(ModelV1 mv1, ModelV1context wv, StockAvg av, List<StockAvg> avgList) {
-		if (!stockBasicService.online1Year(mv1.getCode())) {
-			log.info("Online 不足1年，code={}", mv1.getCode());
-			return false;
-		}
+	private boolean getDataAndRunIndexs(ModelV1 mv1, ModelV1context cxt, StockAvg av, List<StockAvg> avgList) {
 		String code = mv1.getCode();
 		log.info("model V1 processing for code:{}", code);
+		if (!stockBasicService.online1Year(code)) {
+			cxt.setDropOutMsg("Online 上市不足1年");
+			return false;
+		}
 		// 1强势:次数和差值:3/5/10/20/120/250天
-		List<DaliyBasicInfo> dailyList = strongService.checkStrong(mv1, wv);
+		List<DaliyBasicInfo> dailyList = strongService.checkStrong(mv1, cxt);
 		if (dailyList == null) {
 			return false;
 		}
 		DaliyBasicInfo lastDate = dailyList.get(dailyList.size() - 1);
 		// 2交易方向:次数和差值:3/5/10/20/120/250天
 		// 3程序单:次数:3/5/10/20/120/250天
-		tickDataService.tickDataCheck(mv1, wv);
+		tickDataService.tickDataCheck(mv1, cxt);
 		this.priceIndex(mv1);
 		// 均价
-		avgService.checkAvg(mv1, lastDate.getTrade_date(), av, avgList, dailyList, wv);
+		avgService.checkAvg(mv1, lastDate.getTrade_date(), av, avgList, dailyList, cxt);
 		// 量
 		mv1.setId(code + mv1.getDate());
-		log.info(wv);
-		log.info(av);
+		// log.info(wv);
+		// log.info(av);
 		return true;
 	}
 

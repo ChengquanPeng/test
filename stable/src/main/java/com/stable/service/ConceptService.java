@@ -82,9 +82,8 @@ public class ConceptService {
 					ci.setName(codes.get(0).getConceptName());
 					ci.setRanking(daily.getRanking());
 					ci.setTodayChange(daily.getTodayChange());
-					list.forEach(x -> {
-						log.info(ci.getName());
-					});
+					log.info(ci.getName());
+					
 					codes.forEach(c -> {
 						List<ConceptInfo> l = m.get(c.getCode());
 						if (l == null) {
