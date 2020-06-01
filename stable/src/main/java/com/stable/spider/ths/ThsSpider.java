@@ -202,11 +202,15 @@ public class ThsSpider {
 		int index = 1;
 		int end = 0;
 		int trytime = 0;
+		int pageIndex = 1;
 		do {
 			String url = String.format(GN_LIST, index);
 			DomElement table = null;
 			HtmlPage page = null;
 			try {
+				if (pageIndex > 3) {// 最多3页
+					return;
+				}
 				ThreadsUtil.sleepRandomSecBetween5And15();
 //				header.put(REFERER, refer);
 				page = htmlunitSpider.getHtmlPageFromUrl(url);
@@ -251,6 +255,7 @@ public class ThsSpider {
 					end = Integer.valueOf(pageInfo.split(SPIT)[1]);
 				}
 				trytime = 0;
+				pageIndex++;
 			} catch (Exception e) {
 				trytime++;
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);

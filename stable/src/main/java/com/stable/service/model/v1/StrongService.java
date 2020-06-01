@@ -8,12 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
-import com.stable.service.DaliyBasicHistroyService;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.ModelV1context;
 import com.stable.vo.bus.DaliyBasicInfo;
-import com.stable.vo.spi.req.EsQueryPageReq;
 import com.stable.vo.up.strategy.ModelV1;
 
 import lombok.extern.log4j.Log4j2;
@@ -24,9 +22,6 @@ public class StrongService {
 
 	@Autowired
 	private TushareSpider tushareSpider;
-
-	@Autowired
-	private DaliyBasicHistroyService daliyBasicHistroyService;
 
 //	"000001.SH","上证综指",
 //	"399001.SZ","深证成指",
@@ -92,16 +87,8 @@ public class StrongService {
 		}
 	}
 
-	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
-
-	public List<DaliyBasicInfo> checkStrong(ModelV1 mv1, ModelV1context cxt) {
+	public List<DaliyBasicInfo> checkStrong(ModelV1 mv1, ModelV1context cxt, List<DaliyBasicInfo> dailyList) {
 		String code = mv1.getCode();
-		List<DaliyBasicInfo> dailyList = daliyBasicHistroyService
-				.queryListByCodeForModel(code, mv1.getDate(), queryPage).getContent();
-		if (dailyList.size() < 5) {
-			cxt.setDropOutMsg("每日指标记录小于5条,checkStrong get size<5");
-			return null;
-		}
 		DaliyBasicInfo last = dailyList.get(dailyList.size() - 1);
 		// log.info("daliy last,code={},date={}", last.getCode(), last.getTrade_date());
 		Map<Integer, Double> cache = this.getIndexMap(code, mv1.getDate(), last.getTrade_date());

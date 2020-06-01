@@ -49,14 +49,13 @@ public class AvgService {
 		}
 	}
 
-	public void checkAvg(ModelV1 mv1, int startDate, List<StockAvg> avgList,
-			List<DaliyBasicInfo> dailyList, ModelV1context cxt) {
+	public void checkAvg(ModelV1 mv1, int startDate, List<StockAvg> avgList, List<DaliyBasicInfo> dailyList,
+			ModelV1context cxt) {
 		try {
-			StockAvg av = null;//TODO
 			String code = mv1.getCode();
 			int endDate = mv1.getDate();
-			StockAvg r = getAvg(av, code, startDate, endDate, avgList, true);
-			if (r != null) {
+			StockAvg av = getAvg(code, startDate, endDate, avgList);
+			if (av != null) {
 				mv1.setAvgIndex(0);
 				getAvgPriceIndex(mv1, av, cxt);
 				getAvgPriceType(mv1, startDate, av, avgList, dailyList, cxt);
@@ -70,26 +69,34 @@ public class AvgService {
 		}
 	}
 
-	private StockAvg getAvg(StockAvg av, String code, int startDate, int endDate, List<StockAvg> avgList,
-			boolean isFirstLevel) {
+	private StockAvg getAvg(String code, int startDate, int endDate, List<StockAvg> avgList) {
 		String params = TushareSpider.formatCode(code) + " " + startDate + " " + endDate + " qfq D";
-		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
-		if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
-			log.warn("pythonFileName：{}，未获取到数据 params：{}", pythonFileName, code, params);
-			if (lines != null && !lines.isEmpty()) {
-				log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
+		boolean gotData = false;
+		List<String> lines = null;
+		int i = 0;
+		do {
+			lines = PythonCallUtil.callPythonScript(pythonFileName, params);
+			if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
+				if (i >= 3) {
+					log.warn("pythonFileName：{}，未获取到数据 params：{}", pythonFileName, code, params);
+					if (lines != null && !lines.isEmpty()) {
+						log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
+					}
+					ErrorLogFileUitl.writeError(new RuntimeException(), code, "未获取到均价信息", startDate + " " + endDate);
+					return null;
+				}
+			} else {
+				gotData = true;
 			}
-			ErrorLogFileUitl.writeError(new RuntimeException(), code, "未获取到均价信息", startDate + " " + endDate);
-			return null;
-		}
+			i++;
+		} while (!gotData);
+
 		try {
 			String[] strs = lines.get(0).replaceAll("nan", "0").split(",");
 			if (strs[1].equals(String.valueOf(endDate))) {
 				// code,date,3,5,10,20,30,120,250
 				// 600408.SH,20200403,2.2933,2.302,2.282,2.3255,2.297,2.2712,2.4559
-				if (!isFirstLevel) {
-					av = new StockAvg();
-				}
+				StockAvg av = new StockAvg();
 				av.setCode(code);
 				av.setDate(endDate);
 				av.setId();
@@ -98,10 +105,8 @@ public class AvgService {
 				av.setAvgPriceIndex10(Double.valueOf(strs[4]));
 				av.setAvgPriceIndex20(Double.valueOf(strs[5]));
 				av.setAvgPriceIndex30(Double.valueOf(strs[6]));
-				if (isFirstLevel) {
-					av.setAvgPriceIndex120(Double.valueOf(strs[7]));
-					av.setAvgPriceIndex250(Double.valueOf(strs[8]));
-				}
+				av.setAvgPriceIndex120(Double.valueOf(strs[7]));
+				av.setAvgPriceIndex250(Double.valueOf(strs[8]));
 				avgList.add(av);
 				return av;
 			}
@@ -120,19 +125,7 @@ public class AvgService {
 			List<DaliyBasicInfo> dailyList, ModelV1context cxt) {
 		if (mv1.getAvgIndex() >= 10) {
 			cxt.setBase20Avg(true);// 至少20日均线
-			List<DaliyBasicInfo> day20 = new LinkedList<DaliyBasicInfo>();
-			for (int i = 0; i < 20; i++) {
-				day20.add(dailyList.get(i));
-			}
-			// 20天涨幅
-			double max20 = day20.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
-			double min20 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
-//			log.info("20 days,max={},min={}", max20, min20);
-			if (max20 > CurrencyUitl.topPrice20(min20)) {
-				cxt.setDropOutMsg("20天涨幅超过20%");
-				mv1.setAvgIndex(-100);
-				return;
-			}
+
 			String code = av.getCode();
 			List<StockAvg> avglist = queryListByCodeForModel(code, av.getDate(), queryPage);
 			// 已有的map
@@ -154,7 +147,7 @@ public class AvgService {
 				if (map.containsKey(d.getTrade_date())) {
 					clist.add(map.get(d.getTrade_date()));
 				} else {
-					StockAvg r = getAvg(null, code, startDate, d.getTrade_date(), avgList, false);
+					StockAvg r = getAvg(code, startDate, d.getTrade_date(), avgList);
 					if (r == null) {
 						log.warn("数据不全code={},startDate={},enddate={}", code, startDate, d.getTrade_date());
 						cxt.setDropOutMsg("均线数据不全，补充不到完整均线");
@@ -203,7 +196,7 @@ public class AvgService {
 					// 剔除往下走或者振幅较大
 					cxt.setDropOutMsg("均线往下走或者振幅超过10%");
 					mv1.setAvgIndex(-100);
-					return;
+					return;// TODO
 				}
 			}
 
@@ -215,7 +208,7 @@ public class AvgService {
 			if (count > 15) {
 				mv1.setAvgIndex(-100);
 				cxt.setDropOutMsg("30个交易日中，超过15天30日均线大于5日均线");
-				return;
+				return;// TODO
 			}
 			mv1.setAvgIndex(mv1.getAvgIndex() + avgPrice30);
 		}

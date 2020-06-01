@@ -22,9 +22,10 @@
 		sharding-item-parameters="0=a" description="系统状态检查和重启"
 		sharding-total-count="1" overwrite="true" />
 
+	<!-- 每天表达式cron="0 15 4 * * ?"  -->
 	<job:simple id="EveryWorkingDayMorningJob"
 		class="com.stable.job.EveryWorkingDayMorningJob"
-		registry-center-ref="regCenter" cron="0 15 4 * * ?"
+		registry-center-ref="regCenter" cron="0 15 4 ? * 2,3,4,5,6 *"
 		sharding-item-parameters="0=a" description="每日早上4点15执行任务(当日分红除权)"
 		sharding-total-count="1" overwrite="true" />
 

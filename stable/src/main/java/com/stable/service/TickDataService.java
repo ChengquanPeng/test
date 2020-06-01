@@ -193,14 +193,14 @@ public class TickDataService {
 														WxPushUtil.pushSystem1("检测到ES系统异常，正在重启...");
 														OSystemUtil.restart();
 													}
-												} finally {
-													cnt.countDown();
 												}
 											}
 										});
 									} catch (Exception e) {
 										e.printStackTrace();
 										ErrorLogFileUitl.writeError(e, d.toString(), "", "");
+									} finally {
+										cnt.countDown();
 									}
 								}
 								try {
@@ -280,7 +280,8 @@ public class TickDataService {
 	public List<TickDataBuySellInfo> listForModel(String code, int date, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
-		//log.info("queryPage code={},date={},pageNum={},size={}", code, date, pageNum, size);
+		// log.info("queryPage code={},date={},pageNum={},size={}", code, date, pageNum,
+		// size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));

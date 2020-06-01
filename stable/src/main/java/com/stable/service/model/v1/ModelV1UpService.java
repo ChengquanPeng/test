@@ -1,6 +1,7 @@
 package com.stable.service.model.v1;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,11 +27,13 @@ import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsModelV1Dao;
 import com.stable.service.ConceptService;
 import com.stable.service.ConceptService.ConceptInfo;
+import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TickDataService;
 import com.stable.service.TradeCalService;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.MyRunnable;
@@ -60,7 +63,8 @@ public class ModelV1UpService {
 	private PriceLifeService priceLifeService;
 	@Autowired
 	private AvgService avgService;
-
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private EsModelV1Dao esModelV1Dao;
 	@Autowired
@@ -72,6 +76,8 @@ public class ModelV1UpService {
 
 	@Autowired
 	private ConceptService conceptService;
+
+	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 
 	public synchronized void runJob(int date) {
 		try {
@@ -143,7 +149,14 @@ public class ModelV1UpService {
 				TasksWorker2nd.add(new MyRunnable() {
 					@Override
 					public void running() {
-						runModel(mv, sort, saveList, avgList, gn, cxts, cunt);
+						try {
+							runModel(mv, sort, saveList, avgList, gn, cxts);
+						} catch (Exception e) {
+							e.printStackTrace();
+							ErrorLogFileUitl.writeError(e, "", "", "");
+						} finally {
+							cunt.countDown();
+						}
 					}
 				});
 			}
@@ -172,7 +185,7 @@ public class ModelV1UpService {
 	}
 
 	private void runModel(ModelV1 mv1, V1SortStrategyListener sort, List<ModelV1> saveList, List<StockAvg> avgList,
-			Map<String, List<ConceptInfo>> gn, List<ModelV1context> cxts, CountDownLatch cunt) {
+			Map<String, List<ConceptInfo>> gn, List<ModelV1context> cxts) {
 		ModelV1context cxt = new ModelV1context();
 		cxt.setCode(mv1.getCode());
 
@@ -190,7 +203,6 @@ public class ModelV1UpService {
 			cxts.add(cxt);
 		}
 		cxt.setScore(mv1.getScore());
-		cunt.countDown();
 	}
 
 	// **评分
@@ -228,6 +240,10 @@ public class ModelV1UpService {
 		return r;
 	}
 
+	private List<DaliyBasicInfo> getBasicList(ModelV1 mv1) {
+		return daliyBasicHistroyService.queryListByCodeForModel(mv1.getCode(), mv1.getDate(), queryPage).getContent();
+	}
+
 	private boolean getDataAndRunIndexs(ModelV1 mv1, ModelV1context cxt, List<StockAvg> avgList) {
 		String code = mv1.getCode();
 		log.info("model V1 processing for code:{}", code);
@@ -235,22 +251,34 @@ public class ModelV1UpService {
 			cxt.setDropOutMsg("Online 上市不足1年");
 			return false;
 		}
-		// 1强势:次数和差值:3/5/10/20/120/250天
-		List<DaliyBasicInfo> dailyList = strongService.checkStrong(mv1, cxt);
-		if (dailyList == null) {
+		List<DaliyBasicInfo> dailyList = getBasicList(mv1);
+		if (dailyList == null || dailyList.size() < 5) {
+			cxt.setDropOutMsg("每日指标记录小于5条,checkStrong get size<5");
 			return false;
 		}
+		// 均价
 		DaliyBasicInfo lastDate = dailyList.get(dailyList.size() - 1);
+		avgService.checkAvg(mv1, lastDate.getTrade_date(), avgList, dailyList, cxt);
+		// 1强势:次数和差值:3/5/10/20/120/250天
+		strongService.checkStrong(mv1, cxt, dailyList);
 		// 2交易方向:次数和差值:3/5/10/20/120/250天
 		// 3程序单:次数:3/5/10/20/120/250天
 		tickDataService.tickDataCheck(mv1, cxt);
+		// 20天涨幅
+		List<DaliyBasicInfo> day20 = new LinkedList<DaliyBasicInfo>();
+		for (int i = 0; i < 20; i++) {
+			day20.add(dailyList.get(i));
+		}
+		double max20 = day20.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
+		double min20 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
+//					log.info("20 days,max={},min={}", max20, min20);
+		if (max20 > CurrencyUitl.topPrice20(min20)) {
+			cxt.setDropOutMsg("20天涨幅超过20%");
+//			mv1.setAvgIndex(-100);
+//			return; TODO
+		}
 		this.priceIndex(mv1);
-		// 均价
-		avgService.checkAvg(mv1, lastDate.getTrade_date(), avgList, dailyList, cxt);
-		// 量
 		mv1.setId(code + mv1.getDate());
-		// log.info(wv);
-		// log.info(av);
 		return true;
 	}
 
