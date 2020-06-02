@@ -49,9 +49,8 @@ public class ConceptService {
 
 		@Override
 		public String toString() {
-			return name + " 涨幅:" + CurrencyUitl.roundHalfUp(todayChange) + "%,排名:" + ranking;
+			return "排名:" + ranking + " " + name + " 涨幅:" + CurrencyUitl.roundHalfUp(todayChange) + "%,</br>";
 		}
-
 	}
 
 	private List<ConceptDaily> getTopConcepts(int date) {
@@ -83,7 +82,7 @@ public class ConceptService {
 					ci.setRanking(daily.getRanking());
 					ci.setTodayChange(daily.getTodayChange());
 					log.info(ci.getName());
-					
+
 					codes.forEach(c -> {
 						List<ConceptInfo> l = m.get(c.getCode());
 						if (l == null) {

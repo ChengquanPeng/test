@@ -306,7 +306,7 @@ public class DaliyTradeHistroyService {
 			SortOrder s) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
-		log.info("queryPage code={},pageNum={},size={}", code, pageNum, size);
+//		log.info("queryPage code={},pageNum={},size={}", code, pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {

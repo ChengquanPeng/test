@@ -73,7 +73,6 @@ public class ModelV1UpService {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private TushareSpider tushareSpider;
-
 	@Autowired
 	private ConceptService conceptService;
 
@@ -196,10 +195,10 @@ public class ModelV1UpService {
 				isOk = sort.condition(mv1, cxt);
 			}
 		}
-
-		if (isOk) {
+		if (cxt.isBase20Avg()) {
 			saveList.add(mv1);
-		} else {
+		}
+		if (!isOk) {
 			cxts.add(cxt);
 		}
 		cxt.setScore(mv1.getScore());

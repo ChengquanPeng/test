@@ -25,6 +25,7 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.PythonCallUtil;
+import com.stable.utils.ThreadsUtil;
 import com.stable.vo.ModelV1context;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockAvg;
@@ -69,7 +70,7 @@ public class AvgService {
 		}
 	}
 
-	private StockAvg getAvg(String code, int startDate, int endDate, List<StockAvg> avgList) {
+	private synchronized StockAvg getAvg(String code, int startDate, int endDate, List<StockAvg> avgList) {
 		String params = TushareSpider.formatCode(code) + " " + startDate + " " + endDate + " qfq D";
 		boolean gotData = false;
 		List<String> lines = null;
@@ -85,6 +86,7 @@ public class AvgService {
 					ErrorLogFileUitl.writeError(new RuntimeException(), code, "未获取到均价信息", startDate + " " + endDate);
 					return null;
 				}
+				ThreadsUtil.sleepRandomSecBetween5And15();
 			} else {
 				gotData = true;
 			}
