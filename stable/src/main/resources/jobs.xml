@@ -37,8 +37,8 @@
 
 	<job:simple id="EveryWorkingDayJobTradeBasic"
 		class="com.stable.job.EveryWorkingDayJobTradeBasic"
-		registry-center-ref="regCenter" cron="0 35 18 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上18点35执行任务-每日指标-模型"
+		registry-center-ref="regCenter" cron="0 01 18 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a" description="每日晚上18点01执行任务-每日指标-模型"
 		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryWorkingDayJob"
