@@ -17,12 +17,12 @@
 		max-retries="3" />
 
 	<!-- 配置作业 下面的TestJob就是我们刚才新建的测试类 -->
-	<job:simple id="SysStatusJob" class="com.stable.job.SysStatusJob"
-		registry-center-ref="regCenter" cron="0 0/30 * * * ?"
-		sharding-item-parameters="0=a" description="系统状态检查和重启"
-		sharding-total-count="1" overwrite="true" />
+	<job:simple id="SysStatusJob"
+		class="com.stable.job.SysStatusJob" registry-center-ref="regCenter"
+		cron="0 0/30 * * * ?" sharding-item-parameters="0=a"
+		description="系统状态检查和重启" sharding-total-count="1" overwrite="true" />
 
-	<!-- 每天表达式cron="0 15 4 * * ?"  -->
+	<!-- 每天表达式cron="0 15 4 * * ?" -->
 	<job:simple id="EveryWorkingDayMorningJob"
 		class="com.stable.job.EveryWorkingDayMorningJob"
 		registry-center-ref="regCenter" cron="0 15 4 ? * 2,3,4,5,6 *"
@@ -34,35 +34,35 @@
 		registry-center-ref="regCenter" cron="0 05 16 ? * 2,3,4,5,6 *"
 		sharding-item-parameters="0=a" description="每日晚上16点05执行任务(同花顺概念)"
 		sharding-total-count="1" overwrite="true" />
-		
-	<job:simple id="EveryWorkingDayJob"
-		class="com.stable.job.EveryWorkingDayJob"
-		registry-center-ref="regCenter" cron="0 05 19 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上19点05执行任务(回购公告、分红除权公告)"
-		sharding-total-count="1" overwrite="true" />
-		
-	<job:simple id="TradeHistoryJob"
-		class="com.stable.job.TradeHistoryJob"
-		registry-center-ref="regCenter" cron="0 15 23 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上23点15执行任务-获取日交易(分红除权)"
-		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryWorkingDayJobTradeBasic"
 		class="com.stable.job.EveryWorkingDayJobTradeBasic"
 		registry-center-ref="regCenter" cron="0 35 18 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上18点35执行任务"
-		sharding-total-count="1" overwrite="true" />
-	
-	<job:simple id="EveryWeekMonJob"
-		class="com.stable.job.EveryWeekMonJob" 
-		registry-center-ref="regCenter" cron="0 15 5 ? * MON" 
-		sharding-item-parameters="0=a" description="每周一早上5点15执行任务（股票列表，回购，分红除权，业绩）" 
+		sharding-item-parameters="0=a" description="每日晚上18点35执行任务-每日指标-模型"
 		sharding-total-count="1" overwrite="true" />
 
+	<job:simple id="EveryWorkingDayJob"
+		class="com.stable.job.EveryWorkingDayJob"
+		registry-center-ref="regCenter" cron="0 05 19 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a"
+		description="每日晚上19点05执行任务(回购公告、分红除权公告)" sharding-total-count="1"
+		overwrite="true" />
+
+	<job:simple id="TradeHistoryJob"
+		class="com.stable.job.TradeHistoryJob" registry-center-ref="regCenter"
+		cron="0 15 23 ? * 2,3,4,5,6 *" sharding-item-parameters="0=a"
+		description="每日晚上23点15执行任务-获取日交易(分红除权)" sharding-total-count="1"
+		overwrite="true" />
+
+	<job:simple id="EveryWeekMonJob"
+		class="com.stable.job.EveryWeekMonJob" registry-center-ref="regCenter"
+		cron="0 15 5 ? * MON" sharding-item-parameters="0=a"
+		description="每周一早上5点15执行任务（股票列表，回购，分红除权，业绩）" sharding-total-count="1"
+		overwrite="true" />
+
 	<job:simple id="EveryMonthJob"
-		class="com.stable.job.EveryMonthJob" 
-		registry-center-ref="regCenter" cron="1 5 1 1 * ?" 
-		sharding-item-parameters="0=a" description="每月1日凌晨执行（日历同步）" 
-		sharding-total-count="1" overwrite="true" />
+		class="com.stable.job.EveryMonthJob" registry-center-ref="regCenter"
+		cron="1 5 1 1 * ?" sharding-item-parameters="0=a"
+		description="每月1日凌晨执行（日历同步）" sharding-total-count="1" overwrite="true" />
 
 </beans>

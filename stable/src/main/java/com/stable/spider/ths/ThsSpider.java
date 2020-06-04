@@ -93,12 +93,12 @@ public class ThsSpider {
 	}
 
 	public void start() {
+		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		synchGnAndCode();
-		synchConceptDaliy();
+		synchConceptDaliy(date);
 	}
 
-	private void synchConceptDaliy() {
-		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+	private void synchConceptDaliy(int date) {
 		if (!tradeCalService.isOpen(date)) {
 			log.info("非交易日");
 			return;
@@ -241,22 +241,25 @@ public class ThsSpider {
 					cp.setId(START_THS + cp.getCode());
 					cp.setType(ths);
 					list.add(cp);
-					getAliasCdoe(cp, map);
 					log.info(cp);
+					boolean fetchNext = true;
 					if (getNew) {// 每天新增
 						if (map.containsKey(cp.getCode())) {
-							log.info("以获取到最新");
-							return;
+							fetchNext = false;
 						} else {
 							log.info("获取到新概念:" + cp.getName());
+							fetchNext = true;
 						}
 					}
-					getSubCodeList(cp, codelist);
-					if (codelist.size() > 100) {
-						saveCodeConcept(codelist);
-					}
-					if (list.size() >= 100) {
-						saveConcept(list);
+					if (fetchNext) {
+						getAliasCdoe(cp, map);
+						getSubCodeList(cp, codelist);
+						if (codelist.size() > 100) {
+							saveCodeConcept(codelist);
+						}
+						if (list.size() >= 100) {
+							saveConcept(list);
+						}
 					}
 				}
 				index++;
