@@ -12,17 +12,14 @@ import com.stable.utils.FileWriteUitl;
 import com.stable.utils.SpringUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.ModelContext;
+import com.stable.vo.up.strategy.ModelV1;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class ImageStrategyListener implements StrategyListener {
 
-	private List<ModelContext> set = new LinkedList<ModelContext>();
-
-	public void condition(ModelContext mv) {
-		set.add(mv);
-	}
+	private List<ModelV1> set = new LinkedList<ModelV1>();
 
 	public void fulshToFile() {
 		log.info("List<ModelContext> size:{}", set.size());
@@ -32,7 +29,7 @@ public class ImageStrategyListener implements StrategyListener {
 			FileWriteUitl fw = new FileWriteUitl(filepath, true);
 			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < set.size(); i++) {
-				ModelContext mc = set.get(i);
+				ModelV1 mc = set.get(i);
 				sb.append(String.format("代码:%s,日期:%s,匹配图形:%s", mc.getCode(), mc.getDate(), mc.getImgResult()))
 						.append(FileWriteUitl.LINE_HTML).append(FileWriteUitl.LINE_FILE);
 
@@ -44,8 +41,20 @@ public class ImageStrategyListener implements StrategyListener {
 	}
 
 	@Override
-	public void processingModelResult(ModelContext cxt, LineAvgPrice lineAvgPrice, LinePrice linePrice, LineVol lineVol,
+	public void processingModelResult(ModelContext mc, LineAvgPrice lineAvgPrice, LinePrice linePrice, LineVol lineVol,
 			LineTickData lineTickData) {
+		ModelV1 mv = new ModelV1();
+		mv.setCode(mc.getCode());
+		mv.setDate(mc.getDate());
+		mv.setModelType(3);
+		mv.setImgResult(mc.getImgResult());
+		mv.setId(mv.getModelType() + mv.getCode() + mv.getDate());
+		set.add(mv);
+	}
+
+	@Override
+	public List<ModelV1> getResultList() {
+		return set;
 	}
 
 }

@@ -25,6 +25,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
+import com.stable.es.dao.base.EsModelV1Dao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.ImageStrategyListener;
@@ -71,6 +72,8 @@ public class DaliyTradeHistroyService {
 	private PriceLifeService priceLifeService;
 	@Autowired
 	private ImageService imageService;
+	@Autowired
+	private EsModelV1Dao esModelV1Dao;
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -135,26 +138,29 @@ public class DaliyTradeHistroyService {
 					ImageStrategyListener sl = new ImageStrategyListener();
 					for (int i = 0; i < array.size(); i++) {
 						DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
-						ModelContext mv = new ModelContext();
-						mv.setCode(d.getCode());
-						mv.setDate(d.getTrade_date());
-						if (stockBasicService.online1Year(mv.getCode())) {
-							String str = imageService.checkImg(mv.getCode(), mv.getDate());
+						ModelContext mc = new ModelContext();
+						mc.setCode(d.getCode());
+						mc.setDate(d.getTrade_date());
+						if (stockBasicService.online1Year(mc.getCode())) {
+							String str = imageService.checkImg(mc.getCode(), mc.getDate());
 							if (StringUtils.isNotBlank(str)) {
 								if (str.contains(ImageService.MATCH_L2)) {
 //									mv.setImageIndex(2);
 								} else {
 //									mv.setImageIndex(1);
 								}
-								mv.setImgResult(str);
-								sl.condition(mv);
+								mc.setImgResult(str);
+								sl.processingModelResult(mc, null, null, null, null);
 							}
 						} else {
-							log.info("Online 不足1年，code={}", mv.getCode());
+							log.info("Online 不足1年，code={}", mc.getCode());
 						}
 
 					}
 					sl.fulshToFile();// 存盘
+					if (sl.getResultList().size() > 0) {
+						esModelV1Dao.saveAll(sl.getResultList());
+					}
 					log.info("图片模型执行完成。");
 					WxPushUtil
 							.pushSystem1("图形模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());

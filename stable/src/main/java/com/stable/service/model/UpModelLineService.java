@@ -135,6 +135,7 @@ public class UpModelLineService {
 		List<StockAvg> avgList = Collections.synchronizedList(new LinkedList<StockAvg>());
 		List<StrategyListener> models = new LinkedList<StrategyListener>();
 		models.add(new V1SortStrategyListener());
+		models.add(new V2SortStrategyListener());
 		try {
 			Map<String, List<ConceptInfo>> gn = conceptService.getDailyMap(treadeDate);
 			int size = array.size();
@@ -173,6 +174,9 @@ public class UpModelLineService {
 			}
 			models.forEach(sort -> {
 				sort.fulshToFile();
+				if (sort.getResultList().size() > 0) {
+					esModelV1Dao.saveAll(sort.getResultList());
+				}
 			});
 
 			log.info("MV1模型执行完成");

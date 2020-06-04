@@ -18,6 +18,9 @@ public class ModelV1 {
 	@Field(type = FieldType.Integer)
 	private int date;
 
+	// 模板类型
+	@Field(type = FieldType.Integer)
+	private int modelType = 0;
 	// 分数
 	@Field(type = FieldType.Integer)
 	private int score = 0;
@@ -44,5 +47,9 @@ public class ModelV1 {
 	// 板块活跃度
 	@Field(type = FieldType.Integer)
 	private int gnScore;
+
+	// 图形结果
+	@Field(type = FieldType.Text)
+	private String imgResult;
 	// 回购/分红/业绩
 }
