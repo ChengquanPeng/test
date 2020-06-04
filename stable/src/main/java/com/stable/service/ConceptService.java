@@ -49,7 +49,7 @@ public class ConceptService {
 
 		@Override
 		public String toString() {
-			return "排名:" + ranking + " " + name + " 涨幅:" + CurrencyUitl.roundHalfUp(todayChange) + "%,</br>";
+			return "Rank:" + ranking + " " + name + " UP:" + CurrencyUitl.roundHalfUp(todayChange) + "%,</br>";
 		}
 	}
 

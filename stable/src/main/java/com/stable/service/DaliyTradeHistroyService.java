@@ -27,9 +27,8 @@ import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.job.MyCallable;
-import com.stable.service.model.StrategyListener;
+import com.stable.service.model.ImageStrategyListener;
 import com.stable.service.model.image.ImageService;
-import com.stable.service.model.v1.ImageStrategyListener;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -40,12 +39,12 @@ import com.stable.utils.TasksWorker;
 import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.http.resp.DaliyTradeHistResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
-import com.stable.vo.up.strategy.ModelV1;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -133,24 +132,23 @@ public class DaliyTradeHistroyService {
 			public void run() {
 				String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
 				try {
-					StrategyListener sl = new ImageStrategyListener();
+					ImageStrategyListener sl = new ImageStrategyListener();
 					for (int i = 0; i < array.size(); i++) {
 						DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
-						ModelV1 mv = new ModelV1();
+						ModelContext mv = new ModelContext();
 						mv.setCode(d.getCode());
 						mv.setDate(d.getTrade_date());
-						mv.setClose(d.getClose());
 						if (stockBasicService.online1Year(mv.getCode())) {
 							String str = imageService.checkImg(mv.getCode(), mv.getDate());
 							if (StringUtils.isNotBlank(str)) {
 								if (str.contains(ImageService.MATCH_L2)) {
-									mv.setImageIndex(2);
+//									mv.setImageIndex(2);
 								} else {
-									mv.setImageIndex(1);
+//									mv.setImageIndex(1);
 								}
+								mv.setImgResult(str);
+								sl.condition(mv);
 							}
-							// 条件
-							sl.condition(mv, str);
 						} else {
 							log.info("Online 不足1年，code={}", mv.getCode());
 						}

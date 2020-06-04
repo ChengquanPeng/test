@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.stable.service.model.v1.ModelV1UpService;
+import com.stable.service.model.UpModelLineService;
 import com.stable.vo.http.JsonResult;
 
 import lombok.extern.log4j.Log4j2;
@@ -17,7 +17,7 @@ import lombok.extern.log4j.Log4j2;
 public class ModelController {
 
 	@Autowired
-	private ModelV1UpService upLevel1Service;
+	private UpModelLineService upLevel1Service;
 
 	/**
 	 * 执行模型

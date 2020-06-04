@@ -1,6 +1,11 @@
 package com.stable.vo;
 
+import java.util.List;
+import java.util.Map;
+
 import com.stable.constant.Constant;
+import com.stable.service.ConceptService.ConceptInfo;
+import com.stable.vo.bus.DaliyBasicInfo;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,36 +14,34 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class ModelV1context {
+public class ModelContext {
 	// 1强势:短中长期买入=>次数和差值:3/5/10/20/120/250天
 	private String code;
+	private int date;
+	DaliyBasicInfo today;
+	private boolean baseDataOk = true;
+	private int priceIndex = 0;
+	private Map<String, List<ConceptInfo>> gnDaliy;
+
 	private int score;
-	private boolean base20Avg;
+	private boolean base30Avg;
+	private int sortWay;
+	private int sortPgm;
 	private StringBuffer detailDesc;
 
 	private int wayTimes3;
 	private Long wayDef3;
 	private int wayTimes5;
 	private Long wayDef5;
-	private int wayTimes10;
-	private Long wayDef10;
-	private int wayTimes20;
-	private Long wayDef20;
-	private int wayTimes120;
-	private Long wayDef120;
-	private int wayTimes250;
-	private Long wayDef250;
 
 	private int pgmTimes3;
 	private int pgmTimes5;
-	private int pgmTimes10;
-	private int pgmTimes20;
-	private int pgmTimes120;
-	private int pgmTimes250;
 
 	private StringBuffer gn;
 
 	private String dropOutMsg;
+
+	private String imgResult;
 
 	public void addDetailDesc(String desc) {
 		if (detailDesc == null) {

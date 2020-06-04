@@ -176,15 +176,16 @@ public class ThsSpider {
 		Calendar c = Calendar.getInstance();
 		c.setTime(today);
 		int weekday = c.get(Calendar.DAY_OF_WEEK);
+		boolean getNew = false;
 		if (weekday != 6) {
 			log.info("今日非周五");
-			return;
+			getNew = true;
 		}
 		try {
 			List<Concept> list = new LinkedList<Concept>();
 			List<CodeConcept> codelist = new LinkedList<CodeConcept>();
 			Map<String, Concept> map = getAllAliasCode();
-			getGnList(list, codelist, map);
+			getGnList(getNew, list, codelist, map);
 			if (list.size() > 0) {
 				saveConcept(list);
 			}
@@ -198,19 +199,20 @@ public class ThsSpider {
 		}
 	}
 
-	public void getGnList(List<Concept> list, List<CodeConcept> codelist, Map<String, Concept> map) {
+	public void getGnList(boolean getNew, List<Concept> list, List<CodeConcept> codelist, Map<String, Concept> map) {
+		int limit = 3;
+		if (getNew) {
+			limit = 1;
+		}
+
 		int index = 1;
 		int end = 0;
 		int trytime = 0;
-		int pageIndex = 1;
 		do {
 			String url = String.format(GN_LIST, index);
 			DomElement table = null;
 			HtmlPage page = null;
 			try {
-				if (pageIndex > 3) {// 最多3页
-					return;
-				}
 				ThreadsUtil.sleepRandomSecBetween5And15();
 //				header.put(REFERER, refer);
 				page = htmlunitSpider.getHtmlPageFromUrl(url);
@@ -241,6 +243,14 @@ public class ThsSpider {
 					list.add(cp);
 					getAliasCdoe(cp, map);
 					log.info(cp);
+					if (getNew) {// 每天新增
+						if (map.containsKey(cp.getCode())) {
+							log.info("以获取到最新");
+							return;
+						} else {
+							log.info("获取到新概念:" + cp.getName());
+						}
+					}
 					getSubCodeList(cp, codelist);
 					if (codelist.size() > 100) {
 						saveCodeConcept(codelist);
@@ -255,7 +265,9 @@ public class ThsSpider {
 					end = Integer.valueOf(pageInfo.split(SPIT)[1]);
 				}
 				trytime = 0;
-				pageIndex++;
+				if (index > limit) {// 最多3页
+					return;
+				}
 			} catch (Exception e) {
 				trytime++;
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
