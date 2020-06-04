@@ -117,10 +117,10 @@ public class LineAvgPrice {
 
 	public boolean isAvgSort20T30() {
 		// 20和30日均线>各均线
-		if (todayAv.getAvgPriceIndex20() >= todayAv.getAvgPriceIndex3()//
-				&& todayAv.getAvgPriceIndex20() >= todayAv.getAvgPriceIndex5()
-				&& todayAv.getAvgPriceIndex20() >= todayAv.getAvgPriceIndex10()
-				&& todayAv.getAvgPriceIndex30() >= todayAv.getAvgPriceIndex20()) {
+		if (todayAv.getAvgPriceIndex3() >= todayAv.getAvgPriceIndex20()
+				&& todayAv.getAvgPriceIndex5() >= todayAv.getAvgPriceIndex20()
+				&& todayAv.getAvgPriceIndex10() >= todayAv.getAvgPriceIndex20()
+				&& todayAv.getAvgPriceIndex20() >= todayAv.getAvgPriceIndex30()) {
 			cxt.addDetailDesc("30日均线排列base20T30");
 			return true;
 		}
