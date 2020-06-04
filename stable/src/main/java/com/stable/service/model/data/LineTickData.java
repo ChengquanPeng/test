@@ -2,8 +2,6 @@ package com.stable.service.model.data;
 
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-
 import com.stable.service.TickDataService;
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
@@ -12,7 +10,6 @@ import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
 
-@Service
 @Log4j2
 public class LineTickData {
 

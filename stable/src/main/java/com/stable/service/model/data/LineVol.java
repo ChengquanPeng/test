@@ -2,12 +2,9 @@ package com.stable.service.model.data;
 
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
 
-@Service
 public class LineVol {
 
 	private ModelContext cxt;
