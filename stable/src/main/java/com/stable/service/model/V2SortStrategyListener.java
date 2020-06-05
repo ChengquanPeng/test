@@ -94,9 +94,10 @@ public class V2SortStrategyListener implements StrategyListener {
 									&& today.getClose() > todayAv.getAvgPriceIndex20()
 									&& today.getClose() > todayAv.getAvgPriceIndex30()) {
 
-								// 排除上影线及突然放量上涨
+								// 排除上影线&突然放量上涨&周线不行
 								String s = lineVol.moreVol();
-								if (!linePrice.isHighOrLowVolToday() && StringUtils.isNotBlank(s)) {
+								if (!linePrice.isHighOrLowVolToday() && StringUtils.isNotBlank(s)
+										&& lineAvgPrice.isWeek4AvgBad()) {
 									setDetail(detailDesc, s);
 									isOk = true;
 									avgScore = 100;

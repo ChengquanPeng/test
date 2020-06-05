@@ -1,5 +1,6 @@
 package com.stable.service.model.data;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -41,7 +42,57 @@ public class AvgService {
 		}
 	}
 
-	public StockAvg getDPriceAvg(String code, int startDate, int endDate, List<StockAvg> avgList) {
+	public List<StockAvg> getWPriceAvg(String code, int startDate, int endDate) {
+		String params = TushareSpider.formatCode(code) + " " + startDate + " " + endDate + " qfq W";
+		boolean gotData = false;
+		List<String> lines = null;
+		int i = 0;
+		do {
+			lines = PythonCallUtil.callPythonScript(pythonFileName, params);
+			if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
+				if (i >= 3) {
+					log.warn("pythonFileName：{}，未获取到数据 params：{}", pythonFileName, code, params);
+					if (lines != null && !lines.isEmpty()) {
+						log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
+					}
+					ErrorLogFileUitl.writeError(new RuntimeException(), code, "未获取到均价信息", startDate + " " + endDate);
+					return null;
+				}
+				ThreadsUtil.sleepRandomSecBetween5And15();
+			} else {
+				gotData = true;
+			}
+			i++;
+		} while (!gotData);
+
+		try {
+			List<StockAvg> list4 = new LinkedList<StockAvg>();
+			for (int j = 0; j < 4; j++) {
+				String[] strs = lines.get(j).replaceAll("nan", "0").split(",");
+				// code,date,3,5,10,20,30,120,250
+				// 600408.SH,20200403,2.2933,2.302,2.282,2.3255,2.297,2.2712,2.4559
+				StockAvg av = new StockAvg();
+				av.setCode(code);
+				av.setDate(Integer.valueOf(strs[1]));
+				av.setId();
+				av.setAvgPriceIndex3(Double.valueOf(strs[2]));
+				av.setAvgPriceIndex5(Double.valueOf(strs[3]));
+				av.setAvgPriceIndex10(Double.valueOf(strs[4]));
+				av.setAvgPriceIndex20(Double.valueOf(strs[5]));
+				av.setAvgPriceIndex30(Double.valueOf(strs[6]));
+				av.setAvgPriceIndex120(Double.valueOf(strs[7]));
+				av.setAvgPriceIndex250(Double.valueOf(strs[8]));
+				list4.add(av);
+			}
+			return list4;
+		} catch (Exception e) {
+			String msg = "获取到的数据:" + lines.get(0);
+//			log.error(msg);
+			throw new RuntimeException(msg, e);
+		}
+	}
+
+	public List<StockAvg> getDPriceAvg(String code, int startDate, int endDate) {
 		String params = TushareSpider.formatCode(code) + " " + startDate + " " + endDate + " qfq D";
 		boolean gotData = false;
 		List<String> lines = null;
@@ -65,13 +116,14 @@ public class AvgService {
 		} while (!gotData);
 
 		try {
-			String[] strs = lines.get(0).replaceAll("nan", "0").split(",");
-			if (strs[1].equals(String.valueOf(endDate))) {
+			List<StockAvg> list30 = new LinkedList<StockAvg>();
+			for (int j = 0; j < 30; j++) {
+				String[] strs = lines.get(j).replaceAll("nan", "0").split(",");
 				// code,date,3,5,10,20,30,120,250
 				// 600408.SH,20200403,2.2933,2.302,2.282,2.3255,2.297,2.2712,2.4559
 				StockAvg av = new StockAvg();
 				av.setCode(code);
-				av.setDate(endDate);
+				av.setDate(Integer.valueOf(strs[1]));
 				av.setId();
 				av.setAvgPriceIndex3(Double.valueOf(strs[2]));
 				av.setAvgPriceIndex5(Double.valueOf(strs[3]));
@@ -80,15 +132,14 @@ public class AvgService {
 				av.setAvgPriceIndex30(Double.valueOf(strs[6]));
 				av.setAvgPriceIndex120(Double.valueOf(strs[7]));
 				av.setAvgPriceIndex250(Double.valueOf(strs[8]));
-				avgList.add(av);
-				return av;
+				list30.add(av);
 			}
+			return list30;
 		} catch (Exception e) {
 			String msg = "获取到的数据:" + lines.get(0);
 //			log.error(msg);
 			throw new RuntimeException(msg, e);
 		}
-		return null;
 	}
 
 	public List<StockAvg> queryListByCodeForModel(String code, int date, EsQueryPageReq queryPage) {

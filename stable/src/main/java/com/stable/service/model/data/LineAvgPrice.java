@@ -1,10 +1,7 @@
 package com.stable.service.model.data;
 
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.ModelContext;
@@ -22,20 +19,41 @@ public class LineAvgPrice {
 	private String code;
 	private int lastDate;
 	private int date;
-	private List<StockAvg> avgList;
+	private List<StockAvg> avgSaveList;
 	private List<DaliyBasicInfo> dailyList;
 	// TEMP
 	private List<StockAvg> clist30;
+	private List<StockAvg> week4;
 	public StockAvg todayAv;
 
-	public LineAvgPrice(AvgService avgService, ModelContext cxt, int lastDate, List<StockAvg> avgList,
+	public LineAvgPrice(AvgService avgService, ModelContext cxt, int lastDate, List<StockAvg> avgSaveList,
 			List<DaliyBasicInfo> dailyList) {
 		this.avgService = avgService;
 		this.code = cxt.getCode();
 		this.lastDate = lastDate;
 		this.date = cxt.getDate();
-		this.avgList = avgList;
+		this.avgSaveList = avgSaveList;
 		this.dailyList = dailyList;
+	}
+
+	private boolean isWeekAvgGet = false;
+	private boolean isWeekAvgRes = false;
+
+	// 是否5日均线在30日线上，超过15天
+	public boolean isWeek4AvgBad() {
+		if (isWeekAvgGet) {
+			return isWeekAvgRes;
+		}
+		week4 = avgService.getWPriceAvg(code, lastDate, date);
+		// 排除下跌周期中，收盘不在W均线上
+		long count = week4.stream().filter(x -> {
+			return x.getAvgPriceIndex30() > x.getAvgPriceIndex20();
+		}).count();
+		if (count >= 2) {
+			isWeekAvgRes = true;
+		}
+		isWeekAvgGet = true;
+		return isWeekAvgRes;
 	}
 
 	private boolean isFeedDataGet = false;
@@ -45,28 +63,22 @@ public class LineAvgPrice {
 		if (isFeedDataGet) {
 			return isFeedDataGetRes;
 		}
-		List<StockAvg> avglistLocal = avgService.queryListByCodeForModel(code, date, queryPage);
-		// 已有的map
-		Map<Integer, StockAvg> map = new HashMap<Integer, StockAvg>();
-		if (avglistLocal != null && avglistLocal.size() > 0) {
-			avglistLocal.stream().forEach(item -> {
-				map.put(item.getDate(), item);
-			});
-		}
+		final List<StockAvg> avglistLocal = avgService.queryListByCodeForModel(code, date, queryPage);
 		// 补全30天
-		clist30 = new LinkedList<StockAvg>();
-		for (int i = 0; i < 30; i++) {
-			DaliyBasicInfo d = dailyList.get(i);
-			if (map.containsKey(d.getTrade_date())) {
-				clist30.add(map.get(d.getTrade_date()));
-			} else {
-				StockAvg r = avgService.getDPriceAvg(code, lastDate, d.getTrade_date(), avgList);
-				if (r == null) {
-					log.warn("数据不全code={},startDate={},enddate={}", code, lastDate, d.getTrade_date());
-					isFeedDataGetRes = false;
-				}
-				clist30.add(r);
+		if (avglistLocal != null && avglistLocal.size() < 30) {
+			clist30 = avgService.getDPriceAvg(code, lastDate, date);
+			todayAv = clist30.get(0);
+			if (clist30.size() < 30) {
+				log.warn("数据不全code={},startDate={},enddate={}", code, lastDate, date);
+				isFeedDataGetRes = false;
+				isFeedDataGet = true;
+				return isFeedDataGetRes;
 			}
+			clist30.forEach(x -> {
+				if (!avglistLocal.contains(x)) {
+					avgSaveList.add(x);
+				}
+			});
 		}
 		todayAv = clist30.get(0);
 		isFeedDataGet = true;
