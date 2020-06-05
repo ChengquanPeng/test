@@ -83,10 +83,24 @@ public class V2SortStrategyListener implements StrategyListener {
 									todayAv.getAvgPriceIndex20(), today.getLow(), today.getClose(),
 									todayAv.getAvgPriceIndex5(), (todayAv.getAvgPriceIndex20() > today.getLow()
 											&& today.getClose() > todayAv.getAvgPriceIndex5()));
+							if (today.getLow() <= 0 || today.getClose() <= 0) {
+								throw new RuntimeException("数据异常,today.getLow()<=0||today.getClose()<=0?");
+							}
+							// 一阳穿N线
 							if (todayAv.getAvgPriceIndex20() > today.getLow()
-									&& today.getClose() > todayAv.getAvgPriceIndex5()) {
-								isOk = true;
-								avgScore = 100;
+									&& today.getClose() > todayAv.getAvgPriceIndex3()
+									&& today.getClose() > todayAv.getAvgPriceIndex5()
+									&& today.getClose() > todayAv.getAvgPriceIndex10()
+									&& today.getClose() > todayAv.getAvgPriceIndex20()
+									&& today.getClose() > todayAv.getAvgPriceIndex30()) {
+
+								// 排除上影线及突然放量上涨
+								String s = lineVol.moreVol();
+								if (!linePrice.isHighOrLowVolToday() && StringUtils.isNotBlank(s)) {
+									setDetail(detailDesc, s);
+									isOk = true;
+									avgScore = 100;
+								}
 							}
 						}
 
@@ -129,7 +143,7 @@ public class V2SortStrategyListener implements StrategyListener {
 				}
 				result.put(mv.getCode(), detailDesc.toString());
 			} else {
-				log.info("code={},dropOutMsg={}", dropOutMsg);
+				log.info("code={},dropOutMsg={}", mc.getCode(), dropOutMsg);
 			}
 			mv.setAvgScore(avgScore);
 			mv.setSortStrong(strongScore);

@@ -128,17 +128,17 @@ public class V1SortStrategyListener implements StrategyListener {
 				}
 				// 价格
 				if (linePrice.isHighOrLowVolToday()) {
-					// 排除上影线,排除高开低走,20天波动超过20%
+					// 排除上影线,
 					dropOutMsg = "上影线";
 					isOk = false;
 				}
 				if (linePrice.isHignOpenWithLowCloseToday()) {
-					// 排除上影线,排除高开低走,20天波动超过20%
+					// 排除高开低走
 					dropOutMsg = "高开低走";
 					isOk = false;
 				}
 				if (linePrice.isRange20pWith20days()) {
-					// 排除上影线,排除高开低走,20天波动超过20%
+					// 20天波动超过20%
 					dropOutMsg = "20天波动超过20%";
 					isOk = false;
 				}
@@ -249,18 +249,19 @@ public class V1SortStrategyListener implements StrategyListener {
 		StringBuffer sb2 = new StringBuffer(
 				"<table border='1' cellspacing='0' cellpadding='0'><tr><th>seq</th><th>code</th><th>名称</th><th>分数</th><th>入围</th><th>均线排列(20)</th><th>原因</th></tr>"
 						+ FileWriteUitl.LINE_FILE);
-		int index = 1;
 		log.info("mcs:size:" + mcs.size());
-		for (ModelContext mc : mcs) {
-			String code = mc.getCode();
-			log.info(index + "mcs:size:" + code);
-			sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))// 代码
-					.append(getHTML(sbs.getCodeName(code)))// 名称
-					.append(getHTML(mc.getScore()))// 分数
-					.append(getHTML(map.containsKey(code)))// 入围
-					.append(getHTML(mc.isBase30Avg()))// 至少30日均线排列
-					.append(getHTML(result.get(code))).append("</tr>").append(FileWriteUitl.LINE_FILE);// 原因
-			index++;
+		for (int i = 0; i < mcs.size(); i++) {
+			ModelContext mc = mcs.get(i);
+			if (mc != null) {
+				String code = mc.getCode();
+//				log.info(i + "mcs:size:" + code);
+				sb2.append("<tr>").append(getHTML(i)).append(getHTML_SN(code))// 代码
+						.append(getHTML(sbs.getCodeName(code)))// 名称
+						.append(getHTML(mc.getScore()))// 分数
+						.append(getHTML(map.containsKey(code)))// 入围
+						.append(getHTML(mc.isBase30Avg()))// 至少30日均线排列
+						.append(getHTML(result.get(code))).append("</tr>").append(FileWriteUitl.LINE_FILE);// 原因
+			}
 		}
 		sb2.append(endder);
 		FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);

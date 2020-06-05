@@ -147,7 +147,7 @@ public class UpModelLineService {
 				ModelContext cxt = new ModelContext();
 				cxt.setCode(d.getCode());
 				cxt.setDate(d.getTrade_date());
-				cxt.setToday(d);
+				cxt.setToday(d);// 未包含全部信息-来自Tushare
 				cxt.setGnDaliy(gn);
 
 				TasksWorker2nd.add(new MyRunnable() {
@@ -213,12 +213,12 @@ public class UpModelLineService {
 				isOk = false;
 			}
 		}
-		cxt.setToday(dailyList.get(0));
 		LineAvgPrice lineAvgPrice = null;
 		LinePrice linePrice = null;
 		LineVol lineVol = null;
 		LineTickData lineTickData = null;
 		if (isOk) {
+			cxt.setToday(dailyList.get(0));// 包含全部信息-来自ES
 			// 均价
 			int lastDate = dailyList.get(dailyList.size() - 1).getTrade_date();
 			lineAvgPrice = new LineAvgPrice(avgService, cxt, lastDate, avgList, dailyList);
