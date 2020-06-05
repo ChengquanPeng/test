@@ -190,7 +190,7 @@ public class V1SortStrategyListener implements StrategyListener {
 	// **评分
 
 	public V1SortStrategyListener() {
-		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短期强势", "主力行为", "主动买入", "价格指数", "概念详情", "评分详情" };
+		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短期强势", "主力行为", "主动买入", "价格指数", "评分详情" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
 		}
@@ -228,10 +228,10 @@ public class V1SortStrategyListener implements StrategyListener {
 			sb.append(endder);
 			sb2.append(endder);
 
-			String filepath = efc.getModelV1SortFloder() + "sort_v1_" + treadeDate + ".html";
-			FileWriteUitl fw = new FileWriteUitl(filepath, true);
-			fw.writeLine(sb.toString());
-			fw.close();
+//			String filepath = efc.getModelV1SortFloder() + "sort_v1_" + treadeDate + ".html";
+//			FileWriteUitl fw = new FileWriteUitl(filepath, true);
+//			fw.writeLine(sb.toString());
+//			fw.close();
 
 			String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v1_prv_" + treadeDate + ".html";
 			FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);
