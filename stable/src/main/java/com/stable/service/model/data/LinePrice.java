@@ -10,6 +10,9 @@ import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockAvg;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class LinePrice {
 
 	private ModelContext cxt;
@@ -29,8 +32,15 @@ public class LinePrice {
 		today = cxt.getToday();
 	}
 
+	@Getter
+	@Setter
+	public class StrongResult {
+		int strongScore;
+		String strongDetail;
+	}
+
 	// 涨跌对比大盘
-	public int strongScore() {
+	public StrongResult strongScore() {
 		int sortStrong = 0;
 		Map<Integer, Double> cache = strongService.getIndexMap(cxt.getCode(), cxt.getDate(), lastDate);
 		int index = 5;
@@ -58,16 +68,18 @@ public class LinePrice {
 			stock += db.getTodayChangeRate();
 			base += cache.get(db.getTrade_date());
 		}
+		StrongResult sr = new StrongResult();
 		if (sortStrong > 0) {
 			if (stock > base) {
 				sortStrong++;
 				sortStrong += 5;// 提高权重
-				cxt.addDetailDesc("5天对比大盘强势次数:" + days + "days[" + sortStrong + "]");
+				sr.setStrongDetail("5天对比大盘强势次数:" + days + "days[" + sortStrong + "]");
+				sr.setStrongScore(sortStrong);
 			} else {
-				sortStrong = 0;
+				sr.setStrongScore(0);
 			}
 		}
-		return sortStrong;
+		return sr;
 	}
 
 	// 排除高开低走
@@ -78,7 +90,6 @@ public class LinePrice {
 		}
 		// 开盘高于昨收，收盘低于开盘
 		if (today.getOpen() > today.getYesterdayPrice() && today.getOpen() > today.getClose()) {
-			cxt.setDropOutMsg("高开低走");
 			return true;
 		}
 		return false;
@@ -91,7 +102,6 @@ public class LinePrice {
 			double half = diff / 2;
 			double mid = CurrencyUitl.roundHalfUp(half) + today.getYesterdayPrice();
 			if (mid >= today.getClose()) {
-				cxt.setDropOutMsg("上影线");
 				return true;
 			}
 		}
@@ -107,7 +117,6 @@ public class LinePrice {
 		double max20 = day20.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
 		double min20 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
 		if (max20 > CurrencyUitl.topPrice20(min20)) {
-			cxt.setDropOutMsg("20天波动超过20%");
 			return true;
 		}
 		return false;

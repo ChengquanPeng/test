@@ -7,32 +7,28 @@ import com.stable.vo.bus.DaliyBasicInfo;
 
 public class LineVol {
 
-	private ModelContext cxt;
 	private List<DaliyBasicInfo> dailyList;
 
 	public LineVol(ModelContext cxt, List<DaliyBasicInfo> dailyList) {
-		this.cxt = cxt;
 		this.dailyList = dailyList;
 	}
 
 	// 换手率超过30%或者低于2%
-	public boolean isHighOrLowVolToday() {
+	public int isHighOrLowVolToday() {
 		double rate = dailyList.get(0).getTurnover_rate_f();
 		if (rate >= 30.0) {
-			cxt.setDropOutMsg("换手率超过30%");
-			return true;
+			return 1;
 		} else if (rate <= 2.0) {
-			cxt.setDropOutMsg("换手率低于2%");
-			return true;
+			return 2;
 		}
-		return false;
+		return 0;
 	}
 
-	public boolean moreVolWithAvg() {
+	public String moreVolWithAvg() {
 		DaliyBasicInfo d3 = dailyList.get(0);
 		DaliyBasicInfo d2 = dailyList.get(1);
 		DaliyBasicInfo d1 = dailyList.get(2);
-
+		String r = "";
 		// ======= 短线--交易量指标 =======
 		long total = 0;
 		for (int i = 0; i < 30; i++) {
@@ -42,39 +38,36 @@ public class LineVol {
 		// 2天连续放量上涨
 		if (d3.getVol() > avgVol && d3.getVol() > d2.getVol() && d2.getVol() > d1.getVol()
 				&& d3.getClose() > d2.getClose() && d2.getClose() > d1.getClose()) {
-			cxt.addDetailDesc("2天连续放量上涨-avgVol");
-			return true;
+			r = "2天连续放量上涨-avgVol";
 		}
 		// 突然放量上涨
 		if (d3.getClose() > d2.getClose() && d3.getVol() > d2.getVol()) {
 			long half = d2.getVol() / 2;
 			if (d3.getVol() >= (d2.getVol() + half) && d3.getVol() > avgVol) {
-				cxt.addDetailDesc("突然放量上涨");
-				return true;
+				r += ",突然放量上涨-avgVol";
 			}
 		}
-		return false;
+		return r;
 	}
 
-	public boolean moreVol() {
+	public String moreVol() {
 		DaliyBasicInfo d3 = dailyList.get(0);
 		DaliyBasicInfo d2 = dailyList.get(1);
 		DaliyBasicInfo d1 = dailyList.get(2);
 
+		String r = "";
 		// 2天连续放量上涨
 		if (d3.getVol() > d2.getVol() && d2.getVol() > d1.getVol() && d3.getClose() > d2.getClose()
 				&& d2.getClose() > d1.getClose()) {
-			cxt.addDetailDesc("2天连续放量上涨");
-			return true;
+			r = "2天连续放量上涨";
 		}
 		// 突然放量上涨
 		if (d3.getClose() > d2.getClose() && d3.getVol() > d2.getVol()) {
 			long half = d2.getVol() / 2;
 			if (d3.getVol() >= (d2.getVol() + half)) {
-				cxt.addDetailDesc("突然放量上涨");
-				return true;
+				r += ",突然放量上涨";
 			}
 		}
-		return false;
+		return r;
 	}
 }

@@ -27,15 +27,13 @@ public class LineTickData {
 	// 3程序单:次数:3/5/10/20/120/250天
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(5);
 
-	public void tickDataInfo() {
+	public boolean tickDataInfo() {
 		DaliyBasicInfo firstFiveDate = dailyList.get(4);
 		List<TickDataBuySellInfo> list = tickDataService.listForModel(cxt.getCode(), firstFiveDate.getTrade_date(),
 				cxt.getDate(), queryPage);
 		if (list.size() < 5) {
 			log.error("size < 5");
-			cxt.setDropOutMsg("每日指标记录小于5条,checkStrong get size<5");
-			cxt.addDetailDesc("每日指标记录小于5条,checkStrong get size<5");
-			return;
+			return false;
 		}
 		// check-3
 		int wayTimes3 = 0;
@@ -96,6 +94,7 @@ public class LineTickData {
 			sortPgm = 2;
 		}
 		cxt.setSortPgm(sortPgm);
+		return true;
 	}
 
 }

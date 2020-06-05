@@ -7,11 +7,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.stable.config.SpringConfig;
+import com.stable.constant.Constant;
 import com.stable.service.ConceptService.ConceptInfo;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.data.LinePrice;
+import com.stable.service.model.data.LinePrice.StrongResult;
 import com.stable.service.model.data.LineTickData;
 import com.stable.service.model.data.LineVol;
 import com.stable.utils.ErrorLogFileUitl;
@@ -30,24 +34,31 @@ public class V2SortStrategyListener implements StrategyListener {
 	private String endder = "</table><script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script>";
 
 	private Map<String, ModelContext> map = new HashMap<String, ModelContext>();
-	private List<ModelContext> cxts = new LinkedList<ModelContext>();
+	private Map<String, String> result = new HashMap<String, String>();
 
 	// 白马：长期30日上方，回踩30日线后，突然放量上涨的
 
 	List<ModelV1> saveList = new LinkedList<ModelV1>();
 	private int treadeDate;
 
-	public void processingModelResult(ModelContext cxt, LineAvgPrice lineAvgPrice, LinePrice linePrice, LineVol lineVol,
+	private void setDetail(StringBuffer detailDesc, String desc) {
+		detailDesc.append(desc).append(Constant.DOU_HAO);
+	}
+
+	public void processingModelResult(ModelContext mc, LineAvgPrice lineAvgPrice, LinePrice linePrice, LineVol lineVol,
 			LineTickData lineTickData) {
 
 		ModelV1 mv = new ModelV1();
-		mv.setCode(cxt.getCode());
-		mv.setDate(cxt.getDate());
+		mv.setCode(mc.getCode());
+		mv.setDate(mc.getDate());
 		mv.setModelType(2);
 		mv.setId(mv.getModelType() + mv.getCode() + mv.getDate());
 
+		StringBuffer detailDesc = new StringBuffer();
+		String dropOutMsg = "";
+
 		boolean isOk = false;
-		if (cxt.isBaseDataOk()) {
+		if (StringUtils.isBlank(mc.getBaseDataOk())) {
 			int avgScore = 0;
 			int strongScore = 0;
 			int pgmScore = 0;
@@ -56,15 +67,23 @@ public class V2SortStrategyListener implements StrategyListener {
 
 			// 均线
 			try {
-				if (lineAvgPrice.feedData()) {
+				int r1 = lineAvgPrice.feedData();
+				if (0 == r1) {
 					if (lineAvgPrice.isAvgSort20T30()) {// 20和30日均F各均线
+						setDetail(detailDesc, "30日均线排列base20T30");
 						if (lineAvgPrice.isWhiteHorse()) {
+							setDetail(detailDesc, "白马？");
 							mv.setWhiteHorse(1);// 白马？
 //							if (lineVol.moreVol()) {// 3日量
 //								avgScore += 10;
 //							}
-							DaliyBasicInfo today = cxt.getToday();
+							DaliyBasicInfo today = mc.getToday();
 							StockAvg todayAv = lineAvgPrice.todayAv;
+
+							log.info("code={},avg20={},low={},close={},avg5={},result={}", mc.getCode(),
+									todayAv.getAvgPriceIndex20(), today.getLow(), today.getClose(),
+									todayAv.getAvgPriceIndex5(), (todayAv.getAvgPriceIndex20() > today.getLow()
+											&& today.getClose() > todayAv.getAvgPriceIndex5()));
 							if (todayAv.getAvgPriceIndex20() > today.getLow()
 									&& today.getClose() > todayAv.getAvgPriceIndex5()) {
 								isOk = true;
@@ -74,59 +93,69 @@ public class V2SortStrategyListener implements StrategyListener {
 
 					} else {
 						isOk = false;
-						cxt.setDropOutMsg("均线不满足要求");
+						dropOutMsg = "均线不满足要求";
 					}
 				} else {
 					isOk = false;
-					cxt.setDropOutMsg("未获取到均价");
+					if (r1 == 1) {
+						dropOutMsg = "未获取到均价";
+					} else {
+						dropOutMsg = "未获取到均价-30D";
+					}
 				}
 			} catch (Exception e) {
 				isOk = false;
-				cxt.setDropOutMsg("获取到均价异常");
+				dropOutMsg = "获取到均价异常";
 				e.printStackTrace();
 				ErrorLogFileUitl.writeError(e, "均线执行异常", "", "");
 			}
-
+			if (!lineTickData.tickDataInfo()) {
+				setDetail(detailDesc, "每日指标记录小于5条,checkStrong get size<5");
+				dropOutMsg += "每日指标记录小于5条,checkStrong get size<5";
+			}
 			if (isOk) {
-				strongScore = linePrice.strongScore();
+				StrongResult sr = linePrice.strongScore();
+				strongScore = sr.getStrongScore();
+				if (strongScore > 0) {
+					setDetail(detailDesc, sr.getStrongDetail());
+				}
 
-				lineTickData.tickDataInfo();
-				pgmScore = cxt.getSortPgm() * 5;// 3.程序单
-				wayScore = cxt.getSortWay() * 5;// 4.交易方向
+				pgmScore = mc.getSortPgm() * 5;// 3.程序单
+				wayScore = mc.getSortWay() * 5;// 4.交易方向
 
 				// 概念板块
-				List<ConceptInfo> list = cxt.getGnDaliy().get(mv.getCode());
+				List<ConceptInfo> list = mc.getGnDaliy().get(mv.getCode());
 				if (list != null) {
 					for (int i = 0; i < list.size(); i++) {
 						ConceptInfo x = list.get(i);
 						gnScore += x.getRanking();
-						cxt.addGnStr(x.toString());
+						setDetail(detailDesc, x.toString());
 					}
 				}
-
+				result.put(mv.getCode(), detailDesc.toString());
 			} else {
-				cxts.add(cxt);
+				log.info("code={},dropOutMsg={}", dropOutMsg);
 			}
 			mv.setAvgScore(avgScore);
 			mv.setSortStrong(strongScore);
 			mv.setSortPgm(pgmScore);
 			mv.setSortWay(wayScore);
 			mv.setGnScore(gnScore);
-			mv.setPriceIndex(cxt.getPriceIndex());
+			mv.setPriceIndex(mc.getPriceIndex());
 			mv.setScore(avgScore + strongScore + pgmScore + wayScore + gnScore);
 			if (isOk) {
 				saveList.add(mv);
 			}
-			map.put(cxt.getCode(), cxt);
+			map.put(mc.getCode(), mc);
 		} else {
-			cxts.add(cxt);
+			log.info("code={},dropOutMsg={}", mc.getBaseDataOk());
 		}
 	}
 
 	// **评分
 
 	public V2SortStrategyListener() {
-		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短期强势", "主力行为", "主动买入", "价格指数", "概念详情", "评分详情" };
+		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短期强势", "主力行为", "主动买入", "价格指数", "评分详情" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
 		}
@@ -146,15 +175,13 @@ public class V2SortStrategyListener implements StrategyListener {
 			int index = 1;
 
 			for (ModelV1 mv : saveList) {
-
-				sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(mv.getCode()))
-						.append(getHTML(sbs.getCodeName(mv.getCode()))).append(getHTML(mv.getDate()))
+				String code = mv.getCode();
+				sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))
+						.append(getHTML(sbs.getCodeName(code))).append(getHTML(mv.getDate()))
 						.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgScore()))
 						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
 						.append(getHTML(mv.getSortWay())).append(getHTML(mv.getPriceIndex()))
-						.append(getHTML(map.get(mv.getCode()).getGnStr()))
-						.append(getHTML(map.get(mv.getCode()).getDetailDescStr())).append("</tr>")
-						.append(FileWriteUitl.LINE_FILE);
+						.append(getHTML(result.get(code))).append("</tr>").append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
 			sb.append(endder);

@@ -197,25 +197,27 @@ public class UpModelLineService {
 		return daliyBasicHistroyService.queryListByCodeForModel(cxt.getCode(), cxt.getDate(), queryPage).getContent();
 	}
 
-	private boolean runModels(ModelContext cxt, List<StrategyListener> models, List<StockAvg> avgList) {
+	private void runModels(ModelContext cxt, List<StrategyListener> models, List<StockAvg> avgList) {
+		boolean isOk = true;
 		String code = cxt.getCode();
 		log.info("model V1 processing for code:{}", code);
 		if (!stockBasicService.online1Year(code)) {
-			cxt.setBaseDataOk(false);
-			cxt.setDropOutMsg("Online 上市不足1年");
-			return false;
+			cxt.setBaseDataOk("Online 上市不足1年");
+			isOk = false;
 		}
-		List<DaliyBasicInfo> dailyList = getBasicList(cxt);
-		if (dailyList == null || dailyList.size() < 5) {
-			cxt.setBaseDataOk(false);
-			cxt.setDropOutMsg("每日指标记录小于5条,checkStrong get size<5");
-			return false;
+		List<DaliyBasicInfo> dailyList = null;
+		if (isOk) {
+			dailyList = getBasicList(cxt);
+			if (dailyList == null || dailyList.size() < 5) {
+				cxt.setBaseDataOk("每日指标记录小于5条,checkStrong get size<5");
+				isOk = false;
+			}
 		}
 		LineAvgPrice lineAvgPrice = null;
 		LinePrice linePrice = null;
 		LineVol lineVol = null;
 		LineTickData lineTickData = null;
-		if (cxt.isBaseDataOk()) {
+		if (isOk) {
 			// 均价
 			int lastDate = dailyList.get(dailyList.size() - 1).getTrade_date();
 			lineAvgPrice = new LineAvgPrice(avgService, cxt, lastDate, avgList, dailyList);
@@ -231,7 +233,6 @@ public class UpModelLineService {
 		for (StrategyListener m : models) {
 			m.processingModelResult(cxt, lineAvgPrice, linePrice, lineVol, lineTickData);
 		}
-		return true;
 	}
 
 	// 收盘价介于最高价和最低价的index

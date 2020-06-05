@@ -19,7 +19,6 @@ public class LineAvgPrice {
 	private final static EsQueryPageReq queryPage = new EsQueryPageReq(30);
 	// construction
 	private AvgService avgService;
-	private ModelContext cxt;
 	private String code;
 	private int lastDate;
 	private int date;
@@ -32,7 +31,6 @@ public class LineAvgPrice {
 	public LineAvgPrice(AvgService avgService, ModelContext cxt, int lastDate, List<StockAvg> avgList,
 			List<DaliyBasicInfo> dailyList) {
 		this.avgService = avgService;
-		this.cxt = cxt;
 		this.code = cxt.getCode();
 		this.lastDate = lastDate;
 		this.date = cxt.getDate();
@@ -40,11 +38,10 @@ public class LineAvgPrice {
 		this.dailyList = dailyList;
 	}
 
-	public boolean feedData() {
+	public int feedData() {
 		todayAv = avgService.getDPriceAvg(code, lastDate, date, avgList);
 		if (todayAv == null) {
-			cxt.setDropOutMsg("未获取到均价");
-			return false;
+			return 1;
 		}
 
 		List<StockAvg> avglistLocal = avgService.queryListByCodeForModel(code, todayAv.getDate(), queryPage);
@@ -66,13 +63,12 @@ public class LineAvgPrice {
 				StockAvg r = avgService.getDPriceAvg(code, lastDate, d.getTrade_date(), avgList);
 				if (r == null) {
 					log.warn("数据不全code={},startDate={},enddate={}", code, lastDate, d.getTrade_date());
-					cxt.setDropOutMsg("未获取到均价-30D");
-					return false;
+					return 2;
 				}
 				clist30.add(r);
 			}
 		}
-		return true;
+		return 0;
 	}
 
 	// 是否5日均线在30日线上，超过15天
@@ -82,7 +78,6 @@ public class LineAvgPrice {
 			return x.getAvgPriceIndex30() >= x.getAvgPriceIndex5();
 		}).count();
 		if (count >= 15) {
-			cxt.setDropOutMsg("30个交易日中，30日均线在5日均线上方多日");
 			return true;
 		}
 		return false;
@@ -97,7 +92,6 @@ public class LineAvgPrice {
 			}
 		}
 		if (whiteHorseTmp >= 22) {
-			cxt.addDetailDesc("白马？");
 			return true;
 		}
 		return false;
@@ -109,7 +103,6 @@ public class LineAvgPrice {
 				&& todayAv.getAvgPriceIndex5() >= todayAv.getAvgPriceIndex10()
 				&& todayAv.getAvgPriceIndex10() >= todayAv.getAvgPriceIndex20()
 				&& todayAv.getAvgPriceIndex20() >= todayAv.getAvgPriceIndex30()) {
-			cxt.addDetailDesc("30日各均线排列整齐3T30");
 			return true;
 		}
 		return false;
@@ -121,7 +114,6 @@ public class LineAvgPrice {
 				&& todayAv.getAvgPriceIndex5() >= todayAv.getAvgPriceIndex20()
 				&& todayAv.getAvgPriceIndex10() >= todayAv.getAvgPriceIndex20()
 				&& todayAv.getAvgPriceIndex20() >= todayAv.getAvgPriceIndex30()) {
-			cxt.addDetailDesc("30日均线排列base20T30");
 			return true;
 		}
 		return false;
@@ -142,7 +134,6 @@ public class LineAvgPrice {
 		// 横盘突破:3日均线整幅10%以内， 30日均线振幅在5%以内
 		if (CurrencyUitl.topPrice(minAvg3, false) <= maxAvg3 && //
 				CurrencyUitl.topPrice(minAvg30, true) <= maxAvg30) {
-			cxt.addDetailDesc("横盘突破? ");
 			return true;
 		}
 		return false;
