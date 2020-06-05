@@ -92,7 +92,7 @@ public class LineAvgPrice {
 	public boolean isWhiteHorse() {
 		int whiteHorseTmp = 0;
 		for (int i = 0; i < 30; i++) {
-			if (clist30.get(i).getAvgPriceIndex30() >= dailyList.get(i).getClose()) {
+			if (dailyList.get(i).getClose() >= clist30.get(i).getAvgPriceIndex30()) {
 				whiteHorseTmp++;
 			}
 		}
