@@ -33,7 +33,7 @@ public class V1SortStrategyListener implements StrategyListener {
 
 	private Map<String, ModelContext> map = new HashMap<String, ModelContext>();
 	private Map<String, String> result = new HashMap<String, String>();
-	private List<ModelContext> cxts = new LinkedList<ModelContext>();
+	private List<ModelContext> mcs = new LinkedList<ModelContext>();
 
 	// 均线横盘突破,放量上涨:
 	// 价格排除:x涨太多;x上影线;x大幅高开低走(不包括收盘5日线上);
@@ -168,7 +168,7 @@ public class V1SortStrategyListener implements StrategyListener {
 				result.put(mv.getCode(), detailDesc.toString());
 			} else {
 				result.put(mv.getCode(), dropOutMsg);
-				cxts.add(mc);
+				mcs.add(mc);
 			}
 			mv.setAvgScore(avgScore);
 			mv.setSortStrong(strongScore);
@@ -183,7 +183,7 @@ public class V1SortStrategyListener implements StrategyListener {
 			map.put(mc.getCode(), mc);
 		} else {
 			result.put(mv.getCode(), mc.getBaseDataOk());
-			cxts.add(mc);
+			mcs.add(mc);
 		}
 	}
 
@@ -243,7 +243,6 @@ public class V1SortStrategyListener implements StrategyListener {
 	}
 
 	private void fulshToFile2() {
-		sort2(cxts);
 		StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 		String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v1_dropout_" + treadeDate + ".html";
@@ -251,13 +250,15 @@ public class V1SortStrategyListener implements StrategyListener {
 				"<table border='1' cellspacing='0' cellpadding='0'><tr><th>seq</th><th>code</th><th>名称</th><th>分数</th><th>入围</th><th>均线排列(20)</th><th>原因</th></tr>"
 						+ FileWriteUitl.LINE_FILE);
 		int index = 1;
-		for (ModelContext cxt : cxts) {
-			String code = cxt.getCode();
+		log.info("mcs:size:" + mcs.size());
+		for (ModelContext mc : mcs) {
+			String code = mc.getCode();
+			log.info(index + "mcs:size:" + code);
 			sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))// 代码
 					.append(getHTML(sbs.getCodeName(code)))// 名称
-					.append(getHTML(cxt.getScore()))// 分数
+					.append(getHTML(mc.getScore()))// 分数
 					.append(getHTML(map.containsKey(code)))// 入围
-					.append(getHTML(cxt.isBase30Avg()))// 至少30日均线排列
+					.append(getHTML(mc.isBase30Avg()))// 至少30日均线排列
 					.append(getHTML(result.get(code))).append("</tr>").append(FileWriteUitl.LINE_FILE);// 原因
 			index++;
 		}
@@ -283,15 +284,6 @@ public class V1SortStrategyListener implements StrategyListener {
 		Collections.sort(set, new Comparator<ModelV1>() {
 			@Override
 			public int compare(ModelV1 o1, ModelV1 o2) {
-				return o2.getScore() - o1.getScore();
-			}
-		});
-	}
-
-	private void sort2(List<ModelContext> set) {
-		Collections.sort(set, new Comparator<ModelContext>() {
-			@Override
-			public int compare(ModelContext o1, ModelContext o2) {
 				return o2.getScore() - o1.getScore();
 			}
 		});

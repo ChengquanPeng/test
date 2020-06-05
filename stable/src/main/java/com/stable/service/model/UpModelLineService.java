@@ -213,6 +213,7 @@ public class UpModelLineService {
 				isOk = false;
 			}
 		}
+		cxt.setToday(dailyList.get(0));
 		LineAvgPrice lineAvgPrice = null;
 		LinePrice linePrice = null;
 		LineVol lineVol = null;
