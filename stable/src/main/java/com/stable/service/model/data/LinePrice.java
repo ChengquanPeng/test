@@ -39,8 +39,13 @@ public class LinePrice {
 		String strongDetail;
 	}
 
+	StrongResult sr = null;
+
 	// 涨跌对比大盘
 	public StrongResult strongScore() {
+		if (sr != null) {
+			return sr;
+		}
 		int sortStrong = 0;
 		Map<Integer, Double> cache = strongService.getIndexMap(cxt.getCode(), cxt.getDate(), lastDate);
 		int index = 5;
@@ -68,7 +73,7 @@ public class LinePrice {
 			stock += db.getTodayChangeRate();
 			base += cache.get(db.getTrade_date());
 		}
-		StrongResult sr = new StrongResult();
+		sr = new StrongResult();
 		if (sortStrong > 0) {
 			if (stock > base) {
 				sortStrong++;
@@ -82,34 +87,56 @@ public class LinePrice {
 		return sr;
 	}
 
+	private boolean isHignOpenWithLowCloseTodayGet = false;
+	private boolean isHignOpenWithLowCloseTodayRes = false;
+
 	// 排除高开低走
 	public boolean isHignOpenWithLowCloseToday() {
+		if (isHignOpenWithLowCloseTodayGet) {
+			return isHignOpenWithLowCloseTodayRes;
+		}
 		if (todayAv != null && today.getClose() > todayAv.getAvgPriceIndex5()) {
 			// 不管涨跌，收盘在5日线上
-			return false;
+			isHignOpenWithLowCloseTodayRes = false;
+			isHignOpenWithLowCloseTodayGet = true;
+			return isHignOpenWithLowCloseTodayRes;
 		}
 		// 开盘高于昨收，收盘低于开盘
 		if (today.getOpen() > today.getYesterdayPrice() && today.getOpen() > today.getClose()) {
-			return true;
+			isHignOpenWithLowCloseTodayRes = true;
 		}
-		return false;
+		isHignOpenWithLowCloseTodayGet = true;
+		return isHignOpenWithLowCloseTodayRes;
 	}
+
+	private boolean isHighOrLowVolTodaysGet = false;
+	private boolean isHighOrLowVolTodayRes = false;
 
 	// 排除上影线(上涨情况下：收盘>昨收=(最高-昨收)/2,下跌排除TODO)
 	public boolean isHighOrLowVolToday() {
+		if (isHighOrLowVolTodaysGet) {
+			return isHighOrLowVolTodayRes;
+		}
 		if (today.getTodayChange() > 0) {
 			double diff = today.getHigh() - today.getYesterdayPrice();
 			double half = diff / 2;
 			double mid = CurrencyUitl.roundHalfUp(half) + today.getYesterdayPrice();
 			if (mid >= today.getClose()) {
-				return true;
+				isHighOrLowVolTodayRes = true;
 			}
 		}
+		isHighOrLowVolTodaysGet = true;
 		return false;
 	}
 
+	private boolean isRange20pWith20daysGet = false;
+	private boolean isRange20pWith20daysRes = false;
+
 	// 20天波动超过20%
 	public boolean isRange20pWith20days() {
+		if (isRange20pWith20daysGet) {
+			return isRange20pWith20daysRes;
+		}
 		List<DaliyBasicInfo> day20 = new LinkedList<DaliyBasicInfo>();
 		for (int i = 0; i < 20; i++) {
 			day20.add(dailyList.get(i));
@@ -117,8 +144,9 @@ public class LinePrice {
 		double max20 = day20.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
 		double min20 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
 		if (max20 > CurrencyUitl.topPrice20(min20)) {
-			return true;
+			isRange20pWith20daysRes = true;
 		}
-		return false;
+		isRange20pWith20daysGet = true;
+		return isRange20pWith20daysRes;
 	}
 }

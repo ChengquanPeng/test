@@ -38,16 +38,16 @@ public class LineAvgPrice {
 		this.dailyList = dailyList;
 	}
 
-	public int feedData() {
-		todayAv = avgService.getDPriceAvg(code, lastDate, date, avgList);
-		if (todayAv == null) {
-			return 1;
-		}
+	private boolean isFeedDataGet = false;
+	private boolean isFeedDataGetRes = true;
 
-		List<StockAvg> avglistLocal = avgService.queryListByCodeForModel(code, todayAv.getDate(), queryPage);
+	public boolean feedData() {
+		if (isFeedDataGet) {
+			return isFeedDataGetRes;
+		}
+		List<StockAvg> avglistLocal = avgService.queryListByCodeForModel(code, date, queryPage);
 		// 已有的map
 		Map<Integer, StockAvg> map = new HashMap<Integer, StockAvg>();
-		map.put(todayAv.getDate(), todayAv);
 		if (avglistLocal != null && avglistLocal.size() > 0) {
 			avglistLocal.stream().forEach(item -> {
 				map.put(item.getDate(), item);
@@ -63,28 +63,43 @@ public class LineAvgPrice {
 				StockAvg r = avgService.getDPriceAvg(code, lastDate, d.getTrade_date(), avgList);
 				if (r == null) {
 					log.warn("数据不全code={},startDate={},enddate={}", code, lastDate, d.getTrade_date());
-					return 2;
+					isFeedDataGetRes = false;
 				}
 				clist30.add(r);
 			}
 		}
-		return 0;
+		todayAv = clist30.get(0);
+		isFeedDataGet = true;
+		return isFeedDataGetRes;
 	}
+
+	private boolean is5Don30DhalfGet = false;
+	private boolean is5Don30DhalfRes = false;
 
 	// 是否5日均线在30日线上，超过15天
 	public boolean is5Don30Dhalf() {
+		if (is5Don30DhalfGet) {
+			return is5Don30DhalfRes;
+		}
 		// 排除下跌周期中，刚开始反转的均线
 		long count = clist30.stream().filter(x -> {
 			return x.getAvgPriceIndex30() >= x.getAvgPriceIndex5();
 		}).count();
 		if (count >= 15) {
-			return true;
+			is5Don30DhalfRes = true;
 		}
-		return false;
+		is5Don30DhalfGet = true;
+		return is5Don30DhalfRes;
 	}
+
+	private boolean isWhiteHorseGet = false;
+	private boolean isWhiteHorseRes = false;
 
 	// 类似白马
 	public boolean isWhiteHorse() {
+		if (isWhiteHorseGet) {
+			return isWhiteHorseRes;
+		}
 		int whiteHorseTmp = 0;
 		for (int i = 0; i < 30; i++) {
 			if (dailyList.get(i).getClose() >= clist30.get(i).getAvgPriceIndex30()) {
@@ -92,9 +107,10 @@ public class LineAvgPrice {
 			}
 		}
 		if (whiteHorseTmp >= 22) {
-			return true;
+			isWhiteHorseRes = true;
 		}
-		return false;
+		isWhiteHorseGet = true;
+		return isWhiteHorseRes;
 	}
 
 	// 各均线排列整齐

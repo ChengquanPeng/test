@@ -67,8 +67,7 @@ public class V2SortStrategyListener implements StrategyListener {
 
 			// 均线
 			try {
-				int r1 = lineAvgPrice.feedData();
-				if (0 == r1) {
+				if (lineAvgPrice.feedData()) {
 					if (lineAvgPrice.isAvgSort20T30()) {// 20和30日均F各均线
 						setDetail(detailDesc, "30日均线排列base20T30");
 						if (lineAvgPrice.isWhiteHorse()) {
@@ -97,11 +96,7 @@ public class V2SortStrategyListener implements StrategyListener {
 					}
 				} else {
 					isOk = false;
-					if (r1 == 1) {
-						dropOutMsg = "未获取到均价";
-					} else {
-						dropOutMsg = "未获取到均价-30D";
-					}
+					dropOutMsg = "未获取到均价-30D";
 				}
 			} catch (Exception e) {
 				isOk = false;
