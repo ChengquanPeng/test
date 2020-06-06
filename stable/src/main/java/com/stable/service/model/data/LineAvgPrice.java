@@ -79,6 +79,8 @@ public class LineAvgPrice {
 					avgSaveList.add(x);
 				}
 			});
+		} else {
+			clist30 = avglistLocal;
 		}
 		todayAv = clist30.get(0);
 		isFeedDataGet = true;

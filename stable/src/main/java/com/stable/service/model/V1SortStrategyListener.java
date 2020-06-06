@@ -42,6 +42,10 @@ public class V1SortStrategyListener implements StrategyListener {
 	List<ModelV1> saveList = new LinkedList<ModelV1>();
 	private int treadeDate;
 
+	public V1SortStrategyListener(int date) {
+		this.treadeDate = date;
+	}
+
 	private void setDetail(StringBuffer detailDesc, String desc) {
 		detailDesc.append(desc).append(Constant.DOU_HAO);
 	}
@@ -200,7 +204,6 @@ public class V1SortStrategyListener implements StrategyListener {
 	public void fulshToFile() {
 		log.info("saveList size:{}", saveList.size());
 		if (saveList.size() > 0) {
-			treadeDate = saveList.get(0).getDate();
 			StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
 			sort(saveList);
 			SpringConfig efc = SpringUtil.getBean(SpringConfig.class);

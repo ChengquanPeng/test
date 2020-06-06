@@ -134,8 +134,8 @@ public class UpModelLineService {
 		}
 		List<StockAvg> avgList = Collections.synchronizedList(new LinkedList<StockAvg>());
 		List<StrategyListener> models = new LinkedList<StrategyListener>();
-		models.add(new V1SortStrategyListener());
-		models.add(new V2SortStrategyListener());
+		models.add(new V1SortStrategyListener(treadeDate));
+		models.add(new V2SortStrategyListener(treadeDate));
 		try {
 			Map<String, List<ConceptInfo>> gn = conceptService.getDailyMap(treadeDate);
 			int size = array.size();

@@ -41,6 +41,10 @@ public class V2SortStrategyListener implements StrategyListener {
 	List<ModelV1> saveList = new LinkedList<ModelV1>();
 	private int treadeDate;
 
+	public V2SortStrategyListener(int date) {
+		this.treadeDate = date;
+	}
+
 	private void setDetail(StringBuffer detailDesc, String desc) {
 		detailDesc.append(desc).append(Constant.DOU_HAO);
 	}
@@ -94,9 +98,9 @@ public class V2SortStrategyListener implements StrategyListener {
 									&& today.getClose() > todayAv.getAvgPriceIndex20()
 									&& today.getClose() > todayAv.getAvgPriceIndex30()) {
 
-								// 排除上影线&突然放量上涨&周线不行
+								// 上涨至少3%& 排除上影线&突然放量上涨&周线不行
 								String s = lineVol.moreVol();
-								if (!linePrice.isHighOrLowVolToday() && StringUtils.isNotBlank(s)
+								if (linePrice.isUp3percent() && !linePrice.isHighOrLowVolToday() && StringUtils.isNotBlank(s)
 										&& lineAvgPrice.isWeek4AvgBad()) {
 									setDetail(detailDesc, s);
 									isOk = true;
@@ -173,17 +177,13 @@ public class V2SortStrategyListener implements StrategyListener {
 	}
 
 	public void fulshToFile() {
+		StringBuffer sb2 = new StringBuffer(header);
+		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 		log.info("saveList size:{}", saveList.size());
 		if (saveList.size() > 0) {
-			treadeDate = saveList.get(0).getDate();
 			StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
 			sort(saveList);
-			SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
-
-			StringBuffer sb = new StringBuffer(header);
-			StringBuffer sb2 = new StringBuffer(header);
 			int index = 1;
-
 			for (ModelV1 mv : saveList) {
 				String code = mv.getCode();
 				sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))
@@ -194,15 +194,12 @@ public class V2SortStrategyListener implements StrategyListener {
 						.append(getHTML(result.get(code))).append("</tr>").append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
-			sb.append(endder);
 			sb2.append(endder);
-
-			String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v2_prv_" + treadeDate + ".html";
-			FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);
-			fw2.writeLine(sb2.toString());
-			fw2.close();
 		}
-
+		String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v2_prv_" + treadeDate + ".html";
+		FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);
+		fw2.writeLine(sb2.toString());
+		fw2.close();
 	}
 
 	private String getHTML(Object text) {

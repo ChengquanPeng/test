@@ -20,7 +20,7 @@ public class LinePrice {
 	private StockAvg todayAv;
 	private StrongService strongService;
 	private int lastDate;
-	DaliyBasicInfo today;
+	private DaliyBasicInfo today;
 
 	public LinePrice(StrongService strongService, ModelContext cxt, List<DaliyBasicInfo> dailyList, StockAvg todayAv,
 			int lastDate) {
@@ -111,6 +111,13 @@ public class LinePrice {
 
 	private boolean isHighOrLowVolTodaysGet = false;
 	private boolean isHighOrLowVolTodayRes = false;
+
+	/**
+	 * 至少涨3%
+	 */
+	public boolean isUp3percent() {
+		return today.getTodayChangeRate() > 3.0;
+	}
 
 	// 排除上影线(上涨情况下：收盘>昨收=(最高-昨收)/2,下跌排除TODO)
 	public boolean isHighOrLowVolToday() {

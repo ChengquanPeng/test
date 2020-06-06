@@ -165,6 +165,7 @@ public class DaliyTradeHistroyService {
 					WxPushUtil
 							.pushSystem1("图形模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
 				} catch (Exception e) {
+					e.printStackTrace();
 					ErrorLogFileUitl.writeError(e, e.getMessage(), "", "");
 					WxPushUtil.pushSystem1("图形模型执行异常！ 开始时间:" + startTime);
 				}
