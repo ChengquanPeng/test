@@ -37,7 +37,7 @@ public class LineTickData {
 		DaliyBasicInfo firstFiveDate = dailyList.get(4);
 		List<TickDataBuySellInfo> list = tickDataService.listForModel(cxt.getCode(), firstFiveDate.getTrade_date(),
 				cxt.getDate(), queryPage);
-		if (list.size() < 5) {
+		if (list == null || list.size() < 5) {
 			log.error("size < 5");
 			isTickDataInfoRes = false;
 			isTickDataInfoGet = true;

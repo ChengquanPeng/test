@@ -2,10 +2,10 @@ package com.stable.service.model;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,12 +33,11 @@ public class V2SortStrategyListener implements StrategyListener {
 	private String header = "<table border='1' cellspacing='0' cellpadding='0'><tr>";
 	private String endder = "</table><script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script>";
 
-	private Map<String, ModelContext> map = new HashMap<String, ModelContext>();
-	private Map<String, String> result = new HashMap<String, String>();
+	private Map<String, String> result = new ConcurrentHashMap<String, String>();
 
 	// 白马：长期30日上方，回踩30日线后，突然放量上涨的
 
-	List<ModelV1> saveList = new LinkedList<ModelV1>();
+	List<ModelV1> saveList = Collections.synchronizedList(new LinkedList<ModelV1>());
 	private int treadeDate;
 
 	public V2SortStrategyListener(int date) {
@@ -100,8 +99,8 @@ public class V2SortStrategyListener implements StrategyListener {
 
 								// 上涨至少3%& 排除上影线&突然放量上涨&周线不行
 								String s = lineVol.moreVol();
-								if (linePrice.isUp3percent() && !linePrice.isHighOrLowVolToday() && StringUtils.isNotBlank(s)
-										&& lineAvgPrice.isWeek4AvgBad()) {
+								if (linePrice.isUp3percent() && !linePrice.isHighOrLowVolToday()
+										&& StringUtils.isNotBlank(s) && lineAvgPrice.isWeek4AvgBad()) {
 									setDetail(detailDesc, s);
 									isOk = true;
 									avgScore = 100;
@@ -160,9 +159,8 @@ public class V2SortStrategyListener implements StrategyListener {
 			if (isOk) {
 				saveList.add(mv);
 			}
-			map.put(mc.getCode(), mc);
 		} else {
-			log.info("code={},dropOutMsg={}", mc.getBaseDataOk());
+			log.info("code={},dropOutMsg={}", mc.getCode(), mc.getBaseDataOk());
 		}
 	}
 

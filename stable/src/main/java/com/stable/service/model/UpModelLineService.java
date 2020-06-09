@@ -172,13 +172,13 @@ public class UpModelLineService {
 			if (avgList.size() > 0) {
 				avgService.saveStockAvg(avgList);
 			}
-			models.forEach(sort -> {
+			for (int i = 0; i < models.size(); i++) {
+				StrategyListener sort = models.get(i);
 				sort.fulshToFile();
 				if (sort.getResultList().size() > 0) {
 					esModelV1Dao.saveAll(sort.getResultList());
 				}
-			});
-
+			}
 			log.info("MV1模型执行完成");
 			WxPushUtil.pushSystem1("MV1模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
 		} catch (Exception e) {

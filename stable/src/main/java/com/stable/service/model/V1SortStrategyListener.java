@@ -2,10 +2,10 @@ package com.stable.service.model;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,15 +31,19 @@ public class V1SortStrategyListener implements StrategyListener {
 	private String header = "<table border='1' cellspacing='0' cellpadding='0'><tr>";
 	private String endder = "</table><script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script>";
 
-	private Map<String, ModelContext> map = new HashMap<String, ModelContext>();
-	private Map<String, String> result = new HashMap<String, String>();
-	private List<ModelContext> mcs = new LinkedList<ModelContext>();
+	// 不OK List
+	private List<ModelContext> mcs = Collections.synchronizedList(new LinkedList<ModelContext>());
+
+	// OK List
+	List<ModelV1> saveList = Collections.synchronizedList(new LinkedList<ModelV1>());
+
+	// OK和不OK结果
+	private Map<String, String> result = new ConcurrentHashMap<String, String>();
 
 	// 均线横盘突破,放量上涨:
 	// 价格排除:x涨太多;x上影线;x大幅高开低走(不包括收盘5日线上);
 	// 量排除: x换手率太高或者太低; 放量超过30日均量50%
 
-	List<ModelV1> saveList = new LinkedList<ModelV1>();
 	private int treadeDate;
 
 	public V1SortStrategyListener(int date) {
@@ -147,11 +151,13 @@ public class V1SortStrategyListener implements StrategyListener {
 					isOk = false;
 				}
 			}
-			if (!lineTickData.tickDataInfo()) {
-				setDetail(detailDesc, "每日指标记录小于5条,checkStrong get size<5");
-				dropOutMsg += "每日指标记录小于5条,checkStrong get size<5";
-			}
+
 			if (isOk) {
+				if (!lineTickData.tickDataInfo()) {
+					setDetail(detailDesc, "每日指标记录小于5条,checkStrong get size<5");
+					dropOutMsg += "每日指标记录小于5条,checkStrong get size<5";
+				}
+
 				StrongResult sr = linePrice.strongScore();
 				strongScore = sr.getStrongScore();
 				if (strongScore > 0) {
@@ -169,22 +175,20 @@ public class V1SortStrategyListener implements StrategyListener {
 						setDetail(detailDesc, x.toString());
 					}
 				}
+				mv.setAvgScore(avgScore);
+				mv.setSortStrong(strongScore);
+				mv.setSortPgm(pgmScore);
+				mv.setSortWay(wayScore);
+				mv.setGnScore(gnScore);
+				mv.setPriceIndex(mc.getPriceIndex());
+				mv.setScore(avgScore + strongScore + pgmScore + wayScore + gnScore);
+
 				result.put(mv.getCode(), detailDesc.toString());
+				saveList.add(mv);
 			} else {
 				result.put(mv.getCode(), dropOutMsg);
 				mcs.add(mc);
 			}
-			mv.setAvgScore(avgScore);
-			mv.setSortStrong(strongScore);
-			mv.setSortPgm(pgmScore);
-			mv.setSortWay(wayScore);
-			mv.setGnScore(gnScore);
-			mv.setPriceIndex(mc.getPriceIndex());
-			mv.setScore(avgScore + strongScore + pgmScore + wayScore + gnScore);
-			if (isOk) {
-				saveList.add(mv);
-			}
-			map.put(mc.getCode(), mc);
 		} else {
 			result.put(mv.getCode(), mc.getBaseDataOk());
 			mcs.add(mc);
@@ -250,23 +254,21 @@ public class V1SortStrategyListener implements StrategyListener {
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 		String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v1_dropout_" + treadeDate + ".html";
 		StringBuffer sb2 = new StringBuffer(
-				"<table border='1' cellspacing='0' cellpadding='0'><tr><th>seq</th><th>code</th><th>名称</th><th>分数</th><th>入围</th><th>均线排列(20)</th><th>原因</th></tr>"
+				"<table border='1' cellspacing='0' cellpadding='0'><tr><th>seq</th><th>code</th><th>名称</th><th>分数</th><th>均线排列(20)</th><th>原因</th></tr>"
 						+ FileWriteUitl.LINE_FILE);
 		log.info("mcs:size:" + mcs.size());
 		for (int i = 0; i < mcs.size(); i++) {
+			//log.info("currIndex:{},totoal:{}", i, mcs.size());
 			ModelContext mc = mcs.get(i);
-			if (mc != null) {
-				String code = mc.getCode();
-//				log.info(i + "mcs:size:" + code);
-				sb2.append("<tr>").append(getHTML(i)).append(getHTML_SN(code))// 代码
-						.append(getHTML(sbs.getCodeName(code)))// 名称
-						.append(getHTML(mc.getScore()))// 分数
-						.append(getHTML(map.containsKey(code)))// 入围
-						.append(getHTML(mc.isBase30Avg()))// 至少30日均线排列
-						.append(getHTML(result.get(code))).append("</tr>").append(FileWriteUitl.LINE_FILE);// 原因
-			}
+			String code = mc.getCode();
+			sb2.append("<tr>").append(getHTML(i)).append(getHTML_SN(code))// 代码
+					.append(getHTML(sbs.getCodeName(code)))// 名称
+					.append(getHTML(mc.getScore()))// 分数
+					.append(getHTML(mc.isBase30Avg()))// 至少30日均线排列
+					.append(getHTML(result.get(code))).append("</tr>").append(FileWriteUitl.LINE_FILE);// 原因
 		}
 		sb2.append(endder);
+
 		FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);
 		fw2.writeLine(sb2.toString());
 		fw2.close();
