@@ -100,10 +100,19 @@ public class V2SortStrategyListener implements StrategyListener {
 								// 上涨至少3%& 排除上影线&突然放量上涨&周线不行
 								String s = lineVol.moreVol();
 								if (linePrice.isUp3percent() && !linePrice.isHighOrLowVolToday()
-										&& StringUtils.isNotBlank(s) && lineAvgPrice.isWeek4AvgBad()) {
-									setDetail(detailDesc, s);
+										&& StringUtils.isNotBlank(s)) {
 									isOk = true;
 									avgScore = 100;
+									if (lineAvgPrice.isWeek4AvgOk()) {
+										avgScore += 10;
+										mv.setWeekOk(1);
+									}
+									if (linePrice.isRange30pWith20days()) {
+										avgScore += 10;
+										mv.setIsRange30p(1);
+									}
+									setDetail(detailDesc, s);
+
 								}
 							}
 						}
@@ -189,7 +198,9 @@ public class V2SortStrategyListener implements StrategyListener {
 						.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgScore()))
 						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
 						.append(getHTML(mv.getSortWay())).append(getHTML(mv.getPriceIndex()))
-						.append(getHTML(result.get(code))).append("</tr>").append(FileWriteUitl.LINE_FILE);
+						.append(getHTML(
+								result.get(code) + ",weekOk?" + mv.getWeekOk() + ",振幅超30%?" + mv.getIsRange30p()))
+						.append("</tr>").append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
 			sb2.append(endder);

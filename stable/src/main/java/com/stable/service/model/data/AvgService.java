@@ -138,6 +138,7 @@ public class AvgService {
 		} catch (Exception e) {
 			String msg = "获取到的数据:" + lines.get(0);
 //			log.error(msg);
+			e.printStackTrace();
 			throw new RuntimeException(msg, e);
 		}
 	}

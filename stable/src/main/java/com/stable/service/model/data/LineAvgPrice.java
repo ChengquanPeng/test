@@ -40,14 +40,14 @@ public class LineAvgPrice {
 	private boolean isWeekAvgRes = false;
 
 	// 是否5日均线在30日线上，超过15天
-	public boolean isWeek4AvgBad() {
+	public boolean isWeek4AvgOk() {
 		if (isWeekAvgGet) {
 			return isWeekAvgRes;
 		}
 		week4 = avgService.getWPriceAvg(code, lastDate, date);
 		// 排除下跌周期中，收盘不在W均线上
 		long count = week4.stream().filter(x -> {
-			return x.getAvgPriceIndex30() > x.getAvgPriceIndex20();
+			return x.getAvgPriceIndex20() > x.getAvgPriceIndex30();
 		}).count();
 		if (count >= 2) {
 			isWeekAvgRes = true;

@@ -47,6 +47,12 @@ public class ModelV1 {
 	// 板块活跃度
 	@Field(type = FieldType.Integer)
 	private int gnScore;
+	// 周线是否OK
+	@Field(type = FieldType.Integer)
+	private int weekOk = 0;
+	// 超过30%的波动
+	@Field(type = FieldType.Integer)
+	private int isRange30p = 0;
 
 	// 图形结果
 	@Field(type = FieldType.Text)
