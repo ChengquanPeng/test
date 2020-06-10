@@ -8,7 +8,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import lombok.Data;
 
 @Data
-@Document(indexName = "modelv1")
+@Document(indexName = "modelv2")
 public class ModelV1 {
 
 	@Id
@@ -17,7 +17,6 @@ public class ModelV1 {
 	private String code;
 	@Field(type = FieldType.Integer)
 	private int date;
-
 	// 模板类型
 	@Field(type = FieldType.Integer)
 	private int modelType = 0;

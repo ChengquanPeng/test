@@ -60,7 +60,7 @@ public class TickDataController {
 	/**
 	 * 根据code重新获取历史记录（前复权） all{1,0}
 	 */
-	@RequestMapping(value = "/fetch", method = RequestMethod.GET)
+	@RequestMapping(value = "/fetchByCode", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> fetchByCode(String code) {
 		JsonResult r = new JsonResult();
 		try {
