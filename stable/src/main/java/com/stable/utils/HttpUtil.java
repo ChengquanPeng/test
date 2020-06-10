@@ -33,6 +33,7 @@ public class HttpUtil {
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
 				String result = EntityUtils.toString(entity, UTF_8);
+				//System.err.println(result);
 				jsonObj = JSON.parseObject(result);
 			}
 		} catch (IOException e) {

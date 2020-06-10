@@ -46,8 +46,10 @@ import com.stable.utils.OSystemUtil;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.TasksWorker2nd;
+import com.stable.utils.TickDataUitl;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
+import com.stable.vo.bus.TickData;
 import com.stable.vo.bus.TickDataBuySellInfo;
 import com.stable.vo.http.resp.TickDataBuySellInfoResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -373,36 +375,6 @@ public class TickDataService {
 		private List<TickData> list;
 	}
 
-	@Data
-	class TickData {
-		private String time;
-		private double price;
-		private double change;
-		private long volume;
-		private long amount;
-		private String type;
-
-		public String getSecV1() {
-			return time.split(":")[2];
-		}
-	}
-
-	private TickData getDataObject(String line) {
-		if (StringUtils.isBlank(line)) {
-			return null;
-		}
-		String str = line.trim().substring(1);
-		String[] fv = str.split(",");
-		TickData td = new TickData();
-		td.setTime(fv[0]);
-		td.setPrice(Double.valueOf(fv[1]));
-		td.setChange(Double.valueOf(fv[2]));
-		td.setVolume(Double.valueOf(fv[3]).longValue());
-		td.setAmount(Double.valueOf(fv[4]).longValue());
-		td.setType(fv[5]);
-		return td;
-	}
-
 	private String getRateInt(int size) {
 		if (size < 10) {
 			return "0" + size;
@@ -457,7 +429,7 @@ public class TickDataService {
 		// 涨停：买入盘多，卖出算中性
 		// 跌停：卖出盘多，买入算中性
 		for (String line : lines) {
-			TickData td = getDataObject(line);
+			TickData td = TickDataUitl.getDataObjectFromTushare(line);
 			if (td != null) {
 				if ("S".equals(td.getType())) {
 					sm.put(td.getTime(), td);
@@ -467,9 +439,9 @@ public class TickDataService {
 					sa += Long.valueOf(td.getAmount());
 
 					if (topPrice > 0 && td.getPrice() >= topPrice) {// 涨停：买入盘多，卖出算中性
-						ot++;
+						ot += td.getDetailNum();
 					} else {
-						st++;
+						st += td.getDetailNum();
 					}
 				} else if ("B".equals(td.getType())) {
 					bm.put(td.getTime(), td);
@@ -479,9 +451,9 @@ public class TickDataService {
 					ba += Long.valueOf(td.getAmount());
 
 					if (lowPrice > 0 && td.getPrice() <= lowPrice) {// 跌停：卖出盘多，买入算中性
-						ot++;
+						ot += td.getDetailNum();
 					} else {
-						bt++;
+						bt += td.getDetailNum();
 					}
 				} else {
 					sm.put(td.getTime(), td);
@@ -492,7 +464,7 @@ public class TickDataService {
 
 					nv += Long.valueOf(td.getVolume());
 					na += Long.valueOf(td.getAmount());
-					ot++;
+					ot += td.getDetailNum();
 				}
 				am.put(td.getTime(), td);
 				al.add(td);
