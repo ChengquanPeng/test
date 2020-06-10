@@ -30,7 +30,7 @@ public class ModelController {
 	public ResponseEntity<JsonResult> run(String startDate, String endDate) {
 		JsonResult r = new JsonResult();
 		try {
-			log.info("startDate=,endDate=", startDate, endDate);
+			log.info("startDate={},endDate={}", startDate, endDate);
 			if (StringUtils.isBlank(startDate) && StringUtils.isBlank(endDate)) {
 				return ResponseEntity.badRequest().build();
 			}

@@ -29,8 +29,36 @@ public class EastmoneySpider {
 		return 0;
 	}
 
+	public synchronized static List<String> getReallyTickByJob(String code) {
+		try {
+			ThreadsUtil.sleepSleep1Seconds();
+			int mk = EastmoneySpider.formatCode(code);
+			JSONObject result = HttpUtil.doGet(String.format(URL_FORMAT, mk, code));
+			JSONObject data = (JSONObject) result.get("data");
+			JSONArray details = (JSONArray) data.get("details");
+			List<String> list = new LinkedList<String>();
+			for (int i = 0; i < details.size(); i++) {
+				String line = details.get(i).toString();
+				if (i <= 50) {
+					TickData d = TickDataUitl.getDataObjectFromEasymoney(line);
+					// 排除集合竞价
+					if (Integer.valueOf(d.getTime().replaceAll(":", "")) >= 92500) {
+						list.add(line);
+					}
+				} else {
+					list.add(line);
+				}
+			}
+			if (list.size() < 20) {
+				return null;
+			}
+			return list;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 	public synchronized static List<TickData> getReallyTick(String code) {
-		ThreadsUtil.thsSleepRandom();
 		try {
 			int mk = EastmoneySpider.formatCode(code);
 			JSONObject result = HttpUtil.doGet(String.format(URL_FORMAT, mk, code));

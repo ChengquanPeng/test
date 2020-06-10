@@ -29,6 +29,13 @@
 		sharding-item-parameters="0=a" description="每日早上4点15执行任务(当日分红除权)"
 		sharding-total-count="1" overwrite="true" />
 
+
+	<job:simple id="EveryWorkingDayJobEsayMoneyTickData"
+		class="com.stable.job.EveryWorkingDayJobEsayMoneyTickData"
+		registry-center-ref="regCenter" cron="0 25 15 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a" description="每日晚上15点25执行任务(东方财富Tick)"
+		sharding-total-count="1" overwrite="true" />
+
 	<job:simple id="EveryWorkingDayJobThsGn"
 		class="com.stable.job.EveryWorkingDayJobThsGn"
 		registry-center-ref="regCenter" cron="0 05 16 ? * 2,3,4,5,6 *"

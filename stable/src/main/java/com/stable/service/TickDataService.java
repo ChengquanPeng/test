@@ -37,6 +37,7 @@ import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.UpModelLineService;
+import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -155,6 +156,7 @@ public class TickDataService {
 						queryPage.setPageNum(currPage);
 						queryPage.setPageSize(1000);
 						String fetchTickData = null;
+						int todaydate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 
 						// 查询模式：查询全部=需要翻页，查询剩余=就查询当前页
 						boolean nextPage = false;
@@ -180,7 +182,7 @@ public class TickDataService {
 												try {
 													log.info("running index:{}", index);
 													int fetchResult = 0;
-													if (sumTickData(d, html)) {
+													if (sumTickData(todaydate, d, html)) {
 														fetchResult = 1;
 													}
 													d.setFetchTickData(fetchResult);
@@ -333,16 +335,79 @@ public class TickDataService {
 	}
 
 	/**
+	 * 收盘从东方财富获取TickData
+	 */
+	public void fetchTickDataFromEasyMoney() {
+		List<TickDataBuySellInfo> esList = Collections.synchronizedList(new ArrayList<TickDataBuySellInfo>());
+		try {
+			int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+			if (tradeCalService.isOpen(date)) {
+				EsQueryPageReq queryPage = new EsQueryPageReq(90000);
+
+				String lastDate = tradeCalService.getPretradeDate(date + "");
+				List<DaliyBasicInfo> basics = daliyBasicHistroyService
+						.queryListByCode("", lastDate, "", queryPage, SortOrder.ASC).getContent();
+
+				for (DaliyBasicInfo d : basics) {
+					List<String> lines = EastmoneySpider.getReallyTickByJob(d.getCode());
+					if (lines != null) {
+						TickDataBuySellInfo ts = this.sumTickData(d.getCode(), date, d.getYesterdayPrice(),
+								d.getCirc_mv(), 0, lines, false);
+						if (ts != null) {
+							esList.add(ts);
+						}
+					}
+				}
+			} else {
+				log.info("now={}非工作日", date);
+			}
+		} finally {
+			if (esList.size() > 0) {
+				esTickDataBuySellInfoDao.saveAll(esList);
+			}
+		}
+	}
+
+	/**
 	 * 统计每天
 	 */
-	public boolean sumTickData(DaliyBasicInfo base, boolean html) {
+	public boolean sumTickData(int todaydate, DaliyBasicInfo base, boolean html) {
 		// 获取日线交易数据
 		daliyBasicHistroyService.getDailyData(base);
 
 		String code = base.getCode();
 		int date = base.getTrade_date();
 
+		if (esTickDataBuySellInfoDao.findById(code + date).isPresent()) {
+			// 已经存在
+			return true;
+		}
+		List<String> lines = null;
+		int source = 0;
+		if (todaydate == date) {// 默认当天使用Eastmoney
+			lines = EastmoneySpider.getReallyTickByJob(code);
+			source = 0;
+		}
+		if (lines == null) {// EastMoney没有则使用Tushare
+			lines = getFromTushare(code, date);
+			source = 1;
+		}
+		if (lines == null) {// 未获取到数据返回
+			return false;
+		}
 		// ThreadsUtil.sleepRandomSecBetween1And2();
+
+		double yesterdayPrice = base.getYesterdayPrice();
+		double circMv = base.getCirc_mv();
+		TickDataBuySellInfo tickdatasum = this.sumTickData(code, date, yesterdayPrice, circMv, source, lines, html);
+		if (tickdatasum != null) {
+			tickdataList.add(tickdatasum);
+		}
+		// log.info(tickdatasum.toString());
+		return true;
+	}
+
+	private List<String> getFromTushare(String code, int date) {
 		String params = code + " " + date;
 		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
 		// List<String> lines = PythonCallUtil.callPythonScriptByServerTickData(code,
@@ -352,7 +417,7 @@ public class TickDataService {
 			if (lines != null && !lines.isEmpty()) {
 				log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
 			}
-			return false;
+			return null;
 		}
 //		ThreadsUtil.sleepRandomSecBetween1And5();
 
@@ -361,12 +426,7 @@ public class TickDataService {
 			lines.remove(0);// 第一条是：http://stock.gtimg.cn/data/index.php?appn=detail&action=download&c=sz002376&d=20200430
 		}
 		log.info("getTickData：{}，获取到数据 date：{},数据条数:{}", code, date, lines.size());
-		TickDataBuySellInfo tickdatasum = this.sumTickData(base, lines, html);
-		if (tickdatasum != null) {
-			tickdataList.add(tickdatasum);
-		}
-		// log.info(tickdatasum.toString());
-		return true;
+		return lines;
 	}
 
 	@Data
@@ -385,17 +445,9 @@ public class TickDataService {
 		return size + "";
 	}
 
-	// 流通市值小于500亿
-	private boolean needChkProgam(DaliyBasicInfo base) {
-		if (base.getCirc_mv() < 5000000) {
-			return true;
-		}
-		return false;
-	}
+	private TickDataBuySellInfo sumTickData(String code, int date, double yesterdayPrice, double circMv, int source,
+			List<String> lines, boolean html) {
 
-	private TickDataBuySellInfo sumTickData(DaliyBasicInfo base, List<String> lines, boolean html) {
-		String code = base.getCode();
-		int date = base.getTrade_date();
 		TickDataBuySellInfo result = new TickDataBuySellInfo();
 
 		Map<String, TickData> bm = new HashMap<String, TickData>();
@@ -418,18 +470,23 @@ public class TickDataService {
 		double topPrice;
 		double lowPrice;
 		if (StockAType.KCB == StockAType.formatCode(code)) {// 科创板20%涨跌幅
-			topPrice = CurrencyUitl.topPrice20(base.getYesterdayPrice());
-			lowPrice = CurrencyUitl.lowestPrice20(base.getYesterdayPrice());
+			topPrice = CurrencyUitl.topPrice20(yesterdayPrice);
+			lowPrice = CurrencyUitl.lowestPrice20(yesterdayPrice);
 		} else {
 			boolean isST = stockBasicService.getCodeName(code).contains("ST");
-			topPrice = CurrencyUitl.topPrice(base.getYesterdayPrice(), isST);
-			lowPrice = CurrencyUitl.lowestPrice(base.getYesterdayPrice(), isST);
+			topPrice = CurrencyUitl.topPrice(yesterdayPrice, isST);
+			lowPrice = CurrencyUitl.lowestPrice(yesterdayPrice, isST);
 		}
 
 		// 涨停：买入盘多，卖出算中性
 		// 跌停：卖出盘多，买入算中性
 		for (String line : lines) {
-			TickData td = TickDataUitl.getDataObjectFromTushare(line);
+			TickData td = null;
+			if (source == 1) {
+				td = TickDataUitl.getDataObjectFromTushare(line);
+			} else {
+				td = TickDataUitl.getDataObjectFromEasymoney(line);
+			}
 			if (td != null) {
 				if ("S".equals(td.getType())) {
 					sm.put(td.getTime(), td);
@@ -487,7 +544,9 @@ public class TickDataService {
 		// log.info("买入量:{},卖出量:{},中性量:{},总量:{}", bv, sv, nv, result.getTotalVol());
 
 		// 程序单check
-		boolean needChkProgam = needChkProgam(base);
+
+		// 流通市值小于500亿
+		boolean needChkProgam = circMv < 5000000;
 		int rate = 0;// -1:不需要检查，0：未检查到，>0可信度
 		if (needChkProgam) {
 			// all
