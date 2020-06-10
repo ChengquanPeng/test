@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.TickDataService;
+import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.DateUtil;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -47,6 +48,23 @@ public class TickDataController {
 		JsonResult r = new JsonResult();
 		try {
 			tickDataService.fetch(code, date, all, "1".equals(html), startDate, false);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+	
+	/**
+	 * 根据code重新获取历史记录（前复权） all{1,0}
+	 */
+	@RequestMapping(value = "/fetch", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> fetchByCode(String code) {
+		JsonResult r = new JsonResult();
+		try {
+			r.setResult(EastmoneySpider.getReallyTick(code));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
