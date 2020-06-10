@@ -10,7 +10,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Component
 @Log4j2
-public class EveryWorkingDayJobEsayMoneyTickData extends MySimpleJob {
+public class TickDataJobFromEsayMoneyTickData extends MySimpleJob {
 
 	@Autowired
 	private TickDataService tickDataService;
