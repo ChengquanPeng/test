@@ -342,7 +342,7 @@ public class TickDataService {
 		try {
 			int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 			if (tradeCalService.isOpen(date)) {
-				EsQueryPageReq queryPage = new EsQueryPageReq(90000);
+				EsQueryPageReq queryPage = new EsQueryPageReq(9000);
 
 				String lastDate = tradeCalService.getPretradeDate(date + "");
 				List<DaliyBasicInfo> basics = daliyBasicHistroyService

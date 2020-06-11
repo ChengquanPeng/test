@@ -157,23 +157,24 @@ public class LinePrice {
 		return isRange20pWith20daysRes;
 	}
 
-	private boolean isRange30pWith20daysGet = false;
-	private boolean isRange30pWith20daysRes = false;
+	private boolean isRange30pWith30daysGet = false;
+	private boolean isRange30pWith30daysRes = false;
+
 	// 20天波动超过30%
-	public boolean isRange30pWith20days() {
-		if (isRange30pWith20daysGet) {
-			return isRange30pWith20daysRes;
+	public boolean isRange30pWith30days() {
+		if (isRange30pWith30daysGet) {
+			return isRange30pWith30daysRes;
 		}
-		List<DaliyBasicInfo> day20 = new LinkedList<DaliyBasicInfo>();
-		for (int i = 0; i < 20; i++) {
-			day20.add(dailyList.get(i));
+		List<DaliyBasicInfo> day30 = new LinkedList<DaliyBasicInfo>();
+		for (int i = 0; i < 30; i++) {
+			day30.add(dailyList.get(i));
 		}
-		double max20 = day20.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
-		double min20 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
-		if (max20 > CurrencyUitl.topPrice30(min20)) {
+		double max30 = day30.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
+		double min30 = day30.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
+		if (max30 > CurrencyUitl.topPrice30(min30)) {
 			isRange20pWith20daysRes = true;
 		}
-		isRange30pWith20daysGet = true;
-		return isRange30pWith20daysRes;
+		isRange30pWith30daysGet = true;
+		return isRange30pWith30daysRes;
 	}
 }

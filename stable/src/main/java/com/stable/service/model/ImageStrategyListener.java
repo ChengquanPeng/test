@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.stable.config.SpringConfig;
+import com.stable.enums.ModelType;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.data.LinePrice;
 import com.stable.service.model.data.LineTickData;
@@ -46,7 +47,7 @@ public class ImageStrategyListener implements StrategyListener {
 		ModelV1 mv = new ModelV1();
 		mv.setCode(mc.getCode());
 		mv.setDate(mc.getDate());
-		mv.setModelType(3);
+		mv.setModelType(ModelType.IMAGE.getCode());
 		mv.setImgResult(mc.getImgResult());
 		mv.setId(mv.getModelType() + mv.getCode() + mv.getDate());
 		set.add(mv);

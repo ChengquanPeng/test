@@ -136,6 +136,7 @@ public class UpModelLineService {
 		List<StrategyListener> models = new LinkedList<StrategyListener>();
 		models.add(new V1SortStrategyListener(treadeDate));
 		models.add(new V2SortStrategyListener(treadeDate));
+		models.add(new V2PRESortStrategyListener(treadeDate));
 		try {
 			Map<String, List<ConceptInfo>> gn = conceptService.getDailyMap(treadeDate);
 			int size = array.size();
@@ -251,7 +252,7 @@ public class UpModelLineService {
 		}
 	}
 
-	public List<ModelV1> getListByCode(String code, String date, String score, String imageIndex,
+	public List<ModelV1> getListByCode(String code, String date, String whiteHorse, String score, String imageIndex,
 			EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
@@ -265,6 +266,9 @@ public class UpModelLineService {
 		}
 		if (StringUtils.isNotBlank(imageIndex)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("imageIndex", 1));
+		}
+		if (StringUtils.isNotBlank(whiteHorse)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("whiteHorse", 1));
 		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("score").unmappedType("integer").order(SortOrder.DESC);
 

@@ -106,6 +106,27 @@ public class LineAvgPrice {
 		return is5Don30DhalfRes;
 	}
 
+	private boolean isWhiteHorseV2Get = false;
+	private boolean isWhiteHorseV2Res = false;
+
+	// 类似白马(30个交易日，20日均线一直在30日均线之上（更加宽松比V1）
+	public boolean isWhiteHorseV2() {
+		if (isWhiteHorseV2Get) {
+			return isWhiteHorseV2Res;
+		}
+		int whiteHorseTmp = 0;
+		for (int i = 0; i < 30; i++) {
+			if (clist30.get(i).getAvgPriceIndex20() >= clist30.get(i).getAvgPriceIndex30()) {
+				whiteHorseTmp++;
+			}
+		}
+		if (whiteHorseTmp >= 25) {
+			isWhiteHorseV2Res = true;
+		}
+		isWhiteHorseV2Get = true;
+		return isWhiteHorseV2Res;
+	}
+
 	private boolean isWhiteHorseGet = false;
 	private boolean isWhiteHorseRes = false;
 
@@ -133,6 +154,14 @@ public class LineAvgPrice {
 				&& todayAv.getAvgPriceIndex5() >= todayAv.getAvgPriceIndex10()
 				&& todayAv.getAvgPriceIndex10() >= todayAv.getAvgPriceIndex20()
 				&& todayAv.getAvgPriceIndex20() >= todayAv.getAvgPriceIndex30()) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isAvgSort20T30Only() {
+		// 20日和30日均线>排列就OK
+		if (todayAv.getAvgPriceIndex20() >= todayAv.getAvgPriceIndex30()) {
 			return true;
 		}
 		return false;

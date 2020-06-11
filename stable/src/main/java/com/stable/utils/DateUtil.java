@@ -10,6 +10,7 @@ public class DateUtil {
 	public static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
 	public static final String YYYY_MM_DD = "yyyyMMdd";
 	public static final String YYYY_MM_DD2 = "yyyy-MM-dd";
+	public static final String YYYY_MM_DD3_HHMMSS = "yyyyMMdd HH:mm:ss";
 
 	public static String convertDate(String yyyyMMdd) {
 		try {
@@ -53,13 +54,23 @@ public class DateUtil {
 			return format.parse(str);
 		} catch (ParseException e) {
 			e.printStackTrace();
-			throw new RuntimeException("ParseException:formatter:" + formatter);
+			throw new RuntimeException("ParseException:formatter:" + str + "," + formatter);
 		}
 	}
 
 	public static String getTodayYYYYMMDDHHMMSS() {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
 		return format.format(new Date());
+	}
+
+	public static Date parseTodayYYYYMMDDHHMMSS(String time) {
+		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD3_HHMMSS);
+		try {
+			return format.parse(time);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new RuntimeException("ParseException:formatter:" + time + "," + YYYY_MM_DD3_HHMMSS);
+		}
 	}
 
 	public static String getTodayYYYYMMDDHHMMSS_NOspit() {

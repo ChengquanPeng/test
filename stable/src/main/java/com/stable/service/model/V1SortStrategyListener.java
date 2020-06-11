@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.stable.config.SpringConfig;
 import com.stable.constant.Constant;
+import com.stable.enums.ModelType;
 import com.stable.service.ConceptService.ConceptInfo;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.LineAvgPrice;
@@ -60,7 +61,7 @@ public class V1SortStrategyListener implements StrategyListener {
 		ModelV1 mv = new ModelV1();
 		mv.setCode(mc.getCode());
 		mv.setDate(mc.getDate());
-		mv.setModelType(1);
+		mv.setModelType(ModelType.V1.getCode());
 		mv.setId(mv.getModelType() + mv.getCode() + mv.getDate());
 
 		StringBuffer detailDesc = new StringBuffer();
@@ -240,7 +241,7 @@ public class V1SortStrategyListener implements StrategyListener {
 //			fw.writeLine(sb.toString());
 //			fw.close();
 
-			String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v1_prv_" + treadeDate + ".html";
+			String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v1_" + treadeDate + ".html";
 			FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);
 			fw2.writeLine(sb2.toString());
 			fw2.close();
@@ -258,7 +259,7 @@ public class V1SortStrategyListener implements StrategyListener {
 						+ FileWriteUitl.LINE_FILE);
 		log.info("mcs:size:" + mcs.size());
 		for (int i = 0; i < mcs.size(); i++) {
-			//log.info("currIndex:{},totoal:{}", i, mcs.size());
+			// log.info("currIndex:{},totoal:{}", i, mcs.size());
 			ModelContext mc = mcs.get(i);
 			String code = mc.getCode();
 			sb2.append("<tr>").append(getHTML(i)).append(getHTML_SN(code))// 代码

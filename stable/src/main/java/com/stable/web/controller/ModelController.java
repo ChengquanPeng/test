@@ -37,7 +37,7 @@ public class ModelController {
 			if (StringUtils.isNotBlank(startDate) && StringUtils.isBlank(endDate)) {
 				log.info("request date={}", startDate);
 				upLevel1Service.runJob(Integer.valueOf(startDate));
-			} else if (StringUtils.isBlank(startDate) && StringUtils.isNotBlank(endDate)) {
+			} else if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)) {
 
 				Date d = DateUtil.parseDate(startDate);
 				int end = Integer.valueOf(endDate);
@@ -49,7 +49,6 @@ public class ModelController {
 					date = Integer.valueOf(DateUtil.formatYYYYMMDD(d));
 				} while (date <= end);
 			}
-
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

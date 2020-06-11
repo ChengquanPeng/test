@@ -30,7 +30,7 @@ import com.stable.vo.up.strategy.ModelV1;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class V2SortStrategyListener implements StrategyListener {
+public class V2PRESortStrategyListener implements StrategyListener {
 	private String header = "<table border='1' cellspacing='0' cellpadding='0'><tr>";
 	private String endder = "</table><script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script>";
 
@@ -41,7 +41,7 @@ public class V2SortStrategyListener implements StrategyListener {
 	List<ModelV1> saveList = Collections.synchronizedList(new LinkedList<ModelV1>());
 	private int treadeDate;
 
-	public V2SortStrategyListener(int date) {
+	public V2PRESortStrategyListener(int date) {
 		this.treadeDate = date;
 	}
 
@@ -55,7 +55,7 @@ public class V2SortStrategyListener implements StrategyListener {
 		ModelV1 mv = new ModelV1();
 		mv.setCode(mc.getCode());
 		mv.setDate(mc.getDate());
-		mv.setModelType(ModelType.V2.getCode());
+		mv.setModelType(ModelType.V2_PRE.getCode());
 		mv.setId(mv.getModelType() + mv.getCode() + mv.getDate());
 		StringBuffer detailDesc = new StringBuffer();
 		String dropOutMsg = "";
@@ -67,7 +67,6 @@ public class V2SortStrategyListener implements StrategyListener {
 			int pgmScore = 0;
 			int wayScore = 0;
 			int gnScore = 0;
-
 			// 均线
 			try {
 				if (lineAvgPrice.feedData()) {
@@ -77,52 +76,17 @@ public class V2SortStrategyListener implements StrategyListener {
 						DaliyBasicInfo today = mc.getToday();
 						StockAvg todayAv = lineAvgPrice.todayAv;
 
-						log.info("code={},avg20={},low={},close={},avg5={},result={}", mc.getCode(),
-								todayAv.getAvgPriceIndex20(), today.getLow(), today.getClose(),
-								todayAv.getAvgPriceIndex5(), (todayAv.getAvgPriceIndex20() > today.getLow()
-										&& today.getClose() > todayAv.getAvgPriceIndex5()));
-						if (today.getLow() <= 0 || today.getClose() <= 0) {
-							throw new RuntimeException("数据异常,today.getLow()<=0||today.getClose()<=0?");
-						}
-						// 一阳穿N线
-						if ((todayAv.getAvgPriceIndex3() > today.getYesterdayPrice()
-								|| todayAv.getAvgPriceIndex5() > today.getYesterdayPrice()
-								|| todayAv.getAvgPriceIndex10() > today.getYesterdayPrice()
-								|| todayAv.getAvgPriceIndex20() > today.getYesterdayPrice()
-								|| todayAv.getAvgPriceIndex30() > today.getYesterdayPrice()//
-						)// 作日收盘价在任意均线之下
-								&& (today.getClose() > todayAv.getAvgPriceIndex3()
-										&& today.getClose() > todayAv.getAvgPriceIndex5()
-										&& today.getClose() > todayAv.getAvgPriceIndex10()
-										&& today.getClose() > todayAv.getAvgPriceIndex20()
-										&& today.getClose() > todayAv.getAvgPriceIndex30()//
-								)// 收盘在任意均线之上
-						) {
-
-							// 上涨至少3%& 排除上影线&突然放量上涨&周线不行
-							String s = lineVol.moreVol();
-							if (linePrice.isUp3percent() && !linePrice.isHighOrLowVolToday()
-									&& StringUtils.isNotBlank(s)) {
+						// 收盘在任意均线之下且振幅超30%，周线OK，进入第二日监听列表
+						if (todayAv.getAvgPriceIndex3() > today.getClose()
+								|| todayAv.getAvgPriceIndex5() > today.getClose()
+								|| todayAv.getAvgPriceIndex10() > today.getClose()
+								|| todayAv.getAvgPriceIndex20() > today.getClose()
+								|| todayAv.getAvgPriceIndex30() > today.getClose()) {
+							if (linePrice.isRange30pWith30days() && lineAvgPrice.isWeek4AvgOk()) {
 								isOk = true;
-								avgScore = 100;
-								if (lineAvgPrice.isWeek4AvgOk()) {
-									avgScore += 10;
-									mv.setWeekOk(1);
-								}
-								if (linePrice.isRange30pWith30days()) {
-									avgScore += 10;
-									mv.setIsRange30p(1);
-								}
-								setDetail(detailDesc, s);
 							}
 						}
-					} else {
-						isOk = false;
-						dropOutMsg = "非白马";
 					}
-				} else {
-					isOk = false;
-					dropOutMsg = "未获取到均价-30D";
 				}
 			} catch (Exception e) {
 				isOk = false;
@@ -176,7 +140,7 @@ public class V2SortStrategyListener implements StrategyListener {
 
 	// **评分
 
-	public V2SortStrategyListener() {
+	public V2PRESortStrategyListener() {
 		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短期强势", "主力行为", "主动买入", "价格指数", "评分详情" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
@@ -206,7 +170,7 @@ public class V2SortStrategyListener implements StrategyListener {
 			}
 			sb2.append(endder);
 		}
-		String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v2_" + treadeDate + ".html";
+		String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v2_pre_" + treadeDate + ".html";
 		FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);
 		fw2.writeLine(sb2.toString());
 		fw2.close();
