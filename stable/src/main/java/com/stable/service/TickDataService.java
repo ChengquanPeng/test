@@ -358,6 +358,7 @@ public class TickDataService {
 						}
 					}
 				}
+				WxPushUtil.pushSystem1("东方财富完成tickdata获取");
 			} else {
 				log.info("now={}非工作日", date);
 			}
@@ -396,7 +397,6 @@ public class TickDataService {
 			return false;
 		}
 		// ThreadsUtil.sleepRandomSecBetween1And2();
-
 		double yesterdayPrice = base.getYesterdayPrice();
 		double circMv = base.getCirc_mv();
 		TickDataBuySellInfo tickdatasum = this.sumTickData(code, date, yesterdayPrice, circMv, source, lines, html);
@@ -425,7 +425,6 @@ public class TickDataService {
 		if (lines.get(0).startsWith("http")) {
 			lines.remove(0);// 第一条是：http://stock.gtimg.cn/data/index.php?appn=detail&action=download&c=sz002376&d=20200430
 		}
-		log.info("getTickData：{}，获取到数据 date：{},数据条数:{}", code, date, lines.size());
 		return lines;
 	}
 
@@ -447,7 +446,7 @@ public class TickDataService {
 
 	private TickDataBuySellInfo sumTickData(String code, int date, double yesterdayPrice, double circMv, int source,
 			List<String> lines, boolean html) {
-
+		log.info("source:0df,1tushare:{},getTickData：{}，获取到数据 date：{},数据条数:{}", source, code, date, lines.size());
 		TickDataBuySellInfo result = new TickDataBuySellInfo();
 
 		Map<String, TickData> bm = new HashMap<String, TickData>();
