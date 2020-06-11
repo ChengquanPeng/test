@@ -349,6 +349,7 @@ public class TickDataService {
 						.queryListByCode("", lastDate, "", queryPage, SortOrder.ASC).getContent();
 
 				for (DaliyBasicInfo d : basics) {
+					log.info("fetch TickData From EasyMoney,code={}", d.getCode());
 					List<String> lines = EastmoneySpider.getReallyTickByJob(d.getCode());
 					if (lines != null) {
 						TickDataBuySellInfo ts = this.sumTickData(d.getCode(), date, d.getYesterdayPrice(),
