@@ -70,15 +70,15 @@ public class V2PRESortStrategyListener implements StrategyListener {
 						setDetail(detailDesc, "白马？");
 						mv.setWhiteHorse(1);// 白马？
 						DaliyBasicInfo today = mc.getToday();
-						StockAvg todayAv = lineAvgPrice.todayAv;
+						StockAvg av = lineAvgPrice.todayAv;
 
 						// 收盘在任意均线之下且振幅超30%，周线OK，进入第二日监听列表
-						if (todayAv.getAvgPriceIndex3() > today.getClose()
-								|| todayAv.getAvgPriceIndex5() > today.getClose()
-								|| todayAv.getAvgPriceIndex10() > today.getClose()
-								|| todayAv.getAvgPriceIndex20() > today.getClose()
-								|| todayAv.getAvgPriceIndex30() > today.getClose()) {
-							if (linePrice.isRange30pWith30days() && lineAvgPrice.isWeek4AvgOk()) {
+						if (av.getAvgPriceIndex3() > today.getClose()
+								|| av.getAvgPriceIndex5() > today.getClose()
+								|| av.getAvgPriceIndex10() > today.getClose()
+								|| av.getAvgPriceIndex20() > today.getClose()
+								|| av.getAvgPriceIndex30() > today.getClose()) {
+							if (linePrice.checkPriceBack6dayWhitToday()) {// 回调过超10%
 								isOk = true;
 							}
 						}

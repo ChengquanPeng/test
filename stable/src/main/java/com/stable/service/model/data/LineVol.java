@@ -59,10 +59,7 @@ public class LineVol {
 
 		if (d4.getVol() > d1.getVol() && d4.getVol() > d2.getVol() && d4.getVol() > d3.getVol()) {
 			// 突然放量上涨
-			long half = d3.getVol() / 2;
-			if (d4.getVol() >= (d3.getVol() + half)) {
-				return true;
-			}
+			return true;
 		}
 		return false;
 	}

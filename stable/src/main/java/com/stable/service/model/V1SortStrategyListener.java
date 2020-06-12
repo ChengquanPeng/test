@@ -132,7 +132,7 @@ public class V1SortStrategyListener implements StrategyListener {
 					isOk = false;
 				}
 				// 价格
-				if (linePrice.isHighOrLowVolToday()) {
+				if (linePrice.isLowClosePriceToday()) {
 					// 排除上影线,
 					dropOutMsg = "上影线";
 					isOk = false;

@@ -71,33 +71,37 @@ public class V2SortStrategyListener implements StrategyListener {
 						setDetail(detailDesc, "白马？");
 						mv.setWhiteHorse(1);// 白马？
 						DaliyBasicInfo today = mc.getToday();
-						StockAvg todayAv = lineAvgPrice.todayAv;
+						StockAvg av = lineAvgPrice.todayAv;
 
-						log.info("code={},avg20={},low={},close={},avg5={},result={}", mc.getCode(),
-								todayAv.getAvgPriceIndex20(), today.getLow(), today.getClose(),
-								todayAv.getAvgPriceIndex5(), (todayAv.getAvgPriceIndex20() > today.getLow()
-										&& today.getClose() > todayAv.getAvgPriceIndex5()));
 						if (today.getLow() <= 0 || today.getClose() <= 0) {
 							throw new RuntimeException("数据异常,today.getLow()<=0||today.getClose()<=0?");
 						}
 						// 一阳穿N线
-						if ((todayAv.getAvgPriceIndex3() > today.getYesterdayPrice()
-								|| todayAv.getAvgPriceIndex5() > today.getYesterdayPrice()
-								|| todayAv.getAvgPriceIndex10() > today.getYesterdayPrice()
-								|| todayAv.getAvgPriceIndex20() > today.getYesterdayPrice()
-								|| todayAv.getAvgPriceIndex30() > today.getYesterdayPrice()//
+						if ((av.getAvgPriceIndex3() > today.getYesterdayPrice()
+								|| av.getAvgPriceIndex5() > today.getYesterdayPrice()
+								|| av.getAvgPriceIndex10() > today.getYesterdayPrice()
+								|| av.getAvgPriceIndex20() > today.getYesterdayPrice()
+								|| av.getAvgPriceIndex30() > today.getYesterdayPrice()//
 						)// 作日收盘价在任意均线之下
-								&& (today.getClose() > todayAv.getAvgPriceIndex3()
-										&& today.getClose() > todayAv.getAvgPriceIndex5()
-										&& today.getClose() > todayAv.getAvgPriceIndex10()
-										&& today.getClose() > todayAv.getAvgPriceIndex20()
-										&& today.getClose() > todayAv.getAvgPriceIndex30()//
-								)// 收盘在任意均线之上
+								&& (today.getClose() > av.getAvgPriceIndex3()
+										&& today.getClose() > av.getAvgPriceIndex5()
+										&& today.getClose() > av.getAvgPriceIndex10()
+										&& today.getClose() > av.getAvgPriceIndex20()
+										&& today.getClose() > av.getAvgPriceIndex30()//
+								)//
 						) {
 
-							// 上涨至少3%& 排除上影线&突然放量上涨&周线不行&回调过超10%&当日量价齐升（3天)
-							if (linePrice.isUp3percent() && !linePrice.isHighOrLowVolToday() && lineVol.check3dayVol()
-									&& linePrice.check3dayPrice() && linePrice.checkPriceBack6dayWhitoutToday()) {
+							boolean b1 = linePrice.isUp3percent();// 上涨至少3%
+							boolean b2 = linePrice.isLowClosePriceToday();// 排除上影线
+							boolean b3 = linePrice.isHignOpenWithLowCloseToday();// 高开低走
+							boolean b4 = lineVol.check3dayVol();// 对比3天-量
+							boolean b5 = linePrice.check3dayPrice();// 对比3天-价
+							boolean b6 = linePrice.checkPriceBack6dayWhitoutToday();// 回调过超10%
+
+							log.info("code={},上涨至少3%={},非上影线={},非高开低走={},对比3天-量={},对比3天-价={},回调过超10%={}", mc.getCode(),
+									b1, !b2, !b3, b4, b5, b6);
+
+							if (b1 && !b2 && !b3 && b4 && b5 && b6) {
 								isOk = true;
 								avgScore = 100;
 								if (lineAvgPrice.isWeek4AvgOk()) {
@@ -109,6 +113,15 @@ public class V2SortStrategyListener implements StrategyListener {
 									mv.setIsRange30p(1);
 								}
 							}
+						} else {
+							log.info(
+									"code={},getYesterdayPrice={},getClose={},AvgPriceIndex3={},AvgPriceIndex5={},AvgPriceIndex10={}"
+											+ ",AvgPriceIndex20={},AvgPriceIndex30={}",
+									mc.getCode(), today.getYesterdayPrice(), today.getClose(), av.getAvgPriceIndex3(),
+									av.getAvgPriceIndex5(), av.getAvgPriceIndex10(), av.getAvgPriceIndex20(),
+									av.getAvgPriceIndex30());
+							isOk = false;
+							dropOutMsg = "作日收盘价在任意均线之下,收盘在任意均线之上";
 						}
 					} else {
 						isOk = false;

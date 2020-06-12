@@ -111,9 +111,6 @@ public class LinePrice {
 		return isHignOpenWithLowCloseTodayRes;
 	}
 
-	private boolean isHighOrLowVolTodaysGet = false;
-	private boolean isHighOrLowVolTodayRes = false;
-
 	/**
 	 * 至少涨3%
 	 */
@@ -121,21 +118,24 @@ public class LinePrice {
 		return today.getTodayChangeRate() > 3.0;
 	}
 
-	// 排除上影线(上涨情况下：收盘>昨收=(最高-昨收)/2,下跌排除TODO)
-	public boolean isHighOrLowVolToday() {
+	private boolean isHighOrLowVolTodaysGet = false;
+	private boolean isHighOrLowVolTodayRes = false;
+
+	// 排除上影线(上涨情况下：收盘>昨收+(最高-昨收)/2)
+	public boolean isLowClosePriceToday() {
 		if (isHighOrLowVolTodaysGet) {
 			return isHighOrLowVolTodayRes;
 		}
 		if (today.getTodayChange() > 0) {
-			double diff = today.getHigh() - today.getYesterdayPrice();
-			double half = diff / 2;
+			double up = today.getHigh() - today.getYesterdayPrice();
+			double half = up / 2;
 			double mid = CurrencyUitl.roundHalfUp(half) + today.getYesterdayPrice();
 			if (mid >= today.getClose()) {
 				isHighOrLowVolTodayRes = true;
 			}
 		}
 		isHighOrLowVolTodaysGet = true;
-		return false;
+		return isHighOrLowVolTodayRes;
 	}
 
 	private boolean isRange20pWith20daysGet = false;
@@ -193,20 +193,37 @@ public class LinePrice {
 		return false;
 	}
 
-	public boolean checkPriceBack6dayWhitoutToday() {
-		List<DaliyBasicInfo> l1 = new ArrayList<DaliyBasicInfo>();
-		l1.add(dailyList.get(1));
-		l1.add(dailyList.get(2));
-		l1.add(dailyList.get(3));
-		List<DaliyBasicInfo> l2 = new ArrayList<DaliyBasicInfo>();
-		l2.add(dailyList.get(4));
-		l2.add(dailyList.get(5));
-		l2.add(dailyList.get(6));
+	public boolean checkPriceBack6dayWhitToday() {
+		List<DaliyBasicInfo> highList = new ArrayList<DaliyBasicInfo>();
+		highList.add(dailyList.get(3));
+		highList.add(dailyList.get(4));
+		highList.add(dailyList.get(5));
+		List<DaliyBasicInfo> lowList = new ArrayList<DaliyBasicInfo>();
+		lowList.add(dailyList.get(0));
+		lowList.add(dailyList.get(1));
+		lowList.add(dailyList.get(2));
 
-		double high = l1.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
-		double low = l2.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
-		l1.addAll(l2);
-		int s = l1.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
+		double high = highList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
+		double low = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
+		highList.addAll(lowList);
+		int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
+		return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
+	}
+
+	public boolean checkPriceBack6dayWhitoutToday() {
+		List<DaliyBasicInfo> highList = new ArrayList<DaliyBasicInfo>();
+		highList.add(dailyList.get(4));
+		highList.add(dailyList.get(5));
+		highList.add(dailyList.get(6));
+		List<DaliyBasicInfo> lowList = new ArrayList<DaliyBasicInfo>();
+		lowList.add(dailyList.get(1));
+		lowList.add(dailyList.get(2));
+		lowList.add(dailyList.get(3));
+
+		double high = highList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
+		double low = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
+		highList.addAll(lowList);
+		int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
 		return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
 	}
 }
