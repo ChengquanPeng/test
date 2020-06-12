@@ -347,19 +347,24 @@ public class TickDataService {
 				String lastDate = tradeCalService.getPretradeDate(date + "");
 				List<DaliyBasicInfo> basics = daliyBasicHistroyService
 						.queryListByCode("", lastDate, "", queryPage, SortOrder.ASC).getContent();
-
+				int size = basics.size();
+				log.info("total size:{}", size);
+				int index = 1;
+				int succ = 0;
 				for (DaliyBasicInfo d : basics) {
-					log.info("fetch TickData From EasyMoney,code={}", d.getCode());
+					log.info("fetch TickData From EasyMoney,code={},index={}", d.getCode(), index);
 					List<String> lines = EastmoneySpider.getReallyTickByJob(d.getCode());
 					if (lines != null) {
 						TickDataBuySellInfo ts = this.sumTickData(d.getCode(), date, d.getYesterdayPrice(),
 								d.getCirc_mv(), 0, lines, false);
 						if (ts != null) {
 							esList.add(ts);
+							succ++;
 						}
 					}
+					index++;
 				}
-				WxPushUtil.pushSystem1("东方财富完成tickdata获取");
+				WxPushUtil.pushSystem1("东方财富完成tickdata获取,total succ=" + succ);
 			} else {
 				log.info("now={}非工作日", date);
 			}
