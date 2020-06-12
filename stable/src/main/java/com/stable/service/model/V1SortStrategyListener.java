@@ -244,10 +244,10 @@ public class V1SortStrategyListener implements StrategyListener {
 			fw2.close();
 		}
 
-		fulshToFile2();
+		//fulshToFile2();
 	}
 
-	private void fulshToFile2() {
+	protected void fulshToFile2() {
 		StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 		String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v1_dropout_" + treadeDate + ".html";

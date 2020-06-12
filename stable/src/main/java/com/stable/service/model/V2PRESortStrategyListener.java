@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.stable.config.SpringConfig;
 import com.stable.constant.Constant;
 import com.stable.enums.ModelType;
+import com.stable.enums.StockAType;
 import com.stable.service.ConceptService.ConceptInfo;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.LineAvgPrice;
@@ -19,6 +20,7 @@ import com.stable.service.model.data.LinePrice;
 import com.stable.service.model.data.LinePrice.StrongResult;
 import com.stable.service.model.data.LineTickData;
 import com.stable.service.model.data.LineVol;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.FileWriteUitl;
 import com.stable.utils.SpringUtil;
@@ -44,6 +46,8 @@ public class V2PRESortStrategyListener implements StrategyListener {
 	private void setDetail(StringBuffer detailDesc, String desc) {
 		detailDesc.append(desc).append(Constant.DOU_HAO);
 	}
+
+	private StockBasicService stockBasicService;
 
 	public void processingModelResult(ModelContext mc, LineAvgPrice lineAvgPrice, LinePrice linePrice, LineVol lineVol,
 			LineTickData lineTickData) {
@@ -71,15 +75,27 @@ public class V2PRESortStrategyListener implements StrategyListener {
 						mv.setWhiteHorse(1);// 白马？
 						DaliyBasicInfo today = mc.getToday();
 						StockAvg av = lineAvgPrice.todayAv;
+						String code = mc.getCode();
 
 						// 收盘在任意均线之下且振幅超30%，周线OK，进入第二日监听列表
-						if (av.getAvgPriceIndex3() > today.getClose()
-								|| av.getAvgPriceIndex5() > today.getClose()
+						if (av.getAvgPriceIndex3() > today.getClose() || av.getAvgPriceIndex5() > today.getClose()
 								|| av.getAvgPriceIndex10() > today.getClose()
 								|| av.getAvgPriceIndex20() > today.getClose()
 								|| av.getAvgPriceIndex30() > today.getClose()) {
 							if (linePrice.checkPriceBack6dayWhitToday()) {// 回调过超10%
-								isOk = true;
+								double topPrice = CurrencyUitl.topPrice20(today.getClose());
+								if (StockAType.KCB == StockAType.formatCode(code)) {// 科创板20%涨跌幅
+									topPrice = CurrencyUitl.topPrice20(today.getClose());
+								} else {
+									boolean isST = stockBasicService.getCodeName(code).contains("ST");
+									topPrice = CurrencyUitl.topPrice(today.getClose(), isST);
+								}
+								// 涨停价格可能超过各均线
+								if (topPrice > av.getAvgPriceIndex3() && topPrice > av.getAvgPriceIndex5()
+										&& topPrice > av.getAvgPriceIndex10() && topPrice > av.getAvgPriceIndex20()
+										&& topPrice > av.getAvgPriceIndex30()) {
+									isOk = true;
+								}
 							}
 						}
 					}
@@ -135,6 +151,7 @@ public class V2PRESortStrategyListener implements StrategyListener {
 	// **评分
 
 	public V2PRESortStrategyListener(int date) {
+		stockBasicService = SpringUtil.getBean(StockBasicService.class);
 		this.treadeDate = date;
 		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短期强势", "主力行为", "主动买入", "价格指数", "评分详情" };
 		for (int i = 0; i < s.length; i++) {
@@ -148,13 +165,12 @@ public class V2PRESortStrategyListener implements StrategyListener {
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 		log.info("saveList size:{}", saveList.size());
 		if (saveList.size() > 0) {
-			StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
 			sort(saveList);
 			int index = 1;
 			for (ModelV1 mv : saveList) {
 				String code = mv.getCode();
 				sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))
-						.append(getHTML(sbs.getCodeName(code))).append(getHTML(mv.getDate()))
+						.append(getHTML(stockBasicService.getCodeName(code))).append(getHTML(mv.getDate()))
 						.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgScore()))
 						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
 						.append(getHTML(mv.getSortWay())).append(getHTML(mv.getPriceIndex()))
