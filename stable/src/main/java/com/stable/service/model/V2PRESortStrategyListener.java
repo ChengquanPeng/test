@@ -41,10 +41,6 @@ public class V2PRESortStrategyListener implements StrategyListener {
 	List<ModelV1> saveList = Collections.synchronizedList(new LinkedList<ModelV1>());
 	private int treadeDate;
 
-	public V2PRESortStrategyListener(int date) {
-		this.treadeDate = date;
-	}
-
 	private void setDetail(StringBuffer detailDesc, String desc) {
 		detailDesc.append(desc).append(Constant.DOU_HAO);
 	}
@@ -119,19 +115,17 @@ public class V2PRESortStrategyListener implements StrategyListener {
 						setDetail(detailDesc, x.toString());
 					}
 				}
+				mv.setAvgScore(avgScore);
+				mv.setSortStrong(strongScore);
+				mv.setSortPgm(pgmScore);
+				mv.setSortWay(wayScore);
+				mv.setGnScore(gnScore);
+				mv.setPriceIndex(mc.getPriceIndex());
+				mv.setScore(avgScore + strongScore + pgmScore + wayScore + gnScore);
+				saveList.add(mv);
 				result.put(mv.getCode(), detailDesc.toString());
 			} else {
 				log.info("code={},dropOutMsg={}", mc.getCode(), dropOutMsg);
-			}
-			mv.setAvgScore(avgScore);
-			mv.setSortStrong(strongScore);
-			mv.setSortPgm(pgmScore);
-			mv.setSortWay(wayScore);
-			mv.setGnScore(gnScore);
-			mv.setPriceIndex(mc.getPriceIndex());
-			mv.setScore(avgScore + strongScore + pgmScore + wayScore + gnScore);
-			if (isOk) {
-				saveList.add(mv);
 			}
 		} else {
 			log.info("code={},dropOutMsg={}", mc.getCode(), mc.getBaseDataOk());
@@ -140,7 +134,8 @@ public class V2PRESortStrategyListener implements StrategyListener {
 
 	// **评分
 
-	public V2PRESortStrategyListener() {
+	public V2PRESortStrategyListener(int date) {
+		this.treadeDate = date;
 		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短期强势", "主力行为", "主动买入", "价格指数", "评分详情" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
@@ -168,8 +163,10 @@ public class V2PRESortStrategyListener implements StrategyListener {
 						.append("</tr>").append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
-			sb2.append(endder);
+		} else {
+			sb2.append("<tr><td>无记录</td></tr>").append(FileWriteUitl.LINE_FILE);
 		}
+		sb2.append(endder);
 		String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v2_pre_" + treadeDate + ".html";
 		FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);
 		fw2.writeLine(sb2.toString());

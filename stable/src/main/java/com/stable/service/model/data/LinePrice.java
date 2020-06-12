@@ -1,9 +1,11 @@
 package com.stable.service.model.data;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.ModelContext;
@@ -160,7 +162,7 @@ public class LinePrice {
 	private boolean isRange30pWith30daysGet = false;
 	private boolean isRange30pWith30daysRes = false;
 
-	// 20天波动超过30%
+	// 30天波动超过30%
 	public boolean isRange30pWith30days() {
 		if (isRange30pWith30daysGet) {
 			return isRange30pWith30daysRes;
@@ -176,5 +178,35 @@ public class LinePrice {
 		}
 		isRange30pWith30daysGet = true;
 		return isRange30pWith30daysRes;
+	}
+
+	// 当日收盘价超过前3日的最高价
+	public boolean check3dayPrice() {
+		DaliyBasicInfo d4 = dailyList.get(0);
+		DaliyBasicInfo d3 = dailyList.get(1);
+		DaliyBasicInfo d2 = dailyList.get(2);
+		DaliyBasicInfo d1 = dailyList.get(3);
+
+		if (d4.getClose() >= d1.getHigh() && d4.getClose() >= d2.getHigh() && d4.getClose() >= d3.getHigh()) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean checkPriceBack6dayWhitoutToday() {
+		List<DaliyBasicInfo> l1 = new ArrayList<DaliyBasicInfo>();
+		l1.add(dailyList.get(1));
+		l1.add(dailyList.get(2));
+		l1.add(dailyList.get(3));
+		List<DaliyBasicInfo> l2 = new ArrayList<DaliyBasicInfo>();
+		l2.add(dailyList.get(4));
+		l2.add(dailyList.get(5));
+		l2.add(dailyList.get(6));
+
+		double high = l1.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
+		double low = l2.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
+		l1.addAll(l2);
+		int s = l1.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
+		return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
 	}
 }

@@ -41,10 +41,6 @@ public class V2SortStrategyListener implements StrategyListener {
 	List<ModelV1> saveList = Collections.synchronizedList(new LinkedList<ModelV1>());
 	private int treadeDate;
 
-	public V2SortStrategyListener(int date) {
-		this.treadeDate = date;
-	}
-
 	private void setDetail(StringBuffer detailDesc, String desc) {
 		detailDesc.append(desc).append(Constant.DOU_HAO);
 	}
@@ -99,10 +95,9 @@ public class V2SortStrategyListener implements StrategyListener {
 								)// 收盘在任意均线之上
 						) {
 
-							// 上涨至少3%& 排除上影线&突然放量上涨&周线不行
-							String s = lineVol.moreVol();
-							if (linePrice.isUp3percent() && !linePrice.isHighOrLowVolToday()
-									&& StringUtils.isNotBlank(s)) {
+							// 上涨至少3%& 排除上影线&突然放量上涨&周线不行&回调过超10%&当日量价齐升（3天)
+							if (linePrice.isUp3percent() && !linePrice.isHighOrLowVolToday() && lineVol.check3dayVol()
+									&& linePrice.check3dayPrice() && linePrice.checkPriceBack6dayWhitoutToday()) {
 								isOk = true;
 								avgScore = 100;
 								if (lineAvgPrice.isWeek4AvgOk()) {
@@ -113,7 +108,6 @@ public class V2SortStrategyListener implements StrategyListener {
 									avgScore += 10;
 									mv.setIsRange30p(1);
 								}
-								setDetail(detailDesc, s);
 							}
 						}
 					} else {
@@ -176,7 +170,8 @@ public class V2SortStrategyListener implements StrategyListener {
 
 	// **评分
 
-	public V2SortStrategyListener() {
+	public V2SortStrategyListener(int date) {
+		this.treadeDate = date;
 		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短期强势", "主力行为", "主动买入", "价格指数", "评分详情" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
@@ -204,8 +199,10 @@ public class V2SortStrategyListener implements StrategyListener {
 						.append("</tr>").append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
-			sb2.append(endder);
+		} else {
+			sb2.append("<tr><td>无记录</td></tr>").append(FileWriteUitl.LINE_FILE);
 		}
+		sb2.append(endder);
 		String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v2_" + treadeDate + ".html";
 		FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);
 		fw2.writeLine(sb2.toString());

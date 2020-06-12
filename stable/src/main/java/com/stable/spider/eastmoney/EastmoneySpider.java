@@ -29,9 +29,14 @@ public class EastmoneySpider {
 		return 0;
 	}
 
+	private static int c = 0;
+
 	public synchronized static List<String> getReallyTickByJob(String code) {
 		try {
-			ThreadsUtil.sleepSleep1Seconds();
+			if (c >= 60) {
+				ThreadsUtil.sleepRandomSecBetween1And5();
+				c = 0;
+			}
 			int mk = EastmoneySpider.formatCode(code);
 			JSONObject result = HttpUtil.doGet(String.format(URL_FORMAT, mk, code));
 			JSONObject data = (JSONObject) result.get("data");
@@ -54,7 +59,10 @@ public class EastmoneySpider {
 			}
 			return list;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return null;
+		} finally {
+			c++;
 		}
 	}
 

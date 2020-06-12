@@ -50,6 +50,23 @@ public class LineVol {
 		return r;
 	}
 
+	// 当日收盘价超过前3日的量，并且突然放量
+	public boolean check3dayVol() {
+		DaliyBasicInfo d4 = dailyList.get(0);
+		DaliyBasicInfo d3 = dailyList.get(1);
+		DaliyBasicInfo d2 = dailyList.get(2);
+		DaliyBasicInfo d1 = dailyList.get(3);
+
+		if (d4.getVol() > d1.getVol() && d4.getVol() > d2.getVol() && d4.getVol() > d3.getVol()) {
+			// 突然放量上涨
+			long half = d3.getVol() / 2;
+			if (d4.getVol() >= (d3.getVol() + half)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public String moreVol() {
 		DaliyBasicInfo d3 = dailyList.get(0);
 		DaliyBasicInfo d2 = dailyList.get(1);
