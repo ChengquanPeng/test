@@ -19,6 +19,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.jboss.netty.util.internal.ConcurrentHashMap;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -157,6 +158,15 @@ public class TickDataService {
 						queryPage.setPageSize(1000);
 						String fetchTickData = null;
 						int todaydate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+						Map<String, Integer> todayAlready = new ConcurrentHashMap<String, Integer>();
+						if (isJobSource) {
+							List<TickDataBuySellInfo> l = list(null, todaydate + "", null, new EsQueryPageReq(9999));
+							if (l != null && l.size() > 0) {
+								l.stream().forEach(x -> {
+									todayAlready.put(x.getCode(), 1);
+								});
+							}
+						}
 
 						// 查询模式：查询全部=需要翻页，查询剩余=就查询当前页
 						boolean nextPage = false;
@@ -182,7 +192,7 @@ public class TickDataService {
 												try {
 													log.info("running index:{}", index);
 													int fetchResult = 0;
-													if (sumTickData(todaydate, d, html)) {
+													if (sumTickData(todaydate, todayAlready, d, html)) {
 														fetchResult = 1;
 													}
 													d.setFetchTickData(fetchResult);
@@ -378,14 +388,14 @@ public class TickDataService {
 	/**
 	 * 统计每天
 	 */
-	public boolean sumTickData(int todaydate, DaliyBasicInfo base, boolean html) {
+	public boolean sumTickData(int todaydate, Map<String, Integer> todayAlready, DaliyBasicInfo base, boolean html) {
 		// 获取日线交易数据
 		daliyBasicHistroyService.getDailyData(base);
 
 		String code = base.getCode();
 		int date = base.getTrade_date();
 
-		if (esTickDataBuySellInfoDao.findById(code + date).isPresent()) {
+		if (todaydate == date && todayAlready.containsKey(code)) {
 			// 已经存在
 			return true;
 		}

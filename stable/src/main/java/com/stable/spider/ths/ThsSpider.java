@@ -1,5 +1,6 @@
 package com.stable.spider.ths;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -94,18 +95,25 @@ public class ThsSpider {
 
 	public void start() {
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-		synchGnAndCode();
-		synchConceptDaliy(date);
+		Map<String, Concept> m = synchGnAndCode();
+		if (m == null) {
+			try {
+				Thread.sleep(Duration.ofMinutes(5).toMillis());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			m = getAllAliasCode();
+		}
+		synchConceptDaliy(date, m);
 	}
 
-	private void synchConceptDaliy(int date) {
+	private void synchConceptDaliy(int date, Map<String, Concept> m) {
 		if (!tradeCalService.isOpen(date)) {
 			log.info("非交易日");
 			return;
 		}
 		List<ConceptDaily> list = new LinkedList<ConceptDaily>();
 		try {
-			Map<String, Concept> m = this.getAllAliasCode();
 			List<String> keys = new ArrayList<String>(m.keySet());
 			for (int i = 0; i < keys.size(); i++) {
 				int trytime = 0;
@@ -171,7 +179,7 @@ public class ThsSpider {
 		}
 	}
 
-	private void synchGnAndCode() {
+	private Map<String, Concept> synchGnAndCode() {
 		Date today = new Date();
 		Calendar c = Calendar.getInstance();
 		c.setTime(today);
@@ -181,10 +189,11 @@ public class ThsSpider {
 			log.info("今日非周五");
 			getNew = true;
 		}
+		Map<String, Concept> map = null;
 		try {
 			List<Concept> list = new LinkedList<Concept>();
 			List<CodeConcept> codelist = new LinkedList<CodeConcept>();
-			Map<String, Concept> map = getAllAliasCode();
+			map = getAllAliasCode();
 			getGnList(getNew, list, codelist, map);
 			if (list.size() > 0) {
 				saveConcept(list);
@@ -196,7 +205,9 @@ public class ThsSpider {
 		} catch (Exception e) {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1("同花顺板块出错");
+			map = null;
 		}
+		return map;
 	}
 
 	public void getGnList(boolean getNew, List<Concept> list, List<CodeConcept> codelist, Map<String, Concept> map) {
