@@ -50,9 +50,26 @@ public class ThsSpider {
 	// "http://basic.10jqka.com.cn/%s/finance.html";
 
 	private String GN_LIST = "http://q.10jqka.com.cn/gn/index/field/addtime/order/desc/page/%s/ajax/1/";
-	private int ths = 1;
-	private String START_THS = "THS";
-	private String SPIT = "/";
+	private static int ths = 1;
+	private static String START_THS = "THS";
+	private static String SPIT = "/";
+	private static Map<String, Concept> allmap = new HashMap<String, Concept>();
+	static {
+		for (int i = 0; i < ConAll.all.length; i++) {
+			String[] string = ConAll.all[i].split(",");
+			String url = string[0];
+			String name = string[1];
+			List<String> ids = Arrays.asList(url.split(SPIT));
+			Concept cp = new Concept();
+			cp.setCode(ids.get(ids.size() - 1));
+			cp.setId(START_THS + cp.getCode());
+			cp.setType(ths);
+			cp.setDate(20100101);
+			cp.setHref(url);
+			cp.setName(name);
+			allmap.put(cp.getId(), cp);
+		}
+	}
 
 //	private String host = "http://127.0.0.1:8081";
 //	private String host = "http://106.52.95.147:9999";
@@ -301,6 +318,24 @@ public class ThsSpider {
 				htmlunitSpider.close();
 			}
 		} while (index <= end);
+
+		try {
+			for (String id : allmap.keySet()) {
+				if (!map.containsKey(id)) {
+					Concept cp = allmap.get(id);
+					getAliasCdoe(cp, map);
+					getSubCodeList(cp, codelist);
+					list.add(cp);
+				}
+			}
+		} finally {
+			if (list.size() > 0) {
+				saveConcept(list);
+			}
+			if (codelist.size() > 0) {
+				saveCodeConcept(codelist);
+			}
+		}
 	}
 
 	private String GN_CODE_LIST = "http://q.10jqka.com.cn/gn/detail/field/264648/order/desc/page/%s/ajax/1/code/%s";
@@ -334,6 +369,7 @@ public class ThsSpider {
 		int index = 1;
 		int end = 0;
 		int trytime = 0;
+		int stcnt = 0;
 		do {
 			ThreadsUtil.sleepRandomSecBetween5And15();
 
@@ -363,6 +399,7 @@ public class ThsSpider {
 					cc.setId(cp.getId() + cc.getCode());
 					codelist.add(cc);
 					log.info(cc);
+					stcnt++;
 				}
 				index++;
 				if (cp.getCnt() > 10 && end == 0) {
@@ -370,6 +407,7 @@ public class ThsSpider {
 					end = Integer.valueOf(pageInfo.split(SPIT)[1]);
 				}
 				trytime = 0;
+				cp.setCnt(stcnt);
 			} catch (Exception e) {
 				trytime++;
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
