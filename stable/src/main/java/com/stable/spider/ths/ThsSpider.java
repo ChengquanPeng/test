@@ -321,11 +321,13 @@ public class ThsSpider {
 
 		try {
 			for (String id : allmap.keySet()) {
+				log.info("!map.contains name={},? {}", allmap.get(id).getName(), (!map.containsKey(id)));
 				if (!map.containsKey(id)) {
 					Concept cp = allmap.get(id);
 					getAliasCdoe(cp, map);
 					getSubCodeList(cp, codelist);
 					list.add(cp);
+					log.info("获取到新概念:" + cp.getName());
 				}
 			}
 		} finally {
@@ -351,6 +353,7 @@ public class ThsSpider {
 		try {
 			page = htmlunitSpider.getHtmlPageFromUrl(cp.getHref());
 			String aliasCode = page.getElementById("clid").getAttribute("value");
+			log.info("{} get AliasCode code:{}", cp.getName(), aliasCode);
 			if (StringUtils.isNotBlank(aliasCode) && !"null".equals(aliasCode)) {
 				cp.setAliasCode(aliasCode);
 				map.put(cp.getCode(), cp);
