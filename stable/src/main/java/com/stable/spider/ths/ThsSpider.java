@@ -297,7 +297,7 @@ public class ThsSpider {
 				}
 				trytime = 0;
 				if (index > limit) {// 最多3页
-					return;
+					break;
 				}
 			} catch (Exception e) {
 				trytime++;
