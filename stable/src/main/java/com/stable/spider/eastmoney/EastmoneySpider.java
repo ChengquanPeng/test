@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.utils.HttpUtil;
-import com.stable.utils.ThreadsUtil;
 import com.stable.utils.TickDataUitl;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.TickData;
@@ -29,14 +28,8 @@ public class EastmoneySpider {
 		return 0;
 	}
 
-	private static int c = 0;
-
 	public synchronized static List<String> getReallyTickByJob(String code) {
 		try {
-			if (c >= 60) {
-				ThreadsUtil.sleepRandomSecBetween1And5();
-				c = 0;
-			}
 			int mk = EastmoneySpider.formatCode(code);
 			JSONObject result = HttpUtil.doGet(String.format(URL_FORMAT, mk, code));
 			JSONObject data = (JSONObject) result.get("data");
@@ -62,11 +55,10 @@ public class EastmoneySpider {
 			e.printStackTrace();
 			return null;
 		} finally {
-			c++;
 		}
 	}
 
-	public synchronized static List<TickData> getReallyTick(String code) {
+	public static List<TickData> getReallyTick(String code) {
 		try {
 			int mk = EastmoneySpider.formatCode(code);
 			JSONObject result = HttpUtil.doGet(String.format(URL_FORMAT, mk, code));

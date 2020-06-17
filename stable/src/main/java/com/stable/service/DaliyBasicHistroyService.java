@@ -287,10 +287,20 @@ public class DaliyBasicHistroyService {
 		return this.queryListByCode(code, date, fetchTickData, queryPage, SortOrder.DESC);
 	}
 
+	public DaliyBasicInfo queryListByCodeForRealtime(String code, int date) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.matchPhraseQuery("trade_date", date));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+		return esDaliyBasicInfoDao.search(sq).getContent().get(0);
+	}
+
 	public Page<DaliyBasicInfo> queryListByCodeForModel(String code, int date, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
-		//log.info("queryPage code={},trade_date={},pageNum={},size={}", code, date, pageNum, size);
+		// log.info("queryPage code={},trade_date={},pageNum={},size={}", code, date,
+		// pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));

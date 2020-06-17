@@ -73,8 +73,16 @@ public class CurrencyUitl {
 		return String.valueOf(l);
 	}
 
+	// 3%
+	public final static double topPrice3p(double preClosedPrice) {
+		preClosedPrice = preClosedPrice * 1.03;
+		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
+				.doubleValue();
+		return result;
+	}
+
 	/**
-	 * 涨停价格
+	 * 涨停价格3
 	 */
 	public final static double topPrice(double preClosedPrice, boolean isST) {
 		if (isST) {
@@ -130,8 +138,7 @@ public class CurrencyUitl {
 	}
 
 	public static void main(String[] args) {
-		double s = 5.41;
-		System.err.println(topPrice(s, true) + " " + lowestPrice(s, true));
+		System.err.println(CurrencyUitl.covertToString(253354520l));
 //		System.err.println(CurrencyUitl.covertToLong("1.1万亿"));
 //		System.err.println(CurrencyUitl.covertToString(997));
 //		System.err.println(CurrencyUitl.covertToString(-9978890000.0f));

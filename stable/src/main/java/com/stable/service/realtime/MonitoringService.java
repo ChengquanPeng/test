@@ -7,8 +7,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.stable.service.DaliyBasicHistroyService;
+import com.stable.service.TickDataService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.UpModelLineService;
+import com.stable.service.model.data.AvgService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -20,11 +23,19 @@ public class MonitoringService {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private UpModelLineService upModelLineService;
+	@Autowired
+	private AvgService avgService;
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
+	@Autowired
+	private TickDataService tickDataService;
+
 	private EsQueryPageReq querypage = new EsQueryPageReq(1000);
 
 	public synchronized void startObservable() {
 		String date = DateUtil.getTodayYYYYMMDD();
 		if (!tradeCalService.isOpen(Integer.valueOf(date))) {
+			WxPushUtil.pushSystem1("非交易日结束监听");
 			return;
 		}
 		long now = new Date().getTime();
@@ -42,7 +53,9 @@ public class MonitoringService {
 				WxPushUtil.pushSystem1("交易日" + observableDate + "没有白马股，休眠线程！到15:00");
 			} else {
 				olist.forEach(x -> {
-					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer(x);
+					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer(x,
+							daliyBasicHistroyService.queryListByCodeForRealtime(x.getCode(), x.getDate()),
+							avgService.queryListByCodeForRealtime(x.getCode(), x.getDate()), tickDataService);
 					new Thread(task).start();
 					list.add(task);
 				});
@@ -59,6 +72,7 @@ public class MonitoringService {
 			for (RealtimeDetailsAnalyzer t : list) {
 				t.stop();
 			}
+			WxPushUtil.pushSystem1("交易日结束监听");
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

@@ -143,6 +143,20 @@ public class AvgService {
 		}
 	}
 
+	public StockAvg queryListByCodeForRealtime(String code, int date) {
+		try {
+			BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+			bqb.must(QueryBuilders.matchPhraseQuery("date", date));
+			NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+			SearchQuery sq = queryBuilder.withQuery(bqb).build();
+			return stockAvgDao.search(sq).getContent().get(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	public List<StockAvg> queryListByCodeForModel(String code, int date, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();

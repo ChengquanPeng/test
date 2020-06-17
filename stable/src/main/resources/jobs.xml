@@ -29,7 +29,12 @@
 		sharding-item-parameters="0=a" description="每日早上4点15执行任务(当日分红除权)"
 		sharding-total-count="1" overwrite="true" />
 
-
+	<job:simple id="RealtimeJob"
+		class="com.stable.job.RealtimeJob"
+		registry-center-ref="regCenter" cron="0 32 9 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a" description="每日9点32执行任务(实时)"
+		sharding-total-count="1" overwrite="true" />
+		
 	<job:simple id="TickDataJobFromEastmoneyTickDataJob"
 		class="com.stable.job.TickDataJobFromEastmoneyTickData"
 		registry-center-ref="regCenter" cron="0 25 15 ? * 2,3,4,5,6 *"
