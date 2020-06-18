@@ -18,7 +18,6 @@ public class MyApplicationRunner implements ApplicationRunner {
 //        for (String arg : sourceArgs) {
 //            System.out.print(arg + " ");
 //        }
-//        System.out.println();
 		WxPushUtil.pushSystem1("系统正常启动");
 		new Thread(new Runnable() {
 
@@ -27,24 +26,5 @@ public class MyApplicationRunner implements ApplicationRunner {
 				realtimeJob.execute(null);
 			}
 		}).start();
-
-		// new RuntimeException().printStackTrace();
-
-//		try {
-//			TimeUnit.MINUTES.sleep(1);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				Object job = SpringUtil.getBean("tickDataJob");
-//				if (job != null && job instanceof SimpleJob) {
-//					WxPushUtil.pushSystem1("tickDataJob 运行中..,");
-//					((SimpleJob) job).execute(null);
-//
-//				}
-//			}
-//		}).start();
 	}
 }
