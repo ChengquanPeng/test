@@ -196,7 +196,7 @@ public class V1SortStrategyListener implements StrategyListener {
 
 	public V1SortStrategyListener(int date) {
 		this.treadeDate = date;
-		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短期强势", "主力行为", "主动买入", "价格指数", "评分详情" };
+		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短期强势", "主力行为", "市场行为", "价格指数", "评分详情" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
 		}

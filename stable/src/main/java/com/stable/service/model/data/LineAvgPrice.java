@@ -1,7 +1,10 @@
 package com.stable.service.model.data;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.ModelContext;
@@ -63,9 +66,23 @@ public class LineAvgPrice {
 		if (isFeedDataGet) {
 			return isFeedDataGetRes;
 		}
-		final List<StockAvg> avglistLocal = avgService.queryListByCodeForModel(code, date, queryPage);
-		// 补全30天
-		if (avglistLocal != null && avglistLocal.size() < 30) {
+		// 最近30条
+		List<StockAvg> avglistLocalTmp = avgService.queryListByCodeForModel(code, date, queryPage);
+		Map<Integer, StockAvg> m = new HashMap<Integer, StockAvg>();
+		avglistLocalTmp.forEach(x -> {
+			m.put(x.getDate(), x);
+		});
+
+		// 最近的30条是否和dailyList的30天，时间是否匹配
+		List<StockAvg> avglistLocal = new LinkedList<StockAvg>();
+		for (int i = 0; i < 30; i++) {
+			if (m.containsKey(dailyList.get(i).getTrade_date())) {
+				avglistLocal.add(m.get(dailyList.get(i).getTrade_date()));
+			}
+		}
+
+		// 不匹配， 补全30天
+		if (avglistLocal.size() < 30) {
 			clist30 = avgService.getDPriceAvg(code, lastDate, date);
 			todayAv = clist30.get(0);
 			if (clist30.size() < 30) {
@@ -75,7 +92,7 @@ public class LineAvgPrice {
 				return isFeedDataGetRes;
 			}
 			clist30.forEach(x -> {
-				if (!avglistLocal.contains(x)) {
+				if (!m.containsKey(x.getDate())) {
 					avgSaveList.add(x);
 				}
 			});

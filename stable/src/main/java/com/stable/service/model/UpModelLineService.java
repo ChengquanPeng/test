@@ -170,6 +170,7 @@ public class UpModelLineService {
 //			if (saveList.size() > 0) {
 //				esModelV1Dao.saveAll(saveList);
 //			}
+			log.info("avgList size:" + avgList.size());
 			if (avgList.size() > 0) {
 				avgService.saveStockAvg(avgList);
 			}
@@ -254,7 +255,7 @@ public class UpModelLineService {
 	}
 
 	public List<ModelV1> getListByCode(String code, String date, String whiteHorse, String score, String imageIndex,
-			EsQueryPageReq querypage) {
+			EsQueryPageReq querypage, Integer modelType) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -267,6 +268,9 @@ public class UpModelLineService {
 		}
 		if (StringUtils.isNotBlank(imageIndex)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("imageIndex", 1));
+		}
+		if (modelType != null) {
+			bqb.must(QueryBuilders.matchPhraseQuery("modelType", modelType));
 		}
 		if (StringUtils.isNotBlank(whiteHorse)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("whiteHorse", 1));

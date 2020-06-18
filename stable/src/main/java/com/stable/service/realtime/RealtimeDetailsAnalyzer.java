@@ -14,6 +14,9 @@ import com.stable.vo.bus.TickData;
 import com.stable.vo.bus.TickDataBuySellInfo;
 import com.stable.vo.up.strategy.ModelV1;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 public class RealtimeDetailsAnalyzer implements Runnable {
 	private long ONE_MIN = 3 * 60 * 1000;// 1MIN
 	private DaliyBasicInfo ytdBasic;
@@ -56,7 +59,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		while (isRunning) {
 			try {
 				List<TickData> allTickData = EastmoneySpider.getReallyTick(code);
-
+				log.info("{} allTickData size:{}", code, allTickData.size());
 				if (allTickData != null) {
 					double high = allTickData.stream().max(Comparator.comparingDouble(TickData::getPrice)).get()
 							.getPrice();

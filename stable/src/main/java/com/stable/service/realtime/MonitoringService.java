@@ -17,7 +17,10 @@ import com.stable.utils.WxPushUtil;
 import com.stable.vo.spi.req.EsQueryPageReq;
 import com.stable.vo.up.strategy.ModelV1;
 
+import lombok.extern.log4j.Log4j2;
+
 @Service
+@Log4j2
 public class MonitoringService {
 	@Autowired
 	private TradeCalService tradeCalService;
@@ -47,8 +50,12 @@ public class MonitoringService {
 		String observableDate = tradeCalService.getPretradeDate(date);
 		try {
 
-			List<ModelV1> olist = upModelLineService.getListByCode(null, observableDate, "1", null, null, querypage);
+			List<ModelV1> olist = upModelLineService.getListByCode(null, observableDate, "1", null, null, querypage, 4);
 
+			log.info("observableDate:" + observableDate);
+			olist.forEach(x -> {
+				log.info(x);
+			});
 			if (olist == null || olist.size() <= 0) {
 				WxPushUtil.pushSystem1("交易日" + observableDate + "没有白马股，休眠线程！到15:00");
 			} else {
@@ -72,7 +79,7 @@ public class MonitoringService {
 			for (RealtimeDetailsAnalyzer t : list) {
 				t.stop();
 			}
-			WxPushUtil.pushSystem1("交易日结束监听");
+			// WxPushUtil.pushSystem1("交易日结束监听");
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
