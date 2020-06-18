@@ -2,11 +2,13 @@ package com.stable.service.realtime;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import com.stable.service.TickDataService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
+import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockAvg;
@@ -55,9 +57,26 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 		// 量控量
 //		long ytdvol = ytdBasic.getVol();
+		String today = DateUtil.getTodayYYYYMMDD();
+
+		long d1130 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+				DateUtil.parseDate(today + "113000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+		Date date = DateUtil.parseDate(today + "130100", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
+		long d1300 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(date);
 
 		while (isRunning) {
 			try {
+
+				long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
+				if (d1130 <= now && now <= d1300) {
+					long from3 = new Date().getTime();
+					int millis = (int) ((date.getTime() - from3));
+					log.info("{},中场休息。", code);
+					if (millis > 0) {
+						Thread.sleep(millis);
+					}
+				}
+
 				List<TickData> allTickData = EastmoneySpider.getReallyTick(code);
 				log.info("{} allTickData size:{}", code, allTickData.size());
 				if (allTickData != null) {

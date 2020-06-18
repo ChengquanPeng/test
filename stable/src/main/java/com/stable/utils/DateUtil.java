@@ -78,6 +78,11 @@ public class DateUtil {
 		return format.format(new Date());
 	}
 
+	public static Long getTodayYYYYMMDDHHMMSS_NOspit(Date date) {
+		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS_NO_SPIT);
+		return Long.valueOf(format.format(date));
+	}
+
 	public static String getTodayBefor7DayYYYYMMDD() {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
 		return format.format(addDate(new Date(), -7));
