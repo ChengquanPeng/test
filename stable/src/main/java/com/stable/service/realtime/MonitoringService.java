@@ -53,12 +53,12 @@ public class MonitoringService {
 			List<ModelV1> olist = upModelLineService.getListByCode(null, observableDate, "1", null, null, querypage, 4);
 
 			log.info("observableDate:" + observableDate);
-			olist.forEach(x -> {
-				log.info(x);
-			});
 			if (olist == null || olist.size() <= 0) {
 				WxPushUtil.pushSystem1("交易日" + observableDate + "没有白马股，休眠线程！到15:00");
 			} else {
+				olist.forEach(x -> {
+					log.info(x);
+				});
 				olist.forEach(x -> {
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer(x,
 							daliyBasicHistroyService.queryListByCodeForRealtime(x.getCode(), x.getDate()),
