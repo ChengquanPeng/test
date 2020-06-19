@@ -45,6 +45,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		this.ytdAvg = ytdAvg;
 		code = modelV1.getCode();
 		date = modelV1.getDate();
+		this.daliyBasicHistroyService = daliyBasicHistroyService;
 	}
 
 	@Getter
