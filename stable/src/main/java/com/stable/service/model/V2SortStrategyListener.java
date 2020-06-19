@@ -74,7 +74,7 @@ public class V2SortStrategyListener implements StrategyListener {
 						StockAvg av = lineAvgPrice.todayAv;
 
 						if (today.getLow() <= 0 || today.getClose() <= 0) {
-							throw new RuntimeException("数据异常,today.getLow()<=0||today.getClose()<=0?");
+							throw new RuntimeException(mc.getCode() + " 数据异常,today.getLow()<=0||today.getClose()<=0?");
 						}
 						// 一阳穿N线
 						if ((av.getAvgPriceIndex3() > today.getYesterdayPrice()

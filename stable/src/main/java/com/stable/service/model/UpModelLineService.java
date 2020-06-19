@@ -248,7 +248,7 @@ public class UpModelLineService {
 	// 收盘价介于最高价和最低价的index
 	private int priceIndex(DaliyBasicInfo b) {
 		PriceLife pl = priceLifeService.getPriceLife(b.getCode());
-		if (b.getClose() <= pl.getLowest()) {
+		if (pl == null || b.getClose() <= pl.getLowest()) {
 			return 0;
 		} else if (b.getClose() >= pl.getHighest()) {
 			return 100;
