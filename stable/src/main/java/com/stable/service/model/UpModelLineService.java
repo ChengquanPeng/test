@@ -238,6 +238,7 @@ public class UpModelLineService {
 			// 2交易方向:次数和差值:3/5/10/20/120/250天
 			// 3程序单:次数:3/5/10/20/120/250天
 			lineTickData = new LineTickData(cxt, dailyList, tickDataService);
+			lineTickData.tickDataInfo();// TickData数据
 			cxt.setPriceIndex(this.priceIndex(cxt.getToday()));
 		}
 		for (StrategyListener m : models) {

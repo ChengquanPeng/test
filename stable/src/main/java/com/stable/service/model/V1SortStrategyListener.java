@@ -154,7 +154,6 @@ public class V1SortStrategyListener implements StrategyListener {
 					setDetail(detailDesc, "每日指标记录小于5条,checkStrong get size<5");
 					dropOutMsg += "每日指标记录小于5条,checkStrong get size<5";
 				}
-
 				StrongResult sr = linePrice.strongScore();
 				strongScore = sr.getStrongScore();
 				if (strongScore > 0) {
@@ -244,7 +243,7 @@ public class V1SortStrategyListener implements StrategyListener {
 			fw2.close();
 		}
 
-		//fulshToFile2();
+		// fulshToFile2();
 	}
 
 	protected void fulshToFile2() {

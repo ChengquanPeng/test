@@ -18,7 +18,6 @@ import com.stable.vo.bus.TickDataBuySellInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 import com.stable.vo.up.strategy.ModelV1;
 
-import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -29,11 +28,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private TickDataService tickDataService;
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	private String code;
-	private int date;
+	private int lastTradeDate;
 	private boolean isRunning = true;
-	private VolAvg d1 = null;
-	private VolAvg d2 = null;
-	private VolAvg d3 = null;
 
 	public void stop() {
 		isRunning = false;
@@ -44,36 +40,18 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		this.tickDataService = tickDataService;
 		this.ytdAvg = ytdAvg;
 		code = modelV1.getCode();
-		date = modelV1.getDate();
+		lastTradeDate = modelV1.getDate();
 		this.daliyBasicHistroyService = daliyBasicHistroyService;
 	}
-
-	@Getter
-	class VolAvg {
-		private long v15;// 15分钟均量
-		private long v30;// 30分钟均量
-		private long v60;// 60分钟均量
-
-		public VolAvg(long historyVol) {
-			v15 = historyVol / (4 * 4);
-			v30 = historyVol / (4 * 2);
-			v30 = historyVol / (4 * 1);
-		}
-	}
-
 	public void run() {
-		DaliyBasicInfo ytdBasic = daliyBasicHistroyService.queryListByCodeForRealtime(code, date);
+		DaliyBasicInfo ytdBasic = daliyBasicHistroyService.queryListByCodeForRealtime(code, lastTradeDate);
 		if (ytdAvg == null || ytdBasic == null) {
 			WxPushUtil.pushSystem1(
 					"实时:数据不全，终止监控。ytdAvg==null？" + (ytdAvg == null) + "},ytdBasic==null？" + (ytdBasic == null));
 			return;
 		}
-		List<DaliyBasicInfo> list3 = daliyBasicHistroyService.queryListByCodeForModel(code, date, queryPage)
+		List<DaliyBasicInfo> list3 = daliyBasicHistroyService.queryListByCodeForModel(code, lastTradeDate, queryPage)
 				.getContent();
-
-		d1 = new VolAvg(ytdBasic.getVol());
-		d2 = new VolAvg(list3.get(1).getVol());
-		d3 = new VolAvg(list3.get(2).getVol());
 
 		double yesterdayPrice = ytdBasic.getYesterdayPrice();
 
@@ -118,11 +96,26 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						// 需要看量，开高低走，上影线情况 //TODO
 						TickDataBuySellInfo d = tickDataService.sumTickData2(code, 0, yesterdayPrice,
 								ytdBasic.getCirc_mv(), allTickData, false);
+						boolean pg = false;
+						if (d.getProgramRate() > 0) {
+							pg = true;
+						} else {
+							List<TickDataBuySellInfo> listtds = tickDataService.listForModel(code,
+									list3.get(2).getTrade_date(), lastTradeDate, queryPage);
+							if (listtds != null) {
+								for (int i = 0; i < listtds.size(); i++) {
+									TickDataBuySellInfo x = listtds.get(i);
+									if (x.getProgramRate() > 0) {
+										pg = true;
+									}
+								}
+							}
+						}
 						WxPushUtil.pushSystem1("请关注:" + code + ",市场行为:"
-								+ (d.getBuyTimes() > d.getSellTimes() ? "买入" : "卖出") + ",程序单:"
-								+ (d.getProgramRate() > 0) + ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt())
-								+ ",卖出额:" + CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
-								+ CurrencyUitl.covertToString(d.getTotalAmt()) + ",请关注量，上影线，高开低走等");
+								+ (d.getBuyTimes() > d.getSellTimes() ? "买入" : "卖出") + ",主力行为:" + (pg ? "Yes" : "No")
+								+ ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt()) + ",卖出额:"
+								+ CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
+								+ CurrencyUitl.covertToString(d.getTotalAmt()) + ",请关注量(同花顺)，提防上影线，高开低走等");
 						isRunning = false;
 					}
 				}
