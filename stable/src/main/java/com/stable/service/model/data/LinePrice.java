@@ -193,6 +193,18 @@ public class LinePrice {
 		return false;
 	}
 
+	// 明日收盘价超过前3日的最高价
+	public boolean check3dayPrice(double topPrice) {
+		DaliyBasicInfo d4 = dailyList.get(0);
+		DaliyBasicInfo d3 = dailyList.get(1);
+		DaliyBasicInfo d2 = dailyList.get(2);
+
+		if (topPrice >= d4.getHigh() && topPrice >= d2.getHigh() && topPrice >= d3.getHigh()) {
+			return true;
+		}
+		return false;
+	}
+
 	public boolean checkPriceBack6dayWhitToday() {
 		List<DaliyBasicInfo> highList = new ArrayList<DaliyBasicInfo>();
 		highList.add(dailyList.get(3));

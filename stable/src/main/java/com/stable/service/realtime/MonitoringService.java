@@ -29,9 +29,9 @@ public class MonitoringService {
 	@Autowired
 	private AvgService avgService;
 	@Autowired
-	private DaliyBasicHistroyService daliyBasicHistroyService;
-	@Autowired
 	private TickDataService tickDataService;
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
 
 	private EsQueryPageReq querypage = new EsQueryPageReq(1000);
 
@@ -60,8 +60,7 @@ public class MonitoringService {
 					log.info(x);
 				});
 				olist.forEach(x -> {
-					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer(x,
-							daliyBasicHistroyService.queryListByCodeForRealtime(x.getCode(), x.getDate()),
+					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer(x, daliyBasicHistroyService,
 							avgService.queryListByCodeForRealtime(x.getCode(), x.getDate()), tickDataService);
 					new Thread(task).start();
 					list.add(task);
@@ -79,7 +78,7 @@ public class MonitoringService {
 			for (RealtimeDetailsAnalyzer t : list) {
 				t.stop();
 			}
-			// WxPushUtil.pushSystem1("交易日结束监听");
+			WxPushUtil.pushSystem1("交易日结束监听");
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

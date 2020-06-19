@@ -64,6 +64,14 @@ public class LineVol {
 		return false;
 	}
 
+	public boolean check3dayVol(long nowvol, DaliyBasicInfo d1, DaliyBasicInfo d2, DaliyBasicInfo d3) {
+		if (nowvol > d1.getVol() && nowvol > d2.getVol() && nowvol > d3.getVol()) {
+			// 突然放量上涨
+			return true;
+		}
+		return false;
+	}
+
 	public String moreVol() {
 		DaliyBasicInfo d3 = dailyList.get(0);
 		DaliyBasicInfo d2 = dailyList.get(1);

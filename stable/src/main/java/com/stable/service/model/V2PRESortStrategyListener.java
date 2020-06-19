@@ -94,7 +94,10 @@ public class V2PRESortStrategyListener implements StrategyListener {
 								if (topPrice > av.getAvgPriceIndex3() && topPrice > av.getAvgPriceIndex5()
 										&& topPrice > av.getAvgPriceIndex10() && topPrice > av.getAvgPriceIndex20()
 										&& topPrice > av.getAvgPriceIndex30()) {
-									isOk = true;
+
+									if (linePrice.check3dayPrice(topPrice)) {// 涨停价：超过对比3天-价
+										isOk = true;
+									}
 								}
 							}
 						}

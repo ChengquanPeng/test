@@ -16,4 +16,10 @@ public class TickData {
 		return time.split(":")[2];
 	}
 
+	public void setTime(String time) {
+		this.time = time;
+		inttime = Integer.valueOf(time.replaceAll(":", ""));
+	}
+
+	private int inttime;
 }
