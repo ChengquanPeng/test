@@ -101,6 +101,14 @@ public class MonitoringService {
 		}
 	}
 
+	public void stopThread(String code) {
+		if (map != null) {
+			if (map.containsKey(code)) {
+				map.get(code).stop();
+			}
+		}
+	}
+
 	public BuyTrace buyAndStopThread(String code) {
 		if (map != null) {
 			if (map.containsKey(code)) {

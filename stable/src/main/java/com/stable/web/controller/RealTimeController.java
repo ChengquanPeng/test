@@ -15,12 +15,30 @@ public class RealTimeController {
 
 	@Autowired
 	private MonitoringService monitoringService;
+	
+	/**
+	 * 实时买入，并终止线程
+	 */
+	@RequestMapping(value = "/stop", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> stop(String code) {
+		JsonResult r = new JsonResult();
+		try {
+			monitoringService.stopThread(code);
+			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
 
 	/**
 	 * 实时买入，并终止线程
 	 */
 	@RequestMapping(value = "/buy", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> list(String code) {
+	public ResponseEntity<JsonResult> buy(String code) {
 		JsonResult r = new JsonResult();
 		try {
 			r.setResult(monitoringService.buyAndStopThread(code));
