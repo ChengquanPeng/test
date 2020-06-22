@@ -26,5 +26,13 @@ public class BuyTrace extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int soldDate;
 	@Field(type = FieldType.Double)
+	private double soldPrice;
+	@Field(type = FieldType.Double)
 	private double profit;
+	@Field(type = FieldType.Integer)
+	private int buyModelType;
+
+	public void setId() {
+		id = code + buyDate;
+	}
 }

@@ -5,12 +5,17 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import com.stable.enums.BuyModelType;
+import com.stable.enums.StockAType;
 import com.stable.service.DaliyBasicHistroyService;
+import com.stable.service.StockBasicService;
 import com.stable.service.TickDataService;
+import com.stable.service.trace.BuyTraceService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.BuyTrace;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockAvg;
 import com.stable.vo.bus.TickData;
@@ -30,21 +35,71 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private String code;
 	private int lastTradeDate;
 	private boolean isRunning = true;
+	private DaliyBasicInfo ytdBasic;
+	private StockBasicService stockBasicService;
+	private BuyTraceService buyTraceService;
+	private boolean waitingBuy = true;
 
 	public void stop() {
 		isRunning = false;
 	}
 
 	public RealtimeDetailsAnalyzer(ModelV1 modelV1, DaliyBasicHistroyService daliyBasicHistroyService, StockAvg ytdAvg,
-			TickDataService tickDataService) {
+			TickDataService tickDataService, StockBasicService stockBasicService, BuyTraceService buyTraceService) {
 		this.tickDataService = tickDataService;
 		this.ytdAvg = ytdAvg;
 		code = modelV1.getCode();
 		lastTradeDate = modelV1.getDate();
 		this.daliyBasicHistroyService = daliyBasicHistroyService;
+		this.stockBasicService = stockBasicService;
+		this.buyTraceService = buyTraceService;
 	}
+
+	private double getTopPrice() {
+		double yesterdayPrice = ytdBasic.getYesterdayPrice();
+		double topPrice = 0.0;
+		if (StockAType.KCB == StockAType.formatCode(code)) {// 科创板20%涨跌幅
+			topPrice = CurrencyUitl.topPrice20(yesterdayPrice);
+		} else {
+			boolean isST = stockBasicService.getCodeName(code).contains("ST");
+			topPrice = CurrencyUitl.topPrice(yesterdayPrice, isST);
+		}
+		return topPrice;
+	}
+
+	public Double getBuyPrice() {
+		List<TickData> allTickData = EastmoneySpider.getReallyTick(code);
+		double buyPrice = allTickData.get(allTickData.size() - 1).getPrice();
+		double topPrice = getTopPrice();
+		if (buyPrice == topPrice) {
+			isRunning = false;
+			return null;
+		} else if (buyPrice < topPrice) {
+			isRunning = false;
+			return buyPrice;
+		} else {
+			throw new RuntimeException(code + stockBasicService.getCodeName(code) + ",成交价大于buyPrice[" + buyPrice
+					+ "],涨停价格topPrice[" + topPrice + "]?");
+		}
+	}
+
+	private void saveToTrace(double buyPrice) {
+		if (waitingBuy && buyPrice < getTopPrice()) {
+			BuyTrace bt = new BuyTrace();
+			bt.setBuyDate(Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
+			bt.setBuyModelType(BuyModelType.B2.getCode());
+			bt.setBuyPrice(buyPrice);
+			bt.setCode(code);
+			bt.setId();
+			bt.setStatus(2);
+			buyTraceService.addToTrace(bt);
+			log.info("已成交:{}" + bt);
+			waitingBuy = false;
+		}
+	}
+
 	public void run() {
-		DaliyBasicInfo ytdBasic = daliyBasicHistroyService.queryListByCodeForRealtime(code, lastTradeDate);
+		ytdBasic = daliyBasicHistroyService.queryListByCodeForRealtime(code, lastTradeDate);
 		if (ytdAvg == null || ytdBasic == null) {
 			WxPushUtil.pushSystem1(
 					"实时:数据不全，终止监控。ytdAvg==null？" + (ytdAvg == null) + "},ytdBasic==null？" + (ytdBasic == null));
@@ -93,7 +148,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					double high = allTickData.stream().max(Comparator.comparingDouble(TickData::getPrice)).get()
 							.getPrice();
 					if (high >= chkPrice) {// 一阳穿N，并涨幅3%以上
-						// 需要看量，开高低走，上影线情况 //TODO
+						// 需要看量，开高低走，上影线情况
 						TickDataBuySellInfo d = tickDataService.sumTickData2(code, 0, yesterdayPrice,
 								ytdBasic.getCirc_mv(), allTickData, false);
 						boolean pg = false;
@@ -116,7 +171,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 								+ ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt()) + ",卖出额:"
 								+ CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
 								+ CurrencyUitl.covertToString(d.getTotalAmt()) + ",请关注量(同花顺)，提防上影线，高开低走等");
-						isRunning = false;
+						// isRunning = false;
+						saveToTrace(allTickData.get(allTickData.size() - 1).getPrice());
 					}
 				}
 
@@ -127,14 +183,4 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			}
 		}
 	}
-
-	public boolean checkVolOk(List<TickData> allTickData) {
-		TickData td = allTickData.get(allTickData.size() - 1);
-
-		if (td.getInttime() > 144500) {
-
-		}
-		return false;
-	}
-
 }
