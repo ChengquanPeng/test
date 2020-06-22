@@ -33,13 +33,28 @@ public class HttpUtil {
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
 				String result = EntityUtils.toString(entity, UTF_8);
-				//System.err.println(result);
+				// System.err.println(result);
 				jsonObj = JSON.parseObject(result);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return jsonObj;
+	}
+
+	public static String doGet2(String url) {
+		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+		HttpGet httpget = new HttpGet(url);
+		try {
+			HttpResponse response = httpclient.execute(httpget);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				return EntityUtils.toString(entity, UTF_8);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return "";
 	}
 
 	public static String doGet2(String url, Map<String, String> header) {
@@ -59,7 +74,6 @@ public class HttpUtil {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 		return null;
 	}
 

@@ -1,6 +1,7 @@
 package com.stable.service.realtime;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -12,6 +13,8 @@ import com.stable.service.StockBasicService;
 import com.stable.service.TickDataService;
 import com.stable.service.trace.BuyTraceService;
 import com.stable.spider.eastmoney.EastmoneySpider;
+import com.stable.spider.sina.SinaRealTime;
+import com.stable.spider.sina.SinaRealtimeUitl;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
@@ -28,7 +31,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class RealtimeDetailsAnalyzer implements Runnable {
 	private static final EsQueryPageReq queryPage = new EsQueryPageReq(3);
-	private long ONE_MIN = 3 * 60 * 1000;// 1MIN
+	private long ONE_MIN = 1 * 60 * 1000;// 1MIN
+	private long FIVE_MIN = 5 * 60 * 1000;// 5MIN
+	private long WAIT_MIN = ONE_MIN;
 	private StockAvg ytdAvg;
 	private TickDataService tickDataService;
 	private DaliyBasicHistroyService daliyBasicHistroyService;
@@ -144,7 +149,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 		while (isRunning) {
 			try {
-
 				long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
 				if (d1130 <= now && now <= d1300) {
 					long from3 = new Date().getTime();
@@ -155,51 +159,70 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					}
 				}
 
-				List<TickData> allTickData = EastmoneySpider.getReallyTick(code);
-				log.info("{} allTickData size:{}", code, allTickData.size());
-				if (allTickData != null) {
-					double high = allTickData.stream().max(Comparator.comparingDouble(TickData::getPrice)).get()
-							.getPrice();
-					if (high >= chkPrice) {// 一阳穿N，并涨幅3%以上
-						// 需要看量，开高低走，上影线情况
-						TickDataBuySellInfo d = tickDataService.sumTickData2(code, 0, yesterdayPrice,
-								ytdBasic.getCirc_mv(), allTickData, false);
-						boolean pg = false;
-						if (d.getProgramRate() > 0) {
-							pg = true;
-						} else {
-							List<TickDataBuySellInfo> listtds = tickDataService.listForModel(code,
-									list3.get(2).getTrade_date(), lastTradeDate, queryPage);
-							if (listtds != null) {
-								for (int i = 0; i < listtds.size(); i++) {
-									TickDataBuySellInfo x = listtds.get(i);
-									if (x.getProgramRate() > 0) {
-										pg = true;
-									}
+				double highPrice = 0.0;
+				double nowPrice = 0.0;
+				List<TickData> allTickData = null;
+				SinaRealTime srt = SinaRealtimeUitl.get(code);
+				if (srt != null) {
+					log.info("{} SINA 实时:{}", code, srt);
+					highPrice = srt.getHigh();
+					nowPrice = srt.getNow();
+					WAIT_MIN = ONE_MIN;// 新浪1分钟频率
+				} else {
+					// 切换到东方财富
+					allTickData = EastmoneySpider.getReallyTick(code);
+					if (allTickData != null) {
+						highPrice = allTickData.stream().max(Comparator.comparingDouble(TickData::getPrice)).get()
+								.getPrice();
+						nowPrice = allTickData.get(allTickData.size() - 1).getPrice();
+					} else {
+						allTickData = Collections.emptyList();
+					}
+					WAIT_MIN = FIVE_MIN;// 东方财富5分钟频率
+				}
+
+				if (highPrice >= chkPrice && nowPrice >= chkPrice) {// 一阳穿N，并涨幅3%以上
+					WAIT_MIN = FIVE_MIN;// 东方财富5分钟频率
+					if (allTickData == null) {
+						allTickData = EastmoneySpider.getReallyTick(code);
+					}
+					// 需要看量，开高低走，上影线情况
+					TickDataBuySellInfo d = tickDataService.sumTickData2(code, 0, yesterdayPrice, ytdBasic.getCirc_mv(),
+							allTickData, false);
+					boolean pg = false;
+					if (d.getProgramRate() > 0) {
+						pg = true;
+					} else {
+						List<TickDataBuySellInfo> listtds = tickDataService.listForModel(code,
+								list3.get(2).getTrade_date(), lastTradeDate, queryPage);
+						if (listtds != null) {
+							for (int i = 0; i < listtds.size(); i++) {
+								TickDataBuySellInfo x = listtds.get(i);
+								if (x.getProgramRate() > 0) {
+									pg = true;
 								}
 							}
 						}
-
-						boolean buytime = d.getBuyTimes() > d.getSellTimes();
-						isPg = pg;
-						isCurrMkt = buytime;
-						WxPushUtil.pushSystem1("请关注:" + code + ",市场行为:" + (buytime ? "买入" : "卖出") + ",主力行为:"
-								+ (pg ? "Yes" : "No") + ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt())
-								+ ",卖出额:" + CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
-								+ CurrencyUitl.covertToString(d.getTotalAmt())
-								+ ",请关注量(同花顺)，提防上影线，高开低走等,STOP: http://106.52.95.147:9999/web/realtime/buy?code="
-								+ code);
-						// isRunning = false;
-						saveToTrace(allTickData.get(allTickData.size() - 1).getPrice(), buytime, pg);
 					}
-				}
 
-				Thread.sleep(ONE_MIN);// 1分钟//TODO
+					boolean buytime = d.getBuyTimes() > d.getSellTimes();
+					isPg = pg;
+					isCurrMkt = buytime;
+					WxPushUtil.pushSystem1("请关注:" + code + ",市场行为:" + (buytime ? "买入" : "卖出") + ",主力行为:"
+							+ (pg ? "Yes" : "No") + ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt()) + ",卖出额:"
+							+ CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
+							+ CurrencyUitl.covertToString(d.getTotalAmt())
+							+ ",请关注量(同花顺)，提防上影线，高开低走等,STOP: http://106.52.95.147:9999/web/realtime/buy?stop?code="
+							+ code);
+					// isRunning = false;
+					saveToTrace(allTickData.get(allTickData.size() - 1).getPrice(), buytime, pg);
+				}
+				Thread.sleep(WAIT_MIN);
 			} catch (Exception e) {
 				e.printStackTrace();
 				WxPushUtil.pushSystem1(code + " 监听异常！");
 				try {
-					Thread.sleep(ONE_MIN);
+					Thread.sleep(WAIT_MIN);
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}
