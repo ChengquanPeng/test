@@ -8,6 +8,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BuyTraceService {
 
+	@Autowired
 	private EsBuyTraceDao esBuyTraceDao;
 
 	public void addToTrace(BuyTrace bt) {

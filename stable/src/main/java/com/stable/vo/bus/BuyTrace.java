@@ -7,9 +7,11 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
+@ToString
 @Document(indexName = "buy_trace")
 public class BuyTrace extends EsBase {
 	private static final long serialVersionUID = -6862288561607105101L;
@@ -31,6 +33,10 @@ public class BuyTrace extends EsBase {
 	private double profit;
 	@Field(type = FieldType.Integer)
 	private int buyModelType;
+	@Field(type = FieldType.Integer)
+	private int currMkt;// 市场:1买入，2卖出
+	@Field(type = FieldType.Integer)
+	private int program;// 市场:1程序，2无程序
 
 	public void setId() {
 		id = code + buyDate;

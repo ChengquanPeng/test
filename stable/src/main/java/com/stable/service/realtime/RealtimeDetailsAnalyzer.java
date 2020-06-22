@@ -39,6 +39,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private StockBasicService stockBasicService;
 	private BuyTraceService buyTraceService;
 	private boolean waitingBuy = true;
+	private boolean isPg = false;
+	private boolean isCurrMkt = false;
 
 	public void stop() {
 		isRunning = false;
@@ -83,7 +85,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		}
 	}
 
-	private void saveToTrace(double buyPrice) {
+	private void saveToTrace(double buyPrice, boolean buytimes, boolean pg) {
 		if (waitingBuy && buyPrice < getTopPrice()) {
 			BuyTrace bt = new BuyTrace();
 			bt.setBuyDate(Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
@@ -92,6 +94,10 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			bt.setCode(code);
 			bt.setId();
 			bt.setStatus(2);
+			int program = pg ? 1 : 2;
+			bt.setProgram(program);
+			int currMkt = buytimes ? 1 : 2;
+			bt.setCurrMkt(currMkt);
 			buyTraceService.addToTrace(bt);
 			log.info("已成交:{}" + bt);
 			waitingBuy = false;
@@ -166,13 +172,15 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 								}
 							}
 						}
-						WxPushUtil.pushSystem1("请关注:" + code + ",市场行为:"
-								+ (d.getBuyTimes() > d.getSellTimes() ? "买入" : "卖出") + ",主力行为:" + (pg ? "Yes" : "No")
-								+ ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt()) + ",卖出额:"
-								+ CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
+						isPg = pg;
+						boolean buytime = d.getBuyTimes() > d.getSellTimes();
+						isCurrMkt = buytime;
+						WxPushUtil.pushSystem1("请关注:" + code + ",市场行为:" + (buytime ? "买入" : "卖出") + ",主力行为:"
+								+ (pg ? "Yes" : "No") + ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt())
+								+ ",卖出额:" + CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
 								+ CurrencyUitl.covertToString(d.getTotalAmt()) + ",请关注量(同花顺)，提防上影线，高开低走等");
 						// isRunning = false;
-						saveToTrace(allTickData.get(allTickData.size() - 1).getPrice());
+						saveToTrace(allTickData.get(allTickData.size() - 1).getPrice(), buytime, pg);
 					}
 				}
 
@@ -180,7 +188,20 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			} catch (Exception e) {
 				e.printStackTrace();
 				WxPushUtil.pushSystem1(code + " 监听异常！");
+				try {
+					Thread.sleep(ONE_MIN);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
+	}
+
+	public boolean isPg() {
+		return isPg;
+	}
+
+	public boolean isCurrMkt() {
+		return isCurrMkt;
 	}
 }

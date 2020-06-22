@@ -115,6 +115,8 @@ public class MonitoringService {
 					bt.setCode(code);
 					bt.setId();
 					bt.setStatus(2);
+					bt.setProgram(analyzer.isPg() ? 1 : 2);
+					bt.setCurrMkt(analyzer.isCurrMkt() ? 1 : 2);
 					buyTraceService.addToTrace(bt);
 					log.info("已成交:{}" + bt);
 					return bt;
