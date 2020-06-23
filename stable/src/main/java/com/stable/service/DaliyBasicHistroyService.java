@@ -51,6 +51,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class DaliyBasicHistroyService {
 	@Autowired
+	private DaliyTradeHistroyService tradeHistroyService;
+	@Autowired
 	private TushareSpider tushareSpider;
 	@Autowired
 	private RedisUtil redisUtil;
@@ -191,14 +193,14 @@ public class DaliyBasicHistroyService {
 				log.info("每日*定时任务 daily_basic [end],result={}", result);
 
 				if (result) {
-					nextJob();
+					nextTickDataJob();
 				}
 				return null;
 			}
 		});
 	}
 
-	private void nextJob() {
+	private void nextTickDataJob() {
 		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
 			@Override
 			public Object call() throws Exception {
@@ -209,6 +211,11 @@ public class DaliyBasicHistroyService {
 				return null;
 			}
 		});
+	}
+	
+	public void nextTradeHistroyJob() {
+		log.info("获取日交易(分红除权)");
+		tradeHistroyService.jobSpiderAll();
 	}
 
 	public void jobSpiderAllDailyBasic(String tradeDate) {

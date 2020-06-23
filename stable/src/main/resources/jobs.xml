@@ -60,12 +60,6 @@
 		description="每日晚上19点05执行任务(回购公告、分红除权公告)" sharding-total-count="1"
 		overwrite="true" />
 
-	<job:simple id="TradeHistoryJob"
-		class="com.stable.job.TradeHistoryJob" registry-center-ref="regCenter"
-		cron="0 15 21 ? * 2,3,4,5,6 *" sharding-item-parameters="0=a"
-		description="每日晚上21点15执行任务-获取日交易(分红除权)" sharding-total-count="1"
-		overwrite="true" />
-
 	<job:simple id="EveryWeekMonJob"
 		class="com.stable.job.EveryWeekMonJob" registry-center-ref="regCenter"
 		cron="0 15 5 ? * MON" sharding-item-parameters="0=a"

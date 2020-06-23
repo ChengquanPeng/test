@@ -37,7 +37,6 @@ import com.stable.enums.StockAType;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.job.MyCallable;
-import com.stable.service.model.UpModelLineService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -76,8 +75,6 @@ public class TickDataService {
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private StockBasicService stockBasicService;
-	@Autowired
-	private UpModelLineService upLevel1Service;
 	@Autowired
 	private TradeCalService tradeCalService;
 
@@ -243,8 +240,8 @@ public class TickDataService {
 			log.info("等待任务执行完成");
 			lis.get();
 			if (isJobSource) {
-				log.info("等待执行模型。。");
-				upLevel1Service.runJob(0);
+				log.info("等待每日交易(复权执行)完成。。");
+				daliyBasicHistroyService.nextTradeHistroyJob();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

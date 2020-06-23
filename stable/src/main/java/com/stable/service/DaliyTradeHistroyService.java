@@ -29,6 +29,7 @@ import com.stable.es.dao.base.EsModelV1Dao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.ImageStrategyListener;
+import com.stable.service.model.UpModelLineService;
 import com.stable.service.model.image.ImageService;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
@@ -74,6 +75,8 @@ public class DaliyTradeHistroyService {
 	private ImageService imageService;
 	@Autowired
 	private EsModelV1Dao esModelV1Dao;
+	@Autowired
+	private UpModelLineService upLevel1Service;
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -111,7 +114,6 @@ public class DaliyTradeHistroyService {
 		int date = Integer.valueOf(today);
 		if (tradeCalService.isOpen(date)) {
 			if (spiderTodayDaliyTrade(today)) {
-
 				JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
 				if (array == null || array.size() <= 0) {
 					WxPushUtil.pushSystem1("图形指标：tushare获取记录StockDaliyBasic失败");
@@ -376,9 +378,14 @@ public class DaliyTradeHistroyService {
 		TasksWorker.getInstance().getService()
 				.submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.DAY) {
 					public Object mycall() {
-						log.info("每日*定时任务-日交易[started]");
-						spiderTodayDaliyTrade();
-						log.info("每日*定时任务-日交易[end]");
+						try {
+							log.info("每日*定时任务-日交易[started]");
+							spiderTodayDaliyTrade();
+							log.info("每日*定时任务-日交易[end]");
+						} finally {
+							log.info("等待模型执行");
+							upLevel1Service.runJob(0);
+						}
 						return null;
 					}
 				});
