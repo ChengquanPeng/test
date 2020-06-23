@@ -118,9 +118,11 @@ public class UpModelLineService {
 				}
 				log.info("processing date={}", date);
 				List<ModelV1> deleteall = getListByCode(null, date + "", null, null, null, deleteQueryPage, null);
-				log.info("删除当天{}记录条数{}", date, deleteall.size());
-				esModelV1Dao.deleteAll(deleteall);
-				Thread.sleep(3 * 1000);
+				if (deleteall != null) {
+					log.info("删除当天{}记录条数{}", date, deleteall.size());
+					esModelV1Dao.deleteAll(deleteall);
+					Thread.sleep(3 * 1000);
+				}
 				log.info("模型date={}开始", date);
 				run(date);
 			}
