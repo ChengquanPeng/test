@@ -3,7 +3,7 @@ package com.stable.enums;
 public enum RunLogBizTypeEnum {
 	TRADE_CAL(1, "交易日历同步"), 
 	STOCK_LIST(2, "股票列表同步"), 
-	FINACE_HISTORY(3, "股票报告同步"), 
+	FINACE_HISTORY(3, "股票财务报告同步"), 
 	BUY_BACK(4, "回购同步"),
 	TRADE_HISTROY(5, "日线数据同步"), 
 	DIVIDEND(6, "分红除权信息同步"),

@@ -31,6 +31,7 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.http.resp.BuyBackInfoResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -119,6 +120,7 @@ public class BuyBackService {
 					log.info("同步回购公告列表[started],ann_date={},", ann_date);
 					JSONArray array = tushareSpider.getBuyBackList(null, null, ann_date);
 					// System.err.println(array.toJSONString());
+					int cnt = 0;
 					if (array != null && array.size() > 0) {
 						List<BuyBackInfo> list = new LinkedList<BuyBackInfo>();
 						log.info("获取到回购公告记录条数={}", array.size());
@@ -128,12 +130,13 @@ public class BuyBackService {
 							list.add(base);
 						}
 						buyBackInfoDao.saveAll(list);
+						cnt = list.size();
 						redisUtil.set(RedisConstant.RDS_BUY_BACK_LAST_DAY, last);
 					} else {
 						log.info("未获取到回购公告");
 					}
 					log.info("同步回购公告列表[end],ann_date={}", ann_date);
-
+					WxPushUtil.pushSystem1(ann_date + " 获取到[" + cnt + "]条回购公告！");
 				} while (true);
 				return null;
 			}
@@ -181,6 +184,7 @@ public class BuyBackService {
 		log.info("同步回购公告列表[started],start_date={},end_date={},", start_date, end_date);
 		JSONArray array = tushareSpider.getBuyBackList(start_date, end_date, null);
 		// System.err.println(array.toJSONString());
+		int cnt = 0;
 		if (array != null && array.size() > 0) {
 			log.info("获取到回购公告记录条数={}", array.size());
 			List<BuyBackInfo> list = new LinkedList<BuyBackInfo>();
@@ -190,9 +194,11 @@ public class BuyBackService {
 				list.add(base);
 			}
 			buyBackInfoDao.saveAll(list);
+			cnt = list.size();
 		} else {
 			log.info("未获取到回购公告");
 		}
+		WxPushUtil.pushSystem1(start_date + " " + end_date + "获取回购记录条数=" + cnt);
 		log.info("同步回购公告列表[end],start_date={},end_date={},", start_date, end_date);
 	}
 

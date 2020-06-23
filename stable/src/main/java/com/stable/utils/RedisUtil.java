@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.Cursor;
@@ -187,7 +188,7 @@ public class RedisUtil {
 	private String getjsonstirng(Object value) {
 		return JSON.toJSONString(value, SerializerFeature.WriteDateUseDateFormat);
 	}
-	
+
 	public void del(String key) {
 		redisTemplate.delete(key);
 	}
@@ -200,6 +201,14 @@ public class RedisUtil {
 	 */
 	public String get(String key) {
 		return redisTemplate.opsForValue().get(key);
+	}
+
+	public String get(String key, String def) {
+		String value = redisTemplate.opsForValue().get(key);
+		if (StringUtils.isBlank(value)) {
+			return def;
+		}
+		return value;
 	}
 
 	/**

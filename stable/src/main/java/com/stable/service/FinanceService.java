@@ -28,6 +28,7 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.resp.FinanceBaseInfoResp;
@@ -172,21 +173,25 @@ public class FinanceService {
 		TasksWorker.getInstance().getService()
 				.submit(new MyCallable(RunLogBizTypeEnum.FINACE_HISTORY, RunCycleEnum.WEEK) {
 					public Object mycall() {
-						log.info("同步股票报告[started]");
+						log.info("同步财务报告报告[started]");
 						List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 						log.info("股票总数：" + list.size());
 						List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
+						int cnt = 0;
 						for (StockBaseInfo s : list) {
 							spiderFinaceHistoryInfo(s.getCode(), rl);
 							if (rl.size() > 1000) {
 								esFinanceBaseInfoDao.saveAll(rl);
+								cnt += rl.size();
 								rl = new LinkedList<FinanceBaseInfo>();
 							}
 						}
 						if (rl.size() > 0) {
 							esFinanceBaseInfoDao.saveAll(rl);
+							cnt += rl.size();
 						}
-						log.info("同步股票报告[end]");
+						log.info("同步财务报告报告[end]");
+						WxPushUtil.pushSystem1("同步股票财务报告完成！记录条数=" + cnt);
 						return null;
 					}
 				});

@@ -56,6 +56,7 @@ public class MonitoringService {
 		long now = new Date().getTime();
 		long isAlivingMillis = DateUtil.parseTodayYYYYMMDDHHMMSS(date + " 15:00:00").getTime();
 		if (now > isAlivingMillis) {// 已经超时
+			log.info("now > isAlivingMillis,已超时");
 			return;
 		}
 		List<RealtimeDetailsAnalyzer> list = new LinkedList<RealtimeDetailsAnalyzer>();

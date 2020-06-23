@@ -65,8 +65,8 @@ public abstract class MyCallable implements Callable<Object> {
 
 	private void pushWx(int status, String startTime, String endTime) {
 		if (status == 1) {
-			WxPushUtil.pushSystem1(
-					"正常  " + cycle.getName() + " " + biz.getBtypeName() + " 开始时间:" + startTime + " 结束时间：" + endTime);
+			// WxPushUtil.pushSystem1("正常 " + cycle.getName() + " " + biz.getBtypeName() + "
+			// 开始时间:" + startTime + " 结束时间：" + endTime);
 		} else if (status == 2) {
 			WxPushUtil.pushSystem1(">>>异常<<< " + cycle.getName() + " " + biz.getBtypeName() + " 开始时间:" + startTime
 					+ " 结束时间：" + endTime);

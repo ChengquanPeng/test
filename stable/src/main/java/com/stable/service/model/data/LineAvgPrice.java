@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.stable.constant.RedisConstant;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
@@ -22,6 +23,7 @@ public class LineAvgPrice {
 	private String code;
 	private int lastDate;
 	private int date;
+	private int lastDividendDate = 0;
 	private List<StockAvg> avgSaveList;
 	private List<DaliyBasicInfo> dailyList;
 	// TEMP
@@ -30,13 +32,14 @@ public class LineAvgPrice {
 	public StockAvg todayAv;
 
 	public LineAvgPrice(AvgService avgService, ModelContext cxt, int lastDate, List<StockAvg> avgSaveList,
-			List<DaliyBasicInfo> dailyList) {
+			List<DaliyBasicInfo> dailyList,int lastDividendDate) {
 		this.avgService = avgService;
 		this.code = cxt.getCode();
 		this.lastDate = lastDate;
 		this.date = cxt.getDate();
 		this.avgSaveList = avgSaveList;
 		this.dailyList = dailyList;
+		this.lastDividendDate = lastDividendDate;
 	}
 
 	private boolean isWeekAvgGet = false;
@@ -153,6 +156,12 @@ public class LineAvgPrice {
 			return isWhiteHorseRes;
 		}
 		int whiteHorseTmp = 0;
+		int lastDate = dailyList.get(29).getTrade_date();// 第30个
+		
+		if (lastDate <= lastDividendDate) {
+			//TODO
+		}
+		// Null
 		for (int i = 0; i < 30; i++) {
 			if (dailyList.get(i).getClose() >= clist30.get(i).getAvgPriceIndex30()) {
 				whiteHorseTmp++;

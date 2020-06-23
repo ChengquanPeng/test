@@ -20,6 +20,7 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.TradeCal;
 
 import lombok.extern.log4j.Log4j2;
@@ -67,28 +68,31 @@ public class TradeCalService {
 
 	private void fetchCal(String start_date, String end_date) {
 		JSONArray array = tushareSpider.getTradeCal(start_date, end_date);
-		if (array == null || array.size() <= 0) {
-			log.warn("未获取到交易日历");
-			return;
-		}
-		List<TradeCal> list = new LinkedList<TradeCal>();
-		for (int i = 0; i < array.size(); i++) {
-			JSONArray arr = array.getJSONArray(i);
-			String cal_date = arr.getString(0);// 日历日期
-			String is_open = arr.getString(1);// 是否开市
-			String pretrade_date = arr.getString(2);// 上一个交易日
-			redisUtil.set(RedisConstant.RDS_TRADE_CAL_ + cal_date, pretrade_date, Duration.ofDays(92));
+		int cnt = 0;
+		if (array != null && array.size() > 0) {
+			List<TradeCal> list = new LinkedList<TradeCal>();
+			for (int i = 0; i < array.size(); i++) {
+				JSONArray arr = array.getJSONArray(i);
+				String cal_date = arr.getString(0);// 日历日期
+				String is_open = arr.getString(1);// 是否开市
+				String pretrade_date = arr.getString(2);// 上一个交易日
+				redisUtil.set(RedisConstant.RDS_TRADE_CAL_ + cal_date, pretrade_date, Duration.ofDays(92));
 
-			TradeCal tc = new TradeCal();
-			tc.setCal_date(Integer.valueOf(cal_date));
-			tc.setIs_open(Integer.valueOf(is_open));
-			tc.setPretrade_date(Integer.valueOf(pretrade_date));
-			// calDao.save(tc);
-			list.add(tc);
+				TradeCal tc = new TradeCal();
+				tc.setCal_date(Integer.valueOf(cal_date));
+				tc.setIs_open(Integer.valueOf(is_open));
+				tc.setPretrade_date(Integer.valueOf(pretrade_date));
+				// calDao.save(tc);
+				list.add(tc);
+			}
+			if (list.size() > 0) {
+				calDao.saveAll(list);
+				cnt = list.size();
+			}
+		} else {
+			log.warn("未获取到交易日历");
 		}
-		if (list.size() > 0) {
-			calDao.saveAll(list);
-		}
+		WxPushUtil.pushSystem1(start_date + " " + end_date + "获取交易日历条数=" + cnt);
 	}
 
 	public boolean isOpen(int date) {

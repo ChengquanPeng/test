@@ -22,6 +22,7 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -97,11 +98,14 @@ public class StockBasicService {
 								synBaseStockInfo(base);
 								list.add(base);
 							}
+							int cnt = 0;
 							if (list != null) {
 								esStockBaseInfoDao.saveAll(list);
+								cnt = list.size();
 							}
 							log.info("同步股票列表[end]");
 							LOCAL_ALL_ONLINE_LIST.clear();// 清空缓存
+							WxPushUtil.pushSystem1("同步股票列表完成！记录条数=" + cnt);
 							return null;
 						} finally {
 							semap.release();

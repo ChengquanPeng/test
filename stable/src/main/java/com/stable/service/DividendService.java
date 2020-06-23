@@ -21,13 +21,16 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsDividendHistoryDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
+import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DividendHistory;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.resp.DividendHistoryResp;
@@ -54,9 +57,12 @@ public class DividendService {
 	private final String SS = "实施";
 	@Autowired
 	private DaliyTradeHistroyService daliydTradeHistroyService;
+	@Autowired
+	private RedisUtil redisUtil;
 
-	private boolean spiderDividend(String ts_code, String ann_date) {
+	private int spiderDividend(String ts_code, String ann_date) {
 		log.info("Dividend,tushare,ts_code={},ann_date={}", ts_code, ann_date);
+		List<DividendHistory> list = new LinkedList<DividendHistory>();
 		try {
 			DividendReq req = new DividendReq();
 			if (StringUtils.isNotBlank(ts_code)) {
@@ -69,10 +75,10 @@ public class DividendService {
 
 			if (array == null || array.size() <= 0) {
 				log.warn("未获取到分红送股数据交易记录,tushare,req={}", req.toString());
-				return false;
+				return 0;
 			}
 			log.info("获取到分红送股数据交易记录条数={}", array.size());
-			List<DividendHistory> list = new LinkedList<DividendHistory>();
+
 			// System.err.println(array);
 			for (int i = 0; i < array.size(); i++) {
 				JSONArray arr = array.getJSONArray(i);
@@ -85,9 +91,11 @@ public class DividendService {
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return false;
+			if (list.size() > 0) {
+				esDividendHistoryDao.saveAll(list);
+			}
 		}
-		return true;
+		return list.size();
 	}
 
 	public List<DividendHistory> getListByCode(String code, String proc, EsQueryPageReq querypage) {
@@ -120,14 +128,13 @@ public class DividendService {
 				DividendHistoryResp resp = new DividendHistoryResp();
 				BeanUtils.copyProperties(dh, resp);
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
-
 				res.add(resp);
 			}
 		}
 		return res;
 	}
 
-	public List<DividendHistory> getTodayListByCode() {
+	public List<DividendHistory> get7DayRangeList() {
 		Pageable pageable = PageRequest.of(0, 10000);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		// 7天左右需要除权的
@@ -143,7 +150,6 @@ public class DividendService {
 			return page.getContent();
 		}
 		return null;
-
 	}
 
 	/**
@@ -154,14 +160,25 @@ public class DividendService {
 				.submit(new MyCallable(RunLogBizTypeEnum.DIVIDEND_TRADE_HISTROY, RunCycleEnum.DAY) {
 					@Override
 					public Object mycall() {
-						List<DividendHistory> list = getTodayListByCode();
+						List<DividendHistory> list = get7DayRangeList();
 						if (list != null) {
+							StringBuffer sb = new StringBuffer();
 							for (DividendHistory d : list) {
 								log.info("今日分红除权相关信息{}", d);
 								daliydTradeHistroyService.removeCacheByChuQuan(d.getCode());
+								redisUtil.set(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + d.getCode(),
+										String.valueOf(d.getEx_date()));
+								sb.append(d.getCode()).append(",");
 							}
+							if (sb.length() > 0) {
+								WxPushUtil.pushSystem1("今日实施[" + list.size() + "]条分红分股！" + sb.toString());
+							} else {
+								WxPushUtil.pushSystem1("今日无实施分红分股");
+							}
+
 						} else {
 							log.info("今日无股票分红除权相关信息");
+							WxPushUtil.pushSystem1("今日无实施分红分股");
 						}
 						return null;
 					}
@@ -176,7 +193,8 @@ public class DividendService {
 				.submit(new MyCallable(RunLogBizTypeEnum.DIVIDEND, RunCycleEnum.MANUAL, "code:" + code) {
 					@Override
 					public Object mycall() {
-						spiderDividend(TushareSpider.formatCode(code), null);
+						int cnt = spiderDividend(TushareSpider.formatCode(code), null);
+						WxPushUtil.pushSystem1(code + "获取到[" + cnt + "]条分红分股公告！");
 						return null;
 					}
 				});
@@ -188,9 +206,11 @@ public class DividendService {
 					@Override
 					public Object mycall() {
 						List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+						int cnt = 0;
 						for (StockBaseInfo s : list) {
-							spiderDividend(s.getTs_code(), null);
+							cnt += spiderDividend(s.getTs_code(), null);
 						}
+						WxPushUtil.pushSystem1("All获取到[" + cnt + "]条分红分股公告！");
 						return null;
 					}
 				});
@@ -211,14 +231,16 @@ public class DividendService {
 					d = 2 - cal.get(Calendar.DAY_OF_WEEK);
 				}
 				cal.add(Calendar.DAY_OF_WEEK, d);
+				int cnt = 0;
 				// 所在周开始日期
 				for (int i = 1; i <= 5; i++) {
 					String date = DateUtil.getYYYYMMDD(cal.getTime());
 					log.info("每日*定时任务-日分红公告[started]:date={}", date);
-					spiderDividend(null, date);
+					cnt += spiderDividend(null, date);
 					log.info("每日*定时任务-日分红公告[end]:date={}", date);
 					cal.add(Calendar.DAY_OF_WEEK, 1);
 				}
+				WxPushUtil.pushSystem1("上周获取到[" + cnt + "]条分红分股公告！");
 				return null;
 			}
 		});
@@ -230,9 +252,11 @@ public class DividendService {
 	public void jobSpiderDividendByDate() {
 		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.DIVIDEND, RunCycleEnum.DAY) {
 			public Object mycall() {
+				String today = DateUtil.getTodayYYYYMMDD();
 				log.info("每日*定时任务-日分红公告[started]");
-				spiderDividend(null, DateUtil.getTodayYYYYMMDD());
+				int cnt = spiderDividend(null, today);
 				log.info("每日*定时任务-日分红公告[end]");
+				WxPushUtil.pushSystem1(today + " 获取到[" + cnt + "]条分红分股公告！");
 				return null;
 			}
 		});

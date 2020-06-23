@@ -222,11 +222,13 @@ public class UpModelLineService {
 		LineVol lineVol = null;
 		LineTickData lineTickData = null;
 		if (isOk) {
+			String lastDividendDate = redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0");
+
 			cxt.setToday(dailyList.get(0));// 包含全部信息-来自ES
 			// 均价
 			int lastDate = dailyList.get(dailyList.size() - 1).getTrade_date();
-			lineAvgPrice = new LineAvgPrice(avgService, cxt, lastDate, avgList, dailyList);
-
+			lineAvgPrice = new LineAvgPrice(avgService, cxt, lastDate, avgList, dailyList,
+					Integer.valueOf(lastDividendDate));
 			// 1强势:次数和差值:3/5/10/20/120/250天
 			linePrice = new LinePrice(strongService, cxt, dailyList, lineAvgPrice.todayAv, lastDate);
 			lineVol = new LineVol(cxt, dailyList);
