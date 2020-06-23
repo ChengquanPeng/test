@@ -27,6 +27,7 @@ import com.stable.es.dao.base.EsModelV1Dao;
 import com.stable.service.ConceptService;
 import com.stable.service.ConceptService.ConceptInfo;
 import com.stable.service.DaliyBasicHistroyService;
+import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TickDataService;
@@ -79,6 +80,8 @@ public class UpModelLineService {
 	private TushareSpider tushareSpider;
 	@Autowired
 	private ConceptService conceptService;
+	@Autowired
+	private DaliyTradeHistroyService daliyTradeHistroyService;
 
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 	private final EsQueryPageReq deleteQueryPage = new EsQueryPageReq(9999);
@@ -228,9 +231,10 @@ public class UpModelLineService {
 			// 均价
 			int lastDate = dailyList.get(dailyList.size() - 1).getTrade_date();
 			lineAvgPrice = new LineAvgPrice(avgService, cxt, lastDate, avgList, dailyList,
-					Integer.valueOf(lastDividendDate));
+					Integer.valueOf(lastDividendDate), daliyTradeHistroyService);
 			// 1强势:次数和差值:3/5/10/20/120/250天
-			linePrice = new LinePrice(strongService, cxt, dailyList, lineAvgPrice.todayAv, lastDate);
+			linePrice = new LinePrice(strongService, cxt, dailyList, lineAvgPrice.todayAv, lastDate,
+					Integer.valueOf(lastDividendDate), daliyTradeHistroyService);
 			lineVol = new LineVol(cxt, dailyList);
 			// 2交易方向:次数和差值:3/5/10/20/120/250天
 			// 3程序单:次数:3/5/10/20/120/250天

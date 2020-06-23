@@ -6,11 +6,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.stable.constant.RedisConstant;
+import org.elasticsearch.search.sort.SortOrder;
+
+import com.stable.service.DaliyTradeHistroyService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockAvg;
+import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
@@ -23,16 +26,20 @@ public class LineAvgPrice {
 	private String code;
 	private int lastDate;
 	private int date;
-	private int lastDividendDate = 0;
+	private DaliyBasicInfo today;
+
 	private List<StockAvg> avgSaveList;
 	private List<DaliyBasicInfo> dailyList;
 	// TEMP
 	private List<StockAvg> clist30;
 	private List<StockAvg> week4;
 	public StockAvg todayAv;
+	// 除权
+	private int lastDividendDate = 0;
+	private DaliyTradeHistroyService daliyTradeHistroyService;
 
 	public LineAvgPrice(AvgService avgService, ModelContext cxt, int lastDate, List<StockAvg> avgSaveList,
-			List<DaliyBasicInfo> dailyList,int lastDividendDate) {
+			List<DaliyBasicInfo> dailyList, int lastDividendDate, DaliyTradeHistroyService daliyTradeHistroyService) {
 		this.avgService = avgService;
 		this.code = cxt.getCode();
 		this.lastDate = lastDate;
@@ -40,6 +47,8 @@ public class LineAvgPrice {
 		this.avgSaveList = avgSaveList;
 		this.dailyList = dailyList;
 		this.lastDividendDate = lastDividendDate;
+		this.daliyTradeHistroyService = daliyTradeHistroyService;
+		today = cxt.getToday();
 	}
 
 	private boolean isWeekAvgGet = false;
@@ -157,14 +166,24 @@ public class LineAvgPrice {
 		}
 		int whiteHorseTmp = 0;
 		int lastDate = dailyList.get(29).getTrade_date();// 第30个
-		
 		if (lastDate <= lastDividendDate) {
-			//TODO
-		}
-		// Null
-		for (int i = 0; i < 30; i++) {
-			if (dailyList.get(i).getClose() >= clist30.get(i).getAvgPriceIndex30()) {
-				whiteHorseTmp++;
+			List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCode(code, lastDate,
+					today.getTrade_date(), queryPage, SortOrder.DESC);
+			if (list == null || list.size() < 30) {
+				throw new RuntimeException(code + "获取复权数据从" + lastDate + "到" + today.getTrade_date() + "错误！");
+			}
+			// 复权数据
+			for (int i = 0; i < 30; i++) {
+				if (list.get(i).getClosed() >= clist30.get(i).getAvgPriceIndex30()) {
+					whiteHorseTmp++;
+				}
+			}
+		} else {
+			// 不需要复权数据
+			for (int i = 0; i < 30; i++) {
+				if (dailyList.get(i).getClose() >= clist30.get(i).getAvgPriceIndex30()) {
+					whiteHorseTmp++;
+				}
 			}
 		}
 		if (whiteHorseTmp >= 22) {

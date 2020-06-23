@@ -7,31 +7,54 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.elasticsearch.search.sort.SortOrder;
+
+import com.stable.service.DaliyTradeHistroyService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockAvg;
+import com.stable.vo.bus.TradeHistInfoDaliy;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.Getter;
 import lombok.Setter;
 
 public class LinePrice {
-
+	private final static EsQueryPageReq queryPage = new EsQueryPageReq(30);
 	private ModelContext cxt;
 	private List<DaliyBasicInfo> dailyList;
+	private List<TradeHistInfoDaliy> listD30;
 	private StockAvg todayAv;
 	private StrongService strongService;
 	private int lastDate;
+	private String code;
 	private DaliyBasicInfo today;
+	// 除权
+	private boolean isUseDividData = false;
+	private int lastDividendDate;
 
 	public LinePrice(StrongService strongService, ModelContext cxt, List<DaliyBasicInfo> dailyList, StockAvg todayAv,
-			int lastDate) {
+			int lastDate, int lastDividendDate, DaliyTradeHistroyService daliyTradeHistroyService) {
 		this.cxt = cxt;
 		this.dailyList = dailyList;
 		this.todayAv = todayAv;
 		this.strongService = strongService;
 		this.lastDate = lastDate;
 		today = cxt.getToday();
+
+		code = cxt.getCode();
+		this.lastDividendDate = lastDividendDate;
+		int lastDate30 = dailyList.get(29).getTrade_date();// 第30个
+		if (lastDate30 <= lastDividendDate) {
+			isUseDividData = true;
+
+			listD30 = daliyTradeHistroyService.queryListByCode(code, lastDate, today.getTrade_date(), queryPage,
+					SortOrder.DESC);
+			if (listD30 == null || listD30.size() < 30) {
+				throw new RuntimeException(code + "获取复权数据从" + lastDate + "到" + today.getTrade_date() + "错误！");
+			}
+		}
 	}
 
 	@Getter
@@ -146,12 +169,25 @@ public class LinePrice {
 		if (isRange20pWith20daysGet) {
 			return isRange20pWith20daysRes;
 		}
-		List<DaliyBasicInfo> day20 = new LinkedList<DaliyBasicInfo>();
-		for (int i = 0; i < 20; i++) {
-			day20.add(dailyList.get(i));
+
+		double max20;
+		double min20;
+		if (isUseDividData) {// 复权数据
+			List<TradeHistInfoDaliy> day20 = new LinkedList<TradeHistInfoDaliy>();
+			for (int i = 0; i < 20; i++) {
+				day20.add(listD30.get(i));
+			}
+			max20 = day20.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get().getHigh();
+			min20 = day20.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
+		} else {
+			List<DaliyBasicInfo> day20 = new LinkedList<DaliyBasicInfo>();
+			for (int i = 0; i < 20; i++) {
+				day20.add(dailyList.get(i));
+			}
+			max20 = day20.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
+			min20 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
 		}
-		double max20 = day20.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
-		double min20 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
+
 		if (max20 > CurrencyUitl.topPrice20(min20)) {
 			isRange20pWith20daysRes = true;
 		}
@@ -167,12 +203,24 @@ public class LinePrice {
 		if (isRange30pWith30daysGet) {
 			return isRange30pWith30daysRes;
 		}
-		List<DaliyBasicInfo> day30 = new LinkedList<DaliyBasicInfo>();
-		for (int i = 0; i < 30; i++) {
-			day30.add(dailyList.get(i));
+
+		double max30;
+		double min30;
+		if (isUseDividData) {// 复权数据
+			List<TradeHistInfoDaliy> day20 = new LinkedList<TradeHistInfoDaliy>();
+			for (int i = 0; i < 30; i++) {
+				day20.add(listD30.get(i));
+			}
+			max30 = day20.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get().getHigh();
+			min30 = day20.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
+		} else {
+			List<DaliyBasicInfo> day30 = new LinkedList<DaliyBasicInfo>();
+			for (int i = 0; i < 30; i++) {
+				day30.add(dailyList.get(i));
+			}
+			max30 = day30.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
+			min30 = day30.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
 		}
-		double max30 = day30.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
-		double min30 = day30.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
 		if (max30 > CurrencyUitl.topPrice30(min30)) {
 			isRange20pWith20daysRes = true;
 		}
@@ -182,60 +230,115 @@ public class LinePrice {
 
 	// 当日收盘价超过前3日的最高价
 	public boolean check3dayPrice() {
-		DaliyBasicInfo d4 = dailyList.get(0);
-		DaliyBasicInfo d3 = dailyList.get(1);
-		DaliyBasicInfo d2 = dailyList.get(2);
 		DaliyBasicInfo d1 = dailyList.get(3);
+		if (d1.getTrade_date() <= lastDividendDate) {
+			TradeHistInfoDaliy d4 = listD30.get(0);
+			TradeHistInfoDaliy d3 = listD30.get(1);
+			TradeHistInfoDaliy d2 = listD30.get(2);
+			TradeHistInfoDaliy d0 = listD30.get(3);
 
-		if (d4.getClose() >= d1.getHigh() && d4.getClose() >= d2.getHigh() && d4.getClose() >= d3.getHigh()) {
-			return true;
+			if (d4.getClosed() >= d0.getHigh() && d4.getClosed() >= d2.getHigh() && d4.getClosed() >= d3.getHigh()) {
+				return true;
+			}
+		} else {
+			DaliyBasicInfo d4 = dailyList.get(0);
+			DaliyBasicInfo d3 = dailyList.get(1);
+			DaliyBasicInfo d2 = dailyList.get(2);
+
+			if (d4.getClose() >= d1.getHigh() && d4.getClose() >= d2.getHigh() && d4.getClose() >= d3.getHigh()) {
+				return true;
+			}
 		}
 		return false;
 	}
 
 	// 明日收盘价超过前3日的最高价
 	public boolean check3dayPrice(double topPrice) {
-		DaliyBasicInfo d4 = dailyList.get(0);
-		DaliyBasicInfo d3 = dailyList.get(1);
 		DaliyBasicInfo d2 = dailyList.get(2);
-
-		if (topPrice >= d4.getHigh() && topPrice >= d2.getHigh() && topPrice >= d3.getHigh()) {
-			return true;
+		if (d2.getTrade_date() <= lastDividendDate) {
+			TradeHistInfoDaliy d10 = listD30.get(0);
+			TradeHistInfoDaliy d12 = listD30.get(1);
+			TradeHistInfoDaliy d13 = listD30.get(2);
+			if (topPrice >= d10.getHigh() && topPrice >= d12.getHigh() && topPrice >= d13.getHigh()) {
+				return true;
+			}
+		} else {
+			DaliyBasicInfo d4 = dailyList.get(0);
+			DaliyBasicInfo d3 = dailyList.get(1);
+			if (topPrice >= d4.getHigh() && topPrice >= d2.getHigh() && topPrice >= d3.getHigh()) {
+				return true;
+			}
 		}
 		return false;
 	}
 
 	public boolean checkPriceBack6dayWhitToday() {
-		List<DaliyBasicInfo> highList = new ArrayList<DaliyBasicInfo>();
-		highList.add(dailyList.get(3));
-		highList.add(dailyList.get(4));
-		highList.add(dailyList.get(5));
-		List<DaliyBasicInfo> lowList = new ArrayList<DaliyBasicInfo>();
-		lowList.add(dailyList.get(0));
-		lowList.add(dailyList.get(1));
-		lowList.add(dailyList.get(2));
-
-		double high = highList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
-		double low = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
-		highList.addAll(lowList);
-		int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
-		return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
+		DaliyBasicInfo d = dailyList.get(5);
+		if (d.getTrade_date() <= lastDividendDate) {
+			List<TradeHistInfoDaliy> highList = new ArrayList<TradeHistInfoDaliy>();
+			highList.add(listD30.get(3));
+			highList.add(listD30.get(4));
+			highList.add(listD30.get(5));
+			List<TradeHistInfoDaliy> lowList = new ArrayList<TradeHistInfoDaliy>();
+			lowList.add(listD30.get(0));
+			lowList.add(listD30.get(1));
+			lowList.add(listD30.get(2));
+			double high = highList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
+					.getHigh();
+			double low = lowList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
+			highList.addAll(lowList);
+			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
+			return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
+		} else {
+			List<DaliyBasicInfo> highList = new ArrayList<DaliyBasicInfo>();
+			highList.add(dailyList.get(3));
+			highList.add(dailyList.get(4));
+			highList.add(dailyList.get(5));
+			List<DaliyBasicInfo> lowList = new ArrayList<DaliyBasicInfo>();
+			lowList.add(dailyList.get(0));
+			lowList.add(dailyList.get(1));
+			lowList.add(dailyList.get(2));
+			double high = highList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
+			double low = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
+			highList.addAll(lowList);
+			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
+			return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
+		}
 	}
 
 	public boolean checkPriceBack6dayWhitoutToday() {
-		List<DaliyBasicInfo> highList = new ArrayList<DaliyBasicInfo>();
-		highList.add(dailyList.get(4));
-		highList.add(dailyList.get(5));
-		highList.add(dailyList.get(6));
-		List<DaliyBasicInfo> lowList = new ArrayList<DaliyBasicInfo>();
-		lowList.add(dailyList.get(1));
-		lowList.add(dailyList.get(2));
-		lowList.add(dailyList.get(3));
+		DaliyBasicInfo d = dailyList.get(6);
+		if (d.getTrade_date() <= lastDividendDate) {
+			List<TradeHistInfoDaliy> highList = new ArrayList<TradeHistInfoDaliy>();
+			highList.add(listD30.get(4));
+			highList.add(listD30.get(5));
+			highList.add(listD30.get(6));
+			List<TradeHistInfoDaliy> lowList = new ArrayList<TradeHistInfoDaliy>();
+			lowList.add(listD30.get(1));
+			lowList.add(listD30.get(2));
+			lowList.add(listD30.get(3));
 
-		double high = highList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
-		double low = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
-		highList.addAll(lowList);
-		int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
-		return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
+			double high = highList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
+					.getHigh();
+			double low = lowList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
+			highList.addAll(lowList);
+			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
+			return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
+		} else {
+			List<DaliyBasicInfo> highList = new ArrayList<DaliyBasicInfo>();
+			highList.add(dailyList.get(4));
+			highList.add(dailyList.get(5));
+			highList.add(dailyList.get(6));
+			List<DaliyBasicInfo> lowList = new ArrayList<DaliyBasicInfo>();
+			lowList.add(dailyList.get(1));
+			lowList.add(dailyList.get(2));
+			lowList.add(dailyList.get(3));
+
+			double high = highList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
+			double low = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
+			highList.addAll(lowList);
+			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
+			return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
+		}
 	}
 }
