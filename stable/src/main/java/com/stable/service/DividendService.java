@@ -106,7 +106,7 @@ public class DividendService {
 		if (StringUtils.isNotBlank(proc)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("div_proc", proc));
 		}
-		FieldSortBuilder sort = SortBuilders.fieldSort("end_date").unmappedType("integer").order(SortOrder.DESC);
+		FieldSortBuilder sort = SortBuilders.fieldSort("ex_date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
