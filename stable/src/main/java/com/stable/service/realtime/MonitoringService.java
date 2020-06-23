@@ -75,7 +75,7 @@ public class MonitoringService {
 				olist.forEach(x -> {
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer(x, daliyBasicHistroyService,
 							avgService.queryListByCodeForRealtime(x.getCode(), x.getDate()), tickDataService,
-							stockBasicService, buyTraceService);
+							stockBasicService.getCodeName(x.getCode()), buyTraceService);
 					new Thread(task).start();
 					list.add(task);
 					map.put(x.getCode(), task);

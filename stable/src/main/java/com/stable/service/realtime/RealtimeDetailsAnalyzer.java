@@ -9,7 +9,6 @@ import java.util.List;
 import com.stable.enums.BuyModelType;
 import com.stable.enums.StockAType;
 import com.stable.service.DaliyBasicHistroyService;
-import com.stable.service.StockBasicService;
 import com.stable.service.TickDataService;
 import com.stable.service.trace.BuyTraceService;
 import com.stable.spider.eastmoney.EastmoneySpider;
@@ -38,10 +37,10 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private TickDataService tickDataService;
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	private String code;
+	private String codeName;
 	private int lastTradeDate;
 	private boolean isRunning = true;
 	private DaliyBasicInfo ytdBasic;
-	private StockBasicService stockBasicService;
 	private BuyTraceService buyTraceService;
 	private boolean waitingBuy = true;
 	private boolean isPg = false;
@@ -52,13 +51,13 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	}
 
 	public RealtimeDetailsAnalyzer(ModelV1 modelV1, DaliyBasicHistroyService daliyBasicHistroyService, StockAvg ytdAvg,
-			TickDataService tickDataService, StockBasicService stockBasicService, BuyTraceService buyTraceService) {
+			TickDataService tickDataService, String codeName, BuyTraceService buyTraceService) {
 		this.tickDataService = tickDataService;
 		this.ytdAvg = ytdAvg;
 		code = modelV1.getCode();
 		lastTradeDate = modelV1.getDate();
 		this.daliyBasicHistroyService = daliyBasicHistroyService;
-		this.stockBasicService = stockBasicService;
+		this.codeName = codeName;
 		this.buyTraceService = buyTraceService;
 	}
 
@@ -68,7 +67,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		if (StockAType.KCB == StockAType.formatCode(code)) {// 科创板20%涨跌幅
 			topPrice = CurrencyUitl.topPrice20(yesterdayPrice);
 		} else {
-			boolean isST = stockBasicService.getCodeName(code).contains("ST");
+			boolean isST = codeName.contains("ST");
 			topPrice = CurrencyUitl.topPrice(yesterdayPrice, isST);
 		}
 		return topPrice;
@@ -92,8 +91,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			isRunning = false;
 			return buyPrice;
 		} else {
-			throw new RuntimeException(code + stockBasicService.getCodeName(code) + ",成交价大于buyPrice[" + buyPrice
-					+ "],涨停价格topPrice[" + topPrice + "]?");
+			throw new RuntimeException(
+					code + codeName + ",成交价大于buyPrice[" + buyPrice + "],涨停价格topPrice[" + topPrice + "]?");
 		}
 	}
 
@@ -208,9 +207,9 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					boolean buytime = d.getBuyTimes() > d.getSellTimes();
 					isPg = pg;
 					isCurrMkt = buytime;
-					WxPushUtil.pushSystem1("请关注:" + code + ",市场行为:" + (buytime ? "买入" : "卖出") + ",主力行为:"
-							+ (pg ? "Yes" : "No") + ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt()) + ",卖出额:"
-							+ CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
+					WxPushUtil.pushSystem1("请关注:" + code + " " + codeName + ",市场行为:" + (buytime ? "买入" : "卖出")
+							+ ",主力行为:" + (pg ? "Yes" : "No") + ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt())
+							+ ",卖出额:" + CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
 							+ CurrencyUitl.covertToString(d.getTotalAmt())
 							+ ",请关注量(同花顺)，提防上影线，高开低走等,STOP: http://106.52.95.147:9999/web/realtime/buy?stop?code="
 							+ code);
