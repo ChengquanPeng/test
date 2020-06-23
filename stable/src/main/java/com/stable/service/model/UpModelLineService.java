@@ -174,10 +174,6 @@ public class UpModelLineService {
 				});
 			}
 			cunt.await();// 等待执行完成
-//			log.info("saveList size:{}", saveList.size());
-//			if (saveList.size() > 0) {
-//				esModelV1Dao.saveAll(saveList);
-//			}
 			log.info("avgList size:" + avgList.size());
 			if (avgList.size() > 0) {
 				avgService.saveStockAvg(avgList);
@@ -193,9 +189,6 @@ public class UpModelLineService {
 			WxPushUtil.pushSystem1(
 					treadeDate + " -> MV模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
 		} catch (Exception e) {
-//			if (saveList.size() > 0) {
-//				esModelV1Dao.saveAll(saveList);
-//			}
 			if (avgList.size() > 0) {
 				avgService.saveStockAvg(avgList);
 			}
