@@ -186,7 +186,7 @@ public class BuyBackService {
 		// System.err.println(array.toJSONString());
 		int cnt = 0;
 		if (array != null && array.size() > 0) {
-			log.info("获取到回购公告记录条数={}", array.size());
+			log.info("{},{},获取到回购公告记录条数={}", start_date, end_date, array.size());
 			List<BuyBackInfo> list = new LinkedList<BuyBackInfo>();
 			for (int i = 0; i < array.size(); i++) {
 				BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));

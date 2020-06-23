@@ -77,7 +77,7 @@ public class DividendService {
 				log.warn("未获取到分红送股数据交易记录,tushare,req={}", req.toString());
 				return 0;
 			}
-			log.info("获取到分红送股数据交易记录条数={}", array.size());
+			log.info("{},{},获取到分红送股数据交易记录条数={}", ts_code, ann_date, array.size());
 
 			// System.err.println(array);
 			for (int i = 0; i < array.size(); i++) {
