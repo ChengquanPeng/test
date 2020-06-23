@@ -2,6 +2,7 @@ package com.stable.service;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -105,30 +106,6 @@ public class DaliyTradeHistroyService {
 	public void removeCacheByChuQuan(String code) {
 		redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
 		priceLifeService.removePriceLifeCache(code);
-	}
-
-	// 全量获取历史记录（定时任务）-根据缓存是否需要重新获取，（除权得时候会重新获取）
-	// 每日更新-job
-	private boolean spiderTodayDaliyTrade() {
-		String today = DateUtil.getTodayYYYYMMDD();
-		int date = Integer.valueOf(today);
-		if (tradeCalService.isOpen(date)) {
-			if (spiderTodayDaliyTrade(today)) {
-				JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
-				if (array == null || array.size() <= 0) {
-					WxPushUtil.pushSystem1("图形指标：tushare获取记录StockDaliyBasic失败");
-				} else {
-					log.info("{}获取到每日指标记录条数={}", today, array.size());
-					imageCheck(array);
-				}
-				return true;
-			} else {
-				WxPushUtil.pushSystem1("日交易tushare获取记录失败");
-			}
-		} else {
-			log.info("非工作日。");
-		}
-		return false;
 	}
 
 	public void imageCheck(JSONArray array) {
@@ -378,17 +355,60 @@ public class DaliyTradeHistroyService {
 		TasksWorker.getInstance().getService()
 				.submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.DAY) {
 					public Object mycall() {
+						String today = DateUtil.getTodayYYYYMMDD();
 						try {
 							log.info("每日*定时任务-日交易[started]");
-							spiderTodayDaliyTrade();
+							// 全量获取历史记录（定时任务）-根据缓存是否需要重新获取，（除权得时候会重新获取）
+							// 每日更新-job
+							int date = Integer.valueOf(today);
+							if (tradeCalService.isOpen(date)) {
+								if (spiderTodayDaliyTrade(today)) {
+									return true;
+								} else {
+									WxPushUtil.pushSystem1("日交易tushare获取记录失败");
+								}
+							} else {
+								log.info("非工作日。");
+							}
 							log.info("每日*定时任务-日交易[end]");
 						} finally {
 							log.info("等待模型执行");
-							upLevel1Service.runJob(0);
+							nextModelJob(today);
 						}
 						return null;
 					}
 				});
+	}
+
+	private void nextModelJob(String today) {
+		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
+			@Override
+			public Object call() throws Exception {
+				try {
+					upLevel1Service.runJob(0);
+				} finally {
+					log.info("等待图片模型执行");
+					nextImageJob(today);
+				}
+				return null;
+			}
+		});
+	}
+
+	private void nextImageJob(String today) {
+		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
+			@Override
+			public Object call() throws Exception {
+				JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
+				if (array == null || array.size() <= 0) {
+					WxPushUtil.pushSystem1("图形指标：tushare获取记录StockDaliyBasic失败");
+				} else {
+					log.info("{}获取到每日指标记录条数={}", today, array.size());
+					imageCheck(array);
+				}
+				return null;
+			}
+		});
 	}
 
 	/**
