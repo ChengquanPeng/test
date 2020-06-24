@@ -299,6 +299,15 @@ public class DaliyBasicHistroyService {
 		return this.queryListByCode(code, date, fetchTickData, queryPage, SortOrder.DESC);
 	}
 
+	public DaliyBasicInfo queryLastest(String code) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(SortOrder.DESC);
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+		return esDaliyBasicInfoDao.search(sq).getContent().get(0);
+	}
+
 	public DaliyBasicInfo queryListByCodeForRealtime(String code, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));

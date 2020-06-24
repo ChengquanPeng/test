@@ -235,6 +235,9 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 	public String getBillDetailReport() {
 		List<TickData> allTickData = EastmoneySpider.getReallyTick(code);
+		if (allTickData == null || allTickData.isEmpty()) {
+			return "没有找到今日数据";
+		}
 		TickDataBuySellInfo d = tickDataService.sumTickData2(code, 0, yesterdayPrice, ytdBasic.getCirc_mv(),
 				allTickData, false);
 		boolean buytime = d.getBuyTimes() > d.getSellTimes();

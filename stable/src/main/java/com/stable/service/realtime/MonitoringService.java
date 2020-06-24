@@ -20,6 +20,7 @@ import com.stable.service.trace.BuyTraceService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BuyTrace;
+import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 import com.stable.vo.up.strategy.ModelV1;
 
@@ -110,13 +111,19 @@ public class MonitoringService {
 		}
 	}
 
-	public String billDetailReport(String code) {
+	public String todayBillingDetailReport(String code) {
 		if (map != null) {
 			if (map.containsKey(code)) {
 				return map.get(code).getBillDetailReport();
 			}
 		}
-		return "";
+		DaliyBasicInfo db = daliyBasicHistroyService.queryLastest(code);
+		ModelV1 x = new ModelV1();
+		x.setCode(code);
+		x.setDate(db.getTrade_date());
+		return new RealtimeDetailsAnalyzer(x, daliyBasicHistroyService,
+				avgService.queryListByCodeForRealtime(x.getCode(), x.getDate()), tickDataService,
+				stockBasicService.getCodeName(x.getCode()), buyTraceService).getBillDetailReport();
 	}
 
 	public BuyTrace buyAndStopThread(String code) {

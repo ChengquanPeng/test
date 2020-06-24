@@ -23,7 +23,7 @@ public class RealTimeController {
 	public ResponseEntity<JsonResult> detail(String code) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(monitoringService.billDetailReport(code));
+			r.setResult(monitoringService.todayBillingDetailReport(code));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
