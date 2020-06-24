@@ -37,13 +37,16 @@ public class BuyTraceService {
 		esBuyTraceDao.saveAll(bts);
 	}
 
-	public List<BuyTrace> getListByCode(String code, int status, EsQueryPageReq querypage) {
+	public List<BuyTrace> getListByCode(String code, int status, int buyModelType, EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		}
 		if (status > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("status", status));
+		}
+		if (buyModelType > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("buyModelType", buyModelType));
 		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("buyDate").unmappedType("integer").order(SortOrder.DESC);
 

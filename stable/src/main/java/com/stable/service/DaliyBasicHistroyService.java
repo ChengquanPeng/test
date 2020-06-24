@@ -308,15 +308,6 @@ public class DaliyBasicHistroyService {
 		return esDaliyBasicInfoDao.search(sq).getContent().get(0);
 	}
 
-	public DaliyBasicInfo queryListByCodeForRealtime(String code, int date) {
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		bqb.must(QueryBuilders.matchPhraseQuery("trade_date", date));
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).build();
-		return esDaliyBasicInfoDao.search(sq).getContent().get(0);
-	}
-
 	public Page<DaliyBasicInfo> queryListByCodeForModel(String code, int date, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();

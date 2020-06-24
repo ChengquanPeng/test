@@ -64,7 +64,7 @@ public class TickDataController {
 	public ResponseEntity<JsonResult> fetchByCode(String code) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(EastmoneySpider.getReallyTick(code));
+			r.setResult(EastmoneySpider.getRealtimeTick(code));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

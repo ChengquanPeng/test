@@ -297,6 +297,37 @@ public class TickDataService {
 		return res;
 	}
 
+	EsQueryPageReq qp = new EsQueryPageReq(10);
+
+	// 最新的10日中，有10条
+	public boolean hasProgram(String code) {
+		int pageNum = qp.getPageNum();
+		int size = qp.getPageSize();
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<TickDataBuySellInfo> page = esTickDataBuySellInfoDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			List<TickDataBuySellInfo> listtds = page.getContent();
+			int c = 0;
+			for (int i = 0; i < listtds.size(); i++) {
+				TickDataBuySellInfo x = listtds.get(i);
+				if (x.getProgramRate() > 0) {
+					c++;
+				}
+			}
+			if (c >= 4) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public List<TickDataBuySellInfo> listForModel(String code, int startDate, int endDate, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
@@ -371,7 +402,7 @@ public class TickDataService {
 				int succ = 0;
 				for (DaliyBasicInfo d : basics) {
 					log.info("fetch TickData From EasyMoney,code={},index={}", d.getCode(), index);
-					List<String> lines = EastmoneySpider.getReallyTickByJob(d.getCode());
+					List<String> lines = EastmoneySpider.getRealtimeTickByJob(d.getCode());
 					if (lines != null) {
 						TickDataBuySellInfo ts = this.sumTickData(d.getCode(), date, d.getYesterdayPrice(),
 								d.getCirc_mv(), 0, lines, false);
@@ -410,7 +441,7 @@ public class TickDataService {
 		List<String> lines = null;
 		int source = 0;
 		if (todaydate == date) {// 默认当天使用Eastmoney
-			lines = EastmoneySpider.getReallyTickByJob(code);
+			lines = EastmoneySpider.getRealtimeTickByJob(code);
 			source = 0;
 		}
 		if (lines == null) {// EastMoney没有则使用Tushare

@@ -103,7 +103,7 @@ public class LinePrice {
 			if (stock > base) {
 				sortStrong++;
 				sortStrong += 5;// 提高权重
-				sr.setStrongDetail("5天对比大盘强势次数:" + days + "days[" + sortStrong + "]");
+				sr.setStrongDetail("5天对比大盘强势次数:" + days + "天[" + sortStrong + "]");
 				sr.setStrongScore(sortStrong);
 			} else {
 				sr.setStrongScore(0);

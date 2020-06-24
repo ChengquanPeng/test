@@ -32,9 +32,7 @@ public class BuyTrace extends EsBase {
 	@Field(type = FieldType.Double)
 	private double profit;
 	@Field(type = FieldType.Integer)
-	private int buyModelType;
-	@Field(type = FieldType.Integer)
-	private int currMkt;// 市场:1买入，2卖出
+	private int buyModelType;// 人工还是机器
 	@Field(type = FieldType.Integer)
 	private int program;// 市场:1程序，2无程序
 

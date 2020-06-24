@@ -28,7 +28,7 @@ public class EastmoneySpider {
 		return 0;
 	}
 
-	public synchronized static List<String> getReallyTickByJob(String code) {
+	public synchronized static List<String> getRealtimeTickByJob(String code) {
 		try {
 			int mk = EastmoneySpider.formatCode(code);
 			JSONObject result = HttpUtil.doGet(String.format(URL_FORMAT, mk, code));
@@ -58,7 +58,7 @@ public class EastmoneySpider {
 		}
 	}
 
-	public static List<TickData> getReallyTick(String code) {
+	public static List<TickData> getRealtimeTick(String code) {
 		try {
 			int mk = EastmoneySpider.formatCode(code);
 			JSONObject result = HttpUtil.doGet(String.format(URL_FORMAT, mk, code));
@@ -89,6 +89,6 @@ public class EastmoneySpider {
 	}
 
 	public static void main(String[] args) {
-		EastmoneySpider.getReallyTick("603456");
+		EastmoneySpider.getRealtimeTick("603456");
 	}
 }
