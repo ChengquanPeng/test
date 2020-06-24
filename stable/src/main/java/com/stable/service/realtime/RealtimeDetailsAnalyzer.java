@@ -141,8 +141,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				.max(Double::compare).get();
 		// 最终监控价
 		double chkPrice = Arrays.asList(p1, p2, p3).stream().max(Double::compare).get();
+		log.info("{}=>p1一阳N线价:{},最少3%:{},p3大于前三天最高价:{},最终监控价:{}", code, p1, p2, p3, chkPrice);
 		// 量控量
-//		long ytdvol = ytdBasic.getVol();
 		String today = DateUtil.getTodayYYYYMMDD();
 
 		long d1130 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
