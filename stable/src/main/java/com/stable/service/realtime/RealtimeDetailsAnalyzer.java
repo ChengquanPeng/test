@@ -41,6 +41,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private int lastTradeDate;
 	private boolean isRunning = true;
 	private DaliyBasicInfo ytdBasic;
+	private double yesterdayPrice;
 	private BuyTraceService buyTraceService;
 	private boolean waitingBuy = true;
 	private boolean isPg = false;
@@ -63,7 +64,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	}
 
 	private double getTopPrice() {
-		double yesterdayPrice = ytdBasic.getYesterdayPrice();
 		double topPrice = 0.0;
 		if (StockAType.KCB == StockAType.formatCode(code)) {// 科创板20%涨跌幅
 			topPrice = CurrencyUitl.topPrice20(yesterdayPrice);
@@ -77,7 +77,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	public Double getBuyPrice() {
 		List<TickData> allTickData = EastmoneySpider.getReallyTick(code);
 		// 分笔分析
-		double yesterdayPrice = ytdBasic.getYesterdayPrice();
 		TickDataBuySellInfo d = tickDataService.sumTickData2(code, 0, yesterdayPrice, ytdBasic.getCirc_mv(),
 				allTickData, false);
 		boolean buytime = d.getBuyTimes() > d.getSellTimes();
@@ -125,11 +124,10 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					"实时:数据不全，终止监控。ytdAvg==null？" + (ytdAvg == null) + "},ytdBasic==null？" + (ytdBasic == null));
 			return;
 		}
+		yesterdayPrice = ytdBasic.getClose();
 		topPrice = getTopPrice();
 		List<DaliyBasicInfo> list3 = daliyBasicHistroyService.queryListByCodeForModel(code, lastTradeDate, queryPage)
 				.getContent();
-
-		double yesterdayPrice = ytdBasic.getYesterdayPrice();
 
 		// 监控价-1一阳N线价
 		double p1 = Arrays.asList(ytdAvg.getAvgPriceIndex3(), ytdAvg.getAvgPriceIndex5(), ytdAvg.getAvgPriceIndex10(),
@@ -141,7 +139,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				.max(Double::compare).get();
 		// 最终监控价
 		double chkPrice = Arrays.asList(p1, p2, p3).stream().max(Double::compare).get();
-		log.info("{}=>p1一阳N线价:{},最少3%:{},p3大于前三天最高价:{},最终监控价:{}", code, p1, p2, p3, chkPrice);
+		log.info("{}=>p1一阳N线价:{},最少3%:{},p3大于前三天最高价:{},最终监控价:{},昨收:{},今日涨停价:{}", code, p1, p2, p3, chkPrice,
+				yesterdayPrice, topPrice);
 		// 量控量
 		String today = DateUtil.getTodayYYYYMMDD();
 

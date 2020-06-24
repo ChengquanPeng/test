@@ -77,7 +77,7 @@ public class V2PRESortStrategyListener implements StrategyListener {
 						StockAvg av = lineAvgPrice.todayAv;
 						String code = mc.getCode();
 
-						// 收盘在任意均线之下且振幅超30%，周线OK，进入第二日监听列表
+						// 收盘在任意均线之下，进入第二日监听列表
 						if (av.getAvgPriceIndex3() > today.getClose() || av.getAvgPriceIndex5() > today.getClose()
 								|| av.getAvgPriceIndex10() > today.getClose()
 								|| av.getAvgPriceIndex20() > today.getClose()
@@ -97,11 +97,23 @@ public class V2PRESortStrategyListener implements StrategyListener {
 
 									if (linePrice.check3dayPrice(topPrice)) {// 涨停价：超过对比3天-价
 										isOk = true;
+									} else {
+										dropOutMsg = "涨停价格未超过前3日最高价";
 									}
+								} else {
+									dropOutMsg = "涨停价格未超过各均线";
 								}
+							} else {
+								dropOutMsg = "checkPriceBack6dayWhitToday";
 							}
+						} else {
+							dropOutMsg = "收盘不在任意均线之下";
 						}
+					} else {
+						dropOutMsg = "非白马";
 					}
+				} else {
+					dropOutMsg = "未获取到均价";
 				}
 			} catch (Exception e) {
 				isOk = false;

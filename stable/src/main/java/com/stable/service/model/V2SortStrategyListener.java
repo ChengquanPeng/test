@@ -113,6 +113,8 @@ public class V2SortStrategyListener implements StrategyListener {
 									avgScore += 10;
 									mv.setIsRange30p(1);
 								}
+							} else {
+								dropOutMsg = "b1-b6不满足要求";
 							}
 						} else {
 							log.info(

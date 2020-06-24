@@ -263,9 +263,9 @@ public class LinePrice {
 				return true;
 			}
 		} else {
-			DaliyBasicInfo d4 = dailyList.get(0);
-			DaliyBasicInfo d3 = dailyList.get(1);
-			if (topPrice >= d4.getHigh() && topPrice >= d2.getHigh() && topPrice >= d3.getHigh()) {
+			DaliyBasicInfo d0 = dailyList.get(0);
+			DaliyBasicInfo d1 = dailyList.get(1);
+			if (topPrice >= d0.getHigh() && topPrice >= d1.getHigh() && topPrice >= d2.getHigh()) {
 				return true;
 			}
 		}
