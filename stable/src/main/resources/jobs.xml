@@ -23,12 +23,6 @@
 		description="系统状态检查和重启" sharding-total-count="1" overwrite="true" />
 
 	<!-- 每天表达式cron="0 15 4 * * ?" -->
-	<job:simple id="EveryWorkingDayMorningJob"
-		class="com.stable.job.EveryWorkingDayMorningJob"
-		registry-center-ref="regCenter" cron="0 15 4 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日早上4点15执行任务(当日分红除权)"
-		sharding-total-count="1" overwrite="true" />
-
 	<job:simple id="RealtimeJob"
 		class="com.stable.job.RealtimeJob"
 		registry-center-ref="regCenter" cron="0 32 9 ? * 2,3,4,5,6 *"
@@ -55,10 +49,16 @@
 
 	<job:simple id="EveryWorkingDayJob"
 		class="com.stable.job.EveryWorkingDayJob"
-		registry-center-ref="regCenter" cron="0 05 19 ? * 2,3,4,5,6 *"
+		registry-center-ref="regCenter" cron="0 05 23 ? * 2,3,4,5,6 *"
 		sharding-item-parameters="0=a"
-		description="每日晚上19点05执行任务(回购公告、分红除权公告)" sharding-total-count="1"
+		description="每日晚上23点05执行任务(回购公告、分红除权公告)" sharding-total-count="1"
 		overwrite="true" />
+	
+	<job:simple id="EveryWorkingDayMorningJob"
+		class="com.stable.job.EveryWorkingDayMorningJob"
+		registry-center-ref="regCenter" cron="0 15 4 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a" description="每日早上4点15执行任务(当日分红除权)"
+		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryWeekMonJob"
 		class="com.stable.job.EveryWeekMonJob" registry-center-ref="regCenter"

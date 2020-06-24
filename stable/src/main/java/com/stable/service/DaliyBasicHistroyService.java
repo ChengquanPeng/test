@@ -191,7 +191,7 @@ public class DaliyBasicHistroyService {
 				String today = DateUtil.getTodayYYYYMMDD();
 				boolean result = spiderDaliyDailyBasic(today);
 				log.info("每日*定时任务 daily_basic [end],result={}", result);
-				WxPushUtil.pushSystem1("正常执行=>daily_basic（每日指标）记录,tushare,日期=" + today);
+				WxPushUtil.pushSystem1("Seq1=>正常执行=>daily_basic（每日指标）记录,tushare,日期=" + today);
 				if (result) {
 					nextTickDataJob();
 				}
@@ -208,22 +208,15 @@ public class DaliyBasicHistroyService {
 				tickDataService.resetTickDataStatus();
 				log.info("Tick data 剩余fetch");
 				tickDataService.fetch("", "", "0", false, "", true);
-				WxPushUtil.pushSystem1("正常执行=>分笔任务TickDataJob");
+				WxPushUtil.pushSystem1("Seq2=>正常执行=>分笔任务TickDataJob");
 				return null;
 			}
 		});
 	}
 
 	public void nextTradeHistroyJob() {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			@Override
-			public Object call() throws Exception {
-				log.info("获取日交易(分红除权)");
-				tradeHistroyService.jobSpiderAll();
-				WxPushUtil.pushSystem1("正常执行=>日K复权任务");
-				return null;
-			}
-		});
+		log.info("获取日交易(分红除权)");
+		tradeHistroyService.jobSpiderAll();
 	}
 
 	public void jobSpiderAllDailyBasic(String tradeDate) {

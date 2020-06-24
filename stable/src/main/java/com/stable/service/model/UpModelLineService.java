@@ -189,8 +189,8 @@ public class UpModelLineService {
 				}
 			}
 			log.info("MV1模型执行完成");
-			WxPushUtil.pushSystem1(
-					treadeDate + " -> MV模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
+			WxPushUtil.pushSystem1("Seq4=>" + treadeDate + " -> MV模型执行完成！ 开始时间:" + startTime + " 结束时间："
+					+ DateUtil.getTodayYYYYMMDDHHMMSS());
 		} catch (Exception e) {
 			if (avgList.size() > 0) {
 				avgService.saveStockAvg(avgList);

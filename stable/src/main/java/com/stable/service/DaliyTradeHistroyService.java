@@ -3,6 +3,7 @@ package com.stable.service;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -140,9 +141,9 @@ public class DaliyTradeHistroyService {
 					if (sl.getResultList().size() > 0) {
 						esModelV1Dao.saveAll(sl.getResultList());
 					}
-					log.info("图片模型执行完成。");
-					WxPushUtil
-							.pushSystem1("图形模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
+					log.info("Seq5=>图片模型执行完成。");
+					WxPushUtil.pushSystem1(
+							"Seq5=>图形模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
 				} catch (Exception e) {
 					e.printStackTrace();
 					ErrorLogFileUitl.writeError(e, e.getMessage(), "", "");
@@ -166,6 +167,7 @@ public class DaliyTradeHistroyService {
 				return false;
 			}
 			log.info("获取到日交易记录条数={}", array.size());
+			CountDownLatch cnt = new CountDownLatch(array.size());
 			List<TradeHistInfoDaliy> list = new LinkedList<TradeHistInfoDaliy>();
 			for (int i = 0; i < array.size(); i++) {
 				// 1.保存记录
@@ -192,8 +194,12 @@ public class DaliyTradeHistroyService {
 					String datep = yyyymmdd;
 					TasksWorker2nd.add(new MyRunnable() {
 						public void running() {
-							spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), datep, today, 0);
-							redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+							try {
+								spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), datep, today, 0);
+								redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+							} finally {
+								cnt.countDown();
+							}
 						}
 					});
 				} else {
@@ -201,7 +207,13 @@ public class DaliyTradeHistroyService {
 							today, i);
 					redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 					priceLifeService.checkAndSetPrice(d);
+					cnt.countDown();
 				}
+			}
+			try {
+				cnt.await();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 			if (list.size() > 0) {
 				tradeHistDaliy.saveAll(list);
@@ -363,14 +375,14 @@ public class DaliyTradeHistroyService {
 							int date = Integer.valueOf(today);
 							if (tradeCalService.isOpen(date)) {
 								if (spiderTodayDaliyTrade(today)) {
-									return true;
 								} else {
-									WxPushUtil.pushSystem1("日交易tushare获取记录失败");
+									WxPushUtil.pushSystem1("异常=>Seq3=>日K复权任务");
 								}
 							} else {
 								log.info("非工作日。");
 							}
 							log.info("每日*定时任务-日交易[end]");
+							WxPushUtil.pushSystem1("Seq3=>正常执行=>日K复权任务");
 						} finally {
 							log.info("等待模型执行");
 							nextModelJob(today);
