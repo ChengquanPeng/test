@@ -121,7 +121,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		ytdBasic = daliyBasicHistroyService.queryListByCodeForRealtime(code, lastTradeDate);
 		if (ytdAvg == null || ytdBasic == null) {
 			WxPushUtil.pushSystem1(
-					"实时:数据不全，终止监控。ytdAvg==null？" + (ytdAvg == null) + "},ytdBasic==null？" + (ytdBasic == null));
+					"实时:数据不全，终止监控。ytdAvg==null?" + (ytdAvg == null) + "},ytdBasic==null?" + (ytdBasic == null));
 			return;
 		}
 		yesterdayPrice = ytdBasic.getClose();
