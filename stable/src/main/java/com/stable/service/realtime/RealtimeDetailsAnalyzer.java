@@ -149,7 +149,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				DateUtil.parseDate(today + "113000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 		Date date = DateUtil.parseDate(today + "130100", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
 		long d1300 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(date);
-
 		while (isRunning) {
 			try {
 				long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
@@ -167,10 +166,10 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				List<TickData> allTickData = null;
 				SinaRealTime srt = SinaRealtimeUitl.get(code);
 				if (srt != null) {
-					log.info("{} SINA 实时:{}", code, srt);
 					highPrice = srt.getHigh();
 					nowPrice = srt.getNow();
 					WAIT_MIN = ONE_MIN;// 新浪1分钟频率
+					log.info("{} SINA 实时:highPrice:{},nowPrice:{},监控价:{}", code, highPrice, nowPrice, chkPrice);
 				} else {
 					// 切换到东方财富
 					allTickData = EastmoneySpider.getReallyTick(code);
@@ -178,8 +177,10 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						highPrice = allTickData.stream().max(Comparator.comparingDouble(TickData::getPrice)).get()
 								.getPrice();
 						nowPrice = allTickData.get(allTickData.size() - 1).getPrice();
+						log.info("{} 东方财富 实时:highPrice:{},nowPrice:{},监控价:{}", code, highPrice, nowPrice, chkPrice);
 					} else {
 						allTickData = Collections.emptyList();
+						log.info("{} 东方财富 实时未获取到分笔", code);
 					}
 					WAIT_MIN = FIVE_MIN;// 东方财富5分钟频率
 				}
