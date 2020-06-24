@@ -161,6 +161,9 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				DateUtil.parseDate(today + "113000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 		Date date = DateUtil.parseDate(today + "130100", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
 		long d1300 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(date);
+		long d1454 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+				DateUtil.parseDate(today + "145400", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+
 		while (isRunning) {
 			try {
 				long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
@@ -199,30 +202,40 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					isSina = false;
 				}
 
-				if (highPrice >= chkPrice && nowPrice >= chkPrice) {// 一阳穿N，并涨幅3%以上
-					WAIT_MIN = FIVE_MIN;// 东方财富5分钟频率
-					if (allTickData == null) {
-						allTickData = EastmoneySpider.getRealtimeTick(code);
-					}
-					// 需要看量，开高低走，上影线情况
-					TickDataBuySellInfo d = tickDataService.sumTickData2(code, 0, yesterdayPrice, ytdBasic.getCirc_mv(),
-							allTickData, false);
-					boolean pg = false;
-					if (d.getProgramRate() > 0) {
-						pg = true;
-					} else {
-						pg = tickDataService.hasProgram(code);
-					}
+				// 买入
+				if (MonitoringType.SELL != mt) {
+					if (highPrice >= chkPrice && nowPrice >= chkPrice) {// 一阳穿N，并涨幅3%以上
+						WAIT_MIN = FIVE_MIN;// 东方财富5分钟频率
+						if (allTickData == null) {
+							allTickData = EastmoneySpider.getRealtimeTick(code);
+						}
+						// 需要看量，开高低走，上影线情况
+						TickDataBuySellInfo d = tickDataService.sumTickData2(code, 0, yesterdayPrice,
+								ytdBasic.getCirc_mv(), allTickData, false);
+						boolean pg = false;
+						if (d.getProgramRate() > 0) {
+							pg = true;
+						} else {
+							pg = tickDataService.hasProgram(code);
+						}
 
-					boolean buytime = d.getBuyTimes() > d.getSellTimes();
-					WxPushUtil.pushSystem1("请关注:" + code + " " + codeName + ",市场行为:" + (buytime ? "买入" : "卖出")
-							+ ",主力行为:" + (pg ? "Yes" : "No") + ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt())
-							+ ",卖出额:" + CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
-							+ CurrencyUitl.covertToString(d.getTotalAmt())
-							+ ",请关注量(同花顺)，提防上影线，高开低走等,STOP: http://106.52.95.147:9999/web/realtime/buy?stop?detail?code="
-							+ code);
-					// isRunning = false;
-					autoBuy(isSina ? srt.getBuy1() : allTickData.get(allTickData.size() - 1).getPrice(), pg);
+						boolean buytime = d.getBuyTimes() > d.getSellTimes();
+						WxPushUtil.pushSystem1("请关注:" + code + " " + codeName + ",市场行为:" + (buytime ? "买入" : "卖出")
+								+ ",主力行为:" + (pg ? "Yes" : "No") + ",买入额:"
+								+ CurrencyUitl.covertToString(d.getBuyTotalAmt()) + ",卖出额:"
+								+ CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
+								+ CurrencyUitl.covertToString(d.getTotalAmt())
+								+ ",请关注量(同花顺)，提防上影线，高开低走等,STOP: http://106.52.95.147:9999/web/realtime/buy?stop?detail?code="
+								+ code);
+						// isRunning = false;
+						autoBuy(isSina ? srt.getBuy1() : allTickData.get(allTickData.size() - 1).getPrice(), pg);
+					}
+				}
+
+				// 卖出
+				if (now > d1454 && MonitoringType.BUY != mt) {
+					// 下跌卖出
+					// 上涨：上影线，高开低走
 				}
 				Thread.sleep(WAIT_MIN);
 			} catch (Exception e) {
