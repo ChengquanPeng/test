@@ -109,7 +109,7 @@ public class DaliyTradeHistroyService {
 		priceLifeService.removePriceLifeCache(code);
 	}
 
-	public void imageCheck(JSONArray array) {
+	public void imageCheck(JSONArray array, String today) {
 		ListenableFuture<?> l = TasksWorker.getInstance().getService().submit(new Runnable() {
 			@Override
 			public void run() {
@@ -142,12 +142,12 @@ public class DaliyTradeHistroyService {
 						esModelV1Dao.saveAll(sl.getResultList());
 					}
 					log.info("Seq5=>图片模型执行完成。");
-					WxPushUtil.pushSystem1(
-							"Seq5=>图形模型执行完成！ 开始时间:" + startTime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
+					WxPushUtil.pushSystem1("Seq5=> " + today + " 图形模型执行完成！ 开始时间:" + startTime + " 结束时间："
+							+ DateUtil.getTodayYYYYMMDDHHMMSS() + ",succ=" + sl.getResultList().size());
 				} catch (Exception e) {
 					e.printStackTrace();
 					ErrorLogFileUitl.writeError(e, e.getMessage(), "", "");
-					WxPushUtil.pushSystem1("图形模型执行异常！ 开始时间:" + startTime);
+					WxPushUtil.pushSystem1("异常Seq5=> " + today + " 图形模型执行异常！ 开始时间:" + startTime);
 				}
 			}
 		});
@@ -158,13 +158,13 @@ public class DaliyTradeHistroyService {
 		}
 	}
 
-	private synchronized boolean spiderTodayDaliyTrade(String today) {
+	private synchronized int spiderTodayDaliyTrade(String today) {
 		String preDate = tradeCalService.getPretradeDate(today);
 		try {
 			JSONArray array = tushareSpider.getStockDaliyTrade(null, today, null, null);
 			if (array == null || array.size() <= 0) {
 				log.warn("未获取到日交易记录,tushare,code={}");
-				return false;
+				return 0;
 			}
 			log.info("获取到日交易记录条数={}", array.size());
 			CountDownLatch cnt = new CountDownLatch(array.size());
@@ -217,12 +217,12 @@ public class DaliyTradeHistroyService {
 			}
 			if (list.size() > 0) {
 				tradeHistDaliy.saveAll(list);
+				return list.size();
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return false;
 		}
-		return true;
+		return 0;
 
 	}
 
@@ -374,15 +374,16 @@ public class DaliyTradeHistroyService {
 							// 每日更新-job
 							int date = Integer.valueOf(today);
 							if (tradeCalService.isOpen(date)) {
-								if (spiderTodayDaliyTrade(today)) {
+								int succ = spiderTodayDaliyTrade(today);
+								if (succ > 0) {
+									WxPushUtil.pushSystem1("Seq3=>正常执行=>日K复权任务,succ=" + succ);
 								} else {
-									WxPushUtil.pushSystem1("异常=>Seq3=>日K复权任务");
+									WxPushUtil.pushSystem1("异常执行Seq3=>日K复权任务,succ=0");
 								}
 							} else {
 								log.info("非工作日。");
 							}
 							log.info("每日*定时任务-日交易[end]");
-							WxPushUtil.pushSystem1("Seq3=>正常执行=>日K复权任务");
 						} finally {
 							log.info("等待模型执行");
 							nextModelJob(today);
@@ -411,12 +412,19 @@ public class DaliyTradeHistroyService {
 		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
 			@Override
 			public Object call() throws Exception {
-				JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
+				JSONArray array;
+				try {
+					array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
+				} catch (Exception e) {
+					WxPushUtil.pushSystem1("图形指标：tushare获取记录StockDaliyBasic失败,date=" + today);
+					e.printStackTrace();
+					return null;
+				}
 				if (array == null || array.size() <= 0) {
-					WxPushUtil.pushSystem1("图形指标：tushare获取记录StockDaliyBasic失败");
+					WxPushUtil.pushSystem1("图形指标：tushare获取记录StockDaliyBasic失败,date=" + today);
 				} else {
 					log.info("{}获取到每日指标记录条数={}", today, array.size());
-					imageCheck(array);
+					imageCheck(array, today);
 				}
 				return null;
 			}

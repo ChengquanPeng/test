@@ -68,7 +68,7 @@ public class DaliyBasicHistroyService {
 	public String startDate;
 
 	// 直接全量获取历史记录，不需要根据缓存来判断
-	private synchronized boolean spiderDaliyDailyBasic(String today) {
+	private synchronized int spiderDaliyDailyBasic(String today) {
 		String preDate = tradeCalService.getPretradeDate(today);
 		JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
 		if (array == null || array.size() <= 0) {
@@ -76,14 +76,13 @@ public class DaliyBasicHistroyService {
 			if (tradeCalService.isOpen(Integer.valueOf(today))) {
 				WxPushUtil.pushSystem1("未获取到日交易daily_basic（每日指标）记录,tushare,日期=" + today);
 			}
-			return false;
+			return 0;
 		}
-
+		List<DaliyBasicInfo> list = new LinkedList<DaliyBasicInfo>();
+		int size = array.size();
+		log.info("{}获取到每日指标记录条数={}", today, size);
+		CountDownLatch cnt = new CountDownLatch(size);
 		try {
-			int size = array.size();
-			log.info("{}获取到每日指标记录条数={}", today, size);
-			CountDownLatch cnt = new CountDownLatch(size);
-			List<DaliyBasicInfo> list = new LinkedList<DaliyBasicInfo>();
 			for (int i = 0; i < array.size(); i++) {
 				// System.err.println(array.getJSONArray(i).toJSONString());
 				DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
@@ -113,7 +112,6 @@ public class DaliyBasicHistroyService {
 								log.info("<每日指标记录>需要重新获取或者补全 code={},date={},preDate={},index={}", d.getCode(), date,
 										preDate, index);
 								final String datep = date;
-
 								// 补全缺失
 								spiderStockDaliyBasic(d.getCode(), datep, today);
 								redisUtil.set(RedisConstant.RDS_TRADE_DAILY_BASIC_ + d.getCode(), d.getTrade_date());
@@ -134,9 +132,9 @@ public class DaliyBasicHistroyService {
 			cnt.await();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return false;
+			return 0;
 		}
-		return true;
+		return list.size();
 	}
 
 	/**
@@ -189,11 +187,13 @@ public class DaliyBasicHistroyService {
 			public Object mycall() {
 				log.info("每日*定时任务 daily_basic [started]");
 				String today = DateUtil.getTodayYYYYMMDD();
-				boolean result = spiderDaliyDailyBasic(today);
+				int result = spiderDaliyDailyBasic(today);
 				log.info("每日*定时任务 daily_basic [end],result={}", result);
-				WxPushUtil.pushSystem1("Seq1=>正常执行=>daily_basic（每日指标）记录,tushare,日期=" + today);
-				if (result) {
+				if (result != 0) {
+					WxPushUtil.pushSystem1("Seq1=>正常执行=>daily_basic(每日指标),日期=" + today + ",数量:" + result);
 					nextTickDataJob();
+				} else {
+					WxPushUtil.pushSystem1("异常执行Seq1=>daily_basic(每日指标),日期=" + today + ",数量:0,以后的链条不会被执行");
 				}
 				return null;
 			}
@@ -207,8 +207,12 @@ public class DaliyBasicHistroyService {
 				log.info("resetTickDataStatus fetchTickData [0] -> [-1] ");
 				tickDataService.resetTickDataStatus();
 				log.info("Tick data 剩余fetch");
-				tickDataService.fetch("", "", "0", false, "", true);
-				WxPushUtil.pushSystem1("Seq2=>正常执行=>分笔任务TickDataJob");
+				int succ = tickDataService.fetch("", "", "0", false, "", true);
+				if (succ == 0) {
+					WxPushUtil.pushSystem1("异常执行Seq2=>分笔任务TickDataJob,succ=" + succ);
+				} else {
+					WxPushUtil.pushSystem1("Seq2=>正常执行=>分笔任务TickDataJob,succ=" + succ);
+				}
 				return null;
 			}
 		});

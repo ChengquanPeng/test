@@ -145,9 +145,13 @@ public class UpModelLineService {
 		}
 		List<StockAvg> avgList = Collections.synchronizedList(new LinkedList<StockAvg>());
 		List<StrategyListener> models = new LinkedList<StrategyListener>();
-		models.add(new V1SortStrategyListener(treadeDate));
-		models.add(new V2SortStrategyListener(treadeDate));
-		models.add(new V2PRESortStrategyListener(treadeDate));
+		StrategyListener v1 = new V1SortStrategyListener(treadeDate);
+		StrategyListener v2 = new V2SortStrategyListener(treadeDate);
+		StrategyListener v2p = new V2PRESortStrategyListener(treadeDate);
+
+		models.add(v1);
+		models.add(v2);
+		models.add(v2p);
 		try {
 			Map<String, List<ConceptInfo>> gn = conceptService.getDailyMap(treadeDate);
 			int size = array.size();
@@ -189,8 +193,9 @@ public class UpModelLineService {
 				}
 			}
 			log.info("MV1模型执行完成");
-			WxPushUtil.pushSystem1("Seq4=>" + treadeDate + " -> MV模型执行完成！ 开始时间:" + startTime + " 结束时间："
-					+ DateUtil.getTodayYYYYMMDDHHMMSS());
+			WxPushUtil.pushSystem1("Seq4=> " + treadeDate + " -> MV模型执行完成！ 开始时间:" + startTime + " 结束时间："
+					+ DateUtil.getTodayYYYYMMDDHHMMSS() + ",V1 cnt:" + v1.getResultList().size() + ",V2 cnt:"
+					+ v2.getResultList().size() + ",V2PRE cnt:" + v2p.getResultList().size());
 		} catch (Exception e) {
 			if (avgList.size() > 0) {
 				avgService.saveStockAvg(avgList);

@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
@@ -116,16 +117,16 @@ public class TickDataService {
 		} while (condition);
 	}
 
-	public void fetch(String code, String date, String all, boolean html, String startDate, boolean isJobSource) {
+	public int fetch(String code, String date, String all, boolean html, String startDate, boolean isJobSource) {
 		if (StringUtils.isBlank(code) && StringUtils.isBlank(date) && StringUtils.isBlank(all)) {
 			log.warn("参数为空");
-			return;
+			return 0;
 		}
 		try {
 			boolean getLock = semp.tryAcquire(1, TimeUnit.HOURS);
 			if (!getLock) {
 				log.warn("No Locked");
-				return;
+				return 0;
 			}
 			log.info("Get Locked");
 		} catch (InterruptedException e1) {
@@ -135,7 +136,7 @@ public class TickDataService {
 			String now = DateUtil.getTodayYYYYMMDD();
 			if (!tradeCalService.isOpen(Integer.valueOf(now))) {
 				log.info("now={}非工作日", now);
-				return;
+				return 0;
 			}
 
 			// 循环3次，拿到前3个交易日日期，动态更新starteDate
@@ -143,11 +144,14 @@ public class TickDataService {
 				now = tradeCalService.getPretradeDate(now);
 			}
 			updateStartDateOnline(now);
+		} else {
+			updateStartDateOnline(startDate);
 		}
 
 		ListenableFuture<Object> lis = TasksWorker.getInstance().getService().submit(
 				new MyCallable(RunLogBizTypeEnum.TICK_DATA, RunCycleEnum.MANUAL, code + " " + date + " " + all) {
-					public Object mycall() {
+					public Integer mycall() {
+						int succCnt = 0;
 						boolean condition = true;
 						EsQueryPageReq queryPage = new EsQueryPageReq();
 						int currPage = 1;
@@ -181,6 +185,7 @@ public class TickDataService {
 								List<DaliyBasicInfo> list = page.getContent();
 								CountDownLatch cnt = new CountDownLatch(list.size());
 								int i = 0;
+								AtomicInteger aiCnt = new AtomicInteger();
 								for (DaliyBasicInfo d : list) {
 									int index = i++;
 									try {
@@ -191,6 +196,7 @@ public class TickDataService {
 													int fetchResult = 0;
 													if (sumTickData(todaydate, todayAlready, d, html)) {
 														fetchResult = 1;
+														aiCnt.incrementAndGet();
 													}
 													d.setFetchTickData(fetchResult);
 													batch.add(d);
@@ -221,6 +227,8 @@ public class TickDataService {
 									currPage++;
 									queryPage.setPageNum(currPage);
 								}
+
+								succCnt += aiCnt.get();
 							} else {
 								log.info("page isEmpty ");
 								condition = false;
@@ -232,22 +240,25 @@ public class TickDataService {
 							}
 							log.info("PageSize=1000,condition={},fetchTickData={}", condition, fetchTickData);
 							saveData(true);
+
 						} while (condition);
-						return null;
+						return succCnt;
 					}
 				});
 		try {
 			log.info("等待任务执行完成");
-			lis.get();
+			int succCnt = (Integer) lis.get();
 			if (isJobSource) {
 				log.info("等待每日交易(复权执行)完成。。");
 				daliyBasicHistroyService.nextTradeHistroyJob();
 			}
+			return succCnt;
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			semp.release();
 		}
+		return 0;
 	}
 
 	private List<DaliyBasicInfo> batch = Collections.synchronizedList(new ArrayList<DaliyBasicInfo>());
