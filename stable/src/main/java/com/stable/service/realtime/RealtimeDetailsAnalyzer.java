@@ -215,7 +215,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 							+ ",主力行为:" + (pg ? "Yes" : "No") + ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt())
 							+ ",卖出额:" + CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
 							+ CurrencyUitl.covertToString(d.getTotalAmt())
-							+ ",请关注量(同花顺)，提防上影线，高开低走等,STOP: http://106.52.95.147:9999/web/realtime/buy?stop?code="
+							+ ",请关注量(同花顺)，提防上影线，高开低走等,STOP: http://106.52.95.147:9999/web/realtime/buy?stop?detail?code="
 							+ code);
 					// isRunning = false;
 					saveToTrace(allTickData.get(allTickData.size() - 1).getPrice(), buytime, pg);
@@ -231,6 +231,18 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				}
 			}
 		}
+	}
+
+	public String getBillDetailReport() {
+		List<TickData> allTickData = EastmoneySpider.getReallyTick(code);
+		TickDataBuySellInfo d = tickDataService.sumTickData2(code, 0, yesterdayPrice, ytdBasic.getCirc_mv(),
+				allTickData, false);
+		boolean buytime = d.getBuyTimes() > d.getSellTimes();
+		boolean pg = d.getProgramRate() > 0;
+		return code + " " + codeName + "==>市场行为:" + (buytime ? "买入" : "卖出") + ",主力行为:" + (pg ? "Yes" : "No") + ",买入额:"
+				+ CurrencyUitl.covertToString(d.getBuyTotalAmt()) + ",卖出额:"
+				+ CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
+				+ CurrencyUitl.covertToString(d.getTotalAmt());
 	}
 
 	public boolean isPg() {

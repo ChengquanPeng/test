@@ -110,6 +110,15 @@ public class MonitoringService {
 		}
 	}
 
+	public String billDetailReport(String code) {
+		if (map != null) {
+			if (map.containsKey(code)) {
+				return map.get(code).getBillDetailReport();
+			}
+		}
+		return "";
+	}
+
 	public BuyTrace buyAndStopThread(String code) {
 		if (map != null) {
 			if (map.containsKey(code)) {
