@@ -12,9 +12,11 @@ import com.stable.spider.tushare.TushareSpider;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
+@ToString
 @Document(indexName = "dividend_history")
 public class DividendHistory extends EsBase {
 	/**

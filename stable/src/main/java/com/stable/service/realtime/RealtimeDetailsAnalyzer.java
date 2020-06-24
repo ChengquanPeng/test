@@ -45,6 +45,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean waitingBuy = true;
 	private boolean isPg = false;
 	private boolean isCurrMkt = false;
+	private double topPrice;
 
 	public void stop() {
 		isRunning = false;
@@ -83,7 +84,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		isCurrMkt = buytime;
 		// 分笔分析
 		double buyPrice = allTickData.get(allTickData.size() - 1).getPrice();
-		double topPrice = getTopPrice();
 		if (buyPrice == topPrice) {
 			isRunning = false;
 			return null;
@@ -97,21 +97,24 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	}
 
 	private void saveToTrace(double buyPrice, boolean buytimes, boolean pg) {
-		if (waitingBuy && buyPrice < getTopPrice()) {
-			BuyTrace bt = new BuyTrace();
-			bt.setBuyDate(Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
-			bt.setBuyModelType(BuyModelType.B2.getCode());
-			bt.setBuyPrice(buyPrice);
-			bt.setCode(code);
-			bt.setId();
-			bt.setStatus(2);
-			int program = pg ? 1 : 2;
-			bt.setProgram(program);
-			int currMkt = buytimes ? 1 : 2;
-			bt.setCurrMkt(currMkt);
-			buyTraceService.addToTrace(bt);
-			log.info("已成交:{}" + bt);
-			waitingBuy = false;
+		if (waitingBuy) {
+			log.info(code + codeName + ",buyPrice[" + buyPrice + "],涨停价格topPrice[" + topPrice + "]");
+			if (buyPrice < topPrice) {
+				BuyTrace bt = new BuyTrace();
+				bt.setBuyDate(Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
+				bt.setBuyModelType(BuyModelType.B2.getCode());
+				bt.setBuyPrice(buyPrice);
+				bt.setCode(code);
+				bt.setId();
+				bt.setStatus(2);
+				int program = pg ? 1 : 2;
+				bt.setProgram(program);
+				int currMkt = buytimes ? 1 : 2;
+				bt.setCurrMkt(currMkt);
+				buyTraceService.addToTrace(bt);
+				log.info("已成交:{}" + bt);
+				waitingBuy = false;
+			}
 		}
 	}
 
@@ -122,6 +125,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					"实时:数据不全，终止监控。ytdAvg==null？" + (ytdAvg == null) + "},ytdBasic==null？" + (ytdBasic == null));
 			return;
 		}
+		topPrice = getTopPrice();
 		List<DaliyBasicInfo> list3 = daliyBasicHistroyService.queryListByCodeForModel(code, lastTradeDate, queryPage)
 				.getContent();
 
