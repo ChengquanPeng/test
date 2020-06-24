@@ -86,48 +86,48 @@ public class UpModelLineService {
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 	private final EsQueryPageReq deleteQueryPage = new EsQueryPageReq(9999);
 
-	public synchronized void runJob(int date) {
+	public synchronized void runJob(boolean isJob, int today) {
 		try {
-			if (date == 0) {
-				int today = Integer.valueOf(DateUtil.formatYYYYMMDD(new Date()));
+			if (isJob) {
+				int redisDate = 0;
 				String strDate = redisUtil.get(RedisConstant.RDS_MODEL_V1_DATE);
 				if (StringUtils.isBlank(strDate)) {// 无缓存，从当天开始
-					date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+					redisDate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 				} else {// 缓存的日期是已经执行过，需要+1天
 					Date d = DateUtil.addDate(strDate, 1);
-					date = Integer.valueOf(DateUtil.formatYYYYMMDD(d));
+					redisDate = Integer.valueOf(DateUtil.formatYYYYMMDD(d));
 				}
 				while (true) {
-					if (tradeCalService.isOpen(date)) {
-						log.info("processing date={}", date);
-						run(date);
+					if (tradeCalService.isOpen(redisDate)) {
+						log.info("processing date={}", redisDate);
+						run(redisDate);
 					} else {
-						log.info("{}非交易日", date);
+						log.info("{}非交易日", redisDate);
 					}
 					// 缓存已经处理的日期
-					redisUtil.set(RedisConstant.RDS_MODEL_V1_DATE, date);
+					redisUtil.set(RedisConstant.RDS_MODEL_V1_DATE, redisDate);
 					// 新增一天
-					Date d1 = DateUtil.addDate(date + "", 1);
-					date = Integer.valueOf(DateUtil.formatYYYYMMDD(d1));
-					if (date > today) {
-						log.info("today:{},date:{} 循环结束", today, date);
+					Date d1 = DateUtil.addDate(redisDate + "", 1);
+					redisDate = Integer.valueOf(DateUtil.formatYYYYMMDD(d1));
+					if (redisDate > today) {
+						log.info("today:{},date:{} 循环结束", today, redisDate);
 						break;
 					}
 				}
 			} else {// 手动某一天
-				if (!tradeCalService.isOpen(date)) {
-					log.info("{}非交易日", date);
+				if (!tradeCalService.isOpen(today)) {
+					log.info("{}非交易日", today);
 					return;
 				}
-				log.info("processing date={}", date);
-				List<ModelV1> deleteall = getListByCode(null, date + "", null, null, null, deleteQueryPage, null);
+				log.info("processing date={}", today);
+				List<ModelV1> deleteall = getListByCode(null, today + "", null, null, null, deleteQueryPage, null);
 				if (deleteall != null) {
-					log.info("删除当天{}记录条数{}", date, deleteall.size());
+					log.info("删除当天{}记录条数{}", today, deleteall.size());
 					esModelV1Dao.deleteAll(deleteall);
 					Thread.sleep(3 * 1000);
 				}
-				log.info("模型date={}开始", date);
-				run(date);
+				log.info("模型date={}开始", today);
+				run(today);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

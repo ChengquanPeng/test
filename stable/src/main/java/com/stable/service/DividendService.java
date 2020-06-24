@@ -134,12 +134,12 @@ public class DividendService {
 		return res;
 	}
 
-	public List<DividendHistory> get7DayRangeList() {
+	public List<DividendHistory> get7DayRangeList(String start, String end) {
 		Pageable pageable = PageRequest.of(0, 10000);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		// 7天左右需要除权的
-		bqb.must(QueryBuilders.rangeQuery("ex_date").gte(Integer.valueOf(DateUtil.getTodayBefor7DayYYYYMMDD())));
-		bqb.must(QueryBuilders.rangeQuery("ex_date").lte(Integer.valueOf(DateUtil.getTodayYYYYMMDD())));
+		bqb.must(QueryBuilders.rangeQuery("ex_date").gte(Integer.valueOf(start)));
+		bqb.must(QueryBuilders.rangeQuery("ex_date").lte(Integer.valueOf(end)));
 		bqb.must(QueryBuilders.matchPhraseQuery("div_proc", SS));
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
@@ -160,7 +160,9 @@ public class DividendService {
 				.submit(new MyCallable(RunLogBizTypeEnum.DIVIDEND_TRADE_HISTROY, RunCycleEnum.DAY) {
 					@Override
 					public Object mycall() {
-						List<DividendHistory> list = get7DayRangeList();
+						String start = DateUtil.getTodayBefor7DayYYYYMMDD();
+						String end = DateUtil.getTodayYYYYMMDD();
+						List<DividendHistory> list = get7DayRangeList(start, end);
 						if (list != null) {
 							StringBuffer sb = new StringBuffer();
 							for (DividendHistory d : list) {
@@ -171,9 +173,10 @@ public class DividendService {
 								sb.append(d.getCode()).append(",");
 							}
 							if (sb.length() > 0) {
-								WxPushUtil.pushSystem1("今日实施[" + list.size() + "]条分红分股！" + sb.toString());
+								WxPushUtil.pushSystem1(
+										start + "-" + end + " 实施[" + list.size() + "]条分红分股！" + sb.toString());
 							} else {
-								WxPushUtil.pushSystem1("今日无实施分红分股");
+								WxPushUtil.pushSystem1(start + "-" + end + "无实施分红分股");
 							}
 
 						} else {

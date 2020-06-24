@@ -36,7 +36,10 @@ public class ModelController {
 			}
 			if (StringUtils.isNotBlank(startDate) && StringUtils.isBlank(endDate)) {
 				log.info("request date={}", startDate);
-				upLevel1Service.runJob(Integer.valueOf(startDate));
+				upLevel1Service.runJob(false, Integer.valueOf(startDate));
+			} else if (StringUtils.isBlank(startDate) && StringUtils.isNotBlank(endDate)) {
+				log.info("request date={}", endDate);
+				upLevel1Service.runJob(false, Integer.valueOf(endDate));
 			} else if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)) {
 
 				Date d = DateUtil.parseDate(startDate);
@@ -44,7 +47,7 @@ public class ModelController {
 				int date = Integer.valueOf(DateUtil.formatYYYYMMDD(d));
 				do {
 					log.info("request date={}", date);
-					upLevel1Service.runJob(date);
+					upLevel1Service.runJob(false, date);
 					d = DateUtil.addDate(d, 1);
 					date = Integer.valueOf(DateUtil.formatYYYYMMDD(d));
 				} while (date <= end);

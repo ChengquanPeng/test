@@ -397,7 +397,7 @@ public class DaliyTradeHistroyService {
 			@Override
 			public Object call() throws Exception {
 				try {
-					upLevel1Service.runJob(0);
+					upLevel1Service.runJob(true, Integer.valueOf(today));
 				} finally {
 					log.info("等待图片模型执行");
 					nextImageJob(today);
