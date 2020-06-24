@@ -61,6 +61,16 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		this.daliyBasicHistroyService = daliyBasicHistroyService;
 		this.codeName = codeName;
 		this.buyTraceService = buyTraceService;
+
+		// 初始化
+		ytdBasic = daliyBasicHistroyService.queryListByCodeForRealtime(code, lastTradeDate);
+		if (ytdAvg == null || ytdBasic == null) {
+			WxPushUtil.pushSystem1(
+					"实时:数据不全，终止监控。ytdAvg==null?" + (ytdAvg == null) + "},ytdBasic==null?" + (ytdBasic == null));
+			return;
+		}
+		yesterdayPrice = ytdBasic.getClose();
+		topPrice = getTopPrice();
 	}
 
 	private double getTopPrice() {
@@ -118,14 +128,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	}
 
 	public void run() {
-		ytdBasic = daliyBasicHistroyService.queryListByCodeForRealtime(code, lastTradeDate);
-		if (ytdAvg == null || ytdBasic == null) {
-			WxPushUtil.pushSystem1(
-					"实时:数据不全，终止监控。ytdAvg==null?" + (ytdAvg == null) + "},ytdBasic==null?" + (ytdBasic == null));
-			return;
-		}
-		yesterdayPrice = ytdBasic.getClose();
-		topPrice = getTopPrice();
+
 		List<DaliyBasicInfo> list3 = daliyBasicHistroyService.queryListByCodeForModel(code, lastTradeDate, queryPage)
 				.getContent();
 
