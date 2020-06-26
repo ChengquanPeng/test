@@ -16,7 +16,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Component
 @Log4j2
-public class EveryWorkingDayJob extends MySimpleJob {
+public class EveryDayJob extends MySimpleJob {
 
 	@Autowired
 	private DividendService dividendService;

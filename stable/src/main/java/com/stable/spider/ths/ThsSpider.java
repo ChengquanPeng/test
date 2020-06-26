@@ -112,6 +112,10 @@ public class ThsSpider {
 
 	public void start() {
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+		if (!tradeCalService.isOpen(date)) {
+			log.info("非交易日");
+			return;
+		}
 		Map<String, Concept> m = synchGnAndCode();
 		if (m == null) {
 			try {
@@ -125,10 +129,6 @@ public class ThsSpider {
 	}
 
 	private void synchConceptDaliy(int date, Map<String, Concept> m) {
-		if (!tradeCalService.isOpen(date)) {
-			log.info("非交易日");
-			return;
-		}
 		List<ConceptDaily> list = new LinkedList<ConceptDaily>();
 		try {
 			List<String> keys = new ArrayList<String>(m.keySet());

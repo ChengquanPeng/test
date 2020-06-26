@@ -187,6 +187,7 @@ public class DaliyBasicHistroyService {
 			public Object mycall() {
 				log.info("每日*定时任务 daily_basic [started]");
 				String today = DateUtil.getTodayYYYYMMDD();
+				
 				int result = spiderDaliyDailyBasic(today);
 				log.info("每日*定时任务 daily_basic [end],result={}", result);
 				if (result != 0) {
