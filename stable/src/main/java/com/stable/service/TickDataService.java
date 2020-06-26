@@ -208,14 +208,14 @@ public class TickDataService {
 														WxPushUtil.pushSystem1("检测到ES系统异常，正在重启...");
 														OSystemUtil.restart();
 													}
+												} finally {
+													cnt.countDown();
 												}
 											}
 										});
 									} catch (Exception e) {
 										e.printStackTrace();
 										ErrorLogFileUitl.writeError(e, d.toString(), "", "");
-									} finally {
-										cnt.countDown();
 									}
 								}
 								try {
@@ -229,6 +229,7 @@ public class TickDataService {
 								}
 
 								succCnt += aiCnt.get();
+								log.info("succCnt:" + succCnt);
 							} else {
 								log.info("page isEmpty ");
 								condition = false;
@@ -248,6 +249,7 @@ public class TickDataService {
 		try {
 			log.info("等待任务执行完成");
 			int succCnt = (Integer) lis.get();
+			log.info("Final succCnt:" + succCnt);
 			if (isJobSource) {
 				log.info("等待每日交易(复权执行)完成。。");
 				daliyBasicHistroyService.nextTradeHistroyJob();

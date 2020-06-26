@@ -17,6 +17,6 @@ public class TickDataJob extends MySimpleJob {
 
 	public void myexecute(ShardingContext sc) {
 		log.info("Tick data fetch");
-		tickDataService.fetch("", "", "0", false, "", false);
+		log.info("Tick data fetch:" + tickDataService.fetch("", "", "0", false, "", false));
 	}
 }
