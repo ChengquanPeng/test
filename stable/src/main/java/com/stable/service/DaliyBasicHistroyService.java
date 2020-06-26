@@ -187,7 +187,11 @@ public class DaliyBasicHistroyService {
 			public Object mycall() {
 				log.info("每日*定时任务 daily_basic [started]");
 				String today = DateUtil.getTodayYYYYMMDD();
-				
+				if (!tradeCalService.isOpen(Integer.valueOf(today))) {
+					log.info("非交易日");
+					WxPushUtil.pushSystem1(today + " 非交易日 ,Seq1=>Seq5流水任务不会执行");
+					return null;
+				}
 				int result = spiderDaliyDailyBasic(today);
 				log.info("每日*定时任务 daily_basic [end],result={}", result);
 				if (result != 0) {

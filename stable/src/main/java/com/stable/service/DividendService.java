@@ -236,14 +236,21 @@ public class DividendService {
 				cal.add(Calendar.DAY_OF_WEEK, d);
 				int cnt = 0;
 				// 所在周开始日期
-				for (int i = 1; i <= 5; i++) {
+				String startDate = "";
+				String endDate = "";
+				for (int i = 1; i <= 7; i++) {
 					String date = DateUtil.getYYYYMMDD(cal.getTime());
+					if (i == 1) {
+						startDate = date;
+					} else if (i == 7) {
+						endDate = date;
+					}
 					log.info("每日*定时任务-日分红公告[started]:date={}", date);
 					cnt += spiderDividend(null, date);
 					log.info("每日*定时任务-日分红公告[end]:date={}", date);
 					cal.add(Calendar.DAY_OF_WEEK, 1);
 				}
-				WxPushUtil.pushSystem1("上周获取到[" + cnt + "]条分红分股公告！");
+				WxPushUtil.pushSystem1("上周从 " + startDate + "-" + endDate + "获取到[" + cnt + "]条分红分股公告！");
 				return null;
 			}
 		});
