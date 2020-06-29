@@ -12,7 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Component;
 
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -29,6 +36,7 @@ import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.CodeConcept;
 import com.stable.vo.bus.Concept;
 import com.stable.vo.bus.ConceptDaily;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -67,7 +75,7 @@ public class ThsSpider {
 			cp.setDate(20100101);
 			cp.setHref(url);
 			cp.setName(name);
-			allmap.put(cp.getId(), cp);
+			allmap.put(cp.getCode(), cp);
 		}
 	}
 
@@ -89,6 +97,28 @@ public class ThsSpider {
 		if (list.size() > 0) {
 			esConceptDao.saveAll(list);
 			list.clear();
+		}
+	}
+
+	EsQueryPageReq querypage = new EsQueryPageReq(1000);
+
+	private void deleteCodeConcept(Concept cp) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		if (StringUtils.isNotBlank(cp.getId())) {
+			bqb.must(QueryBuilders.matchPhraseQuery("conceptId", cp.getId()));
+			NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+			Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+			SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+			Page<CodeConcept> page = esCodeConceptDao.search(sq);
+			if (page != null && !page.isEmpty()) {
+				List<CodeConcept> list = page.getContent();
+				esCodeConceptDao.deleteAll(list);
+				log.info("CodeConcept delete size:{}", list.size());
+			} else {
+				log.info("no records CodeConcept");
+			}
+		} else {
+			throw new RuntimeException("cp.getId is null");
 		}
 	}
 
@@ -187,7 +217,7 @@ public class ThsSpider {
 				} while (!fetched);
 			}
 			saveConceptDaily(list);
-			WxPushUtil.pushSystem1("同花顺板块交易记录同步成功");
+			WxPushUtil.pushSystem1("同花顺板块交易记录同步成功,需求抓取总是[" + keys.size() + "],实际成功总数:[" + list.size() + "]");
 		} catch (Exception e) {
 			saveConceptDaily(list);
 			e.printStackTrace();
@@ -201,24 +231,15 @@ public class ThsSpider {
 		Calendar c = Calendar.getInstance();
 		c.setTime(today);
 		int weekday = c.get(Calendar.DAY_OF_WEEK);
-		boolean getNew = false;
+		boolean isFirday = true;
 		if (weekday != 6) {
 			log.info("今日非周五");
-			getNew = true;
+			isFirday = false;
 		}
 		Map<String, Concept> map = null;
 		try {
-			List<Concept> list = new LinkedList<Concept>();
-			List<CodeConcept> codelist = new LinkedList<CodeConcept>();
 			map = getAllAliasCode();
-			getGnList(getNew, list, codelist, map);
-			if (list.size() > 0) {
-				saveConcept(list);
-			}
-			if (codelist.size() > 0) {
-				saveCodeConcept(codelist);
-			}
-			WxPushUtil.pushSystem1("同花顺板块同步成功");
+			getGnList(isFirday, map);
 		} catch (Exception e) {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1("同花顺板块出错");
@@ -227,10 +248,14 @@ public class ThsSpider {
 		return map;
 	}
 
-	public void getGnList(boolean getNew, List<Concept> list, List<CodeConcept> codelist, Map<String, Concept> map) {
-		int limit = 3;
-		if (getNew) {
-			limit = 1;
+	public void getGnList(boolean isFirday, Map<String, Concept> map) {
+		List<Concept> list = new LinkedList<Concept>();
+		List<CodeConcept> codelist = new LinkedList<CodeConcept>();
+		int cntList = 0;
+		int cntCodelist = 0;
+		int limit = 1;
+		if (isFirday) {
+			limit = 3;
 		}
 
 		int index = 1;
@@ -271,7 +296,9 @@ public class ThsSpider {
 					list.add(cp);
 					log.info(cp);
 					boolean fetchNext = true;
-					if (getNew) {// 每天新增
+
+					if (!isFirday) {// 周一到周4只需要获取新概念，周五就重新获取概率下所有股票
+						// 每天新增
 						if (map.containsKey(cp.getCode())) {
 							fetchNext = false;
 						} else {
@@ -282,10 +309,13 @@ public class ThsSpider {
 					if (fetchNext) {
 						getAliasCdoe(cp, map);
 						getSubCodeList(cp, codelist);
+						deleteCodeConcept(cp);
 						if (codelist.size() > 100) {
+							cntCodelist += codelist.size();
 							saveCodeConcept(codelist);
 						}
 						if (list.size() >= 100) {
+							cntList += list.size();
 							saveConcept(list);
 						}
 					}
@@ -306,9 +336,11 @@ public class ThsSpider {
 					e.printStackTrace();
 					WxPushUtil.pushSystem1("同花顺概念-列表抓包出错,url=" + url);
 					if (list.size() > 0) {
+						cntList += list.size();
 						saveConcept(list);
 					}
 					if (codelist.size() > 0) {
+						cntCodelist += codelist.size();
 						saveCodeConcept(codelist);
 					}
 					throw new RuntimeException(e);
@@ -332,12 +364,16 @@ public class ThsSpider {
 			}
 		} finally {
 			if (list.size() > 0) {
+				cntList += list.size();
 				saveConcept(list);
 			}
 			if (codelist.size() > 0) {
+				cntCodelist += codelist.size();
 				saveCodeConcept(codelist);
 			}
 		}
+
+		WxPushUtil.pushSystem1("同花顺板块同步成功,同步概念[" + cntList + "],概念相关股票[" + cntCodelist + "]");
 	}
 
 	private String GN_CODE_LIST = "http://q.10jqka.com.cn/gn/detail/field/264648/order/desc/page/%s/ajax/1/code/%s";
