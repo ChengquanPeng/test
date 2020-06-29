@@ -137,7 +137,23 @@ public class CurrencyUitl {
 		return result;
 	}
 
+	/**
+	 * 涨停价格3
+	 */
+	public final static double cutProfit(double buyPrice, double soldPrice) {
+		if (soldPrice > buyPrice) {
+			double per = ((soldPrice - buyPrice) / buyPrice) * 100;
+			return new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+		} else if (soldPrice < buyPrice) {
+			double per = ((buyPrice - soldPrice) / buyPrice) * 100;
+			return new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+		} else {
+			return 0.0;
+		}
+	}
+
 	public static void main(String[] args) {
+		System.err.println((11.0 - 10.0) / 10.0 * 100);
 		System.err.println(CurrencyUitl.covertToString(253354520l));
 //		System.err.println(CurrencyUitl.covertToLong("1.1万亿"));
 //		System.err.println(CurrencyUitl.covertToString(997));

@@ -14,6 +14,7 @@ import com.stable.enums.BuyModelType;
 import com.stable.enums.MonitoringType;
 import com.stable.enums.TradeType;
 import com.stable.service.DaliyBasicHistroyService;
+import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TickDataService;
 import com.stable.service.TradeCalService;
@@ -52,6 +53,8 @@ public class MonitoringService {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private BuyTraceService buyTraceService;
+	@Autowired
+	private DaliyTradeHistroyService daliyTradeHistroyService;
 
 	static final EsQueryPageReq querypage = new EsQueryPageReq(1000);
 
@@ -122,12 +125,12 @@ public class MonitoringService {
 				allList.forEach(x -> {
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer(x, daliyBasicHistroyService,
 							avgService.queryListByCodeForRealtime(x.getCode(), x.getDate()), tickDataService,
-							stockBasicService.getCodeName(x.getCode()), buyTraceService);
+							stockBasicService.getCodeName(x.getCode()), buyTraceService, daliyTradeHistroyService);
 					new Thread(task).start();
 					list.add(task);
 					map.put(x.getCode(), task);
 				});
-				WxPushUtil.pushSystem1("交易日" + observableDate + "开始监听实时交易，监听总数:" + allList.size() + ",买入["
+				WxPushUtil.pushSystem1("交易日" + observableDate + "开始监听实时交易，监听总数:[" + allList.size() + "],买入["
 						+ buyMap.size() + "],卖出[" + sellMap.size() + "]");
 			}
 

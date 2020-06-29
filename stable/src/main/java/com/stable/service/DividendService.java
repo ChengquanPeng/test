@@ -233,6 +233,7 @@ public class DividendService {
 				} else {
 					d = 2 - cal.get(Calendar.DAY_OF_WEEK);
 				}
+				d = d - 7;// 上周
 				cal.add(Calendar.DAY_OF_WEEK, d);
 				int cnt = 0;
 				// 所在周开始日期

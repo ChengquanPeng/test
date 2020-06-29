@@ -146,15 +146,38 @@ public class BuyBackService {
 	public void jobFetchHist() {
 		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.BUY_BACK, RunCycleEnum.WEEK) {
 			public Object mycall() {
+//				Calendar cal = Calendar.getInstance();
+//				String startDate = "", endDate = "";
+//				int first = 0, last = 0;
+//				first = cal.getActualMinimum(Calendar.DAY_OF_MONTH);
+//				cal.set(Calendar.DAY_OF_MONTH, first);
+//				startDate = DateUtil.getYYYYMMDD(cal.getTime());
+//				last = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+//				cal.set(Calendar.DAY_OF_MONTH, last);
+//				endDate = DateUtil.getYYYYMMDD(cal.getTime());
+//				fetchHist(startDate, endDate);
+
 				Calendar cal = Calendar.getInstance();
-				String startDate = "", endDate = "";
-				int first = 0, last = 0;
-				first = cal.getActualMinimum(Calendar.DAY_OF_MONTH);
-				cal.set(Calendar.DAY_OF_MONTH, first);
-				startDate = DateUtil.getYYYYMMDD(cal.getTime());
-				last = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-				cal.set(Calendar.DAY_OF_MONTH, last);
-				endDate = DateUtil.getYYYYMMDD(cal.getTime());
+				cal.setTime(new Date());
+				int d = 0;
+				if (cal.get(Calendar.DAY_OF_WEEK) == 1) {
+					d = -6;
+				} else {
+					d = 2 - cal.get(Calendar.DAY_OF_WEEK);
+				}
+				d = d - 7;// 上周
+				cal.add(Calendar.DAY_OF_WEEK, d);
+				// 所在周开始日期
+				String startDate = "";
+				String endDate = "";
+				for (int i = 1; i <= 7; i++) {
+					String date = DateUtil.getYYYYMMDD(cal.getTime());
+					if (i == 1) {
+						startDate = date;
+					} else if (i == 7) {
+						endDate = date;
+					}
+				}
 				fetchHist(startDate, endDate);
 				return null;
 			}
