@@ -11,11 +11,13 @@ import com.alibaba.fastjson.JSONArray;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
+@ToString
 @Document(indexName = "stock_base_info")
-public class StockBaseInfo extends EsBase{
+public class StockBaseInfo extends EsBase {
 //	ts_code	str	TS代码
 //	symbol	str	股票代码
 //	name	str	股票名称
