@@ -283,7 +283,7 @@ public class LinePrice {
 			lowList.add(listD30.get(0));
 			lowList.add(listD30.get(1));
 			lowList.add(listD30.get(2));
-			double high = highList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
+			double high = highList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
 					.getHigh();
 			double low = lowList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
 			highList.addAll(lowList);
@@ -298,7 +298,7 @@ public class LinePrice {
 			lowList.add(dailyList.get(0));
 			lowList.add(dailyList.get(1));
 			lowList.add(dailyList.get(2));
-			double high = highList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
+			double high = highList.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
 			double low = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
 			highList.addAll(lowList);
 			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
@@ -318,7 +318,7 @@ public class LinePrice {
 			lowList.add(listD30.get(2));
 			lowList.add(listD30.get(3));
 
-			double high = highList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
+			double high = highList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
 					.getHigh();
 			double low = lowList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
 			highList.addAll(lowList);
@@ -334,7 +334,7 @@ public class LinePrice {
 			lowList.add(dailyList.get(2));
 			lowList.add(dailyList.get(3));
 
-			double high = highList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
+			double high = highList.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
 			double low = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
 			highList.addAll(lowList);
 			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();

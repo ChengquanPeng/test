@@ -146,6 +146,7 @@ public class CurrencyUitl {
 			return new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 		} else if (soldPrice < buyPrice) {
 			double per = ((buyPrice - soldPrice) / buyPrice) * 100;
+			per = 0.0 - per;
 			return new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 		} else {
 			return 0.0;
@@ -153,7 +154,7 @@ public class CurrencyUitl {
 	}
 
 	public static void main(String[] args) {
-		System.err.println((11.0 - 10.0) / 10.0 * 100);
+		System.err.println(0.0 - 9.98);
 		System.err.println(CurrencyUitl.covertToString(253354520l));
 //		System.err.println(CurrencyUitl.covertToLong("1.1万亿"));
 //		System.err.println(CurrencyUitl.covertToString(997));

@@ -305,15 +305,17 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 									bt.setStatus(TradeType.SOLD.getCode());
 									bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
 									buyTraceService.addToTrace(bt);
-									log.info("机器卖已成交:{}" + bt);
+									log.info("机器卖已成交:{}", bt);
 									sells.add(bt);
 									WxPushUtil.pushSystem1(code + " " + codeName + " [" + (isLowClose ? "上影线" : "高开低走")
 											+ "]," + bt.getBuyDate() + "买入价格:" + bt.getBuyPrice() + ",卖出价:"
-											+ bt.getSoldPrice() + "收益:" + bt.getProfit());
+											+ bt.getSoldPrice() + "收益:" + bt.getProfit()+"%");
 								}
 
 								if (sells.size() > 0) {
-									buyTraces.removeAll(sells);
+									sells.forEach(x -> {
+										buyTraces.remove(x);
+									});
 								}
 							}
 						}
