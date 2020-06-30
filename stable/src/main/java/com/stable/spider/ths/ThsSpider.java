@@ -216,8 +216,9 @@ public class ThsSpider {
 					}
 				} while (!fetched);
 			}
+			int cnt = list.size();
 			saveConceptDaily(list);
-			WxPushUtil.pushSystem1("同花顺板块交易记录同步成功,需求抓取总是[" + keys.size() + "],实际成功总数:[" + list.size() + "]");
+			WxPushUtil.pushSystem1("同花顺板块交易记录同步成功,需求抓取总是[" + keys.size() + "],实际成功总数:[" + cnt + "]");
 		} catch (Exception e) {
 			saveConceptDaily(list);
 			e.printStackTrace();
