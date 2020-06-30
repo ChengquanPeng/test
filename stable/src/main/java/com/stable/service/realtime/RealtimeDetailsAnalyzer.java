@@ -54,6 +54,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private MonitoringType mt;
 	private List<BuyTrace> buyTraces;
 	private double highPriceFromBuy = 0.0;
+	private String today = DateUtil.getTodayYYYYMMDD();
+	private int itoday = Integer.valueOf(today);
 
 	public void stop() {
 		isRunning = false;
@@ -100,13 +102,14 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			int minDate = 20991231;
 			for (int i = 0; i < buyTraces.size(); i++) {
 				BuyTrace bt = buyTraces.get(i);
-				if (minDate > bt.getBuyDate()) {
+				if (minDate > bt.getBuyDate() && bt.getBuyDate() != itoday) {
 					minDate = bt.getBuyDate();
 				}
 			}
 			if (minDate != 20991231) {
-				List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCode(codeName, minDate, 0,
+				List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCode(code, minDate, 0,
 						MonitoringService.querypage, SortOrder.ASC);
+				log.info("list is null?{},code={},minDate={}", (list == null), code, minDate);
 				highPriceFromBuy = list.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
 						.getHigh();
 			}
@@ -166,8 +169,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		log.info("{}=>p1一阳N线价:{},最少3%:{},p3大于前三天最高价:{},最终监控价:{},昨收:{},今日涨停价:{}", code, p1, p2, p3, chkPrice,
 				yesterdayPrice, topPrice);
 		// 量控量
-		String today = DateUtil.getTodayYYYYMMDD();
-		int itoday = Integer.valueOf(today);
 
 		long d1130 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
 				DateUtil.parseDate(today + "113000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));

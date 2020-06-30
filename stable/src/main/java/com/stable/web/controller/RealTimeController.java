@@ -52,13 +52,30 @@ public class RealTimeController {
 	}
 
 	/**
-	 * 实时买入
+	 * 实时买入-人工
 	 */
 	@RequestMapping(value = "/buy", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> buy(String code) {
 		JsonResult r = new JsonResult();
 		try {
 			r.setResult(monitoringService.buy(code));
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * 实时买出-人工
+	 */
+	@RequestMapping(value = "/sell", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> sell(String code) {
+		JsonResult r = new JsonResult();
+		try {
+			r.setResult(monitoringService.sell(code));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
