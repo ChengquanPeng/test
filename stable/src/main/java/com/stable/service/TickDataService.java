@@ -192,7 +192,7 @@ public class TickDataService {
 										TasksWorker2nd.add(new MyRunnable() {
 											public void running() {
 												try {
-													log.info("running index:{}", index);
+													log.info("running code:{},index:{}", d.getCode(), index);
 													int fetchResult = 0;
 													if (sumTickData(todaydate, todayAlready, d, html)) {
 														fetchResult = 1;
