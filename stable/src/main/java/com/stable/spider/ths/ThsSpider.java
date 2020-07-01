@@ -295,7 +295,7 @@ public class ThsSpider {
 					cp.setCode(ids.get(ids.size() - 1));
 					cp.setId(START_THS + cp.getCode());
 					cp.setType(ths);
-					list.add(cp);
+
 					log.info(cp);
 					boolean fetchNext = true;
 
@@ -312,6 +312,7 @@ public class ThsSpider {
 						getAliasCdoe(cp, map);
 						getSubCodeList(cp, codelist);
 						deleteCodeConcept(cp);
+						list.add(cp);
 						if (codelist.size() > 100) {
 							cntCodelist += codelist.size();
 							saveCodeConcept(codelist);
