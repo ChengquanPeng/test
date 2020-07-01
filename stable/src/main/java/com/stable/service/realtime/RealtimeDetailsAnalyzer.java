@@ -56,6 +56,9 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private double highPriceFromBuy = 0.0;
 	private String today = DateUtil.getTodayYYYYMMDD();
 	private int itoday = Integer.valueOf(today);
+	private String firstTimeWarning = null;
+	private int warningCnt = 0;
+	private boolean pg = false;
 
 	public void stop() {
 		isRunning = false;
@@ -228,19 +231,25 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						// 需要看量，开高低走，上影线情况
 						TickDataBuySellInfo d = tickDataService.sumTickData2(code, 0, yesterdayPrice,
 								ytdBasic.getCirc_mv(), allTickData, false);
-						boolean pg = false;
-						if (d.getProgramRate() > 0) {
-							pg = true;
-						} else {
-							pg = tickDataService.hasProgram(code);
+						if (!pg) {
+							if (d.getProgramRate() > 0) {
+								pg = true;
+							} else {
+								pg = tickDataService.hasProgram(code);
+							}
 						}
+						if (firstTimeWarning == null) {
+							firstTimeWarning = DateUtil.getTodayYYYYMMDDHHMMSS();
+						}
+						warningCnt++;
 
 						boolean buytime = d.getBuyTimes() > d.getSellTimes();
 						WxPushUtil.pushSystem1("请关注:" + code + " " + codeName + ",市场行为:" + (buytime ? "买入" : "卖出")
 								+ ",主力行为:" + (pg ? "Yes" : "No") + ",买入额:"
 								+ CurrencyUitl.covertToString(d.getBuyTotalAmt()) + ",卖出额:"
 								+ CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
-								+ CurrencyUitl.covertToString(d.getTotalAmt())
+								+ CurrencyUitl.covertToString(d.getTotalAmt()) + ",第一次提醒时间:" + firstTimeWarning
+								+ ",提醒次数:" + warningCnt + ",chkPrice:" + chkPrice + ",当前价格:" + nowPrice
 								+ ",请关注量(同花顺)，提防上影线，高开低走等,STOP: http://106.52.95.147:9999/web/realtime/buy?stop?detail?code="
 								+ code);
 						// isRunning = false;
