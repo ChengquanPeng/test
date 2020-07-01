@@ -52,7 +52,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean waitingBuy = true;
 	private double topPrice;
 	private MonitoringType mt;
-	private List<BuyTrace> buyTraces;
+	private List<BuyTrace> buyTraces = new LinkedList<BuyTrace>();
 	private double highPriceFromBuy = 0.0;
 	private String today = DateUtil.getTodayYYYYMMDD();
 	private int itoday = Integer.valueOf(today);
@@ -93,10 +93,12 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 		// 卖出
 		if (MonitoringType.BUY != mt) {
-			buyTraces = buyTraceService.getListByCode(code, TradeType.BOUGHT.getCode(), BuyModelType.B2.getCode(),
-					MonitoringService.querypage);
-			if (buyTraces == null) {
-				buyTraces = new LinkedList<BuyTrace>();
+			List<BuyTrace> bts = buyTraceService.getListByCode(code, TradeType.BOUGHT.getCode(),
+					BuyModelType.B2.getCode(), MonitoringService.querypage);
+			if (bts != null && bts.size() > 0) {
+				bts.forEach(x -> {
+					buyTraces.add(x);
+				});
 			}
 
 			int minDate = 20991231;
@@ -113,10 +115,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				highPriceFromBuy = list.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
 						.getHigh();
 			}
-		}
-
-		if (buyTraces == null) {
-			buyTraces = new LinkedList<BuyTrace>();
 		}
 	}
 
@@ -288,7 +286,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						if (sells.size() > 0) {
 							buyTraces.removeAll(sells);
 						}
-
 					}
 					// 14:50
 					if (now > d1450) {
@@ -309,13 +306,11 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 									sells.add(bt);
 									WxPushUtil.pushSystem1(code + " " + codeName + " [" + (isLowClose ? "上影线" : "高开低走")
 											+ "]," + bt.getBuyDate() + "买入价格:" + bt.getBuyPrice() + ",卖出价:"
-											+ bt.getSoldPrice() + "收益:" + bt.getProfit()+"%");
+											+ bt.getSoldPrice() + "收益:" + bt.getProfit() + "%");
 								}
 
 								if (sells.size() > 0) {
-									sells.forEach(x -> {
-										buyTraces.remove(x);
-									});
+									buyTraces.removeAll(sells);
 								}
 							}
 						}
