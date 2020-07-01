@@ -164,17 +164,16 @@ public class DividendService {
 						String end = DateUtil.getTodayYYYYMMDD();
 						List<DividendHistory> list = get7DayRangeList(start, end);
 						if (list != null) {
-							StringBuffer sb = new StringBuffer();
+//							StringBuffer sb = new StringBuffer();
 							for (DividendHistory d : list) {
 								log.info("今日分红除权相关信息{}", d);
 								daliydTradeHistroyService.removeCacheByChuQuan(d.getCode());
 								redisUtil.set(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + d.getCode(),
 										String.valueOf(d.getEx_date()));
-								sb.append(d.getCode()).append(",");
+//								sb.append(d.getCode()).append(",");
 							}
-							if (sb.length() > 0) {
-								WxPushUtil.pushSystem1(
-										start + "-" + end + " 实施[" + list.size() + "]条分红分股！" + sb.toString());
+							if (list.size() > 0) {
+								WxPushUtil.pushSystem1(start + "-" + end + " 实施[" + list.size() + "]条分红分股！");
 							} else {
 								WxPushUtil.pushSystem1(start + "-" + end + "无实施分红分股");
 							}
