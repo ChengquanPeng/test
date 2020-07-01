@@ -25,14 +25,18 @@ public class WxPushUtil {
 	}
 
 	public final static void pushSystem1(String content) {
-		WxPushUtil.pushMsg(content, true, null);
+		WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, true, null);
 	}
 
-	private final static void pushMsg(String content, boolean isMyId, Set<String> uids) {
+	public final static void pushSystem2(String content) {
+		WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, true, null);
+	}
+
+	private final static void pushMsg(int contentType, String content, boolean isMyId, Set<String> uids) {
 		try {
 			Message message = new Message();
 			message.setAppToken(appToken);
-			message.setContentType(Message.CONTENT_TYPE_TEXT);
+			message.setContentType(contentType);
 			message.setContent(content + " 微信推送时间:" + DateUtil.getTodayYYYYMMDDHHMMSS());
 			if (isMyId) {
 				message.setUid(myUid);
@@ -42,7 +46,7 @@ public class WxPushUtil {
 			message.setUrl(null);
 			Result<List<MessageResult>> result = WxPusher.send(message);
 			List<MessageResult> lresult = result.getData();
-			//log.info("result:{}", lresult);
+			// log.info("result:{}", lresult);
 			MessageResult mr = lresult.get(0);
 			log.info("微信推送内容:{},状态:{}", content, mr.getStatus());
 		} catch (Exception e) {

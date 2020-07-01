@@ -2,9 +2,12 @@ package com.stable.service.model;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsModelV1Dao;
+import com.stable.es.dao.base.MonitoringDao;
 import com.stable.service.ConceptService;
 import com.stable.service.ConceptService.ConceptInfo;
 import com.stable.service.DaliyBasicHistroyService;
@@ -47,6 +51,7 @@ import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
+import com.stable.vo.bus.Monitoring;
 import com.stable.vo.bus.PriceLife;
 import com.stable.vo.bus.StockAvg;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -82,6 +87,8 @@ public class UpModelLineService {
 	private ConceptService conceptService;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
+	@Autowired
+	private MonitoringDao monitoringDao;
 
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 	private final EsQueryPageReq deleteQueryPage = new EsQueryPageReq(9999);
@@ -100,7 +107,7 @@ public class UpModelLineService {
 				while (true) {
 					if (tradeCalService.isOpen(redisDate)) {
 						log.info("processing date={}", redisDate);
-						run(redisDate);
+						run(isJob, redisDate);
 					} else {
 						log.info("{}非交易日", redisDate);
 					}
@@ -127,7 +134,7 @@ public class UpModelLineService {
 					Thread.sleep(3 * 1000);
 				}
 				log.info("模型date={}开始", today);
-				run(today);
+				run(isJob, today);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -136,7 +143,7 @@ public class UpModelLineService {
 		}
 	}
 
-	private void run(int treadeDate) {
+	private void run(boolean isJob, int treadeDate) {
 		String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
 		JSONArray array = tushareSpider.getStockDaliyBasic(null, treadeDate + "", null, null).getJSONArray("items");
 		if (array == null || array.size() <= 0) {
@@ -190,6 +197,25 @@ public class UpModelLineService {
 				sort.fulshToFile();
 				if (sort.getResultList().size() > 0) {
 					esModelV1Dao.saveAll(sort.getResultList());
+				}
+			}
+			if (isJob) {
+				if (v2p.getResultList().size() > 0) {
+					List<Monitoring> ml = new LinkedList<Monitoring>();
+					for (ModelV1 mv : v2p.getResultList()) {
+						Optional<Monitoring> op = monitoringDao.findById(mv.getCode());
+						Monitoring mt = null;
+						if (op.isPresent()) {
+							mt = op.get();
+						} else {
+							mt = new Monitoring();
+							mt.setCode(mv.getCode());
+						}
+						mt.setBuy(1);
+						mt.setReqBuyDate(treadeDate);
+						ml.add(mt);
+					}
+					monitoringDao.saveAll(ml);
 				}
 			}
 			log.info("MV1模型执行完成");
@@ -265,6 +291,31 @@ public class UpModelLineService {
 			int present = Double.valueOf(diff / base * 100).intValue();
 			return present;
 		}
+	}
+
+	public Set<Monitoring> getListByCode(EsQueryPageReq querypage) {
+		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+		Set<Monitoring> r = new HashSet<Monitoring>();
+
+		BoolQueryBuilder bqb2 = QueryBuilders.boolQuery();
+		bqb2.must(QueryBuilders.matchPhraseQuery("msell", 1));
+		NativeSearchQueryBuilder queryBuilder2 = new NativeSearchQueryBuilder();
+		SearchQuery sq2 = queryBuilder2.withQuery(bqb2).withPageable(pageable).build();
+		Page<Monitoring> page2 = monitoringDao.search(sq2);
+		if (page2 != null && !page2.isEmpty()) {
+			r.addAll(page2.getContent());
+		}
+
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("buy", 1));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+		Page<Monitoring> page = monitoringDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			r.addAll(page.getContent());
+		}
+		return r;
 	}
 
 	public List<ModelV1> getListByCode(String code, String date, String whiteHorse, String score, String imageIndex,

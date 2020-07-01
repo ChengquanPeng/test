@@ -1,18 +1,18 @@
 package com.stable.service.realtime;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.stable.enums.BuyModelType;
-import com.stable.enums.MonitoringType;
 import com.stable.enums.TradeType;
+import com.stable.es.dao.base.MonitoringDao;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
@@ -29,10 +29,10 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BuyTrace;
 import com.stable.vo.bus.DaliyBasicInfo;
+import com.stable.vo.bus.Monitoring;
 import com.stable.vo.bus.TickData;
 import com.stable.vo.bus.TickDataBuySellInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
-import com.stable.vo.up.strategy.ModelV1;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -55,6 +55,8 @@ public class MonitoringService {
 	private BuyTraceService buyTraceService;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
+	@Autowired
+	private MonitoringDao monitoringDao;
 
 	static final EsQueryPageReq querypage = new EsQueryPageReq(1000);
 
@@ -62,77 +64,58 @@ public class MonitoringService {
 
 	public synchronized void startObservable() {
 		String date = DateUtil.getTodayYYYYMMDD();
-		if (!tradeCalService.isOpen(Integer.valueOf(date))) {
+		int idate = Integer.valueOf(date);
+		if (!tradeCalService.isOpen(idate)) {
 			WxPushUtil.pushSystem1("非交易日结束监听");
 			return;
 		}
 		long now = new Date().getTime();
-		long isAlivingMillis = DateUtil.parseTodayYYYYMMDDHHMMSS(date + " 15:00:00").getTime();
+		long isAlivingMillis = DateUtil.parseTodayYYYYMMDDHHMMSS(date + " 15:03:00").getTime();
 		if (now > isAlivingMillis) {// 已经超时
 			log.info("now > isAlivingMillis,已超时");
 			return;
 		}
-		List<RealtimeDetailsAnalyzer> list = new LinkedList<RealtimeDetailsAnalyzer>();
+
 		String observableDate = tradeCalService.getPretradeDate(date);
 		try {
 			log.info("observableDate:" + observableDate);
-			// 买入
-			List<ModelV1> bList = upModelLineService.getListByCode(null, observableDate, "1", null, null, querypage, 4);
-			Map<String, MonitoringVo> buyMap = new HashMap<String, MonitoringVo>();
-			List<MonitoringVo> allList = new LinkedList<MonitoringVo>();
-			if (bList != null) {
-				bList.forEach(x -> {
-					MonitoringVo m = new MonitoringVo();
-					m.setCode(x.getCode());
-					m.setDate(x.getDate());
-					m.setMt(MonitoringType.BUY);
-					allList.add(m);
-					buyMap.put(m.getCode(), m);
-				});
-			}
+			// 获取买入监听列表
+			Set<Monitoring> bList = upModelLineService.getListByCode(querypage);
+			List<Monitoring> wupdate = new LinkedList<Monitoring>();
 
-			// 卖出
-			List<BuyTrace> blist = buyTraceService.getListByCode("", TradeType.BOUGHT.getCode(),
-					BuyModelType.B2.getCode(), querypage);
-			Map<String, MonitoringVo> sellMap = new HashMap<String, MonitoringVo>();
-			if (blist != null) {
-				blist.forEach(x -> {
-					if (!sellMap.containsKey(x.getCode())) {
-						MonitoringVo m = new MonitoringVo();
-						m.setCode(x.getCode());
-						m.setMt(MonitoringType.SELL);
-						sellMap.put(x.getCode(), m);
+			List<RealtimeDetailsAnalyzer> list = new LinkedList<RealtimeDetailsAnalyzer>();
+			RealtimeDetailsResulter resulter = new RealtimeDetailsResulter();
+
+			int buytt = 0;
+			int selltt = 0;
+			if (bList != null && bList.size() > 0) {
+				// 启动监听线程
+				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
+				for (Monitoring x : bList) {
+					log.info(x);
+					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
+					if (task.init(x, resulter, daliyBasicHistroyService,
+							avgService.queryListByCodeForRealtime(x.getCode(), x.getReqBuyDate()), tickDataService,
+							stockBasicService.getCodeName(x.getCode()), buyTraceService, daliyTradeHistroyService)) {
+						new Thread(task).start();
+						list.add(task);
+						map.put(x.getCode(), task);
+
+						if (x.getBuy() == 1) {
+							buytt++;
+						}
+						selltt += task.getSellCnt();
+						wupdate.add(x);
 					}
-				});
-			}
-
-			// 合并
-			for (String key : sellMap.keySet()) {
-				if (buyMap.containsKey(key)) {
-					buyMap.get(key).setMt(MonitoringType.ALL);
-				} else {
-					allList.add(sellMap.get(key));
+				}
+				// 启动结果线程
+				if (list.size() > 0) {
+					new Thread(resulter).start();
 				}
 			}
 
-			if (allList == null || allList.size() <= 0) {
-				WxPushUtil.pushSystem1("交易日" + observableDate + "没有白马股，休眠线程！到15:00");
-			} else {
-				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
-				allList.forEach(x -> {
-					log.info(x);
-				});
-				allList.forEach(x -> {
-					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer(x, daliyBasicHistroyService,
-							avgService.queryListByCodeForRealtime(x.getCode(), x.getDate()), tickDataService,
-							stockBasicService.getCodeName(x.getCode()), buyTraceService, daliyTradeHistroyService);
-					new Thread(task).start();
-					list.add(task);
-					map.put(x.getCode(), task);
-				});
-				WxPushUtil.pushSystem1("交易日" + observableDate + "开始监听实时交易，监听总数:[" + allList.size() + "],买入["
-						+ buyMap.size() + "],卖出[" + sellMap.size() + "]");
-			}
+			WxPushUtil.pushSystem1("交易日" + observableDate + "开始监听实时交易，监听总数:[" + bList.size() + "],实际总数[" + list.size()
+					+ "],买入[" + buytt + "],卖出[" + selltt + "]");
 
 			long from3 = new Date().getTime();
 			int millis = (int) ((isAlivingMillis - from3));
@@ -143,6 +126,15 @@ public class MonitoringService {
 			// 到点停止所有线程
 			for (RealtimeDetailsAnalyzer t : list) {
 				t.stop();
+			}
+			resulter.stop();
+			// 修改监听状态
+			if (wupdate.size() > 0) {
+				wupdate.forEach(x -> {
+					x.setBuy(0);
+					x.setLastMoniDate(idate);
+				});
+				monitoringDao.saveAll(wupdate);
 			}
 			WxPushUtil.pushSystem1("交易日结束监听");
 		} catch (Exception e) {

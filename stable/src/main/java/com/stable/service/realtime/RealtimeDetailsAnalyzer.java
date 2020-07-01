@@ -10,7 +10,6 @@ import java.util.List;
 import org.elasticsearch.search.sort.SortOrder;
 
 import com.stable.enums.BuyModelType;
-import com.stable.enums.MonitoringType;
 import com.stable.enums.StockAType;
 import com.stable.enums.TradeType;
 import com.stable.service.DaliyBasicHistroyService;
@@ -25,6 +24,7 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BuyTrace;
 import com.stable.vo.bus.DaliyBasicInfo;
+import com.stable.vo.bus.Monitoring;
 import com.stable.vo.bus.StockAvg;
 import com.stable.vo.bus.TickData;
 import com.stable.vo.bus.TickDataBuySellInfo;
@@ -51,7 +51,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private BuyTraceService buyTraceService;
 	private boolean waitingBuy = true;
 	private double topPrice;
-	private MonitoringType mt;
 	private List<BuyTrace> buyTraces = new LinkedList<BuyTrace>();
 	private double highPriceFromBuy = 0.0;
 	private String today = DateUtil.getTodayYYYYMMDD();
@@ -59,50 +58,59 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private String firstTimeWarning = null;
 	private int warningCnt = 0;
 	private boolean pg = false;
+	private Monitoring mv;
+	private RealtimeDetailsResulter resulter;
+	private boolean needMoniSell = false;
 
 	public void stop() {
 		isRunning = false;
 	}
 
-	public RealtimeDetailsAnalyzer(MonitoringVo mv, DaliyBasicHistroyService daliyBasicHistroyService, StockAvg ytdAvg,
-			TickDataService tickDataService, String codeName, BuyTraceService buyTraceService,
-			DaliyTradeHistroyService daliyTradeHistroyService) {
+	public boolean init(Monitoring mv, RealtimeDetailsResulter resulter,
+			DaliyBasicHistroyService daliyBasicHistroyService, StockAvg ytdAvg, TickDataService tickDataService,
+			String codeName, BuyTraceService buyTraceService, DaliyTradeHistroyService daliyTradeHistroyService) {
+		this.resulter = resulter;
 		this.tickDataService = tickDataService;
 		this.ytdAvg = ytdAvg;
 		this.code = mv.getCode();
 		this.codeName = codeName;
-		this.lastTradeDate = mv.getDate();
+		this.lastTradeDate = mv.getReqBuyDate();
 		this.daliyBasicHistroyService = daliyBasicHistroyService;
 		this.buyTraceService = buyTraceService;
-		this.mt = mv.getMt();
+		this.mv = mv;
+
+		SinaRealTime srt = SinaRealtimeUitl.get(code);
+		if (srt.getOpen() == 0.0) {
+			log.info("{} {} SINA 今日停牌", code, codeName);
+			WxPushUtil.pushSystem1(code + " " + codeName + "今日停牌");
+			return false;
+		}
 
 		// 买入
-		if (MonitoringType.SELL != mt) {
+		if (mv.getBuy() == 1) {
 			// 初始化
 			ytdBasic = daliyBasicHistroyService.queryLastest(code);
 			if (ytdAvg == null || ytdBasic == null) {
 				WxPushUtil.pushSystem1(
 						"实时:数据不全，终止监控。ytdAvg==null?" + (ytdAvg == null) + "},ytdBasic==null?" + (ytdBasic == null));
-				return;
+				return false;
 			}
 			if (lastTradeDate != ytdBasic.getTrade_date()) {
 				WxPushUtil.pushSystem1("实时:数据不准，终止监控。lastTradeDate (" + lastTradeDate + ")!= ytdBasic.getTrade_date("
 						+ ytdBasic.getTrade_date() + ")");
-				return;
+				return false;
 			}
 			yesterdayPrice = ytdBasic.getClose();
 			topPrice = getTopPrice();
 		}
 
 		// 卖出
-		if (MonitoringType.BUY != mt) {
-			List<BuyTrace> bts = buyTraceService.getListByCode(code, TradeType.BOUGHT.getCode(),
-					BuyModelType.B2.getCode(), MonitoringService.querypage);
-			if (bts != null && bts.size() > 0) {
-				bts.forEach(x -> {
-					buyTraces.add(x);
-				});
-			}
+		List<BuyTrace> bts = buyTraceService.getListByCode(code, TradeType.BOUGHT.getCode(), BuyModelType.B2.getCode(),
+				MonitoringService.querypage);
+		if (bts != null && bts.size() > 0) {
+			bts.forEach(x -> {
+				buyTraces.add(x);
+			});
 
 			int minDate = 20991231;
 			for (int i = 0; i < buyTraces.size(); i++) {
@@ -118,7 +126,14 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				highPriceFromBuy = list.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
 						.getHigh();
 			}
+			needMoniSell = true;
 		}
+
+		return true;
+	}
+
+	public int getSellCnt() {
+		return needMoniSell ? 1 : 0;
 	}
 
 	private double getTopPrice() {
@@ -222,7 +237,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				}
 
 				// 买入
-				if (MonitoringType.SELL != mt) {
+				if (mv.getBuy() == 1) {
 					if (highPrice >= chkPrice && nowPrice >= chkPrice) {// 一阳穿N，并涨幅3%以上
 						WAIT_MIN = FIVE_MIN;// 东方财富5分钟频率
 						if (allTickData == null) {
@@ -244,58 +259,56 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						warningCnt++;
 
 						boolean buytime = d.getBuyTimes() > d.getSellTimes();
-						WxPushUtil.pushSystem1("请关注:" + code + " " + codeName + ",市场行为:" + (buytime ? "买入" : "卖出")
-								+ ",主力行为:" + (pg ? "Yes" : "No") + ",买入额:"
-								+ CurrencyUitl.covertToString(d.getBuyTotalAmt()) + ",卖出额:"
-								+ CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
+						String msg = "关注:" + code + " " + codeName + ",市场行为:" + (buytime ? "买入" : "卖出") + ",主力行为:"
+								+ (pg ? "Yes" : "No") + ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt())
+								+ ",卖出额:" + CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
 								+ CurrencyUitl.covertToString(d.getTotalAmt()) + ",第一次提醒时间:" + firstTimeWarning
-								+ ",提醒次数:" + warningCnt + ",chkPrice:" + chkPrice + ",当前价格:" + nowPrice
-								+ ",请关注量(同花顺)，提防上影线，高开低走等,STOP: http://106.52.95.147:9999/web/realtime/buy?stop?detail?code="
-								+ code);
+								+ ",提醒次数:" + warningCnt + ",chkPrice:" + chkPrice + ",当前价格:" + nowPrice;
+						// + ",请关注量(同花顺)，提防上影线，高开低走等,STOP:
+						// http://106.52.95.147:9999/web/realtime/buy?stop?detail?code=code;
+						resulter.addBuyMessage(msg);
+//						WxPushUtil.pushSystem1(msg);
 						// isRunning = false;
 						autoBuy(isSina ? srt.getSell1() : allTickData.get(allTickData.size() - 1).getPrice(), pg);
 					}
 				}
 
 				// 卖出
-				if (MonitoringType.BUY != mt) {
-					if (buyTraces.size() > 0) {
-						List<BuyTrace> sells = new LinkedList<BuyTrace>();
-						for (int i = 0; i < buyTraces.size(); i++) {
-							BuyTrace bt = buyTraces.get(i);
-							// 1.非当天
-							// 2.买1大于0
-							if (itoday > bt.getBuyDate() && srt.getBuy1() > 0.0) {
-								if (bt.getBuyPrice() >= nowPrice) {// 套牢卖出:当前价格低于买入价（有可能除权的情况）
-									bt.setSoldDate(itoday);
-									bt.setSoldPrice(srt.getBuy1());
-									bt.setStatus(TradeType.SOLD.getCode());
-									bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
-									buyTraceService.addToTrace(bt);
-									log.info("机器卖已成交:{}" + bt);
-									sells.add(bt);
-									WxPushUtil.pushSystem1(code + " " + codeName + " [止损卖出]," + bt.getBuyDate()
-											+ "买入价格:" + bt.getBuyPrice() + ",卖出价:" + bt.getSoldPrice() + "收益:"
-											+ bt.getProfit());
-								} else if (checkBackLine > 0.0 && checkBackLine >= nowPrice) {// 最高点回调5%卖
-									bt.setSoldDate(itoday);
-									bt.setSoldPrice(srt.getBuy1());
-									bt.setStatus(TradeType.SOLD.getCode());
-									bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
-									buyTraceService.addToTrace(bt);
-									log.info("机器卖已成交:{}" + bt);
-									sells.add(bt);
-									WxPushUtil.pushSystem1(code + " " + codeName + " [最高点回调5%卖]," + bt.getBuyDate()
-											+ "买入价格:" + bt.getBuyPrice() + ",卖出价:" + bt.getSoldPrice() + "收益:"
-											+ bt.getProfit());
-								}
+				if (buyTraces.size() > 0) {
+					List<BuyTrace> sells2 = new LinkedList<BuyTrace>();
+					for (int i = 0; i < buyTraces.size(); i++) {
+						BuyTrace bt = buyTraces.get(i);
+						//// 下跌卖出 1.非当天 2.买1大于0 3,当前价格低于5日线
+						if (itoday > bt.getBuyDate() && srt.getBuy1() > 0.0 && ytdAvg.getAvgPriceIndex5() > nowPrice) {
+							if (bt.getBuyPrice() >= nowPrice) {// 套牢卖出:当前价格低于买入价（有可能除权的情况）
+								bt.setSoldDate(itoday);
+								bt.setSoldPrice(srt.getBuy1());
+								bt.setStatus(TradeType.SOLD.getCode());
+								bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
+								buyTraceService.addToTrace(bt);
+								log.info("机器卖已成交:{}" + bt);
+								sells2.add(bt);
+								WxPushUtil.pushSystem1(code + " " + codeName + " [止损卖出]," + bt.getBuyDate() + "买入价格:"
+										+ bt.getBuyPrice() + ",卖出价:" + bt.getSoldPrice() + "收益:" + bt.getProfit());
+							} else if (checkBackLine > 0.0 && checkBackLine >= nowPrice) {// 最高点回调5%卖
+								bt.setSoldDate(itoday);
+								bt.setSoldPrice(srt.getBuy1());
+								bt.setStatus(TradeType.SOLD.getCode());
+								bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
+								buyTraceService.addToTrace(bt);
+								log.info("机器卖已成交:{}" + bt);
+								sells2.add(bt);
+								WxPushUtil.pushSystem1(code + " " + codeName + " [最高点回调5%卖]," + bt.getBuyDate()
+										+ "买入价格:" + bt.getBuyPrice() + ",卖出价:" + bt.getSoldPrice() + "收益:"
+										+ bt.getProfit());
 							}
+						}
 
-						}
-						if (sells.size() > 0) {
-							buyTraces.removeAll(sells);
-						}
 					}
+					if (sells2.size() > 0) {
+						buyTraces.removeAll(sells2);
+					}
+
 					// 14:50
 					if (now > d1450) {
 						boolean isLowClose = isLowClosePriceToday(srt);
@@ -324,9 +337,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 							}
 						}
 					}
-					// 下跌卖出
-					// 上涨：上影线，高开低走
 				}
+
 				Thread.sleep(WAIT_MIN);
 			} catch (Exception e) {
 				e.printStackTrace();

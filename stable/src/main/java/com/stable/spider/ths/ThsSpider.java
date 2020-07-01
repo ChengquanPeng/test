@@ -63,20 +63,20 @@ public class ThsSpider {
 	private static String SPIT = "/";
 	private static Map<String, Concept> allmap = new HashMap<String, Concept>();
 	static {
-		for (int i = 0; i < ConAll.all.length; i++) {
-			String[] string = ConAll.all[i].split(",");
-			String url = string[0];
-			String name = string[1];
-			List<String> ids = Arrays.asList(url.split(SPIT));
-			Concept cp = new Concept();
-			cp.setCode(ids.get(ids.size() - 1));
-			cp.setId(START_THS + cp.getCode());
-			cp.setType(ths);
-			cp.setDate(20100101);
-			cp.setHref(url);
-			cp.setName(name);
-			allmap.put(cp.getCode(), cp);
-		}
+//		for (int i = 0; i < ConAll.all.length; i++) {
+//			String[] string = ConAll.all[i].split(",");
+//			String url = string[0];
+//			String name = string[1];
+//			List<String> ids = Arrays.asList(url.split(SPIT));
+//			Concept cp = new Concept();
+//			cp.setCode(ids.get(ids.size() - 1));
+//			cp.setId(START_THS + cp.getCode());
+//			cp.setType(ths);
+//			cp.setDate(20100101);
+//			cp.setHref(url);
+//			cp.setName(name);
+//			allmap.put(cp.getCode(), cp);
+//		}
 	}
 
 //	private String host = "http://127.0.0.1:8081";
@@ -134,6 +134,7 @@ public class ThsSpider {
 		esConceptDao.findAll().forEach(x -> {
 			if (StringUtils.isNotBlank(x.getAliasCode()) && !"null".equals(x.getAliasCode())) {
 				m.put(x.getCode(), x);
+				log.info(x);
 			}
 		});
 		log.info(m.size());
