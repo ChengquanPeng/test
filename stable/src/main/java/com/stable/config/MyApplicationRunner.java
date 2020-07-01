@@ -1,11 +1,22 @@
 package com.stable.config;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import com.stable.job.RealtimeJob;
+import com.stable.utils.OSystemUtil;
+import com.stable.utils.SpringUtil;
 import com.stable.utils.WxPushUtil;
 
 @Component
@@ -21,6 +32,10 @@ public class MyApplicationRunner implements ApplicationRunner {
 //        for (String arg : sourceArgs) {
 //            System.out.print(arg + " ");
 //        }
+		if (OSystemUtil.isWindows()) {
+			printUrl();
+			return;
+		}
 		WxPushUtil.pushSystem1("系统正常启动");
 
 		new Thread(new Runnable() {
@@ -29,5 +44,24 @@ public class MyApplicationRunner implements ApplicationRunner {
 				realtimeJob.execute(null);
 			}
 		}).start();
+	}
+
+	private void printUrl() {
+		RequestMappingHandlerMapping bean = SpringUtil.getBean(RequestMappingHandlerMapping.class);
+		Map<RequestMappingInfo, HandlerMethod> handlerMethods = bean.getHandlerMethods();
+		handlerMethods.forEach((k, v) -> {
+			Set<RequestMethod> methods = k.getMethodsCondition().getMethods();
+			if (CollectionUtils.isEmpty(methods)) {
+				methods = new HashSet<>();
+				methods.add(RequestMethod.GET);
+				methods.add(RequestMethod.POST);
+			}
+			final Set<String> patterns = k.getPatternsCondition().getPatterns();
+			for (RequestMethod requestMethod : methods) {
+				for (String pattern : patterns) {
+					System.err.println("method：" + requestMethod + ",pattern:" + pattern);
+				}
+			}
+		});
 	}
 }
