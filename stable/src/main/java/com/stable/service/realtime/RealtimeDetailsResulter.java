@@ -6,6 +6,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.stable.utils.WxPushUtil;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 public class RealtimeDetailsResulter implements Runnable {
 	private static final String BR = "</br>";
 	private boolean isRunning = true;
@@ -28,6 +31,7 @@ public class RealtimeDetailsResulter implements Runnable {
 	public void sendMsg() {
 		lock.lock();
 		try {
+			log.info("message size:" + msgs.size());
 			if (msgs.size() > 0) {
 				StringBuffer sb = new StringBuffer("风险第一！！！>>");
 				sb.append(BR);
@@ -49,7 +53,7 @@ public class RealtimeDetailsResulter implements Runnable {
 	public void run() {
 		while (isRunning) {
 			try {
-
+				sendMsg();
 				Thread.sleep(WAIT_MIN);
 			} catch (Exception e) {
 				e.printStackTrace();

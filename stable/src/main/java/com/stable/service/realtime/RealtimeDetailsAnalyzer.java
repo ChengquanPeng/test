@@ -267,6 +267,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						// + ",请关注量(同花顺)，提防上影线，高开低走等,STOP:
 						// http://106.52.95.147:9999/web/realtime/buy?stop?detail?code=code;
 						resulter.addBuyMessage(msg);
+						log.info(msg);
 //						WxPushUtil.pushSystem1(msg);
 						// isRunning = false;
 						autoBuy(isSina ? srt.getSell1() : allTickData.get(allTickData.size() - 1).getPrice(), pg);
@@ -289,7 +290,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 								log.info("机器卖已成交:{}" + bt);
 								sells2.add(bt);
 								WxPushUtil.pushSystem1(code + " " + codeName + " [止损卖出]," + bt.getBuyDate() + "买入价格:"
-										+ bt.getBuyPrice() + ",卖出价:" + bt.getSoldPrice() + "收益:" + bt.getProfit());
+										+ bt.getBuyPrice() + ",卖出价:" + bt.getSoldPrice() + "收益:" + bt.getProfit()
+										+ "%");
 							} else if (checkBackLine > 0.0 && checkBackLine >= nowPrice) {// 最高点回调5%卖
 								bt.setSoldDate(itoday);
 								bt.setSoldPrice(srt.getBuy1());
@@ -300,7 +302,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 								sells2.add(bt);
 								WxPushUtil.pushSystem1(code + " " + codeName + " [最高点回调5%卖]," + bt.getBuyDate()
 										+ "买入价格:" + bt.getBuyPrice() + ",卖出价:" + bt.getSoldPrice() + "收益:"
-										+ bt.getProfit());
+										+ bt.getProfit() + "%");
 							}
 						}
 
