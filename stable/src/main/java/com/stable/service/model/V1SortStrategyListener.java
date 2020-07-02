@@ -182,6 +182,7 @@ public class V1SortStrategyListener implements StrategyListener {
 				result.put(mv.getCode(), detailDesc.toString());
 				saveList.add(mv);
 			} else {
+				log.info("code={},dropOutMsg={}", mc.getCode(), dropOutMsg);
 				result.put(mv.getCode(), dropOutMsg);
 				mcs.add(mc);
 			}
