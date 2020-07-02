@@ -40,6 +40,7 @@ public class RealtimeDetailsResulter implements Runnable {
 				});
 				sb.append("请关注量(同花顺)，提防上影线，高开低走等, 链接:http://106.52.95.147:9999/web/realtime/buy?stop?detail?code=");
 				WxPushUtil.pushSystem2(sb.toString());
+				msgs = new LinkedList<String>();
 			}
 		} finally {
 			lock.unlock();

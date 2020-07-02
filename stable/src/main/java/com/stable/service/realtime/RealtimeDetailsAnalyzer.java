@@ -1,7 +1,6 @@
 package com.stable.service.realtime;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
@@ -15,6 +14,7 @@ import com.stable.enums.TradeType;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.TickDataService;
+import com.stable.service.model.data.AvgService;
 import com.stable.service.trace.BuyTraceService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.sina.SinaRealTime;
@@ -52,7 +52,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean waitingBuy = true;
 	private double topPrice;
 	private List<BuyTrace> buyTraces = new LinkedList<BuyTrace>();
-	private double highPriceFromBuy = 0.0;
+	private double checkBackLine = 0.0;
 	private String today = DateUtil.getTodayYYYYMMDD();
 	private int itoday = Integer.valueOf(today);
 	private String firstTimeWarning = null;
@@ -67,11 +67,10 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	}
 
 	public boolean init(Monitoring mv, RealtimeDetailsResulter resulter,
-			DaliyBasicHistroyService daliyBasicHistroyService, StockAvg ytdAvg, TickDataService tickDataService,
+			DaliyBasicHistroyService daliyBasicHistroyService, AvgService avgService, TickDataService tickDataService,
 			String codeName, BuyTraceService buyTraceService, DaliyTradeHistroyService daliyTradeHistroyService) {
 		this.resulter = resulter;
 		this.tickDataService = tickDataService;
-		this.ytdAvg = ytdAvg;
 		this.code = mv.getCode();
 		this.codeName = codeName;
 		this.lastTradeDate = mv.getReqBuyDate();
@@ -88,6 +87,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 		// 买入
 		if (mv.getBuy() == 1) {
+			this.ytdAvg = avgService.queryListByCodeForRealtime(mv.getCode(), mv.getReqBuyDate());
 			// 初始化
 			ytdBasic = daliyBasicHistroyService.queryLastest(code);
 			if (ytdAvg == null || ytdBasic == null) {
@@ -123,8 +123,11 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCode(code, minDate, 0,
 						MonitoringService.querypage, SortOrder.ASC);
 				log.info("list is null?{},code={},minDate={}", (list == null), code, minDate);
-				highPriceFromBuy = list.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
-						.getHigh();
+				double highPriceFromBuy = list.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh))
+						.get().getHigh();
+				if (highPriceFromBuy > 0.0) {
+					checkBackLine = CurrencyUitl.lowestPrice(highPriceFromBuy, true);
+				}
 			}
 			needMoniSell = true;
 		}
@@ -169,22 +172,28 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	}
 
 	public void run() {
-		List<DaliyBasicInfo> list3 = daliyBasicHistroyService.queryListByCodeForModel(code, lastTradeDate, queryPage)
-				.getContent();
+		// 买入
+		double chkPrice = 0.0;
+		if (mv.getBuy() == 1) {
+			List<DaliyBasicInfo> list3 = daliyBasicHistroyService
+					.queryListByCodeForModel(code, lastTradeDate, queryPage).getContent();
 
-		// 监控价-1一阳N线价
-		double p1 = Arrays.asList(ytdAvg.getAvgPriceIndex3(), ytdAvg.getAvgPriceIndex5(), ytdAvg.getAvgPriceIndex10(),
-				ytdAvg.getAvgPriceIndex20(), ytdAvg.getAvgPriceIndex30()).stream().max(Double::compare).get();
-		// 监控价-2最少3%
-		double p2 = CurrencyUitl.topPrice3p(yesterdayPrice);
-		// 监控价-3大于前三天最高价
-		double p3 = Arrays.asList(ytdBasic.getHigh(), list3.get(1).getHigh(), list3.get(2).getHigh()).stream()
-				.max(Double::compare).get();
-		// 最终监控价
-		double chkPrice = Arrays.asList(p1, p2, p3).stream().max(Double::compare).get();
-		log.info("{}=>p1一阳N线价:{},最少3%:{},p3大于前三天最高价:{},最终监控价:{},昨收:{},今日涨停价:{}", code, p1, p2, p3, chkPrice,
-				yesterdayPrice, topPrice);
-		// 量控量
+			// 监控价-1一阳N线价
+			double p1 = Arrays
+					.asList(ytdAvg.getAvgPriceIndex3(), ytdAvg.getAvgPriceIndex5(), ytdAvg.getAvgPriceIndex10(),
+							ytdAvg.getAvgPriceIndex20(), ytdAvg.getAvgPriceIndex30())
+					.stream().max(Double::compare).get();
+			// 监控价-2最少3%
+			double p2 = CurrencyUitl.topPrice3p(yesterdayPrice);
+			// 监控价-3大于前三天最高价
+			double p3 = Arrays.asList(ytdBasic.getHigh(), list3.get(1).getHigh(), list3.get(2).getHigh()).stream()
+					.max(Double::compare).get();
+			// 最终监控价
+			chkPrice = Arrays.asList(p1, p2, p3).stream().max(Double::compare).get();
+			log.info("{}=>p1一阳N线价:{},最少3%:{},p3大于前三天最高价:{},最终监控价:{},昨收:{},今日涨停价:{}", code, p1, p2, p3, chkPrice,
+					yesterdayPrice, topPrice);
+			// 量控量
+		}
 
 		long d1130 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
 				DateUtil.parseDate(today + "113000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
@@ -193,10 +202,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		long d1450 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
 				DateUtil.parseDate(today + "145000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 
-		double checkBackLine = 0.0;
-		if (highPriceFromBuy > 0.0) {
-			checkBackLine = CurrencyUitl.lowestPrice(highPriceFromBuy, true);
-		}
+		// 卖出
 
 		while (isRunning) {
 			try {
@@ -212,37 +218,32 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 				double highPrice = 0.0;
 				double nowPrice = 0.0;
-				List<TickData> allTickData = null;
 				SinaRealTime srt = SinaRealtimeUitl.get(code);
-				boolean isSina = true;
-				if (srt != null) {
-					highPrice = srt.getHigh();
-					nowPrice = srt.getNow();
-					WAIT_MIN = ONE_MIN;// 新浪1分钟频率
-					log.info("{} SINA 实时:highPrice:{},nowPrice:{},监控价:{}", code, highPrice, nowPrice, chkPrice);
-				} else {
-					// 切换到东方财富
-					allTickData = EastmoneySpider.getRealtimeTick(code);
-					if (allTickData != null) {
-						highPrice = allTickData.stream().max(Comparator.comparingDouble(TickData::getPrice)).get()
-								.getPrice();
-						nowPrice = allTickData.get(allTickData.size() - 1).getPrice();
-						log.info("{} 东方财富 实时:highPrice:{},nowPrice:{},监控价:{}", code, highPrice, nowPrice, chkPrice);
-					} else {
-						allTickData = Collections.emptyList();
-						log.info("{} 东方财富 实时未获取到分笔", code);
-					}
-					WAIT_MIN = FIVE_MIN;// 东方财富5分钟频率
-					isSina = false;
-				}
+				highPrice = srt.getHigh();
+				nowPrice = srt.getNow();
+				WAIT_MIN = ONE_MIN;// 新浪1分钟频率
+				log.info("{} SINA 实时:highPrice:{},nowPrice:{},监控价:{}", code, highPrice, nowPrice, chkPrice);
+//				else {
+//					// 切换到东方财富
+//					allTickData = EastmoneySpider.getRealtimeTick(code);
+//					if (allTickData != null) {
+//						highPrice = allTickData.stream().max(Comparator.comparingDouble(TickData::getPrice)).get()
+//								.getPrice();
+//						nowPrice = allTickData.get(allTickData.size() - 1).getPrice();
+//						log.info("{} 东方财富 实时:highPrice:{},nowPrice:{},监控价:{}", code, highPrice, nowPrice, chkPrice);
+//					} else {
+//						allTickData = Collections.emptyList();
+//						log.info("{} 东方财富 实时未获取到分笔", code);
+//					}
+//					WAIT_MIN = FIVE_MIN;// 东方财富5分钟频率
+//					isSina = false;
+//				}
 
 				// 买入
 				if (mv.getBuy() == 1) {
 					if (highPrice >= chkPrice && nowPrice >= chkPrice) {// 一阳穿N，并涨幅3%以上
 						WAIT_MIN = FIVE_MIN;// 东方财富5分钟频率
-						if (allTickData == null) {
-							allTickData = EastmoneySpider.getRealtimeTick(code);
-						}
+						List<TickData> allTickData = EastmoneySpider.getRealtimeTick(code);
 						// 需要看量，开高低走，上影线情况
 						TickDataBuySellInfo d = tickDataService.sumTickData2(code, 0, yesterdayPrice,
 								ytdBasic.getCirc_mv(), allTickData, false);
@@ -264,13 +265,9 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 								+ ",卖出额:" + CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
 								+ CurrencyUitl.covertToString(d.getTotalAmt()) + ",第一次提醒时间:" + firstTimeWarning
 								+ ",提醒次数:" + warningCnt + ",chkPrice:" + chkPrice + ",当前价格:" + nowPrice;
-						// + ",请关注量(同花顺)，提防上影线，高开低走等,STOP:
-						// http://106.52.95.147:9999/web/realtime/buy?stop?detail?code=code;
 						resulter.addBuyMessage(msg);
 						log.info(msg);
-//						WxPushUtil.pushSystem1(msg);
-						// isRunning = false;
-						autoBuy(isSina ? srt.getSell1() : allTickData.get(allTickData.size() - 1).getPrice(), pg);
+						autoBuy(srt.getSell1(), pg);
 					}
 				}
 

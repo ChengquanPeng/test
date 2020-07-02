@@ -1,6 +1,7 @@
 package com.stable.service.realtime;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -79,23 +80,48 @@ public class MonitoringService {
 		String observableDate = tradeCalService.getPretradeDate(date);
 		try {
 			log.info("observableDate:" + observableDate);
+			// 所有买卖Code List
+			Set<String> allCode = new HashSet<String>();
 			// 获取买入监听列表
 			Set<Monitoring> bList = upModelLineService.getListByCode(querypage);
-			List<Monitoring> wupdate = new LinkedList<Monitoring>();
+			List<Monitoring> wupdate = new LinkedList<Monitoring>();// 买入列表更新
+			if (bList == null) {
+				bList = new HashSet<Monitoring>();
+			}
+
+			// 获取买卖监听列表
+			List<BuyTrace> sList = buyTraceService.getListByCode("", TradeType.BOUGHT.getCode(),
+					BuyModelType.B2.getCode(), querypage);
+
+			// 合并
+			bList.forEach(x -> {
+				allCode.add(x.getCode());
+			});
+			if (sList != null) {
+				for (BuyTrace bt : sList) {
+					if (!allCode.contains(bt.getCode())) {
+						allCode.add(bt.getCode());
+						// list add
+						Monitoring m = new Monitoring();
+						m.setCode(bt.getCode());
+						m.setBuy(0);// 卖出
+						bList.add(m);
+					}
+				}
+			}
 
 			List<RealtimeDetailsAnalyzer> list = new LinkedList<RealtimeDetailsAnalyzer>();
 			RealtimeDetailsResulter resulter = new RealtimeDetailsResulter();
 
 			int buytt = 0;
 			int selltt = 0;
-			if (bList != null && bList.size() > 0) {
+			if (bList.size() > 0) {
 				// 启动监听线程
 				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
 				for (Monitoring x : bList) {
 					log.info(x);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
-					if (task.init(x, resulter, daliyBasicHistroyService,
-							avgService.queryListByCodeForRealtime(x.getCode(), x.getReqBuyDate()), tickDataService,
+					if (task.init(x, resulter, daliyBasicHistroyService, avgService, tickDataService,
 							stockBasicService.getCodeName(x.getCode()), buyTraceService, daliyTradeHistroyService)) {
 						new Thread(task).start();
 						list.add(task);
@@ -103,9 +129,10 @@ public class MonitoringService {
 
 						if (x.getBuy() == 1) {
 							buytt++;
+							wupdate.add(x);
 						}
 						selltt += task.getSellCnt();
-						wupdate.add(x);
+
 					}
 				}
 				// 启动结果线程
