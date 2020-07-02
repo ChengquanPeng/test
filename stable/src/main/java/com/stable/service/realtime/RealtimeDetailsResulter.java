@@ -35,9 +35,11 @@ public class RealtimeDetailsResulter implements Runnable {
 			if (msgs.size() > 0) {
 				StringBuffer sb = new StringBuffer("风险第一！！！>>");
 				sb.append(BR);
-				msgs.forEach(x -> {
-					sb.append(x);
-				});
+				int index = 1;
+				for (String x : msgs) {
+					sb.append("序号:").append(index).append(x);
+					index++;
+				}
 				sb.append("请关注量(同花顺)，提防上影线，高开低走等, 链接:http://106.52.95.147:9999/web/realtime/buy?stop?detail?code=");
 				WxPushUtil.pushSystem2(sb.toString());
 				msgs = new LinkedList<String>();

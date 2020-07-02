@@ -84,13 +84,23 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			WxPushUtil.pushSystem1(code + " " + codeName + "今日停牌");
 			return false;
 		}
+		if (mv.getReqBuyDate() > 0) {
+			this.ytdAvg = avgService.queryListByCodeForRealtime(mv.getCode(), mv.getReqBuyDate());
+		}
+		if (this.ytdAvg == null) {
+			this.ytdAvg = avgService.queryListByCodeForRealtime(mv.getCode());
+		}
+		if (ytdAvg == null) {
+			WxPushUtil.pushSystem1("实时:数据不全，终止监控。ytdAvg==null?true");
+			return false;
+		}
 
 		// 买入
 		if (mv.getBuy() == 1) {
-			this.ytdAvg = avgService.queryListByCodeForRealtime(mv.getCode(), mv.getReqBuyDate());
+
 			// 初始化
 			ytdBasic = daliyBasicHistroyService.queryLastest(code);
-			if (ytdAvg == null || ytdBasic == null) {
+			if (ytdBasic == null) {
 				WxPushUtil.pushSystem1(
 						"实时:数据不全，终止监控。ytdAvg==null?" + (ytdAvg == null) + "},ytdBasic==null?" + (ytdBasic == null));
 				return false;
@@ -164,7 +174,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				int program = pg ? 1 : 2;
 				bt.setProgram(program);
 				buyTraceService.addToTrace(bt);
-				log.info("机器买已成交:{}" + bt);
+				log.info("机器买已成交:{}", bt);
 				buyTraces.add(bt);
 				waitingBuy = false;
 			}
@@ -284,7 +294,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 								bt.setStatus(TradeType.SOLD.getCode());
 								bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
 								buyTraceService.addToTrace(bt);
-								log.info("机器卖已成交:{}" + bt);
+								log.info("机器卖已成交:{}", bt);
 								sells2.add(bt);
 								WxPushUtil.pushSystem1(code + " " + codeName + " [止损卖出]," + bt.getBuyDate() + "买入价格:"
 										+ bt.getBuyPrice() + ",卖出价:" + bt.getSoldPrice() + "收益:" + bt.getProfit()
@@ -295,7 +305,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 								bt.setStatus(TradeType.SOLD.getCode());
 								bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
 								buyTraceService.addToTrace(bt);
-								log.info("机器卖已成交:{}" + bt);
+								log.info("机器卖已成交:{}", bt);
 								sells2.add(bt);
 								WxPushUtil.pushSystem1(code + " " + codeName + " [最高点回调5%卖]," + bt.getBuyDate()
 										+ "买入价格:" + bt.getBuyPrice() + ",卖出价:" + bt.getSoldPrice() + "收益:"
