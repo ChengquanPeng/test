@@ -257,7 +257,7 @@ public class ThsSpider {
 		int cntCodelist = 0;
 		int limit = 1;
 		if (isFirday) {
-			limit = 3;
+//			limit = 3;
 		}
 
 		int index = 1;

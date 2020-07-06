@@ -40,6 +40,7 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class MonitoringService {
+	private static final String BR = "</br>";
 	@Autowired
 	private TradeCalService tradeCalService;
 	@Autowired
@@ -149,12 +150,20 @@ public class MonitoringService {
 			if (millis > 0) {
 				Thread.sleep(millis);
 			}
-
+			List<BuyTrace> buyedList = new LinkedList<BuyTrace>();
+			List<BuyTrace> selledList = new LinkedList<BuyTrace>();
 			// 到点停止所有线程
 			for (RealtimeDetailsAnalyzer t : list) {
 				t.stop();
+				if (t.getBuyed() != null) {
+					buyedList.add(t.getBuyed());
+				}
+				if (t.getSelled() != null) {
+					selledList.add(t.getSelled());
+				}
 			}
 			resulter.stop();
+
 			// 修改监听状态
 			if (wupdate.size() > 0) {
 				wupdate.forEach(x -> {
@@ -163,12 +172,38 @@ public class MonitoringService {
 				});
 				monitoringDao.saveAll(wupdate);
 			}
-			WxPushUtil.pushSystem1("交易日结束监听");
+			sendEndMessaget(buyedList, selledList);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			map = null;
 		}
+	}
+
+	private void sendEndMessaget(List<BuyTrace> buyedList, List<BuyTrace> selledList) {
+		StringBuffer sb = new StringBuffer("交易日结束监听,买入数量[" + buyedList.size() + "],卖出数量[" + selledList.size() + "]");
+		sb.append(BR);
+		int index = 1;
+		if (buyedList.size() > 0) {
+			sb.append("买入明细：==>").append(BR);
+			for (BuyTrace x : buyedList) {
+				sb.append("序号:").append(index).append(x.getCode()).append(" ")
+						.append(stockBasicService.getCodeName(x.getCode())).append(" 买入价格:").append(x.getBuyPrice())
+						.append(BR);
+				index++;
+			}
+		}
+		if (selledList.size() > 0) {
+			sb.append("卖出明细：==>").append(BR);
+			for (BuyTrace x : selledList) {
+				sb.append("序号:").append(index).append(x.getCode()).append(" ")
+						.append(stockBasicService.getCodeName(x.getCode())).append(" 买入价格:").append(x.getBuyPrice())
+						.append(" 卖出价格:").append(x.getSoldPrice()).append(" 收益:").append(x.getProfit()).append("%")
+						.append(BR);
+				index++;
+			}
+		}
+		WxPushUtil.pushSystem2(sb.toString());
 	}
 
 	public void stopThread(String code) {

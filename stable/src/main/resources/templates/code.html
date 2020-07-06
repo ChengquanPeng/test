@@ -1,11 +1,22 @@
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style type="text/css">
-.bor{border:1px dashed #d8d8d8;font-size: 14px;}
-.hder{height: 40px;font:bold;font-size: 16px;}
-tr td{border:1px dashed #d8d8d8;vertical-align: bottom;}
+.bor {
+	border: 1px dashed #d8d8d8;
+	font-size: 14px;
+}
 
+.hder {
+	height: 40px;
+	font: bold;
+	font-size: 16px;
+}
+
+tr td {
+	border: 1px dashed #d8d8d8;
+	vertical-align: bottom;
+}
 </style>
 <script type="text/javascript" src="./common.js"></script>
 <script type="text/javascript">
@@ -13,7 +24,29 @@ tr td{border:1px dashed #d8d8d8;vertical-align: bottom;}
 </script>
 </head>
 <body>
-<span th:text="${code}"></span>在50亿小盘中监听程序单子：每个5秒，30秒数买入10手，20手等等，相同时间间隔，相同量。=》主力的调研公司比小散更加专业，跟着主力走。
+	<table border='1' cellspacing='0' cellpadding='0'>
+		<tr></tr>
+	</table>
+	<script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script>
+	<span th:text="${code}"></span>
+	</br> 利润： 1：年报连续3年盈利？盈利持续增长？ 2：最近3个季度连续盈利？同比盈利持续增长？最近利润同比增长？环比增长？
+	</br> 营收： 1：年报连续3年营收持续增长？ 2：最近3个季度营收持续增长？最近季度营收同比增长？环比增长？
+	</br> 最近季度营收和利润同时同比增长？同时环比增长？
+	</br> 分红：最近一年分红？连续3年持续分红？上市年份，累计分红次数
+	</br>
+	回购：是否处于回购期（开始，股东大会通过，回购金额超1000万，过期日期），未超过过期日期，状态无：完成且金额超1000）。最近一次回购金额？累计回购次数（股东大会通过，回购金额超1000万）
+	</br> 板块：所属概念板块（活跃度：30日板块上涨幅度和次数）
+	</br>最新业绩预报快报
+	</br>90个交易日程序单数量
+	</br>
+	</br>
+	</br>地雷：
+	</br>最近季度利润亏损，最近3个季度连续亏损，连续2年亏损，最近利润营收同比下跌？最近季度营收和利润同时同比下跌？
+	</br>最近2年无分红，最近分红年份，
+	</br>最近2年无回购，最近回购年份，
+	</br>股权质押
+	</br>限售股解禁
+
 </body>
 
 </html>
