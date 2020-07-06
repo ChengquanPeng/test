@@ -189,7 +189,7 @@ public class MonitoringService {
 			for (BuyTrace x : buyedList) {
 				sb.append("序号:").append(index).append(x.getCode()).append(" ")
 						.append(stockBasicService.getCodeName(x.getCode())).append(" 买入价格:").append(x.getBuyPrice())
-						.append(BR);
+						.append(" 买入时间:").append(x.getBuyDate()).append(BR);
 				index++;
 			}
 		}
@@ -197,9 +197,9 @@ public class MonitoringService {
 			sb.append("卖出明细：==>").append(BR);
 			for (BuyTrace x : selledList) {
 				sb.append("序号:").append(index).append(x.getCode()).append(" ")
-						.append(stockBasicService.getCodeName(x.getCode())).append(" 买入价格:").append(x.getBuyPrice())
-						.append(" 卖出价格:").append(x.getSoldPrice()).append(" 收益:").append(x.getProfit()).append("%")
-						.append(BR);
+						.append(stockBasicService.getCodeName(x.getCode())).append(" 买入时间:").append(x.getBuyDate())
+						.append(" 买入价格:").append(x.getBuyPrice()).append(" 卖出价格:").append(x.getSoldPrice())
+						.append(" 收益:").append(x.getProfit()).append("%").append(BR);
 				index++;
 			}
 		}
