@@ -35,6 +35,7 @@ import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.Monitoring;
 import com.stable.vo.bus.TickData;
 import com.stable.vo.bus.TickDataBuySellInfo;
+import com.stable.vo.http.resp.ReportVo;
 import com.stable.vo.http.resp.ViewVo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -94,7 +95,7 @@ public class MonitoringService {
 			}
 
 			// 获取买卖监听列表
-			List<BuyTrace> sList = buyTraceService.getListByCode("", TradeType.BOUGHT.getCode(),
+			List<BuyTrace> sList = buyTraceService.getListByCode("", 0, TradeType.BOUGHT.getCode(),
 					BuyModelType.B2.getCode(), querypage);
 
 			// 合并
@@ -236,7 +237,7 @@ public class MonitoringService {
 	public String sell(String code) {
 		SinaRealTime srt = SinaRealtimeUitl.get(code);
 		if (srt != null && srt.getSell1() > 0.0) {
-			List<BuyTrace> list = buyTraceService.getListByCode(code, TradeType.BOUGHT.getCode(),
+			List<BuyTrace> list = buyTraceService.getListByCode(code, 0, TradeType.BOUGHT.getCode(),
 					BuyModelType.B1.getCode(), querypage);
 			if (list != null) {
 				for (BuyTrace bt : list) {
@@ -270,12 +271,16 @@ public class MonitoringService {
 		return null;
 	}
 
-	public List<ViewVo> getVeiw(String all) {
+	public List<ViewVo> getVeiw(String all, String fromDate) {
 		int status = 0;
 		if (StringUtils.isBlank(all) || "0".equals(all)) {
 			status = TradeType.BOUGHT.getCode();
 		}
-		List<BuyTrace> list = buyTraceService.getListByCode("", status, BuyModelType.B2.getCode(), querypage);
+		int buydate = 0;
+		if (StringUtils.isNotBlank(fromDate)) {
+			buydate = Integer.valueOf(fromDate);
+		}
+		List<BuyTrace> list = buyTraceService.getListByCode("", buydate, 0, status, querypage);
 		List<ViewVo> l = new LinkedList<ViewVo>();
 		if (list != null) {
 			for (int i = 0; i < list.size(); i++) {
@@ -295,5 +300,75 @@ public class MonitoringService {
 			}
 		}
 		return l;
+	}
+
+	public ReportVo report(String all, String fromDate) {
+		ReportVo pv = new ReportVo();
+
+		int status = 0;
+		if (StringUtils.isNotBlank(all) && "1".equals(all)) {
+			pv.setAll("全部");
+		} else {
+			status = TradeType.SOLD.getCode();
+			pv.setAll("已成交");
+		}
+		int buydate = 0;
+		if (StringUtils.isNotBlank(fromDate)) {
+			buydate = Integer.valueOf(fromDate);
+		}
+		pv.setFromDate(fromDate);
+
+		List<BuyTrace> list = buyTraceService.getListByCode("", buydate, 0, status, querypage);
+
+		if (list != null) {
+			int allc = 0;// 总数
+			double allp = 0.0;// 总盈亏
+			int ynowc = 0;// 盈利总数（未成交）
+			int ynowp = 0;// 盈利的总盈亏（未成交）
+			int sc = 0;// 已卖总数
+			double sp = 0.0;// 已卖总盈亏
+			int ysc = 0;// 已卖中盈利总数
+			double ysp = 0.0;// 已卖中盈利总盈亏
+
+			for (int i = 0; i < list.size(); i++) {
+				BuyTrace bt = list.get(i);
+
+				if (bt.getSoldDate() <= 0) {
+					SinaRealTime srt = SinaRealtimeUitl.get(bt.getCode());
+					if (srt != null && srt.getBuy1() > 0.0) {
+						bt.setSoldPrice(srt.getBuy1());
+						bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
+					}
+				} else {
+					sc++;
+					sp += bt.getProfit();
+
+					if (bt.getProfit() > 0.0) {
+						ysc++;
+						ysp += bt.getProfit();
+					}
+				}
+
+				if (bt.getProfit() > 0.0) {
+					ynowc++;
+					ynowp += bt.getProfit();
+				}
+				allc++;
+				allp += bt.getProfit();
+			}
+
+			pv.setAllCnt(allc);
+			pv.setAllProfit(allp);
+			pv.setSoldCnt(sc);
+			pv.setSoldProfit(sp);
+			pv.setYsoldCnt(ysc);
+			pv.setYsoldProfit(ysp);
+			pv.setSoldRate(CurrencyUitl.getRate(ysc, sc));
+
+			pv.setYnowCnt(ynowc);
+			pv.setYnowProfit(ynowp);
+			pv.setNowRate(CurrencyUitl.getRate(ynowc, allc));
+		}
+		return pv;
 	}
 }

@@ -117,8 +117,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		}
 
 		// 卖出
-		List<BuyTrace> bts = buyTraceService.getListByCode(code, TradeType.BOUGHT.getCode(), BuyModelType.B2.getCode(),
-				MonitoringService.querypage);
+		List<BuyTrace> bts = buyTraceService.getListByCode(code, 0, TradeType.BOUGHT.getCode(),
+				BuyModelType.B2.getCode(), MonitoringService.querypage);
 		if (bts != null && bts.size() > 0) {
 			bts.forEach(x -> {
 				buyTraces.add(x);

@@ -40,13 +40,13 @@ tr td {
 		<tr th:each="info : ${vvs}">
 			<td th:text="${info.index}"></td>
 			<td class='sn' th:text="${info.code}"></td>
-			<th th:text="${info.name}"></th>
-			<th th:text="${info.buyDate}"></th>
-			<th th:text="${info.buyPrice}"></th>
-			<th th:text="${info.soldDate}"></th>
-			<th th:text="${info.soldPrice}"></th>
-			<th th:text="${info.profit}">%</th>
-			<th th:text="${info.program}"></th>
+			<td th:text="${info.name}"></td>
+			<td th:text="${info.program}"></td>
+			<td th:text="${info.buyDate}"></td>
+			<td th:text="${info.buyPrice}"></td>
+			<td th:text="${info.soldDate}"></td>
+			<td th:text="${info.soldPrice}"></td>
+			<td><span th:text="${info.profit}"></span>%</td>
 		</tr>
 	</table>
 	<script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script>

@@ -153,8 +153,16 @@ public class CurrencyUitl {
 		}
 	}
 
+	public final static double getRate(int yes, int total) {
+		if (total == 0) {
+			return 0.0;
+		}
+		double per = (Double.valueOf(yes) / Double.valueOf(total)) * 100;
+		return new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+	}
+
 	public static void main(String[] args) {
-		System.err.println(0.0 - 9.98);
+		System.err.println(getRate(20, 100));
 		System.err.println(CurrencyUitl.covertToString(253354520l));
 //		System.err.println(CurrencyUitl.covertToLong("1.1万亿"));
 //		System.err.println(CurrencyUitl.covertToString(997));
