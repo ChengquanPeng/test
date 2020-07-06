@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ import com.stable.service.trace.BuyTraceService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.sina.SinaRealTime;
 import com.stable.spider.sina.SinaRealtimeUitl;
+import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
@@ -33,6 +35,7 @@ import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.Monitoring;
 import com.stable.vo.bus.TickData;
 import com.stable.vo.bus.TickDataBuySellInfo;
+import com.stable.vo.http.resp.ViewVo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
@@ -265,5 +268,32 @@ public class MonitoringService {
 			return bt;
 		}
 		return null;
+	}
+
+	public List<ViewVo> getVeiw(String all) {
+		int status = 0;
+		if (StringUtils.isBlank(all) || "0".equals(all)) {
+			status = TradeType.BOUGHT.getCode();
+		}
+		List<BuyTrace> list = buyTraceService.getListByCode("", status, BuyModelType.B2.getCode(), querypage);
+		List<ViewVo> l = new LinkedList<ViewVo>();
+		if (list != null) {
+			for (int i = 0; i < list.size(); i++) {
+				BuyTrace bt = list.get(i);
+				ViewVo vv = new ViewVo();
+				BeanCopy.copy(bt, vv);
+				vv.setIndex(i + 1);
+				vv.setName(stockBasicService.getCodeName(vv.getCode()));
+				if (vv.getSoldDate() <= 0) {
+					SinaRealTime srt = SinaRealtimeUitl.get(vv.getCode());
+					if (srt != null && srt.getBuy1() > 0.0) {
+						vv.setSoldPrice(srt.getBuy1());
+						vv.setProfit(CurrencyUitl.cutProfit(vv.getBuyPrice(), vv.getSoldPrice()));
+					}
+				}
+				l.add(vv);
+			}
+		}
+		return l;
 	}
 }

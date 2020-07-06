@@ -16,8 +16,9 @@ public class RealTimeController {
 	@Autowired
 	private MonitoringService monitoringService;
 
+
 	/**
-	 * 终止线程
+	 * 交易详情
 	 */
 	@RequestMapping(value = "/detail", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> detail(String code) {

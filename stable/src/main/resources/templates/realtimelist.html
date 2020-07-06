@@ -1,0 +1,55 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+.bor {
+	border: 1px dashed #d8d8d8;
+	font-size: 14px;
+}
+
+.hder {
+	height: 40px;
+	font: bold;
+	font-size: 16px;
+}
+
+tr td {
+	border: 1px dashed #d8d8d8;
+	vertical-align: bottom;
+}
+</style>
+<script type="text/javascript" src="./common.js"></script>
+<script type="text/javascript">
+	
+</script>
+</head>
+<body>
+	<table border='1' cellspacing='0' cellpadding='0'>
+		<tr>
+			<th>序号</th>
+			<th>代码</th>
+			<th>名称</th>
+			<th>程序单</th>
+			<th>买入日期</th>
+			<th>买入价格</th>
+			<th>卖出日期</th>
+			<th>卖出/当前价格</th>
+			<th>收益</th>
+		</tr>
+
+		<tr th:each="info : ${vvs}">
+			<td th:text="${info.index}"></td>
+			<td class='sn' th:text="${info.code}"></td>
+			<th th:text="${info.name}"></th>
+			<th th:text="${info.buyDate}"></th>
+			<th th:text="${info.buyPrice}"></th>
+			<th th:text="${info.soldDate}"></th>
+			<th th:text="${info.soldPrice}"></th>
+			<th th:text="${info.profit}">%</th>
+			<th th:text="${info.program}"></th>
+		</tr>
+	</table>
+	<script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script>
+</body>
+
+</html>
