@@ -178,7 +178,19 @@ public class LinePrice {
 				day20.add(listD30.get(i));
 			}
 			max20 = day20.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get().getHigh();
+
 			min20 = day20.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
+			double min201 = day20.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+					.getLow();
+			double max201 = day20.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+					.getHigh();
+
+			if (max201 > max20) {
+				max20 = max201;
+			}
+			if (min201 < min20) {
+				min20 = min201;
+			}
 		} else {
 			List<DaliyBasicInfo> day20 = new LinkedList<DaliyBasicInfo>();
 			for (int i = 0; i < 20; i++) {
@@ -186,6 +198,18 @@ public class LinePrice {
 			}
 			max20 = day20.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
 			min20 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
+
+			double min201 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
+					.getLow();
+			double max201 = day20.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
+					.getHigh();
+
+			if (max201 > max20) {
+				max20 = max201;
+			}
+			if (min201 < min20) {
+				min20 = min201;
+			}
 		}
 
 		if (max20 > CurrencyUitl.topPrice20(min20)) {
@@ -207,12 +231,23 @@ public class LinePrice {
 		double max30;
 		double min30;
 		if (isUseDividData) {// 复权数据
-			List<TradeHistInfoDaliy> day20 = new LinkedList<TradeHistInfoDaliy>();
+			List<TradeHistInfoDaliy> day30 = new LinkedList<TradeHistInfoDaliy>();
 			for (int i = 0; i < 30; i++) {
-				day20.add(listD30.get(i));
+				day30.add(listD30.get(i));
 			}
-			max30 = day20.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get().getHigh();
-			min30 = day20.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
+			max30 = day30.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get().getHigh();
+			min30 = day30.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
+
+			double min201 = day30.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+					.getLow();
+			double max201 = day30.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+					.getHigh();
+			if (max201 > max30) {
+				max30 = max201;
+			}
+			if (min201 < min30) {
+				min30 = min201;
+			}
 		} else {
 			List<DaliyBasicInfo> day30 = new LinkedList<DaliyBasicInfo>();
 			for (int i = 0; i < 30; i++) {
@@ -220,6 +255,17 @@ public class LinePrice {
 			}
 			max30 = day30.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
 			min30 = day30.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
+
+			double min201 = day30.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
+					.getLow();
+			double max201 = day30.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
+					.getHigh();
+			if (max201 > max30) {
+				max30 = max201;
+			}
+			if (min201 < min30) {
+				min30 = min201;
+			}
 		}
 		if (max30 > CurrencyUitl.topPrice30(min30)) {
 			isRange20pWith20daysRes = true;
@@ -283,9 +329,19 @@ public class LinePrice {
 			lowList.add(listD30.get(0));
 			lowList.add(listD30.get(1));
 			lowList.add(listD30.get(2));
-			double high = highList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
+			double high = highList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+					.getHigh();// 低开情况
+			double high2 = highList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
 					.getHigh();
+			double low2 = lowList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+					.getLow();// 高开情况
 			double low = lowList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
+			if (high2 > high) {
+				high = high2;
+			}
+			if (low2 < low) {
+				low = low2;
+			}
 			highList.addAll(lowList);
 			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
 			return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
@@ -298,8 +354,18 @@ public class LinePrice {
 			lowList.add(dailyList.get(0));
 			lowList.add(dailyList.get(1));
 			lowList.add(dailyList.get(2));
-			double high = highList.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
-			double low = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
+			double high2 = highList.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
+					.getHigh();// 低开情况
+			double high = highList.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();// 最高价（正常情况）
+			double low2 = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
+					.getLow();// 高开情况
+			double low = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();// 最低价（正常情况）
+			if (high2 > high) {
+				high = high2;
+			}
+			if (low2 < low) {
+				low = low2;
+			}
 			highList.addAll(lowList);
 			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
 			return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
@@ -318,9 +384,19 @@ public class LinePrice {
 			lowList.add(listD30.get(2));
 			lowList.add(listD30.get(3));
 
-			double high = highList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
-					.getHigh();
-			double low = lowList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
+			double high = highList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+					.getHigh();// 低开情况
+			double high2 = highList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
+					.getHigh();// 最高价（正常情况）
+			double low2 = lowList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+					.getLow();// 高开情况
+			double low = lowList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();// 最低价（正常情况）
+			if (high2 > high) {
+				high = high2;
+			}
+			if (low2 < low) {
+				low = low2;
+			}
 			highList.addAll(lowList);
 			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
 			return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
@@ -334,8 +410,18 @@ public class LinePrice {
 			lowList.add(dailyList.get(2));
 			lowList.add(dailyList.get(3));
 
-			double high = highList.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
-			double low = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
+			double high2 = highList.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
+					.getHigh();// 低开情况
+			double high = highList.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();// 最高价（正常情况）
+			double low2 = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
+					.getLow();// 高开情况
+			double low = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();// 最低价（正常情况）
+			if (high2 > high) {
+				high = high2;
+			}
+			if (low2 < low) {
+				low = low2;
+			}
 			highList.addAll(lowList);
 			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
 			return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));

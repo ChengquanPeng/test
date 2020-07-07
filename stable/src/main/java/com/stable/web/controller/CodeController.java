@@ -36,7 +36,7 @@ public class CodeController {
 	 * 测试页面列表
 	 */
 	@RequestMapping(value = "/realtime/view", method = RequestMethod.GET)
-	public String view(String all, String buyDate, EsQueryPageReq page, Model model) {
+	public String view(String all, String buyDate, Model model) {
 		try {
 			List<ViewVo> l = monitoringService.getVeiw(all, buyDate);
 			model.addAttribute("vvs", l);
@@ -50,7 +50,7 @@ public class CodeController {
 	 * 测试页面报告
 	 */
 	@RequestMapping(value = "/realtime/report", method = RequestMethod.GET)
-	public String report(String all, String buyDate, EsQueryPageReq page, Model model) {
+	public String report(String all, String buyDate, Model model) {
 		try {
 			model.addAttribute("info", monitoringService.report(all, buyDate));
 		} catch (Exception e) {

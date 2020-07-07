@@ -137,6 +137,11 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				log.info("list is null?{},code={},minDate={}", (list == null), code, minDate);
 				double highPriceFromBuy = list.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh))
 						.get().getHigh();
+				double highPriceFromBuy2 = list.stream()
+						.max(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get().getHigh();
+				if (highPriceFromBuy2 > highPriceFromBuy) {
+					highPriceFromBuy = highPriceFromBuy2;
+				}
 				if (highPriceFromBuy > 0.0) {
 					checkBackLine = CurrencyUitl.lowestPrice(highPriceFromBuy, true);
 				}
