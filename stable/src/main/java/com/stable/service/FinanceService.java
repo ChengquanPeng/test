@@ -150,6 +150,23 @@ public class FinanceService {
 		return res;
 	}
 
+	public List<FinanceBaseInfo> getFinaceReportByDate(int date, EsQueryPageReq queryPage) {
+		Pageable pageable = PageRequest.of(queryPage.getPageNum(), queryPage.getPageSize());
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("f_ann_date", date));
+		FieldSortBuilder sort = SortBuilders.fieldSort("f_ann_date").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		log.info("no last report fince date={}", date);
+		return null;
+	}
+
 	public FinanceBaseInfo getLastFinaceReport(String code) {
 		Pageable pageable = PageRequest.of(0, 1);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();

@@ -191,7 +191,7 @@ public class MonitoringService {
 		if (buyedList.size() > 0) {
 			sb.append("买入明细：==>").append(BR);
 			for (BuyTrace x : buyedList) {
-				sb.append("序号:").append(index).append(x.getCode()).append(" ")
+				sb.append("序号:").append(index).append(", ").append(x.getCode()).append(" ")
 						.append(stockBasicService.getCodeName(x.getCode())).append(" 买入价格:").append(x.getBuyPrice())
 						.append(" 买入时间:").append(x.getBuyDate()).append(BR);
 				index++;
