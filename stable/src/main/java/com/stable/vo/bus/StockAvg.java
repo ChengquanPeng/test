@@ -35,6 +35,8 @@ public class StockAvg extends EsBase {
 	private double avgPriceIndex120;
 	@Field(type = FieldType.Double)
 	private double avgPriceIndex250;
+	@Field(type = FieldType.Integer)
+	private int lastDividendDate;
 
 	public void setId() {
 		id = code + date;

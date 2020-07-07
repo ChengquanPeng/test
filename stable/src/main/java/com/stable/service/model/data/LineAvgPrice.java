@@ -81,20 +81,16 @@ public class LineAvgPrice {
 		// 最近30条
 		List<StockAvg> avglistLocalTmp = avgService.queryListByCodeForModel(code, date, queryPage);
 		Map<Integer, StockAvg> m = new HashMap<Integer, StockAvg>();
-		avglistLocalTmp.forEach(x -> {
+		boolean needReload = false;
+		for (StockAvg x : avglistLocalTmp) {
 			m.put(x.getDate(), x);
-		});
-
-		// 最近的30条是否和dailyList的30天，时间是否匹配
-		List<StockAvg> avglistLocal = new LinkedList<StockAvg>();
-		for (int i = 0; i < 30; i++) {
-			if (m.containsKey(dailyList.get(i).getTrade_date())) {
-				avglistLocal.add(m.get(dailyList.get(i).getTrade_date()));
+			if (x.getLastDividendDate() != lastDividendDate) {
+				needReload = true;
 			}
 		}
 
-		// 不匹配， 补全30天
-		if (avglistLocal.size() < 30) {
+		// 复权问题需要重新
+		if (needReload) {
 			clist30 = avgService.getDPriceAvg(code, lastDate, date);
 			todayAv = clist30.get(0);
 			if (clist30.size() < 30) {
@@ -104,12 +100,35 @@ public class LineAvgPrice {
 				return isFeedDataGetRes;
 			}
 			clist30.forEach(x -> {
-				if (!m.containsKey(x.getDate())) {
-					avgSaveList.add(x);
-				}
+				avgSaveList.add(x);
 			});
-		} else {
-			clist30 = avglistLocal;
+		} else {// 不需要重新则看数据是否完整
+			// 最近的30条是否和dailyList的30天，时间是否匹配
+			List<StockAvg> avglistLocal = new LinkedList<StockAvg>();
+			for (int i = 0; i < 30; i++) {
+				if (m.containsKey(dailyList.get(i).getTrade_date())) {
+					avglistLocal.add(m.get(dailyList.get(i).getTrade_date()));
+				}
+			}
+
+			// 不匹配， 补全30天
+			if (avglistLocal.size() < 30) {
+				clist30 = avgService.getDPriceAvg(code, lastDate, date);
+				todayAv = clist30.get(0);
+				if (clist30.size() < 30) {
+					log.warn("数据不全code={},startDate={},enddate={}", code, lastDate, date);
+					isFeedDataGetRes = false;
+					isFeedDataGet = true;
+					return isFeedDataGetRes;
+				}
+				clist30.forEach(x -> {
+					if (!m.containsKey(x.getDate())) {
+						avgSaveList.add(x);
+					}
+				});
+			} else {
+				clist30 = avglistLocal;// 匹配
+			}
 		}
 		todayAv = clist30.get(0);
 		isFeedDataGet = true;
