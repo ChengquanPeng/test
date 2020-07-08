@@ -11,9 +11,11 @@ import com.alibaba.fastjson.JSONArray;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
+@ToString
 @Document(indexName = "finance_base_info")
 public class FinanceBaseInfo extends EsBase {
 
@@ -141,6 +143,10 @@ public class FinanceBaseInfo extends EsBase {
 		}
 		try {
 			total_revenue = Double.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+		}
+		try {
+			revenue = Double.valueOf(arr.getString(i++));
 		} catch (Exception e) {
 		}
 		try {
