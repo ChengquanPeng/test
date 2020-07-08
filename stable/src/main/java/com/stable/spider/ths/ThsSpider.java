@@ -260,6 +260,8 @@ public class ThsSpider {
 //			limit = 3;
 		}
 
+		StringBuffer newGn = new StringBuffer();
+
 		int index = 1;
 		int end = 0;
 		int trytime = 0;
@@ -304,6 +306,7 @@ public class ThsSpider {
 						if (map.containsKey(cp.getCode())) {
 							fetchNext = false;
 						} else {
+							newGn.append(cp.getName()).append(",");
 							log.info("获取到新概念:" + cp.getName());
 							fetchNext = true;
 						}
@@ -376,7 +379,8 @@ public class ThsSpider {
 			}
 		}
 
-		WxPushUtil.pushSystem1("同花顺板块同步成功,同步概念[" + cntList + "],概念相关股票[" + cntCodelist + "]");
+		WxPushUtil.pushSystem1("同花顺板块同步成功,同步概念[" + cntList + "],概念相关股票[" + cntCodelist + "]"
+				+ (newGn.length() > 0 ? ",获取到新概念:" + newGn.toString() : ""));
 	}
 
 	private String GN_CODE_LIST = "http://q.10jqka.com.cn/gn/detail/field/264648/order/desc/page/%s/ajax/1/code/%s";
