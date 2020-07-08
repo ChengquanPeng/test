@@ -81,11 +81,9 @@ public class FinanceService {
 		// JSONArray fields = datas.getJSONArray("fields");
 		JSONArray items = datas.getJSONArray("items");
 		int lastYear = 0;
-		int index = 0;
-		for (int i = items.size(); i > 0; i--) {
+		for (int i = 0; i < items.size(); i++) {
 			FinanceBaseInfo f = new FinanceBaseInfo();
-			index = i - 1;
-			f.setValue(code, items.getJSONArray(index));
+			f.setValue(code, items.getJSONArray(i));
 			if (f.getYear() >= year) {
 				// esFinanceBaseInfoDao.save(f);
 				list.add(f);
