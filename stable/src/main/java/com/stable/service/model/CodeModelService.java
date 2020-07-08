@@ -1,9 +1,7 @@
 package com.stable.service.model;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -21,23 +19,26 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsCodeBaseModelDao;
+import com.stable.service.BuyBackService;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
+import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
 import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
-import com.stable.service.TickDataService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.data.AvgService;
-import com.stable.service.model.data.StrongService;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.bus.CodeBaseModel;
+import com.stable.vo.bus.DividendHistory;
 import com.stable.vo.bus.FinanceBaseInfo;
+import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
@@ -47,9 +48,9 @@ import lombok.extern.log4j.Log4j2;
 public class CodeModelService {
 
 	@Autowired
-	private StrongService strongService;
+	private DividendService dividendService;
 	@Autowired
-	private TickDataService tickDataService;
+	private BuyBackService buyBackService;
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -119,8 +120,26 @@ public class CodeModelService {
 	}
 
 	private void run(boolean isJob, int treadeDate) {
-		Set<String> codes = new HashSet<String>();
-		List<FinanceBaseInfo> listf = financeService.getFinaceReportByDate(treadeDate, deleteQueryPage);
+		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
+		for (StockBaseInfo s : codelist) {
+			String code = s.getCode();
+			// TODO 公告日期比较及时，但是可能会不通过，需要看分红是否实施，回购实际金额等
+			// 财务
+			FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code, treadeDate, deleteQueryPage);
+			if (fbi != null) {
+
+			}
+			// 分红
+			DividendHistory dh = dividendService.getLastRecordByLteDate(code, treadeDate, deleteQueryPage);
+			if (dh != null) {
+
+			}
+			// 回购
+			BuyBackInfo bb = buyBackService.getLastRecordByLteDate(code, treadeDate, deleteQueryPage);
+			if (bb != null) {
+
+			}
+		}
 	}
 
 	public List<CodeBaseModel> getListByCode(int date, EsQueryPageReq querypage) {

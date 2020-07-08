@@ -134,6 +134,24 @@ public class DividendService {
 		return res;
 	}
 
+	public DividendHistory getLastRecordByLteDate(String code, int date, EsQueryPageReq queryPage) {
+		Pageable pageable = PageRequest.of(queryPage.getPageNum(), queryPage.getPageSize());
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("ann_date").lte(Integer.valueOf(date)));
+		FieldSortBuilder sort = SortBuilders.fieldSort("end_date").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<DividendHistory> page = esDividendHistoryDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		log.info("no DividendHistory date={}", date);
+		return null;
+	}
+
 	public List<DividendHistory> get7DayRangeList(String start, String end) {
 		Pageable pageable = PageRequest.of(0, 10000);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();

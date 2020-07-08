@@ -299,7 +299,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 									bt.setSoldPrice(srt.getBuy1());
 									bt.setStatus(TradeType.SOLD.getCode());
 									bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
-									buyTraceService.addToTrace(bt);
+									toSell(bt);
 									log.info("机器卖已成交:{}", bt);
 									sells2.add(bt);
 									WxPushUtil.pushSystem1(code + " " + codeName + " [止损卖出]," + bt.getBuyDate()
@@ -310,7 +310,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 									bt.setSoldPrice(srt.getBuy1());
 									bt.setStatus(TradeType.SOLD.getCode());
 									bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
-									buyTraceService.addToTrace(bt);
+									toSell(bt);
 									log.info("机器卖已成交:{}", bt);
 									sells2.add(bt);
 									WxPushUtil.pushSystem1(code + " " + codeName + " [最高点回调5%卖]," + bt.getBuyDate()
@@ -337,7 +337,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 									bt.setSoldPrice(srt.getBuy1());
 									bt.setStatus(TradeType.SOLD.getCode());
 									bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
-									buyTraceService.addToTrace(bt);
+									toSell(bt);
 									log.info("机器卖已成交:{}", bt);
 									sells.add(bt);
 									WxPushUtil.pushSystem1(code + " " + codeName + " [" + (isLowClose ? "上影线" : "高开低走")
@@ -398,5 +398,10 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 	public BuyTrace getSelled() {
 		return selled;
+	}
+
+	private void toSell(BuyTrace bt) {
+		selled = bt;
+		buyTraceService.addToTrace(bt);
 	}
 }

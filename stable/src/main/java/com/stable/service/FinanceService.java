@@ -80,10 +80,10 @@ public class FinanceService {
 		int year = (StringUtils.isBlank(yyyy) ? 0 : Integer.valueOf(yyyy));
 		// JSONArray fields = datas.getJSONArray("fields");
 		JSONArray items = datas.getJSONArray("items");
-		FinanceBaseInfo f = null;
+		int lastYear = 0;
 		int index = 0;
 		for (int i = items.size(); i > 0; i--) {
-			f = new FinanceBaseInfo();
+			FinanceBaseInfo f = new FinanceBaseInfo();
 			index = i - 1;
 			f.setValue(code, items.getJSONArray(index));
 			if (f.getYear() >= year) {
@@ -91,9 +91,12 @@ public class FinanceService {
 				list.add(f);
 				log.info("Finace income saved code={},getAnn_date={}", code, f.getAnn_date());
 			}
+			if (lastYear == 0) {
+				lastYear = f.getYear();
+			}
 		}
-		if (f != null) {
-			redisUtil.set(RedisConstant.RDS_FINACE_HIST_INFO_ + code, f.getYear());
+		if (lastYear != 0) {
+			redisUtil.set(RedisConstant.RDS_FINACE_HIST_INFO_ + code, lastYear);
 		}
 		return true;
 	}
@@ -150,18 +153,19 @@ public class FinanceService {
 		return res;
 	}
 
-	public List<FinanceBaseInfo> getFinaceReportByDate(int date, EsQueryPageReq queryPage) {
+	public FinanceBaseInfo getFinaceReportByLteDate(String code, int date, EsQueryPageReq queryPage) {
 		Pageable pageable = PageRequest.of(queryPage.getPageNum(), queryPage.getPageSize());
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("f_ann_date", date));
-		FieldSortBuilder sort = SortBuilders.fieldSort("f_ann_date").unmappedType("integer").order(SortOrder.DESC);
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("f_ann_date").lte(date));// 报告期
+		FieldSortBuilder sort = SortBuilders.fieldSort("end_date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 
 		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
 		if (page != null && !page.isEmpty()) {
-			return page.getContent();
+			return page.getContent().get(0);
 		}
 		log.info("no last report fince date={}", date);
 		return null;
@@ -196,19 +200,20 @@ public class FinanceService {
 						List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
 						int cnt = 0;
 						for (StockBaseInfo s : list) {
-							spiderFinaceHistoryInfo(s.getCode(), rl);
+							if (spiderFinaceHistoryInfo(s.getCode(), rl)) {
+								cnt++;
+							}
 							if (rl.size() > 1000) {
 								esFinanceBaseInfoDao.saveAll(rl);
-								cnt += rl.size();
 								rl = new LinkedList<FinanceBaseInfo>();
 							}
 						}
 						if (rl.size() > 0) {
 							esFinanceBaseInfoDao.saveAll(rl);
-							cnt += rl.size();
 						}
 						log.info("同步财务报告报告[end]");
-						WxPushUtil.pushSystem1("同步股票财务报告完成！记录条数=" + cnt);
+						WxPushUtil.pushSystem1("同步股票财务报告完成！股票总数：[" + list.size() + "],成功股票数[" + cnt + "],失败股票数="
+								+ (list.size() - cnt));
 						return null;
 					}
 				});
