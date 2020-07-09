@@ -303,7 +303,7 @@ public class MonitoringService {
 			pv.setType("全部");
 		}
 
-		List<BuyTrace> list = buyTraceService.getListByCode("", buydate, buyModelType, status, querypage);
+		List<BuyTrace> list = buyTraceService.getListByCode("", buydate, status, buyModelType, querypage);
 		List<ViewVo> l = new LinkedList<ViewVo>();
 		if (list != null) {
 			int allc = 0;// 总数
@@ -317,10 +317,6 @@ public class MonitoringService {
 
 			for (int i = 0; i < list.size(); i++) {
 				BuyTrace bt = list.get(i);
-				ViewVo vv = new ViewVo();
-				BeanCopy.copy(bt, vv);
-				vv.setIndex(i + 1);
-				vv.setName(stockBasicService.getCodeName(vv.getCode()));
 
 				if (bt.getSoldDate() <= 0) {
 					SinaRealTime srt = SinaRealtimeUitl.get(bt.getCode());
@@ -346,6 +342,10 @@ public class MonitoringService {
 				allp += bt.getProfit();
 
 				// 明细
+				ViewVo vv = new ViewVo();
+				BeanCopy.copy(bt, vv);
+				vv.setIndex(i + 1);
+				vv.setName(stockBasicService.getCodeName(vv.getCode()));
 				l.add(vv);
 			}
 
