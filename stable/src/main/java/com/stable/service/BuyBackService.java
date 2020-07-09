@@ -240,15 +240,14 @@ public class BuyBackService {
 		return res;
 	}
 
-	public BuyBackInfo getLastRecordByLteDate(String code, int date, EsQueryPageReq queryPage) {
-		Pageable pageable = PageRequest.of(queryPage.getPageNum(), queryPage.getPageSize());
+	public BuyBackInfo getLastRecordByLteDate(String code, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.rangeQuery("ann_date").lte(Integer.valueOf(date)));
 		FieldSortBuilder sort = SortBuilders.fieldSort("ann_date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
 
 		Page<BuyBackInfo> page = buyBackInfoDao.search(sq);
 		if (page != null && !page.isEmpty()) {

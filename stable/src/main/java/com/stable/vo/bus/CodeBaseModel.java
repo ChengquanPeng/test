@@ -58,4 +58,11 @@ public class CodeBaseModel extends EsBase {
 	// 限售股解禁
 	private int floatDate;// 解禁日期
 	private double floatRatio;// 流通股份占总股本比率
+
+	public String getKeyString() {
+		return "[code=" + code + ",currYear=" + currYear + ", currQuarter=" + currQuarter + ", lastDividendDate="
+				+ lastDividendDate + ", lastBackDate=" + lastBackDate + ", endDate=" + endDate + ", floatDate="
+				+ floatDate + "]";
+	}
+
 }

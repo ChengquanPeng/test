@@ -151,15 +151,14 @@ public class FinanceService {
 		return res;
 	}
 
-	public FinanceBaseInfo getFinaceReportByLteDate(String code, int date, EsQueryPageReq queryPage) {
-		Pageable pageable = PageRequest.of(queryPage.getPageNum(), queryPage.getPageSize());
+	public FinanceBaseInfo getFinaceReportByLteDate(String code, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.rangeQuery("f_ann_date").lte(date));// 报告期
 		FieldSortBuilder sort = SortBuilders.fieldSort("end_date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
 
 		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
 		if (page != null && !page.isEmpty()) {

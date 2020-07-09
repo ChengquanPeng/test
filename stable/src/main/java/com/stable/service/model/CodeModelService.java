@@ -123,23 +123,52 @@ public class CodeModelService {
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 		for (StockBaseInfo s : codelist) {
 			String code = s.getCode();
-			// TODO 公告日期比较及时，但是可能会不通过，需要看分红是否实施，回购实际金额等
-			// 财务
-			FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code, treadeDate, deleteQueryPage);
-			if (fbi != null) {
-
+			log.info("Code Model  processing for code:{}", code);
+			if (!stockBasicService.online1Year(code)) {
+				log.info("{},Online 上市不足1年", code);
+				continue;
 			}
+			// TODO 公告日期比较及时，但是可能会不通过，需要看分红是否实施，回购实际金额等
+			CodeBaseModel lastOne = getLastModelByCode(code, treadeDate);
+			// 财务
+			FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code, treadeDate);
+			if (fbi == null) {
+				ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, treadeDate + "", "Code Model错误");
+				continue;
+			}
+			CodeBaseModel newOne = new CodeBaseModel();
+			newOne.setCode(code);
+			newOne.setDate(treadeDate);
+			newOne.setCurrYear(fbi.getYear());
+			newOne.setCurrQuarter(fbi.getQuarter());
 			// 分红
-			DividendHistory dh = dividendService.getLastRecordByLteDate(code, treadeDate, deleteQueryPage);
+			DividendHistory dh = dividendService.getLastRecordByLteDate(code, treadeDate);
 			if (dh != null) {
-
+				newOne.setLastDividendDate(dh.getEnd_date());//分红年度
 			}
 			// 回购
-			BuyBackInfo bb = buyBackService.getLastRecordByLteDate(code, treadeDate, deleteQueryPage);
+			BuyBackInfo bb = buyBackService.getLastRecordByLteDate(code, treadeDate);
 			if (bb != null) {
 
 			}
 		}
+	}
+
+	public CodeBaseModel getLastModelByCode(String code, int date) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("date").lte(date));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+
+		Page<CodeBaseModel> page = codeBaseModelDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		log.info("no last records CodeBaseModels");
+		return null;
+
 	}
 
 	public List<CodeBaseModel> getListByCode(int date, EsQueryPageReq querypage) {

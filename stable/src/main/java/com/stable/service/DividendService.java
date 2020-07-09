@@ -134,15 +134,14 @@ public class DividendService {
 		return res;
 	}
 
-	public DividendHistory getLastRecordByLteDate(String code, int date, EsQueryPageReq queryPage) {
-		Pageable pageable = PageRequest.of(queryPage.getPageNum(), queryPage.getPageSize());
+	public DividendHistory getLastRecordByLteDate(String code, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		bqb.must(QueryBuilders.rangeQuery("ann_date").lte(Integer.valueOf(date)));
+		bqb.must(QueryBuilders.rangeQuery("end_date").lte(Integer.valueOf(date)));
 		FieldSortBuilder sort = SortBuilders.fieldSort("end_date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
 
 		Page<DividendHistory> page = esDividendHistoryDao.search(sq);
 		if (page != null && !page.isEmpty()) {
