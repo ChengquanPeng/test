@@ -24,36 +24,40 @@ tr td {
 </script>
 </head>
 <body>
-	数据类型: <span th:text="${stat.all}"></span><br />
-	数据范围: <span th:text="${stat.type}"></span><br />
-	开始日期: <span th:text="${stat.fromDate}"></span><br />
+	数据类型:
+	<span th:text="${stat.all}"></span>
+	<br /> 数据范围:
+	<span th:text="${stat.type}"></span>
+	<br /> 开始日期:
+	<span th:text="${stat.fromDate}"></span>
+	<br />
 	<br />
 	<table border='1' cellspacing='0' cellpadding='0'>
 		<tr>
 			<th>类型</th>
 			<th>总交易次数</th>
 			<th>总盈利次数</th>
-			<th>总交易盈亏</th>
 			<th>成功率</th>
+			<th>累加交易盈亏（非总持仓盈亏）</th>
 		</tr>
 
 		<tr>
 			<td>所有交易(未卖)</td>
 			<td th:text="${stat.allCnt}"></td>
 			<td th:text="${stat.ynowCnt}"></td>
-			<td th:text="${stat.allProfit}"></td>
 			<td><span th:text="${stat.nowRate}"></span>%</td>
+			<td><span th:text="${stat.allProfit}"></span>%</td>
 		</tr>
 
 		<tr>
 			<td>已完成交易</td>
 			<td th:text="${stat.soldCnt}"></td>
 			<td th:text="${stat.ysoldCnt}"></td>
-			<td th:text="${stat.soldProfit}"></td>
 			<td><span th:text="${stat.soldRate}"></span>%</td>
+			<td><span th:text="${stat.soldProfit}"></span>%</td>
 		</tr>
 	</table>
-	<br/>
+	<br />
 	<table border='1' cellspacing='0' cellpadding='0'>
 		<tr>
 			<th>序号</th>

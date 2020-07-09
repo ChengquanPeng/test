@@ -282,7 +282,7 @@ public class MonitoringService {
 			pv.setAll("已买入");
 		} else if ("2".equals(all)) {
 			status = TradeType.SOLD.getCode();
-			pv.setAll("已买出");
+			pv.setAll("已卖出");
 		}
 		int buydate = 0;
 		if (StringUtils.isNotBlank(fromDate)) {
