@@ -1,5 +1,7 @@
 package com.stable.vo.http.resp;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,7 +10,9 @@ import lombok.Setter;
 public class ReportVo {
 
 	private String all;// 数据范围
+	private String type;// 数据类型
 	private String fromDate;// 日期范围
+
 	// 所有交易
 	private int allCnt;// 所有总数
 	private double allProfit;// 所有总盈亏
@@ -21,5 +25,7 @@ public class ReportVo {
 	private int ysoldCnt;// 已卖中的盈利总数
 	private double ysoldProfit;// 已卖中的盈利总盈亏
 	private double soldRate;// 已卖成功率
+
+	private List<ViewVo> list;
 
 }

@@ -194,7 +194,8 @@ public class FinanceService {
 					public Object mycall() {
 						log.info("同步财务报告报告[started]");
 						List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
-						log.info("股票总数：" + list.size());
+						int total = list.size();
+						log.info("股票总数：" + total);
 						List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
 						int cnt = 0;
 						for (StockBaseInfo s : list) {
@@ -210,8 +211,8 @@ public class FinanceService {
 							esFinanceBaseInfoDao.saveAll(rl);
 						}
 						log.info("同步财务报告报告[end]");
-						WxPushUtil.pushSystem1("同步股票财务报告完成！股票总数：[" + list.size() + "],成功股票数[" + cnt + "],失败股票数="
-								+ (list.size() - cnt));
+						WxPushUtil.pushSystem1(
+								"同步股票财务报告完成！股票总数：[" + total + "],成功股票数[" + cnt + "],失败股票数=" + (total - cnt));
 						return null;
 					}
 				});

@@ -271,55 +271,40 @@ public class MonitoringService {
 		return null;
 	}
 
-	public List<ViewVo> getVeiw(String all, String fromDate) {
-		int status = 0;
-		if (StringUtils.isBlank(all) || "0".equals(all)) {
-			status = TradeType.BOUGHT.getCode();
-		}
-		int buydate = 0;
-		if (StringUtils.isNotBlank(fromDate)) {
-			buydate = Integer.valueOf(fromDate);
-		}
-		List<BuyTrace> list = buyTraceService.getListByCode("", buydate, 0, status, querypage);
-		List<ViewVo> l = new LinkedList<ViewVo>();
-		if (list != null) {
-			for (int i = 0; i < list.size(); i++) {
-				BuyTrace bt = list.get(i);
-				ViewVo vv = new ViewVo();
-				BeanCopy.copy(bt, vv);
-				vv.setIndex(i + 1);
-				vv.setName(stockBasicService.getCodeName(vv.getCode()));
-				if (vv.getSoldDate() <= 0) {
-					SinaRealTime srt = SinaRealtimeUitl.get(vv.getCode());
-					if (srt != null && srt.getBuy1() > 0.0) {
-						vv.setSoldPrice(srt.getBuy1());
-						vv.setProfit(CurrencyUitl.cutProfit(vv.getBuyPrice(), vv.getSoldPrice()));
-					}
-				}
-				l.add(vv);
-			}
-		}
-		return l;
-	}
-
-	public ReportVo report(String all, String fromDate) {
+	public ReportVo getVeiw(String all, String type, String fromDate) {
 		ReportVo pv = new ReportVo();
 
 		int status = 0;
-		if (StringUtils.isNotBlank(all) && "1".equals(all)) {
-			pv.setAll("全部");
-		} else {
+		if (StringUtils.isBlank(all) || "0".equals(all)) {
+			pv.setAll("全部(未卖出)");
+		} else if ("1".equals(all)) {
+			status = TradeType.BOUGHT.getCode();
+			pv.setAll("已买入");
+		} else if ("2".equals(all)) {
 			status = TradeType.SOLD.getCode();
-			pv.setAll("已成交");
+			pv.setAll("已买出");
 		}
 		int buydate = 0;
 		if (StringUtils.isNotBlank(fromDate)) {
 			buydate = Integer.valueOf(fromDate);
 		}
 		pv.setFromDate(fromDate);
+		int buyModelType = 0;
+		if (StringUtils.isNotBlank(type)) {
+			buyModelType = Integer.valueOf(type);
+			if (buyModelType == 1) {
+				pv.setType("人工");
+			} else if (buyModelType == 2) {
+				pv.setType("机器");
+			} else {
+				pv.setType("未知" + buyModelType);
+			}
+		} else {
+			pv.setType("全部");
+		}
 
-		List<BuyTrace> list = buyTraceService.getListByCode("", buydate, 0, status, querypage);
-
+		List<BuyTrace> list = buyTraceService.getListByCode("", buydate, buyModelType, status, querypage);
+		List<ViewVo> l = new LinkedList<ViewVo>();
 		if (list != null) {
 			int allc = 0;// 总数
 			double allp = 0.0;// 总盈亏
@@ -332,6 +317,10 @@ public class MonitoringService {
 
 			for (int i = 0; i < list.size(); i++) {
 				BuyTrace bt = list.get(i);
+				ViewVo vv = new ViewVo();
+				BeanCopy.copy(bt, vv);
+				vv.setIndex(i + 1);
+				vv.setName(stockBasicService.getCodeName(vv.getCode()));
 
 				if (bt.getSoldDate() <= 0) {
 					SinaRealTime srt = SinaRealtimeUitl.get(bt.getCode());
@@ -355,6 +344,9 @@ public class MonitoringService {
 				}
 				allc++;
 				allp += bt.getProfit();
+
+				// 明细
+				l.add(vv);
 			}
 
 			pv.setAllCnt(allc);
@@ -369,6 +361,7 @@ public class MonitoringService {
 			pv.setYnowProfit(ynowp);
 			pv.setNowRate(CurrencyUitl.getRate(ynowc, allc));
 		}
+		pv.setList(l);
 		return pv;
 	}
 }

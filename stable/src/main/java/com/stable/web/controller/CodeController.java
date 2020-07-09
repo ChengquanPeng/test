@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.stable.service.realtime.MonitoringService;
+import com.stable.vo.http.resp.ReportVo;
 import com.stable.vo.http.resp.ViewVo;
 
 @Controller
@@ -35,27 +36,15 @@ public class CodeController {
 	 * 测试页面列表
 	 */
 	@RequestMapping(value = "/realtime/view", method = RequestMethod.GET)
-	public String view(String all, String buyDate, Model model) {
+	public String view(String all, String type, String buyDate, Model model) {
 		try {
-			List<ViewVo> l = monitoringService.getVeiw(all, buyDate);
+			ReportVo pv = monitoringService.getVeiw(all, type, buyDate);
+			List<ViewVo> l = pv.getList();
 			model.addAttribute("vvs", l);
+			model.addAttribute("stat", pv);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return "realtimelist";
 	}
-
-	/**
-	 * 测试页面报告
-	 */
-	@RequestMapping(value = "/realtime/report", method = RequestMethod.GET)
-	public String report(String all, String buyDate, Model model) {
-		try {
-			model.addAttribute("info", monitoringService.report(all, buyDate));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return "realtimeReport";
-	}
-
 }
