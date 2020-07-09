@@ -19,7 +19,9 @@ import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class LinePrice {
 	private final static EsQueryPageReq queryPage = new EsQueryPageReq(30);
 	private ModelContext cxt;
@@ -344,6 +346,17 @@ public class LinePrice {
 			}
 			highList.addAll(lowList);
 			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
+
+			if (d.getCode().equals("000829")) {
+				log.info(d);
+				log.info(listD30.get(0));
+				log.info(listD30.get(1));
+				log.info(listD30.get(2));
+				log.info(listD30.get(3));
+				log.info(listD30.get(4));
+				log.info(listD30.get(5));
+				log.info("high={},high2={},low={},low2={},s={},", high, high2, low, low2, s);
+			}
 			return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
 		} else {
 			List<DaliyBasicInfo> highList = new ArrayList<DaliyBasicInfo>();
@@ -368,6 +381,17 @@ public class LinePrice {
 			}
 			highList.addAll(lowList);
 			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
+
+			if (d.getCode().equals("000829")) {
+				log.info(d);
+				log.info(dailyList.get(0));
+				log.info(dailyList.get(1));
+				log.info(dailyList.get(2));
+				log.info(dailyList.get(3));
+				log.info(dailyList.get(4));
+				log.info(dailyList.get(5));
+				log.info("high={},high2={},low={},low2={},s={},", high, high2, low, low2, s);
+			}
 			return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
 		}
 	}

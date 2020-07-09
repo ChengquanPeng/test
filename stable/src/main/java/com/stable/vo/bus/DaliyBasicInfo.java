@@ -10,9 +10,11 @@ import com.stable.spider.tushare.TushareSpider;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
+@ToString
 @Document(indexName = "daliy_basic_info")
 public class DaliyBasicInfo extends EsBase {
 	/**

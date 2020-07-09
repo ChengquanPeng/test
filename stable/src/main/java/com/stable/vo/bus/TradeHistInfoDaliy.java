@@ -10,9 +10,11 @@ import com.stable.spider.tushare.TushareSpider;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
+@ToString
 @Document(indexName = "trade_hist_info_daliy")
 public class TradeHistInfoDaliy extends EsBase {
 
