@@ -25,7 +25,8 @@ import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
-import com.stable.service.PriceLifeService;
+import com.stable.service.PledgeStatService;
+import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.data.AvgService;
@@ -38,6 +39,8 @@ import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.DividendHistory;
 import com.stable.vo.bus.FinanceBaseInfo;
+import com.stable.vo.bus.PledgeStat;
+import com.stable.vo.bus.ShareFloat;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -54,7 +57,7 @@ public class CodeModelService {
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
-	private PriceLifeService priceLifeService;
+	private PledgeStatService pledgeStatService;
 	@Autowired
 	private AvgService avgService;
 	@Autowired
@@ -73,6 +76,8 @@ public class CodeModelService {
 	private EsCodeBaseModelDao codeBaseModelDao;
 	@Autowired
 	private FinanceService financeService;
+	@Autowired
+	private ShareFloatService shareFloatService;
 
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 	private final EsQueryPageReq deleteQueryPage = new EsQueryPageReq(9999);
@@ -144,13 +149,30 @@ public class CodeModelService {
 			// 分红
 			DividendHistory dh = dividendService.getLastRecordByLteDate(code, treadeDate);
 			if (dh != null) {
-				newOne.setLastDividendDate(dh.getEnd_date());//分红年度
+				newOne.setLastDividendDate(dh.getEnd_date());// 分红年度
 			}
 			// 回购
 			BuyBackInfo bb = buyBackService.getLastRecordByLteDate(code, treadeDate);
 			if (bb != null) {
-
+				newOne.setLastBackDate(Integer.valueOf(bb.getAnn_date()));// 股东大会通过
 			}
+			// 质押比例
+			PledgeStat ps = pledgeStatService.getLastRecords(code, treadeDate);
+			if (ps != null) {
+				newOne.setEndDate(ps.getEndDate());// 截止日期
+				newOne.setPledgeRatio(ps.getPledgeRatio());// 质押比例
+			}
+			// 限售股解禁
+			ShareFloat sf = shareFloatService.getLastRecordByLteDate(code, treadeDate);
+			if (sf != null) {
+				newOne.setFloatDate(sf.getAnnDate());// 解禁日期
+				newOne.setFloatRatio(sf.getFloatRatio());// 流通股份占总股本比率
+			}
+			if (lastOne != null && lastOne.getKeyString().equals(newOne.getKeyString())) {
+				log.info(lastOne.getKeyString());
+				continue;
+			}
+			
 		}
 	}
 

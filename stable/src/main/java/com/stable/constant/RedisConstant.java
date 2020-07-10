@@ -19,4 +19,8 @@ public class RedisConstant {
 	public static final String RDS_MODEL_V1_DATE = "RDS_MODEL_V1_DATE";
 	// 模型-基本面
 	public static final String RDS_MODEL_BASE_DATE = "RDS_MODEL_BASE_DATE_";
+	// 质押
+	public static final String RDS_PLEDGE_STAT_LAST_DAY = "RDS_PLEDGE_STAT_LAST_DAY_";
+	// 解禁
+	public static final String RDS_SHARE_FLOAT_LAST_DAY = "RDS_SHARE_FLOAT_LAST_DAY_";
 }

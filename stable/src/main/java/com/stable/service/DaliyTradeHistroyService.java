@@ -401,14 +401,14 @@ public class DaliyTradeHistroyService {
 					upLevel1Service.runJob(true, Integer.valueOf(today));
 				} finally {
 					log.info("等待图片模型执行");
-					nextImageJob(today);
+					//nextImageJob(today);
 				}
 				return null;
 			}
 		});
 	}
 
-	private void nextImageJob(String today) {
+	public void nextImageJob(String today) {
 		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
 			@Override
 			public Object call() throws Exception {

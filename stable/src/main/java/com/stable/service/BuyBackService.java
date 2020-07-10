@@ -40,9 +40,6 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * 回购
- * 
- * @author roy
- *
  */
 @Service
 @Log4j2
@@ -244,6 +241,9 @@ public class BuyBackService {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.rangeQuery("ann_date").lte(Integer.valueOf(date)));
+		bqb.must(QueryBuilders.rangeQuery("amount").gte(10000000));// 超过1千万
+		bqb.must(QueryBuilders.matchPhraseQuery("proc", "股东大会通过"));// 股东大会通过
+
 		FieldSortBuilder sort = SortBuilders.fieldSort("ann_date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();

@@ -17,16 +17,16 @@ public class CodeBaseModel extends EsBase {
 	private int currYear;
 	private int currQuarter;
 	// ===========基本能力===========
-	// 利润(传统行业,销售行业主要指标)
-	private int profitUpYears;// 年报盈利年数？
-	private int profitUp2yearc;// 年报连续2年盈利持续增长？
-	private int profitUpQuartert;// 最近季度同比增长？
-	private int profitUp2quarterc;// 最近2个季度同比持续增长？
 	// 营收(科技类,故事类主要指标)
 	private int incomeUpYears;// 年报连续营年数？
 	private int incomeUp2yearc;// 年报连续2年营收持续增长？
 	private int incomeUpQuartert;// 最近季度同比增长？
 	private int incomeUp2quarterc;// 最近2个季度同比持续增长？
+	// 利润(传统行业,销售行业主要指标)
+	private int profitUpYears;// 年报盈利年数？
+	private int profitUp2yearc;// 年报连续2年盈利持续增长？
+	private int profitUpQuartert;// 最近季度同比增长？
+	private int profitUp2quarterc;// 最近2个季度同比持续增长？
 
 	// ===========现金能力===========
 	// 分红

@@ -41,8 +41,8 @@
 		sharding-item-parameters="0=a" description="每日晚上16点05执行任务(同花顺概念)"
 		sharding-total-count="1" overwrite="true" />
 
-	<job:simple id="EveryWorkingDayJobTradeBasic"
-		class="com.stable.job.EveryWorkingDayJobTradeBasic"
+	<job:simple id="EveryWorkingDayJob"
+		class="com.stable.job.EveryWorkingDayJob"
 		registry-center-ref="regCenter" cron="0 01 18 ? * 2,3,4,5,6 *"
 		sharding-item-parameters="0=a" description="每日晚上18点01执行任务-每日指标-模型"
 		sharding-total-count="1" overwrite="true" />
