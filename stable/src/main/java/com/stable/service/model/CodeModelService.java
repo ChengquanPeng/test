@@ -79,7 +79,7 @@ public class CodeModelService {
 	@Autowired
 	private ShareFloatService shareFloatService;
 
-	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
+	private final EsQueryPageReq queryPage8 = new EsQueryPageReq(8);
 	private final EsQueryPageReq deleteQueryPage = new EsQueryPageReq(9999);
 
 	public synchronized void runJob(boolean isJob, int today) {
@@ -168,12 +168,37 @@ public class CodeModelService {
 				newOne.setFloatDate(sf.getAnnDate());// 解禁日期
 				newOne.setFloatRatio(sf.getFloatRatio());// 流通股份占总股本比率
 			}
+			log.info("{},KeyString:{}", code, newOne.getKeyString());
 			if (lastOne != null && lastOne.getKeyString().equals(newOne.getKeyString())) {
-				log.info(lastOne.getKeyString());
+				log.info("{},lastOne equals newOne!");
 				continue;
 			}
-			
+
 		}
+	}
+
+	private void processingFinance(CodeBaseModel base) {
+		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(base.getCode(), base.getDate(),
+				queryPage8);
+
+		int incomeUpYears = 0;
+		
+		for (FinanceBaseInfo fbi : fbis) {
+			if(fbi.getQuarter()==4 ) {
+				
+			}
+		}
+
+		// 营收(科技类,故事类主要指标)
+//		private ;// 年报连续营年数？
+//		private int incomeUp2yearc;// 年报连续2年营收持续增长？
+//		private int incomeUpQuartert;// 最近季度同比增长？
+//		private int incomeUp2quarterc;// 最近2个季度同比持续增长？
+//		// 利润(传统行业,销售行业主要指标)
+//		private int profitUpYears;// 年报盈利年数？
+//		private int profitUp2yearc;// 年报连续2年盈利持续增长？
+//		private int profitUpQuartert;// 最近季度同比增长？
+//		private int profitUp2quarterc;// 最近2个季度同比持续增长？
 	}
 
 	public CodeBaseModel getLastModelByCode(String code, int date) {

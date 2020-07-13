@@ -7,22 +7,20 @@ public class FinanceBaseInfoResp {
 
 	private String code;
 	private String codeName;
+	private String endType;
 	private String endDate;
-	private String annDate;
-	private String totalRevenue;
-	private String totalCogs;
-	private String operateProfit;
-	private String totalProfit;
-	private String incomeTax;
-	private String income;
-	private String finExp;
-	private String basicEps;
+	private String yyzsr; // 营业总收入
+	private String gsjlr; // 归属净利润
+	private String kfjlr; // 扣非净利润
+	private double yyzsrtbzz; // 营业总收入同比增长(%)
+	private double gsjlrtbzz; // 归属净利润同比增长(%)
+	private double kfjlrtbzz; // 扣非净利润同比增长(%)
 
-	public void setEndDate(int year, int q) {
+	public void setEndType(int year, int q) {
 		if (q == 4) {
-			endDate = year + "-年报";
+			endType = year + "-年报";
 		} else {
-			endDate = year + "-" + q;
+			endType = year + "-" + q;
 		}
 	}
 }

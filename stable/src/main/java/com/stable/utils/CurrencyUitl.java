@@ -162,8 +162,8 @@ public class CurrencyUitl {
 	}
 
 	public static void main(String[] args) {
-		System.err.println(getRate(20, 100));
-		System.err.println(CurrencyUitl.covertToString(253354520l));
+		System.err.println(CurrencyUitl.covertToLong("4082亿"));
+		System.err.println(CurrencyUitl.covertToLong("4082万"));
 //		System.err.println(CurrencyUitl.covertToLong("1.1万亿"));
 //		System.err.println(CurrencyUitl.covertToString(997));
 //		System.err.println(CurrencyUitl.covertToString(-9978890000.0f));

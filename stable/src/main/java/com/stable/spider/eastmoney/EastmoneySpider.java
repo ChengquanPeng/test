@@ -1,16 +1,20 @@
 package com.stable.spider.eastmoney;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.TickDataUitl;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.TickData;
 
 @Component
@@ -86,6 +90,43 @@ public class EastmoneySpider {
 			WxPushUtil.pushSystem1("东方财富获取分笔失败:code=" + code);
 			return Collections.emptyList();
 		}
+	}
+
+	/**
+	 * 财务信息
+	 * 
+	 * @param code 6位普通股票代码
+	 * @param type 0按报告期、1=年报
+	 * @return http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=1&code=SZ300750
+	 */
+	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=%s&code=%s";
+
+	public static List<FinanceBaseInfo> getNewFinanceAnalysis(String code, int type) {
+		List<FinanceBaseInfo> list = new ArrayList<>();
+		String url = String.format(financeUrl, type, formatCode(code));
+		String result = HttpUtil.doGet2(url);
+		JSONArray objects = JSON.parseArray(result);
+		for (int i = 0; i < objects.size(); i++) {
+			JSONObject data = objects.getJSONObject(i);
+			String date = data.get("date").toString(); // 年报日期
+			Double yyzsrtbzz = data.getDouble("yyzsrtbzz"); // 营业总收入同比增长(%)
+			Double gsjlrtbzz = data.getDouble("gsjlrtbzz"); // 归属净利润同比增长(%)
+			Double kfjlrtbzz = data.getDouble("kfjlrtbzz"); // 扣非净利润同比增长(%)
+
+			Long yyzsr = CurrencyUitl.covertToLong(data.get("yyzsr").toString()); // 营业总收入
+			Long gsjlr = CurrencyUitl.covertToLong(data.get("gsjlr").toString()); // 归属净利润
+			Long kfjlr = CurrencyUitl.covertToLong(data.get("kfjlr").toString()); // 扣非净利润同比增长(%)
+
+			FinanceBaseInfo newFinanceAnalysis = new FinanceBaseInfo(code, Integer.valueOf(date.replaceAll("-", "")));
+			newFinanceAnalysis.setYyzsrtbzz(yyzsrtbzz);
+			newFinanceAnalysis.setGsjlrtbzz(gsjlrtbzz);
+			newFinanceAnalysis.setKfjlrtbzz(kfjlrtbzz);
+			newFinanceAnalysis.setYyzsr(yyzsr);
+			newFinanceAnalysis.setGsjlr(gsjlr);
+			newFinanceAnalysis.setKfjlr(kfjlr);
+			list.add(newFinanceAnalysis);
+		}
+		return list;
 	}
 
 	public static void main(String[] args) {

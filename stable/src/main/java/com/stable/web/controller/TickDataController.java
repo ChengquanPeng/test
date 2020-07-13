@@ -1,6 +1,5 @@
 package com.stable.web.controller;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.TickDataService;
 import com.stable.spider.eastmoney.EastmoneySpider;
-import com.stable.utils.DateUtil;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -27,9 +25,9 @@ public class TickDataController {
 	public ResponseEntity<JsonResult> list(String code, String date, String program, EsQueryPageReq queryPage) {
 		JsonResult r = new JsonResult();
 		try {
-			if (StringUtils.isBlank(code) && StringUtils.isBlank(date)) {
-				date = DateUtil.getTodayYYYYMMDD();
-			}
+//			if (StringUtils.isBlank(code) && StringUtils.isBlank(date)) {
+			// date = DateUtil.getTodayYYYYMMDD();
+//			}
 			r.setResult(tickDataService.listForWebPage(code, date, program, queryPage));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
@@ -56,7 +54,7 @@ public class TickDataController {
 		}
 		return ResponseEntity.ok(r);
 	}
-	
+
 	/**
 	 * 根据code重新获取历史记录（前复权） all{1,0}
 	 */
