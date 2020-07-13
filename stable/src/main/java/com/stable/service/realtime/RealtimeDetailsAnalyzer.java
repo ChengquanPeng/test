@@ -274,12 +274,15 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 									+ ",卖出额:" + CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
 									+ CurrencyUitl.covertToString(d.getTotalAmt()) + ",第一次提醒时间:" + firstTimeWarning
 									+ ",提醒次数:" + warningCnt + ",chkPrice:" + chkPrice + ",当前价格:" + nowPrice;
-							resulter.addBuyMessage(msg);
+							resulter.addBuyMessage(code, msg);
 							log.info(msg);
 
 							if (!buyIssue && now > d1450) {
 								autoBuy(srt.getSell1(), pg);
 							}
+						} else {
+							WAIT_MIN = ONE_MIN;// 新浪1分钟频
+							resulter.removeBuyMessage(code);
 						}
 					}
 				}
