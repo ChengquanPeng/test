@@ -174,30 +174,12 @@ public class BuyBackService {
 					} else if (i == 7) {
 						endDate = date;
 					}
+					cal.add(Calendar.DAY_OF_WEEK, 1);
 				}
 				fetchHist(startDate, endDate);
 				return null;
 			}
 		});
-	}
-
-	public static void main(String[] args) {
-		Date today = DateUtil.addDate(new Date(), -1);
-		System.err.println(today);
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(today);
-		int d = 0;
-		if (cal.get(Calendar.DAY_OF_WEEK) == 1) {
-			d = -6;
-		} else {
-			d = 2 - cal.get(Calendar.DAY_OF_WEEK);
-		}
-		cal.add(Calendar.DAY_OF_WEEK, d);
-		// 所在周开始日期
-		for (int i = 1; i <= 5; i++) {
-			System.err.println(cal.getTime());
-			cal.add(Calendar.DAY_OF_WEEK, 1);
-		}
 	}
 
 	private void fetchHist(String start_date, String end_date) {
