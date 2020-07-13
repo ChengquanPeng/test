@@ -30,6 +30,7 @@ import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.data.AvgService;
+import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -181,19 +182,19 @@ public class CodeModelService {
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(base.getCode(), base.getDate(),
 				queryPage8);
 
-		int incomeUpYears = 0;
-		
-		for (FinanceBaseInfo fbi : fbis) {
-			if(fbi.getQuarter()==4 ) {
-				
-			}
-		}
-
+		FinanceAnalyzer fa = new FinanceAnalyzer();
 		// 营收(科技类,故事类主要指标)
 //		private ;// 年报连续营年数？
 //		private int incomeUp2yearc;// 年报连续2年营收持续增长？
 //		private int incomeUpQuartert;// 最近季度同比增长？
 //		private int incomeUp2quarterc;// 最近2个季度同比持续增长？
+		for (FinanceBaseInfo fbi : fbis) {
+			if (fbi.getQuarter() == 4) {
+				fa.putYear(fbi);
+			}
+		}
+		base.setIncomeUp2yearc(fa.getincomeUp2yearc());
+
 //		// 利润(传统行业,销售行业主要指标)
 //		private int profitUpYears;// 年报盈利年数？
 //		private int profitUp2yearc;// 年报连续2年盈利持续增长？

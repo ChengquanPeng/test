@@ -138,14 +138,21 @@ public class EastmoneySpider {
 			} catch (Exception e) {
 			}
 
-			Long yyzsr = CurrencyUitl.covertToLong(data.get("yyzsr").toString()); // 营业总收入
-			Long gsjlr = CurrencyUitl.covertToLong(data.get("gsjlr").toString()); // 归属净利润
-			Long kfjlr = CurrencyUitl.covertToLong(data.get("kfjlr").toString()); // 扣非净利润同比增长(%)
-
-			newFinanceAnalysis.setYyzsr(yyzsr);
-			newFinanceAnalysis.setGsjlr(gsjlr);
-			newFinanceAnalysis.setKfjlr(kfjlr);
-
+			try {
+				Long yyzsr = CurrencyUitl.covertToLong(data.get("yyzsr").toString()); // 营业总收入
+				newFinanceAnalysis.setYyzsr(yyzsr);
+			} catch (Exception e) {
+			}
+			try {
+				Long gsjlr = CurrencyUitl.covertToLong(data.get("gsjlr").toString()); // 归属净利润
+				newFinanceAnalysis.setGsjlr(gsjlr);
+			} catch (Exception e) {
+			}
+			try {
+				Long kfjlr = CurrencyUitl.covertToLong(data.get("kfjlr").toString()); // 扣非净利润同比增长(%)
+				newFinanceAnalysis.setKfjlr(kfjlr);
+			} catch (Exception e) {
+			}
 			list.add(newFinanceAnalysis);
 		}
 		return list;

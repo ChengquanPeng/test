@@ -40,6 +40,10 @@ public class FinanceBaseInfo extends EsBase {
 	@Field(type = FieldType.Double)
 	private double kfjlrtbzz; // 扣非净利润同比增长(%)
 
+	public FinanceBaseInfo() {
+
+	}
+
 	public FinanceBaseInfo(String code, int date) {
 		this.code = code;
 		this.date = date;
