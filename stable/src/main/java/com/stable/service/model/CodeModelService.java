@@ -20,18 +20,12 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsCodeBaseModelDao;
 import com.stable.service.BuyBackService;
-import com.stable.service.ConceptService;
-import com.stable.service.DaliyBasicHistroyService;
-import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
 import com.stable.service.PledgeStatService;
 import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
-import com.stable.service.TradeCalService;
-import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.FinanceAnalyzer;
-import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
@@ -60,19 +54,7 @@ public class CodeModelService {
 	@Autowired
 	private PledgeStatService pledgeStatService;
 	@Autowired
-	private AvgService avgService;
-	@Autowired
-	private DaliyBasicHistroyService daliyBasicHistroyService;
-	@Autowired
 	private RedisUtil redisUtil;
-	@Autowired
-	private TradeCalService tradeCalService;
-	@Autowired
-	private TushareSpider tushareSpider;
-	@Autowired
-	private ConceptService conceptService;
-	@Autowired
-	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private EsCodeBaseModelDao codeBaseModelDao;
 	@Autowired
@@ -175,6 +157,7 @@ public class CodeModelService {
 				continue;
 			}
 
+			processingFinance(newOne);
 		}
 	}
 
@@ -183,23 +166,29 @@ public class CodeModelService {
 				queryPage8);
 
 		FinanceAnalyzer fa = new FinanceAnalyzer();
-		// 营收(科技类,故事类主要指标)
-//		private ;// 年报连续营年数？
-//		private int incomeUp2yearc;// 年报连续2年营收持续增长？
-//		private int incomeUpQuartert;// 最近季度同比增长？
-//		private int incomeUp2quarterc;// 最近2个季度同比持续增长？
-		for (FinanceBaseInfo fbi : fbis) {
-			if (fbi.getQuarter() == 4) {
-				fa.putYear(fbi);
-			}
-		}
-		base.setIncomeUp2yearc(fa.getincomeUp2yearc());
 
-//		// 利润(传统行业,销售行业主要指标)
-//		private int profitUpYears;// 年报盈利年数？
-//		private int profitUp2yearc;// 年报连续2年盈利持续增长？
-//		private int profitUpQuartert;// 最近季度同比增长？
-//		private int profitUp2quarterc;// 最近2个季度同比持续增长？
+		for (FinanceBaseInfo fbi : fbis) {
+			fa.putJidu1(fbi);
+		}
+		// 营收(科技类,故事类主要指标)
+		base.setIncomeUpyear(fa.getCurrYear().getYyzsrtbzz() > 0 ? 1 : 0);// 年报连续营收持续增长？
+		base.setIncomeUpQuarter(fa.getCurrJidu().getYyzsrtbzz() > 0 ? 1 : 0);// 最近季度同比增长？
+		base.setIncomeUp2quarter(fa.getincome2Jiduc());// 最近2个季度同比持续增长？
+
+		// 利润(传统行业,销售行业主要指标)
+		base.setProfitUpyear(fa.getCurrYear().getGsjlrtbzz() > 0 ? 1 : 0);// 归属净利润年报持续增长？
+		base.setProfitUpQuarter(fa.getCurrJidu().getGsjlrtbzz() > 0 ? 1 : 0);// 归属净利润最近季度同比增长？
+		base.setProfitUp2quarter(fa.profitUp2quarter());// 最近2个季度同比持续增长？
+
+		// 营收地雷
+		base.setIncomeDownYear(fa.getCurrYear().getYyzsrtbzz() < 0 ? -1 : 0);// 年营收同比下降
+		base.setIncomeDownQuarter(fa.getCurrJidu().getYyzsrtbzz() < 0 ? -1 : 0);// 季度营收同比下降
+		base.setIncomeDown2Quarter(fa.incomeDown2Quarter() == 1 ? -2 : 0);// 最近2个季度同比下降
+		// 利润地雷
+		base.setProfitDownQuarter(fa.getCurrJidu().getGsjlr() < 0 ? -1 : 0);// 最近季度利润下降TODO//科技类，故事类不看此指标
+		base.setProfitDown2Quarter(fa.profitDown2Quarter() == 1 ? -2 : 0);// 最近2季度都同比下降？
+		base.setProfitDownYear(fa.getCurrYear().getGsjlrtbzz() < 0 ? -1 : 0);// 最近年报同比下降TODO//科技类，故事类不看此指标
+		base.setProfitDown2Year(fa.profitDown2Year() == 1 ? -5 : 0);// 年报连续亏损年数？（可能退市）
 	}
 
 	public CodeBaseModel getLastModelByCode(String code, int date) {

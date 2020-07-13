@@ -18,15 +18,13 @@ public class CodeBaseModel extends EsBase {
 	private int currQuarter;
 	// ===========基本能力===========
 	// 营收(科技类,故事类主要指标)
-	private int incomeUpYears;// 年报连续营年数？
-	private int incomeUp2yearc;// 年报连续2年营收持续增长？
-	private int incomeUpQuartert;// 最近季度同比增长？
-	private int incomeUp2quarterc;// 最近2个季度同比持续增长？
+	private int incomeUpyear;// 年报连续营收持续增长？
+	private int incomeUpQuarter;// 最近季度同比增长？
+	private int incomeUp2quarter;// 最近2个季度同比持续增长？
 	// 利润(传统行业,销售行业主要指标)
-	private int profitUpYears;// 年报盈利年数？
-	private int profitUp2yearc;// 年报连续2年盈利持续增长？
-	private int profitUpQuartert;// 最近季度同比增长？
-	private int profitUp2quarterc;// 最近2个季度同比持续增长？
+	private int profitUpyear;// 年报持续增长？
+	private int profitUpQuarter;// 最近季度同比增长？
+	private int profitUp2quarter;// 最近2个季度同比持续增长？
 
 	// ===========现金能力===========
 	// 分红
@@ -40,15 +38,16 @@ public class CodeBaseModel extends EsBase {
 	// ===========主力行为===========
 
 	// ===========地雷===========
-	// 利润地雷
-	private int profitDownQuarter;// 最近季度利润亏损TODO//科技类，故事类不看此指标
-	private int profitDownQuarters;// 最近3个季度连续亏损TODO//科技类，故事类不看此指标
-	private int profitDownYears;// 年报连续亏损年数？（可能退市）
-	private int profitDownQuartert;// 最近季度同比下降？
 	// 营收地雷
 	private int incomeDownYear;// 年营收同比下降
 	private int incomeDownQuarter;// 季度营收同比下降
 	private int incomeDown2Quarter;// 最近2个季度同比扩大下降
+	// 利润地雷
+	private int profitDownYear;// 年净利同比下降 //科技类，故事类不看此指标
+	private int profitDownQuarter;// 季度净利同比下降 //科技类，故事类不看此指标
+	private int profitDown2Quarter;// 最近2个季度连续下降TODO//科技类，故事类不看此指标
+	private int profitDown2Year;// 年报连续亏损年数？（可能退市）
+
 	// 分红，回购
 	private int noDividend2year;// 最近1年无分红
 	private int noBack2year;// 最近1年无分红
