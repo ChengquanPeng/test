@@ -82,6 +82,7 @@ public class RealtimeDetailsResulter implements Runnable {
 		long d0940 = d1.getTime();
 		if (now <= d0940) {
 			ScheduledWorker.scheduledTimeAndTask(task, d1);
+			log.info("scheduled Task with Time:{}", d1);
 		}
 
 		// 中午收盘一次
@@ -89,6 +90,7 @@ public class RealtimeDetailsResulter implements Runnable {
 		long d1140 = d2.getTime();
 		if (now <= d1140) {
 			ScheduledWorker.scheduledTimeAndTask(task, d2);
+			log.info("scheduled Task with Time:{}", d2);
 		}
 
 		// 下午收盘一次
@@ -96,6 +98,7 @@ public class RealtimeDetailsResulter implements Runnable {
 		long d1450 = d3.getTime();
 		if (now <= d1450) {
 			ScheduledWorker.scheduledTimeAndTask(task, d3);
+			log.info("scheduled Task with Time:{}", d3);
 		}
 
 		// 收盘后
@@ -103,6 +106,7 @@ public class RealtimeDetailsResulter implements Runnable {
 		long d1503 = d4.getTime();
 		if (now <= d1503) {
 			ScheduledWorker.scheduledTimeAndTask(task, d4);
+			log.info("scheduled Task with Time:{}", d4);
 		}
 
 	}
