@@ -80,21 +80,20 @@ public class FinanceService {
 		int year = (StringUtils.isBlank(yyyy) ? 0 : Integer.valueOf(yyyy));
 		// JSONArray fields = datas.getJSONArray("fields");
 		JSONArray items = datas.getJSONArray("items");
-		int lastYear = 0;
-		for (int i = 0; i < items.size(); i++) {
-			FinanceBaseInfo f = new FinanceBaseInfo();
-			f.setValue(code, items.getJSONArray(i));
+		FinanceBaseInfo f = null;
+		int index = 0;
+		for (int i = items.size(); i > 0; i--) {
+			f = new FinanceBaseInfo();
+			index = i - 1;
+			f.setValue(code, items.getJSONArray(index));
 			if (f.getYear() >= year) {
 				// esFinanceBaseInfoDao.save(f);
 				list.add(f);
 				log.info("Finace income saved code={},getAnn_date={}", code, f.getAnn_date());
 			}
-			if (lastYear == 0) {
-				lastYear = f.getYear();
-			}
 		}
-		if (lastYear != 0) {
-			redisUtil.set(RedisConstant.RDS_FINACE_HIST_INFO_ + code, lastYear);
+		if (f != null) {
+			redisUtil.set(RedisConstant.RDS_FINACE_HIST_INFO_ + code, f.getYear());
 		}
 		return true;
 	}
