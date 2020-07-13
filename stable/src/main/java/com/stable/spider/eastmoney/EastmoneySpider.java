@@ -32,6 +32,18 @@ public class EastmoneySpider {
 		return 0;
 	}
 
+	/**
+	 * 格式化成东方财富 API所需格式
+	 */
+	public static String formatCode2(String code) {
+		// 5开头，沪市基金或权证 60开头上证
+		if (code.startsWith("6")) {
+			return String.format("SH%s", code);
+		} else {
+			return String.format("SZ%s", code);
+		}
+	}
+
 	public synchronized static List<String> getRealtimeTickByJob(String code) {
 		try {
 			int mk = EastmoneySpider.formatCode(code);
@@ -103,7 +115,7 @@ public class EastmoneySpider {
 
 	public static List<FinanceBaseInfo> getNewFinanceAnalysis(String code, int type) {
 		List<FinanceBaseInfo> list = new ArrayList<>();
-		String url = String.format(financeUrl, type, formatCode(code));
+		String url = String.format(financeUrl, type, formatCode2(code));
 		String result = HttpUtil.doGet2(url);
 		JSONArray objects = JSON.parseArray(result);
 		for (int i = 0; i < objects.size(); i++) {
@@ -130,6 +142,6 @@ public class EastmoneySpider {
 	}
 
 	public static void main(String[] args) {
-		EastmoneySpider.getRealtimeTick("603456");
+		EastmoneySpider.getNewFinanceAnalysis("603456", 0);
 	}
 }
