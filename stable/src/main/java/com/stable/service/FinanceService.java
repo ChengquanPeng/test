@@ -24,6 +24,7 @@ import com.stable.job.MyCallable;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.TasksWorker;
+import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.StockBaseInfo;
@@ -62,12 +63,18 @@ public class FinanceService {
 	}
 
 	private boolean spiderFinaceHistoryInfo(String code, List<FinanceBaseInfo> list) {
-		List<FinanceBaseInfo> datas = EastmoneySpider.getNewFinanceAnalysis(code, 0);// 0按报告期、1=年报
-		if (datas == null || datas.size() <= 0) {
-			log.warn("未从东方财富抓取到Finane记录,code={}", code);
-			return false;
+		try {
+
+			List<FinanceBaseInfo> datas = EastmoneySpider.getNewFinanceAnalysis(code, 0);// 0按报告期、1=年报
+			if (datas == null || datas.size() <= 0) {
+				log.warn("未从东方财富抓取到Finane记录,code={}", code);
+				return false;
+			}
+			log.warn("从东方财富抓取到Finane记录{}条,code={}", datas.size(), code);
+			list.addAll(datas);
+		} finally {
+			ThreadsUtil.sleepRandomSecBetween1And5();
 		}
-		list.addAll(datas);
 		return true;
 	}
 

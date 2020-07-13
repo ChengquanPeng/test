@@ -121,27 +121,37 @@ public class EastmoneySpider {
 		for (int i = 0; i < objects.size(); i++) {
 			JSONObject data = objects.getJSONObject(i);
 			String date = data.get("date").toString(); // 年报日期
-			Double yyzsrtbzz = data.getDouble("yyzsrtbzz"); // 营业总收入同比增长(%)
-			Double gsjlrtbzz = data.getDouble("gsjlrtbzz"); // 归属净利润同比增长(%)
-			Double kfjlrtbzz = data.getDouble("kfjlrtbzz"); // 扣非净利润同比增长(%)
+			FinanceBaseInfo newFinanceAnalysis = new FinanceBaseInfo(code, Integer.valueOf(date.replaceAll("-", "")));
+			try {
+				Double yyzsrtbzz = data.getDouble("yyzsrtbzz"); // 营业总收入同比增长(%)
+				newFinanceAnalysis.setYyzsrtbzz(yyzsrtbzz);
+			} catch (Exception e) {
+			}
+			try {
+				Double gsjlrtbzz = data.getDouble("gsjlrtbzz"); // 归属净利润同比增长(%)
+				newFinanceAnalysis.setGsjlrtbzz(gsjlrtbzz);
+			} catch (Exception e) {
+			}
+			try {
+				Double kfjlrtbzz = data.getDouble("kfjlrtbzz"); // 扣非净利润同比增长(%)
+				newFinanceAnalysis.setKfjlrtbzz(kfjlrtbzz);
+			} catch (Exception e) {
+			}
 
 			Long yyzsr = CurrencyUitl.covertToLong(data.get("yyzsr").toString()); // 营业总收入
 			Long gsjlr = CurrencyUitl.covertToLong(data.get("gsjlr").toString()); // 归属净利润
 			Long kfjlr = CurrencyUitl.covertToLong(data.get("kfjlr").toString()); // 扣非净利润同比增长(%)
 
-			FinanceBaseInfo newFinanceAnalysis = new FinanceBaseInfo(code, Integer.valueOf(date.replaceAll("-", "")));
-			newFinanceAnalysis.setYyzsrtbzz(yyzsrtbzz);
-			newFinanceAnalysis.setGsjlrtbzz(gsjlrtbzz);
-			newFinanceAnalysis.setKfjlrtbzz(kfjlrtbzz);
 			newFinanceAnalysis.setYyzsr(yyzsr);
 			newFinanceAnalysis.setGsjlr(gsjlr);
 			newFinanceAnalysis.setKfjlr(kfjlr);
+
 			list.add(newFinanceAnalysis);
 		}
 		return list;
 	}
 
 	public static void main(String[] args) {
-		EastmoneySpider.getNewFinanceAnalysis("603456", 0);
+		EastmoneySpider.getNewFinanceAnalysis("000002", 0);
 	}
 }
