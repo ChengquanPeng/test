@@ -69,19 +69,18 @@ public class RealtimeDetailsResulter implements Runnable {
 	public void run() {
 		String today = DateUtil.getTodayYYYYMMDD();
 		long now = new Date().getTime();
-		TimerTask task = new TimerTask() {
-			@Override
-			public void run() {
-				sendMsg();
-
-			}
-		};
 
 		// 开盘一次
 		Date d1 = DateUtil.parseDate(today + "094000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
 		long d0940 = d1.getTime();
 		if (now <= d0940) {
-			ScheduledWorker.scheduledTimeAndTask(task, d1);
+			ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
+				@Override
+				public void run() {
+					sendMsg();
+
+				}
+			}, d1);
 			log.info("scheduled Task with Time:{}", d1);
 		}
 
@@ -89,7 +88,13 @@ public class RealtimeDetailsResulter implements Runnable {
 		Date d2 = DateUtil.parseDate(today + "114000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
 		long d1140 = d2.getTime();
 		if (now <= d1140) {
-			ScheduledWorker.scheduledTimeAndTask(task, d2);
+			ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
+				@Override
+				public void run() {
+					sendMsg();
+
+				}
+			}, d2);
 			log.info("scheduled Task with Time:{}", d2);
 		}
 
@@ -97,7 +102,13 @@ public class RealtimeDetailsResulter implements Runnable {
 		Date d3 = DateUtil.parseDate(today + "145000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
 		long d1450 = d3.getTime();
 		if (now <= d1450) {
-			ScheduledWorker.scheduledTimeAndTask(task, d3);
+			ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
+				@Override
+				public void run() {
+					sendMsg();
+
+				}
+			}, d3);
 			log.info("scheduled Task with Time:{}", d3);
 		}
 
@@ -105,7 +116,13 @@ public class RealtimeDetailsResulter implements Runnable {
 		Date d4 = DateUtil.parseDate(today + "150300", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
 		long d1503 = d4.getTime();
 		if (now <= d1503) {
-			ScheduledWorker.scheduledTimeAndTask(task, d4);
+			ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
+				@Override
+				public void run() {
+					sendMsg();
+
+				}
+			}, d4);
 			log.info("scheduled Task with Time:{}", d4);
 		}
 
