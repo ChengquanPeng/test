@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +48,7 @@ public class ImageService {
 	@Autowired
 	private ImageGeneratingByPythonUtil imageGeneratingByPythonUtil;
 
-	@PostConstruct
+	// @PostConstruct //暂时去掉
 	private void load() {
 		list = ImageChkGroupUtil.getList();
 	}
