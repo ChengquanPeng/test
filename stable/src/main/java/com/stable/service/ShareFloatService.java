@@ -60,7 +60,7 @@ public class ShareFloatService {
 	 */
 	public void fetchAll() {
 		TasksWorker.getInstance().getService()
-				.submit(new MyCallable(RunLogBizTypeEnum.SHARE_FLOAT, RunCycleEnum.MANUAL, "fetchAll from 19900101") {
+				.submit(new MyCallable(RunLogBizTypeEnum.SHARE_FLOAT, RunCycleEnum.MANUAL, "fetchAll from 20190101") {
 					public Object mycall() {
 						Calendar cal = Calendar.getInstance();
 						String startDate = "", endDate = "";
@@ -80,7 +80,7 @@ public class ShareFloatService {
 
 							ife = Integer.valueOf(endDate);
 							cal.add(Calendar.MONTH, -1);// 前一月
-						} while (ife >= 19900101);
+						} while (ife >= 20190101);
 						return null;
 					}
 
@@ -191,10 +191,10 @@ public class ShareFloatService {
 		log.info("同步限售解禁公告列表[end],start_date={},end_date={},", start_date, end_date);
 	}
 
-	public ShareFloat getLastRecordByLteDate(String code, int date) {
+	public ShareFloat getLastRecordByLteDate(String code, int start, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		bqb.must(QueryBuilders.rangeQuery("annDate").lte(Integer.valueOf(date)));
+		bqb.must(QueryBuilders.rangeQuery("annDate").gte(start).lte(date));
 		FieldSortBuilder sort = SortBuilders.fieldSort("annDate").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();

@@ -39,7 +39,7 @@ public class ImageService {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Value("${image.folder}")
-	private String imageFolder = "";
+	public String imageFolder = "";
 
 	private String PRICE = "PRICE";
 	private String Volume = "Volume";
@@ -192,22 +192,5 @@ public class ImageService {
 
 	public double compareImage(String image1, String image2) {
 		return Double.valueOf(String.format("%.2f", ImageCompareSimilarityUtil.getSimilarity(image1, image2)));
-	}
-
-	public void deletePastDateFile() {
-		File file = new File(imageFolder);
-		log.info("文件夹：{}", imageFolder);
-		File[] filelist = file.listFiles();
-		long newtime = System.currentTimeMillis();
-		for (int i = 0; i < filelist.length; i++) {
-			long txttime = filelist[i].lastModified();// 遍历的度文件时间知
-			long time = newtime - txttime;
-			if ((time / (1000 * 60 * 60 * 24)) > 30) {
-				boolean b = filelist[i].delete();
-				if (b) {
-					log.info(filelist[i].getName() + "删除成功!");
-				}
-			}
-		}
 	}
 }

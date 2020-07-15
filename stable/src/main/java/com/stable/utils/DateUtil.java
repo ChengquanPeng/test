@@ -146,6 +146,15 @@ public class DateUtil {
 		return 0;
 	}
 
+	public static int getPreYear(int yyyyMMdd) {
+//		Date date = new Date();//获取当前时间    
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(parseDate(yyyyMMdd));
+		calendar.add(Calendar.YEAR, -1);// 当前时间减去一年，即一年前的时间    
+		Date py = calendar.getTime();// 获取一年前的时间，或者一个月前的时间  
+		return Integer.valueOf(formatYYYYMMDD(py));
+	}
+
 	public static void main(String[] args) {
 		System.err.println(getTodayBefor7DayYYYYMMDD());
 	}

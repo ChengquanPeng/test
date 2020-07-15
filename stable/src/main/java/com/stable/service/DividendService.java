@@ -48,6 +48,7 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class DividendService {
+	private static final String GDDH = "股东大会通过";
 	@Autowired
 	private TushareSpider tushareSpider;
 	@Autowired
@@ -134,10 +135,11 @@ public class DividendService {
 		return res;
 	}
 
-	public DividendHistory getLastRecordByLteDate(String code, int date) {
+	public DividendHistory getLastRecordByLteDate(String code, int start, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		bqb.must(QueryBuilders.rangeQuery("end_date").lte(Integer.valueOf(date)));
+		bqb.must(QueryBuilders.rangeQuery("end_date").gte(start).lte(date));
+		bqb.must(QueryBuilders.termsQuery("div_proc", GDDH, SS));// 股东大会通过
 		FieldSortBuilder sort = SortBuilders.fieldSort("end_date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();

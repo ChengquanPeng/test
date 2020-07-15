@@ -303,22 +303,22 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 									bt.setStatus(TradeType.SOLD.getCode());
 									bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
 									toSell(bt);
-									log.info("机器卖已成交:{}", bt);
+									log.info("[止损卖出]:{}", bt);
 									sells2.add(bt);
-									WxPushUtil.pushSystem1(code + " " + codeName + " [止损卖出]," + bt.getBuyDate()
-											+ "买入价格:" + bt.getBuyPrice() + ",卖出价:" + bt.getSoldPrice() + "收益:"
-											+ bt.getProfit() + "%");
+//									WxPushUtil.pushSystem1(code + " " + codeName + " [止损卖出]," + bt.getBuyDate()
+//											+ "买入价格:" + bt.getBuyPrice() + ",卖出价:" + bt.getSoldPrice() + "收益:"
+//											+ bt.getProfit() + "%");
 								} else if (checkBackLine > 0.0 && checkBackLine >= nowPrice) {// 最高点回调5%卖
 									bt.setSoldDate(itoday);
 									bt.setSoldPrice(srt.getBuy1());
 									bt.setStatus(TradeType.SOLD.getCode());
 									bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
 									toSell(bt);
-									log.info("机器卖已成交:{}", bt);
+									log.info("[最高点回调5%卖]:{}", bt);
 									sells2.add(bt);
-									WxPushUtil.pushSystem1(code + " " + codeName + " [最高点回调5%卖]," + bt.getBuyDate()
-											+ "买入价格:" + bt.getBuyPrice() + ",卖出价:" + bt.getSoldPrice() + "收益:"
-											+ bt.getProfit() + "%");
+//									WxPushUtil.pushSystem1(code + " " + codeName + " [最高点回调5%卖]," + bt.getBuyDate()
+//											+ "买入价格:" + bt.getBuyPrice() + ",卖出价:" + bt.getSoldPrice() + "收益:"
+//											+ bt.getProfit() + "%");
 								}
 							}
 
@@ -341,11 +341,11 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 									bt.setStatus(TradeType.SOLD.getCode());
 									bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
 									toSell(bt);
-									log.info("机器卖已成交:{}", bt);
+									log.info("[" + (isLowClose ? "上影线" : "高开低走") + "卖出]:{}", bt);
 									sells.add(bt);
-									WxPushUtil.pushSystem1(code + " " + codeName + " [" + (isLowClose ? "上影线" : "高开低走")
-											+ "]," + bt.getBuyDate() + "买入价格:" + bt.getBuyPrice() + ",卖出价:"
-											+ bt.getSoldPrice() + "收益:" + bt.getProfit() + "%");
+//									WxPushUtil.pushSystem1(code + " " + codeName + " [" + (isLowClose ? "上影线" : "高开低走")
+//											+ "]," + bt.getBuyDate() + "买入价格:" + bt.getBuyPrice() + ",卖出价:"
+//											+ bt.getSoldPrice() + "收益:" + bt.getProfit() + "%");
 								}
 
 								if (sells.size() > 0) {

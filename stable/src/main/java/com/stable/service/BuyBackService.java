@@ -44,6 +44,10 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class BuyBackService {
+	private static final String DONE = "完成";
+	private static final String STOP = "停止";
+	public static final String GDDH = "股东大会通过";
+	public static final String SS = "实施";
 	@Autowired
 	private TushareSpider tushareSpider;
 	@Autowired
@@ -219,12 +223,12 @@ public class BuyBackService {
 		return res;
 	}
 
-	public BuyBackInfo getLastRecordByLteDate(String code, int date) {
+	public BuyBackInfo getLastRecordByLteDate(String code, int start, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		bqb.must(QueryBuilders.rangeQuery("ann_date").lte(Integer.valueOf(date)));
+		bqb.must(QueryBuilders.rangeQuery("ann_date").gte(start).lte(date));
 		bqb.must(QueryBuilders.rangeQuery("amount").gte(10000000));// 超过1千万
-		bqb.must(QueryBuilders.matchPhraseQuery("proc", "股东大会通过"));// 股东大会通过
+		bqb.must(QueryBuilders.termsQuery("proc", GDDH, SS, DONE, STOP));// 股东大会通过
 
 		FieldSortBuilder sort = SortBuilders.fieldSort("ann_date").unmappedType("integer").order(SortOrder.DESC);
 
@@ -252,13 +256,13 @@ public class BuyBackService {
 		} else if (dtype == 2) {
 			bqb.must(QueryBuilders.matchPhraseQuery("proc", "预案"));
 		} else if (dtype == 3) {
-			bqb.must(QueryBuilders.matchPhraseQuery("proc", "股东大会通过"));
+			bqb.must(QueryBuilders.matchPhraseQuery("proc", GDDH));
 		} else if (dtype == 4) {
-			bqb.must(QueryBuilders.matchPhraseQuery("proc", "实施"));
+			bqb.must(QueryBuilders.matchPhraseQuery("proc", SS));
 		} else if (dtype == 5) {
-			bqb.must(QueryBuilders.matchPhraseQuery("proc", "完成"));
+			bqb.must(QueryBuilders.matchPhraseQuery("proc", DONE));
 		} else if (dtype == 6) {
-			bqb.must(QueryBuilders.matchPhraseQuery("proc", "停止"));
+			bqb.must(QueryBuilders.matchPhraseQuery("proc", STOP));
 		}
 		// 全部
 		SortOrder s = SortOrder.DESC;

@@ -77,7 +77,7 @@ public class CodeModelService {
 					redisDate = Integer.valueOf(DateUtil.formatYYYYMMDD(d));
 				}
 				while (true) {
-					log.info("processing date={}", redisDate);
+					log.info("CodeModel processing date={}", redisDate);
 					run(isJob, redisDate);
 					// 缓存已经处理的日期
 					redisUtil.set(RedisConstant.RDS_MODEL_V1_DATE, redisDate);
@@ -85,29 +85,30 @@ public class CodeModelService {
 					Date d1 = DateUtil.addDate(redisDate + "", 1);
 					redisDate = Integer.valueOf(DateUtil.formatYYYYMMDD(d1));
 					if (redisDate > today) {
-						log.info("today:{},date:{} 循环结束", today, redisDate);
+						log.info("CodeModel today:{},date:{} 循环结束", today, redisDate);
 						break;
 					}
 				}
 			} else {// 手动某一天
-				log.info("processing date={}", today);
+				log.info("CodeModel processing date={}", today);
 				List<CodeBaseModel> deleteall = getListByCode(today, deleteQueryPage);
 				if (deleteall != null) {
-					log.info("删除当天{}记录条数{}", today, deleteall.size());
+					log.info("CodeModel删除当天{}记录条数{}", today, deleteall.size());
 					codeBaseModelDao.deleteAll(deleteall);
 					Thread.sleep(3 * 1000);
 				}
-				log.info("模型date={}开始", today);
+				log.info("CodeModel模型date={}开始", today);
 				run(isJob, today);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			ErrorLogFileUitl.writeError(e, "模型运行异常", "", "");
-			WxPushUtil.pushSystem1("模型运行异常..");
+			ErrorLogFileUitl.writeError(e, "CodeModel模型运行异常", "", "");
+			WxPushUtil.pushSystem1("CodeModel模型运行异常..");
 		}
 	}
 
 	private void run(boolean isJob, int treadeDate) {
+		int oneYearAgo = DateUtil.getPreYear(treadeDate);
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 		for (StockBaseInfo s : codelist) {
 			String code = s.getCode();
@@ -116,7 +117,6 @@ public class CodeModelService {
 				log.info("{},Online 上市不足1年", code);
 				continue;
 			}
-			// TODO 公告日期比较及时，但是可能会不通过，需要看分红是否实施，回购实际金额等
 			CodeBaseModel lastOne = getLastModelByCode(code, treadeDate);
 			// 财务
 			FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code, treadeDate);
@@ -130,14 +130,14 @@ public class CodeModelService {
 			newOne.setCurrYear(fbi.getYear());
 			newOne.setCurrQuarter(fbi.getQuarter());
 			// 分红
-			DividendHistory dh = dividendService.getLastRecordByLteDate(code, treadeDate);
+			DividendHistory dh = dividendService.getLastRecordByLteDate(code, oneYearAgo, treadeDate);
 			if (dh != null) {
 				newOne.setLastDividendDate(dh.getEnd_date());// 分红年度
 			}
 			// 回购
-			BuyBackInfo bb = buyBackService.getLastRecordByLteDate(code, treadeDate);
+			BuyBackInfo bb = buyBackService.getLastRecordByLteDate(code, oneYearAgo, treadeDate);
 			if (bb != null) {
-				newOne.setLastBackDate(Integer.valueOf(bb.getAnn_date()));// 股东大会通过
+				newOne.setLastBackDate(Integer.valueOf(bb.getAnn_date()));// 股东大会通过/完成/停止/实施
 			}
 			// 质押比例
 			PledgeStat ps = pledgeStatService.getLastRecords(code, treadeDate);
@@ -146,7 +146,7 @@ public class CodeModelService {
 				newOne.setPledgeRatio(ps.getPledgeRatio());// 质押比例
 			}
 			// 限售股解禁
-			ShareFloat sf = shareFloatService.getLastRecordByLteDate(code, treadeDate);
+			ShareFloat sf = shareFloatService.getLastRecordByLteDate(code, oneYearAgo, treadeDate);
 			if (sf != null) {
 				newOne.setFloatDate(sf.getAnnDate());// 解禁日期
 				newOne.setFloatRatio(sf.getFloatRatio());// 流通股份占总股本比率
@@ -158,6 +158,19 @@ public class CodeModelService {
 			}
 
 			processingFinance(newOne);
+			if (bb != null) {
+				// 股东大会通过/实施
+				if (bb.getProc().equals(BuyBackService.GDDH) || bb.getProc().equals(BuyBackService.SS)) {
+					newOne.setInBacking(1);
+				} else {
+					newOne.setInBacking(0);
+				}
+			} else {
+				newOne.setNoBackyear(-1);// 最近1年无回购
+			}
+			if (dh == null) {
+				newOne.setNoDividendyear(-1);// 最近1年无分红
+			}
 		}
 	}
 

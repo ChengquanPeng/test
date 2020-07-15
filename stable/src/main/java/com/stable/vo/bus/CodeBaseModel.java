@@ -29,11 +29,9 @@ public class CodeBaseModel extends EsBase {
 	// ===========现金能力===========
 	// 分红
 	private int lastDividendDate;// 最近分红年份
-	private int dividendCnt;// 最近分红次数（需要参考上市年份）
 	// 回购
 	private int inBacking;// 正在回购
 	private int lastBackDate;// 最后一次回购日期
-	private int backCnt;// 累计回购次数
 
 	// ===========主力行为===========
 
@@ -49,8 +47,8 @@ public class CodeBaseModel extends EsBase {
 	private int profitDown2Year;// 年报连续亏损年数？（可能退市）
 
 	// 分红，回购
-	private int noDividend2year;// 最近1年无分红
-	private int noBack2year;// 最近1年无分红
+	private int noDividendyear;// 最近1年无分红
+	private int noBackyear;// 最近1年无回购
 	// 质押比例
 	private int endDate;// 截止日期
 	private double pledgeRatio;// 质押比例
