@@ -1,6 +1,7 @@
 package com.stable.service.model;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsCodeBaseModelDao;
+import com.stable.es.dao.base.EsCodeBaseModelHistDao;
 import com.stable.service.BuyBackService;
 import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
@@ -26,12 +28,14 @@ import com.stable.service.PledgeStatService;
 import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.FinanceAnalyzer;
+import com.stable.utils.BeanCopy;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.bus.CodeBaseModel;
+import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.DividendHistory;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.PledgeStat;
@@ -58,12 +62,13 @@ public class CodeModelService {
 	@Autowired
 	private EsCodeBaseModelDao codeBaseModelDao;
 	@Autowired
+	private EsCodeBaseModelHistDao codeBaseModelHistDao;
+	@Autowired
 	private FinanceService financeService;
 	@Autowired
 	private ShareFloatService shareFloatService;
 
 	private final EsQueryPageReq queryPage8 = new EsQueryPageReq(8);
-	private final EsQueryPageReq deleteQueryPage = new EsQueryPageReq(9999);
 
 	public synchronized void runJob(boolean isJob, int today) {
 		try {
@@ -91,13 +96,6 @@ public class CodeModelService {
 				}
 			} else {// 手动某一天
 				log.info("CodeModel processing date={}", today);
-				List<CodeBaseModel> deleteall = getListByCode(today, deleteQueryPage);
-				if (deleteall != null) {
-					log.info("CodeModel删除当天{}记录条数{}", today, deleteall.size());
-					codeBaseModelDao.deleteAll(deleteall);
-					Thread.sleep(3 * 1000);
-				}
-				log.info("CodeModel模型date={}开始", today);
 				run(isJob, today);
 			}
 		} catch (Exception e) {
@@ -107,8 +105,12 @@ public class CodeModelService {
 		}
 	}
 
-	private void run(boolean isJob, int treadeDate) {
+	private synchronized void run(boolean isJob, int treadeDate) {
+		int updatedate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+		List<CodeBaseModel> listm = new LinkedList<CodeBaseModel>();
+		List<CodeBaseModelHist> listh = new LinkedList<CodeBaseModelHist>();
 		int oneYearAgo = DateUtil.getPreYear(treadeDate);
+		int nextYear = DateUtil.getNextYear(treadeDate);
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 		for (StockBaseInfo s : codelist) {
 			String code = s.getCode();
@@ -117,7 +119,7 @@ public class CodeModelService {
 				log.info("{},Online 上市不足1年", code);
 				continue;
 			}
-			CodeBaseModel lastOne = getLastModelByCode(code, treadeDate);
+			CodeBaseModel lastOne = getLastModelByCode(code);
 			// 财务
 			FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code, treadeDate);
 			if (fbi == null) {
@@ -146,7 +148,7 @@ public class CodeModelService {
 				newOne.setPledgeRatio(ps.getPledgeRatio());// 质押比例
 			}
 			// 限售股解禁
-			ShareFloat sf = shareFloatService.getLastRecordByLteDate(code, oneYearAgo, treadeDate);
+			ShareFloat sf = shareFloatService.getLastRecordByLteDate(code, treadeDate, nextYear);
 			if (sf != null) {
 				newOne.setFloatDate(sf.getAnnDate());// 解禁日期
 				newOne.setFloatRatio(sf.getFloatRatio());// 流通股份占总股本比率
@@ -159,19 +161,75 @@ public class CodeModelService {
 
 			processingFinance(newOne);
 			if (bb != null) {
-				// 股东大会通过/实施
-				if (bb.getProc().equals(BuyBackService.GDDH) || bb.getProc().equals(BuyBackService.SS)) {
-					newOne.setInBacking(1);
-				} else {
-					newOne.setInBacking(0);
-				}
+				// 股东大会通过/实施/完成
 			} else {
 				newOne.setNoBackyear(-1);// 最近1年无回购
 			}
 			if (dh == null) {
 				newOne.setNoDividendyear(-1);// 最近1年无分红
 			}
+
+			// 正向分数
+			// 营收(20)
+			int incomeupbase = newOne.getIncomeUpYear() + newOne.getIncomeUpQuarter() + newOne.getIncomeUp2Quarter();
+			incomeupbase += incomeupbase * 20;
+			// 利润(5)
+			int profitupbase = newOne.getProfitUpYear() + newOne.getProfitUpQuarter() + newOne.getProfitUp2Quarter();
+			profitupbase += profitupbase * 5;
+			// 分红(5)
+			int dividendbase = 0;
+			if (newOne.getLastDividendDate() != 0) {
+				dividendbase = 3;
+			} else {
+				dividendbase = -2;
+			}
+			// 回购(5)
+			int backbase = 0;
+			if (newOne.getLastBackDate() != 0) {
+				backbase = 3;
+			} else {
+				backbase = -1;
+			}
+			//
+			int up = incomeupbase + profitupbase + dividendbase + backbase;// 分
+			// 负向分数
+			// 营收(10)
+			int incomedownbase = newOne.getIncomeDownYear() + newOne.getIncomeDownQuarter()
+					+ newOne.getIncomeDown2Quarter();
+			incomedownbase += incomedownbase * -10;
+			// 利润(3)
+			int profitdownbase = newOne.getProfitDownYear() + newOne.getProfitDownQuarter()
+					+ newOne.getProfitDown2Quarter() + newOne.getProfitDown2Year();
+			profitdownbase += profitdownbase * -3;
+			// 质押
+			int pledgeRatio = 0;
+			if (newOne.getPledgeRatio() > 90) {
+				pledgeRatio = -5;
+			}
+			// 解禁
+			int shareFloat = 0;
+			if (newOne.getFloatDate() > 0) {
+				backbase = -3;
+			}
+			int down = incomedownbase + profitdownbase + pledgeRatio + shareFloat;
+			int finals = up + down;
+
+			newOne.setScore(finals);
+			newOne.setUdpateDate(updatedate);
+			// copy history
+			CodeBaseModelHist hist = new CodeBaseModelHist();
+			BeanCopy.copy(newOne, hist);
+			newOne.setId(code);
+			hist.setId(code + treadeDate);
+			listm.add(newOne);
+			listh.add(hist);
 		}
+		if (listm.size() > 0) {
+			codeBaseModelDao.saveAll(listm);
+			codeBaseModelHistDao.saveAll(listh);
+		}
+		log.info("Code 模型执行完成");
+		WxPushUtil.pushSystem1("Seq5=> 今日已更新CODE-MODEL条数:" + listm.size());
 	}
 
 	private void processingFinance(CodeBaseModel base) {
@@ -184,14 +242,14 @@ public class CodeModelService {
 			fa.putJidu1(fbi);
 		}
 		// 营收(科技类,故事类主要指标)
-		base.setIncomeUpyear(fa.getCurrYear().getYyzsrtbzz() > 0 ? 1 : 0);// 年报连续营收持续增长？
+		base.setIncomeUpYear(fa.getCurrYear().getYyzsrtbzz() > 0 ? 1 : 0);// 年报连续营收持续增长？
 		base.setIncomeUpQuarter(fa.getCurrJidu().getYyzsrtbzz() > 0 ? 1 : 0);// 最近季度同比增长？
-		base.setIncomeUp2quarter(fa.getincome2Jiduc());// 最近2个季度同比持续增长？
+		base.setIncomeUp2Quarter(fa.getincome2Jiduc());// 最近2个季度同比持续增长？
 
 		// 利润(传统行业,销售行业主要指标)
-		base.setProfitUpyear(fa.getCurrYear().getGsjlrtbzz() > 0 ? 1 : 0);// 归属净利润年报持续增长？
+		base.setProfitUpYear(fa.getCurrYear().getGsjlrtbzz() > 0 ? 1 : 0);// 归属净利润年报持续增长？
 		base.setProfitUpQuarter(fa.getCurrJidu().getGsjlrtbzz() > 0 ? 1 : 0);// 归属净利润最近季度同比增长？
-		base.setProfitUp2quarter(fa.profitUp2quarter());// 最近2个季度同比持续增长？
+		base.setProfitUp2Quarter(fa.profitUp2quarter());// 最近2个季度同比持续增长？
 
 		// 营收地雷
 		base.setIncomeDownYear(fa.getCurrYear().getYyzsrtbzz() < 0 ? -1 : 0);// 年营收同比下降
@@ -204,14 +262,11 @@ public class CodeModelService {
 		base.setProfitDown2Year(fa.profitDown2Year() == 1 ? -5 : 0);// 年报连续亏损年数？（可能退市）
 	}
 
-	public CodeBaseModel getLastModelByCode(String code, int date) {
+	public CodeBaseModel getLastModelByCode(String code) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		bqb.must(QueryBuilders.rangeQuery("date").lte(date));
-		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
-
+		SearchQuery sq = queryBuilder.withQuery(bqb).build();
 		Page<CodeBaseModel> page = codeBaseModelDao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			return page.getContent().get(0);

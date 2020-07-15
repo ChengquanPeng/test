@@ -10,8 +10,8 @@ import lombok.Setter;
 
 @Setter
 @Getter
-@Document(indexName = "code_base_model")
-public class CodeBaseModel extends EsBase {
+@Document(indexName = "code_base_model_hist")
+public class CodeBaseModelHist extends EsBase {
 	private static final long serialVersionUID = 1L;
 
 	@Id

@@ -43,6 +43,7 @@ import lombok.extern.log4j.Log4j2;
 @Component
 @Log4j2
 public class ThsSpider {
+	private static final String BRK = "跳过首发新股,参股万达商业";
 	@Autowired
 	private TradeCalService tradeCalService;
 	@Autowired
@@ -167,8 +168,8 @@ public class ThsSpider {
 				int trytime = 0;
 				Concept cp = m.get(keys.get(i));
 				log.info("抓包：" + cp.getName());
-				if ("THS301531".equals(cp.getId())) {
-					log.info("跳过首发新股");
+				if (BRK.contains(cp.getName())) {
+					log.info(BRK + ">>" + cp.getName());
 					// 首发新股
 					continue;
 				}

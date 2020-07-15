@@ -228,7 +228,7 @@ public class BuyBackService {
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.rangeQuery("ann_date").gte(start).lte(date));
 		bqb.must(QueryBuilders.rangeQuery("amount").gte(10000000));// 超过1千万
-		bqb.must(QueryBuilders.termsQuery("proc", GDDH, SS, DONE, STOP));// 股东大会通过
+		bqb.must(QueryBuilders.termsQuery("proc", GDDH, SS, DONE));// 股东大会通过
 
 		FieldSortBuilder sort = SortBuilders.fieldSort("ann_date").unmappedType("integer").order(SortOrder.DESC);
 
