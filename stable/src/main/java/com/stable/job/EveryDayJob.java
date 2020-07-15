@@ -1,5 +1,7 @@
 package com.stable.job;
 
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -8,6 +10,7 @@ import com.stable.config.SpringConfig;
 import com.stable.service.BuyBackService;
 import com.stable.service.DividendService;
 import com.stable.service.ShareFloatService;
+import com.stable.service.model.CodeModelService;
 import com.stable.utils.FileDeleteUitl;
 import com.stable.utils.SpringUtil;
 
@@ -27,6 +30,8 @@ public class EveryDayJob extends MySimpleJob {
 	private BuyBackService buyBackService;
 	@Autowired
 	private ShareFloatService shareFloatService;
+	@Autowired
+	private CodeModelService codeModelService;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
@@ -42,5 +47,11 @@ public class EveryDayJob extends MySimpleJob {
 		FileDeleteUitl.deletePastDateFile(efc.getModelImageFloder());
 		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloder());
 		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloderDesc());
+		try {
+			Thread.sleep(Duration.ofMinutes(5).toMillis());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		codeModelService.runJob(true, 0);
 	}
 }

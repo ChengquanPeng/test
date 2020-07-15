@@ -27,6 +27,7 @@ import com.stable.service.FinanceService;
 import com.stable.service.PledgeStatService;
 import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
+import com.stable.service.TradeCalService;
 import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.utils.BeanCopy;
 import com.stable.utils.DateUtil;
@@ -67,6 +68,8 @@ public class CodeModelService {
 	private FinanceService financeService;
 	@Autowired
 	private ShareFloatService shareFloatService;
+	@Autowired
+	private TradeCalService tradeCalService;
 
 	private final EsQueryPageReq queryPage8 = new EsQueryPageReq(8);
 
@@ -83,7 +86,12 @@ public class CodeModelService {
 				}
 				while (true) {
 					log.info("CodeModel processing date={}", redisDate);
-					run(isJob, redisDate);
+					if (tradeCalService.isOpen(redisDate)) {
+						log.info("processing date={}", redisDate);
+						run(isJob, redisDate);
+					} else {
+						log.info("{}非交易日", redisDate);
+					}
 					// 缓存已经处理的日期
 					redisUtil.set(RedisConstant.RDS_MODEL_V1_DATE, redisDate);
 					// 新增一天
@@ -96,6 +104,10 @@ public class CodeModelService {
 				}
 			} else {// 手动某一天
 				log.info("CodeModel processing date={}", today);
+				if (!tradeCalService.isOpen(today)) {
+					log.info("{}非交易日", today);
+					return;
+				}
 				run(isJob, today);
 			}
 		} catch (Exception e) {
