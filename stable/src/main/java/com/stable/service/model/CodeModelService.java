@@ -93,7 +93,7 @@ public class CodeModelService {
 						log.info("{}非交易日", redisDate);
 					}
 					// 缓存已经处理的日期
-					redisUtil.set(RedisConstant.RDS_MODEL_V1_DATE, redisDate);
+					redisUtil.set(RedisConstant.RDS_MODEL_BASE_DATE, redisDate);
 					// 新增一天
 					Date d1 = DateUtil.addDate(redisDate + "", 1);
 					redisDate = Integer.valueOf(DateUtil.formatYYYYMMDD(d1));
