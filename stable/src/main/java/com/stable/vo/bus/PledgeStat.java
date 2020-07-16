@@ -35,6 +35,9 @@ public class PledgeStat extends EsBase {
 	@Field(type = FieldType.Double)
 	private double pledgeRatio;// 质押比例
 
+	public PledgeStat() {
+		
+	}
 	// ts_code,end_date,pledge_count,unrest_pledge,rest_pledge,total_share,pledge_ratio
 	public PledgeStat(JSONArray arr) {
 		int i = 0;

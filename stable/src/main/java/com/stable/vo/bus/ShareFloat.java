@@ -34,6 +34,9 @@ public class ShareFloat extends EsBase {
 	private String shareType;// 股份类型
 
 	// ts_code,ann_date,float_date,float_share,float_ratio,holder_name,share_type
+	public ShareFloat() {
+		
+	}
 	public ShareFloat(JSONArray arr) {
 		int i = 0;
 		String ts_code = arr.getString(i++);
