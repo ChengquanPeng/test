@@ -231,7 +231,7 @@ public class MonitoringService {
 		return code + " " + stockBasicService.getCodeName(code) + "==>市场行为:" + (buytime ? "买入" : "卖出") + ",主力行为:"
 				+ (pg ? "Yes" : "No") + ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt()) + ",卖出额:"
 				+ CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
-				+ CurrencyUitl.covertToString(d.getTotalAmt());
+				+ CurrencyUitl.covertToString(d.getTotalAmt()) + " 当前信息(SINA):" + SinaRealtimeUitl.get(code);
 	}
 
 	public String sell(String code) {

@@ -240,7 +240,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				highPrice = srt.getHigh();
 				nowPrice = srt.getNow();
 				WAIT_MIN = ONE_MIN;// 新浪1分钟频率
-				log.info("{} SINA 实时:highPrice:{},nowPrice:{},监控价:{}", code, highPrice, nowPrice, chkPrice);
+				log.info("{} SINA 实时:highPrice:{},nowPrice:{},监控价:{},buy1:{},sell1:{}", code, highPrice, nowPrice,
+						chkPrice, srt.getBuy1(), srt.getSell1());
 
 				// 买入
 				if (mv.getBuy() == 1) {

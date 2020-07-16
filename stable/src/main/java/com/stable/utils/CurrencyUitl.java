@@ -40,7 +40,9 @@ public class CurrencyUitl {
 	}
 
 	public final static String covertToString(Long l) {
-
+		if (l == null) {
+			return "";
+		}
 		if (l > 100000000) {
 			BigDecimal b = new BigDecimal(l);
 			return b.divide(YI_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + YI;
