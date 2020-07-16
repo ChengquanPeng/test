@@ -241,7 +241,7 @@ public class CodeModelService {
 			codeBaseModelHistDao.saveAll(listh);
 		}
 		log.info("Code 模型执行完成");
-		WxPushUtil.pushSystem1("Seq5=> 今日已更新CODE-MODEL条数:" + listm.size());
+		WxPushUtil.pushSystem1("Seq5=> CODE-MODEL 共[" + codelist.size() + "]条,今日更新条数:" + listm.size());
 	}
 
 	private void processingFinance(CodeBaseModel base) {
