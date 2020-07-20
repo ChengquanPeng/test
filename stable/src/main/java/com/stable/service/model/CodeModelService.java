@@ -129,7 +129,7 @@ public class CodeModelService {
 			log.info("Code Model  processing for code:{}", code);
 			if (!stockBasicService.online1Year(code)) {
 				log.info("{},Online 上市不足1年", code);
-				continue;
+				// continue;
 			}
 			CodeBaseModel lastOne = getLastModelByCode(code);
 			// 财务
@@ -303,6 +303,31 @@ public class CodeModelService {
 		}
 		log.info("no records CodeBaseModels");
 		return null;
+	}
+
+	public List<CodeBaseModelHist> getListByCode(String code, EsQueryPageReq querypage) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).withSort(sort).build();
+
+		Page<CodeBaseModelHist> page = codeBaseModelHistDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		log.info("no records CodeBaseModels");
+		return null;
+	}
+
+	public CodeBaseModel getLastOneByCode(String code) {
+		return codeBaseModelDao.findById(code).get();
+	}
+
+	public CodeBaseModel getHistOneByCode(String id) {
+		return codeBaseModelDao.findById(id).get();
 	}
 
 }

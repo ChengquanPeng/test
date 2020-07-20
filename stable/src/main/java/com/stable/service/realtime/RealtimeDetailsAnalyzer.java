@@ -87,13 +87,17 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			return false;
 		}
 		if (mv.getReqBuyDate() > 0) {
-			this.ytdAvg = avgService.queryListByCodeForRealtime(mv.getCode(), mv.getReqBuyDate());
+			this.ytdAvg = avgService.queryListByCodeForRealtime(code, mv.getReqBuyDate());
+			log.info("{} {} get getReqBuyDate 1?", code, mv.getReqBuyDate(), (this.ytdAvg != null));
 		}
 		if (this.ytdAvg == null) {
-			this.ytdAvg = avgService.queryListByCodeForRealtime(mv.getCode());
+			this.ytdAvg = avgService.queryListByCodeForRealtime(code);
+			log.info("{}  get getReqBuyDate 2?", code, (this.ytdAvg != null));
 		}
 		if (ytdAvg == null) {
-			WxPushUtil.pushSystem1("实时:数据不全，终止监控。ytdAvg==null?true");
+			String msg = code + ",实时:数据不全，终止监控! 均价记录ytdAvg==null?true";
+			log.info(msg);
+			WxPushUtil.pushSystem1(msg);
 			return false;
 		}
 

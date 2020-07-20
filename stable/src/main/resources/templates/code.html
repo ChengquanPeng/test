@@ -25,10 +25,14 @@ tr td {
 </head>
 <body>
 	<table border='1' cellspacing='0' cellpadding='0'>
-		<tr></tr>
+		<tr>
+			<th><span th:text="${code}"></span><span th:text="${codeName}"></span><span th:text="${detail.date}"></span></th>
+		</tr>
 	</table>
 	<script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script>
-	<span th:text="${code}"></span>
+	
+	
+	<br />
 	</br> 利润： 1：年报连续3年盈利？盈利持续增长？ 2：最近3个季度连续盈利？同比盈利持续增长？最近利润同比增长？环比增长？
 	</br> 营收： 1：年报连续3年营收持续增长？ 2：最近3个季度营收持续增长？最近季度营收同比增长？环比增长？
 	</br> 最近季度营收和利润同时同比增长？同时环比增长？
