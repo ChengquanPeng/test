@@ -34,9 +34,9 @@ public class CodeController {
 	@RequestMapping(value = "/code/{code}", method = RequestMethod.GET)
 	public String detail(@PathVariable(value = "code") String code, Model model) {
 		try {
+			model.addAttribute("codedetail", codeModelService.getLastOneByCode(code));
 			model.addAttribute("code", code);
 			model.addAttribute("codeName", stockBasicService.getCodeName(code));
-			model.addAttribute("detail", codeModelService.getLastOneByCode(code));
 			model.addAttribute("histList", codeModelService.getListByCode(code, querypage));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -50,11 +50,11 @@ public class CodeController {
 	@RequestMapping(value = "/codehist/{id}", method = RequestMethod.GET)
 	public String id(@PathVariable(value = "id") String id, Model model) {
 		try {
-			CodeBaseModelHist ch = codeModelService.getHistOneByCode(id);
+			CodeBaseModelHist ch = codeModelService.getHistOneById(id);
 			String code = ch.getCode();
 			model.addAttribute("code", code);
 			model.addAttribute("codeName", stockBasicService.getCodeName(code));
-			model.addAttribute("detail", ch);
+			model.addAttribute("codedetail", ch);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -306,6 +306,7 @@ public class CodeModelService {
 	}
 
 	public List<CodeBaseModelHist> getListByCode(String code, EsQueryPageReq querypage) {
+		log.info("getListByCode:{}", code);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
@@ -318,16 +319,37 @@ public class CodeModelService {
 		if (page != null && !page.isEmpty()) {
 			return page.getContent();
 		}
-		log.info("no records CodeBaseModels");
+		log.info("no records CodeBaseModelHists");
 		return null;
 	}
 
 	public CodeBaseModel getLastOneByCode(String code) {
-		return codeBaseModelDao.findById(code).get();
+		log.info("getLastOneByCode:{}", code);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("id", code));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+
+		Page<CodeBaseModel> page = codeBaseModelDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		return null;
 	}
 
-	public CodeBaseModelHist getHistOneByCode(String id) {
-		return codeBaseModelHistDao.findById(id).get();
+	public CodeBaseModelHist getHistOneById(String id) {
+		log.info("getHistOneById:{}", id);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("id", id));
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+
+		Page<CodeBaseModelHist> page = codeBaseModelHistDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		return null;
 	}
 
 }

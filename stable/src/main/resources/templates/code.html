@@ -18,61 +18,56 @@ trtd{
 	vertical-align:bottom;
 }
 </style>
-<script type="text/javascript" src="./common.js"></script>
 <script type="text/javascript" src="/tkhtml/static/addsinaurl.js"></script>
 </head>
 <body>
-	
-	---------------------------------------------
-	代码：<span th:text="${code}"></span>-<span th:text="${codeName}"></span><br/>
-	日期：<span th:text="${detail.date}"></span>分数：<b><span th:text="${detail.score}"></span></b>更新日期:<span th:text="${detail.udpateDate}"></span>
-	<br/>
-	---------------------------------------------
+	<br/>---------------------------------------------<br/>
+	代码：<span th:text="${code}"></span>-<span th:text="${codeName}"></span>-分数：<b><span th:text="${codedetail.score}"></span></b>-更新日期:<span th:text="${codedetail.udpateDate}"></span>
+	<br/>---------------------------------------------<br/>
 	<br/>财务报告年份：
-	<span th:text="${detail.currYear}"></span>报告季度：<span th:text="${detail.currQuarter}"></span>
-	---------------------------------------------
-	<br/>营收(科技类,故事类主要指标)====>
-	1.年报同比增长:<span th:text="${detail.incomeUpYear}"></span><br/>
-	2.最近季度同比增长:<span th:text="${detail.incomeUpYear}"></span><br/>
-	3.最近2个季度同比持续增长:<span th:text="${detail.incomeUp2Quarter}"></span><br/>
+	<span th:text="${codedetail.currYear}"></span>-报告季度：<span th:text="${codedetail.currQuarter}"></span>-日期：<span th:text="${codedetail.date}"></span>
+	<br/>---------------------------------------------<br/>
+	<br/>营收(科技类,故事类主要指标)=><br/>
+	1.年报同比增长:<span th:text="${codedetail.incomeUpYear}"></span><br/>
+	2.最近季度同比增长:<span th:text="${codedetail.incomeUpYear}"></span><br/>
+	3.最近2个季度同比持续增长:<span th:text="${codedetail.incomeUp2Quarter}"></span><br/>
 	<br/>
-	利润(传统行业,销售行业主要指标)====><br/>
-	1.年报同比增长:<span th:text="${detail.profitUpYear}"></span><br/>
-	2.最近季度同比增长:<span th:text="${detail.profitUpQuarter}"></span><br/>
-	3.最近2个季度同比持续增长:<span th:text="${detail.profitUp2Quarter}"></span><br/>
+	利润(传统行业,销售行业主要指标)=><br/>
+	1.年报同比增长:<span th:text="${codedetail.profitUpYear}"></span><br/>
+	2.最近季度同比增长:<span th:text="${codedetail.profitUpQuarter}"></span><br/>
+	3.最近2个季度同比持续增长:<span th:text="${codedetail.profitUp2Quarter}"></span><br/>
 	<br/>
-	现金能力====><br/>
-	1.最近分红年份:<span th:text="${detail.lastDividendDate}"></span><br/>
-	2.最后一次回购日期:<span th:text="${detail.lastBackDate}"></span><br/>
-	---------------------------------------------
-	营收地雷====><br/>
-	1.年报同比下降:<span th:text="${detail.incomeDownYear}"></span><br/>
-	2.最近季度同比下降:<span th:text="${detail.incomeDownQuarter}"></span><br/>
-	3.最近2个季度同比持续下降:<span th:text="${detail.incomeDown2Quarter}"></span><br/>
+	现金能力=><br/>
+	1.最近分红年份:<span th:text="${codedetail.lastDividendDate}"></span><br/>
+	2.最后一次回购日期:<span th:text="${codedetail.lastBackDate}"></span><br/>
+	<br/>---------------------------------------------<br/>
+	营收地雷=><br/>
+	1.年报同比下降:<span th:text="${codedetail.incomeDownYear}"></span><br/>
+	2.最近季度同比下降:<span th:text="${codedetail.incomeDownQuarter}"></span><br/>
+	3.最近2个季度同比持续下降:<span th:text="${codedetail.incomeDown2Quarter}"></span><br/>
 	<br/>
-	净利润地雷====><br/>
-	1.年报同比下降:<span th:text="${detail.profitDownYear}"></span><br/>
-	2.最近季度同比下降:<span th:text="${detail.profitDownQuarter}"></span><br/>
-	3.最近2个季度同比持续下降:<span th:text="${detail.profitDown2Quarter}"></span><br/>
-	4.年报连续亏损年数,(ST=可能退市):<span th:text="${detail.profitDown2Year}"></span><br/>
+	净利润地雷=><br/>
+	1.年报同比下降:<span th:text="${codedetail.profitDownYear}"></span><br/>
+	2.最近季度同比下降:<span th:text="${codedetail.profitDownQuarter}"></span><br/>
+	3.最近2个季度同比持续下降:<span th:text="${codedetail.profitDown2Quarter}"></span><br/>
+	4.年报连续亏损年数,(ST=可能退市):<span th:text="${codedetail.profitDown2Year}"></span><br/>
 	<br/>
-	现金能力====><br/>
-	1.最近1年无分红:<span th:text="${detail.noDividendyear}"></span><br/>
-	2.最近1年无回购:<span th:text="${detail.noBackyear}"></span><br/>
+	现金能力=><br/>
+	1.最近1年无分红:<span th:text="${codedetail.noDividendyear}"></span><br/>
+	2.最近1年无回购:<span th:text="${codedetail.noBackyear}"></span><br/>
 	<br/>
-	现金能力====><br/>
-	1.最近1年无分红:<span th:text="${detail.noDividendyear}"></span><br/>
-	2.最近1年无回购:<span th:text="${detail.noBackyear}"></span><br/>
+	现金能力=><br/>
+	1.最近1年无分红:<span th:text="${codedetail.noDividendyear}"></span><br/>
+	2.最近1年无回购:<span th:text="${codedetail.noBackyear}"></span><br/>
 	<br/>
-	其他情况====><br/>
-	1.质押截止日期:<span th:text="${detail.endDate}"></span>,比例<span th:text="${detail.pledgeRatio}"></span><br/>
-	2.限售股解禁日期:<span th:text="${detail.floatDate}"></span>,流通股份占总股本比率<span th:text="${detail.floatRatio}"></span><br/>
-	<br/>
-	---------------------------------------------
+	其他情况=><br/>
+	1.质押截止日期:<span th:text="${codedetail.endDate}"></span>,比例<span th:text="${codedetail.pledgeRatio}"></span><br/>
+	2.限售股解禁日期:<span th:text="${codedetail.floatDate}"></span>,流通股份占总股本比率<span th:text="${codedetail.floatRatio}"></span><br/>
+	<br/>---------------------------------------------<br/>
 	历史记录:
 	<br/>
 	<div th:each="d: ${histList}">
-		<div><a target="_blank" th:href="@{'/web/codehist/'+${d.id}}">日期:<span th:text="${d.date}"></span></a>,分数:<span th:text="${d.score}"></span></div>
+		<div>日期:<a target="_blank" th:href="@{'/codehist/'+${d.id}}"><span th:text="${d.date}"></span></a>,分数:<span th:text="${d.score}"></span></div>
 	</div>
 </body>
 </html>
