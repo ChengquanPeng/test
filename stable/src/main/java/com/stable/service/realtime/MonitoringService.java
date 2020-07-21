@@ -120,6 +120,7 @@ public class MonitoringService {
 
 			int buytt = 0;
 			int selltt = 0;
+			int failtt = 0;
 			if (bList.size() > 0) {
 				// 启动监听线程
 				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
@@ -138,6 +139,8 @@ public class MonitoringService {
 						}
 						selltt += task.getSellCnt();
 
+					} else {
+						failtt++;
 					}
 				}
 				// 启动结果线程
@@ -147,7 +150,7 @@ public class MonitoringService {
 			}
 
 			WxPushUtil.pushSystem1("交易日" + observableDate + "开始监听实时交易，监听总数:[" + bList.size() + "],实际总数[" + list.size()
-					+ "],买入[" + buytt + "],卖出[" + selltt + "]");
+					+ "],买入[" + buytt + "],卖出[" + selltt + "],监听失败[" + failtt + "]");
 
 			long from3 = new Date().getTime();
 			int millis = (int) ((isAlivingMillis - from3));

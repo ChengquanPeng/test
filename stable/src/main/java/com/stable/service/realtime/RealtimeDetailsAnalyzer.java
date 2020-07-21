@@ -109,8 +109,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				return false;
 			}
 			if (lastTradeDate != ytdBasic.getTrade_date()) {
-				WxPushUtil.pushSystem1(code + ",实时:数据不准，终止监控。lastTradeDate (" + lastTradeDate
-						+ ")!= ytdBasic.getTrade_date(" + ytdBasic.getTrade_date() + ")");
+				log.info(code + ",实时:数据不准，终止监控。lastTradeDate (" + lastTradeDate + ")!= ytdBasic.getTrade_date("
+						+ ytdBasic.getTrade_date() + ")");
 				return false;
 			}
 			yesterdayPrice = ytdBasic.getClose();

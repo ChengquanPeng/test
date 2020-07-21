@@ -72,7 +72,7 @@ trtd{
 	历史记录:
 	<br/>
 	<div th:each="d: ${histList}">
-		<div><a target="_blank" th:href="/web/codehist/${d.id}">日期:<span th:text="${d.date}"></span></a>,分数:<span th:text="${d.score}"></span></div>
+		<div><a target="_blank" th:href="@{'/web/codehist/'+${d.id}}">日期:<span th:text="${d.date}"></span></a>,分数:<span th:text="${d.score}"></span></div>
 	</div>
 </body>
 </html>
