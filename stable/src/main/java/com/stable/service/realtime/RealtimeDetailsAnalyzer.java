@@ -95,25 +95,22 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			log.info("{}  get getReqBuyDate 2?", code, (this.ytdAvg != null));
 		}
 		if (ytdAvg == null) {
-			String msg = code + ",实时:数据不全，终止监控! 均价记录ytdAvg==null?true";
-			log.info(msg);
-			WxPushUtil.pushSystem1(msg);
+			WxPushUtil.pushSystem1(code + ",实时:数据不全，终止监控! 均价记录ytdAvg==null?true");
 			return false;
 		}
 
 		// 买入
 		if (mv.getBuy() == 1) {
-
 			// 初始化
 			ytdBasic = daliyBasicHistroyService.queryLastest(code);
 			if (ytdBasic == null) {
-				WxPushUtil.pushSystem1(
-						"实时:数据不全，终止监控。ytdAvg==null?" + (ytdAvg == null) + "},ytdBasic==null?" + (ytdBasic == null));
+				WxPushUtil.pushSystem1(code + ",实时:数据不全，终止监控。ytdAvg==null?" + (ytdAvg == null) + "},ytdBasic==null?"
+						+ (ytdBasic == null));
 				return false;
 			}
 			if (lastTradeDate != ytdBasic.getTrade_date()) {
-				WxPushUtil.pushSystem1("实时:数据不准，终止监控。lastTradeDate (" + lastTradeDate + ")!= ytdBasic.getTrade_date("
-						+ ytdBasic.getTrade_date() + ")");
+				WxPushUtil.pushSystem1(code + ",实时:数据不准，终止监控。lastTradeDate (" + lastTradeDate
+						+ ")!= ytdBasic.getTrade_date(" + ytdBasic.getTrade_date() + ")");
 				return false;
 			}
 			yesterdayPrice = ytdBasic.getClose();

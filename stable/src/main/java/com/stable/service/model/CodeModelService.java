@@ -326,8 +326,8 @@ public class CodeModelService {
 		return codeBaseModelDao.findById(code).get();
 	}
 
-	public CodeBaseModel getHistOneByCode(String id) {
-		return codeBaseModelDao.findById(id).get();
+	public CodeBaseModelHist getHistOneByCode(String id) {
+		return codeBaseModelHistDao.findById(id).get();
 	}
 
 }
