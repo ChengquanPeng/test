@@ -53,6 +53,17 @@ public class ConceptService {
 		}
 	}
 
+	EsQueryPageReq queryPage = new EsQueryPageReq(100);
+	Pageable pageable = PageRequest.of(queryPage.getPageNum(), queryPage.getPageSize());
+
+	public List<CodeConcept> getCodeConcept(String code) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+		return esCodeConceptDao.search(sq).getContent();
+	}
+
 	private List<ConceptDaily> getTopConcepts(int date) {
 		EsQueryPageReq queryPage = new EsQueryPageReq(10);
 		int pageNum = queryPage.getPageNum();

@@ -127,15 +127,16 @@ public class CodeModelService {
 		for (StockBaseInfo s : codelist) {
 			String code = s.getCode();
 			log.info("Code Model  processing for code:{}", code);
-			if (!stockBasicService.online1Year(code)) {
-				log.info("{},Online 上市不足1年", code);
-				// continue;
-			}
 			CodeBaseModel lastOne = getLastModelByCode(code);
 			// 财务
 			FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code, treadeDate);
 			if (fbi == null) {
-				ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, treadeDate + "", "Code Model错误");
+				boolean onlineYear = stockBasicService.online1Year(code);
+				if (onlineYear) {
+					ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, treadeDate + "", "Code Model错误");
+				} else {
+					log.info("{},Online 上市不足1年", code);
+				}
 				continue;
 			}
 			CodeBaseModel newOne = new CodeBaseModel();

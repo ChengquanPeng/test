@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.realtime.MonitoringService;
@@ -26,6 +27,8 @@ public class CodeController {
 	private CodeModelService codeModelService;
 	@Autowired
 	private StockBasicService stockBasicService;
+	@Autowired
+	private ConceptService conceptService;
 	private EsQueryPageReq querypage = new EsQueryPageReq(10);
 
 	/**
@@ -38,6 +41,7 @@ public class CodeController {
 			model.addAttribute("code", code);
 			model.addAttribute("codeName", stockBasicService.getCodeName(code));
 			model.addAttribute("histList", codeModelService.getListByCode(code, querypage));
+			model.addAttribute("concepts", conceptService.getCodeConcept(code));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

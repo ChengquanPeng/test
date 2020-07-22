@@ -21,12 +21,15 @@ trtd{
 <script type="text/javascript" src="/tkhtml/static/addsinaurl.js"></script>
 </head>
 <body>
-	<br/>---------------------------------------------<br/>
+	<br/>------------------------------------------------------------<br/>
 	代码：<span th:text="${code}"></span>-<span th:text="${codeName}"></span>-分数：<b><span th:text="${codedetail.score}"></span></b>-更新日期:<span th:text="${codedetail.udpateDate}"></span>
-	<br/>---------------------------------------------<br/>
+	<br/>------------------------------------------------------------<br/>
+	概念：<div th:each="cp: ${concepts}"><span th:text="${cp.conceptName}"></span>&nbsp;&nbsp;&nbsp;&nbsp;</div>
+	<div><a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}}">同花顺基本信息=></a></div>
+	<br/>------------------------------------------------------------<br/>
 	<br/>财务报告年份：
 	<span th:text="${codedetail.currYear}"></span>-报告季度：<span th:text="${codedetail.currQuarter}"></span>-日期：<span th:text="${codedetail.date}"></span>
-	<br/>---------------------------------------------<br/>
+	<br/>------------------------------------------------------------<br/>
 	<br/>营收(科技类,故事类主要指标)=><br/>
 	1.年报同比增长:<span th:text="${codedetail.incomeUpYear}"></span><br/>
 	2.最近季度同比增长:<span th:text="${codedetail.incomeUpYear}"></span><br/>
@@ -40,7 +43,7 @@ trtd{
 	现金能力=><br/>
 	1.最近分红年份:<span th:text="${codedetail.lastDividendDate}"></span><br/>
 	2.最后一次回购日期:<span th:text="${codedetail.lastBackDate}"></span><br/>
-	<br/>---------------------------------------------<br/>
+	<br/>------------------------------------------------------------<br/>
 	营收地雷=><br/>
 	1.年报同比下降:<span th:text="${codedetail.incomeDownYear}"></span><br/>
 	2.最近季度同比下降:<span th:text="${codedetail.incomeDownQuarter}"></span><br/>
@@ -63,7 +66,7 @@ trtd{
 	其他情况=><br/>
 	1.质押截止日期:<span th:text="${codedetail.endDate}"></span>,比例<span th:text="${codedetail.pledgeRatio}"></span><br/>
 	2.限售股解禁日期:<span th:text="${codedetail.floatDate}"></span>,流通股份占总股本比率<span th:text="${codedetail.floatRatio}"></span><br/>
-	<br/>---------------------------------------------<br/>
+	<br/>------------------------------------------------------------<br/>
 	历史记录:
 	<br/>
 	<div th:each="d: ${histList}">
