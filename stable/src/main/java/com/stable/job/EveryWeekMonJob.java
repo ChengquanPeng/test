@@ -32,7 +32,7 @@ public class EveryWeekMonJob extends MySimpleJob {
 	public void myexecute(ShardingContext sc) {
 		log.info("每周1任务开始执行：");
 		log.info("1.同步股票列表");
-		stockBasicService.jobSynStockList();
+		stockBasicService.jobSynStockList(true);
 		log.info("2.同步股票报告");
 		financeService.jobSpiderFinaceHistoryInfo();
 		log.info("3.同步回购报告");

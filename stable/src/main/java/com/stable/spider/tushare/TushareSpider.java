@@ -82,7 +82,7 @@ public class TushareSpider {
 		JSONObject json = new JSONObject();
 		json.put("api_name", "stock_basic");
 		// 只取上市的
-		json.put("params", JSON.parse("{'list_status':'L'}"));
+//		json.put("params", JSON.parse("{'list_status':'L'}"));
 		json.put("fields", stock_basic_fields);
 		String result = post(json);
 		JSONObject datas = JSON.parseObject(result);

@@ -22,12 +22,13 @@ trtd{
 </head>
 <body>
 	<br/>------------------------------------------------------------<br/>
-	代码：<span th:text="${code}"></span>-<span th:text="${codeName}"></span>-分数：<b><span th:text="${codedetail.score}"></span></b>-更新日期:<span th:text="${codedetail.udpateDate}"></span>
+	代码：<span th:text="${code}"></span>-<span th:text="${codeName}"></span>-分数：<b><span th:text="${codedetail.score}"></span></b>
+	-评分变化：<b><span th:text="${codedetail.upScore}"></span></b>-更新日期:<span th:text="${codedetail.udpateDate}"></span>
 	<br/>------------------------------------------------------------<br/>
-	概念：<div th:each="cp: ${concepts}"><span th:text="${cp.conceptName}"></span>&nbsp;&nbsp;&nbsp;&nbsp;</div>
+	概念：<span th:each="cp: ${concepts}"><span th:text="${cp.conceptName}"></span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
 	<div><a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}}">同花顺基本信息=></a></div>
 	<br/>------------------------------------------------------------<br/>
-	<br/>财务报告年份：
+	财务报告年份：
 	<span th:text="${codedetail.currYear}"></span>-报告季度：<span th:text="${codedetail.currQuarter}"></span>-日期：<span th:text="${codedetail.date}"></span>
 	<br/>------------------------------------------------------------<br/>
 	<br/>营收(科技类,故事类主要指标)=><br/>
@@ -59,10 +60,6 @@ trtd{
 	1.最近1年无分红:<span th:text="${codedetail.noDividendyear}"></span><br/>
 	2.最近1年无回购:<span th:text="${codedetail.noBackyear}"></span><br/>
 	<br/>
-	现金能力=><br/>
-	1.最近1年无分红:<span th:text="${codedetail.noDividendyear}"></span><br/>
-	2.最近1年无回购:<span th:text="${codedetail.noBackyear}"></span><br/>
-	<br/>
 	其他情况=><br/>
 	1.质押截止日期:<span th:text="${codedetail.endDate}"></span>,比例<span th:text="${codedetail.pledgeRatio}"></span><br/>
 	2.限售股解禁日期:<span th:text="${codedetail.floatDate}"></span>,流通股份占总股本比率<span th:text="${codedetail.floatRatio}"></span><br/>
@@ -70,7 +67,7 @@ trtd{
 	历史记录:
 	<br/>
 	<div th:each="d: ${histList}">
-		<div>日期:<a target="_blank" th:href="@{'/codehist/'+${d.id}}"><span th:text="${d.date}"></span></a>,分数:<span th:text="${d.score}"></span></div>
+		<div>日期:<a target="_blank" th:href="@{'/codehist/'+${d.id}}"><span th:text="${d.date}"></span></a>,分数:<span th:text="${d.score}"></span>,评分变化：<span th:text="${codedetail.upScore}"></span></div>
 	</div>
 </body>
 </html>

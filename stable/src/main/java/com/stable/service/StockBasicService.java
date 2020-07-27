@@ -79,7 +79,14 @@ public class StockBasicService {
 
 	private final Semaphore semap = new Semaphore(1);
 
-	public ListenableFuture<Object> jobSynStockList() {
+	public void jobSynStockListAfterUpdateStatus() {
+
+	}
+
+	public static void main(String[] args) {
+	}
+
+	public ListenableFuture<Object> jobSynStockList(boolean isJob) {
 		try {
 			semap.acquire();
 		} catch (InterruptedException e) {
@@ -89,12 +96,13 @@ public class StockBasicService {
 				.submit(new MyCallable(RunLogBizTypeEnum.STOCK_LIST, RunCycleEnum.WEEK) {
 					public Object mycall() {
 						try {
+							Long batchNo = System.currentTimeMillis();
 							log.info("同步股票列表[started]");
 							JSONArray array = tushareSpider.getStockCodeList();
 							// System.err.println(array.toJSONString());
 							List<StockBaseInfo> list = new LinkedList<StockBaseInfo>();
 							for (int i = 0; i < array.size(); i++) {
-								StockBaseInfo base = new StockBaseInfo(array.getJSONArray(i));
+								StockBaseInfo base = new StockBaseInfo(array.getJSONArray(i), batchNo);
 								synBaseStockInfo(base);
 								list.add(base);
 							}
@@ -103,15 +111,34 @@ public class StockBasicService {
 								esStockBaseInfoDao.saveAll(list);
 								cnt = list.size();
 							}
+							List<StockBaseInfo> removelist = new LinkedList<StockBaseInfo>();
+							if (isJob) {
+								Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
+								while (it.hasNext()) {
+									StockBaseInfo e = it.next();
+									if ("L".equals(e.getList_status()) && (e.getUpdBatchNo() == null
+											|| e.getUpdBatchNo().longValue() != batchNo.longValue())) {
+										removelist.add(e);
+										log.info("删除异常股票:{}", e);
+									}
+								}
+								if (removelist.size() > 0) {
+									esStockBaseInfoDao.deleteAll(removelist);
+								}
+							}
 							log.info("同步股票列表[end]");
 							LOCAL_ALL_ONLINE_LIST.clear();// 清空缓存
-							WxPushUtil.pushSystem1("同步股票列表完成！记录条数=" + cnt);
+							WxPushUtil.pushSystem1("同步股票列表完成！记录条数=[" + cnt + "],更新已下市条数:" + removelist.size());
 							return null;
 						} finally {
 							semap.release();
 						}
 					}
 				});
+	}
+
+	public ListenableFuture<Object> jobSynStockList() {
+		return jobSynStockList(false);
 	}
 
 	public void synBaseStockInfo(StockBaseInfo base) {

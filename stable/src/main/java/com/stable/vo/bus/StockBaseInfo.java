@@ -67,12 +67,14 @@ public class StockBaseInfo extends EsBase {
 	private String is_hs;
 	@Field(type = FieldType.Long)
 	private Date updDate;
+	@Field(type = FieldType.Long)
+	private Long updBatchNo;
 
 	public StockBaseInfo() {
 
 	}
 
-	public StockBaseInfo(JSONArray arr) {
+	public StockBaseInfo(JSONArray arr, Long updBatchNo) {
 		int i = 0;
 		ts_code = arr.getString(i++);
 		code = arr.getString(i++);
@@ -89,5 +91,6 @@ public class StockBaseInfo extends EsBase {
 		delist_date = arr.getString(i++);
 		is_hs = arr.getString(i++);
 		this.updDate = new Date();
+		this.updBatchNo = updBatchNo;
 	}
 }

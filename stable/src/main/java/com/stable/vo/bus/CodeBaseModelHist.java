@@ -87,6 +87,9 @@ public class CodeBaseModelHist extends EsBase {
 	// 分数
 	@Field(type = FieldType.Integer)
 	private int score = 0;
+	// 提高分数
+	@Field(type = FieldType.Integer)
+	private int upScore = 0;
 	@Field(type = FieldType.Integer)
 	private int udpateDate;
 
