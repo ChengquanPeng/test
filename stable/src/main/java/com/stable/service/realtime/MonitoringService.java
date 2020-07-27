@@ -89,12 +89,11 @@ public class MonitoringService {
 			Set<String> allCode = new HashSet<String>();
 			// 获取买入监听列表
 			Set<Monitoring> bList = upModelLineService.getListByCode(querypage);
-			List<Monitoring> wupdate = new LinkedList<Monitoring>();// 买入列表更新
 			if (bList == null) {
 				bList = new HashSet<Monitoring>();
 			}
 
-			// 获取买卖监听列表
+			// 获取卖出监听列表
 			List<BuyTrace> sList = buyTraceService.getListByCode("", 0, TradeType.BOUGHT.getCode(),
 					BuyModelType.B2.getCode(), querypage);
 
@@ -135,7 +134,6 @@ public class MonitoringService {
 
 						if (x.getBuy() == 1) {
 							buytt++;
-							wupdate.add(x);
 						}
 						selltt += task.getSellCnt();
 
@@ -172,12 +170,12 @@ public class MonitoringService {
 			resulter.stop();
 
 			// 修改监听状态
-			if (wupdate.size() > 0) {
-				wupdate.forEach(x -> {
+			if (bList.size() > 0) {
+				bList.forEach(x -> {
 					x.setBuy(0);
 					x.setLastMoniDate(idate);
 				});
-				monitoringDao.saveAll(wupdate);
+				monitoringDao.saveAll(bList);
 			}
 			sendEndMessaget(buyedList, selledList);
 		} catch (Exception e) {

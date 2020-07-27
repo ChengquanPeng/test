@@ -2,6 +2,7 @@ package com.stable.service.model;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -54,6 +55,7 @@ import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.Monitoring;
 import com.stable.vo.bus.PriceLife;
 import com.stable.vo.bus.StockAvg;
+import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 import com.stable.vo.up.strategy.ModelV1;
 
@@ -163,9 +165,21 @@ public class UpModelLineService {
 			Map<String, List<ConceptInfo>> gn = conceptService.getDailyMap(treadeDate);
 			int size = array.size();
 			log.info("{}获取到每日指标记录条数={}", treadeDate, size);
-			CountDownLatch cunt = new CountDownLatch(array.size());
-			for (int i = 0; i < array.size(); i++) {
+			Map<String, DaliyBasicInfo> todayDailyBasicMap = new HashMap<String, DaliyBasicInfo>();
+			for (int i = 0; i < size; i++) {
 				DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
+				todayDailyBasicMap.put(d.getCode(), d);
+			}
+			List<StockBaseInfo> allOnlieList = stockBasicService.getAllOnStatusList();
+			log.info("{}获取上市股票数={}", treadeDate, allOnlieList.size());
+			CountDownLatch cunt = new CountDownLatch(allOnlieList.size());
+			for (int i = 0; i < allOnlieList.size(); i++) {
+				StockBaseInfo sbi = allOnlieList.get(i);
+				DaliyBasicInfo d = todayDailyBasicMap.get(sbi.getCode());
+				if (d == null) {
+					d = daliyBasicHistroyService.queryLastest(sbi.getCode());
+					log.info("{} 在{} 没进行交易,用历史数据再跑1次", d.getCode(), treadeDate);
+				}
 
 				ModelContext cxt = new ModelContext();
 				cxt.setCode(d.getCode());
