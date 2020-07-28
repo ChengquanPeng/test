@@ -10,6 +10,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +43,7 @@ import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.PledgeStat;
 import com.stable.vo.bus.ShareFloat;
 import com.stable.vo.bus.StockBaseInfo;
+import com.stable.vo.http.resp.CodeBaseModelResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
@@ -361,5 +363,46 @@ public class CodeModelService {
 			return page.getContent().get(0);
 		}
 		return null;
+	}
+
+	public List<CodeBaseModel> getList(String code, int orderBy, int asc, EsQueryPageReq querypage) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		if (StringUtils.isNotBlank(code)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		}
+		String field = "score";
+		if (orderBy == 2) {
+			field = "upScore";
+		}
+		SortOrder order = SortOrder.DESC;
+		if (asc == 2) {
+			order = SortOrder.ASC;
+		}
+		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).withSort(sort).build();
+
+		Page<CodeBaseModel> page = codeBaseModelDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		log.info("no records CodeBaseModels");
+		return null;
+	}
+
+	public List<CodeBaseModelResp> getListForWeb(String code, int orderBy, int asc, EsQueryPageReq querypage) {
+		List<CodeBaseModel> list = getList(code, orderBy, asc, querypage);
+		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
+		if (list != null) {
+			for (CodeBaseModel dh : list) {
+				CodeBaseModelResp resp = new CodeBaseModelResp();
+				BeanUtils.copyProperties(dh, resp);
+				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
+				res.add(resp);
+			}
+		}
+		return res;
 	}
 }

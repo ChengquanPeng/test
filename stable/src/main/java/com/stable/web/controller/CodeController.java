@@ -3,17 +3,20 @@ package com.stable.web.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.realtime.MonitoringService;
 import com.stable.vo.bus.CodeBaseModelHist;
+import com.stable.vo.http.JsonResult;
 import com.stable.vo.http.resp.ReportVo;
 import com.stable.vo.http.resp.ViewVo;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -79,5 +82,21 @@ public class CodeController {
 			e.printStackTrace();
 		}
 		return "realtimelist";
+	}
+
+	@RequestMapping(value = "/codemodel/list", method = RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<JsonResult> codemodellist(String code, int orderBy, int asc, EsQueryPageReq page) {
+		JsonResult r = new JsonResult();
+		try {
+
+			r.setResult(codeModelService.getListForWeb(code, orderBy, asc, page));
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
 	}
 }
