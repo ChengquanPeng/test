@@ -99,12 +99,17 @@
 						},
 						columns : [ {
 							field : 'code',
-							title : '代码'
+							title : '代码',
+							formatter : function(value, row,index) {
+								var actions = [];
+		                        actions.push('<a href="/web/code/' + value + '">' + value + '</a>');
+		                        return actions.join('');
+							}
 						}, {
 							field : 'codeName',
 							title : '名称'
 						}, {
-							field : 'updatedate',
+							field : 'udpateDate',
 							title : '更新日期'
 						}, {
 							field : 'currYear',
