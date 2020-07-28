@@ -393,6 +393,8 @@ public class CodeModelService {
 	}
 
 	public List<CodeBaseModelResp> getListForWeb(String code, int orderBy, int asc, EsQueryPageReq querypage) {
+		log.info("CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={}", code, orderBy, asc,
+				querypage.getPageNum(), querypage.getPageSize());
 		List<CodeBaseModel> list = getList(code, orderBy, asc, querypage);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {

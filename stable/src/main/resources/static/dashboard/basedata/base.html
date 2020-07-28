@@ -27,7 +27,7 @@
 						股票代码：<input type="text" class="form-control" id="queryCode"> 
 						排序：<select id="gsort" class="form-control">
 							<option value="1" selected="selected">综合评分</option>
-							<option value="2">增量评分</option>
+							<option value="2">评分变化</option>
 						</select>
 						倒序排序:<input type="checkbox" id="asc" name="asc" checked="checked" />
 					<span lass="input-group-btn"> <button class="btn btn-default" type="button" id="queryAction"> Go!</button> </span>
@@ -102,7 +102,7 @@
 							title : '代码',
 							formatter : function(value, row,index) {
 								var actions = [];
-		                        actions.push('<a href="/web/code/' + value + '">' + value + '</a>');
+		                        actions.push('<a target="_blank" href="/web/code/' + value + '">' + value + '</a>');
 		                        return actions.join('');
 							}
 						}, {
