@@ -177,8 +177,15 @@ public class UpModelLineService {
 				StockBaseInfo sbi = allOnlieList.get(i);
 				DaliyBasicInfo d = todayDailyBasicMap.get(sbi.getCode());
 				if (d == null) {
+					log.info("{} 在{} 没进行交易,用历史数据再跑1次", sbi.getCode(), treadeDate);
 					d = daliyBasicHistroyService.queryLastest(sbi.getCode());
-					log.info("{} 在{} 没进行交易,用历史数据再跑1次", d.getCode(), treadeDate);
+					if (d == null) {
+						log.info("{} 在{} 没进行交易,用历史数据再跑1次", sbi.getCode(), treadeDate);
+						ErrorLogFileUitl.writeError(new RuntimeException("未找到daliyBasicHistroy记录"), sbi.getCode(), "",
+								"");
+						cunt.countDown();
+						continue;
+					}
 				}
 
 				ModelContext cxt = new ModelContext();

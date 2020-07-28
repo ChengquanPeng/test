@@ -310,7 +310,12 @@ public class DaliyBasicHistroyService {
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(SortOrder.DESC);
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
-		return esDaliyBasicInfoDao.search(sq).getContent().get(0);
+		try {
+			return esDaliyBasicInfoDao.search(sq).getContent().get(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public Page<DaliyBasicInfo> queryListByCodeForModel(String code, int date, EsQueryPageReq queryPage) {

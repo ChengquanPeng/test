@@ -119,16 +119,17 @@ public class StockBasicService {
 									if ("L".equals(e.getList_status()) && (e.getUpdBatchNo() == null
 											|| e.getUpdBatchNo().longValue() != batchNo.longValue())) {
 										removelist.add(e);
+										e.setList_status("off");// 已退市
 										log.info("删除异常股票:{}", e);
 									}
 								}
 								if (removelist.size() > 0) {
-									esStockBaseInfoDao.deleteAll(removelist);
+									esStockBaseInfoDao.saveAll(removelist);
 								}
 							}
 							log.info("同步股票列表[end]");
 							LOCAL_ALL_ONLINE_LIST.clear();// 清空缓存
-							WxPushUtil.pushSystem1("同步股票列表完成！记录条数=[" + cnt + "],更新已下市条数:" + removelist.size());
+							WxPushUtil.pushSystem1("同步股票列表完成！记录条数=[" + cnt + "],异常股票数:" + removelist.size());
 							return null;
 						} finally {
 							semap.release();
