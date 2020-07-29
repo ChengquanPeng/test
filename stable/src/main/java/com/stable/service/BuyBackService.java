@@ -77,6 +77,7 @@ public class BuyBackService {
 						Calendar cal = Calendar.getInstance();
 						String startDate = "", endDate = "";
 						int ife = 0, first = 0, last = 0;
+						int cnt = 0;
 						do {
 							// 当月第一天
 							first = cal.getActualMinimum(Calendar.DAY_OF_MONTH);
@@ -88,11 +89,12 @@ public class BuyBackService {
 							endDate = DateUtil.getYYYYMMDD(cal.getTime());
 
 							log.info("回购爬虫时间从{}到{}", startDate, endDate);
-							fetchHist(startDate, endDate);
+							cnt += fetchHist(startDate, endDate, false);
 
 							ife = Integer.valueOf(endDate);
 							cal.add(Calendar.MONTH, -1);// 前一月
-						} while (ife >= 19900101);
+						} while (ife >= 20100101);
+						WxPushUtil.pushSystem1("fetchAll-From-20100101 获取到[" + cnt + "]条回购公告！");
 						return null;
 					}
 
@@ -186,7 +188,7 @@ public class BuyBackService {
 		});
 	}
 
-	private void fetchHist(String start_date, String end_date) {
+	private int fetchHist(String start_date, String end_date, boolean isJob) {
 		log.info("同步回购公告列表[started],start_date={},end_date={},", start_date, end_date);
 		JSONArray array = tushareSpider.getBuyBackList(start_date, end_date, null);
 		// System.err.println(array.toJSONString());
@@ -204,8 +206,15 @@ public class BuyBackService {
 		} else {
 			log.info("未获取到回购公告");
 		}
-		WxPushUtil.pushSystem1(start_date + " " + end_date + "获取回购记录条数=" + cnt);
+		if (isJob) {
+			WxPushUtil.pushSystem1(start_date + " " + end_date + "获取回购记录条数=" + cnt);
+		}
 		log.info("同步回购公告列表[end],start_date={},end_date={},", start_date, end_date);
+		return cnt;
+	}
+
+	private void fetchHist(String start_date, String end_date) {
+		fetchHist(start_date, end_date, true);
 	}
 
 	public List<BuyBackInfoResp> getListByCodeForWebPage(String code, int dtype, int asc, EsQueryPageReq querypage) {
