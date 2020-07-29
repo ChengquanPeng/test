@@ -36,29 +36,27 @@ public class BuyBackInfo extends EsBase {
 	 */
 	@Id
 	private String id;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String code;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String ts_code;
-	@Field(type = FieldType.Text, fielddata = true)
-	private String ann_date;
-	@Field(type = FieldType.Text)
-	private String end_date;
-	@Field(type = FieldType.Text)
-	private String exp_date;
+	@Field(type = FieldType.Integer)
+	private int ann_date;
+	@Field(type = FieldType.Integer)
+	private int end_date;
+	@Field(type = FieldType.Integer)
+	private int exp_date;
 
-	@Field(type = FieldType.Text, fielddata = true)
+	@Field(type = FieldType.Keyword)
 	private String proc;
-	@Field(type = FieldType.Keyword, index = false)
-	private String proc2;
 	@Field(type = FieldType.Double)
 	private Double vol = 0d;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Double)
 	private Double amount = 0d;
 
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Double)
 	private Double high_limit = 0d;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Double)
 	private Double low_limit = 0d;
 
 	@Field(type = FieldType.Date)
@@ -72,11 +70,22 @@ public class BuyBackInfo extends EsBase {
 		int i = 0;
 		ts_code = arr.getString(i++);
 		this.code = TushareSpider.removets(ts_code);
-		ann_date = arr.getString(i++);
-		end_date = arr.getString(i++);
+		try {
+			ann_date = Integer.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+
+		}
+		try {
+			ann_date = Integer.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+
+		}
 		proc = arr.getString(i++);
-		proc2 = proc;
-		exp_date = arr.getString(i++);
+		try {
+			exp_date = Integer.valueOf(arr.getString(i++));
+		} catch (Exception e) {
+
+		}
 		try {
 			this.vol = Double.valueOf(arr.getString(i++));
 		} catch (Exception e) {

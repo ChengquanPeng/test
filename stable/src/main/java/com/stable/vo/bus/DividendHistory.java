@@ -40,7 +40,7 @@ public class DividendHistory extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int ann_date;
 	// 实施进度
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String div_proc;
 	// 每股送转
 	@Field(type = FieldType.Text)

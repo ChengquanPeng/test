@@ -48,14 +48,15 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class DividendService {
-	private static final String GDDH = "股东大会通过";
+	private final String GDDH = "股东大会通过";
+	private final String SS = "实施";
 	@Autowired
 	private TushareSpider tushareSpider;
 	@Autowired
 	private EsDividendHistoryDao esDividendHistoryDao;
 	@Autowired
 	private StockBasicService stockBasicService;
-	private final String SS = "实施";
+
 	@Autowired
 	private DaliyTradeHistroyService daliydTradeHistroyService;
 	@Autowired
@@ -149,7 +150,7 @@ public class DividendService {
 		if (page != null && !page.isEmpty()) {
 			return page.getContent().get(0);
 		}
-		log.info("no DividendHistory date={}", date);
+		log.info("no DividendHistory code={},start={},date={},", code, start, date);
 		return null;
 	}
 
