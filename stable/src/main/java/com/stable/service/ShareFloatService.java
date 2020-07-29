@@ -45,7 +45,7 @@ public class ShareFloatService {
 	@Autowired
 	private RedisUtil redisUtil;
 
-	public void spiderBuyBackHistoryInfo(String start_date, String end_date) {
+	public void spiderShareFloatInfo(String start_date, String end_date) {
 		TasksWorker.getInstance().getService().submit(
 				new MyCallable(RunLogBizTypeEnum.SHARE_FLOAT, RunCycleEnum.MANUAL, start_date + " " + end_date) {
 					public Object mycall() {
@@ -65,6 +65,7 @@ public class ShareFloatService {
 						Calendar cal = Calendar.getInstance();
 						String startDate = "", endDate = "";
 						int ife = 0, first = 0, last = 0;
+						int cnt = 0;
 						do {
 							// 当月第一天
 							first = cal.getActualMinimum(Calendar.DAY_OF_MONTH);
@@ -76,11 +77,12 @@ public class ShareFloatService {
 							endDate = DateUtil.getYYYYMMDD(cal.getTime());
 
 							log.info("限售解禁爬虫时间从{}到{}", startDate, endDate);
-							fetchHist(startDate, endDate);
+							cnt += fetchHist(startDate, endDate, false);
 
 							ife = Integer.valueOf(endDate);
 							cal.add(Calendar.MONTH, -1);// 前一月
-						} while (ife >= 20190101);
+						} while (ife >= 2010101);
+						WxPushUtil.pushSystem1("fetchAll-From 2010101  获取限售解禁记录条数=" + cnt);
 						return null;
 					}
 
@@ -163,6 +165,10 @@ public class ShareFloatService {
 	}
 
 	private void fetchHist(String start_date, String end_date) {
+		fetchHist(start_date, end_date, true);
+	}
+
+	private int fetchHist(String start_date, String end_date, boolean isJob) {
 		log.info("同步限售解禁公告列表[started],start_date={},end_date={},", start_date, end_date);
 		int start = Integer.valueOf(start_date);
 		int end = Integer.valueOf(end_date);
@@ -187,8 +193,11 @@ public class ShareFloatService {
 		if (cnt > 0) {
 			esShareFloatDao.saveAll(list);
 		}
-		WxPushUtil.pushSystem1(start_date + " " + end_date + "获取限售解禁记录条数=" + cnt);
+		if (isJob) {
+			WxPushUtil.pushSystem1(start_date + " " + end_date + "获取限售解禁记录条数=" + cnt);
+		}
 		log.info("同步限售解禁公告列表[end],start_date={},end_date={},", start_date, end_date);
+		return cnt;
 	}
 
 	public ShareFloat getLastRecordByLteDate(String code, int start, int date) {

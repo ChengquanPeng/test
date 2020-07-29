@@ -7,6 +7,7 @@ import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.service.BuyBackService;
 import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
+import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
 
 import lombok.extern.log4j.Log4j2;
@@ -27,6 +28,8 @@ public class EveryWeekMonJob extends MySimpleJob {
 	private BuyBackService buyBackService;
 	@Autowired
 	private DividendService dividendService;
+	@Autowired
+	private ShareFloatService shareFloatService;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
@@ -39,5 +42,7 @@ public class EveryWeekMonJob extends MySimpleJob {
 		buyBackService.jobFetchHist();
 		log.info("4.分红送股除权信息同步");
 		dividendService.jobSpiderDividendByWeek();
+		log.info("5.限售解禁");
+		shareFloatService.jobFetchHist();
 	}
 }

@@ -10,6 +10,23 @@ public class FinanceAnalyzer {
 	private FinanceBaseInfo currJidu;// 当前季度
 	private FinanceBaseInfo prevJidu;// 上前季度
 
+	public String printInfo() {
+		StringBuffer sb = new StringBuffer();
+		if (currJidu != null) {
+			sb.append("当前季度:").append(currJidu.toString());
+		}
+		if (prevJidu != null) {
+			sb.append("上一季度:").append(prevJidu.toString());
+		}
+		if (currYear != null) {
+			sb.append("最新年度:").append(currYear.toString());
+		}
+		if (prevYear != null) {
+			sb.append("上级年度:").append(prevYear.toString());
+		}
+		return sb.toString();
+	}
+
 	public void putJidu1(FinanceBaseInfo fbi) {
 		if (currJidu == null) {
 			this.currJidu = fbi;
