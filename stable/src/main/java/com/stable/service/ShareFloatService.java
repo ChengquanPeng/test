@@ -29,6 +29,7 @@ import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.ShareFloat;
+import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -44,6 +45,8 @@ public class ShareFloatService {
 	private EsShareFloatDao esShareFloatDao;
 	@Autowired
 	private RedisUtil redisUtil;
+	@Autowired
+	private StockBasicService stockBasicService;
 
 	public void spiderShareFloatInfo(String start_date, String end_date) {
 		TasksWorker.getInstance().getService().submit(
@@ -62,27 +65,31 @@ public class ShareFloatService {
 		TasksWorker.getInstance().getService()
 				.submit(new MyCallable(RunLogBizTypeEnum.SHARE_FLOAT, RunCycleEnum.MANUAL, "fetchAll from 20190101") {
 					public Object mycall() {
-						Calendar cal = Calendar.getInstance();
-						String startDate = "", endDate = "";
-						int ife = 0, first = 0, last = 0;
+						List<StockBaseInfo> lists = stockBasicService.getAllOnStatusList();
 						int cnt = 0;
-						do {
-							// 当月第一天
-							first = cal.getActualMinimum(Calendar.DAY_OF_MONTH);
-							cal.set(Calendar.DAY_OF_MONTH, first);
-							startDate = DateUtil.getYYYYMMDD(cal.getTime());
-							// 当月最后一天
-							last = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-							cal.set(Calendar.DAY_OF_MONTH, last);
-							endDate = DateUtil.getYYYYMMDD(cal.getTime());
-
-							log.info("限售解禁爬虫时间从{}到{}", startDate, endDate);
-							cnt += fetchHist(startDate, endDate, false);
-
-							ife = Integer.valueOf(endDate);
-							cal.add(Calendar.MONTH, -1);// 前一月
-						} while (ife >= 2010101);
-						WxPushUtil.pushSystem1("fetchAll-From 2010101  获取限售解禁记录条数=" + cnt);
+						List<ShareFloat> list = new LinkedList<ShareFloat>();
+						for (StockBaseInfo sbi : lists) {
+							JSONArray array = tushareSpider.getShareFloatList(sbi.getTs_code(), null);
+							if (array != null && array.size() > 0) {
+								log.info("{},获取到限售解禁公告记录条数={}", sbi.getTs_code(), array.size());
+								for (int i = 0; i < array.size(); i++) {
+									ShareFloat base = new ShareFloat(array.getJSONArray(i));
+									list.add(base);
+								}
+							} else {
+								log.info("{}未获取到限售解禁公告", sbi.getTs_code());
+							}
+							if (list.size() > 1000) {
+								esShareFloatDao.saveAll(list);
+								cnt += list.size();
+								list = new LinkedList<ShareFloat>();
+							}
+						}
+						if (list.size() > 0) {
+							esShareFloatDao.saveAll(list);
+							cnt += list.size();
+						}
+						WxPushUtil.pushSystem1("fetchAll-By AllOnStatusList 获取限售解禁记录条数=" + cnt);
 						return null;
 					}
 
@@ -164,11 +171,7 @@ public class ShareFloatService {
 		});
 	}
 
-	private void fetchHist(String start_date, String end_date) {
-		fetchHist(start_date, end_date, true);
-	}
-
-	private int fetchHist(String start_date, String end_date, boolean isJob) {
+	private int fetchHist(String start_date, String end_date) {
 		log.info("同步限售解禁公告列表[started],start_date={},end_date={},", start_date, end_date);
 		int start = Integer.valueOf(start_date);
 		int end = Integer.valueOf(end_date);
@@ -193,9 +196,7 @@ public class ShareFloatService {
 		if (cnt > 0) {
 			esShareFloatDao.saveAll(list);
 		}
-		if (isJob) {
-			WxPushUtil.pushSystem1(start_date + " " + end_date + "获取限售解禁记录条数=" + cnt);
-		}
+		WxPushUtil.pushSystem1(start_date + " " + end_date + "获取限售解禁记录条数=" + cnt);
 		log.info("同步限售解禁公告列表[end],start_date={},end_date={},", start_date, end_date);
 		return cnt;
 	}
