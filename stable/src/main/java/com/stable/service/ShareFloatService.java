@@ -203,8 +203,8 @@ public class ShareFloatService {
 	public ShareFloat getLastRecordByLteDate(String code, int start, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		bqb.must(QueryBuilders.rangeQuery("annDate").gte(start).lte(date));
-		FieldSortBuilder sort = SortBuilders.fieldSort("annDate").unmappedType("integer").order(SortOrder.DESC);
+		bqb.must(QueryBuilders.rangeQuery("floatDate").gte(start).lte(date));
+		FieldSortBuilder sort = SortBuilders.fieldSort("floatDate").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
