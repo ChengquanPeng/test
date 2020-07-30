@@ -31,43 +31,32 @@ trtd{
 	财务报告年份：
 	<span th:text="${codedetail.currYear}"></span>-报告季度：<span th:text="${codedetail.currQuarter}"></span>-日期：<span th:text="${codedetail.date}"></span>
 	<br/>------------------------------------------------------------<br/>
-	<br/>营收(科技类,故事类主要指标)=><br/>
-	1.年报同比增长:<span th:text="${codedetail.incomeUpYear}"></span><br/>
-	2.最近季度同比增长:<span th:text="${codedetail.incomeUpYear}"></span><br/>
-	3.最近2个季度同比持续增长:<span th:text="${codedetail.incomeUp2Quarter}"></span><br/>
-	<br/>
-	利润(传统行业,销售行业主要指标)=><br/>
-	1.年报同比增长:<span th:text="${codedetail.profitUpYear}"></span><br/>
-	2.最近季度同比增长:<span th:text="${codedetail.profitUpQuarter}"></span><br/>
-	3.最近2个季度同比持续增长:<span th:text="${codedetail.profitUp2Quarter}"></span><br/>
-	<br/>
-	现金能力=><br/>
-	1.最近分红年份:<span th:text="${codedetail.lastDividendDate}"></span><br/>
-	2.最后一次回购日期:<span th:text="${codedetail.lastBackDate}"></span><br/>
-	<br/>------------------------------------------------------------<br/>
-	营收地雷=><br/>
-	1.年报同比下降:<span th:text="${codedetail.incomeDownYear}"></span><br/>
-	2.最近季度同比下降:<span th:text="${codedetail.incomeDownQuarter}"></span><br/>
-	3.最近2个季度同比持续下降:<span th:text="${codedetail.incomeDown2Quarter}"></span><br/>
-	<br/>
-	净利润地雷=><br/>
-	1.年报同比下降:<span th:text="${codedetail.profitDownYear}"></span><br/>
-	2.最近季度同比下降:<span th:text="${codedetail.profitDownQuarter}"></span><br/>
-	3.最近2个季度同比持续下降:<span th:text="${codedetail.profitDown2Quarter}"></span><br/>
-	4.年报连续亏损年数,(ST=可能退市):<span th:text="${codedetail.profitDown2Year}"></span><br/>
-	<br/>
-	现金能力=><br/>
-	1.最近1年无分红:<span th:text="${codedetail.noDividendyear}"></span><br/>
-	2.最近1年无回购:<span th:text="${codedetail.noBackyear}"></span><br/>
-	<br/>
-	其他情况=><br/>
-	1.质押截止日期:<span th:text="${codedetail.endDate}"></span>,比例<span th:text="${codedetail.pledgeRatio}"></span><br/>
-	2.限售股解禁日期:<span th:text="${codedetail.floatDate}"></span>,流通股份占总股本比率<span th:text="${codedetail.floatRatio}"></span><br/>
+	<table border='1' cellspacing='0' cellpadding='0'>
+	<tr><td>项目</td><td>条目</td><td>增长</td><td>地雷</td></tr>
+	<tr><td rowspan='3'>营收<br/>(科技类,故事类主要指标)</td>
+		<td>1.年报同比</td><td><span th:text="${codedetail.incomeUpYear}"></span></td><td><span th:text="${codedetail.incomeDownYear}"></span></td></tr>
+	<tr><td>2.最近季度同比</td><td><span th:text="${codedetail.incomeUpQuarter}"></td><td><span th:text="${codedetail.incomeDownQuarter}"></span></td></tr>
+	<tr><td>3.最近2个季度同比持续</td><td><span th:text="${codedetail.incomeUp2Quarter}"></td><td><span th:text="${codedetail.incomeDown2Quarter}"></span></td></tr>
+	
+	<tr><td rowspan='4'>利润<br/>(传统,销售类主要指标)</td>
+		<td>1.年报同比</td><td><span th:text="${codedetail.profitUpYear}"></span></td><td><span th:text="${codedetail.profitDownYear}"></span></td></tr>
+	<tr><td>2.最近季度同比</td><td><span th:text="${codedetail.profitUpQuarter}"></span></td><td><span th:text="${codedetail.profitDownQuarter}"></span></td></tr>
+	<tr><td>3.最近2个季度同比持续</td><td><span th:text="${codedetail.profitUp2Quarter}"></span></td><td><span th:text="${codedetail.profitDown2Quarter}"></span></td></tr>
+	<tr><td>4.退市风险(亏损年数)</td><td>-</td><td><span th:text="${codedetail.profitDown2Year}"></span></td></tr>
+	
+	<tr><td rowspan='2'>现金能力</td>
+		<td>1.最近分红年份</td><td><span th:text="${codedetail.lastDividendDate}"></span></td><td><span th:text="${codedetail.noDividendyear}"></span></td></tr>
+	<tr><td>2.最后回购日期</td><td><span th:text="${codedetail.lastBackDate}"></span></td><td><span th:text="${codedetail.noBackyear}"></span></td></tr>
+	
+	<tr><td rowspan='2'>其他情况</td>
+		<td colspan='3'>1.股票质押情况:<span th:text="${codedetail.endDate}"></span>,比例<span th:text="${codedetail.pledgeRatio}"></span></td></tr>
+	<tr><td colspan='3'>2.限售股解禁:<span th:text="${codedetail.floatDate}"></span>,流通股份占总股本比率<span th:text="${codedetail.floatRatio}"></span></td></tr>
+	</table>
 	<br/>------------------------------------------------------------<br/>
 	历史记录:
 	<br/>
 	<div th:each="d: ${histList}">
-		<div>日期:<a target="_blank" th:href="@{'/codehist/'+${d.id}}"><span th:text="${d.date}"></span></a>,分数:<span th:text="${d.score}"></span>,评分变化：<span th:text="${codedetail.upScore}"></span></div>
+		<div>日期:<a target="_blank" th:href="@{'/codehist/'+${d.id}}"><span th:text="${d.date}"></span></a>,分数:<span th:text="${d.score}"></span>,评分变化：<span th:text="${d.upScore}"></span></div>
 	</div>
 </body>
 </html>
