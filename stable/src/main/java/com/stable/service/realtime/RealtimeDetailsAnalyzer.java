@@ -84,7 +84,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		if (srt.getOpen() == 0.0) {
 			log.info("{} {} SINA 今日停牌", code, codeName);
 			WxPushUtil.pushSystem1(code + " " + codeName + "今日停牌");
-			return false;
+			return true;
 		}
 		if (mv.getReqBuyDate() > 0) {
 			this.ytdAvg = avgService.queryListByCodeForRealtime(code, mv.getReqBuyDate());
