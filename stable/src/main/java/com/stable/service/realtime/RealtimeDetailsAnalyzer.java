@@ -361,15 +361,20 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				Thread.sleep(WAIT_MIN);
 			} catch (Exception e) {
 				e.printStackTrace();
-				WxPushUtil.pushSystem1(code + " 监听异常！");
+				if (!isPushException) {
+					WxPushUtil.pushSystem1(code + " 监听异常！");
+					isPushException = true;
+				}
 				try {
-					Thread.sleep(WAIT_MIN);
+					Thread.sleep(FIVE_MIN);
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}
 			}
 		}
 	}
+
+	private boolean isPushException = false;
 
 	// 排除上影线
 	public boolean isLowClosePriceToday(SinaRealTime srt) {

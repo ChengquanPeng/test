@@ -15,9 +15,6 @@ public class SinaRealtimeUitl {
 	}
 
 	public static SinaRealTime get(String code) {
-		String str = HttpUtil.doGet2(getUrl(code));
-		String[] rs = str.split("=")[1].split(",");
-
 //		0：”大秦铁路”，股票名字；
 //		1：”27.55″，今日开盘价；
 //		2：”27.25″，昨日收盘价；
@@ -45,15 +42,21 @@ public class SinaRealtimeUitl {
 //		31：”15:05:32″，时间；
 
 		SinaRealTime rt = new SinaRealTime();
-		rt.setOpen(Double.valueOf(rs[1]));
-		rt.setYesterday(Double.valueOf(rs[2]));
-		rt.setNow(Double.valueOf(rs[3]));
-		rt.setHigh(Double.valueOf(rs[4]));
-		rt.setLow(Double.valueOf(rs[5]));
-		rt.setBuy1(Double.valueOf(rs[6]));
-		rt.setSell1(Double.valueOf(rs[7]));
-		rt.setDealNums(Long.valueOf(rs[8]));// 成交的股票数，由于股票交易以一百股为基本单位，所以在使用时，通常把该值除以一百；
-		rt.setDealAmt(Double.valueOf(rs[9]));// 成交金额，单位为“元”，为了一目了然，通常以“万元”为成交金额的单位，所以通常把该值除以一万；
+		try {
+			String str = HttpUtil.doGet2(getUrl(code));
+			String[] rs = str.split("=")[1].split(",");
+			rt.setOpen(Double.valueOf(rs[1]));
+			rt.setYesterday(Double.valueOf(rs[2]));
+			rt.setNow(Double.valueOf(rs[3]));
+			rt.setHigh(Double.valueOf(rs[4]));
+			rt.setLow(Double.valueOf(rs[5]));
+			rt.setBuy1(Double.valueOf(rs[6]));
+			rt.setSell1(Double.valueOf(rs[7]));
+			rt.setDealNums(Long.valueOf(rs[8]));// 成交的股票数，由于股票交易以一百股为基本单位，所以在使用时，通常把该值除以一百；
+			rt.setDealAmt(Double.valueOf(rs[9]));// 成交金额，单位为“元”，为了一目了然，通常以“万元”为成交金额的单位，所以通常把该值除以一万；
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return rt;
 	}
 
