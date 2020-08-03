@@ -149,17 +149,6 @@ public class BuyBackService {
 	public void jobFetchHist() {
 		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.BUY_BACK, RunCycleEnum.WEEK) {
 			public Object mycall() {
-//				Calendar cal = Calendar.getInstance();
-//				String startDate = "", endDate = "";
-//				int first = 0, last = 0;
-//				first = cal.getActualMinimum(Calendar.DAY_OF_MONTH);
-//				cal.set(Calendar.DAY_OF_MONTH, first);
-//				startDate = DateUtil.getYYYYMMDD(cal.getTime());
-//				last = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-//				cal.set(Calendar.DAY_OF_MONTH, last);
-//				endDate = DateUtil.getYYYYMMDD(cal.getTime());
-//				fetchHist(startDate, endDate);
-
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(new Date());
 				int d = 0;

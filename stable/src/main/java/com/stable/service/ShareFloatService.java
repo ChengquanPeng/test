@@ -52,7 +52,7 @@ public class ShareFloatService {
 		TasksWorker.getInstance().getService().submit(
 				new MyCallable(RunLogBizTypeEnum.SHARE_FLOAT, RunCycleEnum.MANUAL, start_date + " " + end_date) {
 					public Object mycall() {
-						fetchHist(start_date, end_date);
+						fetchHist2(start_date);
 						return null;
 					}
 				});
@@ -157,6 +157,7 @@ public class ShareFloatService {
 				// 所在周开始日期
 				String startDate = "";
 				String endDate = "";
+				int cnt = 0;
 				for (int i = 1; i <= 7; i++) {
 					String date = DateUtil.getYYYYMMDD(cal.getTime());
 					if (i == 1) {
@@ -164,40 +165,40 @@ public class ShareFloatService {
 					} else if (i == 7) {
 						endDate = date;
 					}
+					cnt += fetchHist2(date);
+					cal.add(Calendar.DAY_OF_WEEK, 1);
 				}
-				fetchHist(startDate, endDate);
+				WxPushUtil.pushSystem1(startDate + " " + endDate + "获取限售解禁记录条数=" + cnt);
 				return null;
 			}
 		});
 	}
 
-	private int fetchHist(String start_date, String end_date) {
-		log.info("同步限售解禁公告列表[started],start_date={},end_date={},", start_date, end_date);
-		int start = Integer.valueOf(start_date);
-		int end = Integer.valueOf(end_date);
+	private int fetchHist2(String ann_date) {
+		List<StockBaseInfo> lists = stockBasicService.getAllOnStatusList();
 		int cnt = 0;
 		List<ShareFloat> list = new LinkedList<ShareFloat>();
-		for (int i = start; i <= end; i++) {
-			log.info("同步限售解禁公告列表[started],ann_date={},", i);
-			JSONArray array = tushareSpider.getShareFloatList(null, String.valueOf(i));
+		for (StockBaseInfo sbi : lists) {
+			JSONArray array = tushareSpider.getShareFloatList(sbi.getTs_code(), ann_date);
 			if (array != null && array.size() > 0) {
-
-				log.info("获取到限售解禁公告记录条数={}", array.size());
-				for (int j = 0; j < array.size(); j++) {
-					ShareFloat base = new ShareFloat(array.getJSONArray(j));
+				log.info("{},获取到限售解禁公告记录条数={}", sbi.getTs_code(), array.size());
+				for (int i = 0; i < array.size(); i++) {
+					ShareFloat base = new ShareFloat(array.getJSONArray(i));
 					list.add(base);
 				}
 			} else {
-				log.info("未获取到限售解禁公告");
+				log.info("{}未获取到限售解禁公告", sbi.getTs_code());
+			}
+			if (list.size() > 1000) {
+				esShareFloatDao.saveAll(list);
+				cnt += list.size();
+				list = new LinkedList<ShareFloat>();
 			}
 		}
-
-		cnt += list.size();
-		if (cnt > 0) {
+		if (list.size() > 0) {
 			esShareFloatDao.saveAll(list);
+			cnt += list.size();
 		}
-		WxPushUtil.pushSystem1(start_date + " " + end_date + "获取限售解禁记录条数=" + cnt);
-		log.info("同步限售解禁公告列表[end],start_date={},end_date={},", start_date, end_date);
 		return cnt;
 	}
 
