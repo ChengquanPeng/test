@@ -313,7 +313,6 @@ public class DaliyBasicHistroyService {
 		try {
 			return esDaliyBasicInfoDao.search(sq).getContent().get(0);
 		} catch (Exception e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
