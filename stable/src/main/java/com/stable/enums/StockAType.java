@@ -11,7 +11,7 @@ public enum StockAType {
 	private int code;
 	private String startWith;
 	private String desc;
-	
+
 	public static StockAType formatCode(String code) {
 		if (code.startsWith(StockAType.SHM.getStartWith())) {
 			return StockAType.SHM;
@@ -25,5 +25,14 @@ public enum StockAType {
 			return StockAType.KCB;
 		}
 		return null;
+	}
+
+	public static boolean isTop20(String code) {
+		StockAType sa = StockAType.formatCode(code);
+//		if (StockAType.KCB == sa || StockAType.CYB == sa) {
+		if (StockAType.KCB == sa) {
+			return true;
+		}
+		return false;
 	}
 }

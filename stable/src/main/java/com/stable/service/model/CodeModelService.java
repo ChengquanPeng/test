@@ -118,7 +118,7 @@ public class CodeModelService {
 			WxPushUtil.pushSystem1("CodeModel模型运行异常..");
 		}
 	}
-
+	
 	private synchronized void run(boolean isJob, int treadeDate) {
 		int updatedate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		List<CodeBaseModel> listm = new LinkedList<CodeBaseModel>();
@@ -253,7 +253,7 @@ public class CodeModelService {
 			codeBaseModelDao.saveAll(listm);
 			codeBaseModelHistDao.saveAll(listh);
 		}
-		log.info("Code 模型执行完成");
+		log.info("CodeModel 模型执行完成");
 		WxPushUtil.pushSystem1("Seq5=> CODE-MODEL 共[" + codelist.size() + "]条,今日更新条数:" + listm.size());
 	}
 

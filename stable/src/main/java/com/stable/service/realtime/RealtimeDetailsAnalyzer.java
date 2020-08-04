@@ -159,7 +159,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 	private double getTopPrice() {
 		double topPrice = 0.0;
-		if (StockAType.KCB == StockAType.formatCode(code)) {// 科创板20%涨跌幅
+		if (StockAType.isTop20(code)) {// 科创板20%涨跌幅
 			topPrice = CurrencyUitl.topPrice20(yesterdayPrice);
 		} else {
 			boolean isST = codeName.contains("ST");

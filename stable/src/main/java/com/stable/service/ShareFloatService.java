@@ -1,11 +1,8 @@
 package com.stable.service;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -18,14 +15,11 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
-import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsShareFloatDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
-import com.stable.utils.DateUtil;
-import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.ShareFloat;
@@ -44,15 +38,13 @@ public class ShareFloatService {
 	@Autowired
 	private EsShareFloatDao esShareFloatDao;
 	@Autowired
-	private RedisUtil redisUtil;
-	@Autowired
 	private StockBasicService stockBasicService;
 
 	public void spiderShareFloatInfo(String start_date, String end_date) {
 		TasksWorker.getInstance().getService().submit(
 				new MyCallable(RunLogBizTypeEnum.SHARE_FLOAT, RunCycleEnum.MANUAL, start_date + " " + end_date) {
 					public Object mycall() {
-						fetchHist2(start_date);
+						fetchHist3();
 						return null;
 					}
 				});
@@ -96,90 +88,21 @@ public class ShareFloatService {
 				});
 	}
 
-	public void jobFetchHistEveryDay() {
-		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.SHARE_FLOAT, RunCycleEnum.DAY) {
-			public Object mycall() {
-				String rv = redisUtil.get(RedisConstant.RDS_SHARE_FLOAT_LAST_DAY);
-				Date lastDate = null;
-				Date todayDate = new Date();
-				if (StringUtils.isBlank(rv)) {
-					lastDate = DateUtil.addDate(todayDate, -1);
-				} else {
-					lastDate = DateUtil.parseDate(rv);
-				}
-				int today = Integer.valueOf(DateUtil.getYYYYMMDD(todayDate));
-				do {
-					lastDate = DateUtil.addDate(lastDate, 1);// 加一天
-					int last = Integer.valueOf(DateUtil.getYYYYMMDD(lastDate));
-					if (last > today) {
-						break;
-					}
-					String ann_date = String.valueOf(last);
-					log.info("同步限售解禁公告列表[started],ann_date={},", ann_date);
-					JSONArray array = tushareSpider.getShareFloatList(null, ann_date);
-					// System.err.println(array.toJSONString());
-					int cnt = 0;
-					if (array != null && array.size() > 0) {
-						List<ShareFloat> list = new LinkedList<ShareFloat>();
-						log.info("获取到限售解禁公告记录条数={}", array.size());
-						for (int i = 0; i < array.size(); i++) {
-							ShareFloat base = new ShareFloat(array.getJSONArray(i));
-							// buyBackInfoDao.save(base);
-							list.add(base);
-						}
-						esShareFloatDao.saveAll(list);
-						cnt = list.size();
-					} else {
-						log.info("未获取到限售解禁公告");
-					}
-					redisUtil.set(RedisConstant.RDS_SHARE_FLOAT_LAST_DAY, last);
-					log.info("同步限售解禁公告列表[end],ann_date={}", ann_date);
-					WxPushUtil.pushSystem1(ann_date + " 获取到[" + cnt + "]条限售解禁公告！");
-				} while (true);
-				return null;
-			}
-		});
-	}
-
 	public void jobFetchHist() {
 		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.SHARE_FLOAT, RunCycleEnum.WEEK) {
 			public Object mycall() {
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(new Date());
-				int d = 0;
-				if (cal.get(Calendar.DAY_OF_WEEK) == 1) {
-					d = -6;
-				} else {
-					d = 2 - cal.get(Calendar.DAY_OF_WEEK);
-				}
-				d = d - 7;// 上周
-				cal.add(Calendar.DAY_OF_WEEK, d);
-				// 所在周开始日期
-				String startDate = "";
-				String endDate = "";
-				int cnt = 0;
-				for (int i = 1; i <= 7; i++) {
-					String date = DateUtil.getYYYYMMDD(cal.getTime());
-					if (i == 1) {
-						startDate = date;
-					} else if (i == 7) {
-						endDate = date;
-					}
-					cnt += fetchHist2(date);
-					cal.add(Calendar.DAY_OF_WEEK, 1);
-				}
-				WxPushUtil.pushSystem1(startDate + " " + endDate + "获取限售解禁记录条数=" + cnt);
+				WxPushUtil.pushSystem1("每周获取最新的限售解禁记录条数=" + fetchHist3());
 				return null;
 			}
 		});
 	}
 
-	private int fetchHist2(String ann_date) {
+	private int fetchHist3() {
 		List<StockBaseInfo> lists = stockBasicService.getAllOnStatusList();
 		int cnt = 0;
 		List<ShareFloat> list = new LinkedList<ShareFloat>();
 		for (StockBaseInfo sbi : lists) {
-			JSONArray array = tushareSpider.getShareFloatList(sbi.getTs_code(), ann_date);
+			JSONArray array = tushareSpider.getShareFloatList(sbi.getTs_code(), null);
 			if (array != null && array.size() > 0) {
 				log.info("{},获取到限售解禁公告记录条数={}", sbi.getTs_code(), array.size());
 				for (int i = 0; i < array.size(); i++) {

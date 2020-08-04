@@ -9,8 +9,8 @@ import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.config.SpringConfig;
 import com.stable.service.BuyBackService;
 import com.stable.service.DividendService;
-import com.stable.service.ShareFloatService;
 import com.stable.service.model.CodeModelService;
+import com.stable.utils.DateUtil;
 import com.stable.utils.FileDeleteUitl;
 import com.stable.utils.SpringUtil;
 
@@ -29,8 +29,6 @@ public class EveryDayJob extends MySimpleJob {
 	@Autowired
 	private BuyBackService buyBackService;
 	@Autowired
-	private ShareFloatService shareFloatService;
-	@Autowired
 	private CodeModelService codeModelService;
 
 	@Override
@@ -39,8 +37,6 @@ public class EveryDayJob extends MySimpleJob {
 		dividendService.jobSpiderDividendByDate();
 		log.info("回购公告");
 		buyBackService.jobFetchHistEveryDay();
-		log.info("限售股解禁");
-		shareFloatService.jobFetchHistEveryDay();
 
 		log.info("过期文件的删除");
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
@@ -52,6 +48,6 @@ public class EveryDayJob extends MySimpleJob {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		codeModelService.runJob(true, 0);
+		codeModelService.runJob(true, Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
 	}
 }

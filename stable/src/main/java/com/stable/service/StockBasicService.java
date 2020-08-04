@@ -158,7 +158,7 @@ public class StockBasicService {
 		}
 	}
 
-	public List<StockBaseInfo> getAllOnStatusList() {
+	public synchronized List<StockBaseInfo> getAllOnStatusList() {
 		if (LOCAL_ALL_ONLINE_LIST.isEmpty()) {
 			Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
 			// List<StockBaseInfo> list = new LinkedList<StockBaseInfo>();
