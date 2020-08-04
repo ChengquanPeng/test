@@ -317,6 +317,21 @@ public class DaliyBasicHistroyService {
 		}
 	}
 
+	public List<DaliyBasicInfo> queryListByCodeForModel(String code, EsQueryPageReq queryPage) {
+		int pageNum = queryPage.getPageNum();
+		int size = queryPage.getPageSize();
+		// log.info("queryPage code={},trade_date={},pageNum={},size={}", code, date,
+		// pageNum, size);
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		return esDaliyBasicInfoDao.search(sq).getContent();
+	}
+
 	public Page<DaliyBasicInfo> queryListByCodeForModel(String code, int date, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();

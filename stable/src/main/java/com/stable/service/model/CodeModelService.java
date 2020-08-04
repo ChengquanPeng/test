@@ -130,7 +130,7 @@ public class CodeModelService {
 			try {
 				String code = s.getCode();
 				log.info("Code Model  processing for code:{}", code);
-				CodeBaseModel lastOne = getLastModelByCode(code);
+				CodeBaseModel lastOne = getLastOneByCode(code);
 				// 财务
 				FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code, treadeDate);
 				if (fbi == null) {
@@ -254,7 +254,8 @@ public class CodeModelService {
 			codeBaseModelHistDao.saveAll(listh);
 		}
 		log.info("CodeModel 模型执行完成");
-		WxPushUtil.pushSystem1("Seq5=> CODE-MODEL 共[" + codelist.size() + "]条,今日更新条数:" + listm.size());
+		WxPushUtil
+				.pushSystem1("Seq5=> CODE-MODEL " + treadeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listm.size());
 	}
 
 	private void processingFinance(CodeBaseModel base) {
@@ -288,18 +289,18 @@ public class CodeModelService {
 		base.setProfitDown2Year(fa.profitDown2Year() == 1 ? -5 : 0);// 年报连续亏损年数？（可能退市）
 	}
 
-	public CodeBaseModel getLastModelByCode(String code) {
+	public CodeBaseModel getLastOneByCode(String code) {
+		log.info("getLastOneByCode:{}", code);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.matchPhraseQuery("id", code));
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+
 		Page<CodeBaseModel> page = codeBaseModelDao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			return page.getContent().get(0);
 		}
-		log.info("no last records CodeBaseModels");
 		return null;
-
 	}
 
 	public List<CodeBaseModel> getListByCode(int date, EsQueryPageReq querypage) {
@@ -334,20 +335,6 @@ public class CodeModelService {
 			return page.getContent();
 		}
 		log.info("no records CodeBaseModelHists");
-		return null;
-	}
-
-	public CodeBaseModel getLastOneByCode(String code) {
-		log.info("getLastOneByCode:{}", code);
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("id", code));
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).build();
-
-		Page<CodeBaseModel> page = codeBaseModelDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent().get(0);
-		}
 		return null;
 	}
 

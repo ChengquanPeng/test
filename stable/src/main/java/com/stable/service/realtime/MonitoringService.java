@@ -20,6 +20,7 @@ import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TickDataService;
 import com.stable.service.TradeCalService;
+import com.stable.service.model.CodeModelService;
 import com.stable.service.model.UpModelLineService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.trace.BuyTraceService;
@@ -63,6 +64,8 @@ public class MonitoringService {
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private MonitoringDao monitoringDao;
+	@Autowired
+	private CodeModelService codeModelService;
 
 	static final EsQueryPageReq querypage = new EsQueryPageReq(1000);
 
@@ -127,7 +130,8 @@ public class MonitoringService {
 					log.info(x);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
 					if (task.init(x, resulter, daliyBasicHistroyService, avgService, tickDataService,
-							stockBasicService.getCodeName(x.getCode()), buyTraceService, daliyTradeHistroyService)) {
+							stockBasicService.getCodeName(x.getCode()), buyTraceService, daliyTradeHistroyService,
+							codeModelService)) {
 						new Thread(task).start();
 						list.add(task);
 						map.put(x.getCode(), task);
@@ -167,7 +171,6 @@ public class MonitoringService {
 					selledList.add(t.getSelled());
 				}
 			}
-			resulter.stop();
 
 			// 修改监听状态
 			if (bList.size() > 0) {

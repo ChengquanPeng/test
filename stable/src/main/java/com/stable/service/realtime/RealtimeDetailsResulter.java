@@ -1,10 +1,12 @@
 package com.stable.service.realtime;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import com.stable.utils.DateUtil;
 import com.stable.utils.ScheduledWorker;
@@ -15,9 +17,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class RealtimeDetailsResulter implements Runnable {
 	private static final String BR = "</br>";
-	private boolean isRunning = true;
 	private ReentrantLock lock = new ReentrantLock();
-	private Map<String, String> msgs = new ConcurrentHashMap<String, String>();
+	private Map<String, RealtimeMsg> msgs = new ConcurrentHashMap<String, RealtimeMsg>();
 
 	public void addSellMessage(String msg) {
 
@@ -32,7 +33,14 @@ public class RealtimeDetailsResulter implements Runnable {
 		}
 	}
 
-	public void addBuyMessage(String code, String msg) {
+//String msg = "关注:" + code + " " + codeName + ",市场行为:" + (buytime ? "买入" : "卖出") + ",主力行为:"
+	// + (pg ? "Yes" : "No") + ",买入额:" +
+	// CurrencyUitl.covertToString(d.getBuyTotalAmt())
+	// + ",卖出额:" + CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
+	// + CurrencyUitl.covertToString(d.getTotalAmt()) + ",第一次提醒时间:" +
+	// firstTimeWarning
+	// + ",提醒次数:" + warningCnt + ",chkPrice:" + chkPrice + ",当前价格:" + nowPrice;
+	public void addBuyMessage(String code, RealtimeMsg msg) {
 		lock.lock();
 		try {
 			msgs.put(code, msg);
@@ -41,29 +49,47 @@ public class RealtimeDetailsResulter implements Runnable {
 		}
 	}
 
-	public void sendMsg() {
+	public void sendMsg(int type) {
 		lock.lock();
 		try {
 			log.info("message size:" + msgs.size());
 			if (msgs.size() > 0) {
+				// 按照基本分排序
+				ConcurrentHashMap<String, RealtimeMsg> collect1 = msgs.entrySet().stream()
+						.sorted(new Comparator<Map.Entry<String, RealtimeMsg>>() {
+							@Override
+							public int compare(Map.Entry<String, RealtimeMsg> o1, Map.Entry<String, RealtimeMsg> o2) {
+								return Integer.valueOf(o1.getValue().getBaseScore())
+										.compareTo(Integer.valueOf(o2.getValue().getBaseScore()));
+							}
+						}).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2,
+								ConcurrentHashMap::new));
+
 				StringBuffer sb = new StringBuffer("风险第一！！！>>");
 				sb.append(BR);
 				int index = 1;
-				for (String key : msgs.keySet()) {
-					sb.append("序号:").append(index).append(",").append(msgs.get(key)).append(BR);
+				for (String key : collect1.keySet()) {
+					RealtimeMsg rm = msgs.get(key);
+					if (type == 1) {
+						if ((rm.getChkVol1() * 1.3) < rm.getTotalVol() && (rm.getChkVol2() * 1.3) < rm.getTotalVol()) {// 半天的量》均值的半天或者整天的量
+							continue;
+						}
+					} else if (type == 2) {
+						if ((rm.getChkVol2() * 1.3) < rm.getTotalVol()) {// 整天的量》均值的半天或者整天的量
+							continue;
+						}
+					}
+					sb.append("序号:").append(index).append(",").append(rm.toMessage()).append(BR);
 					index++;
 				}
 				sb.append("请关注量(同花顺)，提防上影线，高开低走等, 链接:http://106.52.95.147:9999/web/realtime/buy?stop?detail?code=");
 				WxPushUtil.pushSystem2(sb.toString());
-				msgs = new ConcurrentHashMap<String, String>();
+				msgs = new ConcurrentHashMap<String, RealtimeMsg>();
 			}
 		} finally {
 			lock.unlock();
 		}
 	}
-
-	private long FIVE_MIN = 5 * 60 * 1000;// 5MIN
-	private long WAIT_MIN = FIVE_MIN;
 
 	@Override
 	public void run() {
@@ -77,8 +103,7 @@ public class RealtimeDetailsResulter implements Runnable {
 			ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
 				@Override
 				public void run() {
-					sendMsg();
-
+					sendMsg(0);
 				}
 			}, d1);
 			log.info("scheduled Task with Time:{}", d1);
@@ -91,8 +116,7 @@ public class RealtimeDetailsResulter implements Runnable {
 			ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
 				@Override
 				public void run() {
-					sendMsg();
-
+					sendMsg(1);
 				}
 			}, d2);
 			log.info("scheduled Task with Time:{}", d2);
@@ -105,46 +129,24 @@ public class RealtimeDetailsResulter implements Runnable {
 			ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
 				@Override
 				public void run() {
-					sendMsg();
-
+					sendMsg(2);
 				}
 			}, d3);
 			log.info("scheduled Task with Time:{}", d3);
 		}
 
 		// 收盘后
-		Date d4 = DateUtil.parseDate(today + "150300", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
-		long d1503 = d4.getTime();
-		if (now <= d1503) {
-			ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
-				@Override
-				public void run() {
-					sendMsg();
+//		Date d4 = DateUtil.parseDate(today + "150300", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
+//		long d1503 = d4.getTime();
+//		if (now <= d1503) {
+//			ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
+//				@Override
+//				public void run() {
+//					sendMsg(4);
+//				}
+//			}, d4);
+//			log.info("scheduled Task with Time:{}", d4);
+//		}
 
-				}
-			}, d4);
-			log.info("scheduled Task with Time:{}", d4);
-		}
-
-	}
-
-	void older() {
-		while (isRunning) {
-			try {
-				sendMsg();
-				Thread.sleep(WAIT_MIN);
-			} catch (Exception e) {
-				e.printStackTrace();
-				try {
-					Thread.sleep(WAIT_MIN);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-			}
-		}
-	}
-
-	public void stop() {
-		isRunning = false;
 	}
 }
