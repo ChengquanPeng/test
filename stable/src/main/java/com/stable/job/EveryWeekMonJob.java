@@ -20,6 +20,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class EveryWeekMonJob extends MySimpleJob {
 
+	private static final int TEN_MIN = 10 * 60 * 1000;
 	@Autowired
 	private FinanceService financeService;
 	@Autowired
@@ -36,6 +37,11 @@ public class EveryWeekMonJob extends MySimpleJob {
 		log.info("每周1任务开始执行：");
 		log.info("1.同步股票列表");
 		stockBasicService.jobSynStockList(true);
+		try {
+			Thread.sleep(TEN_MIN);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		log.info("2.同步股票报告");
 		financeService.jobSpiderFinaceHistoryInfo();
 		log.info("3.同步回购报告");
