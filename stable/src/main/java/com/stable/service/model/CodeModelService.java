@@ -118,7 +118,7 @@ public class CodeModelService {
 			WxPushUtil.pushSystem1("CodeModel模型运行异常..");
 		}
 	}
-	
+
 	private synchronized void run(boolean isJob, int treadeDate) {
 		int updatedate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		List<CodeBaseModel> listm = new LinkedList<CodeBaseModel>();
@@ -172,7 +172,7 @@ public class CodeModelService {
 				}
 				log.info("{},KeyString:{}", code, newOne.getKeyString());
 				if (lastOne != null && lastOne.getKeyString().equals(newOne.getKeyString())) {
-					log.info("{},lastOne equals newOne!");
+					log.info("{},lastOne equals newOne!", code);
 					continue;
 				}
 
@@ -266,7 +266,7 @@ public class CodeModelService {
 		for (FinanceBaseInfo fbi : fbis) {
 			fa.putJidu1(fbi);
 		}
-		//log.info(fa.printInfo());
+		// log.info(fa.printInfo());
 		// 营收(科技类,故事类主要指标)
 		base.setIncomeUpYear(fa.getCurrYear().getYyzsrtbzz() > 0 ? 1 : 0);// 年报连续营收持续增长
 		base.setIncomeUpQuarter(fa.getCurrJidu().getYyzsrtbzz() > 0 ? 1 : 0);// 最近季度同比增长
