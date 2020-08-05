@@ -48,7 +48,7 @@ public class FinanceAnalyzer {
 
 	// 最近2个季度
 	// 营收
-	public int getincome2Jiduc() {
+	public int incomeUp2Quarter() {
 		if (currJidu.getYyzsrtbzz() > 0 && prevJidu.getYyzsrtbzz() > 0) {
 			return 1;
 		}
@@ -63,7 +63,7 @@ public class FinanceAnalyzer {
 	}
 
 	// 利润
-	public int profitUp2quarter() {
+	public int profitUp2Quarter() {
 		if (currJidu.getGsjlrtbzz() > 0 && prevJidu.getGsjlrtbzz() > 0) {
 			return 1;
 		}

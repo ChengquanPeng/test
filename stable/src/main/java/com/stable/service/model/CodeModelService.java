@@ -271,21 +271,21 @@ public class CodeModelService {
 		// 营收(科技类,故事类主要指标)
 		base.setIncomeUpYear(fa.getCurrYear().getYyzsrtbzz() > 0 ? 1 : 0);// 年报连续营收持续增长
 		base.setIncomeUpQuarter(fa.getCurrJidu().getYyzsrtbzz() > 0 ? 1 : 0);// 最近季度同比增长
-		base.setIncomeUp2Quarter(fa.getincome2Jiduc());// 最近2个季度同比持续增长？
+		base.setIncomeUp2Quarter(fa.incomeUp2Quarter());// 最近2个季度同比持续增长？
 
 		// 利润(传统行业,销售行业主要指标)
 		base.setProfitUpYear(fa.getCurrYear().getGsjlrtbzz() > 0 ? 1 : 0);// 归属净利润年报持续增长
 		base.setProfitUpQuarter(fa.getCurrJidu().getGsjlrtbzz() > 0 ? 1 : 0);// 归属净利润最近季度同比增长
-		base.setProfitUp2Quarter(fa.profitUp2quarter());// 最近2个季度同比持续增长？
+		base.setProfitUp2Quarter(fa.profitUp2Quarter());// 最近2个季度同比持续增长？
 
 		// 营收地雷
 		base.setIncomeDownYear(fa.getCurrYear().getYyzsrtbzz() < 0 ? -1 : 0);// 年营收同比下降
 		base.setIncomeDownQuarter(fa.getCurrJidu().getYyzsrtbzz() < 0 ? -1 : 0);// 季度营收同比下降
 		base.setIncomeDown2Quarter(fa.incomeDown2Quarter() == 1 ? -2 : 0);// 最近2个季度同比下降
 		// 利润地雷
-		base.setProfitDownQuarter(fa.getCurrJidu().getGsjlr() < 0 ? -1 : 0);// 最近季度利润下降TODO//科技类，故事类不看此指标
-		base.setProfitDown2Quarter(fa.profitDown2Quarter() == 1 ? -2 : 0);// 最近2季度都同比下降
 		base.setProfitDownYear(fa.getCurrYear().getGsjlrtbzz() < 0 ? -1 : 0);// 最近年报同比下降TODO//科技类，故事类不看此指标
+		base.setProfitDownQuarter(fa.getCurrJidu().getGsjlrtbzz() < 0 ? -1 : 0);// 最近季度利润下降TODO//科技类，故事类不看此指标
+		base.setProfitDown2Quarter(fa.profitDown2Quarter() == 1 ? -2 : 0);// 最近2季度都同比下降
 		base.setProfitDown2Year(fa.profitDown2Year() == 1 ? -5 : 0);// 年报连续亏损年数？（可能退市）
 	}
 
