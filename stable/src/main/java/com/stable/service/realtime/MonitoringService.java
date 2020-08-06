@@ -129,9 +129,10 @@ public class MonitoringService {
 				for (Monitoring x : bList) {
 					log.info(x);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
-					if (task.init(x, resulter, daliyBasicHistroyService, avgService, tickDataService,
+					int r = task.init(x, resulter, daliyBasicHistroyService, avgService, tickDataService,
 							stockBasicService.getCodeName(x.getCode()), buyTraceService, daliyTradeHistroyService,
-							codeModelService)) {
+							codeModelService);
+					if (r == 1) {
 						new Thread(task).start();
 						list.add(task);
 						map.put(x.getCode(), task);
@@ -142,7 +143,9 @@ public class MonitoringService {
 						selltt += task.getSellCnt();
 
 					} else {
-						failtt++;
+						if (r < 0) {
+							failtt++;
+						}
 					}
 				}
 				// 启动结果线程

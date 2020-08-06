@@ -69,10 +69,9 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		isRunning = false;
 	}
 
-	public boolean init(Monitoring mv, RealtimeDetailsResulter resulter,
-			DaliyBasicHistroyService daliyBasicHistroyService, AvgService avgService, TickDataService tickDataService,
-			String codeName, BuyTraceService buyTraceService, DaliyTradeHistroyService daliyTradeHistroyService,
-			CodeModelService codeModelService) {
+	public int init(Monitoring mv, RealtimeDetailsResulter resulter, DaliyBasicHistroyService daliyBasicHistroyService,
+			AvgService avgService, TickDataService tickDataService, String codeName, BuyTraceService buyTraceService,
+			DaliyTradeHistroyService daliyTradeHistroyService, CodeModelService codeModelService) {
 		this.resulter = resulter;
 		this.tickDataService = tickDataService;
 		this.code = mv.getCode();
@@ -86,13 +85,13 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		if (srt.getOpen() == 0.0) {
 			log.info("{} {} SINA 今日停牌", code, codeName);
 			WxPushUtil.pushSystem1(code + " " + codeName + "今日停牌");
-			return true;
+			return 0;
 		}
 		this.ytdAvg = avgService.queryListByCodeForRealtime(code);
 		log.info("{}  ytdAvg is null? {}", code, (this.ytdAvg != null));
 		if (ytdAvg == null) {
 			WxPushUtil.pushSystem1(code + ",实时:数据不全，终止监控! 均价记录 ytdAvg is null");
-			return false;
+			return -1;
 		}
 
 		// 买入
@@ -102,12 +101,12 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			if (ytdBasic == null) {
 				WxPushUtil.pushSystem1(code + ",实时:数据不全，终止监控。ytdAvg==null?" + (ytdAvg == null) + "},ytdBasic==null?"
 						+ (ytdBasic == null));
-				return false;
+				return -1;
 			}
 			if (lastTradeDate != ytdBasic.getTrade_date()) {
 				log.info(code + ",实时:数据不准，终止监控。lastTradeDate (" + lastTradeDate + ")!= ytdBasic.getTrade_date("
 						+ ytdBasic.getTrade_date() + ")");
-				return false;
+				return -1;
 			}
 			yesterdayPrice = ytdBasic.getClose();
 			topPrice = getTopPrice();
@@ -147,7 +146,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			needMoniSell = true;
 		}
 
-		return true;
+		return 1;
 	}
 
 	public int getSellCnt() {
