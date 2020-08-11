@@ -43,7 +43,7 @@ import lombok.extern.log4j.Log4j2;
 @Component
 @Log4j2
 public class ThsSpider {
-	private static final String BRK = "跳过首发新股,参股万达商业";
+	private static final String BRK = "跳过首发新股";
 	@Autowired
 	private TradeCalService tradeCalService;
 	@Autowired
@@ -177,10 +177,11 @@ public class ThsSpider {
 				do {
 					ThreadsUtil.sleepRandomSecBetween5And15();
 					HtmlPage page = null;
+					HtmlElement body = null;
 					try {
 						log.info(cp.getHref());
 						page = htmlunitSpider.getHtmlPageFromUrl(cp.getHref());
-						HtmlElement body = page.getBody();
+						body = page.getBody();
 						HtmlElement boardInfos = body.getElementsByAttribute("div", "class", "board-infos").get(0);
 						Iterator<DomElement> it = boardInfos.getChildElements().iterator();
 						ConceptDaily cd = new ConceptDaily();
@@ -205,13 +206,23 @@ public class ThsSpider {
 						log.info(cd);
 						list.add(cd);
 					} catch (Exception e2) {
-						e2.printStackTrace();
-						trytime++;
-						ThreadsUtil.sleepRandomSecBetween15And30(trytime);
-						if (trytime >= 10) {
-							fetched = true;
+						boolean esistingHeading = false;
+						if (body != null) {
+							try {
+								body.getElementsByAttribute("div", "class", "heading").get(0);
+								esistingHeading = true;// 概念下线导致的异常
+							} catch (Exception e) {
+							}
+						}
+						if (!esistingHeading) {
 							e2.printStackTrace();
-							WxPushUtil.pushSystem1("同花顺概念-每日交易出错," + cp.getName() + ",url=" + cp.getHref());
+							trytime++;
+							ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+							if (trytime >= 10) {
+								fetched = true;
+								e2.printStackTrace();
+								WxPushUtil.pushSystem1("同花顺概念-每日交易出错," + cp.getName() + ",url=" + cp.getHref());
+							}
 						}
 					} finally {
 						htmlunitSpider.close();
