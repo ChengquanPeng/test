@@ -20,7 +20,10 @@ import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.TickData;
 
+import lombok.extern.log4j.Log4j2;
+
 @Component
+@Log4j2
 public class EastmoneySpider {
 	private static final String URL_FORMAT = "https://push2.eastmoney.com/api/qt/stock/details/get?secid=%s.%s&fields1=f1,f2,f3,f4,f5&fields2=f51,f52,f53,f54,f55&pos=-111125&";
 
@@ -218,7 +221,9 @@ public class EastmoneySpider {
 
 	private static void getYjkbByPage(String date1, List<FinYjkb> list) {
 		String url1 = getYjkbUrl(date1);
+		log.info("URL:"+url1);
 		String result = HttpUtil.doGet2(url1);
+		log.info("RESULT:"+result);
 		result = result.substring("var BEzQbtii=".length());
 		result = result.substring(0, result.length() - 1);
 		JSONObject objects = JSON.parseObject(result);

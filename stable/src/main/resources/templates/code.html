@@ -29,7 +29,10 @@ trtd{
 	<div><a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}}">同花顺基本信息=></a></div>
 	<br/>------------------------------------------------------------<br/>
 	财务报告年份：
-	<span th:text="${codedetail.currYear}"></span>-报告季度：<span th:text="${codedetail.currQuarter}"></span>-日期：<span th:text="${codedetail.date}"></span>
+	<span th:text="${codedetail.currYear}"></span>-报告：<span th:text="${codedetail.currQuarter}"></span>季度,
+	-营收同比:<span th:text="${codedetail.currIncomeTbzz}"></span>%
+	-净利同比:<span th:text="${codedetail.currProfitTbzz}"></span>%
+	-日期:<span th:text="${codedetail.date}"></span>
 	<br/>------------------------------------------------------------<br/>
 	<table border='1' cellspacing='0' cellpadding='0'>
 	<tr><td>项目</td><td>条目</td><td>增长</td><td>下降/地雷</td></tr>
