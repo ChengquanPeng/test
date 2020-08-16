@@ -84,6 +84,22 @@ public class CodeBaseModelHist extends EsBase {
 	@Field(type = FieldType.Double)
 	protected double floatRatio;// 流通股份占总股本比率
 
+	// 业绩快报预告
+	@Field(type = FieldType.Integer)
+	protected int forestallYear;
+	@Field(type = FieldType.Integer)
+	protected int forestallQuarter;
+
+	// 增长
+	@Field(type = FieldType.Integer)
+	protected double forestallIncomeTbzz;// 营收增长
+	@Field(type = FieldType.Integer)
+	protected double forestallProfitTbzz;// 利润增长
+	@Field(type = FieldType.Integer)
+	protected double currIncomeTbzz;// 营收增长
+	@Field(type = FieldType.Integer)
+	protected double currProfitTbzz;// 利润增长
+
 	// 分数
 	@Field(type = FieldType.Integer)
 	private int score = 0;
@@ -96,7 +112,7 @@ public class CodeBaseModelHist extends EsBase {
 	public String getKeyString() {
 		return "[code=" + code + ",currYear=" + currYear + ", currQuarter=" + currQuarter + ", lastDividendDate="
 				+ lastDividendDate + ", lastBackDate=" + lastBackDate + ", endDate=" + endDate + ", floatDate="
-				+ floatDate + "]";
+				+ floatDate + ", forestallYear=" + forestallYear + ", forestallQuarter=" + forestallQuarter + "]";
 	}
 
 }

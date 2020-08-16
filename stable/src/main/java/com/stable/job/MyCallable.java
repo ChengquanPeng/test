@@ -5,10 +5,8 @@ import java.util.concurrent.Callable;
 
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
-import com.stable.service.RunLogService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
-import com.stable.utils.SpringUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.RunLog;
 
@@ -18,7 +16,7 @@ import lombok.extern.log4j.Log4j2;
 public abstract class MyCallable implements Callable<Object> {
 	private RunLogBizTypeEnum biz;
 	private RunCycleEnum cycle;
-	private RunLogService service = SpringUtil.getBean("RunLogService", RunLogService.class);
+	//private RunLogService service = SpringUtil.getBean("RunLogService", RunLogService.class);
 	private String remark = "";
 
 	public MyCallable(RunLogBizTypeEnum biz, RunCycleEnum cycle) {
@@ -43,7 +41,7 @@ public abstract class MyCallable implements Callable<Object> {
 		rl.setStatus(0);
 		rl.setRemark(remark);
 		rl.setCreateDate(new Date());
-		service.addLog(rl);
+		//service.addLog(rl);
 		try {
 			Object result = mycall();
 			rl.setStatus(1);
@@ -58,7 +56,7 @@ public abstract class MyCallable implements Callable<Object> {
 		} finally {
 			rl.setEndTime(DateUtil.getTodayYYYYMMDDHHMMSS());
 			pushWx(rl.getStatus(), rl.getStartTime(), rl.getEndTime());
-			service.addLog(rl);
+			//service.addLog(rl);
 		}
 		return null;
 	}

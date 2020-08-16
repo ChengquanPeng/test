@@ -11,6 +11,7 @@ public enum RunLogBizTypeEnum {
 	DIVIDEND_TRADE_HISTROY(8, "分红除权-前复权-任务"),
 	TICK_DATA(9, "tickdata分笔数据"),
 	SHARE_FLOAT(10, "解禁"),
+	FINACE_FRIST(11, "预告-快报"), 
 	RETRACE_SH_FIVEDAY(9100, "短线-5日反转");
 
 	public int bcode;

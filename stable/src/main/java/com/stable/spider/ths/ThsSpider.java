@@ -223,6 +223,8 @@ public class ThsSpider {
 								e2.printStackTrace();
 								WxPushUtil.pushSystem1("同花顺概念-每日交易出错," + cp.getName() + ",url=" + cp.getHref());
 							}
+						} else {
+							fetched = true;
 						}
 					} finally {
 						htmlunitSpider.close();

@@ -88,6 +88,15 @@ public class DateUtil {
 		return format.format(addDate(new Date(), -7));
 	}
 
+	public static String getBefor30DayYYYYMMDD(int treadeDate) {
+		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
+		try {
+			return format.format(addDate(format.parse(treadeDate + ""), -30));
+		} catch (ParseException e) {
+			return "";
+		}
+	}
+
 	public static Date addDate(Date date, int days) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);

@@ -11,9 +11,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.utils.CurrencyUitl;
+import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.TickDataUitl;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.FinYjkb;
+import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.TickData;
 
@@ -158,7 +161,172 @@ public class EastmoneySpider {
 		return list;
 	}
 
+	// http://data.eastmoney.com/bbsj/202003/yjyg.html
+	// http://data.eastmoney.com/bbsj/yjyg/000662.html
+	// private final String yjygBase =
+	// "http://data.eastmoney.com/bbsj/yjyg/%s.html";
+
+	// 当年xx03,xx06,xx09,xx12
+	// 6月30日之前，xx-1-12
+	public static List<FinYjkb> getFinYjkb() {
+		List<FinYjkb> list2 = new LinkedList<FinYjkb>();
+		int currYear = DateUtil.getCurYYYY();
+		int currJidu = DateUtil.getCurJidu();
+
+		String date1 = currYear + "-03-31";
+		String date2 = currYear + "-06-30";
+		String date3 = currYear + "-09-30";
+		String date4 = currYear + "-12-31";
+
+		// 快报：准确的
+		getYjkbByPage(date1, list2);
+		getYjkbByPage(date2, list2);
+		getYjkbByPage(date3, list2);
+		getYjkbByPage(date4, list2);
+
+		if (currJidu <= 2) {
+			int prevYear = currYear - 1;
+			String date5 = prevYear + "-12-31";
+			getYjkbByPage(date5, list2);
+		}
+		return list2;
+	}
+
+	public static List<FinYjyg> getFinYjyg() {
+		List<FinYjyg> list = new LinkedList<FinYjyg>();
+		int currYear = DateUtil.getCurYYYY();
+		int currJidu = DateUtil.getCurJidu();
+
+		String date1 = currYear + "-03-31";
+		String date2 = currYear + "-06-30";
+		String date3 = currYear + "-09-30";
+		String date4 = currYear + "-12-31";
+
+		// 预告：未经审计（类似天气预告，不太准确）
+		getYjygByPage(date1, list);
+		getYjygByPage(date2, list);
+		getYjygByPage(date3, list);
+		getYjygByPage(date4, list);
+
+		if (currJidu <= 2) {
+			int prevYear = currYear - 1;
+			String date5 = prevYear + "-12-31";
+			getYjygByPage(date5, list);
+		}
+		return list;
+	}
+
+	private static void getYjkbByPage(String date1, List<FinYjkb> list) {
+		String url1 = getYjkbUrl(date1);
+		String result = HttpUtil.doGet2(url1);
+		result = result.substring("var BEzQbtii=".length());
+		result = result.substring(0, result.length() - 1);
+		JSONObject objects = JSON.parseObject(result);
+		JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
+		for (int i = 0; i < datas.size(); i++) {
+			JSONObject data = datas.getJSONObject(i);
+			String date = data.getString("REPORT_DATE"); // 报告期
+			String anndate = data.getString("NOTICE_DATE"); // 公告日期
+			FinYjkb fy = new FinYjkb();
+			String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
+			int y = Integer.valueOf(datestr.substring(0, 4));
+			int m = Integer.valueOf(datestr.substring(4, 6));
+			int quarter = 0;
+			if (m == 12) {
+				quarter = 4;
+			} else if (m == 9) {
+				quarter = 3;
+			} else if (m == 6) {
+				quarter = 2;
+			} else if (m == 3) {
+				quarter = 1;
+			}
+			fy.setYear(y);
+			fy.setQuarter(quarter);
+			fy.setCode(data.getString("SECURITY_CODE"));
+			fy.setDate(Integer
+					.parseInt(DateUtil.formatYYYYMMDD(DateUtil.parseDate(anndate, DateUtil.YYYY_MM_DD_HH_MM_SS))));
+
+			try {
+				fy.setJlr(data.getLong("PARENT_NETPROFIT"));// 业绩
+			} catch (Exception e) {
+			}
+			try {
+				fy.setJlrtbzz(CurrencyUitl.roundHalfUp(data.getDoubleValue("JLRTBZCL")));// 业绩增长
+			} catch (Exception e) {
+			}
+			try {
+				fy.setYyzsr(data.getLong("TOTAL_OPERATE_INCOME"));// 营收
+			} catch (Exception e) {
+			}
+			try {
+				fy.setYyzsrtbzz(CurrencyUitl.roundHalfUp(data.getDoubleValue("YSTZ")));// 营收幅度
+			} catch (Exception e) {
+			}
+			fy.setId();
+			list.add(fy);
+		}
+	}
+
+	private static String getYjkbUrl(String date) {
+		return "http://datacenter.eastmoney.com/api/data/get?type=RPT_FCI_PERFORMANCEE&sty=ALL&p=1&ps=50&st=UPDATE_DATE,SECURITY_CODE&sr=-1,-1&var=BEzQbtii&filter=(REPORT_DATE=%27"
+				+ date + "%27)&rt=" + System.currentTimeMillis();
+	}
+
+	private static void getYjygByPage(String date1, List<FinYjyg> list) {
+		String url1 = getYjygUrl(date1);
+		String result = HttpUtil.doGet2(url1);
+		result = result.substring("var MRtZkjmw=".length());
+		result = result.substring(0, result.length() - 1);
+		JSONObject objects = JSON.parseObject(result);
+		JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
+		for (int i = 0; i < datas.size(); i++) {
+			JSONObject data = datas.getJSONObject(i);
+			String date = data.getString("REPORTDATE"); // 报告期
+			String anndate = data.getString("NOTICE_DATE"); // 公告日期
+			FinYjyg fy = new FinYjyg();
+			String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
+			int y = Integer.valueOf(datestr.substring(0, 4));
+			int m = Integer.valueOf(datestr.substring(4, 6));
+			int quarter = 0;
+			if (m == 12) {
+				quarter = 4;
+			} else if (m == 9) {
+				quarter = 3;
+			} else if (m == 6) {
+				quarter = 2;
+			} else if (m == 3) {
+				quarter = 1;
+			}
+			fy.setYear(y);
+			fy.setQuarter(quarter);
+			fy.setCode(data.getString("SECURITY_CODE"));
+			fy.setDate(Integer
+					.parseInt(DateUtil.formatYYYYMMDD(DateUtil.parseDate(anndate, DateUtil.YYYY_MM_DD_HH_MM_SS))));
+			try {
+				fy.setType(data.getString("FORECASTTYPE"));// 类型
+			} catch (Exception e) {
+			}
+			try {
+				fy.setJlr(data.getLong("FORECASTL"));// 业绩范围：FORECASTL-FORECASTT
+			} catch (Exception e) {
+			}
+			try {
+				fy.setJlrtbzz(data.getDoubleValue("INCREASET"));// 业绩变动幅度 INCREASET-FORECASTCONTENT
+			} catch (Exception e) {
+			}
+			fy.setId();
+			list.add(fy);
+		}
+	}
+
+	private static String getYjygUrl(String date) {
+		return "http://datacenter.eastmoney.com/api/data/get?type=RPT_PUBLIC_OP_PREDICT&sty=ALL&p=1&ps=50&st=NOTICE_DATE,SECURITY_CODE&sr=-1,-1&var=MRtZkjmw&filter=(REPORTDATE=%27"
+				+ date + "%27)(IsLatest=%22T%22)&rt=" + System.currentTimeMillis();
+	}
+
 	public static void main(String[] args) {
-		EastmoneySpider.getNewFinanceAnalysis("000002", 0);
+//		EastmoneySpider.getNewFinanceAnalysis("000002", 0);
+//		String result = HttpUtil.doGet2(yjygBase);
 	}
 }

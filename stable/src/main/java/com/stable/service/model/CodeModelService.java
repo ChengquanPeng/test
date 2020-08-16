@@ -3,6 +3,7 @@ package com.stable.service.model;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -39,6 +40,8 @@ import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.DividendHistory;
+import com.stable.vo.bus.FinYjkb;
+import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.PledgeStat;
 import com.stable.vo.bus.ShareFloat;
@@ -126,6 +129,9 @@ public class CodeModelService {
 		int oneYearAgo = DateUtil.getPreYear(treadeDate);
 		int nextYear = DateUtil.getNextYear(treadeDate);
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
+		int b30Date = Integer.valueOf(DateUtil.getBefor30DayYYYYMMDD(treadeDate));
+		Map<String, FinYjkb> kbmap = financeService.getLastFinaceKb(b30Date);
+		Map<String, FinYjyg> ygmap = financeService.getLastFinaceYg(b30Date);
 		for (StockBaseInfo s : codelist) {
 			try {
 				String code = s.getCode();
@@ -148,6 +154,9 @@ public class CodeModelService {
 				newOne.setDate(treadeDate);
 				newOne.setCurrYear(fbi.getYear());
 				newOne.setCurrQuarter(fbi.getQuarter());
+				newOne.setCurrIncomeTbzz(fbi.getYyzsrtbzz());
+				newOne.setCurrProfitTbzz(fbi.getGsjlrtbzz());
+
 				// 分红
 				DividendHistory dh = dividendService.getLastRecordByLteDate(code, oneYearAgo, treadeDate);
 				if (dh != null) {
@@ -170,6 +179,37 @@ public class CodeModelService {
 					newOne.setFloatDate(sf.getFloatDate());// 解禁日期
 					newOne.setFloatRatio(sf.getFloatRatio());// 流通股份占总股本比率
 				}
+				// 业绩快报(准确的)
+				FinYjkb yjkb = kbmap.get(code);
+				FinYjyg yjyg = ygmap.get(code);
+				boolean hasKb = false;
+				boolean hasyg = false;
+
+				newOne.setForestallYear(0);
+				newOne.setForestallQuarter(0);
+				newOne.setForestallIncomeTbzz(0);
+				newOne.setForestallProfitTbzz(0);
+				if (yjkb != null) {// 业绩快报(准确的)
+					if ((newOne.getCurrYear() == yjkb.getYear() && newOne.getCurrQuarter() < yjkb.getQuarter())// 同一年，季度大于
+							|| (yjkb.getYear() > newOne.getCurrYear())) {// 不同年
+						newOne.setForestallYear(yjkb.getYear());
+						newOne.setForestallQuarter(yjkb.getQuarter());
+						newOne.setForestallIncomeTbzz(yjkb.getYyzsrtbzz());
+						newOne.setForestallProfitTbzz(yjkb.getJlrtbzz());
+						hasKb = true;
+					}
+				}
+				// 业绩预告(类似天气预报，可能不准)
+				if (!hasKb && yjyg != null) {
+					if ((newOne.getCurrYear() == yjyg.getYear() && newOne.getCurrQuarter() < yjyg.getQuarter())// 同一年，季度大于
+							|| (yjyg.getYear() > newOne.getCurrYear())) {// 不同年
+						newOne.setForestallYear(yjyg.getYear());
+						newOne.setForestallQuarter(yjyg.getQuarter());
+						newOne.setForestallProfitTbzz(yjyg.getJlrtbzz());
+						hasyg = true;
+					}
+				}
+
 				log.info("{},KeyString:{}", code, newOne.getKeyString());
 				if (lastOne != null && lastOne.getKeyString().equals(newOne.getKeyString())) {
 					log.info("{},lastOne equals newOne!", code);
@@ -190,11 +230,11 @@ public class CodeModelService {
 				// 营收(20)
 				int incomeupbase = newOne.getIncomeUpYear() + newOne.getIncomeUpQuarter()
 						+ newOne.getIncomeUp2Quarter();
-				incomeupbase += incomeupbase * 20;
+
 				// 利润(5)
 				int profitupbase = newOne.getProfitUpYear() + newOne.getProfitUpQuarter()
 						+ newOne.getProfitUp2Quarter();
-				profitupbase += profitupbase * 5;
+
 				// 分红(5)
 				int dividendbase = 0;
 				if (newOne.getLastDividendDate() != 0) {
@@ -211,15 +251,16 @@ public class CodeModelService {
 				}
 				//
 				int up = incomeupbase + profitupbase + dividendbase + backbase;// 分
+
 				// 负向分数
 				// 营收(10)
 				int incomedownbase = newOne.getIncomeDownYear() + newOne.getIncomeDownQuarter()
 						+ newOne.getIncomeDown2Quarter();
-				incomedownbase += incomedownbase * -10;
+
 				// 利润(3)
 				int profitdownbase = newOne.getProfitDownYear() + newOne.getProfitDownQuarter()
 						+ newOne.getProfitDown2Quarter() + newOne.getProfitDown2Year();
-				profitdownbase += profitdownbase * -3;
+
 				// 质押
 				int pledgeRatio = 0;
 				if (newOne.getPledgeRatio() > 90) {
@@ -230,12 +271,38 @@ public class CodeModelService {
 				if (newOne.getFloatDate() > 0) {
 					backbase = -3;
 				}
+
+				// 权重
+				incomeupbase += incomeupbase * 20;
+				profitupbase += profitupbase * 5;
+
+				incomedownbase += incomedownbase * -10;
+				profitdownbase += profitdownbase * -3;
+				// 业绩加减分
+				if (hasKb) {
+					if (yjkb.getYyzsrtbzz() > 0) {
+						if (yjkb.getYyzsrtbzz() > 100) {
+							incomeupbase += 20;
+						} else {
+							incomeupbase += 10;
+						}
+					} else {
+						incomedownbase += 10;
+					}
+				} else if (hasyg) {
+					if (yjyg.getJlrtbzz() > 0) {
+						profitupbase += 5;
+					} else {
+						profitdownbase -= 3;
+					}
+				}
+
 				int down = incomedownbase + profitdownbase + pledgeRatio + shareFloat;
 				int finals = up + down;
 
 				newOne.setScore(finals);
 				newOne.setUdpateDate(updatedate);
-				if (lastOne != null) {// 评分上涨
+				if (lastOne != null) {// 评分变化
 					newOne.setUpScore(finals - lastOne.getScore());
 				}
 				// copy history

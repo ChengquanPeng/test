@@ -15,6 +15,7 @@ import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.realtime.MonitoringService;
+import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.http.resp.ReportVo;
@@ -40,11 +41,24 @@ public class CodeController {
 	@RequestMapping(value = "/code/{code}", method = RequestMethod.GET)
 	public String detail(@PathVariable(value = "code") String code, Model model) {
 		try {
-			model.addAttribute("codedetail", codeModelService.getLastOneByCode(code));
+			CodeBaseModel cbm = codeModelService.getLastOneByCode(code);
+			model.addAttribute("codedetail", cbm);
 			model.addAttribute("code", code);
 			model.addAttribute("codeName", stockBasicService.getCodeName(code));
 			model.addAttribute("histList", codeModelService.getListByCode(code, querypage));
 			model.addAttribute("concepts", conceptService.getCodeConcept(code));
+
+			String kb = "";
+			if (cbm.getForestallQuarter() > 0) {
+				kb = cbm.getForestallYear() + "年" + cbm.getForestallQuarter() + "季度";
+				if (cbm.getForestallIncomeTbzz() > 0) {
+					kb += ",营收同比:" + cbm.getForestallIncomeTbzz();
+				}
+				if (cbm.getForestallProfitTbzz() > 0) {
+					kb += ",净利同比:" + cbm.getForestallProfitTbzz();
+				}
+			}
+			model.addAttribute("kb", kb);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -57,11 +71,22 @@ public class CodeController {
 	@RequestMapping(value = "/codehist/{id}", method = RequestMethod.GET)
 	public String id(@PathVariable(value = "id") String id, Model model) {
 		try {
-			CodeBaseModelHist ch = codeModelService.getHistOneById(id);
-			String code = ch.getCode();
+			CodeBaseModelHist cbm = codeModelService.getHistOneById(id);
+			String code = cbm.getCode();
 			model.addAttribute("code", code);
 			model.addAttribute("codeName", stockBasicService.getCodeName(code));
-			model.addAttribute("codedetail", ch);
+			model.addAttribute("codedetail", cbm);
+			String kb = "";
+			if (cbm.getForestallQuarter() > 0) {
+				kb = cbm.getForestallYear() + "年" + cbm.getForestallQuarter() + "季度";
+				if (cbm.getForestallIncomeTbzz() > 0) {
+					kb += ",营收同比:" + cbm.getForestallIncomeTbzz();
+				}
+				if (cbm.getForestallProfitTbzz() > 0) {
+					kb += ",净利同比:" + cbm.getForestallProfitTbzz();
+				}
+			}
+			model.addAttribute("kb", kb);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

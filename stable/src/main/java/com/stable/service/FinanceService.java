@@ -1,7 +1,9 @@
 package com.stable.service;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -19,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
+import com.stable.es.dao.base.EsFinYjkbDao;
+import com.stable.es.dao.base.EsFinYjygDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.eastmoney.EastmoneySpider;
@@ -26,6 +30,8 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.FinYjkb;
+import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.resp.FinanceBaseInfoResp;
@@ -47,6 +53,10 @@ public class FinanceService {
 	private EsFinanceBaseInfoDao esFinanceBaseInfoDao;
 	@Autowired
 	private StockBasicService stockBasicService;
+	@Autowired
+	private EsFinYjygDao esFinYjygDao;
+	@Autowired
+	private EsFinYjkbDao esFinYjkbDao;
 
 	/**
 	 * 删除redis，从头开始获取
@@ -163,8 +173,9 @@ public class FinanceService {
 		return null;
 	}
 
+	Pageable pageable = PageRequest.of(0, 1);
+
 	public FinanceBaseInfo getLastFinaceReport(String code) {
-		Pageable pageable = PageRequest.of(0, 1);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
@@ -180,6 +191,72 @@ public class FinanceService {
 		}
 		log.info("no last report fince code={}", code);
 		return null;
+	}
+
+	Pageable pageable9999 = PageRequest.of(0, 9999);
+
+	public Map<String, FinYjkb> getLastFinaceKb(int date) {
+		Map<String, FinYjkb> res = new HashMap<String, FinYjkb>();
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.rangeQuery("date").gte(date));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<FinYjkb> page = esFinYjkbDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			List<FinYjkb> list = page.getContent();
+			for (int i = 0; i < list.size(); i++) {
+				FinYjkb f = list.get(i);
+				if (!res.containsKey(f.getCode())) {// 只要最新的
+					res.put(f.getCode(), f);
+				}
+			}
+		}
+		return res;
+	}
+
+	public Map<String, FinYjyg> getLastFinaceYg(int date) {
+		Map<String, FinYjyg> res = new HashMap<String, FinYjyg>();
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.rangeQuery("date").gte(date));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<FinYjyg> page = esFinYjygDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			List<FinYjyg> list = page.getContent();
+			for (int i = 0; i < list.size(); i++) {
+				FinYjyg f = list.get(i);
+				if (!res.containsKey(f.getCode())) {// 只要最新的
+					res.put(f.getCode(), f);
+				}
+			}
+		}
+		return res;
+	}
+
+	public void jobSpiderFirstFinaceHistoryInfo() {
+		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.FINACE_FRIST, RunCycleEnum.DAY) {
+			public Object mycall() {
+				log.info("同步业绩预报和快报[started]");
+				List<FinYjkb> list1 = EastmoneySpider.getFinYjkb();
+				List<FinYjyg> list2 = EastmoneySpider.getFinYjyg();
+				if (list1.size() > 0) {
+					esFinYjkbDao.saveAll(list1);
+				}
+				if (list2.size() > 0) {
+					esFinYjygDao.saveAll(list2);
+				}
+				log.info("同步业绩预报和快报[end]");
+				WxPushUtil.pushSystem1("同步业绩预报和快报完成！");
+				return null;
+			}
+		});
+
 	}
 
 	public void jobSpiderFinaceHistoryInfo() {

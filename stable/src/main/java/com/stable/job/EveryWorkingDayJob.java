@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.service.DaliyBasicHistroyService;
+import com.stable.service.FinanceService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -14,10 +15,14 @@ public class EveryWorkingDayJob extends MySimpleJob {
 
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
+	@Autowired
+	private FinanceService financeService;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
-		log.info("个股每日指标");
+		log.info("EveryWorkingDayJob start");
 		daliyBasicHistroyService.jobSpiderAllDailyBasic();
+		financeService.jobSpiderFirstFinaceHistoryInfo();
+		log.info("EveryWorkingDayJob end");
 	}
 }
