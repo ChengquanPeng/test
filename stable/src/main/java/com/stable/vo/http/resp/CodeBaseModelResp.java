@@ -11,4 +11,6 @@ public class CodeBaseModelResp extends CodeBaseModel {
 
 	private static final long serialVersionUID = 1L;
 	private String codeName;
+	private String incomeShow;
+	private String profitShow;
 }

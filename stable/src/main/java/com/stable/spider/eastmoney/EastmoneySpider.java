@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
+import com.stable.utils.ThreadsUtil;
 import com.stable.utils.TickDataUitl;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.FinYjkb;
@@ -220,56 +221,59 @@ public class EastmoneySpider {
 	}
 
 	private static void getYjkbByPage(String date1, List<FinYjkb> list) {
+		ThreadsUtil.sleepRandomSecBetween1And5();
 		String url1 = getYjkbUrl(date1);
-		log.info("URL:"+url1);
+		log.info("URL:" + url1);
 		String result = HttpUtil.doGet2(url1);
-		log.info("RESULT:"+result);
+		log.info("RESULT:" + result);
 		result = result.substring("var BEzQbtii=".length());
 		result = result.substring(0, result.length() - 1);
 		JSONObject objects = JSON.parseObject(result);
-		JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
-		for (int i = 0; i < datas.size(); i++) {
-			JSONObject data = datas.getJSONObject(i);
-			String date = data.getString("REPORT_DATE"); // 报告期
-			String anndate = data.getString("NOTICE_DATE"); // 公告日期
-			FinYjkb fy = new FinYjkb();
-			String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
-			int y = Integer.valueOf(datestr.substring(0, 4));
-			int m = Integer.valueOf(datestr.substring(4, 6));
-			int quarter = 0;
-			if (m == 12) {
-				quarter = 4;
-			} else if (m == 9) {
-				quarter = 3;
-			} else if (m == 6) {
-				quarter = 2;
-			} else if (m == 3) {
-				quarter = 1;
-			}
-			fy.setYear(y);
-			fy.setQuarter(quarter);
-			fy.setCode(data.getString("SECURITY_CODE"));
-			fy.setDate(Integer
-					.parseInt(DateUtil.formatYYYYMMDD(DateUtil.parseDate(anndate, DateUtil.YYYY_MM_DD_HH_MM_SS))));
+		if (objects.getBooleanValue("success")) {
+			JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
+			for (int i = 0; i < datas.size(); i++) {
+				JSONObject data = datas.getJSONObject(i);
+				String date = data.getString("REPORT_DATE"); // 报告期
+				String anndate = data.getString("NOTICE_DATE"); // 公告日期
+				FinYjkb fy = new FinYjkb();
+				String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
+				int y = Integer.valueOf(datestr.substring(0, 4));
+				int m = Integer.valueOf(datestr.substring(4, 6));
+				int quarter = 0;
+				if (m == 12) {
+					quarter = 4;
+				} else if (m == 9) {
+					quarter = 3;
+				} else if (m == 6) {
+					quarter = 2;
+				} else if (m == 3) {
+					quarter = 1;
+				}
+				fy.setYear(y);
+				fy.setQuarter(quarter);
+				fy.setCode(data.getString("SECURITY_CODE"));
+				fy.setDate(Integer
+						.parseInt(DateUtil.formatYYYYMMDD(DateUtil.parseDate(anndate, DateUtil.YYYY_MM_DD_HH_MM_SS))));
 
-			try {
-				fy.setJlr(data.getLong("PARENT_NETPROFIT"));// 业绩
-			} catch (Exception e) {
+				try {
+					fy.setJlr(data.getLong("PARENT_NETPROFIT"));// 业绩
+				} catch (Exception e) {
+				}
+				try {
+					fy.setJlrtbzz(CurrencyUitl.roundHalfUp(data.getDoubleValue("JLRTBZCL")));// 业绩增长
+				} catch (Exception e) {
+				}
+				try {
+					fy.setYyzsr(data.getLong("TOTAL_OPERATE_INCOME"));// 营收
+				} catch (Exception e) {
+				}
+				try {
+					fy.setYyzsrtbzz(CurrencyUitl.roundHalfUp(data.getDoubleValue("YSTZ")));// 营收幅度
+				} catch (Exception e) {
+				}
+				fy.setId();
+				list.add(fy);
 			}
-			try {
-				fy.setJlrtbzz(CurrencyUitl.roundHalfUp(data.getDoubleValue("JLRTBZCL")));// 业绩增长
-			} catch (Exception e) {
-			}
-			try {
-				fy.setYyzsr(data.getLong("TOTAL_OPERATE_INCOME"));// 营收
-			} catch (Exception e) {
-			}
-			try {
-				fy.setYyzsrtbzz(CurrencyUitl.roundHalfUp(data.getDoubleValue("YSTZ")));// 营收幅度
-			} catch (Exception e) {
-			}
-			fy.setId();
-			list.add(fy);
 		}
 	}
 
@@ -279,49 +283,52 @@ public class EastmoneySpider {
 	}
 
 	private static void getYjygByPage(String date1, List<FinYjyg> list) {
+		ThreadsUtil.sleepRandomSecBetween1And5();
 		String url1 = getYjygUrl(date1);
 		String result = HttpUtil.doGet2(url1);
 		result = result.substring("var MRtZkjmw=".length());
 		result = result.substring(0, result.length() - 1);
 		JSONObject objects = JSON.parseObject(result);
-		JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
-		for (int i = 0; i < datas.size(); i++) {
-			JSONObject data = datas.getJSONObject(i);
-			String date = data.getString("REPORTDATE"); // 报告期
-			String anndate = data.getString("NOTICE_DATE"); // 公告日期
-			FinYjyg fy = new FinYjyg();
-			String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
-			int y = Integer.valueOf(datestr.substring(0, 4));
-			int m = Integer.valueOf(datestr.substring(4, 6));
-			int quarter = 0;
-			if (m == 12) {
-				quarter = 4;
-			} else if (m == 9) {
-				quarter = 3;
-			} else if (m == 6) {
-				quarter = 2;
-			} else if (m == 3) {
-				quarter = 1;
+		if (objects.getBooleanValue("success")) {
+			JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
+			for (int i = 0; i < datas.size(); i++) {
+				JSONObject data = datas.getJSONObject(i);
+				String date = data.getString("REPORTDATE"); // 报告期
+				String anndate = data.getString("NOTICE_DATE"); // 公告日期
+				FinYjyg fy = new FinYjyg();
+				String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
+				int y = Integer.valueOf(datestr.substring(0, 4));
+				int m = Integer.valueOf(datestr.substring(4, 6));
+				int quarter = 0;
+				if (m == 12) {
+					quarter = 4;
+				} else if (m == 9) {
+					quarter = 3;
+				} else if (m == 6) {
+					quarter = 2;
+				} else if (m == 3) {
+					quarter = 1;
+				}
+				fy.setYear(y);
+				fy.setQuarter(quarter);
+				fy.setCode(data.getString("SECURITY_CODE"));
+				fy.setDate(Integer
+						.parseInt(DateUtil.formatYYYYMMDD(DateUtil.parseDate(anndate, DateUtil.YYYY_MM_DD_HH_MM_SS))));
+				try {
+					fy.setType(data.getString("FORECASTTYPE"));// 类型
+				} catch (Exception e) {
+				}
+				try {
+					fy.setJlr(data.getLong("FORECASTL"));// 业绩范围：FORECASTL-FORECASTT
+				} catch (Exception e) {
+				}
+				try {
+					fy.setJlrtbzz(data.getDoubleValue("INCREASET"));// 业绩变动幅度 INCREASET-FORECASTCONTENT
+				} catch (Exception e) {
+				}
+				fy.setId();
+				list.add(fy);
 			}
-			fy.setYear(y);
-			fy.setQuarter(quarter);
-			fy.setCode(data.getString("SECURITY_CODE"));
-			fy.setDate(Integer
-					.parseInt(DateUtil.formatYYYYMMDD(DateUtil.parseDate(anndate, DateUtil.YYYY_MM_DD_HH_MM_SS))));
-			try {
-				fy.setType(data.getString("FORECASTTYPE"));// 类型
-			} catch (Exception e) {
-			}
-			try {
-				fy.setJlr(data.getLong("FORECASTL"));// 业绩范围：FORECASTL-FORECASTT
-			} catch (Exception e) {
-			}
-			try {
-				fy.setJlrtbzz(data.getDoubleValue("INCREASET"));// 业绩变动幅度 INCREASET-FORECASTCONTENT
-			} catch (Exception e) {
-			}
-			fy.setId();
-			list.add(fy);
 		}
 	}
 

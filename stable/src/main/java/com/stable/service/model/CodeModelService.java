@@ -457,6 +457,14 @@ public class CodeModelService {
 				CodeBaseModelResp resp = new CodeBaseModelResp();
 				BeanUtils.copyProperties(dh, resp);
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
+				resp.setIncomeShow(dh.getCurrIncomeTbzz() + "%");
+				if (dh.getForestallIncomeTbzz() > 0) {
+					resp.setIncomeShow(resp.getIncomeShow() + "(" + dh.getForestallIncomeTbzz() + "%)");
+				}
+				resp.setProfitShow(dh.getCurrProfitTbzz() + "%");
+				if (dh.getForestallIncomeTbzz() > 0) {
+					resp.setProfitShow(resp.getProfitShow() + "(" + dh.getForestallProfitTbzz() + "%)");
+				}
 				res.add(resp);
 			}
 		}
