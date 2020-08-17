@@ -57,6 +57,8 @@ public class FinanceService {
 	private EsFinYjygDao esFinYjygDao;
 	@Autowired
 	private EsFinYjkbDao esFinYjkbDao;
+	@Autowired
+	private EastmoneySpider eastmoneySpider;
 
 	/**
 	 * 删除redis，从头开始获取
@@ -243,16 +245,25 @@ public class FinanceService {
 		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.FINACE_FRIST, RunCycleEnum.DAY) {
 			public Object mycall() {
 				log.info("同步业绩预报和快报[started]");
-				List<FinYjkb> list1 = EastmoneySpider.getFinYjkb();
-				List<FinYjyg> list2 = EastmoneySpider.getFinYjyg();
+				List<FinYjkb> list1 = eastmoneySpider.getFinYjkb();
+				List<FinYjyg> list2 = eastmoneySpider.getFinYjyg();
+				StringBuffer sb = new StringBuffer();
 				if (list1.size() > 0) {
 					esFinYjkbDao.saveAll(list1);
+					for (FinYjkb fy : list1) {
+						sb.append(stockBasicService.getCodeName(fy.getCode())).append(",");
+					}
 				}
 				if (list2.size() > 0) {
 					esFinYjygDao.saveAll(list2);
+					for (FinYjyg fy : list2) {
+						sb.append(stockBasicService.getCodeName(fy.getCode())).append(",");
+					}
 				}
 				log.info("同步业绩预报和快报[end]");
-				WxPushUtil.pushSystem1("同步业绩预报和快报完成！");
+
+				WxPushUtil.pushSystem1(
+						"同步业绩预报和快报完成！" + (sb.length() > 0 ? ("今日快报或者预告:" + sb.toString()) : "今日无业绩快报或者预告"));
 				return null;
 			}
 		});

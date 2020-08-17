@@ -5,14 +5,17 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.stable.constant.RedisConstant;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
+import com.stable.utils.RedisUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.TickDataUitl;
 import com.stable.utils.WxPushUtil;
@@ -21,12 +24,12 @@ import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.TickData;
 
-import lombok.extern.log4j.Log4j2;
-
 @Component
-@Log4j2
 public class EastmoneySpider {
 	private static final String URL_FORMAT = "https://push2.eastmoney.com/api/qt/stock/details/get?secid=%s.%s&fields1=f1,f2,f3,f4,f5&fields2=f51,f52,f53,f54,f55&pos=-111125&";
+
+	@Autowired
+	private RedisUtil redisUtil;
 
 	public static int formatCode(String code) {
 		if (code.startsWith("6")) {
@@ -172,7 +175,7 @@ public class EastmoneySpider {
 
 	// 当年xx03,xx06,xx09,xx12
 	// 6月30日之前，xx-1-12
-	public static List<FinYjkb> getFinYjkb() {
+	public List<FinYjkb> getFinYjkb() {
 		List<FinYjkb> list2 = new LinkedList<FinYjkb>();
 		int currYear = DateUtil.getCurYYYY();
 		int currJidu = DateUtil.getCurJidu();
@@ -196,7 +199,7 @@ public class EastmoneySpider {
 		return list2;
 	}
 
-	public static List<FinYjyg> getFinYjyg() {
+	public List<FinYjyg> getFinYjyg() {
 		List<FinYjyg> list = new LinkedList<FinYjyg>();
 		int currYear = DateUtil.getCurYYYY();
 		int currJidu = DateUtil.getCurJidu();
@@ -220,15 +223,19 @@ public class EastmoneySpider {
 		return list;
 	}
 
-	private static void getYjkbByPage(String date1, List<FinYjkb> list) {
+	private void getYjkbByPage(String date1, List<FinYjkb> list) {
 		ThreadsUtil.sleepRandomSecBetween1And5();
+		String last = redisUtil.get(RedisConstant.RDS_FIN_KUAIBAO_ + date1);
+		last = last == null ? "" : last;
+		String lastFromPage = null;
+		boolean chkIndor = true;
+
 		String url1 = getYjkbUrl(date1);
-		log.info("URL:" + url1);
 		String result = HttpUtil.doGet2(url1);
-		log.info("RESULT:" + result);
 		result = result.substring("var BEzQbtii=".length());
 		result = result.substring(0, result.length() - 1);
 		JSONObject objects = JSON.parseObject(result);
+
 		if (objects.getBooleanValue("success")) {
 			JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
 			for (int i = 0; i < datas.size(); i++) {
@@ -272,18 +279,37 @@ public class EastmoneySpider {
 				} catch (Exception e) {
 				}
 				fy.setId();
-				list.add(fy);
+
+				if (chkIndor) {
+					if (last.equals(fy.getCode())) {
+						chkIndor = false;
+					} else {
+						list.add(fy);
+					}
+				}
+				if (lastFromPage == null) {
+					lastFromPage = fy.getCode();
+				}
 			}
+		}
+		// 设置最新
+		if (lastFromPage != null) {
+			redisUtil.set(RedisConstant.RDS_FIN_KUAIBAO_ + date1, lastFromPage);
 		}
 	}
 
-	private static String getYjkbUrl(String date) {
+	private String getYjkbUrl(String date) {
 		return "http://datacenter.eastmoney.com/api/data/get?type=RPT_FCI_PERFORMANCEE&sty=ALL&p=1&ps=50&st=UPDATE_DATE,SECURITY_CODE&sr=-1,-1&var=BEzQbtii&filter=(REPORT_DATE=%27"
 				+ date + "%27)&rt=" + System.currentTimeMillis();
 	}
 
-	private static void getYjygByPage(String date1, List<FinYjyg> list) {
+	private void getYjygByPage(String date1, List<FinYjyg> list) {
 		ThreadsUtil.sleepRandomSecBetween1And5();
+		String last = redisUtil.get(RedisConstant.RDS_FIN_YUGAO_ + date1);
+		last = last == null ? "" : last;
+		String lastFromPage = null;
+		boolean chkIndor = true;
+
 		String url1 = getYjygUrl(date1);
 		String result = HttpUtil.doGet2(url1);
 		result = result.substring("var MRtZkjmw=".length());
@@ -327,12 +353,25 @@ public class EastmoneySpider {
 				} catch (Exception e) {
 				}
 				fy.setId();
-				list.add(fy);
+				if (chkIndor) {
+					if (last.equals(fy.getCode())) {
+						chkIndor = false;
+					} else {
+						list.add(fy);
+					}
+				}
+				if (lastFromPage == null) {
+					lastFromPage = fy.getCode();
+				}
 			}
+		}
+		// 设置最新
+		if (lastFromPage != null) {
+			redisUtil.set(RedisConstant.RDS_FIN_YUGAO_ + date1, lastFromPage);
 		}
 	}
 
-	private static String getYjygUrl(String date) {
+	private String getYjygUrl(String date) {
 		return "http://datacenter.eastmoney.com/api/data/get?type=RPT_PUBLIC_OP_PREDICT&sty=ALL&p=1&ps=50&st=NOTICE_DATE,SECURITY_CODE&sr=-1,-1&var=MRtZkjmw&filter=(REPORTDATE=%27"
 				+ date + "%27)(IsLatest=%22T%22)&rt=" + System.currentTimeMillis();
 	}

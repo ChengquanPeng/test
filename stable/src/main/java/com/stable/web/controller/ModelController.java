@@ -25,7 +25,6 @@ public class ModelController {
 	private UpModelLineService upLevel1Service;
 	@Autowired
 	private CodeModelService codeModelService;
-	
 
 	/**
 	 * 执行模型
@@ -64,7 +63,7 @@ public class ModelController {
 		}
 		return ResponseEntity.ok(r);
 	}
-	
+
 	/**
 	 * 执行模型
 	 */
@@ -78,10 +77,10 @@ public class ModelController {
 			}
 			if (StringUtils.isNotBlank(startDate) && StringUtils.isBlank(endDate)) {
 				log.info("request date={}", startDate);
-				upLevel1Service.runJob(false, Integer.valueOf(startDate));
+				codeModelService.runJob(false, Integer.valueOf(startDate));
 			} else if (StringUtils.isBlank(startDate) && StringUtils.isNotBlank(endDate)) {
 				log.info("request date={}", endDate);
-				upLevel1Service.runJob(false, Integer.valueOf(endDate));
+				codeModelService.runJob(false, Integer.valueOf(endDate));
 			} else if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)) {
 
 				Date d = DateUtil.parseDate(startDate);
