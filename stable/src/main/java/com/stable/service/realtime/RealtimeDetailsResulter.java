@@ -1,12 +1,14 @@
 package com.stable.service.realtime;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 
 import com.stable.utils.DateUtil;
 import com.stable.utils.ScheduledWorker;
@@ -55,21 +57,20 @@ public class RealtimeDetailsResulter implements Runnable {
 			log.info("message size:" + msgs.size());
 			if (msgs.size() > 0) {
 				// 按照基本分排序
-				ConcurrentHashMap<String, RealtimeMsg> collect1 = msgs.entrySet().stream()
-						.sorted(new Comparator<Map.Entry<String, RealtimeMsg>>() {
-							@Override
-							public int compare(Map.Entry<String, RealtimeMsg> o1, Map.Entry<String, RealtimeMsg> o2) {
-								return Integer.valueOf(o1.getValue().getBaseScore())
-										.compareTo(Integer.valueOf(o2.getValue().getBaseScore()));
-							}
-						}).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2,
-								ConcurrentHashMap::new));
+				List<RealtimeMsg> list = new ArrayList<RealtimeMsg>();
+				for (String key : msgs.keySet()) {
+					list.add(msgs.get(key));
+				}
+				Collections.sort(list, new Comparator<RealtimeMsg>() {
+					public int compare(RealtimeMsg o1, RealtimeMsg o2) {
+						return o1.getBaseScore() - o2.getBaseScore();
+					}
+				});
 
 				StringBuffer sb = new StringBuffer("风险第一！！！>>");
 				sb.append(BR);
 				int index = 1;
-				for (String key : collect1.keySet()) {
-					RealtimeMsg rm = msgs.get(key);
+				for (RealtimeMsg rm : list) {
 					if (type == 1) {
 						if ((rm.getChkVol1() * 1.3) < rm.getTotalVol() && (rm.getChkVol2() * 1.3) < rm.getTotalVol()) {// 半天的量》均值的半天或者整天的量
 							continue;
