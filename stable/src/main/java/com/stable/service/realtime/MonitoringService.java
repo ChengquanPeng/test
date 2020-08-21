@@ -207,7 +207,7 @@ public class MonitoringService {
 		if (selledList.size() > 0) {
 			sb.append("卖出明细：==>").append(BR);
 			for (BuyTrace x : selledList) {
-				sb.append("序号:").append(index).append(x.getCode()).append(" ")
+				sb.append("序号:").append(index).append(", ").append(x.getCode()).append(" ")
 						.append(stockBasicService.getCodeName(x.getCode())).append(" 买入时间:").append(x.getBuyDate())
 						.append(" 买入价格:").append(x.getBuyPrice()).append(" 卖出价格:").append(x.getSoldPrice())
 						.append(" 收益:").append(x.getProfit()).append("%").append(BR);

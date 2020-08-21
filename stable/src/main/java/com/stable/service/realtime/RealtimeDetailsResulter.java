@@ -63,7 +63,7 @@ public class RealtimeDetailsResulter implements Runnable {
 				}
 				Collections.sort(list, new Comparator<RealtimeMsg>() {
 					public int compare(RealtimeMsg o1, RealtimeMsg o2) {
-						return o1.getBaseScore() - o2.getBaseScore();
+						return o2.getBaseScore() - o1.getBaseScore();
 					}
 				});
 
