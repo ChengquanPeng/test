@@ -71,15 +71,15 @@ public class RealtimeDetailsResulter implements Runnable {
 				sb.append(BR);
 				int index = 1;
 				for (RealtimeMsg rm : list) {
-					if (type == 1) {
-						if ((rm.getChkVol1() * 1.3) < rm.getTotalVol() && (rm.getChkVol2() * 1.3) < rm.getTotalVol()) {// 半天的量》均值的半天或者整天的量
-							continue;
-						}
-					} else if (type == 2) {
-						if ((rm.getChkVol2() * 1.3) < rm.getTotalVol()) {// 整天的量》均值的半天或者整天的量
-							continue;
-						}
-					}
+//					if (type == 1) {
+//						if ((rm.getChkVol1() * 1.3) < rm.getTotalVol() && (rm.getChkVol2() * 1.3) < rm.getTotalVol()) {// 半天的量》均值的半天或者整天的量
+//							continue;
+//						}
+//					} else if (type == 2) {
+//						if ((rm.getChkVol2() * 1.3) < rm.getTotalVol()) {// 整天的量》均值的半天或者整天的量
+//							continue;
+//						}
+//					}
 					sb.append("序号:").append(index).append(",").append(rm.toMessage()).append(BR);
 					index++;
 				}

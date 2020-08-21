@@ -20,6 +20,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsCodeBaseModelDao;
 import com.stable.es.dao.base.EsCodeBaseModelHistDao;
@@ -134,184 +135,7 @@ public class CodeModelService {
 		Map<String, FinYjyg> ygmap = financeService.getLastFinaceYg(b30Date);
 		for (StockBaseInfo s : codelist) {
 			try {
-				String code = s.getCode();
-				log.info("Code Model  processing for code:{}", code);
-				CodeBaseModel lastOne = getLastOneByCode(code);
-				// 财务
-				FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code, treadeDate);
-				if (fbi == null) {
-					boolean onlineYear = stockBasicService.online1Year(code);
-					if (onlineYear) {
-						ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, treadeDate + "",
-								"Code Model错误");
-					} else {
-						log.info("{},Online 上市不足1年", code);
-					}
-					continue;
-				}
-				CodeBaseModel newOne = new CodeBaseModel();
-				newOne.setCode(code);
-				newOne.setDate(treadeDate);
-				newOne.setCurrYear(fbi.getYear());
-				newOne.setCurrQuarter(fbi.getQuarter());
-				newOne.setCurrIncomeTbzz(fbi.getYyzsrtbzz());
-				newOne.setCurrProfitTbzz(fbi.getGsjlrtbzz());
-
-				// 分红
-				DividendHistory dh = dividendService.getLastRecordByLteDate(code, oneYearAgo, treadeDate);
-				if (dh != null) {
-					newOne.setLastDividendDate(dh.getEnd_date());// 分红年度
-				}
-				// 回购
-				BuyBackInfo bb = buyBackService.getLastRecordByLteDate(code, oneYearAgo, treadeDate);
-				if (bb != null) {
-					newOne.setLastBackDate(Integer.valueOf(bb.getAnn_date()));// 股东大会通过/完成/停止/实施
-				}
-				// 质押比例
-				PledgeStat ps = pledgeStatService.getLastRecords(code, treadeDate);
-				if (ps != null) {
-					newOne.setEndDate(ps.getEndDate());// 截止日期
-					newOne.setPledgeRatio(ps.getPledgeRatio());// 质押比例
-				}
-				// 限售股解禁
-				ShareFloat sf = shareFloatService.getLastRecordByLteDate(code, treadeDate, nextYear);
-				if (sf != null) {
-					newOne.setFloatDate(sf.getFloatDate());// 解禁日期
-					newOne.setFloatRatio(sf.getFloatRatio());// 流通股份占总股本比率
-				}
-				// 业绩快报(准确的)
-				FinYjkb yjkb = kbmap.get(code);
-				FinYjyg yjyg = ygmap.get(code);
-				boolean hasKb = false;
-				boolean hasyg = false;
-
-				newOne.setForestallYear(0);
-				newOne.setForestallQuarter(0);
-				newOne.setForestallIncomeTbzz(0);
-				newOne.setForestallProfitTbzz(0);
-				if (yjkb != null) {// 业绩快报(准确的)
-					if ((newOne.getCurrYear() == yjkb.getYear() && newOne.getCurrQuarter() < yjkb.getQuarter())// 同一年，季度大于
-							|| (yjkb.getYear() > newOne.getCurrYear())) {// 不同年
-						newOne.setForestallYear(yjkb.getYear());
-						newOne.setForestallQuarter(yjkb.getQuarter());
-						newOne.setForestallIncomeTbzz(yjkb.getYyzsrtbzz());
-						newOne.setForestallProfitTbzz(yjkb.getJlrtbzz());
-						hasKb = true;
-					}
-				}
-				// 业绩预告(类似天气预报，可能不准)
-				if (!hasKb && yjyg != null) {
-					if ((newOne.getCurrYear() == yjyg.getYear() && newOne.getCurrQuarter() < yjyg.getQuarter())// 同一年，季度大于
-							|| (yjyg.getYear() > newOne.getCurrYear())) {// 不同年
-						newOne.setForestallYear(yjyg.getYear());
-						newOne.setForestallQuarter(yjyg.getQuarter());
-						newOne.setForestallProfitTbzz(yjyg.getJlrtbzz());
-						hasyg = true;
-					}
-				}
-
-				log.info("{},KeyString:{}", code, newOne.getKeyString());
-				if (lastOne != null && lastOne.getKeyString().equals(newOne.getKeyString())) {
-					log.info("{},lastOne equals newOne!", code);
-					continue;
-				}
-
-				processingFinance(newOne);
-				if (bb != null) {
-					// 股东大会通过/实施/完成
-				} else {
-					newOne.setNoBackyear(-1);// 最近1年无回购
-				}
-				if (dh == null) {
-					newOne.setNoDividendyear(-1);// 最近1年无分红
-				}
-
-				// 正向分数
-				// 营收(20)
-				int incomeupbase = newOne.getIncomeUpYear() + newOne.getIncomeUpQuarter()
-						+ newOne.getIncomeUp2Quarter();
-
-				// 利润(5)
-				int profitupbase = newOne.getProfitUpYear() + newOne.getProfitUpQuarter()
-						+ newOne.getProfitUp2Quarter();
-
-				// 分红(5)
-				int dividendbase = 0;
-				if (newOne.getLastDividendDate() != 0) {
-					dividendbase = 3;
-				} else {
-					dividendbase = -2;
-				}
-				// 回购(5)
-				int backbase = 0;
-				if (newOne.getLastBackDate() != 0) {
-					backbase = 3;
-				} else {
-					backbase = -1;
-				}
-				//
-				int up = incomeupbase + profitupbase + dividendbase + backbase;// 分
-
-				// 负向分数
-				// 营收(10)
-				int incomedownbase = newOne.getIncomeDownYear() + newOne.getIncomeDownQuarter()
-						+ newOne.getIncomeDown2Quarter();
-
-				// 利润(3)
-				int profitdownbase = newOne.getProfitDownYear() + newOne.getProfitDownQuarter()
-						+ newOne.getProfitDown2Quarter() + newOne.getProfitDown2Year();
-
-				// 质押
-				int pledgeRatio = 0;
-				if (newOne.getPledgeRatio() > 90) {
-					pledgeRatio = -5;
-				}
-				// 解禁
-				int shareFloat = 0;
-				if (newOne.getFloatDate() > 0) {
-					backbase = -3;
-				}
-
-				// 权重
-				incomeupbase += incomeupbase * 20;
-				profitupbase += profitupbase * 5;
-
-				incomedownbase += incomedownbase * -10;
-				profitdownbase += profitdownbase * -3;
-				// 业绩加减分
-				if (hasKb) {
-					if (yjkb.getYyzsrtbzz() > 0) {
-						if (yjkb.getYyzsrtbzz() > 100) {
-							incomeupbase += 20;
-						} else {
-							incomeupbase += 10;
-						}
-					} else {
-						incomedownbase += 10;
-					}
-				} else if (hasyg) {
-					if (yjyg.getJlrtbzz() > 0) {
-						profitupbase += 5;
-					} else {
-						profitdownbase -= 3;
-					}
-				}
-
-				int down = incomedownbase + profitdownbase + pledgeRatio + shareFloat;
-				int finals = up + down;
-
-				newOne.setScore(finals);
-				newOne.setUdpateDate(updatedate);
-				if (lastOne != null) {// 评分变化
-					newOne.setUpScore(finals - lastOne.getScore());
-				}
-				// copy history
-				CodeBaseModelHist hist = new CodeBaseModelHist();
-				BeanCopy.copy(newOne, hist);
-				newOne.setId(code);
-				hist.setId(code + treadeDate);
-				listm.add(newOne);
-				listh.add(hist);
+				getSorce(s, treadeDate, oneYearAgo, nextYear, updatedate, kbmap, ygmap, listm, listh, true, null);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
 			}
@@ -323,6 +147,230 @@ public class CodeModelService {
 		log.info("CodeModel 模型执行完成");
 		WxPushUtil
 				.pushSystem1("Seq5=> CODE-MODEL " + treadeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listm.size());
+	}
+
+	public synchronized String run(String code) {
+		int updatedate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+		List<CodeBaseModel> listm = new LinkedList<CodeBaseModel>();
+		List<CodeBaseModelHist> listh = new LinkedList<CodeBaseModelHist>();
+		int oneYearAgo = DateUtil.getPreYear(updatedate);
+		int nextYear = DateUtil.getNextYear(updatedate);
+		int b30Date = Integer.valueOf(DateUtil.getBefor30DayYYYYMMDD(updatedate));
+		Map<String, FinYjkb> kbmap = financeService.getLastFinaceKb(b30Date);
+		Map<String, FinYjyg> ygmap = financeService.getLastFinaceYg(b30Date);
+		StringBuffer res = new StringBuffer();
+		try {
+			StockBaseInfo s = JSON.parseObject(redisUtil.get(code), StockBaseInfo.class);
+			getSorce(s, updatedate, oneYearAgo, nextYear, updatedate, kbmap, ygmap, listm, listh, false, res);
+		} catch (Exception e) {
+			ErrorLogFileUitl.writeError(e, "", "", "");
+		}
+		return res.toString();
+	}
+
+	private void getSorce(StockBaseInfo s, int treadeDate, int oneYearAgo, int nextYear, int updatedate,
+			Map<String, FinYjkb> kbmap, Map<String, FinYjyg> ygmap, List<CodeBaseModel> listm,
+			List<CodeBaseModelHist> listh, boolean isJob, StringBuffer sb) {
+
+		String code = s.getCode();
+		log.info("Code Model  processing for code:{}", code);
+		CodeBaseModel lastOne = getLastOneByCode(code);
+		// 财务
+		FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code, treadeDate);
+		if (fbi == null) {
+			boolean onlineYear = stockBasicService.online1Year(code);
+			if (onlineYear) {
+				ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, treadeDate + "", "Code Model错误");
+			} else {
+				log.info("{},Online 上市不足1年", code);
+			}
+			return;
+		}
+		CodeBaseModel newOne = new CodeBaseModel();
+		newOne.setCode(code);
+		newOne.setDate(treadeDate);
+		newOne.setCurrYear(fbi.getYear());
+		newOne.setCurrQuarter(fbi.getQuarter());
+		newOne.setCurrIncomeTbzz(fbi.getYyzsrtbzz());
+		newOne.setCurrProfitTbzz(fbi.getGsjlrtbzz());
+
+		// 分红
+		DividendHistory dh = dividendService.getLastRecordByLteDate(code, oneYearAgo, treadeDate);
+		if (dh != null) {
+			newOne.setLastDividendDate(dh.getEnd_date());// 分红年度
+		}
+		// 回购
+		BuyBackInfo bb = buyBackService.getLastRecordByLteDate(code, oneYearAgo, treadeDate);
+		if (bb != null) {
+			newOne.setLastBackDate(Integer.valueOf(bb.getAnn_date()));// 股东大会通过/完成/停止/实施
+		}
+		// 质押比例
+		PledgeStat ps = pledgeStatService.getLastRecords(code, treadeDate);
+		if (ps != null) {
+			newOne.setEndDate(ps.getEndDate());// 截止日期
+			newOne.setPledgeRatio(ps.getPledgeRatio());// 质押比例
+		}
+		// 限售股解禁
+		ShareFloat sf = shareFloatService.getLastRecordByLteDate(code, treadeDate, nextYear);
+		if (sf != null) {
+			newOne.setFloatDate(sf.getFloatDate());// 解禁日期
+			newOne.setFloatRatio(sf.getFloatRatio());// 流通股份占总股本比率
+		}
+		// 业绩快报(准确的)
+		FinYjkb yjkb = kbmap.get(code);
+		FinYjyg yjyg = ygmap.get(code);
+		boolean hasKb = false;
+		boolean hasyg = false;
+
+		newOne.setForestallYear(0);
+		newOne.setForestallQuarter(0);
+		newOne.setForestallIncomeTbzz(0);
+		newOne.setForestallProfitTbzz(0);
+		if (yjkb != null) {// 业绩快报(准确的)
+			if ((newOne.getCurrYear() == yjkb.getYear() && newOne.getCurrQuarter() < yjkb.getQuarter())// 同一年，季度大于
+					|| (yjkb.getYear() > newOne.getCurrYear())) {// 不同年
+				newOne.setForestallYear(yjkb.getYear());
+				newOne.setForestallQuarter(yjkb.getQuarter());
+				newOne.setForestallIncomeTbzz(yjkb.getYyzsrtbzz());
+				newOne.setForestallProfitTbzz(yjkb.getJlrtbzz());
+				hasKb = true;
+			}
+		}
+		// 业绩预告(类似天气预报，可能不准)
+		if (!hasKb && yjyg != null) {
+			if ((newOne.getCurrYear() == yjyg.getYear() && newOne.getCurrQuarter() < yjyg.getQuarter())// 同一年，季度大于
+					|| (yjyg.getYear() > newOne.getCurrYear())) {// 不同年
+				newOne.setForestallYear(yjyg.getYear());
+				newOne.setForestallQuarter(yjyg.getQuarter());
+				newOne.setForestallProfitTbzz(yjyg.getJlrtbzz());
+				hasyg = true;
+			}
+		}
+
+		log.info("{},KeyString:{}", code, newOne.getKeyString());
+		if (isJob && lastOne != null && lastOne.getKeyString().equals(newOne.getKeyString())) {
+			log.info("{},lastOne equals newOne!", code);
+			return;
+		}
+
+		processingFinance(newOne);
+		if (bb != null) {
+			// 股东大会通过/实施/完成
+		} else {
+			newOne.setNoBackyear(-1);// 最近1年无回购
+		}
+		if (dh == null) {
+			newOne.setNoDividendyear(-1);// 最近1年无分红
+		}
+
+		// 正向分数
+		// 营收(20)
+		int incomeupbase = newOne.getIncomeUpYear() + newOne.getIncomeUpQuarter() + newOne.getIncomeUp2Quarter();
+		// 利润(5)
+		int profitupbase = newOne.getProfitUpYear() + newOne.getProfitUpQuarter() + newOne.getProfitUp2Quarter();
+
+		// 分红(5)
+		int dividendbase = 0;
+		if (newOne.getLastDividendDate() != 0) {
+			dividendbase = 3;
+		} else {
+			dividendbase = -2;
+		}
+		// 回购(5)
+		int backbase = 0;
+		if (newOne.getLastBackDate() != 0) {
+			backbase = 3;
+		} else {
+			backbase = -1;
+		}
+
+		// 负向分数
+		// 营收(10)
+		int incomedownbase = newOne.getIncomeDownYear() + newOne.getIncomeDownQuarter()
+				+ newOne.getIncomeDown2Quarter();
+
+		// 利润(3)
+		int profitdownbase = newOne.getProfitDownYear() + newOne.getProfitDownQuarter() + newOne.getProfitDown2Quarter()
+				+ newOne.getProfitDown2Year();
+
+		// 质押
+		int pledgeRatio = 0;
+		if (newOne.getPledgeRatio() > 60) {
+			pledgeRatio = -5;
+		}
+		// 解禁
+		int shareFloat = 0;
+		if (newOne.getFloatDate() > 0) {
+			shareFloat = -3;
+		}
+
+		// 权重
+		incomeupbase += incomeupbase * 20;
+		profitupbase += profitupbase * 5;
+
+		incomedownbase += incomedownbase * -10;
+		profitdownbase += profitdownbase * -3;
+
+		int kbyg = 0;
+		// 业绩加减分
+		if (hasKb) {
+			if (yjkb.getYyzsrtbzz() > 0) {
+				if (yjkb.getYyzsrtbzz() > 100) {
+					kbyg += 20;
+				} else {
+					kbyg += 10;
+				}
+			} else {
+				kbyg += -10;
+			}
+		} else if (hasyg) {
+			if (yjyg.getJlrtbzz() > 0) {
+				kbyg += 5;
+			} else {
+				kbyg += -3;
+			}
+		}
+
+		int up = incomeupbase + profitupbase + dividendbase + backbase;
+		int down = incomedownbase + profitdownbase + pledgeRatio + shareFloat;
+		int finals = up + down + kbyg;
+
+		if (sb != null) {
+			sb.append("报告期:incomeupbase[" + incomeupbase + "(x20)] = IncomeUpYear[" + newOne.getIncomeUpYear()
+					+ "] + IncomeUpQuarter[" + newOne.getIncomeUpQuarter() + "] + IncomeUp2Quarter:["
+					+ newOne.getIncomeUp2Quarter() + "]");
+			sb.append("报告期:profitupbase[" + profitupbase + "(x5)] = ProfitUpYear[" + newOne.getProfitUpYear()
+					+ "] + ProfitUpQuarter[" + newOne.getProfitUpQuarter() + "] + ProfitUp2Quarter["
+					+ newOne.getProfitUp2Quarter() + "]");
+			sb.append("dividendbase = " + dividendbase);
+			sb.append("backbase = " + backbase);
+			sb.append("报告期:incomedownbase[" + incomedownbase + "(x-10)] = IncomeDownYear[" + newOne.getIncomeDownYear()
+					+ "] + IncomeDownQuarter[" + newOne.getIncomeDownQuarter() + "] + IncomeDown2Quarter["
+					+ newOne.getIncomeDown2Quarter() + "]");
+			sb.append("profitdownbase[" + profitdownbase + "(x-3)] = ProfitDownYear[" + newOne.getProfitDownYear()
+					+ "] + ProfitDownQuarter[" + newOne.getProfitDownQuarter() + "] + ProfitDown2Quarter["
+					+ newOne.getProfitDown2Quarter() + "]");
+			sb.append("pledgeRatio = " + pledgeRatio);
+			sb.append("shareFloat = " + shareFloat);
+			sb.append("up = " + up);
+			sb.append("down = " + down);
+			sb.append("业绩快报预告:kbyg = " + kbyg);
+			sb.append("最后分finals  = " + finals);
+		}
+
+		newOne.setScore(finals);
+		newOne.setUdpateDate(updatedate);
+		if (lastOne != null) {// 评分变化
+			newOne.setUpScore(finals - lastOne.getScore());
+		}
+
+		// copy history
+		CodeBaseModelHist hist = new CodeBaseModelHist();
+		BeanCopy.copy(newOne, hist);
+		newOne.setId(code);
+		hist.setId(code + treadeDate);
+		listm.add(newOne);
+		listh.add(hist);
 	}
 
 	private void processingFinance(CodeBaseModel base) {

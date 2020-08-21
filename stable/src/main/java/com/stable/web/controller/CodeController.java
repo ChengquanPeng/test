@@ -124,4 +124,19 @@ public class CodeController {
 		}
 		return ResponseEntity.ok(r);
 	}
+
+	@RequestMapping(value = "/showsorce/{code}", method = RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<JsonResult> showsorce(String code) {
+		JsonResult r = new JsonResult();
+		try {
+			r.setResult(codeModelService.run(code));
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
 }
