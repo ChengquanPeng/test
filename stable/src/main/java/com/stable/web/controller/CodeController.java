@@ -127,7 +127,7 @@ public class CodeController {
 
 	@RequestMapping(value = "/showsorce/{code}", method = RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<JsonResult> showsorce(String code) {
+	public ResponseEntity<JsonResult> showsorce(@PathVariable(value = "code") String code) {
 		JsonResult r = new JsonResult();
 		try {
 			r.setResult(codeModelService.run(code));

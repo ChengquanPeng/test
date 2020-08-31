@@ -1,9 +1,7 @@
 package com.stable.service;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -195,50 +193,34 @@ public class FinanceService {
 		return null;
 	}
 
-	Pageable pageable9999 = PageRequest.of(0, 9999);
-
-	public Map<String, FinYjkb> getLastFinaceKb(int date) {
-		Map<String, FinYjkb> res = new HashMap<String, FinYjkb>();
+	public FinYjkb getLastFinaceKbByReportDate(int currRptDate) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.rangeQuery("date").gte(date));
-		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		bqb.must(QueryBuilders.rangeQuery("date").gt(currRptDate));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.ASC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 
 		Page<FinYjkb> page = esFinYjkbDao.search(sq);
 		if (page != null && !page.isEmpty()) {
-			List<FinYjkb> list = page.getContent();
-			for (int i = 0; i < list.size(); i++) {
-				FinYjkb f = list.get(i);
-				if (!res.containsKey(f.getCode())) {// 只要最新的
-					res.put(f.getCode(), f);
-				}
-			}
+			return page.getContent().get(0);
 		}
-		return res;
+		return null;
 	}
 
-	public Map<String, FinYjyg> getLastFinaceYg(int date) {
-		Map<String, FinYjyg> res = new HashMap<String, FinYjyg>();
+	public FinYjyg getLastFinaceYgByReportDate(int currRptDate) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.rangeQuery("date").gte(date));
-		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		bqb.must(QueryBuilders.rangeQuery("date").gt(currRptDate));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.ASC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 
 		Page<FinYjyg> page = esFinYjygDao.search(sq);
 		if (page != null && !page.isEmpty()) {
-			List<FinYjyg> list = page.getContent();
-			for (int i = 0; i < list.size(); i++) {
-				FinYjyg f = list.get(i);
-				if (!res.containsKey(f.getCode())) {// 只要最新的
-					res.put(f.getCode(), f);
-				}
-			}
+			return page.getContent().get(0);
 		}
-		return res;
+		return null;
 	}
 
 	public void jobSpiderFirstFinaceHistoryInfo() {

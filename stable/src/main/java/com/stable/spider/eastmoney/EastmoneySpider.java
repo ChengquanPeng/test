@@ -224,156 +224,183 @@ public class EastmoneySpider {
 	}
 
 	private void getYjkbByPage(String date1, List<FinYjkb> list) {
-		ThreadsUtil.sleepRandomSecBetween1And5();
 		String last = redisUtil.get(RedisConstant.RDS_FIN_KUAIBAO_ + date1);
 		last = last == null ? "" : last;
 		String lastFromPage = null;
 		boolean chkIndor = true;
 
-		String url1 = getYjkbUrl(date1);
-		String result = HttpUtil.doGet2(url1);
-		result = result.substring("var BEzQbtii=".length());
-		result = result.substring(0, result.length() - 1);
-		JSONObject objects = JSON.parseObject(result);
+		int page = 1;
+		int trytime = 0;
+		do {
+			ThreadsUtil.sleepRandomSecBetween1And5();
+			String url1 = getYjkbUrl(date1, page);
+			String result = HttpUtil.doGet2(url1);
+			result = result.substring("var BEzQbtii=".length());
+			result = result.substring(0, result.length() - 1);
+			JSONObject objects = JSON.parseObject(result);
 
-		if (objects.getBooleanValue("success")) {
-			JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
-			for (int i = 0; i < datas.size(); i++) {
-				JSONObject data = datas.getJSONObject(i);
-				String date = data.getString("REPORT_DATE"); // 报告期
-				String anndate = data.getString("NOTICE_DATE"); // 公告日期
-				FinYjkb fy = new FinYjkb();
-				String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
-				int y = Integer.valueOf(datestr.substring(0, 4));
-				int m = Integer.valueOf(datestr.substring(4, 6));
-				int quarter = 0;
-				if (m == 12) {
-					quarter = 4;
-				} else if (m == 9) {
-					quarter = 3;
-				} else if (m == 6) {
-					quarter = 2;
-				} else if (m == 3) {
-					quarter = 1;
-				}
-				fy.setYear(y);
-				fy.setQuarter(quarter);
-				fy.setCode(data.getString("SECURITY_CODE"));
-				fy.setDate(Integer
-						.parseInt(DateUtil.formatYYYYMMDD(DateUtil.parseDate(anndate, DateUtil.YYYY_MM_DD_HH_MM_SS))));
+			if (objects.getBooleanValue("success")) {
+				JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
+				for (int i = 0; i < datas.size(); i++) {
+					JSONObject data = datas.getJSONObject(i);
+					String date = data.getString("REPORT_DATE"); // 报告期
+					// String anndate = data.getString("NOTICE_DATE"); // 公告日期
+					FinYjkb fy = new FinYjkb();
+					String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
+					int y = Integer.valueOf(datestr.substring(0, 4));
+					int m = Integer.valueOf(datestr.substring(4, 6));
+					int quarter = 0;
+					if (m == 12) {
+						quarter = 4;
+					} else if (m == 9) {
+						quarter = 3;
+					} else if (m == 6) {
+						quarter = 2;
+					} else if (m == 3) {
+						quarter = 1;
+					}
+					fy.setYear(y);
+					fy.setQuarter(quarter);
+					fy.setCode(data.getString("SECURITY_CODE"));
+					fy.setDate(Integer
+							.parseInt(DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS))));
 
-				try {
-					fy.setJlr(data.getLong("PARENT_NETPROFIT"));// 业绩
-				} catch (Exception e) {
-				}
-				try {
-					fy.setJlrtbzz(CurrencyUitl.roundHalfUp(data.getDoubleValue("JLRTBZCL")));// 业绩增长
-				} catch (Exception e) {
-				}
-				try {
-					fy.setYyzsr(data.getLong("TOTAL_OPERATE_INCOME"));// 营收
-				} catch (Exception e) {
-				}
-				try {
-					fy.setYyzsrtbzz(CurrencyUitl.roundHalfUp(data.getDoubleValue("YSTZ")));// 营收幅度
-				} catch (Exception e) {
-				}
-				fy.setId();
+					try {
+						fy.setJlr(data.getLong("PARENT_NETPROFIT"));// 业绩
+					} catch (Exception e) {
+					}
+					try {
+						fy.setJlrtbzz(CurrencyUitl.roundHalfUp(data.getDoubleValue("JLRTBZCL")));// 业绩增长
+					} catch (Exception e) {
+					}
+					try {
+						fy.setYyzsr(data.getLong("TOTAL_OPERATE_INCOME"));// 营收
+					} catch (Exception e) {
+					}
+					try {
+						fy.setYyzsrtbzz(CurrencyUitl.roundHalfUp(data.getDoubleValue("YSTZ")));// 营收幅度
+					} catch (Exception e) {
+					}
+					fy.setId();
 
-				if (chkIndor) {
-					if (last.equals(fy.getCode())) {
-						chkIndor = false;
-					} else {
-						list.add(fy);
+					if (chkIndor) {
+						if (last.equals(fy.getCode())) {
+							chkIndor = false;
+						} else {
+							list.add(fy);
+						}
+					}
+					if (lastFromPage == null) {
+						lastFromPage = fy.getCode();
 					}
 				}
-				if (lastFromPage == null) {
-					lastFromPage = fy.getCode();
+				page++;
+			} else {
+				trytime++;
+				if (trytime >= 3) {
+					chkIndor = false;
+				}
+				if (page > 1) {// 已经最后一页，无数据
+					chkIndor = false;
 				}
 			}
-		}
+		} while (chkIndor);
 		// 设置最新
 		if (lastFromPage != null) {
 			redisUtil.set(RedisConstant.RDS_FIN_KUAIBAO_ + date1, lastFromPage);
 		}
 	}
 
-	private String getYjkbUrl(String date) {
-		return "http://datacenter.eastmoney.com/api/data/get?type=RPT_FCI_PERFORMANCEE&sty=ALL&p=1&ps=50&st=UPDATE_DATE,SECURITY_CODE&sr=-1,-1&var=BEzQbtii&filter=(REPORT_DATE=%27"
-				+ date + "%27)&rt=" + System.currentTimeMillis();
+	private String getYjkbUrl(String date, int page) {
+		return "http://datacenter.eastmoney.com/api/data/get?type=RPT_FCI_PERFORMANCEE&sty=ALL&p=" + page
+				+ "&ps=5000&st=UPDATE_DATE,SECURITY_CODE&sr=-1,-1&var=BEzQbtii&filter=(REPORT_DATE=%27" + date
+				+ "%27)&rt=" + System.currentTimeMillis();
 	}
 
 	private void getYjygByPage(String date1, List<FinYjyg> list) {
-		ThreadsUtil.sleepRandomSecBetween1And5();
 		String last = redisUtil.get(RedisConstant.RDS_FIN_YUGAO_ + date1);
 		last = last == null ? "" : last;
 		String lastFromPage = null;
 		boolean chkIndor = true;
-
-		String url1 = getYjygUrl(date1);
-		String result = HttpUtil.doGet2(url1);
-		result = result.substring("var MRtZkjmw=".length());
-		result = result.substring(0, result.length() - 1);
-		JSONObject objects = JSON.parseObject(result);
-		if (objects.getBooleanValue("success")) {
-			JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
-			for (int i = 0; i < datas.size(); i++) {
-				JSONObject data = datas.getJSONObject(i);
-				String date = data.getString("REPORTDATE"); // 报告期
-				String anndate = data.getString("NOTICE_DATE"); // 公告日期
-				FinYjyg fy = new FinYjyg();
-				String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
-				int y = Integer.valueOf(datestr.substring(0, 4));
-				int m = Integer.valueOf(datestr.substring(4, 6));
-				int quarter = 0;
-				if (m == 12) {
-					quarter = 4;
-				} else if (m == 9) {
-					quarter = 3;
-				} else if (m == 6) {
-					quarter = 2;
-				} else if (m == 3) {
-					quarter = 1;
-				}
-				fy.setYear(y);
-				fy.setQuarter(quarter);
-				fy.setCode(data.getString("SECURITY_CODE"));
-				fy.setDate(Integer
-						.parseInt(DateUtil.formatYYYYMMDD(DateUtil.parseDate(anndate, DateUtil.YYYY_MM_DD_HH_MM_SS))));
-				try {
-					fy.setType(data.getString("FORECASTTYPE"));// 类型
-				} catch (Exception e) {
-				}
-				try {
-					fy.setJlr(data.getLong("FORECASTL"));// 业绩范围：FORECASTL-FORECASTT
-				} catch (Exception e) {
-				}
-				try {
-					fy.setJlrtbzz(data.getDoubleValue("INCREASET"));// 业绩变动幅度 INCREASET-FORECASTCONTENT
-				} catch (Exception e) {
-				}
-				fy.setId();
-				if (chkIndor) {
-					if (last.equals(fy.getCode())) {
-						chkIndor = false;
-					} else {
-						list.add(fy);
+		int page = 1;
+		int trytime = 0;
+		do {
+			ThreadsUtil.sleepRandomSecBetween1And5();
+			String url1 = getYjygUrl(date1, page);
+			String result = HttpUtil.doGet2(url1);
+			result = result.substring("var MRtZkjmw=".length());
+			result = result.substring(0, result.length() - 1);
+			JSONObject objects = JSON.parseObject(result);
+			if (objects.getBooleanValue("success")) {
+				JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
+				for (int i = 0; i < datas.size(); i++) {
+					JSONObject data = datas.getJSONObject(i);
+					String date = data.getString("REPORTDATE"); // 报告期
+//					String anndate = data.getString("NOTICE_DATE"); // 公告日期
+					FinYjyg fy = new FinYjyg();
+					String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
+					int y = Integer.valueOf(datestr.substring(0, 4));
+					int m = Integer.valueOf(datestr.substring(4, 6));
+					int quarter = 0;
+					if (m == 12) {
+						quarter = 4;
+					} else if (m == 9) {
+						quarter = 3;
+					} else if (m == 6) {
+						quarter = 2;
+					} else if (m == 3) {
+						quarter = 1;
+					}
+					fy.setYear(y);
+					fy.setQuarter(quarter);
+					fy.setCode(data.getString("SECURITY_CODE"));
+					fy.setDate(Integer
+							.parseInt(DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS))));
+					try {
+						fy.setType(data.getString("FORECASTTYPE"));// 类型
+					} catch (Exception e) {
+					}
+					try {
+						fy.setJlr(data.getLong("FORECASTL"));// 业绩范围：FORECASTL-FORECASTT
+					} catch (Exception e) {
+					}
+					try {
+						fy.setJlrtbzz(data.getDoubleValue("INCREASET"));// 业绩变动幅度 INCREASET-FORECASTCONTENT
+					} catch (Exception e) {
+					}
+					fy.setId();
+					if (chkIndor) {
+						if (last.equals(fy.getCode())) {
+							chkIndor = false;
+						} else {
+							list.add(fy);
+						}
+					}
+					if (lastFromPage == null) {
+						lastFromPage = fy.getCode();
 					}
 				}
-				if (lastFromPage == null) {
-					lastFromPage = fy.getCode();
+				page++;
+			} else {
+				trytime++;
+				if (trytime >= 3) {
+					chkIndor = false;
+				}
+				if (page > 1) {// 已经最后一页，无数据
+					chkIndor = false;
 				}
 			}
-		}
+		} while (chkIndor);
 		// 设置最新
 		if (lastFromPage != null) {
 			redisUtil.set(RedisConstant.RDS_FIN_YUGAO_ + date1, lastFromPage);
 		}
 	}
 
-	private String getYjygUrl(String date) {
-		return "http://datacenter.eastmoney.com/api/data/get?type=RPT_PUBLIC_OP_PREDICT&sty=ALL&p=1&ps=50&st=NOTICE_DATE,SECURITY_CODE&sr=-1,-1&var=MRtZkjmw&filter=(REPORTDATE=%27"
-				+ date + "%27)(IsLatest=%22T%22)&rt=" + System.currentTimeMillis();
+	private String getYjygUrl(String date, int page) {
+		return "http://datacenter.eastmoney.com/api/data/get?type=RPT_PUBLIC_OP_PREDICT&sty=ALL&p=" + page
+				+ "&ps=5000&st=NOTICE_DATE,SECURITY_CODE&sr=-1,-1&var=MRtZkjmw&filter=(REPORTDATE=%27" + date
+				+ "%27)(IsLatest=%22T%22)&rt=" + System.currentTimeMillis();
 	}
 
 	public static void main(String[] args) {

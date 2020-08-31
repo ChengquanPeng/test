@@ -155,6 +155,19 @@ public class DateUtil {
 		return 0;
 	}
 
+	public static int getDate(int year, int jidu) {
+		if (jidu == 1) {
+			return Integer.valueOf(year + "0331");
+		} else if (jidu == 2) {
+			return Integer.valueOf(year + "0630");
+		} else if (jidu == 3) {
+			return Integer.valueOf(year + "0930");
+		} else if (jidu == 4) {
+			return Integer.valueOf(year + "1231");
+		}
+		return 0;
+	}
+
 //去年
 	public static int getPreYear(int yyyyMMdd) {
 //		Date date = new Date();//获取当前时间    

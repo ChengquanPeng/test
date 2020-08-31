@@ -3,7 +3,6 @@ package com.stable.service.model;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -130,12 +129,9 @@ public class CodeModelService {
 		int oneYearAgo = DateUtil.getPreYear(treadeDate);
 		int nextYear = DateUtil.getNextYear(treadeDate);
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
-		int b30Date = Integer.valueOf(DateUtil.getBefor30DayYYYYMMDD(treadeDate));
-		Map<String, FinYjkb> kbmap = financeService.getLastFinaceKb(b30Date);
-		Map<String, FinYjyg> ygmap = financeService.getLastFinaceYg(b30Date);
 		for (StockBaseInfo s : codelist) {
 			try {
-				getSorce(s, treadeDate, oneYearAgo, nextYear, updatedate, kbmap, ygmap, listm, listh, true, null);
+				getSorce(s, treadeDate, oneYearAgo, nextYear, updatedate, listm, listh, true, null);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
 			}
@@ -155,13 +151,10 @@ public class CodeModelService {
 		List<CodeBaseModelHist> listh = new LinkedList<CodeBaseModelHist>();
 		int oneYearAgo = DateUtil.getPreYear(updatedate);
 		int nextYear = DateUtil.getNextYear(updatedate);
-		int b30Date = Integer.valueOf(DateUtil.getBefor30DayYYYYMMDD(updatedate));
-		Map<String, FinYjkb> kbmap = financeService.getLastFinaceKb(b30Date);
-		Map<String, FinYjyg> ygmap = financeService.getLastFinaceYg(b30Date);
 		StringBuffer res = new StringBuffer();
 		try {
 			StockBaseInfo s = JSON.parseObject(redisUtil.get(code), StockBaseInfo.class);
-			getSorce(s, updatedate, oneYearAgo, nextYear, updatedate, kbmap, ygmap, listm, listh, false, res);
+			getSorce(s, updatedate, oneYearAgo, nextYear, updatedate, listm, listh, false, res);
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, "", "", "");
 		}
@@ -169,8 +162,7 @@ public class CodeModelService {
 	}
 
 	private void getSorce(StockBaseInfo s, int treadeDate, int oneYearAgo, int nextYear, int updatedate,
-			Map<String, FinYjkb> kbmap, Map<String, FinYjyg> ygmap, List<CodeBaseModel> listm,
-			List<CodeBaseModelHist> listh, boolean isJob, StringBuffer sb) {
+			List<CodeBaseModel> listm, List<CodeBaseModelHist> listh, boolean isJob, StringBuffer sb) {
 
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
@@ -216,16 +208,20 @@ public class CodeModelService {
 			newOne.setFloatDate(sf.getFloatDate());// 解禁日期
 			newOne.setFloatRatio(sf.getFloatRatio());// 流通股份占总股本比率
 		}
+		int currRptDate = DateUtil.getDate(newOne.getCurrYear(), newOne.getCurrQuarter());
 		// 业绩快报(准确的)
-		FinYjkb yjkb = kbmap.get(code);
-		FinYjyg yjyg = ygmap.get(code);
+		FinYjkb yjkb = financeService.getLastFinaceKbByReportDate(currRptDate);
+		FinYjyg yjyg = financeService.getLastFinaceYgByReportDate(currRptDate);
 		boolean hasKb = false;
-		boolean hasyg = false;
 
 		newOne.setForestallYear(0);
 		newOne.setForestallQuarter(0);
 		newOne.setForestallIncomeTbzz(0);
 		newOne.setForestallProfitTbzz(0);
+
+		double ystbzz = fbi.getYyzsrtbzz();
+		double jltbzz = fbi.getGsjlrtbzz();
+
 		if (yjkb != null) {// 业绩快报(准确的)
 			if ((newOne.getCurrYear() == yjkb.getYear() && newOne.getCurrQuarter() < yjkb.getQuarter())// 同一年，季度大于
 					|| (yjkb.getYear() > newOne.getCurrYear())) {// 不同年
@@ -234,6 +230,12 @@ public class CodeModelService {
 				newOne.setForestallIncomeTbzz(yjkb.getYyzsrtbzz());
 				newOne.setForestallProfitTbzz(yjkb.getJlrtbzz());
 				hasKb = true;
+				if (yjkb.getYyzsrtbzz() != 0) {
+					ystbzz = yjkb.getYyzsrtbzz();
+				}
+				if (yjkb.getJlrtbzz() != 0) {
+					jltbzz = yjkb.getJlrtbzz();
+				}
 			}
 		}
 		// 业绩预告(类似天气预报，可能不准)
@@ -243,14 +245,10 @@ public class CodeModelService {
 				newOne.setForestallYear(yjyg.getYear());
 				newOne.setForestallQuarter(yjyg.getQuarter());
 				newOne.setForestallProfitTbzz(yjyg.getJlrtbzz());
-				hasyg = true;
+				if (yjyg.getJlrtbzz() != 0) {
+					jltbzz = yjyg.getJlrtbzz();
+				}
 			}
-		}
-
-		log.info("{},KeyString:{}", code, newOne.getKeyString());
-		if (isJob && lastOne != null && lastOne.getKeyString().equals(newOne.getKeyString())) {
-			log.info("{},lastOne equals newOne!", code);
-			return;
 		}
 
 		processingFinance(newOne);
@@ -269,14 +267,14 @@ public class CodeModelService {
 		// 利润(5)
 		int profitupbase = newOne.getProfitUpYear() + newOne.getProfitUpQuarter() + newOne.getProfitUp2Quarter();
 
-		// 分红(5)
+		// 分红(3)
 		int dividendbase = 0;
 		if (newOne.getLastDividendDate() != 0) {
 			dividendbase = 3;
 		} else {
 			dividendbase = -2;
 		}
-		// 回购(5)
+		// 回购(3)
 		int backbase = 0;
 		if (newOne.getLastBackDate() != 0) {
 			backbase = 3;
@@ -311,29 +309,42 @@ public class CodeModelService {
 		incomedownbase += incomedownbase * -10;
 		profitdownbase += profitdownbase * -3;
 
-		int kbyg = 0;
-		// 业绩加减分
-		if (hasKb) {
-			if (yjkb.getYyzsrtbzz() > 0) {
-				if (yjkb.getYyzsrtbzz() > 100) {
-					kbyg += 20;
-				} else {
-					kbyg += 10;
+		// 营收-业绩-按比例加减分
+		int yjsorce = 0;
+		if (ystbzz != 0) {
+			if (ystbzz > 0) {
+				if (ystbzz > 100) {
+					yjsorce += 10;
+				} else if (ystbzz > 40) {
+					yjsorce += 5;
 				}
 			} else {
-				kbyg += -10;
+				if (ystbzz < -100) {
+					yjsorce += -10;
+				} else if (ystbzz < -30) {
+					yjsorce += -5;
+				}
 			}
-		} else if (hasyg) {
-			if (yjyg.getJlrtbzz() > 0) {
-				kbyg += 5;
+		}
+		if (jltbzz != 0) {
+			if (jltbzz > 0) {
+				if (jltbzz > 100) {
+					yjsorce += 6;
+				} else if (jltbzz > 40) {
+					yjsorce += 3;
+				}
 			} else {
-				kbyg += -3;
+				if (jltbzz < -100) {
+					yjsorce += -5;
+				} else if (jltbzz < -30) {
+					yjsorce += -3;
+				}
 			}
 		}
 
 		int up = incomeupbase + profitupbase + dividendbase + backbase;
 		int down = incomedownbase + profitdownbase + pledgeRatio + shareFloat;
-		int finals = up + down + kbyg;
+		int finals = up + down + yjsorce;
 
 		if (sb != null) {
 			sb.append("报告期:incomeupbase[" + incomeupbase + "(x20)] = IncomeUpYear[" + newOne.getIncomeUpYear()
@@ -354,23 +365,30 @@ public class CodeModelService {
 			sb.append("shareFloat = " + shareFloat);
 			sb.append("up = " + up);
 			sb.append("down = " + down);
-			sb.append("业绩快报预告:kbyg = " + kbyg);
+			sb.append("业绩比例:yjsorce = " + yjsorce);
 			sb.append("最后分finals  = " + finals);
 		}
 
 		newOne.setScore(finals);
 		newOne.setUdpateDate(updatedate);
-		if (lastOne != null) {// 评分变化
-			newOne.setUpScore(finals - lastOne.getScore());
-		}
 
-		// copy history
-		CodeBaseModelHist hist = new CodeBaseModelHist();
-		BeanCopy.copy(newOne, hist);
-		newOne.setId(code);
-		hist.setId(code + treadeDate);
-		listm.add(newOne);
-		listh.add(hist);
+		boolean saveTodb = true;
+		if (lastOne != null) {// 评分变化
+			if (lastOne.getScore() == newOne.getScore()) {
+				saveTodb = false;
+			} else {
+				newOne.setUpScore(finals - lastOne.getScore());
+			}
+		}
+		if (saveTodb) {
+			// copy history
+			CodeBaseModelHist hist = new CodeBaseModelHist();
+			BeanCopy.copy(newOne, hist);
+			newOne.setId(code);
+			hist.setId(code + treadeDate);
+			listm.add(newOne);
+			listh.add(hist);
+		}
 	}
 
 	private void processingFinance(CodeBaseModel base) {
