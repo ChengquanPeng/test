@@ -83,6 +83,7 @@ public class HistTraceService {
 					if (array2 != null && array2.size() > 0) {
 						for (int ij = 0; ij < array2.size(); ij++) {
 							DaliyBasicInfo d2 = new DaliyBasicInfo(array2.getJSONArray(ij));
+							log.info("TraceSortv1Vo procssing code={},date={}", d2.getCode(), d2.getTrade_date());
 							double topPrice = CurrencyUitl.topPrice(d2.getYesterdayPrice(), false);// 涨停价格
 							if (topPrice == d2.getClose()) {// 涨停的票
 								if (d2.getOpen() == topPrice) {// 一字板
@@ -142,6 +143,7 @@ public class HistTraceService {
 										tv.setDaliyBasicInfo(d2);
 										tv.setFirstTopPrice(firstTopPrice);
 										samples.add(tv);
+										log.info("TraceSortv1Vo get sample:{}", tv);
 									}
 								}
 							}
