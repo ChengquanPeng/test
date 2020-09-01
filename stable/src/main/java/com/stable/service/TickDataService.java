@@ -464,7 +464,7 @@ public class TickDataService {
 		return true;
 	}
 
-	private List<String> getFromTushare(String code, int date) {
+	public List<String> getFromTushare(String code, int date) {
 		String params = code + " " + date;
 		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
 		// List<String> lines = PythonCallUtil.callPythonScriptByServerTickData(code,

@@ -29,8 +29,8 @@ public enum StockAType {
 
 	public static boolean isTop20(String code) {
 		StockAType sa = StockAType.formatCode(code);
-//		if (StockAType.KCB == sa || StockAType.CYB == sa) {
-		if (StockAType.KCB == sa) {
+		if (StockAType.KCB == sa || StockAType.CYB == sa) {
+//		if (StockAType.KCB == sa) {
 			return true;
 		}
 		return false;

@@ -154,12 +154,12 @@ public class UpModelLineService {
 		List<StockAvg> avgList = Collections.synchronizedList(new LinkedList<StockAvg>());
 		List<StrategyListener> models = new LinkedList<StrategyListener>();
 		StrategyListener v1 = new V1SortStrategyListener(treadeDate);
-		StrategyListener v2 = new V2SortStrategyListener(treadeDate);
-		StrategyListener v2p = new V2PRESortStrategyListener(treadeDate);
+		// StrategyListener v2 = new V2SortStrategyListener(treadeDate);
+		// StrategyListener v2p = new V2PRESortStrategyListener(treadeDate);
 
 		models.add(v1);
-		models.add(v2);
-		models.add(v2p);
+		// models.add(v2);
+		// models.add(v2p);
 		try {
 			Map<String, List<ConceptInfo>> gn = conceptService.getDailyMap(treadeDate);
 			int size = array.size();
@@ -219,25 +219,24 @@ public class UpModelLineService {
 					esModelV1Dao.saveAll(sort.getResultList());
 				}
 			}
-			if (isJob) {
-				if (v2p.getResultList().size() > 0) {
-					List<Monitoring> ml = new LinkedList<Monitoring>();
-					for (ModelV1 mv : v2p.getResultList()) {
-						Monitoring mt = new Monitoring();
-						mt.setCode(mv.getCode());
-						mt.setBuy(1);
-						mt.setReqBuyDate(treadeDate);
-						ml.add(mt);
-					}
-					if (ml.size() > 0) {
-						monitoringDao.saveAll(ml);
-					}
-				}
-			}
+//			if (isJob) {
+//				if (v2p.getResultList().size() > 0) {
+//					List<Monitoring> ml = new LinkedList<Monitoring>();
+//					for (ModelV1 mv : v2p.getResultList()) {
+//						Monitoring mt = new Monitoring();
+//						mt.setCode(mv.getCode());
+//						mt.setBuy(1);
+//						mt.setReqBuyDate(treadeDate);
+//						ml.add(mt);
+//					}
+//					if (ml.size() > 0) {
+//						monitoringDao.saveAll(ml);
+//					}
+//				}
+//			}
 			log.info("MV1模型执行完成");
 			WxPushUtil.pushSystem1("Seq4=> " + treadeDate + " -> MV模型执行完成！ 开始时间:" + startTime + " 结束时间："
-					+ DateUtil.getTodayYYYYMMDDHHMMSS() + ",V1 cnt:" + v1.getResultList().size() + ",V2 cnt:"
-					+ v2.getResultList().size() + ",V2PRE cnt:" + v2p.getResultList().size());
+					+ DateUtil.getTodayYYYYMMDDHHMMSS());
 		} catch (Exception e) {
 			if (avgList.size() > 0) {
 				avgService.saveStockAvg(avgList);
@@ -282,7 +281,7 @@ public class UpModelLineService {
 			// 1强势:次数和差值:3/5/10/20/120/250天
 			linePrice = new LinePrice(strongService, cxt, dailyList, lineAvgPrice.todayAv, lastDate,
 					Integer.valueOf(lastDividendDate), daliyTradeHistroyService);
-			lineVol = new LineVol(cxt, dailyList);
+			lineVol = new LineVol(dailyList);
 			// 2交易方向:次数和差值:3/5/10/20/120/250天
 			// 3程序单:次数:3/5/10/20/120/250天
 			lineTickData = new LineTickData(cxt, dailyList, tickDataService);

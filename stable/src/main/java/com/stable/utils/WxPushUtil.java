@@ -28,7 +28,7 @@ public class WxPushUtil {
 		WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, true, null);
 	}
 
-	public final static void pushSystem2(String content) {
+	public final static void pushSystem2Html(String content) {
 		WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, true, null);
 	}
 

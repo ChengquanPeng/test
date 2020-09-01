@@ -2,14 +2,13 @@ package com.stable.service.model.data;
 
 import java.util.List;
 
-import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
 
 public class LineVol {
 
 	private List<DaliyBasicInfo> dailyList;
 
-	public LineVol(ModelContext cxt, List<DaliyBasicInfo> dailyList) {
+	public LineVol(List<DaliyBasicInfo> dailyList) {
 		this.dailyList = dailyList;
 	}
 
@@ -91,5 +90,26 @@ public class LineVol {
 			}
 		}
 		return r;
+	}
+
+	public boolean isShortVol() {
+		DaliyBasicInfo d0 = dailyList.get(0);
+		DaliyBasicInfo d1 = dailyList.get(1);
+		DaliyBasicInfo d2 = dailyList.get(2);
+		DaliyBasicInfo d3 = dailyList.get(3);
+
+		long avg = (d1.getVol() + d2.getVol() + d3.getVol()) / 3;
+		if (d0.getVol() < avg) {
+			return true;
+		}
+		long top = Long.valueOf(((Double) (avg * 1.3)).longValue());
+		if (d0.getVol() < top) {
+			return true;
+		}
+		return false;
+	}
+
+	public static void main(String[] args) {
+		System.err.println();
 	}
 }

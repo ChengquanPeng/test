@@ -214,7 +214,7 @@ public class MonitoringService {
 				index++;
 			}
 		}
-		WxPushUtil.pushSystem2(sb.toString());
+		WxPushUtil.pushSystem2Html(sb.toString());
 	}
 
 	public void stopThread(String code) {
