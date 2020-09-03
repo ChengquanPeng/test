@@ -955,12 +955,12 @@ public class TickDataService {
 		return null;
 	}
 
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	SimpleDateFormat sdf2 = new SimpleDateFormat("HHmmss");
 	long diff1 = 5 * 60 * 1000;
 	long diff2 = (90 * 60 * 1000) + diff1;
 
 	private int getBeforeTime(String HHmmss) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf2 = new SimpleDateFormat("HHmmss");
 		try {
 			Date clockInTime = sdf.parse("1970-01-01 " + HHmmss);
 			Date nowTime = new Date(clockInTime.getTime() - diff1);
