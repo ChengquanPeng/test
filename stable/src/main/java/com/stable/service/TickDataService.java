@@ -1,7 +1,10 @@
 package com.stable.service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -31,6 +34,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
@@ -38,7 +42,9 @@ import com.stable.enums.StockAType;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.job.MyCallable;
+import com.stable.service.model.data.LineVol;
 import com.stable.spider.eastmoney.EastmoneySpider;
+import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -54,6 +60,7 @@ import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TickData;
 import com.stable.vo.bus.TickDataBuySellInfo;
 import com.stable.vo.http.resp.TickDataBuySellInfoResp;
+import com.stable.vo.retrace.TraceSortv1Vo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.Data;
@@ -78,6 +85,8 @@ public class TickDataService {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private TradeCalService tradeCalService;
+	@Autowired
+	private TushareSpider tushareSpider;
 
 	public static final Semaphore semp = new Semaphore(1);
 
@@ -147,7 +156,7 @@ public class TickDataService {
 		} else {
 			updateStartDateOnline(startDate);
 		}
-
+		List<TraceSortv1Vo> listsv = new LinkedList<TraceSortv1Vo>();
 		ListenableFuture<Object> lis = TasksWorker.getInstance().getService().submit(
 				new MyCallable(RunLogBizTypeEnum.TICK_DATA, RunCycleEnum.MANUAL, code + " " + date + " " + all) {
 					public Integer mycall() {
@@ -194,7 +203,7 @@ public class TickDataService {
 												try {
 													log.info("running code:{},index:{}", d.getCode(), index);
 													int fetchResult = 0;
-													if (sumTickData(todaydate, todayAlready, d, html)) {
+													if (sumTickData(todaydate, todayAlready, d, html, listsv)) {
 														fetchResult = 1;
 														aiCnt.incrementAndGet();
 													}
@@ -250,6 +259,7 @@ public class TickDataService {
 			log.info("等待任务执行完成");
 			int succCnt = (Integer) lis.get();
 			log.info("Final succCnt:" + succCnt);
+			processSortv1(listsv);
 			if (isJobSource) {
 				log.info("等待每日交易(复权执行)完成。。");
 				daliyBasicHistroyService.nextTradeHistroyJob();
@@ -391,6 +401,7 @@ public class TickDataService {
 	public void fetchTickDataFromEasyMoney() {
 		List<TickDataBuySellInfo> esList = Collections.synchronizedList(new ArrayList<TickDataBuySellInfo>());
 		try {
+			List<TraceSortv1Vo> listsv = new LinkedList<TraceSortv1Vo>();
 			int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 			if (tradeCalService.isOpen(date)) {
 				EsQueryPageReq queryPage = new EsQueryPageReq(9000);
@@ -407,7 +418,7 @@ public class TickDataService {
 					List<String> lines = EastmoneySpider.getRealtimeTickByJob(d.getCode());
 					if (lines != null) {
 						TickDataBuySellInfo ts = this.sumTickData(d.getCode(), date, d.getYesterdayPrice(),
-								d.getCirc_mv(), 0, lines, false);
+								d.getCirc_mv(), 0, lines, false, listsv);
 						if (ts != null) {
 							esList.add(ts);
 							succ++;
@@ -416,6 +427,7 @@ public class TickDataService {
 					index++;
 				}
 				WxPushUtil.pushSystem1("东方财富完成tickdata获取,total succ=" + succ);
+				processSortv1(listsv);
 			} else {
 				log.info("now={}非工作日", date);
 			}
@@ -426,10 +438,23 @@ public class TickDataService {
 		}
 	}
 
+	private void processSortv1(List<TraceSortv1Vo> listsv) {
+		if (listsv.size() > 0) {
+			StringBuffer sb = new StringBuffer();
+			for (TraceSortv1Vo sv : listsv) {
+				String s = sv.toDetailStrShow();
+				log.info(s);
+				sb.append(s).append(",");
+			}
+			WxPushUtil.pushSystem1("急速拉板的分时分析结果[" + listsv.size() + "]:" + sb.toString());
+		}
+	}
+
 	/**
 	 * 统计每天
 	 */
-	public boolean sumTickData(int todaydate, Map<String, Integer> todayAlready, DaliyBasicInfo base, boolean html) {
+	public boolean sumTickData(int todaydate, Map<String, Integer> todayAlready, DaliyBasicInfo base, boolean html,
+			List<TraceSortv1Vo> listsv) {
 		// 获取日线交易数据
 		daliyBasicHistroyService.getDailyData(base);
 
@@ -456,7 +481,8 @@ public class TickDataService {
 		// ThreadsUtil.sleepRandomSecBetween1And2();
 		double yesterdayPrice = base.getYesterdayPrice();
 		double circMv = base.getCirc_mv();
-		TickDataBuySellInfo tickdatasum = this.sumTickData(code, date, yesterdayPrice, circMv, source, lines, html);
+		TickDataBuySellInfo tickdatasum = this.sumTickData(code, date, yesterdayPrice, circMv, source, lines, html,
+				listsv);
 		if (tickdatasum != null) {
 			tickdataList.add(tickdatasum);
 		}
@@ -502,7 +528,7 @@ public class TickDataService {
 	}
 
 	private TickDataBuySellInfo sumTickData(String code, int date, double yesterdayPrice, double circMv, int source,
-			List<String> lines, boolean html) {
+			List<String> lines, boolean html, List<TraceSortv1Vo> listsv) {
 		List<TickData> tds = new ArrayList<TickData>();
 		for (String line : lines) {
 			TickData td = null;
@@ -514,6 +540,14 @@ public class TickDataService {
 			if (td != null) {
 				tds.add(td);
 			}
+		}
+		try {
+			TraceSortv1Vo sv = this.check(code, date + "", null);
+			if (sv != null) {
+				listsv.add(sv);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		log.info("source:{},{} {} 获取到Tick数据条数:{}", source == 0 ? "东方财富" : "tushare", code, date, tds.size());
 		return sumTickData2(code, date, yesterdayPrice, circMv, tds, html);
@@ -825,5 +859,121 @@ public class TickDataService {
 			}
 			return s + "";
 		}
+	}
+
+	EsQueryPageReq queryPage = new EsQueryPageReq(10);
+
+	public TraceSortv1Vo check(String code, String trade_date, DaliyBasicInfo d2) {
+		double topPrice = 0.0;
+		if (d2 == null) {
+			d2 = new DaliyBasicInfo();
+			d2.setCode(code);
+			JSONArray array2 = tushareSpider.getStockDaliyTrade(code, trade_date, null, null);
+			d2.daily(array2.getJSONArray(0));
+
+			if (StockAType.isTop20(code)) {// 科创板20%涨跌幅
+				topPrice = CurrencyUitl.topPrice20(d2.getYesterdayPrice());
+			} else {
+				topPrice = CurrencyUitl.topPrice(d2.getYesterdayPrice(), false);
+			}
+		} else {
+			topPrice = CurrencyUitl.topPrice(d2.getYesterdayPrice(), false);// 涨停价格/历史记录
+		}
+
+		if (topPrice == d2.getClose()) {// 涨停的票
+			if (d2.getOpen() == topPrice) {// 一字板
+				log.info("TraceSortv1Vo procssing key={}{},一字板", d2.getCode(), d2.getTrade_date());
+				return null;
+			}
+			if (d2.getOpen() > CurrencyUitl.topPrice(d2.getYesterdayPrice(), true)) {// 开盘超过5%
+				log.info("TraceSortv1Vo procssing key={}{},开盘超5%", d2.getCode(), d2.getTrade_date());
+				return null;
+			}
+
+			List<DaliyBasicInfo> dailyList = daliyBasicHistroyService.queryListByCode(d2.getCode(), 0,
+					d2.getTrade_date(), queryPage, SortOrder.DESC);
+			LineVol lineVol = new LineVol(dailyList);
+			if (!lineVol.isShortVol()) {// 缩量?
+				log.info("TraceSortv1Vo procssing key={}{},未缩量", d2.getCode(), d2.getTrade_date());
+				return null;
+			}
+			// 未开板
+			List<String> lines = this.getFromTushare(d2.getCode(), d2.getTrade_date());
+			if (lines != null && lines.size() > 10) {
+				boolean checkPriceOpen = true;
+				List<TickData> tds = new LinkedList<TickData>();
+				for (String line : lines) {
+					tds.add(TickDataUitl.getDataObjectFromTushare(line));
+				}
+
+				// 第一次涨停价格
+				TickData firstTopPrice = null;
+				for (int i = 0; i < tds.size(); i++) {
+					TickData td = tds.get(i);
+					if (td.getPrice() == d2.getClose()) {
+						firstTopPrice = td;
+						break;
+					}
+				}
+				// 涨停之前的5分钟价格
+				int chkstime = getBeforeTime(firstTopPrice.getTime());
+				int chketime = firstTopPrice.getInttime();
+				List<TickData> befor5List = new LinkedList<TickData>();
+				for (int i = 0; i < tds.size(); i++) {
+					TickData td = tds.get(i);
+					if (td.getInttime() >= chkstime && td.getInttime() <= chketime) {
+						befor5List.add(td);
+					}
+					if (td.getInttime() > chketime && td.getPrice() < topPrice) {
+						checkPriceOpen = false;
+						break;
+					}
+				}
+				// 未开版
+				if (!checkPriceOpen) {
+					log.info("TraceSortv1Vo procssing key={}{},开板了", d2.getCode(), d2.getTrade_date());
+					return null;
+				}
+
+				double min = befor5List.stream().min(Comparator.comparingDouble(TickData::getPrice)).get().getPrice();
+				if (topPrice > CurrencyUitl.topPrice(min, true)) {// 是否5分钟之内涨停超过5%涨停？
+					TraceSortv1Vo tv = new TraceSortv1Vo();
+					tv.setDaliyBasicInfo(d2);
+					tv.setFirstTopPrice(firstTopPrice);
+					log.info("TraceSortv1Vo get sample:{}", tv);
+					return tv;
+				} else {
+					log.info("TraceSortv1Vo procssing key={}{},未在5分钟整幅未超5%,{},{}", d2.getCode(), d2.getTrade_date(),
+							chkstime, chketime);
+				}
+			} else {
+				log.info("TraceSortv1Vo procssing key={}{},未获取到分时", d2.getCode(), d2.getTrade_date());
+			}
+		} else {
+			log.info("TraceSortv1Vo procssing key={}{},未涨停,{}", d2.getCode(), d2.getTrade_date(), topPrice);
+		}
+		return null;
+	}
+
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	SimpleDateFormat sdf2 = new SimpleDateFormat("HHmmss");
+	long diff1 = 5 * 60 * 1000;
+	long diff2 = (90 * 60 * 1000) + diff1;
+
+	private int getBeforeTime(String HHmmss) {
+		try {
+			Date clockInTime = sdf.parse("1970-01-01 " + HHmmss);
+			Date nowTime = new Date(clockInTime.getTime() - diff1);
+			int r1 = Integer.valueOf(sdf2.format(nowTime));
+			if (r1 > 113001 && r1 < 130000) {// 调过午休时间s
+				Date nowTime2 = new Date(clockInTime.getTime() - diff2);
+				return Integer.valueOf(sdf2.format(nowTime2));
+			} else {
+				return r1;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return Integer.valueOf(HHmmss);
 	}
 }

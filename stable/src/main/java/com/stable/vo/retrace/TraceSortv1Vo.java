@@ -16,4 +16,8 @@ public class TraceSortv1Vo {
 		return "TraceSortv1Vo:" + daliyBasicInfo.getCode() + "," + daliyBasicInfo.getTrade_date() + ",买入?" + buyed
 				+ ",盈利?" + isOk;
 	}
+
+	public String toDetailStrShow() {
+		return daliyBasicInfo.getCode() + "@" + daliyBasicInfo.getTrade_date();
+	}
 }

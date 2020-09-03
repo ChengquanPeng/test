@@ -157,10 +157,18 @@ public class TushareSpider {
 	public JSONArray getStockDaliyTrade(String ts_code, String trade_date, String start_date, String end_date) {
 		try {
 			StockDaliyReq req = new StockDaliyReq();
-			req.setTs_code(ts_code);
-			req.setStart_date(start_date);
-			req.setTrade_date(trade_date);
-			req.setEnd_date(end_date);
+			if (StringUtils.isNotBlank(ts_code)) {
+				req.setTs_code(ts_code);
+			}
+			if (StringUtils.isNotBlank(trade_date)) {
+				req.setTrade_date(trade_date);
+			}
+			if (StringUtils.isNotBlank(start_date)) {
+				req.setStart_date(start_date);
+			}
+			if (StringUtils.isNotBlank(end_date)) {
+				req.setEnd_date(end_date);
+			}
 
 			JSONObject json = new JSONObject();
 			json.put("api_name", "daily");

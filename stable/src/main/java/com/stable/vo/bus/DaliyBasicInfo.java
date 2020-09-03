@@ -172,11 +172,11 @@ public class DaliyBasicInfo extends EsBase {
 	public void daily(JSONArray arr) {
 		int i = 0;
 		arr.getString(i++);// ts_code
-		arr.getString(i++);// date
+		this.trade_date = Integer.valueOf(arr.getString(i++));
 		this.open = Double.valueOf(arr.getString(i++));
 		this.high = Double.valueOf(arr.getString(i++));
 		this.low = Double.valueOf(arr.getString(i++));
-		arr.getString(i++);// close
+		this.close = Double.valueOf(arr.getString(i++));// close
 		this.yesterdayPrice = Double.valueOf(arr.getString(i++));// pre_close
 		this.todayChange = Double.valueOf(arr.getString(i++));// change
 		this.todayChangeRate = Double.valueOf(arr.getString(i++));// pct_chg
