@@ -864,93 +864,99 @@ public class TickDataService {
 	EsQueryPageReq queryPage = new EsQueryPageReq(10);
 
 	public TraceSortv1Vo check(String code, String trade_date, DaliyBasicInfo d2) {
-		double topPrice = 0.0;
-		if (d2 == null) {
-			d2 = new DaliyBasicInfo();
-			d2.setCode(code);
-			JSONArray array2 = tushareSpider.getStockDaliyTrade(code, trade_date, null, null);
-			d2.daily(array2.getJSONArray(0));
+		try {
+			double topPrice = 0.0;
+			if (d2 == null) {
+				d2 = new DaliyBasicInfo();
+				d2.setCode(code);
+				JSONArray array2 = tushareSpider.getStockDaliyTrade(code, trade_date, null, null);
+				d2.daily(array2.getJSONArray(0));
 
-			if (StockAType.isTop20(code)) {// 科创板20%涨跌幅
-				topPrice = CurrencyUitl.topPrice20(d2.getYesterdayPrice());
+				if (StockAType.isTop20(code)) {// 科创板20%涨跌幅
+					topPrice = CurrencyUitl.topPrice20(d2.getYesterdayPrice());
+				} else {
+					topPrice = CurrencyUitl.topPrice(d2.getYesterdayPrice(), false);
+				}
 			} else {
-				topPrice = CurrencyUitl.topPrice(d2.getYesterdayPrice(), false);
-			}
-		} else {
-			topPrice = CurrencyUitl.topPrice(d2.getYesterdayPrice(), false);// 涨停价格/历史记录
-		}
-
-		if (topPrice == d2.getClose()) {// 涨停的票
-			if (d2.getOpen() == topPrice) {// 一字板
-				log.info("TraceSortv1Vo procssing key={}{},一字板", d2.getCode(), d2.getTrade_date());
-				return null;
-			}
-			if (d2.getOpen() > CurrencyUitl.topPrice(d2.getYesterdayPrice(), true)) {// 开盘超过5%
-				log.info("TraceSortv1Vo procssing key={}{},开盘超5%", d2.getCode(), d2.getTrade_date());
-				return null;
+				topPrice = CurrencyUitl.topPrice(d2.getYesterdayPrice(), false);// 涨停价格/历史记录
 			}
 
-			List<DaliyBasicInfo> dailyList = daliyBasicHistroyService.queryListByCode(d2.getCode(), 0,
-					d2.getTrade_date(), queryPage, SortOrder.DESC);
-			LineVol lineVol = new LineVol(dailyList);
-			if (!lineVol.isShortVol()) {// 缩量?
-				log.info("TraceSortv1Vo procssing key={}{},未缩量", d2.getCode(), d2.getTrade_date());
-				return null;
-			}
-			// 未开板
-			List<String> lines = this.getFromTushare(d2.getCode(), d2.getTrade_date());
-			if (lines != null && lines.size() > 10) {
-				boolean checkPriceOpen = true;
-				List<TickData> tds = new LinkedList<TickData>();
-				for (String line : lines) {
-					tds.add(TickDataUitl.getDataObjectFromTushare(line));
+			if (topPrice == d2.getClose()) {// 涨停的票
+				if (d2.getOpen() == topPrice) {// 一字板
+					log.info("TraceSortv1Vo procssing key={}{},一字板", d2.getCode(), d2.getTrade_date());
+					return null;
 				}
-
-				// 第一次涨停价格
-				TickData firstTopPrice = null;
-				for (int i = 0; i < tds.size(); i++) {
-					TickData td = tds.get(i);
-					if (td.getPrice() == d2.getClose()) {
-						firstTopPrice = td;
-						break;
-					}
-				}
-				// 涨停之前的5分钟价格
-				int chkstime = getBeforeTime(firstTopPrice.getTime());
-				int chketime = firstTopPrice.getInttime();
-				List<TickData> befor5List = new LinkedList<TickData>();
-				for (int i = 0; i < tds.size(); i++) {
-					TickData td = tds.get(i);
-					if (td.getInttime() >= chkstime && td.getInttime() <= chketime) {
-						befor5List.add(td);
-					}
-					if (td.getInttime() > chketime && td.getPrice() < topPrice) {
-						checkPriceOpen = false;
-						break;
-					}
-				}
-				// 未开版
-				if (!checkPriceOpen) {
-					log.info("TraceSortv1Vo procssing key={}{},开板了", d2.getCode(), d2.getTrade_date());
+				if (d2.getOpen() > CurrencyUitl.topPrice(d2.getYesterdayPrice(), true)) {// 开盘超过5%
+					log.info("TraceSortv1Vo procssing key={}{},开盘超5%", d2.getCode(), d2.getTrade_date());
 					return null;
 				}
 
-				double min = befor5List.stream().min(Comparator.comparingDouble(TickData::getPrice)).get().getPrice();
-				if (topPrice > CurrencyUitl.topPrice(min, true)) {// 是否5分钟之内涨停超过5%涨停？
-					TraceSortv1Vo tv = new TraceSortv1Vo();
-					tv.setDaliyBasicInfo(d2);
-					tv.setFirstTopPrice(firstTopPrice);
-					log.info("TraceSortv1Vo get sample:{}", tv);
-					return tv;
+				List<DaliyBasicInfo> dailyList = daliyBasicHistroyService.queryListByCode(d2.getCode(), 0,
+						d2.getTrade_date(), queryPage, SortOrder.DESC);
+				LineVol lineVol = new LineVol(dailyList);
+				if (!lineVol.isShortVol()) {// 缩量?
+					log.info("TraceSortv1Vo procssing key={}{},未缩量", d2.getCode(), d2.getTrade_date());
+					return null;
+				}
+				// 未开板
+				List<String> lines = this.getFromTushare(d2.getCode(), d2.getTrade_date());
+				if (lines != null && lines.size() > 10) {
+					boolean checkPriceOpen = true;
+					List<TickData> tds = new LinkedList<TickData>();
+					for (String line : lines) {
+						tds.add(TickDataUitl.getDataObjectFromTushare(line));
+					}
+
+					// 第一次涨停价格
+					TickData firstTopPrice = null;
+					for (int i = 0; i < tds.size(); i++) {
+						TickData td = tds.get(i);
+						if (td.getPrice() == d2.getClose()) {
+							firstTopPrice = td;
+							break;
+						}
+					}
+					// 涨停之前的5分钟价格
+					int chkstime = getBeforeTime(firstTopPrice.getTime());
+					int chketime = firstTopPrice.getInttime();
+					List<TickData> befor5List = new LinkedList<TickData>();
+					for (int i = 0; i < tds.size(); i++) {
+						TickData td = tds.get(i);
+						if (td.getInttime() >= chkstime && td.getInttime() <= chketime) {
+							befor5List.add(td);
+						}
+						if (td.getInttime() > chketime && td.getPrice() < topPrice) {
+							checkPriceOpen = false;
+							break;
+						}
+					}
+					// 未开版
+					if (!checkPriceOpen) {
+						log.info("TraceSortv1Vo procssing key={}{},开板了", d2.getCode(), d2.getTrade_date());
+						return null;
+					}
+
+					double min = befor5List.stream().min(Comparator.comparingDouble(TickData::getPrice)).get()
+							.getPrice();
+					if (topPrice > CurrencyUitl.topPrice(min, true)) {// 是否5分钟之内涨停超过5%涨停？
+						TraceSortv1Vo tv = new TraceSortv1Vo();
+						tv.setDaliyBasicInfo(d2);
+						tv.setFirstTopPrice(firstTopPrice);
+						log.info("TraceSortv1Vo get sample:{}", tv);
+						return tv;
+					} else {
+						log.info("TraceSortv1Vo procssing key={}{},未在5分钟整幅未超5%,{},{}", d2.getCode(), d2.getTrade_date(),
+								chkstime, chketime);
+					}
 				} else {
-					log.info("TraceSortv1Vo procssing key={}{},未在5分钟整幅未超5%,{},{}", d2.getCode(), d2.getTrade_date(),
-							chkstime, chketime);
+					log.info("TraceSortv1Vo procssing key={}{},未获取到分时", d2.getCode(), d2.getTrade_date());
 				}
 			} else {
-				log.info("TraceSortv1Vo procssing key={}{},未获取到分时", d2.getCode(), d2.getTrade_date());
+				log.info("TraceSortv1Vo procssing key={}{},未涨停,{}", d2.getCode(), d2.getTrade_date(), topPrice);
 			}
-		} else {
-			log.info("TraceSortv1Vo procssing key={}{},未涨停,{}", d2.getCode(), d2.getTrade_date(), topPrice);
+		} catch (Exception e) {
+			ErrorLogFileUitl.writeError(e, code, trade_date, ((d2 != null ? d2.getTrade_date() + "" : "")));
+			e.printStackTrace();
 		}
 		return null;
 	}

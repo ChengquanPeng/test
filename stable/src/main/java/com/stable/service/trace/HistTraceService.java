@@ -85,25 +85,31 @@ public class HistTraceService {
 					}
 
 				} catch (Exception e) {
-					ErrorLogFileUitl.writeError(e, "", "", "");
+					ErrorLogFileUitl.writeError(e, s.getCode(), startDate, startDate);
 				}
 				ThreadsUtil.thsSleepRandom();
 			}
 
 			log.info("获取样本数:" + samples.size());
 			for (TraceSortv1Vo t1 : samples) {
-				List<DaliyBasicInfo> dailyList = daliyBasicHistroyService.queryListByCode(
-						t1.getDaliyBasicInfo().getCode(), t1.getDaliyBasicInfo().getTrade_date(), 0, queryPage,
-						SortOrder.ASC);
-				// i=0;是涨停当天
-				DaliyBasicInfo d1 = dailyList.get(1);// 第二天
-				double topPrice = CurrencyUitl.topPrice(d1.getYesterdayPrice(), false);
-				if (topPrice > d1.getOpen()) {
-					t1.setBuyed(true);
-					DaliyBasicInfo d2 = dailyList.get(2);// 第三天开盘价或者收盘价>第二天集合竞价的买入价
-					if (d2.getOpen() > d1.getOpen() || d2.getClose() > d1.getOpen()) {
-						t1.setOk(true);
+				try {
+					List<DaliyBasicInfo> dailyList = daliyBasicHistroyService.queryListByCode(
+							t1.getDaliyBasicInfo().getCode(), t1.getDaliyBasicInfo().getTrade_date(), 0, queryPage,
+							SortOrder.ASC);
+					// i=0;是涨停当天
+					DaliyBasicInfo d1 = dailyList.get(1);// 第二天
+					double topPrice = CurrencyUitl.topPrice(d1.getYesterdayPrice(), false);
+					if (topPrice > d1.getOpen()) {
+						t1.setBuyed(true);
+						DaliyBasicInfo d2 = dailyList.get(2);// 第三天开盘价或者收盘价>第二天集合竞价的买入价
+						if (d2.getOpen() > d1.getOpen() || d2.getClose() > d1.getOpen()) {
+							t1.setOk(true);
+						}
 					}
+				} catch (Exception e) {
+					ErrorLogFileUitl.writeError(e, t1.getDaliyBasicInfo().getCode(),
+							t1.getDaliyBasicInfo().getTrade_date() + "", "");
+					e.printStackTrace();
 				}
 			}
 
