@@ -381,8 +381,8 @@ public class CodeModelService {
 		newOne.setUdpateDate(updatedate);
 
 		boolean saveTodb = true;
-		if (lastOne != null) {// 评分变化
-			if (lastOne.getScore() == newOne.getScore()) {
+		if (lastOne != null) {// 评分变化和季度
+			if (lastOne.getScore() == newOne.getScore() && lastOne.getCurrQuarter() == newOne.getCurrQuarter()) {
 				saveTodb = false;
 			} else {
 				newOne.setUpScore(finals - lastOne.getScore());
