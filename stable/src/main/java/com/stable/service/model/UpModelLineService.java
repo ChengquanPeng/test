@@ -153,13 +153,16 @@ public class UpModelLineService {
 		}
 		List<StockAvg> avgList = Collections.synchronizedList(new LinkedList<StockAvg>());
 		List<StrategyListener> models = new LinkedList<StrategyListener>();
-		StrategyListener v1 = new V1SortStrategyListener(treadeDate);
+		// StrategyListener v1 = new V1SortStrategyListener(treadeDate);
 		// StrategyListener v2 = new V2SortStrategyListener(treadeDate);
 		// StrategyListener v2p = new V2PRESortStrategyListener(treadeDate);
 
-		models.add(v1);
+		// models.add(v1);
 		// models.add(v2);
 		// models.add(v2p);
+		if (models.size() <= 0) {
+			return;
+		}
 		try {
 			Map<String, List<ConceptInfo>> gn = conceptService.getDailyMap(treadeDate);
 			int size = array.size();

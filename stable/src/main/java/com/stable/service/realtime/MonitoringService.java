@@ -72,6 +72,9 @@ public class MonitoringService {
 	private Map<String, RealtimeDetailsAnalyzer> map = null;
 
 	public synchronized void startObservable() {
+		if (1 == 1) {
+			return;
+		}
 		String date = DateUtil.getTodayYYYYMMDD();
 		int idate = Integer.valueOf(date);
 		if (!tradeCalService.isOpen(idate)) {

@@ -23,6 +23,8 @@ import com.alibaba.fastjson.JSON;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsCodeBaseModelDao;
 import com.stable.es.dao.base.EsCodeBaseModelHistDao;
+import com.stable.es.dao.base.EsCodeConceptDao;
+import com.stable.es.dao.base.EsConceptDao;
 import com.stable.service.BuyBackService;
 import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
@@ -39,6 +41,8 @@ import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
+import com.stable.vo.bus.CodeConcept;
+import com.stable.vo.bus.Concept;
 import com.stable.vo.bus.DividendHistory;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
@@ -75,6 +79,10 @@ public class CodeModelService {
 	private ShareFloatService shareFloatService;
 	@Autowired
 	private TradeCalService tradeCalService;
+	@Autowired
+	private EsConceptDao esConceptDao;
+	@Autowired
+	private EsCodeConceptDao esCodeConceptDao;
 
 	private final EsQueryPageReq queryPage8 = new EsQueryPageReq(8);
 
@@ -486,7 +494,7 @@ public class CodeModelService {
 		return null;
 	}
 
-	public List<CodeBaseModel> getList(String code, int orderBy, int asc, EsQueryPageReq querypage) {
+	public List<CodeBaseModel> getList(String code, int orderBy, String conceptId, int asc, EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -498,6 +506,12 @@ public class CodeModelService {
 		SortOrder order = SortOrder.DESC;
 		if (asc == 2) {
 			order = SortOrder.ASC;
+		}
+		if (StringUtils.isNotBlank(conceptId)) {
+			List<String> list = listCodeByCodeConceptId(conceptId);
+			if (list != null) {
+				bqb.must(QueryBuilders.termsQuery("code", list));
+			}
 		}
 		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);
 
@@ -513,10 +527,12 @@ public class CodeModelService {
 		return null;
 	}
 
-	public List<CodeBaseModelResp> getListForWeb(String code, int orderBy, int asc, EsQueryPageReq querypage) {
-		log.info("CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={}", code, orderBy, asc,
-				querypage.getPageNum(), querypage.getPageSize());
-		List<CodeBaseModel> list = getList(code, orderBy, asc, querypage);
+	public List<CodeBaseModelResp> getListForWeb(String code, int orderBy, String conceptId, int asc,
+			EsQueryPageReq querypage) {
+		log.info("CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={},conceptId={}", code, orderBy,
+				asc, querypage.getPageNum(), querypage.getPageSize(), conceptId);
+
+		List<CodeBaseModel> list = getList(code, orderBy, conceptId, asc, querypage);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {
 			for (CodeBaseModel dh : list) {
@@ -535,5 +551,54 @@ public class CodeModelService {
 			}
 		}
 		return res;
+	}
+
+	private String getConceptId(String conceptId) {
+		EsQueryPageReq querypage = new EsQueryPageReq(1);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		if (StringUtils.isNotBlank(conceptId)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", conceptId));
+		} else {
+			return null;
+		}
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<Concept> page = esConceptDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0).getId();
+		}
+		log.info("no records aliasCode:{}", conceptId);
+		return null;
+
+	}
+
+	private List<String> listCodeByCodeConceptId(String conceptId) {
+		EsQueryPageReq querypage = new EsQueryPageReq(1000);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		conceptId = getConceptId(conceptId);
+		if (StringUtils.isNotBlank(conceptId)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("conceptId", conceptId));
+		} else {
+			return null;
+		}
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+
+		Page<CodeConcept> page = esCodeConceptDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			List<CodeConcept> list = page.getContent();
+			List<String> codes = new LinkedList<String>();
+			for (CodeConcept cc : list) {
+				codes.add(cc.getCode());
+			}
+			return codes;
+		}
+		log.info("no records listCodeByCodeConceptId:{}", conceptId);
+		return null;
 	}
 }

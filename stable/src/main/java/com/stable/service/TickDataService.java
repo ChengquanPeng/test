@@ -541,14 +541,14 @@ public class TickDataService {
 				tds.add(td);
 			}
 		}
-		try {
-			TraceSortv1Vo sv = this.check(code, date + "", null);
-			if (sv != null) {
-				listsv.add(sv);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		try {
+//			TraceSortv1Vo sv = this.check(code, date + "", null);
+//			if (sv != null) {
+//				listsv.add(sv);
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		log.info("source:{},{} {} 获取到Tick数据条数:{}", source == 0 ? "东方财富" : "tushare", code, date, tds.size());
 		return sumTickData2(code, date, yesterdayPrice, circMv, tds, html);
 	}
@@ -869,7 +869,8 @@ public class TickDataService {
 			if (d2 == null) {
 				d2 = new DaliyBasicInfo();
 				d2.setCode(code);
-				JSONArray array2 = tushareSpider.getStockDaliyTrade(code, trade_date, null, null);
+				JSONArray array2 = tushareSpider.getStockDaliyTrade(TushareSpider.formatCode(code), trade_date, null,
+						null);
 				d2.daily(array2.getJSONArray(0));
 
 				if (StockAType.isTop20(code)) {// 科创板20%涨跌幅
@@ -961,7 +962,7 @@ public class TickDataService {
 		return null;
 	}
 
-	long diff1 = 5 * 60 * 1000;
+	long diff1 = 3 * 60 * 1000;
 	long diff2 = (90 * 60 * 1000) + diff1;
 
 	private int getBeforeTime(String HHmmss) {

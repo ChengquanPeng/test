@@ -32,6 +32,8 @@ public class StockAvg extends EsBase {
 	@Field(type = FieldType.Double)
 	private double avgPriceIndex30;
 	@Field(type = FieldType.Double)
+	private double avgPriceIndex60;
+	@Field(type = FieldType.Double)
 	private double avgPriceIndex120;
 	@Field(type = FieldType.Double)
 	private double avgPriceIndex250;

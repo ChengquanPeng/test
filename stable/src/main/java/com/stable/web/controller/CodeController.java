@@ -111,11 +111,12 @@ public class CodeController {
 
 	@RequestMapping(value = "/codemodel/list", method = RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<JsonResult> codemodellist(String code, int orderBy, int asc, EsQueryPageReq page) {
+	public ResponseEntity<JsonResult> codemodellist(String code, int orderBy, int asc, String conceptId,
+			EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
 
-			r.setResult(codeModelService.getListForWeb(code, orderBy, asc, page));
+			r.setResult(codeModelService.getListForWeb(code, orderBy, conceptId, asc, page));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

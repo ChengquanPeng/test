@@ -22,13 +22,14 @@
 		<div class="row">
 			<div id="menu"></div>
 			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
-			<div class="col-lg-5">
+			<div class="col-lg-7">
 					<div class="input-group">
 						股票代码：<input type="text" class="form-control" id="queryCode"> 
 						排序：<select id="gsort" class="form-control">
 							<option value="1" selected="selected">综合评分</option>
 							<option value="2">评分变化</option>
 						</select>
+						概念id：<input type="text" class="form-control" id="conceptId"> 
 						倒序排序:<input type="checkbox" id="asc" name="asc" checked="checked" />
 					<span lass="input-group-btn"> <button class="btn btn-default" type="button" id="queryAction"> Go!</button> </span>
 					</div>
@@ -92,6 +93,7 @@
 							param.code = code;
 							param.orderBy = gsort;
 							param.asc = 1;
+							param.conceptId = $('#conceptId').val();
 							if(!document.getElementById("asc").checked){
 								param.asc = 2;
 							}

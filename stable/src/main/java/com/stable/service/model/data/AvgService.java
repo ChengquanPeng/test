@@ -80,8 +80,9 @@ public class AvgService {
 				av.setAvgPriceIndex10(Double.valueOf(strs[4]));
 				av.setAvgPriceIndex20(Double.valueOf(strs[5]));
 				av.setAvgPriceIndex30(Double.valueOf(strs[6]));
-				av.setAvgPriceIndex120(Double.valueOf(strs[7]));
-				av.setAvgPriceIndex250(Double.valueOf(strs[8]));
+				av.setAvgPriceIndex60(Double.valueOf(strs[7]));
+				av.setAvgPriceIndex120(Double.valueOf(strs[8]));
+				av.setAvgPriceIndex250(Double.valueOf(strs[9]));
 				list4.add(av);
 			}
 			return list4;
@@ -130,8 +131,9 @@ public class AvgService {
 				av.setAvgPriceIndex10(Double.valueOf(strs[4]));
 				av.setAvgPriceIndex20(Double.valueOf(strs[5]));
 				av.setAvgPriceIndex30(Double.valueOf(strs[6]));
-				av.setAvgPriceIndex120(Double.valueOf(strs[7]));
-				av.setAvgPriceIndex250(Double.valueOf(strs[8]));
+				av.setAvgPriceIndex60(Double.valueOf(strs[7]));
+				av.setAvgPriceIndex120(Double.valueOf(strs[8]));
+				av.setAvgPriceIndex250(Double.valueOf(strs[9]));
 				list30.add(av);
 			}
 			return list30;
