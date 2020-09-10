@@ -43,4 +43,14 @@ public class StockAvg extends EsBase {
 	public void setId() {
 		id = code + date;
 	}
+
+	public int getLastDividendDate() {
+		return lastDividendDate;
+	}
+
+	public void setLastDividendDate(int lastDividendDate) {
+		this.lastDividendDate = lastDividendDate;
+	}
+	
+	
 }

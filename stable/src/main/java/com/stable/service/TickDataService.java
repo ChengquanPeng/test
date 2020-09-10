@@ -42,6 +42,8 @@ import com.stable.enums.StockAType;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.job.MyCallable;
+import com.stable.service.model.data.AvgService;
+import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.data.LineVol;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.tushare.TushareSpider;
@@ -87,6 +89,8 @@ public class TickDataService {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private TushareSpider tushareSpider;
+	@Autowired
+	private AvgService avgService;
 
 	public static final Semaphore semp = new Semaphore(1);
 
@@ -892,6 +896,7 @@ public class TickDataService {
 					return null;
 				}
 
+				/*
 				List<DaliyBasicInfo> dailyList = daliyBasicHistroyService.queryListByCode(d2.getCode(), 0,
 						d2.getTrade_date(), queryPage, SortOrder.DESC);
 				LineVol lineVol = new LineVol(dailyList);
@@ -899,6 +904,7 @@ public class TickDataService {
 					log.info("TraceSortv1Vo procssing key={}{},未缩量", d2.getCode(), d2.getTrade_date());
 					return null;
 				}
+				*/
 				// 未开板
 				List<String> lines = this.getFromTushare(d2.getCode(), d2.getTrade_date());
 				if (lines != null && lines.size() > 10) {
@@ -941,6 +947,19 @@ public class TickDataService {
 							.getPrice();
 					if (topPrice > CurrencyUitl.topPrice(min, true)) {// 是否5分钟之内涨停超过5%涨停？
 						TraceSortv1Vo tv = new TraceSortv1Vo();
+						//白马
+						LineAvgPrice avgprice = new LineAvgPrice(code, d2.getTrade_date(), avgService,
+								daliyBasicHistroyService);
+						if (avgprice.isWhiteHorseV2()) {
+							tv.setWhiteHorse(true);
+						}
+						//放量
+						List<DaliyBasicInfo> dailyList = daliyBasicHistroyService.queryListByCode(d2.getCode(), 0,
+								d2.getTrade_date(), queryPage, SortOrder.DESC);
+						LineVol lineVol = new LineVol(dailyList);
+						if (lineVol.isShortVol()) {// 缩量?
+							tv.setShortVol(true);
+						}
 						tv.setDaliyBasicInfo(d2);
 						tv.setFirstTopPrice(firstTopPrice);
 						log.info("TraceSortv1Vo get sample:{}", tv);
@@ -962,7 +981,7 @@ public class TickDataService {
 		return null;
 	}
 
-	long diff1 = 3 * 60 * 1000;
+	long diff1 = 5 * 60 * 1000;
 	long diff2 = (90 * 60 * 1000) + diff1;
 
 	private int getBeforeTime(String HHmmss) {

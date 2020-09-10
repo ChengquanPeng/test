@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.elasticsearch.search.sort.SortOrder;
 
+import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.ModelContext;
@@ -49,6 +50,15 @@ public class LineAvgPrice {
 		this.lastDividendDate = lastDividendDate;
 		this.daliyTradeHistroyService = daliyTradeHistroyService;
 		today = cxt.getToday();
+	}
+
+	public LineAvgPrice(String code, int date, AvgService avgService,
+			DaliyBasicHistroyService daliyBasicHistroyService) {
+		EsQueryPageReq queryPage = new EsQueryPageReq(250);
+		List<DaliyBasicInfo> dailyList = daliyBasicHistroyService.queryListByCodeForModel(code, date, queryPage)
+				.getContent();
+		int startDate = dailyList.get(dailyList.size() - 1).getTrade_date();
+		clist30 = avgService.getDPriceAvg(code, startDate, date);
 	}
 
 	private boolean isWeekAvgGet = false;
@@ -100,6 +110,7 @@ public class LineAvgPrice {
 				return isFeedDataGetRes;
 			}
 			clist30.forEach(x -> {
+				x.setLastDividendDate(lastDividendDate);
 				avgSaveList.add(x);
 			});
 		} else {// 不需要重新则看数据是否完整
@@ -123,6 +134,7 @@ public class LineAvgPrice {
 				}
 				clist30.forEach(x -> {
 					if (!m.containsKey(x.getDate())) {
+						x.setLastDividendDate(lastDividendDate);
 						avgSaveList.add(x);
 					}
 				});

@@ -11,6 +11,8 @@ public class TraceSortv1Vo {
 	private TickData firstTopPrice;
 	private boolean buyed = false;
 	private boolean isOk = false;
+	private boolean isWhiteHorse = false;
+	private boolean isShortVol = false;
 
 	public String toDetailStr() {
 		return "TraceSortv1Vo:" + daliyBasicInfo.getCode() + "," + daliyBasicInfo.getTrade_date() + ",买入?" + buyed

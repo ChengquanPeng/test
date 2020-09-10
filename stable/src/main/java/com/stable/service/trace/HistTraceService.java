@@ -113,20 +113,94 @@ public class HistTraceService {
 				}
 			}
 
-			int total = 0;
-			int isok = 0;
+			int total1 = 0;
+			int isok1 = 0;
+			// 全部
+			log.info("ALL samples....");
 			for (TraceSortv1Vo t1 : samples) {
 				if (t1.isBuyed()) {
-					total++;
+					total1++;
 					if (t1.isOk()) {
-						isok++;
+						isok1++;
 					}
 					log.info(t1.toDetailStr());
 				}
 			}
-			if (total > 0) {
-				WxPushUtil.pushSystem1(startDate + " " + endDate + "样本数量:" + samples.size() + ",成功买入次数:" + total
-						+ ",盈利次数:" + isok + ",盈利:" + CurrencyUitl.roundHalfUp(isok / Double.valueOf(total)) + "%");
+			// 全部-缩量
+			int totalsyes = 0;
+			int isoksyes = 0;
+			log.info("ShortVol....");
+			for (TraceSortv1Vo t1 : samples) {
+				if (t1.isBuyed() && t1.isShortVol()) {
+					totalsyes++;
+					if (t1.isOk()) {
+						isoksyes++;
+					}
+					log.info(t1.toDetailStr());
+				}
+			}
+			// 全部-放量
+			int totalsno = 0;
+			int isoksno = 0;
+			log.info("ShortVolNo....");
+			for (TraceSortv1Vo t1 : samples) {
+				if (t1.isBuyed() && !t1.isShortVol()) {
+					totalsno++;
+					if (t1.isOk()) {
+						isoksno++;
+					}
+					log.info(t1.toDetailStr());
+				}
+			}
+			// 白马-缩量
+			int totalwhsy = 0;
+			int isokwhsy = 0;
+			log.info("WhiteHorse-sort....");
+			for (TraceSortv1Vo t1 : samples) {
+				if (t1.isBuyed() && t1.isWhiteHorse() && t1.isShortVol()) {
+					totalwhsy++;
+					if (t1.isOk()) {
+						isokwhsy++;
+					}
+					log.info(t1.toDetailStr());
+				}
+			}
+			// 白马-放量
+			int totalwhsn = 0;
+			int isokwhsn = 0;
+			log.info("WhiteHorse-sortno....");
+			for (TraceSortv1Vo t1 : samples) {
+				if (t1.isBuyed() && t1.isWhiteHorse() && t1.isShortVol()) {
+					totalwhsn++;
+					if (t1.isOk()) {
+						isokwhsn++;
+					}
+					log.info(t1.toDetailStr());
+				}
+			}
+			// 白马
+			int total2 = 0;
+			int isok2 = 0;
+			log.info("WhiteHorse....");
+			for (TraceSortv1Vo t1 : samples) {
+				if (t1.isBuyed() && t1.isWhiteHorse()) {
+					total2++;
+					if (t1.isOk()) {
+						isok2++;
+					}
+					log.info(t1.toDetailStr());
+				}
+			}
+
+			if (total1 > 0) {
+				WxPushUtil.pushSystem1(startDate + " " + endDate + "样本数量:" + samples.size() + 
+						",[所有]成功买入次数:" + total1+ ",盈利次数:" + isok1 + ",盈利:" + CurrencyUitl.roundHalfUp(isok1 / Double.valueOf(total1)) + "%"
+						+",[所有-放量]成功买入次数:" + totalsno + ",盈利次数:" + isoksno + ",盈利:"+ CurrencyUitl.roundHalfUp(isoksno / Double.valueOf(totalsno)) + "%"
+						+",[所有-缩量]成功买入次数:" + totalsyes + ",盈利次数:" + isoksyes + ",盈利:"+ CurrencyUitl.roundHalfUp(isoksyes / Double.valueOf(totalsyes)) + "%"
+						+",[白马]成功买入次数:" + total2 + ",盈利次数:" + isok2 + ",盈利:"+ CurrencyUitl.roundHalfUp(isok2 / Double.valueOf(total2)) + "%"
+						+",[白马-放量]成功买入次数:" + totalwhsn + ",盈利次数:" + isokwhsn + ",盈利:"+ CurrencyUitl.roundHalfUp(isokwhsn / Double.valueOf(totalwhsn)) + "%"
+						+",[白马-缩量]成功买入次数:" + totalwhsy + ",盈利次数:" + isokwhsy + ",盈利:"+ CurrencyUitl.roundHalfUp(isokwhsy / Double.valueOf(totalwhsy)) + "%"
+						);
 			} else {
 				WxPushUtil.pushSystem1(startDate + " " + endDate + "样本数量:" + samples.size() + ",无成功买入样例");
 			}
