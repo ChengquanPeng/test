@@ -55,10 +55,19 @@ public class LineAvgPrice {
 	public LineAvgPrice(String code, int date, AvgService avgService,
 			DaliyBasicHistroyService daliyBasicHistroyService) {
 		EsQueryPageReq queryPage = new EsQueryPageReq(250);
-		List<DaliyBasicInfo> dailyList = daliyBasicHistroyService.queryListByCodeForModel(code, date, queryPage)
-				.getContent();
+		dailyList = daliyBasicHistroyService.queryListByCodeForModel(code, date, queryPage).getContent();
 		int startDate = dailyList.get(dailyList.size() - 1).getTrade_date();
 		clist30 = avgService.getDPriceAvg(code, startDate, date);
+	}
+
+	public LineAvgPrice(String code, int date, AvgService avgService, int lastDividendDate, List<StockAvg> avgSaveList,
+			List<DaliyBasicInfo> dailyList) {
+		this.code = code;
+		this.date = date;
+		this.avgService = avgService;
+		this.lastDividendDate = lastDividendDate;
+		this.avgSaveList = avgSaveList;
+		this.dailyList = dailyList;
 	}
 
 	private boolean isWeekAvgGet = false;

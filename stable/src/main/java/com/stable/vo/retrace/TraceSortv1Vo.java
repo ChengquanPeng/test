@@ -14,6 +14,14 @@ public class TraceSortv1Vo {
 	private boolean isWhiteHorse = false;
 	private boolean isShortVol = false;
 
+	public boolean isOk() {
+		return isOk;
+	}
+
+	public void setOk(boolean isOk) {
+		this.isOk = isOk;
+	}
+
 	public String toDetailStr() {
 		return "TraceSortv1Vo:" + daliyBasicInfo.getCode() + "," + daliyBasicInfo.getTrade_date() + ",买入?" + buyed
 				+ ",盈利?" + isOk;

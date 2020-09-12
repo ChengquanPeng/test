@@ -83,7 +83,7 @@ public class V2SortStrategyListener implements StrategyListener {
 								|| av.getAvgPriceIndex10() > today.getYesterdayPrice()
 								|| av.getAvgPriceIndex20() > today.getYesterdayPrice()
 								|| av.getAvgPriceIndex30() > today.getYesterdayPrice()//
-						)// 作日收盘价在任意均线之下
+						)// 昨日收盘价在任意均线之下
 								&& (today.getClose() > av.getAvgPriceIndex3()
 										&& today.getClose() > av.getAvgPriceIndex5()
 										&& today.getClose() > av.getAvgPriceIndex10()

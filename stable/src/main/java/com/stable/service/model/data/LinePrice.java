@@ -19,9 +19,7 @@ import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
 
-@Log4j2
 public class LinePrice {
 	private final static EsQueryPageReq queryPage = new EsQueryPageReq(30);
 	private ModelContext cxt;
@@ -30,11 +28,13 @@ public class LinePrice {
 	private StockAvg todayAv;
 	private StrongService strongService;
 	private int lastDate;
+	private int date;
 	private String code;
 	private DaliyBasicInfo today;
 	// 除权
 	private boolean isUseDividData = false;
 	private int lastDividendDate;
+	private DaliyTradeHistroyService daliyTradeHistroyService;
 
 	public LinePrice(StrongService strongService, ModelContext cxt, List<DaliyBasicInfo> dailyList, StockAvg todayAv,
 			int lastDate, int lastDividendDate, DaliyTradeHistroyService daliyTradeHistroyService) {
@@ -57,6 +57,12 @@ public class LinePrice {
 				throw new RuntimeException(code + "获取复权数据从" + lastDate + "到" + today.getTrade_date() + "错误！");
 			}
 		}
+	}
+
+	public LinePrice(String code, int date, DaliyTradeHistroyService daliyTradeHistroyService) {
+		this.code = code;
+		this.date = date;
+		this.daliyTradeHistroyService = daliyTradeHistroyService;
 	}
 
 	@Getter
@@ -346,17 +352,6 @@ public class LinePrice {
 			}
 			highList.addAll(lowList);
 			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
-
-			if (d.getCode().equals("000829")) {
-				log.info(d);
-				log.info(listD30.get(0));
-				log.info(listD30.get(1));
-				log.info(listD30.get(2));
-				log.info(listD30.get(3));
-				log.info(listD30.get(4));
-				log.info(listD30.get(5));
-				log.info("high={},high2={},low={},low2={},s={},", high, high2, low, low2, s);
-			}
 			return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
 		} else {
 			List<DaliyBasicInfo> highList = new ArrayList<DaliyBasicInfo>();
@@ -368,10 +363,10 @@ public class LinePrice {
 			lowList.add(dailyList.get(1));
 			lowList.add(dailyList.get(2));
 			double high2 = highList.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
-					.getHigh();// 低开情况
+					.getHigh();// 高开情况
 			double high = highList.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();// 最高价（正常情况）
 			double low2 = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
-					.getLow();// 高开情况
+					.getLow();// 低开情况
 			double low = lowList.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();// 最低价（正常情况）
 			if (high2 > high) {
 				high = high2;
@@ -381,17 +376,6 @@ public class LinePrice {
 			}
 			highList.addAll(lowList);
 			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
-
-			if (d.getCode().equals("000829")) {
-				log.info(d);
-				log.info(dailyList.get(0));
-				log.info(dailyList.get(1));
-				log.info(dailyList.get(2));
-				log.info(dailyList.get(3));
-				log.info(dailyList.get(4));
-				log.info(dailyList.get(5));
-				log.info("high={},high2={},low={},low2={},s={},", high, high2, low, low2, s);
-			}
 			return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
 		}
 	}
@@ -450,5 +434,47 @@ public class LinePrice {
 			int s = highList.stream().filter(x -> x.getTodayChangeRate() < 0).collect(Collectors.toList()).size();
 			return (s >= 2 && (high > CurrencyUitl.topPrice(low, false)));
 		}
+	}
+
+	public boolean checkPriceBack6dayWhitoutTodayV2() {
+		listD30 = daliyTradeHistroyService.queryListByCode(code, 0, date, queryPage, SortOrder.DESC);
+		if (listD30 == null || listD30.size() < 30) {
+			throw new RuntimeException(code + "获取复权数据从" + lastDate + "到" + today.getTrade_date() + "错误！");
+		}
+		List<TradeHistInfoDaliy> highList = new ArrayList<TradeHistInfoDaliy>();
+		highList.add(listD30.get(3));
+		highList.add(listD30.get(4));
+		highList.add(listD30.get(5));
+
+		List<TradeHistInfoDaliy> lowList = new ArrayList<TradeHistInfoDaliy>();
+		lowList.add(listD30.get(0));
+		lowList.add(listD30.get(1));
+		lowList.add(listD30.get(2));
+		double high = highList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+				.getHigh();// 低开情况
+		double high2 = highList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get().getHigh();
+		double low2 = lowList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+				.getLow();// 高开情况
+		double low = lowList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
+		if (high2 > high) {
+			high = high2;
+		}
+		if (low2 < low) {
+			low = low2;
+		}
+		return (high > CurrencyUitl.topPrice(low, false));
+	}
+
+	// 当日收盘价超过前3日的最高价
+	public boolean check3dayPriceV2() {
+		TradeHistInfoDaliy d4 = listD30.get(0);
+		TradeHistInfoDaliy d3 = listD30.get(1);
+		TradeHistInfoDaliy d2 = listD30.get(2);
+		TradeHistInfoDaliy d0 = listD30.get(3);
+
+		if (d4.getClosed() >= d0.getHigh() && d4.getClosed() >= d2.getHigh() && d4.getClosed() >= d3.getHigh()) {
+			return true;
+		}
+		return false;
 	}
 }

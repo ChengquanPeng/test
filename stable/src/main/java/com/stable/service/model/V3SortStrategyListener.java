@@ -51,7 +51,7 @@ public class V3SortStrategyListener implements StrategyListener {
 		ModelV1 mv = new ModelV1();
 		mv.setCode(mc.getCode());
 		mv.setDate(mc.getDate());
-		mv.setModelType(ModelType.V2.getCode());
+		mv.setModelType(ModelType.SORT_V1.getCode());
 		mv.setId(mv.getModelType() + mv.getCode() + mv.getDate());
 		StringBuffer detailDesc = new StringBuffer();
 		String dropOutMsg = "";
@@ -71,61 +71,15 @@ public class V3SortStrategyListener implements StrategyListener {
 						setDetail(detailDesc, "白马？");
 						mv.setWhiteHorse(1);// 白马？
 						DaliyBasicInfo today = mc.getToday();
-						StockAvg av = lineAvgPrice.todayAv;
-
 						if (today.getLow() <= 0 || today.getClose() <= 0) {
 							throw new RuntimeException(mc.getCode() + " " + mc.getDate()
 									+ " 数据异常,today.getLow()<=0||today.getClose()<=0?");
 						}
-						// 一阳穿N线
-						if ((av.getAvgPriceIndex3() > today.getYesterdayPrice()
-								|| av.getAvgPriceIndex5() > today.getYesterdayPrice()
-								|| av.getAvgPriceIndex10() > today.getYesterdayPrice()
-								|| av.getAvgPriceIndex20() > today.getYesterdayPrice()
-								|| av.getAvgPriceIndex30() > today.getYesterdayPrice()//
-						)// 作日收盘价在任意均线之下
-								&& (today.getClose() > av.getAvgPriceIndex3()
-										&& today.getClose() > av.getAvgPriceIndex5()
-										&& today.getClose() > av.getAvgPriceIndex10()
-										&& today.getClose() > av.getAvgPriceIndex20()
-										&& today.getClose() > av.getAvgPriceIndex30()//
-								)//
-						) {
-
-							boolean b1 = linePrice.isUp3percent();// 上涨至少3%
-							boolean b2 = linePrice.isLowClosePriceToday();// 排除上影线
-							boolean b3 = linePrice.isHignOpenWithLowCloseToday();// 高开低走
-							boolean b4 = lineVol.check3dayVol();// 对比3天-量
-							boolean b5 = linePrice.check3dayPrice();// 对比3天-价
-							boolean b6 = linePrice.checkPriceBack6dayWhitoutToday();// 回调过超10%
-
-							log.info("code={},上涨至少3%={},非上影线={},非高开低走={},对比3天-量={},对比3天-价={},回调过超10%={}", mc.getCode(),
-									b1, !b2, !b3, b4, b5, b6);
-
-							if (b1 && !b2 && !b3 && b4 && b5 && b6) {
-								isOk = true;
-								avgScore = 100;
-								if (lineAvgPrice.isWeek4AvgOk()) {
-									avgScore += 10;
-									mv.setWeekOk(1);
-								}
-								if (linePrice.isRange30pWith30days()) {
-									avgScore += 10;
-									mv.setIsRange30p(1);
-								}
-							} else {
-								dropOutMsg = "b1-b6不满足要求";
-							}
-						} else {
-							log.info(
-									"code={},getYesterdayPrice={},getClose={},AvgPriceIndex3={},AvgPriceIndex5={},AvgPriceIndex10={}"
-											+ ",AvgPriceIndex20={},AvgPriceIndex30={}",
-									mc.getCode(), today.getYesterdayPrice(), today.getClose(), av.getAvgPriceIndex3(),
-									av.getAvgPriceIndex5(), av.getAvgPriceIndex10(), av.getAvgPriceIndex20(),
-									av.getAvgPriceIndex30());
-							isOk = false;
-							dropOutMsg = "作日收盘价在任意均线之下,收盘在任意均线之上";
-						}
+						//缩量
+						//上涨
+						//
+						
+						
 					} else {
 						isOk = false;
 						dropOutMsg = "非白马";

@@ -1,5 +1,6 @@
 package com.stable.service.model.data;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import com.stable.vo.bus.DaliyBasicInfo;
@@ -109,7 +110,22 @@ public class LineVol {
 		return false;
 	}
 
-	public static void main(String[] args) {
-		System.err.println();
+	public boolean isShortVolV2() {
+		List<DaliyBasicInfo> localdailyList = new LinkedList<DaliyBasicInfo>();
+		localdailyList.add(dailyList.get(0));
+		localdailyList.add(dailyList.get(1));
+		localdailyList.add(dailyList.get(2));
+		localdailyList.add(dailyList.get(3));
+		localdailyList.add(dailyList.get(4));
+		// 均值x1.2
+		long max = Double
+				.valueOf(localdailyList.stream().mapToLong(DaliyBasicInfo::getVol).sum() / localdailyList.size() * 1.2)
+				.longValue();
+		for (DaliyBasicInfo d : localdailyList) {
+			if (d.getVol() > max) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

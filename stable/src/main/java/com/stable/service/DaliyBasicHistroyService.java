@@ -278,27 +278,6 @@ public class DaliyBasicHistroyService {
 		return esDaliyBasicInfoDao.search(sq);
 	}
 
-	public List<DaliyBasicInfo> queryListByCode(String code, int startDate, int endDate, EsQueryPageReq queryPage,
-			SortOrder s) {
-		int pageNum = queryPage.getPageNum();
-		int size = queryPage.getPageSize();
-		log.info("queryPage code={},startDate={},endDate={},", code, startDate, endDate);
-		Pageable pageable = PageRequest.of(pageNum, size);
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		if (startDate > 0) {
-			bqb.must(QueryBuilders.rangeQuery("trade_date").gte(startDate));
-		}
-		if (endDate > 0) {
-			bqb.must(QueryBuilders.rangeQuery("trade_date").lte(endDate));
-		}
-		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(s);
-
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
-		return esDaliyBasicInfoDao.search(sq).getContent();
-	}
-
 	public Page<DaliyBasicInfo> queryListByCode(String code, String date, String fetchTickData,
 			EsQueryPageReq queryPage) {
 		return this.queryListByCode(code, date, fetchTickData, queryPage, SortOrder.DESC);
@@ -346,5 +325,26 @@ public class DaliyBasicHistroyService {
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 		return esDaliyBasicInfoDao.search(sq);
+	}
+
+	public List<DaliyBasicInfo> queryListByCode(String code, int startDate, int endDate, EsQueryPageReq queryPage,
+			SortOrder s) {
+		int pageNum = queryPage.getPageNum();
+		int size = queryPage.getPageSize();
+		log.info("queryPage code={},startDate={},endDate={},", code, startDate, endDate);
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		if (startDate > 0) {
+			bqb.must(QueryBuilders.rangeQuery("trade_date").gte(startDate));
+		}
+		if (endDate > 0) {
+			bqb.must(QueryBuilders.rangeQuery("trade_date").lte(endDate));
+		}
+		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(s);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		return esDaliyBasicInfoDao.search(sq).getContent();
 	}
 }

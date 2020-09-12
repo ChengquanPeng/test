@@ -256,7 +256,7 @@ public class UpModelLineService {
 	private void runModels(ModelContext cxt, List<StrategyListener> models, List<StockAvg> avgList) {
 		boolean isOk = true;
 		String code = cxt.getCode();
-		log.info("model V1 processing for code:{}", code);
+		log.info("model version processing for code:{}", code);
 		if (!stockBasicService.online1Year(code)) {
 			cxt.setBaseDataOk("Online 上市不足1年");
 			isOk = false;
