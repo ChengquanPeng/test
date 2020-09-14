@@ -7,6 +7,7 @@ public class TraceSortv2Vo {
 	private String code;
 	private int date;
 	private boolean isOk = false;
+	private double profit;// 盈利
 
 	public boolean isOk() {
 		return isOk;
