@@ -95,8 +95,14 @@ public class HistTraceService {
 				if (StockAType.KCB == sa) {
 					continue;
 				}
-				List<TraceSortv2Vo> codesamples = new LinkedList<TraceSortv2Vo>();
 				String code = s.getCode();
+				boolean onlineYear = stockBasicService.online1Year(code);
+				if (!onlineYear) {
+					// log.info("{},Online 上市不足1年", code);
+					continue;
+				}
+				List<TraceSortv2Vo> codesamples = new LinkedList<TraceSortv2Vo>();
+
 				// 最后除权日期
 				int lastDividendDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
 				// code均线 (qfq)
