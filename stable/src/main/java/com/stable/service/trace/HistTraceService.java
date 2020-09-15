@@ -188,7 +188,6 @@ public class HistTraceService {
 			}
 
 			log.info("V2获取样本数:" + samples.size());
-			double totalProfit = 0.0;
 
 			for (TraceSortv2Vo t1 : samples) {
 				try {
@@ -201,21 +200,15 @@ public class HistTraceService {
 					// 最高盈利
 					double maxPrice = dailyList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed))
 							.get().getClosed();
-					double profit = 0.0;
+					// 最高亏损
+					double minPrice = dailyList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed))
+							.get().getClosed();
 					t1.setBuyPrice(d0.getClosed());
+					t1.setMaxPrice(maxPrice);
+					t1.setMaxProfit(CurrencyUitl.cutProfit(d0.getClosed(), maxPrice));
+					t1.setMinPrice(minPrice);
+					t1.setMaxLoss(CurrencyUitl.cutProfit(d0.getClosed(), minPrice));
 
-					if (maxPrice > d0.getClosed()) {
-						profit = CurrencyUitl.cutProfit(d0.getClosed(), maxPrice);// 最高盈利
-						t1.setOk(true);
-						t1.setMaxPrice(maxPrice);
-					} else {
-						double minPrice = dailyList.stream()
-								.min(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed)).get().getClosed();
-						profit = CurrencyUitl.cutProfit(d0.getClosed(), minPrice);// 最高亏损
-						t1.setMinPrice(minPrice);
-					}
-					totalProfit += profit;
-					t1.setProfit(profit);
 				} catch (Exception e) {
 					ErrorLogFileUitl.writeError(e, t1.getCode(), t1.getDate() + "", "");
 					e.printStackTrace();
@@ -236,29 +229,42 @@ public class HistTraceService {
 			double d_t_m5 = 0;
 			double d_t_r5_10 = 0;
 			double d_t_m10 = 0;
+			// 理论最高总盈亏
+			double totalProfit = 0.0;
+			double totalLoss = 0.0;
+			int cnt_up = 0;
+			int cnt_down = 0;
 			for (TraceSortv2Vo t1 : samples) {
+				log.info(t1.toString());
 				try {
-					if (t1.getProfit() > 0) {
-						if (t1.getProfit() < 5) {// 5以内
+					double profit = t1.getMaxProfit();
+					totalProfit += profit;
+					if (profit > 0) {
+						cnt_up++;
+						if (profit < 5) {// 5以内
 							c_m5++;
-							t_m5 += t1.getProfit();
-						} else if (t1.getProfit() >= 10) {// 10%以上
+							t_m5 += profit;
+						} else if (profit >= 10) {// 10%以上
 							c_m10++;
-							t_m10 += t1.getProfit();
+							t_m10 += profit;
 						} else {// 5-10%以上
 							c_r5_10++;
-							t_r5_10 += t1.getProfit();
+							t_r5_10 += profit;
 						}
-					} else if (t1.getProfit() < 0) {
-						if (t1.getProfit() <= -10) {// -10%以上
+					}
+					double loss = t1.getMaxLoss();
+					totalLoss += loss;
+					if (loss < 0) {
+						cnt_down++;
+						if (loss <= -10) {// -10%以上
 							d_c_m10++;
-							d_t_m10 += t1.getProfit();
-						} else if (t1.getProfit() <= -5) {// -5-10%以上
+							d_t_m10 += loss;
+						} else if (loss <= -5) {// -5-10%以上
 							d_c_r5_10++;
-							d_t_r5_10 += t1.getProfit();
+							d_t_r5_10 += loss;
 						} else {// -5以内
 							d_c_m5++;
-							d_t_m5 += t1.getProfit();
+							d_t_m5 += loss;
 						}
 					}
 				} catch (Exception e) {
@@ -266,24 +272,15 @@ public class HistTraceService {
 					e.printStackTrace();
 				}
 			}
-
-			int total1 = 0;
-			int isok1 = 0;
-			// 全部
-			log.info("ALL samples....");
-			for (TraceSortv2Vo t1 : samples) {
-				total1++;
-				if (t1.isOk()) {
-					isok1++;
-				}
-				log.info(t1.toString());
-			}
-
-			if (total1 > 0) {
-				WxPushUtil.pushSystem1("样本区间:" + startDate + " " + endDate + "样本数量(5天期):" + samples.size()//
-						+ ",[所有]成功买入次数:" + total1 + ",盈利次数:" + isok1 + ",盈利概率:"
-						+ CurrencyUitl.roundHalfUp(isok1 / Double.valueOf(total1)) * 100 + "%" //
-						+ ",总盈利百分比:" + totalProfit + "%"//
+			int total_all = samples.size();
+			if (total_all > 0) {
+				WxPushUtil.pushSystem1("样本区间:" + startDate + " " + endDate + "样本数量(5天期):" + total_all//
+						+ ",[理论最高盈利]次数:" + cnt_up + ",盈利概率:"
+						+ CurrencyUitl.roundHalfUp(cnt_up / Double.valueOf(total_all)) * 100 + "%" + ",总盈利百分比:"
+						+ totalProfit + "%"//
+						+ ",[理论最高亏损]次数:" + cnt_down + ",亏损概率:"
+						+ CurrencyUitl.roundHalfUp(cnt_down / Double.valueOf(total_all)) * 100 + "%" + ",总亏损百分比:"
+						+ totalLoss + "%"//
 						// 盈利
 						+ "@盈利10%以上=>次数:" + c_m10 + ",总额:" + t_m10 + "%,平均:" + (t_m10 / c_m10)//
 						+ "@盈利5-10%=>次数:" + c_r5_10 + ",总额:" + t_r5_10 + "%,平均:" + (t_r5_10 / c_r5_10)//

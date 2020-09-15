@@ -6,21 +6,9 @@ import lombok.Data;
 public class TraceSortv2Vo {
 	private String code;
 	private int date;
-	private boolean isOk = false;
 	private double buyPrice;
 	private double maxPrice;
 	private double minPrice;
-	private double profit;// 盈利
-
-	public boolean isOk() {
-		return isOk;
-	}
-
-	public void setOk(boolean isOk) {
-		this.isOk = isOk;
-	}
-
-	public String toDetailStrShow() {
-		return code + "@" + date;
-	}
+	private double maxProfit;// 最高盈利
+	private double maxLoss;// 最低盈利
 }
