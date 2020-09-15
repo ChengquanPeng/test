@@ -119,7 +119,7 @@ public class LineVol {
 		localdailyList.add(dailyList.get(4));
 		// 均值x1.3
 		long max = Double
-				.valueOf(localdailyList.stream().mapToLong(DaliyBasicInfo::getVol).sum() / localdailyList.size() * 1.3)
+				.valueOf(localdailyList.stream().mapToLong(DaliyBasicInfo::getVol).sum() / localdailyList.size() * 1.2)
 				.longValue();
 		for (DaliyBasicInfo d : localdailyList) {
 			if (d.getVol() > max) {

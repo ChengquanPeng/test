@@ -7,6 +7,9 @@ public class TraceSortv2Vo {
 	private String code;
 	private int date;
 	private boolean isOk = false;
+	private double buyPrice;
+	private double maxPrice;
+	private double minPrice;
 	private double profit;// 盈利
 
 	public boolean isOk() {
@@ -15,10 +18,6 @@ public class TraceSortv2Vo {
 
 	public void setOk(boolean isOk) {
 		this.isOk = isOk;
-	}
-
-	public String toDetailStr() {
-		return "TraceSortv1Vo:" + code + "," + date + "," + (isOk ? "Y" : "N");
 	}
 
 	public String toDetailStrShow() {

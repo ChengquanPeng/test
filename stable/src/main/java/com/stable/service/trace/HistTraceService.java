@@ -62,12 +62,14 @@ public class HistTraceService {
 
 	EsQueryPageReq queryPage250 = new EsQueryPageReq(250);
 	EsQueryPageReq queryPage20 = new EsQueryPageReq(20);
+	EsQueryPageReq queryPage6 = new EsQueryPageReq(6);
 	EsQueryPageReq queryPage5 = new EsQueryPageReq(5);
 
 	/**
 	 * 右侧交易
 	 */
 	public void sortv2(String startDate, String endDate) {
+		String sysstart = DateUtil.getTodayYYYYMMDDHHMMSS();
 		try {
 			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 			if (StringUtils.isBlank(startDate)) {
@@ -192,19 +194,28 @@ public class HistTraceService {
 				try {
 					//
 					List<TradeHistInfoDaliy> dailyList = daliyTradeHistroyService.queryListByCode(t1.getCode(),
-							t1.getDate(), 0, queryPage5, SortOrder.ASC);
-					// i=0;是涨停当天
+							t1.getDate(), 0, queryPage6, SortOrder.ASC);
+					// i=0;是当天
 					TradeHistInfoDaliy d0 = dailyList.get(0);
+					dailyList.remove(0);
 					// 最高盈利
 					double maxPrice = dailyList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed))
 							.get().getClosed();
-					double profit = CurrencyUitl.cutProfit(d0.getClosed(), maxPrice);// 最高盈利
-					t1.setProfit(profit);
-					totalProfit += profit;
-					if (profit > 0) {
-						t1.setOk(true);
-					}
+					double profit = 0.0;
+					t1.setBuyPrice(d0.getClosed());
 
+					if (maxPrice > d0.getClosed()) {
+						profit = CurrencyUitl.cutProfit(d0.getClosed(), maxPrice);// 最高盈利
+						t1.setOk(true);
+						t1.setMaxPrice(maxPrice);
+					} else {
+						double minPrice = dailyList.stream()
+								.min(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed)).get().getClosed();
+						profit = CurrencyUitl.cutProfit(d0.getClosed(), minPrice);// 最高亏损
+						t1.setMinPrice(minPrice);
+					}
+					totalProfit += profit;
+					t1.setProfit(profit);
 				} catch (Exception e) {
 					ErrorLogFileUitl.writeError(e, t1.getCode(), t1.getDate() + "", "");
 					e.printStackTrace();
@@ -265,22 +276,23 @@ public class HistTraceService {
 				if (t1.isOk()) {
 					isok1++;
 				}
-				log.info(t1.toDetailStr());
+				log.info(t1.toString());
 			}
 
 			if (total1 > 0) {
-				WxPushUtil.pushSystem1(startDate + " " + endDate + "样本数量(5天期):" + samples.size()//
+				WxPushUtil.pushSystem1("样本区间:" + startDate + " " + endDate + "样本数量(5天期):" + samples.size()//
 						+ ",[所有]成功买入次数:" + total1 + ",盈利次数:" + isok1 + ",盈利概率:"
 						+ CurrencyUitl.roundHalfUp(isok1 / Double.valueOf(total1)) * 100 + "%" //
 						+ ",总盈利百分比:" + totalProfit + "%"//
 						// 盈利
 						+ "@盈利10%以上=>次数:" + c_m10 + ",总额:" + t_m10 + "%,平均:" + (t_m10 / c_m10)//
 						+ "@盈利5-10%=>次数:" + c_r5_10 + ",总额:" + t_r5_10 + "%,平均:" + (t_r5_10 / c_r5_10)//
-						+ "@盈利10%以上=>次数:" + c_m5 + ",总额:" + t_m5 + "%,平均:" + (t_m5 / c_m5)//
+						+ "@盈利5%以内=>次数:" + c_m5 + ",总额:" + t_m5 + "%,平均:" + (t_m5 / c_m5)//
 						// 亏损
 						+ "@亏损10%以上=>次数:" + d_c_m10 + ",总额:" + d_t_m10 + "%,平均:" + (d_t_m10 / d_c_m10)//
 						+ "@亏损5-10%=>次数:" + d_c_r5_10 + ",总额:" + d_t_r5_10 + "%,平均:" + (d_t_r5_10 / d_c_r5_10)//
-						+ "@亏损10%以上=>次数:" + d_c_m5 + ",总额:" + d_t_m5 + "%,平均:" + (d_t_m5 / d_c_m5)//
+						+ "@亏损5%以内=>次数:" + d_c_m5 + ",总额:" + d_t_m5 + "%,平均:" + (d_t_m5 / d_c_m5)//
+						+ ",开始时间:" + sysstart//
 				);
 			} else {
 				WxPushUtil.pushSystem1(startDate + " " + endDate + "样本数量:" + samples.size() + ",无成功买入样例");
