@@ -44,4 +44,19 @@ public class RetraceController {
 		}
 		return ResponseEntity.ok(r);
 	}
+
+	@RequestMapping(value = "/sortv3", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> sortv3(String startDate, String endDate, int days, int volType) {
+		JsonResult r = new JsonResult();
+		try {
+			histTraceService.sortv3(startDate, endDate, days, volType);
+			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
 }

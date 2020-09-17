@@ -169,6 +169,19 @@ public class LinePrice {
 		return isHighOrLowVolTodayRes;
 	}
 
+	// 排除上影线
+	public boolean isLowClosePriceToday(DaliyBasicInfo today) {
+		if (today.getTodayChange() > 0) {
+			double up = today.getHigh() - today.getYesterdayPrice();
+			double half = up / 2;
+			double mid = CurrencyUitl.roundHalfUp(half) + today.getYesterdayPrice();
+			if (mid >= today.getClose()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private boolean isRange20pWith20daysGet = false;
 	private boolean isRange20pWith20daysRes = false;
 
