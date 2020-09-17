@@ -110,7 +110,7 @@ public class LineVol {
 		return false;
 	}
 
-	public boolean isShortVolV2() {
+	public boolean isShortVolV2(double base) {
 		List<DaliyBasicInfo> localdailyList = new LinkedList<DaliyBasicInfo>();
 		localdailyList.add(dailyList.get(0));
 		localdailyList.add(dailyList.get(1));
@@ -119,7 +119,7 @@ public class LineVol {
 		localdailyList.add(dailyList.get(4));
 		// 均值x1.3
 		long max = Double
-				.valueOf(localdailyList.stream().mapToLong(DaliyBasicInfo::getVol).sum() / localdailyList.size() * 1.2)
+				.valueOf(localdailyList.stream().mapToLong(DaliyBasicInfo::getVol).sum() / localdailyList.size() * base)
 				.longValue();
 		for (DaliyBasicInfo d : localdailyList) {
 			if (d.getVol() > max) {
@@ -127,5 +127,9 @@ public class LineVol {
 			}
 		}
 		return true;
+	}
+
+	public static void main(String[] args) {
+		System.err.println(100002 * 1.2);
 	}
 }

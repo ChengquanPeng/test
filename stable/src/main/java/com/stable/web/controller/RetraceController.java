@@ -29,12 +29,12 @@ public class RetraceController {
 		}
 		return ResponseEntity.ok(r);
 	}
-	
+
 	@RequestMapping(value = "/sortv2", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> sortv2(String startDate, String endDate) {
+	public ResponseEntity<JsonResult> sortv2(String startDate, String endDate, int days, int volType) {
 		JsonResult r = new JsonResult();
 		try {
-			histTraceService.sortv2(startDate, endDate);
+			histTraceService.sortv2(startDate, endDate, days, volType);
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {

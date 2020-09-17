@@ -1,5 +1,6 @@
 package com.stable.service.trace;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -62,13 +63,12 @@ public class HistTraceService {
 
 	EsQueryPageReq queryPage250 = new EsQueryPageReq(250);
 	EsQueryPageReq queryPage20 = new EsQueryPageReq(20);
-	EsQueryPageReq queryPage6 = new EsQueryPageReq(6);
 	EsQueryPageReq queryPage5 = new EsQueryPageReq(5);
 
 	/**
 	 * 右侧交易
 	 */
-	public void sortv2(String startDate, String endDate) {
+	public void sortv2(String startDate, String endDate, int days, int volType) {
 		String sysstart = DateUtil.getTodayYYYYMMDDHHMMSS();
 		try {
 			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
@@ -78,6 +78,14 @@ public class HistTraceService {
 			if (StringUtils.isBlank(endDate)) {
 				endDate = DateUtil.getTodayYYYYMMDD();
 			}
+			if (days <= 0) {
+				days = 5;
+			}
+			double base = 1.2;
+			if (volType == 13) {
+				base = 1.3;
+			}
+			days++;
 			log.info("startDate={},endDate={}", startDate, endDate);
 			try {
 				boolean getLock = semp.tryAcquire(1, TimeUnit.HOURS);
@@ -89,7 +97,28 @@ public class HistTraceService {
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}
+			// 数量
+			int c_m5 = 0;
+			int c_r5_10 = 0;
+			int c_m10 = 0;
+			int d_c_m5 = 0;
+			int d_c_r5_10 = 0;
+			int d_c_m10 = 0;
+			// 总额
+			double t_m5 = 0;
+			double t_r5_10 = 0;
+			double t_m10 = 0;
+			double d_t_m5 = 0;
+			double d_t_r5_10 = 0;
+			double d_t_m10 = 0;
+			// 理论最高总盈亏
+			double totalProfit = 0.0;
+			double totalLoss = 0.0;
+			int cnt_up = 0;
+			int cnt_down = 0;
 			List<TraceSortv2Vo> samples = new LinkedList<TraceSortv2Vo>();
+			EsQueryPageReq queryPage6 = new EsQueryPageReq(days);
+			// start..
 			for (StockBaseInfo s : codelist) {
 				StockAType sa = StockAType.formatCode(s.getCode());
 				if (StockAType.KCB == sa) {
@@ -124,7 +153,7 @@ public class HistTraceService {
 
 								LineVol lineVol = new LineVol(dailyList);
 								// 缩量
-								if (lineVol.isShortVolV2()) {// 2.没有超过5天均量1.3倍
+								if (lineVol.isShortVolV2(base)) {// 2.没有超过5天均量1.3倍
 									LineAvgPrice lineAvg = new LineAvgPrice(code, date, avgService, lastDividendDate,
 											avgSaveList, dailyList);
 									if (lineAvg.feedData()) {
@@ -152,24 +181,91 @@ public class HistTraceService {
 												boolean b5 = linePrice.check3dayPriceV2();// 6.对比3天-价
 
 												if (b6 && b5) {
-													if (codesamples.size() > 0) {
+													boolean exsits = codesamples.size() > 0;
+													boolean isOk = true;
+													if (exsits) {
 														TraceSortv2Vo tsv = codesamples.get(codesamples.size() - 1);
 														// 30天之前
 														int day30 = Integer.valueOf(DateUtil
-																.formatYYYYMMDD(DateUtil.addDate(date + "", -30)));
+																.formatYYYYMMDD(DateUtil.addDate(date + "", -days)));
 														if (day30 > tsv.getDate()) {// 30天之内存在则不能在作为样本
-															TraceSortv2Vo tv = new TraceSortv2Vo();
-															tv.setCode(code);
-															tv.setDate(date);
-															codesamples.add(tv);
 														} else {
 															// 忽略
+															isOk = false;
 														}
-													} else {
-														TraceSortv2Vo tv = new TraceSortv2Vo();
-														tv.setCode(code);
-														tv.setDate(date);
-														codesamples.add(tv);
+													}
+													if (isOk) {
+														TraceSortv2Vo t1 = new TraceSortv2Vo();
+														t1.setCode(code);
+														t1.setDate(date);
+														codesamples.add(t1);
+
+														try {
+															//
+															List<TradeHistInfoDaliy> dailyList2 = new ArrayList<TradeHistInfoDaliy>();
+															List<TradeHistInfoDaliy> dailyList0 = daliyTradeHistroyService
+																	.queryListByCode(t1.getCode(), t1.getDate(), 0,
+																			queryPage6, SortOrder.ASC);// 返回的list是不可修改对象
+															for (int i = 1; i < dailyList0.size(); i++) {
+																dailyList2.add(dailyList0.get(i));
+															}
+															// i=0;是当天
+															TradeHistInfoDaliy d0 = dailyList0.get(0);
+															// 最高盈利
+															double maxPrice = dailyList2.stream()
+																	.max(Comparator.comparingDouble(
+																			TradeHistInfoDaliy::getClosed))
+																	.get().getClosed();
+															// 最高亏损
+															double minPrice = dailyList2.stream()
+																	.min(Comparator.comparingDouble(
+																			TradeHistInfoDaliy::getClosed))
+																	.get().getClosed();
+															t1.setBuyPrice(d0.getClosed());
+															t1.setMaxPrice(maxPrice);
+															t1.setMaxProfit(
+																	CurrencyUitl.cutProfit(d0.getClosed(), maxPrice));
+															t1.setMinPrice(minPrice);
+															t1.setMaxLoss(
+																	CurrencyUitl.cutProfit(d0.getClosed(), minPrice));
+
+															log.info(t1.toString());
+
+															double profit = t1.getMaxProfit();
+															totalProfit += profit;
+															if (profit > 0) {
+																cnt_up++;
+																if (profit < 5) {// 5以内
+																	c_m5++;
+																	t_m5 += profit;
+																} else if (profit >= 10) {// 10%以上
+																	c_m10++;
+																	t_m10 += profit;
+																} else {// 5-10%以上
+																	c_r5_10++;
+																	t_r5_10 += profit;
+																}
+															}
+															double loss = t1.getMaxLoss();
+															totalLoss += loss;
+															if (loss < 0) {
+																cnt_down++;
+																if (loss <= -10) {// -10%以上
+																	d_c_m10++;
+																	d_t_m10 += loss;
+																} else if (loss <= -5) {// -5-10%以上
+																	d_c_r5_10++;
+																	d_t_r5_10 += loss;
+																} else {// -5以内
+																	d_c_m5++;
+																	d_t_m5 += loss;
+																}
+															}
+														} catch (Exception e) {
+															ErrorLogFileUitl.writeError(e, t1.getCode(),
+																	t1.getDate() + "", "");
+															e.printStackTrace();
+														}
 													}
 												}
 											}
@@ -196,91 +292,11 @@ public class HistTraceService {
 			log.info("V2获取样本数:" + samples.size());
 
 			for (TraceSortv2Vo t1 : samples) {
-				try {
-					//
-					List<TradeHistInfoDaliy> dailyList = daliyTradeHistroyService.queryListByCode(t1.getCode(),
-							t1.getDate(), 0, queryPage6, SortOrder.ASC);
-					// i=0;是当天
-					TradeHistInfoDaliy d0 = dailyList.get(0);
-					dailyList.remove(0);
-					// 最高盈利
-					double maxPrice = dailyList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed))
-							.get().getClosed();
-					// 最高亏损
-					double minPrice = dailyList.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed))
-							.get().getClosed();
-					t1.setBuyPrice(d0.getClosed());
-					t1.setMaxPrice(maxPrice);
-					t1.setMaxProfit(CurrencyUitl.cutProfit(d0.getClosed(), maxPrice));
-					t1.setMinPrice(minPrice);
-					t1.setMaxLoss(CurrencyUitl.cutProfit(d0.getClosed(), minPrice));
-
-				} catch (Exception e) {
-					ErrorLogFileUitl.writeError(e, t1.getCode(), t1.getDate() + "", "");
-					e.printStackTrace();
-				}
-			}
-
-			// 数量
-			int c_m5 = 0;
-			int c_r5_10 = 0;
-			int c_m10 = 0;
-			int d_c_m5 = 0;
-			int d_c_r5_10 = 0;
-			int d_c_m10 = 0;
-			// 总额
-			double t_m5 = 0;
-			double t_r5_10 = 0;
-			double t_m10 = 0;
-			double d_t_m5 = 0;
-			double d_t_r5_10 = 0;
-			double d_t_m10 = 0;
-			// 理论最高总盈亏
-			double totalProfit = 0.0;
-			double totalLoss = 0.0;
-			int cnt_up = 0;
-			int cnt_down = 0;
-			for (TraceSortv2Vo t1 : samples) {
 				log.info(t1.toString());
-				try {
-					double profit = t1.getMaxProfit();
-					totalProfit += profit;
-					if (profit > 0) {
-						cnt_up++;
-						if (profit < 5) {// 5以内
-							c_m5++;
-							t_m5 += profit;
-						} else if (profit >= 10) {// 10%以上
-							c_m10++;
-							t_m10 += profit;
-						} else {// 5-10%以上
-							c_r5_10++;
-							t_r5_10 += profit;
-						}
-					}
-					double loss = t1.getMaxLoss();
-					totalLoss += loss;
-					if (loss < 0) {
-						cnt_down++;
-						if (loss <= -10) {// -10%以上
-							d_c_m10++;
-							d_t_m10 += loss;
-						} else if (loss <= -5) {// -5-10%以上
-							d_c_r5_10++;
-							d_t_r5_10 += loss;
-						} else {// -5以内
-							d_c_m5++;
-							d_t_m5 += loss;
-						}
-					}
-				} catch (Exception e) {
-					ErrorLogFileUitl.writeError(e, t1.getCode(), t1.getDate() + "", "");
-					e.printStackTrace();
-				}
 			}
 			int total_all = samples.size();
 			if (total_all > 0) {
-				WxPushUtil.pushSystem1("样本区间:" + startDate + " " + endDate + "样本数量(5天期):" + total_all//
+				WxPushUtil.pushSystem1("样本区间:" + startDate + " " + endDate + "样本数量(" + (days - 1) + "天期):" + total_all//
 						+ ",[理论最高盈利]次数:" + cnt_up + ",盈利概率:"
 						+ CurrencyUitl.roundHalfUp(cnt_up / Double.valueOf(total_all)) * 100 + "%" + ",总盈利百分比:"
 						+ totalProfit + "%"//
@@ -288,13 +304,19 @@ public class HistTraceService {
 						+ CurrencyUitl.roundHalfUp(cnt_down / Double.valueOf(total_all)) * 100 + "%" + ",总亏损百分比:"
 						+ totalLoss + "%"//
 						// 盈利
-						+ "@盈利10%以上=>次数:" + c_m10 + ",总额:" + t_m10 + "%,平均:" + (t_m10 / c_m10)//
-						+ "@盈利5-10%=>次数:" + c_r5_10 + ",总额:" + t_r5_10 + "%,平均:" + (t_r5_10 / c_r5_10)//
-						+ "@盈利5%以内=>次数:" + c_m5 + ",总额:" + t_m5 + "%,平均:" + (t_m5 / c_m5)//
+						+ "@盈利10%以上=>次数:" + c_m10 + ",总额:" + CurrencyUitl.roundHalfUp(t_m10) + "%,平均:"
+						+ CurrencyUitl.roundHalfUp((t_m10 / c_m10))//
+						+ "@盈利5-10%=>次数:" + c_r5_10 + ",总额:" + CurrencyUitl.roundHalfUp(t_r5_10) + "%,平均:"
+						+ CurrencyUitl.roundHalfUp((t_r5_10 / c_r5_10))//
+						+ "@盈利5%以内=>次数:" + c_m5 + ",总额:" + CurrencyUitl.roundHalfUp(t_m5) + "%,平均:"
+						+ CurrencyUitl.roundHalfUp((t_m5 / c_m5))//
 						// 亏损
-						+ "@亏损10%以上=>次数:" + d_c_m10 + ",总额:" + d_t_m10 + "%,平均:" + (d_t_m10 / d_c_m10)//
-						+ "@亏损5-10%=>次数:" + d_c_r5_10 + ",总额:" + d_t_r5_10 + "%,平均:" + (d_t_r5_10 / d_c_r5_10)//
-						+ "@亏损5%以内=>次数:" + d_c_m5 + ",总额:" + d_t_m5 + "%,平均:" + (d_t_m5 / d_c_m5)//
+						+ "@亏损10%以上=>次数:" + d_c_m10 + ",总额:" + CurrencyUitl.roundHalfUp(d_t_m10) + "%,平均:"
+						+ CurrencyUitl.roundHalfUp((d_t_m10 / d_c_m10))//
+						+ "@亏损5-10%=>次数:" + d_c_r5_10 + ",总额:" + CurrencyUitl.roundHalfUp(d_t_r5_10) + "%,平均:"
+						+ CurrencyUitl.roundHalfUp((d_t_r5_10 / d_c_r5_10))//
+						+ "@亏损5%以内=>次数:" + d_c_m5 + ",总额:" + CurrencyUitl.roundHalfUp(d_t_m5) + "%,平均:"
+						+ CurrencyUitl.roundHalfUp((d_t_m5 / d_c_m5))//
 						+ ",开始时间:" + sysstart//
 				);
 			} else {
