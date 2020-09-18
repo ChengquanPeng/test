@@ -31,10 +31,10 @@ public class RetraceController {
 	}
 
 	@RequestMapping(value = "/sortv2", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> sortv2(String startDate, String endDate, int days, int volType) {
+	public ResponseEntity<JsonResult> sortv2(String startDate, String endDate) {
 		JsonResult r = new JsonResult();
 		try {
-			histTraceService.sortv2(startDate, endDate, days, volType);
+			histTraceService.sortv2(startDate, endDate);
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
@@ -46,10 +46,10 @@ public class RetraceController {
 	}
 
 	@RequestMapping(value = "/sortv3", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> sortv3(String startDate, String endDate, int days, int volType) {
+	public ResponseEntity<JsonResult> sortv3(String startDate, String endDate) {
 		JsonResult r = new JsonResult();
 		try {
-			histTraceService.sortv3(startDate, endDate, days, volType);
+			histTraceService.sortv3(startDate, endDate);
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
