@@ -29,7 +29,6 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
-import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockAvg;
@@ -59,7 +58,9 @@ public class HistTraceService {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 
-	public static final Semaphore semp = new Semaphore(1);
+	public static final Semaphore sempv3 = new Semaphore(1);
+	public static final Semaphore sempv2 = new Semaphore(1);
+	public static final Semaphore sempv1 = new Semaphore(1);
 
 	EsQueryPageReq queryPage250 = new EsQueryPageReq(250);
 	EsQueryPageReq queryPage20 = new EsQueryPageReq(20);
@@ -88,7 +89,7 @@ public class HistTraceService {
 			days++;
 			log.info("startDate={},endDate={}", startDate, endDate);
 			try {
-				boolean getLock = semp.tryAcquire(1, TimeUnit.HOURS);
+				boolean getLock = sempv3.tryAcquire(1, TimeUnit.HOURS);
 				if (!getLock) {
 					log.warn("No Locked");
 					return;
@@ -151,7 +152,7 @@ public class HistTraceService {
 								List<DaliyBasicInfo> dailyList = daliyBasicHistroyService
 										.queryListByCodeForModel(code, date, queryPage250).getContent();
 
-								//LineVol lineVol = new LineVol(dailyList);
+								// LineVol lineVol = new LineVol(dailyList);
 								// 缩量
 								// if (lineVol.isShortVolV2(base)) {// 2.没有超过5天均量1.3倍
 								LineAvgPrice lineAvg = new LineAvgPrice(code, date, avgService, lastDividendDate,
@@ -180,7 +181,7 @@ public class HistTraceService {
 //												boolean b5 = linePrice.check3dayPriceV2();// 6.对比3天-价
 											boolean b4 = linePrice.isLowClosePriceToday(d2);
 
-											if (b6 && b4) {
+											if (b6 && !b4) {
 												boolean exsits = codesamples.size() > 0;
 												boolean isOk = true;
 												if (exsits) {
@@ -285,7 +286,7 @@ public class HistTraceService {
 					avgService.saveStockAvg(avgSaveList);
 				}
 				samples.addAll(codesamples);
-				ThreadsUtil.thsSleepRandom();
+				// ThreadsUtil.sleepSleep1Seconds();
 			}
 
 			log.info("V2获取样本数:" + samples.size());
@@ -295,7 +296,7 @@ public class HistTraceService {
 			}
 			int total_all = samples.size();
 			if (total_all > 0) {
-				WxPushUtil.pushSystem1("样本区间:" + startDate + " " + endDate + "样本数量(" + (days - 1) + "天期):" + total_all//
+				WxPushUtil.pushSystem1("v3样本区间:" + startDate + " " + endDate + "样本数量(" + (days - 1) + "天期):" + total_all//
 						+ ",[理论最高盈利]次数:" + cnt_up + ",盈利概率:"
 						+ CurrencyUitl.roundHalfUp(cnt_up / Double.valueOf(total_all)) * 100 + "%" + ",总盈利百分比:"
 						+ totalProfit //
@@ -352,7 +353,7 @@ public class HistTraceService {
 			days++;
 			log.info("startDate={},endDate={}", startDate, endDate);
 			try {
-				boolean getLock = semp.tryAcquire(1, TimeUnit.HOURS);
+				boolean getLock = sempv2.tryAcquire(1, TimeUnit.HOURS);
 				if (!getLock) {
 					log.warn("No Locked");
 					return;
@@ -445,7 +446,7 @@ public class HistTraceService {
 												boolean b5 = linePrice.check3dayPriceV2();// 6.对比3天-价
 												boolean b4 = linePrice.isLowClosePriceToday(d2);// 上影线
 
-												if (b6 && b5 && b4) {
+												if (b6 && b5 && !b4) {
 													boolean exsits = codesamples.size() > 0;
 													boolean isOk = true;
 													if (exsits) {
@@ -551,7 +552,7 @@ public class HistTraceService {
 					avgService.saveStockAvg(avgSaveList);
 				}
 				samples.addAll(codesamples);
-				ThreadsUtil.thsSleepRandom();
+				// ThreadsUtil.thsSleepRandom();
 			}
 
 			log.info("V2获取样本数:" + samples.size());
@@ -561,7 +562,7 @@ public class HistTraceService {
 			}
 			int total_all = samples.size();
 			if (total_all > 0) {
-				WxPushUtil.pushSystem1("样本区间:" + startDate + " " + endDate + "样本数量(" + (days - 1) + "天期):" + total_all//
+				WxPushUtil.pushSystem1("v2样本区间:" + startDate + " " + endDate + "样本数量(" + (days - 1) + "天期):" + total_all//
 						+ ",[理论最高盈利]次数:" + cnt_up + ",盈利概率:"
 						+ CurrencyUitl.roundHalfUp(cnt_up / Double.valueOf(total_all)) * 100 + "%" + ",总盈利百分比:"
 						+ totalProfit //
@@ -606,7 +607,7 @@ public class HistTraceService {
 			}
 			log.info("startDate={},endDate={}", startDate, endDate);
 			try {
-				boolean getLock = semp.tryAcquire(1, TimeUnit.HOURS);
+				boolean getLock = sempv1.tryAcquire(1, TimeUnit.HOURS);
 				if (!getLock) {
 					log.warn("No Locked");
 					return;
@@ -638,7 +639,7 @@ public class HistTraceService {
 				} catch (Exception e) {
 					ErrorLogFileUitl.writeError(e, s.getCode(), startDate, startDate);
 				}
-				ThreadsUtil.thsSleepRandom();
+				// ThreadsUtil.thsSleepRandom();
 			}
 
 			log.info("获取样本数:" + samples.size());
@@ -746,7 +747,7 @@ public class HistTraceService {
 			}
 
 			if (total1 > 0) {
-				WxPushUtil.pushSystem1(startDate + " " + endDate + "样本数量:" + samples.size() //
+				WxPushUtil.pushSystem1(startDate + " " + endDate + "v1样本数量:" + samples.size() //
 						+ ",[所有]成功买入次数:" + total1 + ",盈利次数:" + isok1 + ",盈利概率:"
 						+ CurrencyUitl.roundHalfUp(isok1 / Double.valueOf(total1)) * 100 + "%" //
 						+ ",[所有-放量]成功买入次数:" + totalsno + ",盈利次数:" + isoksno + ",盈利概率:"
