@@ -48,8 +48,8 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class DividendService {
-	private final String GDDH = "股东大会通过";
-	private final String SS = "实施";
+	public final String GDDH = "股东大会通过";
+	public final String SS = "实施";
 	@Autowired
 	private TushareSpider tushareSpider;
 	@Autowired

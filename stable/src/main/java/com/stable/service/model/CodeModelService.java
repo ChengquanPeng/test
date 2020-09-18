@@ -197,7 +197,16 @@ public class CodeModelService {
 		// 分红
 		DividendHistory dh = dividendService.getLastRecordByLteDate(code, oneYearAgo, treadeDate);
 		if (dh != null) {
-			newOne.setLastDividendDate(dh.getEnd_date());// 分红年度
+			if (dividendService.SS.equals(dh.getDiv_proc())) {
+				newOne.setLastDividendDate(dh.getEnd_date());// 分红年度
+			} else {
+				// 股东大会通过:不分配。。。
+				if (dh.getCash_div() > 0) {
+					newOne.setLastDividendDate(dh.getEnd_date());
+				} else {
+					dh = null;
+				}
+			}
 		}
 		// 回购
 		BuyBackInfo bb = buyBackService.getLastRecordByLteDate(code, oneYearAgo, treadeDate);
