@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.trace.HistTraceService;
-import com.stable.utils.TasksWorker;
 import com.stable.vo.http.JsonResult;
 
 @RequestMapping("/retrace")
@@ -35,20 +34,19 @@ public class RetraceController {
 	public ResponseEntity<JsonResult> sortv2(String startDate, String endDate) {
 		JsonResult r = new JsonResult();
 		try {
-			TasksWorker.getInstance().getService().submit(new Runnable() {
+			new Thread(new Runnable() {
 
 				@Override
 				public void run() {
 					histTraceService.sortv2(startDate, endDate);
 				}
-			});
-			TasksWorker.getInstance().getService().submit(new Runnable() {
-
+			}).start();
+			new Thread(new Runnable() {
 				@Override
 				public void run() {
 					histTraceService.sortv3(startDate, endDate);
 				}
-			});
+			}).start();
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
