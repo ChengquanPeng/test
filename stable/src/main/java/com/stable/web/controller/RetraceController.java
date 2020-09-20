@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.trace.HistTraceService;
+import com.stable.utils.TasksWorker;
 import com.stable.vo.http.JsonResult;
 
 @RequestMapping("/retrace")
@@ -34,22 +35,20 @@ public class RetraceController {
 	public ResponseEntity<JsonResult> sortv2(String startDate, String endDate) {
 		JsonResult r = new JsonResult();
 		try {
-			histTraceService.sortv2(startDate, endDate);
-			r.setResult(JsonResult.OK);
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
+			TasksWorker.getInstance().getService().submit(new Runnable() {
 
-	@RequestMapping(value = "/sortv3", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> sortv3(String startDate, String endDate) {
-		JsonResult r = new JsonResult();
-		try {
-			histTraceService.sortv3(startDate, endDate);
+				@Override
+				public void run() {
+					histTraceService.sortv2(startDate, endDate);
+				}
+			});
+			TasksWorker.getInstance().getService().submit(new Runnable() {
+
+				@Override
+				public void run() {
+					histTraceService.sortv3(startDate, endDate);
+				}
+			});
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
