@@ -39,11 +39,6 @@ public class RetraceController {
 				@Override
 				public void run() {
 					histTraceService.sortv2(startDate, endDate);
-				}
-			}).start();
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
 					histTraceService.sortv3(startDate, endDate);
 				}
 			}).start();

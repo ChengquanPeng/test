@@ -75,7 +75,7 @@ public class HistTraceService {
 	 * 右侧交易
 	 */
 	public void sortv3(String startDate, String endDate) {
-		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDDHHMMSS_NOspit());
+		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		String sysstart = DateUtil.getTodayYYYYMMDDHHMMSS();
 		try {
 			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
@@ -332,13 +332,13 @@ public class HistTraceService {
 									+ ",一年涨幅限制" + oneYear + ")样本数量:" + total_all//
 									+ ",[理论最高盈利]次数:" + cnt_up + ",盈利概率:"
 									+ CurrencyUitl.roundHalfUp(cnt_up / Double.valueOf(total_all)) * 100 + "%"
-									+ ",总盈利百分比:" + totalProfit //
+									+ ",总盈利百分比:" + CurrencyUitl.roundHalfUp(totalProfit) //
 									+ "%,[理论最高亏损]次数:" + cnt_down + ",亏损概率:"
 									+ CurrencyUitl.roundHalfUp(cnt_down / Double.valueOf(total_all)) * 100 + "%"
-									+ ",总亏损百分比:" + totalLoss //
+									+ ",总亏损百分比:" + CurrencyUitl.roundHalfUp(totalLoss) //
 									+ "%,[实际盈利]次数:" + act_cnt_up + ",盈利概率:"
 									+ CurrencyUitl.roundHalfUp(act_cnt_up / Double.valueOf(total_all)) * 100 + "%"
-									+ ",总亏损百分比:" + act_totalProfit //
+									+ ",总亏损百分比:" + CurrencyUitl.roundHalfUp(act_totalProfit) //
 									// 盈利
 									+ "%,@盈利10%以上=>次数:" + c_m10 + ",总额:" + CurrencyUitl.roundHalfUp(t_m10) + "%,平均:"
 									+ CurrencyUitl.roundHalfUp((t_m10 / c_m10))//
@@ -356,7 +356,8 @@ public class HistTraceService {
 									+ "%,开始时间:" + sysstart//
 							);
 						} else {
-							WxPushUtil.pushSystem1(startDate + " " + endDate + "样本数量:" + samples.size() + ",无成功买入样例");
+							WxPushUtil.pushSystem1("v3样本区间:" + startDate + " " + endDate + "条件(" + (d) + "天期,交易量" + vb
+									+ ",一年涨幅限制" + oneYear + ")样本数量:" + total_all);
 						}
 					} // for-days
 				} // for-volbase
@@ -375,7 +376,7 @@ public class HistTraceService {
 	 * 右侧交易
 	 */
 	public void sortv2(String startDate, String endDate) {
-		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDDHHMMSS_NOspit());
+		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		String sysstart = DateUtil.getTodayYYYYMMDDHHMMSS();
 		try {
 			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
@@ -651,13 +652,13 @@ public class HistTraceService {
 									+ ",一年涨幅限制" + oneYear + ")样本数量:" + total_all//
 									+ ",[理论最高盈利]次数:" + cnt_up + ",盈利概率:"
 									+ CurrencyUitl.roundHalfUp(cnt_up / Double.valueOf(total_all)) * 100 + "%"
-									+ ",总盈利百分比:" + totalProfit //
+									+ ",总盈利百分比:" + CurrencyUitl.roundHalfUp(totalProfit) //
 									+ "%,[理论最高亏损]次数:" + cnt_down + ",亏损概率:"
 									+ CurrencyUitl.roundHalfUp(cnt_down / Double.valueOf(total_all)) * 100 + "%"
-									+ ",总亏损百分比:" + totalLoss //
+									+ ",总亏损百分比:" + CurrencyUitl.roundHalfUp(totalLoss) //
 									+ "%,[实际盈利]次数:" + act_cnt_up + ",盈利概率:"
 									+ CurrencyUitl.roundHalfUp(act_cnt_up / Double.valueOf(total_all)) * 100 + "%"
-									+ ",总亏损百分比:" + act_totalProfit //
+									+ ",总亏损百分比:" + CurrencyUitl.roundHalfUp(act_totalProfit) //
 									// 盈利
 									+ "%,@盈利10%以上=>次数:" + c_m10 + ",总额:" + CurrencyUitl.roundHalfUp(t_m10) + "%,平均:"
 									+ CurrencyUitl.roundHalfUp((t_m10 / c_m10))//
@@ -675,7 +676,8 @@ public class HistTraceService {
 									+ "%,开始时间:" + sysstart//
 							);
 						} else {
-							WxPushUtil.pushSystem1(startDate + " " + endDate + "样本数量:" + samples.size() + ",无成功买入样例");
+							WxPushUtil.pushSystem1("v2样本区间:" + startDate + " " + endDate + "条件(" + (d) + "天期,交易量" + vb
+									+ ",一年涨幅限制" + oneYear + ")样本数量:" + total_all);
 						}
 					} // for-days
 				} // for volbases
