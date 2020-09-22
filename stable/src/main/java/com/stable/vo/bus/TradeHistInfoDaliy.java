@@ -76,6 +76,27 @@ public class TradeHistInfoDaliy extends EsBase {
 		setId();
 	}
 
+//	日期，		开盘，收盘，最高，最低，总手，总额，					振幅，	涨跌幅，		涨跌额，	换手，
+//	2020-09-18,	31.26,31.02,31.60,30.64,64224,198563405.00,	3.07,	-0.83,		-0.26,	0.80
+//	2020-09-21,	31.12,30.38,31.13,29.92,72290,218674388.00,	3.90,	-2.06,		-0.64,	0.90
+	public TradeHistInfoDaliy(String code, String lineFromEastMoeny) {
+		this.code = code;
+		String[] vals = lineFromEastMoeny.split(",");
+		int i = 0;
+		this.date = Integer.valueOf(vals[i++].replaceAll("-", ""));// TODO
+		this.open = Double.valueOf(vals[i++]);
+		this.closed = Double.valueOf(vals[i++]);
+		this.high = Double.valueOf(vals[i++]);
+		this.low = Double.valueOf(vals[i++]);
+		this.volume = Double.valueOf((Double.valueOf(vals[i++]) * 100)).longValue();// 成交量 （手）
+		this.amt = Double.valueOf((Double.valueOf(vals[i++]))).longValue();// 成交额 （千元）
+		i++;// 振幅
+		this.todayChangeRate = Double.valueOf(vals[i++]);// pct_chg涨跌幅
+		this.todayChange = Double.valueOf(vals[i++]);// change 涨跌额
+//		this.yesterdayPrice = Double.valueOf(arr.getString(i++));// pre_close
+		setId();
+	}
+
 	public void setId() {
 		this.id = code + date;
 	}

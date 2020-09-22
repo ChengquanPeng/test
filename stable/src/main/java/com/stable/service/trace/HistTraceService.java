@@ -399,7 +399,7 @@ public class HistTraceService {
 			}
 
 			int[] days = { 2, 3, 5 };
-			double[] volBases = { 0, 1.2, 1.3 };
+			double[] volBases = { 0.0, 1.2, 1.3 };
 			int[] oneYearups = { 0, 1 };// 1年未大涨的（TODO,第一波是否涨超30%？）
 			for (int oneYear : oneYearups) {
 				for (double vb : volBases) {
@@ -460,7 +460,7 @@ public class HistTraceService {
 									int date = d2.getTrade_date();
 									log.info("code={},date={}", code, date);
 									try {
-										// 1.上涨且位超过8%
+										// 1.上涨且位未超过8%
 										if (d2.getTodayChangeRate() > 0 && d2.getTodayChangeRate() <= 8.0) {
 											List<DaliyBasicInfo> dailyList = daliyBasicHistroyService
 													.queryListByCodeForModel(code, date, queryPage250).getContent();
@@ -603,6 +603,8 @@ public class HistTraceService {
 										ErrorLogFileUitl.writeError(e, s.getCode(), code, date + "");
 									}
 								}
+							} else {
+								log.info("V2获取样本{} 未获得数据", code);
 							}
 
 							if (avgSaveList.size() > 0) {
@@ -612,7 +614,7 @@ public class HistTraceService {
 							// ThreadsUtil.thsSleepRandom();
 						}
 
-						log.info("V2获取样本数:" + samples.size());
+						log.info("V2获取样本数:{}", samples.size());
 
 						for (TraceSortv2Vo t1 : samples) {
 							log.info(t1.toString());

@@ -33,6 +33,7 @@ import com.stable.job.MyCallable;
 import com.stable.service.model.ImageStrategyListener;
 import com.stable.service.model.UpModelLineService;
 import com.stable.service.model.image.ImageService;
+import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -93,7 +94,7 @@ public class DaliyTradeHistroyService {
 						String json = redisUtil.get(code);
 						if (StringUtils.isNotBlank(json)) {
 							StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-							spiderDaliyTradeHistoryInfoFromIPO(code, base.getList_date(), today, 0);
+							spiderDaliyTradeHistoryInfoFromIPOCenter(code, base.getList_date(), today, 0);
 						}
 						redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 						return null;
@@ -177,25 +178,17 @@ public class DaliyTradeHistroyService {
 				// 2.是否需要更新缺失记录
 				String code = d.getCode();
 				String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
-				if (StringUtils.isBlank(yyyymmdd)) {
+				if (StringUtils.isBlank(yyyymmdd) || (!preDate.equals(yyyymmdd) && !yyyymmdd.equals(today))) {
 					String json = redisUtil.get(d.getCode());
 					// 第一次上市或者除权
-					if (StringUtils.isNotBlank(json)) {
-						StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-						yyyymmdd = base.getList_date();
-						log.info("代码code:{}重新获取记录", code);
-					}
-				}
-
-				// 3.更新缺失记录
-				if (StringUtils.isNotBlank(yyyymmdd) && !preDate.equals(yyyymmdd) && !yyyymmdd.equals(today)) {
-					log.info("代码:{},需要重新获取记录,上个交易日期 preDate:{},开始时间:{},结束时间:{},index={}", code, preDate, yyyymmdd,
-							today, i);
+					StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
+					yyyymmdd = base.getList_date();
+					log.info("代码code:{}重新获取记录", code);
 					String datep = yyyymmdd;
 					TasksWorker2nd.add(new MyRunnable() {
 						public void running() {
 							try {
-								spiderDaliyTradeHistoryInfoFromIPO(d.getCode(), datep, today, 0);
+								spiderDaliyTradeHistoryInfoFromIPOCenter(d.getCode(), datep, today, 0);
 								redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 							} finally {
 								cnt.countDown();
@@ -226,10 +219,40 @@ public class DaliyTradeHistroyService {
 
 	}
 
-	private boolean spiderDaliyTradeHistoryInfoFromIPO(String code, String startDate, String endDate, int fortimes) {
+	// 路由，优先eastmoney
+	private boolean spiderDaliyTradeHistoryInfoFromIPOCenter(String code, String startDate, String today,
+			int fortimes) {
 		priceLifeService.removePriceLifeCache(code);
+		if (spiderDaliyTradeHistoryInfoFromIPOEastMoney(code, fortimes)) {
+			return true;
+		}
+		return spiderDaliyTradeHistoryInfoFromIPOTushare(code, startDate, today, fortimes);
+	}
+
+	private boolean spiderDaliyTradeHistoryInfoFromIPOEastMoney(String code, int fortimes) {
+		if (fortimes >= 3) {
+			log.warn("EastMoeny 超过最大次数：code：{}，fortimes：{}", code, fortimes);
+			return false;
+		}
+		fortimes++;
+		List<TradeHistInfoDaliy> list = null;
+		try {
+			list = EastmoneyQfqSpider.getQfq(code);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (list == null || list.size() <= 0) {
+			return spiderDaliyTradeHistoryInfoFromIPOEastMoney(code, fortimes);
+		} else {
+			tradeHistDaliy.saveAll(list);
+		}
+		return true;
+	}
+
+	private boolean spiderDaliyTradeHistoryInfoFromIPOTushare(String code, String startDate, String today,
+			int fortimes) {
 		if (fortimes >= 10) {
-			log.warn("超过最大次数：code：{}，startDate：{}，endDate：{}，fortimes：{}", code, startDate, endDate, fortimes);
+			log.warn("Tushare 超过最大次数：code：{}，startDate：{}，endDate：{}，fortimes：{}", code, startDate, today, fortimes);
 			return false;
 		}
 		fortimes++;
@@ -246,7 +269,7 @@ public class DaliyTradeHistroyService {
 //		edate=sys.argv[3]
 //		padj=sys.argv[4]
 //		pfreq=sys.argv[5]
-		String params = TushareSpider.formatCode(code) + " " + startDate + " " + endDate + " qfq D";
+		String params = TushareSpider.formatCode(code) + " " + startDate + " " + today + " qfq D";
 		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
 		if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
 			log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，未获取到数据 params：{}", code, params);
@@ -275,7 +298,7 @@ public class DaliyTradeHistroyService {
 		}
 		log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，上市日期startDate：{}，本批当前日期last：{}", code, startDate, last);
 		if (last != null && !startDate.equals(last.getDate() + "")) {
-			return spiderDaliyTradeHistoryInfoFromIPO(code, startDate, last.getDate() + "", fortimes);
+			return spiderDaliyTradeHistoryInfoFromIPOTushare(code, startDate, last.getDate() + "", fortimes);
 		}
 		return true;
 	}
@@ -401,7 +424,7 @@ public class DaliyTradeHistroyService {
 					upLevel1Service.runJob(true, Integer.valueOf(today));
 				} finally {
 					log.info("等待图片模型执行");
-					//nextImageJob(today);
+					// nextImageJob(today);
 				}
 				return null;
 			}

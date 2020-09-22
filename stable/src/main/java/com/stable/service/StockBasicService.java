@@ -83,9 +83,6 @@ public class StockBasicService {
 
 	}
 
-	public static void main(String[] args) {
-	}
-
 	public ListenableFuture<Object> jobSynStockList(boolean isJob) {
 		try {
 			semap.acquire();
@@ -171,7 +168,9 @@ public class StockBasicService {
 				}
 			}
 		}
-		return LOCAL_ALL_ONLINE_LIST;
+		List<StockBaseInfo> copy = new LinkedList<StockBaseInfo>();
+		copy.addAll(LOCAL_ALL_ONLINE_LIST);
+		return copy;
 		// return dbStockBaseInfoDao.getListWithOnStauts();
 	}
 

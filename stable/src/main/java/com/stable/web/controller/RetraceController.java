@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.trace.HistTraceService;
+import com.stable.utils.ThreadsUtil;
 import com.stable.vo.http.JsonResult;
 
 @RequestMapping("/retrace")
@@ -39,6 +40,7 @@ public class RetraceController {
 				@Override
 				public void run() {
 					histTraceService.sortv2(startDate, endDate);
+					ThreadsUtil.sleepRandomSecBetween5And15();
 					histTraceService.sortv3(startDate, endDate);
 				}
 			}).start();
