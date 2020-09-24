@@ -20,7 +20,6 @@ public class RetraceController {
 	public ResponseEntity<JsonResult> sortv1(String startDate, String endDate) {
 		JsonResult r = new JsonResult();
 		try {
-			histTraceService.sortv1(startDate, endDate);
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
@@ -36,11 +35,17 @@ public class RetraceController {
 		JsonResult r = new JsonResult();
 		try {
 			new Thread(new Runnable() {
-
 				@Override
 				public void run() {
 					histTraceService.sortv2(startDate, endDate);
-					ThreadsUtil.sleepRandomSecBetween5And15();
+				}
+			}).start();
+
+			ThreadsUtil.sleepRandomSecBetween5And15();
+
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
 					histTraceService.sortv3(startDate, endDate);
 				}
 			}).start();

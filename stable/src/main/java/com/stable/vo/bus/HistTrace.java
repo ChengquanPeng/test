@@ -35,37 +35,16 @@ public class HistTrace extends EsBase {
 	private int oneYear;// 1年未大涨
 
 	// 结果
-	// 盈亏概率
-	@Field(type = FieldType.Integer)
-	int cnt_up = 0;
-	@Field(type = FieldType.Integer)
-	int c_m5 = 0;
-	@Field(type = FieldType.Integer)
-	int c_r5_10 = 0;
-	@Field(type = FieldType.Integer)
-	int c_m10 = 0;
-	@Field(type = FieldType.Double)
-	double t_m5 = 0;
-	@Field(type = FieldType.Double)
-	double t_r5_10 = 0;
-	@Field(type = FieldType.Double)
-	double t_m10 = 0;
 
-	// 盈亏总额
 	@Field(type = FieldType.Integer)
-	int cnt_down = 0;
-	@Field(type = FieldType.Integer)
-	int d_c_m5 = 0;
-	@Field(type = FieldType.Integer)
-	int d_c_r5_10 = 0;
-	@Field(type = FieldType.Integer)
-	int d_c_m10 = 0;
-	@Field(type = FieldType.Double)
-	double d_t_m5 = 0;
-	@Field(type = FieldType.Double)
-	double d_t_r5_10 = 0;
-	@Field(type = FieldType.Double)
-	double d_t_m10 = 0;
+	private int totalAll;
+
+	@Field(type = FieldType.Text) // 实际被套区间
+	private String lossSettAct;
+	@Field(type = FieldType.Text) // 理论最低收盘价被套区间
+	private String lossSettClosedPrice;
+	@Field(type = FieldType.Text)
+	private String lossSettLowPrice;// 理论最低价被套区间
 
 	// 理论最高总盈亏
 	@Field(type = FieldType.Double)

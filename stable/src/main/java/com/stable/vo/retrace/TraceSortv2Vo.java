@@ -10,4 +10,5 @@ public class TraceSortv2Vo {
 	private double sellPrice;
 	private double maxPrice;
 	private double minPrice;
+	private double minLowPrice;
 }

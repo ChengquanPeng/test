@@ -35,6 +35,8 @@ public class FinYjkb extends EsBase {
 	private double yyzsrtbzz; // 营业总收入同比增长(%)
 	@Field(type = FieldType.Double)
 	private double jlrtbzz; // 归属净利润同比增长(%)
+	@Field(type = FieldType.Integer)
+	private int updateDate;//更新日期
 
 	public void setId() {
 		id = code + date;

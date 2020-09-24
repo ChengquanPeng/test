@@ -25,6 +25,7 @@ import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
+import com.stable.utils.DateUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
@@ -227,20 +228,23 @@ public class FinanceService {
 		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.FINACE_FRIST, RunCycleEnum.DAY) {
 			public Object mycall() {
 				log.info("同步业绩预报和快报[started]");
+				int updateDate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 				List<FinYjkb> list1 = eastmoneySpider.getFinYjkb();
 				List<FinYjyg> list2 = eastmoneySpider.getFinYjyg();
 				StringBuffer sb = new StringBuffer();
 				if (list1.size() > 0) {
-					esFinYjkbDao.saveAll(list1);
 					for (FinYjkb fy : list1) {
 						sb.append(stockBasicService.getCodeName(fy.getCode())).append(",");
+						fy.setUpdateDate(updateDate);
 					}
+					esFinYjkbDao.saveAll(list1);
 				}
 				if (list2.size() > 0) {
-					esFinYjygDao.saveAll(list2);
 					for (FinYjyg fy : list2) {
 						sb.append(stockBasicService.getCodeName(fy.getCode())).append(",");
+						fy.setUpdateDate(updateDate);
 					}
+					esFinYjygDao.saveAll(list2);
 				}
 				log.info("同步业绩预报和快报[end]");
 
