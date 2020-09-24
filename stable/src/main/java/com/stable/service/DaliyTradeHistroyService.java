@@ -196,6 +196,8 @@ public class DaliyTradeHistroyService {
 								}
 							}
 						});
+					}else {
+						log.info("代码code:{} 未获取到StockBaseInfo", code);
 					}
 				} else {
 					log.info("代码:{},不需要重新更新记录,上个交易日期 preDate:{},上次更新日期:{},最后更新日期:{},index={}", code, preDate, yyyymmdd,
