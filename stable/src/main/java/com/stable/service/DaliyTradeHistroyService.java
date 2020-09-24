@@ -179,22 +179,24 @@ public class DaliyTradeHistroyService {
 				String code = d.getCode();
 				String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
 				if (StringUtils.isBlank(yyyymmdd) || (!preDate.equals(yyyymmdd) && !yyyymmdd.equals(today))) {
+					log.info("代码code:{}重新获取记录", code);
 					String json = redisUtil.get(d.getCode());
 					// 第一次上市或者除权
 					StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-					yyyymmdd = base.getList_date();
-					log.info("代码code:{}重新获取记录", code);
-					String datep = yyyymmdd;
-					TasksWorker2nd.add(new MyRunnable() {
-						public void running() {
-							try {
-								spiderDaliyTradeHistoryInfoFromIPOCenter(d.getCode(), datep, today, 0);
-								redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
-							} finally {
-								cnt.countDown();
+					if (base != null) {
+						yyyymmdd = base.getList_date();
+						String datep = yyyymmdd;
+						TasksWorker2nd.add(new MyRunnable() {
+							public void running() {
+								try {
+									spiderDaliyTradeHistoryInfoFromIPOCenter(d.getCode(), datep, today, 0);
+									redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+								} finally {
+									cnt.countDown();
+								}
 							}
-						}
-					});
+						});
+					}
 				} else {
 					log.info("代码:{},不需要重新更新记录,上个交易日期 preDate:{},上次更新日期:{},最后更新日期:{},index={}", code, preDate, yyyymmdd,
 							today, i);
