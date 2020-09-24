@@ -29,6 +29,8 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
+import com.stable.utils.FileWriteUitl;
+import com.stable.utils.LogFileUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
@@ -59,6 +61,8 @@ public class HistTraceService {
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private EsHistTraceDao esHistTraceDao;
+
+	private String FILE_FOLDER = "/my/free/retrace/";
 
 	public static final Semaphore sempv3 = new Semaphore(1);
 	public static final Semaphore sempv2 = new Semaphore(1);
@@ -99,13 +103,17 @@ public class HistTraceService {
 			for (int oneYear : oneYearups) {
 				for (double vb : volBases) {
 					for (int d : days) {
-						v3Really(startDate, endDate, codelist, d, oneYear, vb, sysstart, batch);
+						try {
+							v3Really(startDate, endDate, codelist, d, oneYear, vb, sysstart, batch);
+						} catch (Exception e) {
+							e.printStackTrace();
+							WxPushUtil.pushSystem1("v3样本区间:" + startDate + " " + endDate + "条件(" + (d) + "天期,交易量" + vb
+									+ ",一年涨幅限制" + oneYear + ")样本出错");
+						}
 					} // for-days
 				} // for-volbase
 			} // for-oneYears
-		} catch (
-
-		Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1(startDate + " " + endDate + "样本出错！");
 		} finally {
@@ -190,7 +198,9 @@ public class HistTraceService {
 		int total_all = samples.size();
 		if (total_all > 0) {
 			TraceSortv2StatVo stat = new TraceSortv2StatVo();
-			stat(stat, samples);
+			String filepath = FILE_FOLDER + "v3" + startDate + "_" + endDate + "_" + day + "_" + oneYear + "_" + vb
+					+ "_" + batch + ".log";
+			stat(filepath, stat, samples);
 			sendMessge("v3", batch, startDate, endDate, oneYear, day, vb, stat, total_all, sysstart);
 		} else {
 			WxPushUtil.pushSystem1("v3样本区间:" + startDate + " " + endDate + "条件(" + (d) + "天期,交易量" + vb + ",一年涨幅限制"
@@ -231,7 +241,13 @@ public class HistTraceService {
 			for (int oneYear : oneYearups) {
 				for (double vb : volBases) {
 					for (int d : days) {
-						v2Really(startDate, endDate, codelist, d, oneYear, vb, sysstart, batch);
+						try {
+							v2Really(startDate, endDate, codelist, d, oneYear, vb, sysstart, batch);
+						} catch (Exception e) {
+							e.printStackTrace();
+							WxPushUtil.pushSystem1("v2样本区间:" + startDate + " " + endDate + "条件(" + (d) + "天期,交易量" + vb
+									+ ",一年涨幅限制" + oneYear + ")样本出错");
+						}
 					} // for-days
 				} // for volbases
 			} // for-year
@@ -344,7 +360,9 @@ public class HistTraceService {
 		int total_all = samples.size();
 		if (total_all > 0) {
 			TraceSortv2StatVo stat = new TraceSortv2StatVo();
-			stat(stat, samples);
+			String filepath = FILE_FOLDER + "v2" + startDate + "_" + endDate + "_" + day + "_" + oneYear + "_" + vb
+					+ "_" + batch + ".log";
+			stat(filepath, stat, samples);
 			sendMessge("v2", batch, startDate, endDate, oneYear, day, vb, stat, total_all, sysstart);
 		} else {
 			WxPushUtil.pushSystem1("v2样本区间:" + startDate + " " + endDate + "条件(" + (d) + "天期,交易量" + vb + ",一年涨幅限制"
@@ -399,9 +417,11 @@ public class HistTraceService {
 		}
 	}
 
-	private void stat(TraceSortv2StatVo stat, List<TraceSortv2Vo> samples) {
+	private void stat(String filepath, TraceSortv2StatVo stat, List<TraceSortv2Vo> samples) {
+		StringBuffer sb = new StringBuffer();
 		for (TraceSortv2Vo t1 : samples) {
 			log.info(t1.toString());
+			sb.append(t1.toString()).append(FileWriteUitl.LINE_FILE);
 
 			// 理论最高盈利
 			double profit = CurrencyUitl.cutProfit(t1.getBuyPrice(), t1.getMaxPrice());
@@ -432,6 +452,9 @@ public class HistTraceService {
 			if (low_loss < 0) {
 				stat.statLossLowPrice(low_loss);
 			}
+		}
+		if (sb.length() > 0) {
+			LogFileUitl.writeLog(filepath, sb.toString());
 		}
 	}
 
