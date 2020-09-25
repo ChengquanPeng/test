@@ -20,6 +20,12 @@ public class CurrencyUitl {
 		return result;
 	}
 
+	public final static int roundHalfUpWhithPercent(double price) {
+		int result = new BigDecimal(new Double(price * 100).toString()).setScale(0, BigDecimal.ROUND_HALF_UP)
+				.intValue();
+		return result;
+	}
+
 	public final static Long covertToLong(String str) {
 		if (StringUtils.isBlank(str) || str.contains(Constant.NULL) || str.contains(Constant.FALSE)) {
 			return 0l;

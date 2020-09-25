@@ -24,7 +24,6 @@ import com.stable.utils.FileWriteUitl;
 import com.stable.utils.SpringUtil;
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
-import com.stable.vo.bus.StockAvg;
 import com.stable.vo.up.strategy.ModelV1;
 
 import lombok.extern.log4j.Log4j2;
@@ -75,11 +74,10 @@ public class V3SortStrategyListener implements StrategyListener {
 							throw new RuntimeException(mc.getCode() + " " + mc.getDate()
 									+ " 数据异常,today.getLow()<=0||today.getClose()<=0?");
 						}
-						//缩量
-						//上涨
+						// 缩量
+						// 上涨
 						//
-						
-						
+
 					} else {
 						isOk = false;
 						dropOutMsg = "非白马";

@@ -29,14 +29,15 @@ public class TraceSortv2StatVo {
 	public String getStatLossAct() {
 		StringBuffer sb = new StringBuffer("");
 		if (map_act.size() > 0) {
-			int total = 0;
+			double total = 0;
 			for (Integer key : map_act.keySet()) {
 				int cnt = map_act.get(key);
 				total += cnt;
 			}
 			for (Integer key : map_act.keySet()) {
 				int cnt = map_act.get(key);
-				sb.append("@亏损" + key + "%的次数:[" + cnt + "],区间占比:[" + CurrencyUitl.roundHalfUp((cnt / total)) + "%];");
+				sb.append("@亏损" + key + "%的次数:[" + cnt + "],区间占比:["
+						+ CurrencyUitl.roundHalfUpWhithPercent((Double.valueOf(cnt) / total)) + "%];");
 			}
 		}
 		return sb.toString();
@@ -45,14 +46,15 @@ public class TraceSortv2StatVo {
 	public String getStatLossLowPrice() {
 		StringBuffer sb = new StringBuffer("");
 		if (map_MinLowPrice.size() > 0) {
-			int total = 0;
+			double total = 0;
 			for (Integer key : map_MinLowPrice.keySet()) {
 				int cnt = map_MinLowPrice.get(key);
 				total += cnt;
 			}
 			for (Integer key : map_MinLowPrice.keySet()) {
 				int cnt = map_MinLowPrice.get(key);
-				sb.append("@亏损" + key + "%的次数:[" + cnt + "],区间占比:[" + CurrencyUitl.roundHalfUp((cnt / total)) + "%];");
+				sb.append("@亏损" + key + "%的次数:[" + cnt + "],区间占比:["
+						+ CurrencyUitl.roundHalfUpWhithPercent((Double.valueOf(cnt) / total)) + "%];");
 			}
 		}
 		return sb.toString();
@@ -61,14 +63,15 @@ public class TraceSortv2StatVo {
 	public String getStatLossLowClosedPrice() {
 		StringBuffer sb = new StringBuffer("");
 		if (map_LowClosedPrice.size() > 0) {
-			int total = 0;
+			double total = 0;
 			for (Integer key : map_LowClosedPrice.keySet()) {
 				int cnt = map_LowClosedPrice.get(key);
 				total += cnt;
 			}
 			for (Integer key : map_LowClosedPrice.keySet()) {
 				int cnt = map_LowClosedPrice.get(key);
-				sb.append("@亏损" + key + "%的次数:[" + cnt + "],区间占比:[" + CurrencyUitl.roundHalfUp((cnt / total)) + "%];");
+				sb.append("@亏损" + key + "%的次数:[" + cnt + "],区间占比:["
+						+ CurrencyUitl.roundHalfUpWhithPercent((Double.valueOf(cnt) / total)) + "%];");
 			}
 		}
 		return sb.toString();

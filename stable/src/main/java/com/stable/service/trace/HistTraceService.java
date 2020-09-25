@@ -201,7 +201,7 @@ public class HistTraceService {
 			String filepath = FILE_FOLDER + "v3" + startDate + "_" + endDate + "_" + day + "_" + oneYear + "_" + vb
 					+ "_" + batch + ".log";
 			stat(filepath, stat, samples);
-			sendMessge("v3", batch, startDate, endDate, oneYear, day, vb, stat, total_all, sysstart);
+			sendMessge("v3", batch, startDate, endDate, oneYear, d, vb, stat, total_all, sysstart);
 		} else {
 			WxPushUtil.pushSystem1("v3样本区间:" + startDate + " " + endDate + "条件(" + (d) + "天期,交易量" + vb + ",一年涨幅限制"
 					+ oneYear + ")样本数量:" + total_all);
@@ -363,7 +363,7 @@ public class HistTraceService {
 			String filepath = FILE_FOLDER + "v2" + startDate + "_" + endDate + "_" + day + "_" + oneYear + "_" + vb
 					+ "_" + batch + ".log";
 			stat(filepath, stat, samples);
-			sendMessge("v2", batch, startDate, endDate, oneYear, day, vb, stat, total_all, sysstart);
+			sendMessge("v2", batch, startDate, endDate, oneYear, d, vb, stat, total_all, sysstart);
 		} else {
 			WxPushUtil.pushSystem1("v2样本区间:" + startDate + " " + endDate + "条件(" + (d) + "天期,交易量" + vb + ",一年涨幅限制"
 					+ oneYear + ")样本数量:" + total_all);
@@ -484,14 +484,14 @@ public class HistTraceService {
 		WxPushUtil.pushSystem1(vers + " 样本区间:" + startDate + " " + endDate + "条件(" + (d) + "天期,交易量" + vb + ",一年涨幅限制"
 				+ oneYear + ")样本数量:" + total_all//
 				+ ",[理论最高盈利]次数:" + stat.getCnt_up() + ",盈利概率:"
-				+ CurrencyUitl.roundHalfUp(stat.getCnt_up() / Double.valueOf(total_all)) * 100 + "%" + ",总盈利百分比:"
+				+ CurrencyUitl.roundHalfUpWhithPercent(stat.getCnt_up() / Double.valueOf(total_all)) + "%" + ",总盈利百分比:"
 				+ CurrencyUitl.roundHalfUp(stat.getTotalProfit()) //
 				+ "%,[理论最高亏损]次数:" + stat.getCnt_down() + ",亏损概率:"
-				+ CurrencyUitl.roundHalfUp(stat.getCnt_down() / Double.valueOf(total_all)) * 100 + "%" + ",总亏损百分比:"
-				+ CurrencyUitl.roundHalfUp(stat.getTotalLoss()) //
+				+ CurrencyUitl.roundHalfUpWhithPercent(stat.getCnt_down() / Double.valueOf(total_all)) + "%"
+				+ ",总亏损百分比:" + CurrencyUitl.roundHalfUp(stat.getTotalLoss()) //
 				+ "%,[实际盈利]次数:" + stat.getAct_cnt_up() + ",盈利概率:"
-				+ CurrencyUitl.roundHalfUp(stat.getAct_cnt_up() / Double.valueOf(total_all)) * 100 + "%" + ",实际盈亏百分比:"
-				+ CurrencyUitl.roundHalfUp(stat.getAct_totalProfit()) + "%" //
+				+ CurrencyUitl.roundHalfUpWhithPercent(stat.getAct_cnt_up() / Double.valueOf(total_all)) + "%"
+				+ ",实际盈亏百分比:" + CurrencyUitl.roundHalfUp(stat.getAct_totalProfit()) + "%" //
 				// 盈利
 				+ "[实际亏损分布]" + ht.getLossSettAct() //
 				+ "[收盘价亏损分布]" + ht.getLossSettClosedPrice() //
