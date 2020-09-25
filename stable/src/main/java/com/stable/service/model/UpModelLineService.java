@@ -90,6 +90,8 @@ public class UpModelLineService {
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private MonitoringDao monitoringDao;
+	@Autowired
+	private CodeModelService codeModelService;
 
 	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
 	private final EsQueryPageReq deleteQueryPage = new EsQueryPageReq(9999);
@@ -153,13 +155,10 @@ public class UpModelLineService {
 		}
 		List<StockAvg> avgList = Collections.synchronizedList(new LinkedList<StockAvg>());
 		List<StrategyListener> models = new LinkedList<StrategyListener>();
-		// StrategyListener v1 = new V1SortStrategyListener(treadeDate);
-		// StrategyListener v2 = new V2SortStrategyListener(treadeDate);
-		// StrategyListener v2p = new V2PRESortStrategyListener(treadeDate);
 
-		// models.add(v1);
-		// models.add(v2);
-		// models.add(v2p);
+		models.add(new V1SortStrategyListener(treadeDate, codeModelService));
+		// models.add(new V2SortStrategyListener(treadeDate));
+		// models.add(new V2PRESortStrategyListener(treadeDate));
 		if (models.size() <= 0) {
 			return;
 		}
@@ -215,10 +214,12 @@ public class UpModelLineService {
 			if (avgList.size() > 0) {
 				avgService.saveStockAvg(avgList);
 			}
+			int v1cnt = 0;
 			for (int i = 0; i < models.size(); i++) {
 				StrategyListener sort = models.get(i);
 				sort.fulshToFile();
 				if (sort.getResultList().size() > 0) {
+					v1cnt = sort.getResultList().size();
 					esModelV1Dao.saveAll(sort.getResultList());
 				}
 			}
@@ -239,7 +240,7 @@ public class UpModelLineService {
 //			}
 			log.info("MV1模型执行完成");
 			WxPushUtil.pushSystem1("Seq4=> " + treadeDate + " -> MV模型执行完成！ 开始时间:" + startTime + " 结束时间："
-					+ DateUtil.getTodayYYYYMMDDHHMMSS());
+					+ DateUtil.getTodayYYYYMMDDHHMMSS() + ", V1满足条件获取数量:" + v1cnt);
 		} catch (Exception e) {
 			if (avgList.size() > 0) {
 				avgService.saveStockAvg(avgList);

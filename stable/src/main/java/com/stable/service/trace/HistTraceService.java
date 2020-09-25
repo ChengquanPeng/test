@@ -168,11 +168,11 @@ public class HistTraceService {
 									if (lineAvg.isWhiteHorseV2()) {
 										LinePrice linePrice = new LinePrice(code, date, daliyTradeHistroyService);
 
-										boolean b6 = linePrice.checkPriceBack6dayWhitoutTodayV2();// 5.回调过超10%
+										boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%
 //								boolean b5 = linePrice.check3dayPriceV2();// 6.对比3天-价
 										boolean b4 = linePrice.isLowClosePriceToday(d2);
 
-										if (b6 && !b4 && oneYearCheck(oneYear, code, date)) {
+										if (b6 && !b4 && linePrice.oneYearCheck(oneYear, code, date)) {
 											saveOkRec(code, date, day, codesamples);
 										}
 									}
@@ -325,11 +325,11 @@ public class HistTraceService {
 										) {
 											LinePrice linePrice = new LinePrice(code, date, daliyTradeHistroyService);
 
-											boolean b6 = linePrice.checkPriceBack6dayWhitoutTodayV2();// 5.回调过超10%
+											boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%
 											boolean b5 = linePrice.check3dayPriceV2();// 6.对比3天-价
 											boolean b4 = linePrice.isLowClosePriceToday(d2);// 上影线
 
-											if (b6 && b5 && !b4 && oneYearCheck(oneYear, code, date)) {
+											if (b6 && b5 && !b4 && linePrice.oneYearCheck(oneYear, code, date)) {
 												saveOkRec(code, date, day, codesamples);
 											}
 										}
@@ -499,25 +499,5 @@ public class HistTraceService {
 				// 亏损
 				+ ",开始时间:" + sysstart//
 		);
-	}
-
-	private boolean oneYearCheck(int oneyear, String code, int date) {
-		if (oneyear == 0) {
-			return true;
-		}
-		List<TradeHistInfoDaliy> listD30 = daliyTradeHistroyService.queryListByCode(code, 0, date, queryPage250,
-				SortOrder.DESC);
-		TradeHistInfoDaliy dmax = listD30.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
-		TradeHistInfoDaliy dmin = listD30.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
-		if (dmin.getDate() > dmax.getDate()) {// 先涨-后跌的情况
-			return false;
-		}
-		double maxPrice = dmax.getHigh();
-		double minPrice = dmin.getLow();
-
-		if (CurrencyUitl.cutProfit(minPrice, maxPrice) > 65.0) {
-			return false;
-		}
-		return true;
 	}
 }

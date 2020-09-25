@@ -46,6 +46,7 @@ public class V1SortStrategyListener implements StrategyListener {
 	// 量排除: x换手率太高或者太低; 放量超过30日均量50%
 
 	private int treadeDate;
+	private CodeModelService codeModelService;
 
 	private void setDetail(StringBuffer detailDesc, String desc) {
 		detailDesc.append(desc).append(Constant.DOU_HAO);
@@ -64,7 +65,7 @@ public class V1SortStrategyListener implements StrategyListener {
 		String dropOutMsg = "";
 		boolean isOk = true;
 		if (StringUtils.isBlank(mc.getBaseDataOk())) {
-			int avgScore = 0;
+			int baseScore = 0;
 			int strongScore = 0;
 			int pgmScore = 0;
 			int wayScore = 0;
@@ -73,41 +74,11 @@ public class V1SortStrategyListener implements StrategyListener {
 			// 均线
 			try {
 				if (lineAvgPrice.feedData()) {
-					if (lineAvgPrice.isAvgSort20T30()) {// 20和30日均F各均线
-						setDetail(detailDesc, "30日均线排列base20T30");
-						avgScore += 20;
-						if (lineAvgPrice.isAvgSort3T30()) {// 各均线排列整齐
-							setDetail(detailDesc, "30日各均线排列整齐3T30");
-							avgScore += 5;
+					if (lineAvgPrice.isWhiteHorseV2()) {
+						boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%
+						if (b6 && linePrice.oneYearCheck(1, mc.getCode(), mc.getDate())) {// 一年未涨
+							isOk = true;
 						}
-
-						if (lineAvgPrice.is5Don30Dhalf()) {// 是否5日均线在30日线上，超过15天,排除下跌周期中，刚开始反转的均线
-							dropOutMsg = "30个交易日中，30日均线在5日均线上方多日";
-							isOk = false;
-						} else {
-							if (lineAvgPrice.isWhiteHorse()) {
-								setDetail(detailDesc, "白马？");
-								mv.setWhiteHorse(1);// 白马？
-							}
-							if (lineAvgPrice.isRightUp()) {// 横盘突破:需要看量
-								setDetail(detailDesc, "横盘突破? ");
-								avgScore += 5;
-								String rs1 = lineVol.moreVol();
-								if (StringUtils.isNotBlank(rs1)) {// 3日量
-									avgScore += 10;
-									setDetail(detailDesc, rs1);
-								}
-								String rs2 = lineVol.moreVolWithAvg();
-								if (StringUtils.isNotBlank(rs2)) {// 30日均量
-									avgScore += 10;
-									setDetail(detailDesc, rs2);
-								}
-							}
-							mc.setBase30Avg(true);
-						}
-					} else {
-						isOk = false;
-						dropOutMsg = "均线不满足要求";
 					}
 				} else {
 					isOk = false;
@@ -122,13 +93,8 @@ public class V1SortStrategyListener implements StrategyListener {
 
 			if (isOk) {
 				// 量
-				int r2 = lineVol.isHighOrLowVolToday();
-				if (r2 != 0) {// 换手率超过30%或者低于2%
-					if (r2 == 1) {
-						dropOutMsg = "换手率超过30%";
-					} else {
-						dropOutMsg = "换手率低于2%";
-					}
+				if (lineVol.isHighVolToday20Percent()) {// 换手率超过30%
+					dropOutMsg = "换手率超过20%";
 					isOk = false;
 				}
 				// 价格
@@ -140,11 +106,6 @@ public class V1SortStrategyListener implements StrategyListener {
 				if (linePrice.isHignOpenWithLowCloseToday()) {
 					// 排除高开低走
 					dropOutMsg = "高开低走";
-					isOk = false;
-				}
-				if (linePrice.isRange20pWith20days()) {
-					// 20天波动超过20%
-					dropOutMsg = "20天波动超过20%";
 					isOk = false;
 				}
 			}
@@ -160,7 +121,6 @@ public class V1SortStrategyListener implements StrategyListener {
 					setDetail(detailDesc, sr.getStrongDetail());
 				}
 				pgmScore = mc.getSortPgm() * 5;// 3.程序单
-				wayScore = mc.getSortWay() * 5;// 4.交易方向
 
 				// 概念板块
 				List<ConceptInfo> list = mc.getGnDaliy().get(mv.getCode());
@@ -171,13 +131,14 @@ public class V1SortStrategyListener implements StrategyListener {
 						setDetail(detailDesc, x.toString());
 					}
 				}
-				mv.setAvgScore(avgScore);
+				baseScore = codeModelService.getLastOneByCode(mc.getCode()).getScore();
+				mv.setAvgScore(baseScore);
 				mv.setSortStrong(strongScore);
 				mv.setSortPgm(pgmScore);
 				mv.setSortWay(wayScore);
 				mv.setGnScore(gnScore);
 				mv.setPriceIndex(mc.getPriceIndex());
-				mv.setScore(avgScore + strongScore + pgmScore + wayScore + gnScore);
+				mv.setScore(baseScore + strongScore + pgmScore + wayScore + gnScore);
 
 				result.put(mv.getCode(), detailDesc.toString());
 				saveList.add(mv);
@@ -194,9 +155,10 @@ public class V1SortStrategyListener implements StrategyListener {
 
 	// **评分
 
-	public V1SortStrategyListener(int date) {
+	public V1SortStrategyListener(int date, CodeModelService codeModelService) {
+		this.codeModelService = codeModelService;
 		this.treadeDate = date;
-		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "均线价格", "短期强势", "主力行为", "市场行为", "价格指数", "评分详情" };
+		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "基本面评分", "短期强势", "主力行为" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
 		}
@@ -211,37 +173,36 @@ public class V1SortStrategyListener implements StrategyListener {
 			SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 
 			StringBuffer sb = new StringBuffer(header);
-			StringBuffer sb2 = new StringBuffer(header);
+			// StringBuffer sb2 = new StringBuffer(header);
 			int index = 1;
 
 			for (ModelV1 mv : saveList) {
 				String code = mv.getCode();
 				sb.append("<tr>").append(getHTML(index)).append(getHTML_SN(code)).append(getHTML(sbs.getCodeName(code)))
 						.append(getHTML(mv.getDate())).append(getHTML(mv.getScore())).append(getHTML(mv.getAvgScore()))
-						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
-						.append(getHTML(mv.getSortWay())).append(getHTML(mv.getPriceIndex())).append(getHTML(""))
-						.append("</tr>").append(FileWriteUitl.LINE_FILE);
+						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm())).append("</tr>")
+						.append(FileWriteUitl.LINE_FILE);
 
-				sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))
-						.append(getHTML(sbs.getCodeName(code))).append(getHTML(mv.getDate()))
-						.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgScore()))
-						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
-						.append(getHTML(mv.getSortWay())).append(getHTML(mv.getPriceIndex()))
-						.append(getHTML(result.get(code))).append("</tr>").append(FileWriteUitl.LINE_FILE);
+//				sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))
+//						.append(getHTML(sbs.getCodeName(code))).append(getHTML(mv.getDate()))
+//						.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgScore()))
+//						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
+//						.append(getHTML(mv.getSortWay())).append(getHTML(mv.getPriceIndex()))
+//						.append(getHTML(result.get(code))).append("</tr>").append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
 			sb.append(endder);
-			sb2.append(endder);
+			// sb2.append(endder);
 
-//			String filepath = efc.getModelV1SortFloder() + "sort_v1_" + treadeDate + ".html";
-//			FileWriteUitl fw = new FileWriteUitl(filepath, true);
-//			fw.writeLine(sb.toString());
-//			fw.close();
+			String filepath = efc.getModelV1SortFloder() + "sortv1.html";
+			FileWriteUitl fw = new FileWriteUitl(filepath, true);
+			fw.writeLine(sb.toString());
+			fw.close();
 
-			String filepath2 = efc.getModelV1SortFloderDesc() + "sort_v1_" + treadeDate + ".html";
-			FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);
-			fw2.writeLine(sb2.toString());
-			fw2.close();
+//			String filepath2 = efc.getModelV1SortFloderDesc() + "sortv1.html";
+//			FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);
+//			fw2.writeLine(sb2.toString());
+//			fw2.close();
 		}
 
 		// fulshToFile2();

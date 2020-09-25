@@ -24,6 +24,14 @@ public class LineVol {
 		return 0;
 	}
 
+	public boolean isHighVolToday20Percent() {
+		double rate = dailyList.get(0).getTurnover_rate_f();
+		if (rate >= 20.0) {
+			return true;
+		}
+		return false;
+	}
+
 	public String moreVolWithAvg() {
 		DaliyBasicInfo d3 = dailyList.get(0);
 		DaliyBasicInfo d2 = dailyList.get(1);

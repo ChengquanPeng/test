@@ -97,7 +97,7 @@ public class V2SortStrategyListener implements StrategyListener {
 							boolean b3 = linePrice.isHignOpenWithLowCloseToday();// 高开低走
 							boolean b4 = lineVol.check3dayVol();// 对比3天-量
 							boolean b5 = linePrice.check3dayPrice();// 对比3天-价
-							boolean b6 = linePrice.checkPriceBack6dayWhitoutToday();// 回调过超10%
+							boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 回调过超10%
 
 							log.info("code={},上涨至少3%={},非上影线={},非高开低走={},对比3天-量={},对比3天-价={},回调过超10%={}", mc.getCode(),
 									b1, !b2, !b3, b4, b5, b6);
