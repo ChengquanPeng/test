@@ -103,7 +103,7 @@ public class HistTraceService {
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}
-			int[] days = { 2, 3, 5 };
+			int[] days = { 2, 3 };
 			double[] volBases = { 0, 1.2, 1.3 };
 			int[] oneYearups = { 1 };// 1年未大涨的（TODO,第一波是否涨超30%？）
 			for (int oneYear : oneYearups) {
@@ -128,7 +128,7 @@ public class HistTraceService {
 		}
 	}
 
-	private void v3Really(String startDate, String endDate, List<StockBaseInfo> codelist, int d, int oneYear, double vb,
+	public void v3Really(String startDate, String endDate, List<StockBaseInfo> codelist, int d, int oneYear, double vb,
 			String sysstart, int batch) {
 
 		int day = d + 1;
@@ -242,7 +242,7 @@ public class HistTraceService {
 				e1.printStackTrace();
 			}
 
-			int[] days = { 2, 3, 5 };
+			int[] days = { 2, 3 };
 			double[] volBases = { 0.0, 1.2, 1.3 };
 			int[] oneYearups = { 1 };// 1年未大涨的（TODO,第一波是否涨超30%？）
 			for (int oneYear : oneYearups) {
@@ -267,7 +267,7 @@ public class HistTraceService {
 		}
 	}
 
-	private void v2Really(String startDate, String endDate, List<StockBaseInfo> codelist, int d, int oneYear, double vb,
+	public void v2Really(String startDate, String endDate, List<StockBaseInfo> codelist, int d, int oneYear, double vb,
 			String sysstart, int batch) {
 
 		int day = d + 1;

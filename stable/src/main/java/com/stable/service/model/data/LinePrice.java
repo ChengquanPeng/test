@@ -18,7 +18,9 @@ import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class LinePrice {
 	private final static EsQueryPageReq queryPage = new EsQueryPageReq(30);
 	private ModelContext cxt;
@@ -399,6 +401,9 @@ public class LinePrice {
 
 		if (CurrencyUitl.cutProfit(minPrice, maxPrice) > 65.0) {
 			return false;
+		} else {
+			log.info("code={},checkDate={},maxprice={},maxpriceDate={},mixprice={},maxpriceDate={}", //
+					code, date, maxPrice, dmax.getDate(), minPrice, dmin.getDate());
 		}
 		return true;
 	}
