@@ -33,6 +33,8 @@ public class FinYjyg extends EsBase {
 	private double jlrtbzz; // 业绩变动幅度(%)
 	@Field(type = FieldType.Integer)
 	private int updateDate;// 更新日期
+	@Field(type = FieldType.Integer)
+	private int annDate;// 更新日期
 
 	public void setId() {
 		id = code + date;

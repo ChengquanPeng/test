@@ -137,6 +137,45 @@ public class DateUtil {
 		return cal.get(Calendar.YEAR);
 	}
 
+	public static int getYear(int date) {
+		return Integer.valueOf(String.valueOf(date).substring(0, 4));
+	}
+
+	public static int getJidu(int date) {
+		int month = Integer.valueOf(String.valueOf(date).substring(4, 6));
+		if (1 <= month && month <= 3) {
+			return 1;
+		}
+		if (4 <= month && month <= 6) {
+			return 2;
+		}
+		if (7 <= month && month <= 9) {
+			return 3;
+		}
+		if (10 <= month && month <= 12) {
+			return 4;
+		}
+		return 0;
+	}
+
+	public static int getCurrJiduEndDate(int date) {
+		int year = Integer.valueOf(String.valueOf(date).substring(0, 4));
+		int month = Integer.valueOf(String.valueOf(date).substring(4, 6));
+		if (1 <= month && month <= 3) {
+			return Integer.valueOf(year + "0331");
+		}
+		if (4 <= month && month <= 6) {
+			return Integer.valueOf(year + "0630");
+		}
+		if (7 <= month && month <= 9) {
+			return Integer.valueOf(year + "0930");
+		}
+		if (10 <= month && month <= 12) {
+			return Integer.valueOf(year + "1231");
+		}
+		return 0;
+	}
+
 	public static int getCurJidu() {
 		Calendar cal = Calendar.getInstance();
 		int month = cal.get(Calendar.MONTH) + 1;
@@ -189,6 +228,8 @@ public class DateUtil {
 	}
 
 	public static void main(String[] args) {
-		System.err.println(getTodayBefor7DayYYYYMMDD());
+		System.err.println(getCurrJiduEndDate(20200101));
+		System.err.println(getCurrJiduEndDate(20200421));
+		System.err.println(getCurrJiduEndDate(20201121));
 	}
 }

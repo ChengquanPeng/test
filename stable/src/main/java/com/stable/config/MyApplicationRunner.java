@@ -24,6 +24,8 @@ import com.stable.utils.WxPushUtil;
 public class MyApplicationRunner implements ApplicationRunner {
 	@Autowired
 	private RealtimeJob realtimeJob;
+	// @Autowired
+	// private FinanceService financeService;
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
@@ -37,6 +39,9 @@ public class MyApplicationRunner implements ApplicationRunner {
 			return;
 		}
 		WxPushUtil.pushSystem1("系统正常启动");
+
+//		financeService.jobSpiderFirstFinaceHistoryInfo();
+//		financeService.jobSpiderFinaceHistoryInfo();
 
 		new Thread(new Runnable() {
 			@Override

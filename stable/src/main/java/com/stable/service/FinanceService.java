@@ -1,7 +1,9 @@
 package com.stable.service;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -17,6 +19,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsFinYjkbDao;
@@ -24,11 +27,13 @@ import com.stable.es.dao.base.EsFinYjygDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.eastmoney.EastmoneySpider;
+import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.FinanceBaseInfoTuhsare;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
@@ -40,8 +45,6 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * 财务
- * 
- * @author roy
  *
  */
 @Service
@@ -58,6 +61,8 @@ public class FinanceService {
 	private EsFinYjkbDao esFinYjkbDao;
 	@Autowired
 	private EastmoneySpider eastmoneySpider;
+	@Autowired
+	private TushareSpider tushareSpider;
 
 	/**
 	 * 删除redis，从头开始获取
@@ -80,6 +85,28 @@ public class FinanceService {
 			if (datas == null || datas.size() <= 0) {
 				log.warn("未从东方财富抓取到Finane记录,code={}", code);
 				return false;
+			}
+
+			JSONArray array = tushareSpider.getIncome(TushareSpider.formatCode(code));
+			// System.err.println(array.toJSONString());
+			if (array != null && array.size() > 0) {
+				Map<Integer, Integer> tushareMap = new HashMap<Integer, Integer>();
+				for (int i = 0; i < array.size(); i++) {
+					JSONArray arr = array.getJSONArray(i);
+					FinanceBaseInfoTuhsare ft = new FinanceBaseInfoTuhsare();
+					ft.setValue(code, arr);
+					tushareMap.put(ft.getEnd_date(), ft.getAnn_date());
+				}
+
+				for (FinanceBaseInfo fi : datas) {
+					try {
+						fi.setAnnDate(tushareMap.get(fi.getDate()));
+					} catch (Exception e) {
+						log.warn("code={} date={} 未获取到公告日期", code, fi.getDate());
+					}
+				}
+			} else {
+				log.warn("从tushareSpider 未抓到Finane记录code={}", code);
 			}
 			log.warn("从东方财富抓取到Finane记录{}条,code={}", datas.size(), code);
 			list.addAll(datas);
@@ -176,6 +203,69 @@ public class FinanceService {
 
 	Pageable pageable = PageRequest.of(0, 1);
 
+	public FinanceBaseInfo getLastFinaceReport(String code, int annDate) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("annDate").lte(annDate));// 最新公告
+		FieldSortBuilder sort = SortBuilders.fieldSort("annDate").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			FinanceBaseInfo f = page.getContent().get(0);
+			log.info("page size={},last report fince code={},date={}", page.getContent().size(), code, f.getDate());
+			return f;
+		}
+		log.info("no last report fince code={}", code);
+		return null;
+	}
+
+	public FinYjyg getLastFinYjygReport(String code, int annDate, int year, int jidu) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("annDate").lte(annDate));//
+		bqb.must(QueryBuilders.matchPhraseQuery("year", year));
+		bqb.must(QueryBuilders.matchPhraseQuery("quarter", jidu));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<FinYjyg> page = esFinYjygDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			FinYjyg f = page.getContent().get(0);
+			// log.info("page size={},getLastFinYjkbReport code={},date={}",
+			// page.getContent().size(), code, f.getDate());
+			return f;
+		}
+		log.info("no last report fince code={}", code);
+		return null;
+	}
+
+	public FinYjkb getLastFinYjkbReport(String code, int annDate, int year, int jidu) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("annDate").lte(annDate));//
+		bqb.must(QueryBuilders.matchPhraseQuery("year", year));
+		bqb.must(QueryBuilders.matchPhraseQuery("quarter", jidu));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<FinYjkb> page = esFinYjkbDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			FinYjkb f = page.getContent().get(0);
+			// log.info("page size={},getLastFinYjkbReport code={},date={}",
+			// page.getContent().size(), code, f.getDate());
+			return f;
+		}
+		log.info("no last report fince code={}", code);
+		return null;
+	}
+
 	public FinanceBaseInfo getLastFinaceReport(String code) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -187,7 +277,8 @@ public class FinanceService {
 		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			FinanceBaseInfo f = page.getContent().get(0);
-			log.info("page size={},last report fince code={},date={}", page.getContent().size(), code, f.getDate());
+			// log.info("page size={},last report fince code={},date={}",
+			// page.getContent().size(), code, f.getDate());
 			return f;
 		}
 		log.info("no last report fince code={}", code);

@@ -311,7 +311,7 @@ public class TushareSpider {
 	 */
 	private final String income_fields = "ts_code,ann_date,f_ann_date,end_date,report_type,comp_type,basic_eps,diluted_eps,total_revenue,revenue,int_income,oth_b_income,total_cogs,oper_cost,int_exp,comm_exp,biz_tax_surchg,sell_exp,admin_exp,fin_exp,assets_impair_loss,other_bus_cost,operate_profit,non_oper_income,non_oper_exp,nca_disploss,total_profit,income_tax,n_income,n_income_attr_p,minority_gain,oth_compr_income,t_compr_income,compr_inc_attr_p,compr_inc_attr_m_s,undist_profit,distable_profit";
 
-	public JSONObject getIncome(String ts_code) {
+	public JSONArray getIncome(String ts_code) {
 		try {
 			JSONObject json = new JSONObject();
 			json.put("api_name", "income");
@@ -319,7 +319,7 @@ public class TushareSpider {
 			json.put("fields", income_fields);
 			String result = post(json);
 			JSONObject datas = JSON.parseObject(result);
-			return datas.getJSONObject("data");
+			return datas.getJSONObject("data").getJSONArray("items");
 		} finally {
 			ThreadsUtil.tuShareSleepRandom();
 		}

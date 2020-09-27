@@ -22,6 +22,8 @@ public class FinanceBaseInfo extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int date; // 报告日期
 	@Field(type = FieldType.Integer)
+	private Integer annDate = 0; // 公告日期
+	@Field(type = FieldType.Integer)
 	private int year;// 年
 	@Field(type = FieldType.Integer)
 	private int quarter;// 季度
@@ -63,5 +65,4 @@ public class FinanceBaseInfo extends EsBase {
 		}
 		this.id = this.code + "_" + this.date;
 	}
-
 }

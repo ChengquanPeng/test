@@ -244,7 +244,7 @@ public class EastmoneySpider {
 				for (int i = 0; i < datas.size(); i++) {
 					JSONObject data = datas.getJSONObject(i);
 					String date = data.getString("REPORT_DATE"); // 报告期
-					// String anndate = data.getString("NOTICE_DATE"); // 公告日期
+					String anndate = data.getString("NOTICE_DATE"); // 公告日期
 					FinYjkb fy = new FinYjkb();
 					String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
 					int y = Integer.valueOf(datestr.substring(0, 4));
@@ -264,7 +264,8 @@ public class EastmoneySpider {
 					fy.setCode(data.getString("SECURITY_CODE"));
 					fy.setDate(Integer
 							.parseInt(DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS))));
-
+					fy.setAnnDate(Integer.parseInt(
+							DateUtil.formatYYYYMMDD(DateUtil.parseDate(anndate, DateUtil.YYYY_MM_DD_HH_MM_SS))));
 					try {
 						fy.setJlr(data.getLong("PARENT_NETPROFIT"));// 业绩
 					} catch (Exception e) {
@@ -336,7 +337,7 @@ public class EastmoneySpider {
 				for (int i = 0; i < datas.size(); i++) {
 					JSONObject data = datas.getJSONObject(i);
 					String date = data.getString("REPORTDATE"); // 报告期
-//					String anndate = data.getString("NOTICE_DATE"); // 公告日期
+					String anndate = data.getString("NOTICE_DATE"); // 公告日期
 					FinYjyg fy = new FinYjyg();
 					String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
 					int y = Integer.valueOf(datestr.substring(0, 4));
@@ -356,6 +357,8 @@ public class EastmoneySpider {
 					fy.setCode(data.getString("SECURITY_CODE"));
 					fy.setDate(Integer
 							.parseInt(DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS))));
+					fy.setAnnDate(Integer.parseInt(
+							DateUtil.formatYYYYMMDD(DateUtil.parseDate(anndate, DateUtil.YYYY_MM_DD_HH_MM_SS))));
 					try {
 						fy.setType(data.getString("FORECASTTYPE"));// 类型
 					} catch (Exception e) {
@@ -369,6 +372,7 @@ public class EastmoneySpider {
 					} catch (Exception e) {
 					}
 					fy.setId();
+
 					if (chkIndor) {
 						if (last.equals(fy.getCode())) {
 							chkIndor = false;

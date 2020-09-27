@@ -37,6 +37,7 @@ public class LinePrice {
 
 	public LinePrice(StrongService strongService, ModelContext cxt, List<DaliyBasicInfo> dailyList, StockAvg todayAv,
 			int lastDate, int lastDividendDate, DaliyTradeHistroyService daliyTradeHistroyService) {
+		this.daliyTradeHistroyService = daliyTradeHistroyService;
 		this.cxt = cxt;
 		this.dailyList = dailyList;
 		this.todayAv = todayAv;
