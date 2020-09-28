@@ -206,24 +206,15 @@ public class LineAvgPrice {
 		}
 		int whiteHorseTmp = 0;
 		int lastDate = dailyList.get(29).getTrade_date();// 第30个
-		if (lastDate <= lastDividendDate) {
-			List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCode(code, lastDate,
-					today.getTrade_date(), queryPage, SortOrder.DESC);
-			if (list == null || list.size() < 30) {
-				throw new RuntimeException(code + "获取复权数据从" + lastDate + "到" + today.getTrade_date() + "错误！");
-			}
-			// 复权数据
-			for (int i = 0; i < 30; i++) {
-				if (list.get(i).getClosed() >= clist30.get(i).getAvgPriceIndex30()) {
-					whiteHorseTmp++;
-				}
-			}
-		} else {
-			// 不需要复权数据
-			for (int i = 0; i < 30; i++) {
-				if (dailyList.get(i).getClose() >= clist30.get(i).getAvgPriceIndex30()) {
-					whiteHorseTmp++;
-				}
+		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, lastDate,
+				today.getTrade_date(), queryPage, SortOrder.DESC);
+		if (list == null || list.size() < 30) {
+			throw new RuntimeException(code + "获取复权数据从" + lastDate + "到" + today.getTrade_date() + "错误！");
+		}
+		// 复权数据
+		for (int i = 0; i < 30; i++) {
+			if (list.get(i).getClosed() >= clist30.get(i).getAvgPriceIndex30()) {
+				whiteHorseTmp++;
 			}
 		}
 		if (whiteHorseTmp >= 22) {

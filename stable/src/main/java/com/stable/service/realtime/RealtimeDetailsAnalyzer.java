@@ -129,7 +129,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				}
 			}
 			if (minDate != 20991231) {
-				List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCode(code, minDate, 0,
+				List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, minDate, 0,
 						MonitoringService.querypage, SortOrder.ASC);
 				log.info("list is null?{},code={},minDate={}", (list == null), code, minDate);
 				double highPriceFromBuy = list.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh))

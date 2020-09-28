@@ -96,7 +96,6 @@ public class DaliyTradeHistroyService {
 							StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
 							spiderDaliyTradeHistoryInfoFromIPOCenter(code, base.getList_date(), today, 0);
 						}
-						redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 						return null;
 					}
 				});
@@ -173,10 +172,13 @@ public class DaliyTradeHistroyService {
 			for (int i = 0; i < array.size(); i++) {
 				// 1.保存记录
 				TradeHistInfoDaliy d = new TradeHistInfoDaliy(array.getJSONArray(i));
+				String code = d.getCode();
+				int qfqDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
+				d.setQfqDate(qfqDate);
 				list.add(d);
 
 				// 2.是否需要更新缺失记录
-				String code = d.getCode();
+
 				String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
 				if (StringUtils.isBlank(yyyymmdd) || (!preDate.equals(yyyymmdd) && !yyyymmdd.equals(today))) {
 					log.info("代码code:{}重新获取记录", code);
@@ -190,13 +192,12 @@ public class DaliyTradeHistroyService {
 							public void running() {
 								try {
 									spiderDaliyTradeHistoryInfoFromIPOCenter(d.getCode(), datep, today, 0);
-									redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 								} finally {
 									cnt.countDown();
 								}
 							}
 						});
-					}else {
+					} else {
 						log.info("代码code:{} 未获取到StockBaseInfo", code);
 					}
 				} else {
@@ -228,9 +229,14 @@ public class DaliyTradeHistroyService {
 			int fortimes) {
 		priceLifeService.removePriceLifeCache(code);
 		if (spiderDaliyTradeHistoryInfoFromIPOEastMoney(code, fortimes)) {
+			redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 			return true;
 		}
-		return spiderDaliyTradeHistoryInfoFromIPOTushare(code, startDate, today, fortimes);
+		if (spiderDaliyTradeHistoryInfoFromIPOTushare(code, startDate, today, fortimes)) {
+			redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+			return true;
+		}
+		return false;
 	}
 
 	private boolean spiderDaliyTradeHistoryInfoFromIPOEastMoney(String code, int fortimes) {
@@ -282,12 +288,14 @@ public class DaliyTradeHistroyService {
 			}
 			return false;
 		}
+		int qfqDate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，获取到数据 条数：szie:{}，", code, lines.size() - 1);
 		TradeHistInfoDaliy last = null;
 		List<TradeHistInfoDaliy> list = new LinkedList<TradeHistInfoDaliy>();
 		for (String line : lines) {
 			TradeHistInfoDaliy d = this.getTradeHistInfoDaliy(line);
 			if (d != null) {
+				d.setQfqDate(qfqDate);
 				list.add(d);
 				// this.tradeHistDaliy.save(d);
 				last = d;
@@ -325,7 +333,37 @@ public class DaliyTradeHistroyService {
 		return this.queryListByCode(code, 0, 0, queryPage, SortOrder.DESC);
 	}
 
-	public List<TradeHistInfoDaliy> queryListByCode(String code, int startDate, int endDate, EsQueryPageReq queryPage,
+	public List<TradeHistInfoDaliy> queryListByCodeWithLastQfq(String code, int startDate, int endDate,
+			EsQueryPageReq queryPage, SortOrder s) {
+		int qfqDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
+		List<TradeHistInfoDaliy> db = queryListByCode(code, startDate, endDate, queryPage, s);
+		boolean needFetch = false;
+		if (db != null) {
+			for (TradeHistInfoDaliy r : db) {
+				if (r.getQfqDate() < qfqDate) {// 存的数据是前复权日期版本小于redis，不是最新的
+					needFetch = true;
+					break;
+				}
+			}
+			if (!needFetch) {
+				return db;
+			}
+		}
+
+		if (needFetch || db == null) {
+			String today = DateUtil.getTodayYYYYMMDD();
+			String json = redisUtil.get(code);
+			if (StringUtils.isNotBlank(json)) {
+				StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
+				if (spiderDaliyTradeHistoryInfoFromIPOCenter(code, base.getList_date(), today, 0)) {
+					return queryListByCode(code, startDate, endDate, queryPage, s);
+				}
+			}
+		}
+		return null;
+	}
+
+	private List<TradeHistInfoDaliy> queryListByCode(String code, int startDate, int endDate, EsQueryPageReq queryPage,
 			SortOrder s) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();

@@ -53,8 +53,8 @@ public class LinePrice {
 		if (lastDate30 <= lastDividendDate) {
 			isUseDividData = true;
 
-			listD30 = daliyTradeHistroyService.queryListByCode(code, lastDate, today.getTrade_date(), queryPage,
-					SortOrder.DESC);
+			listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, lastDate, today.getTrade_date(),
+					queryPage, SortOrder.DESC);
 			if (listD30 == null || listD30.size() < 30) {
 				throw new RuntimeException(code + "获取复权数据从" + lastDate + "到" + today.getTrade_date() + "错误！");
 			}
@@ -342,7 +342,7 @@ public class LinePrice {
 	}
 
 	public boolean checkPriceBack6dayWhitTodayV2() {
-		listD30 = daliyTradeHistroyService.queryListByCode(code, 0, date, queryPage, SortOrder.DESC);
+		listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, queryPage, SortOrder.DESC);
 		if (listD30 == null || listD30.size() < 30) {
 			throw new RuntimeException(code + "获取复权数据从" + lastDate + "到" + today.getTrade_date() + "错误！");
 		}
@@ -389,8 +389,8 @@ public class LinePrice {
 		if (oneyear == 0) {
 			return true;
 		}
-		List<TradeHistInfoDaliy> listD30 = daliyTradeHistroyService.queryListByCode(code, 0, date, queryPage250,
-				SortOrder.DESC);
+		List<TradeHistInfoDaliy> listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
+				queryPage250, SortOrder.DESC);
 		TradeHistInfoDaliy dmax = listD30.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
 		TradeHistInfoDaliy dmin = listD30.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
 		if (dmin.getDate() > dmax.getDate()) {// 先涨-后跌的情况

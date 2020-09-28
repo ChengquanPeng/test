@@ -112,7 +112,7 @@ public class ImageService {
 		} else {
 			queryPage = new EsQueryPageReq(size);
 		}
-		list = daliyTradeHistroyService.queryListByCode(code, startDate, endDate, queryPage, SortOrder.DESC);
+		list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, startDate, endDate, queryPage, SortOrder.DESC);
 		if (list == null || list.size() <= 0) {
 			return null;
 		}
@@ -128,7 +128,7 @@ public class ImageService {
 	}
 
 	public int getSize(String code, int startDate, int endDate) {
-		return daliyTradeHistroyService.queryListByCode(code, startDate, endDate, all, SortOrder.DESC).size();
+		return daliyTradeHistroyService.queryListByCodeWithLastQfq(code, startDate, endDate, all, SortOrder.DESC).size();
 	}
 
 	/**

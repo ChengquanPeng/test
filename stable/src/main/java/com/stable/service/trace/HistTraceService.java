@@ -394,7 +394,7 @@ public class HistTraceService {
 			t1.setDate(date);
 			//
 			List<TradeHistInfoDaliy> dailyList2 = new ArrayList<TradeHistInfoDaliy>();
-			List<TradeHistInfoDaliy> dailyList0 = daliyTradeHistroyService.queryListByCode(t1.getCode(), t1.getDate(),
+			List<TradeHistInfoDaliy> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastQfq(t1.getCode(), t1.getDate(),
 					0, queryPage6, SortOrder.ASC);// 返回的list是不可修改对象
 			for (int i = 1; i < dailyList0.size(); i++) {
 				dailyList2.add(dailyList0.get(i));

@@ -6,6 +6,7 @@ import java.util.List;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.TradeHistInfoDaliy;
@@ -38,6 +39,7 @@ public class EastmoneyQfqSpider {
 	// 0不复权，1前复权，2后复权
 	public synchronized static List<TradeHistInfoDaliy> getQfq(String code) {
 		try {
+			int qfqDate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 			Long systemtime = System.currentTimeMillis();
 			String URL_FORMAT = "http://push2his.eastmoney.com/api/qt/stock/kline/get?cb=jQuery" + systemtime
 					+ "&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt="
@@ -45,9 +47,7 @@ public class EastmoneyQfqSpider {
 					+ System.currentTimeMillis();
 			String result = HttpUtil.doGet2(URL_FORMAT);
 			result = result.substring(("jQuery" + systemtime + "(").length());
-			System.err.println(result);
 			result = result.substring(0, result.length() - 2);
-			System.err.println(result);
 			JSONObject objects = JSON.parseObject(result);
 			JSONArray datas = objects.getJSONObject("data").getJSONArray("klines");
 			double yesterdayprice = 0.0;
@@ -57,7 +57,7 @@ public class EastmoneyQfqSpider {
 				TradeHistInfoDaliy td = new TradeHistInfoDaliy(code, data);
 				td.setYesterdayPrice(yesterdayprice);
 				yesterdayprice = td.getClosed();
-				System.err.println(td);
+				td.setQfqDate(qfqDate);
 				list.add(td);
 			}
 			return list;
