@@ -68,7 +68,7 @@ public class HistTraceService {
 	@Autowired
 	private FinanceService financeService;
 
-	private String FILE_FOLDER = "/my/free/retrace/";
+	private String FILE_FOLDER = "/my/free/pvhtml/";
 
 	public static final Semaphore sempv3 = new Semaphore(1);
 	public static final Semaphore sempv2 = new Semaphore(1);
@@ -155,7 +155,7 @@ public class HistTraceService {
 
 			JSONArray array2 = tushareSpider.getStockDaliyTrade(s.getTs_code(), null, startDate, endDate);
 			if (array2 != null && array2.size() > 0) {
-				for (int ij = 0; ij < array2.size(); ij++) {
+				for (int ij = (array2.size() - 1); ij >= 0; ij--) {
 					DaliyBasicInfo d2 = new DaliyBasicInfo();
 					d2.setCode(code);
 					d2.daily(array2.getJSONArray(ij));
@@ -294,7 +294,7 @@ public class HistTraceService {
 
 			JSONArray array2 = tushareSpider.getStockDaliyTrade(s.getTs_code(), null, startDate, endDate);
 			if (array2 != null && array2.size() > 0) {
-				for (int ij = 0; ij < array2.size(); ij++) {
+				for (int ij = (array2.size() - 1); ij >= 0; ij--) {
 					DaliyBasicInfo d2 = new DaliyBasicInfo();
 					d2.setCode(code);
 					d2.daily(array2.getJSONArray(ij));

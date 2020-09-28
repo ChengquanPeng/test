@@ -28,7 +28,7 @@ public class RetraceController {
 	private StockBasicService stockBasicService;
 
 	@RequestMapping(value = "/select", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> sortv1(String startDate, String endDate, int days, int vb, String v) {
+	public ResponseEntity<JsonResult> sortv1(String startDate, String endDate, int days, double vb, String v) {
 		JsonResult r = new JsonResult();
 		try {
 			int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
