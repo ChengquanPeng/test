@@ -11,6 +11,9 @@ import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 public class EastmoneyQfqSpider {
 	/**
 	 * 格式化成东方财富 API所需格式
@@ -60,6 +63,7 @@ public class EastmoneyQfqSpider {
 				td.setQfqDate(qfqDate);
 				list.add(td);
 			}
+			log.info("{} ->从东方财富获取前复权数据记录条数:{}", code, list.size());
 			return list;
 		} finally {
 			ThreadsUtil.sleepRandomSecBetween1And5();

@@ -1,14 +1,10 @@
 package com.stable.service.model.data;
 
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.elasticsearch.search.sort.SortOrder;
 
-import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.ModelContext;
@@ -17,9 +13,7 @@ import com.stable.vo.bus.StockAvg;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
-import lombok.extern.log4j.Log4j2;
-
-@Log4j2
+//@Log4j2
 public class LineAvgPrice {
 	private final static EsQueryPageReq queryPage = new EsQueryPageReq(30);
 	// construction
@@ -29,44 +23,28 @@ public class LineAvgPrice {
 	private int date;
 	private DaliyBasicInfo today;
 
-	private List<StockAvg> avgSaveList;
 	private List<DaliyBasicInfo> dailyList;
 	// TEMP
 	private List<StockAvg> clist30;
 	private List<StockAvg> week4;
 	public StockAvg todayAv;
-	// 除权
-	private int lastDividendDate = 0;
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 
-	public LineAvgPrice(AvgService avgService, ModelContext cxt, int lastDate, List<StockAvg> avgSaveList,
-			List<DaliyBasicInfo> dailyList, int lastDividendDate, DaliyTradeHistroyService daliyTradeHistroyService) {
+	public LineAvgPrice(AvgService avgService, ModelContext cxt, int lastDate, List<DaliyBasicInfo> dailyList,
+			DaliyTradeHistroyService daliyTradeHistroyService) {
 		this.avgService = avgService;
 		this.code = cxt.getCode();
 		this.lastDate = lastDate;
 		this.date = cxt.getDate();
-		this.avgSaveList = avgSaveList;
 		this.dailyList = dailyList;
-		this.lastDividendDate = lastDividendDate;
 		this.daliyTradeHistroyService = daliyTradeHistroyService;
 		today = cxt.getToday();
 	}
 
-	public LineAvgPrice(String code, int date, AvgService avgService,
-			DaliyBasicHistroyService daliyBasicHistroyService) {
-		EsQueryPageReq queryPage = new EsQueryPageReq(250);
-		dailyList = daliyBasicHistroyService.queryListByCodeForModel(code, date, queryPage).getContent();
-		int startDate = dailyList.get(dailyList.size() - 1).getTrade_date();
-		clist30 = avgService.getDPriceAvg(code, startDate, date);
-	}
-
-	public LineAvgPrice(String code, int date, AvgService avgService, int lastDividendDate, List<StockAvg> avgSaveList,
-			List<DaliyBasicInfo> dailyList) {
+	public LineAvgPrice(String code, int date, AvgService avgService, List<DaliyBasicInfo> dailyList) {
 		this.code = code;
 		this.date = date;
 		this.avgService = avgService;
-		this.lastDividendDate = lastDividendDate;
-		this.avgSaveList = avgSaveList;
 		this.dailyList = dailyList;
 	}
 
@@ -98,59 +76,7 @@ public class LineAvgPrice {
 			return isFeedDataGetRes;
 		}
 		// 最近30条
-		List<StockAvg> avglistLocalTmp = avgService.queryListByCodeForModel(code, date, queryPage);
-		Map<Integer, StockAvg> m = new HashMap<Integer, StockAvg>();
-		boolean needReload = false;
-		for (StockAvg x : avglistLocalTmp) {
-			m.put(x.getDate(), x);
-			if (x.getLastDividendDate() != lastDividendDate) {
-				needReload = true;
-			}
-		}
-
-		// 复权问题需要重新
-		if (needReload) {
-			clist30 = avgService.getDPriceAvg(code, lastDate, date);
-			todayAv = clist30.get(0);
-			if (clist30.size() < 30) {
-				log.warn("数据不全code={},startDate={},enddate={}", code, lastDate, date);
-				isFeedDataGetRes = false;
-				isFeedDataGet = true;
-				return isFeedDataGetRes;
-			}
-			clist30.forEach(x -> {
-				x.setLastDividendDate(lastDividendDate);
-				avgSaveList.add(x);
-			});
-		} else {// 不需要重新则看数据是否完整
-			// 最近的30条是否和dailyList的30天，时间是否匹配
-			List<StockAvg> avglistLocal = new LinkedList<StockAvg>();
-			for (int i = 0; i < 30; i++) {
-				if (m.containsKey(dailyList.get(i).getTrade_date())) {
-					avglistLocal.add(m.get(dailyList.get(i).getTrade_date()));
-				}
-			}
-
-			// 不匹配， 补全30天
-			if (avglistLocal.size() < 30) {
-				clist30 = avgService.getDPriceAvg(code, lastDate, date);
-				todayAv = clist30.get(0);
-				if (clist30.size() < 30) {
-					log.warn("数据不全code={},startDate={},enddate={}", code, lastDate, date);
-					isFeedDataGetRes = false;
-					isFeedDataGet = true;
-					return isFeedDataGetRes;
-				}
-				clist30.forEach(x -> {
-					if (!m.containsKey(x.getDate())) {
-						x.setLastDividendDate(lastDividendDate);
-						avgSaveList.add(x);
-					}
-				});
-			} else {
-				clist30 = avglistLocal;// 匹配
-			}
-		}
+		clist30 = avgService.queryListByCodeForModelWithLastQfq(code, date);
 		todayAv = clist30.get(0);
 		isFeedDataGet = true;
 		return isFeedDataGetRes;

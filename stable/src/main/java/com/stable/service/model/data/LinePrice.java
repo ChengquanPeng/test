@@ -33,12 +33,10 @@ public class LinePrice {
 	private String code;
 	private DaliyBasicInfo today;
 	// 除权
-	private boolean isUseDividData = false;
-	private int lastDividendDate;
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 
 	public LinePrice(StrongService strongService, ModelContext cxt, List<DaliyBasicInfo> dailyList, StockAvg todayAv,
-			int lastDate, int lastDividendDate, DaliyTradeHistroyService daliyTradeHistroyService) {
+			int lastDate, DaliyTradeHistroyService daliyTradeHistroyService) {
 		this.daliyTradeHistroyService = daliyTradeHistroyService;
 		this.cxt = cxt;
 		this.dailyList = dailyList;
@@ -48,16 +46,10 @@ public class LinePrice {
 		today = cxt.getToday();
 
 		code = cxt.getCode();
-		this.lastDividendDate = lastDividendDate;
-		int lastDate30 = dailyList.get(29).getTrade_date();// 第30个
-		if (lastDate30 <= lastDividendDate) {
-			isUseDividData = true;
-
-			listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, lastDate, today.getTrade_date(),
-					queryPage, SortOrder.DESC);
-			if (listD30 == null || listD30.size() < 30) {
-				throw new RuntimeException(code + "获取复权数据从" + lastDate + "到" + today.getTrade_date() + "错误！");
-			}
+		listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, lastDate, today.getTrade_date(), queryPage,
+				SortOrder.DESC);
+		if (listD30 == null || listD30.size() < 30) {
+			throw new RuntimeException(code + "获取复权数据从" + lastDate + "到" + today.getTrade_date() + "错误！");
 		}
 	}
 
@@ -174,14 +166,23 @@ public class LinePrice {
 	// 排除上影线
 	public boolean isLowClosePriceToday(DaliyBasicInfo today) {
 		if (today.getTodayChange() > 0) {
-			double up = today.getHigh() - today.getYesterdayPrice();
-			double half = up / 2;
+			double diff = today.getHigh() - today.getYesterdayPrice();
+			double half = diff * 0.8;
 			double mid = CurrencyUitl.roundHalfUp(half) + today.getYesterdayPrice();
 			if (mid >= today.getClose()) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	public static void main(String[] args) {
+		// high,yearter
+		double yearter = 10.1;
+		double up = 11.01 - yearter;
+		double half = up * 0.8;
+		double mid = CurrencyUitl.roundHalfUp(half) + yearter;
+		System.err.println(mid);
 	}
 
 	private boolean isRange20pWith20daysGet = false;
@@ -195,44 +196,23 @@ public class LinePrice {
 
 		double max20;
 		double min20;
-		if (isUseDividData) {// 复权数据
-			List<TradeHistInfoDaliy> day20 = new LinkedList<TradeHistInfoDaliy>();
-			for (int i = 0; i < 20; i++) {
-				day20.add(listD30.get(i));
-			}
-			max20 = day20.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get().getHigh();
+		List<TradeHistInfoDaliy> day20 = new LinkedList<TradeHistInfoDaliy>();
+		for (int i = 0; i < 20; i++) {
+			day20.add(listD30.get(i));
+		}
+		max20 = day20.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get().getHigh();
 
-			min20 = day20.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
-			double min201 = day20.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
-					.getLow();
-			double max201 = day20.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
-					.getHigh();
+		min20 = day20.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
+		double min201 = day20.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+				.getLow();
+		double max201 = day20.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+				.getHigh();
 
-			if (max201 > max20) {
-				max20 = max201;
-			}
-			if (min201 < min20) {
-				min20 = min201;
-			}
-		} else {
-			List<DaliyBasicInfo> day20 = new LinkedList<DaliyBasicInfo>();
-			for (int i = 0; i < 20; i++) {
-				day20.add(dailyList.get(i));
-			}
-			max20 = day20.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
-			min20 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
-
-			double min201 = day20.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
-					.getLow();
-			double max201 = day20.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
-					.getHigh();
-
-			if (max201 > max20) {
-				max20 = max201;
-			}
-			if (min201 < min20) {
-				min20 = min201;
-			}
+		if (max201 > max20) {
+			max20 = max201;
+		}
+		if (min201 < min20) {
+			min20 = min201;
 		}
 
 		if (max20 > CurrencyUitl.topPrice20(min20)) {
@@ -253,42 +233,22 @@ public class LinePrice {
 
 		double max30;
 		double min30;
-		if (isUseDividData) {// 复权数据
-			List<TradeHistInfoDaliy> day30 = new LinkedList<TradeHistInfoDaliy>();
-			for (int i = 0; i < 30; i++) {
-				day30.add(listD30.get(i));
-			}
-			max30 = day30.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get().getHigh();
-			min30 = day30.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
+		List<TradeHistInfoDaliy> day30 = new LinkedList<TradeHistInfoDaliy>();
+		for (int i = 0; i < 30; i++) {
+			day30.add(listD30.get(i));
+		}
+		max30 = day30.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get().getHigh();
+		min30 = day30.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
 
-			double min201 = day30.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
-					.getLow();
-			double max201 = day30.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
-					.getHigh();
-			if (max201 > max30) {
-				max30 = max201;
-			}
-			if (min201 < min30) {
-				min30 = min201;
-			}
-		} else {
-			List<DaliyBasicInfo> day30 = new LinkedList<DaliyBasicInfo>();
-			for (int i = 0; i < 30; i++) {
-				day30.add(dailyList.get(i));
-			}
-			max30 = day30.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getHigh)).get().getHigh();
-			min30 = day30.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getLow)).get().getLow();
-
-			double min201 = day30.stream().min(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
-					.getLow();
-			double max201 = day30.stream().max(Comparator.comparingDouble(DaliyBasicInfo::getYesterdayPrice)).get()
-					.getHigh();
-			if (max201 > max30) {
-				max30 = max201;
-			}
-			if (min201 < min30) {
-				min30 = min201;
-			}
+		double min201 = day30.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+				.getLow();
+		double max201 = day30.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getYesterdayPrice)).get()
+				.getHigh();
+		if (max201 > max30) {
+			max30 = max201;
+		}
+		if (min201 < min30) {
+			min30 = min201;
 		}
 		if (max30 > CurrencyUitl.topPrice30(min30)) {
 			isRange20pWith20daysRes = true;
@@ -299,44 +259,24 @@ public class LinePrice {
 
 	// 当日收盘价超过前3日的最高价
 	public boolean check3dayPrice() {
-		DaliyBasicInfo d1 = dailyList.get(3);
-		if (d1.getTrade_date() <= lastDividendDate) {
-			TradeHistInfoDaliy d4 = listD30.get(0);
-			TradeHistInfoDaliy d3 = listD30.get(1);
-			TradeHistInfoDaliy d2 = listD30.get(2);
-			TradeHistInfoDaliy d0 = listD30.get(3);
+		TradeHistInfoDaliy d4 = listD30.get(0);
+		TradeHistInfoDaliy d3 = listD30.get(1);
+		TradeHistInfoDaliy d2 = listD30.get(2);
+		TradeHistInfoDaliy d0 = listD30.get(3);
 
-			if (d4.getClosed() >= d0.getHigh() && d4.getClosed() >= d2.getHigh() && d4.getClosed() >= d3.getHigh()) {
-				return true;
-			}
-		} else {
-			DaliyBasicInfo d4 = dailyList.get(0);
-			DaliyBasicInfo d3 = dailyList.get(1);
-			DaliyBasicInfo d2 = dailyList.get(2);
-
-			if (d4.getClose() >= d1.getHigh() && d4.getClose() >= d2.getHigh() && d4.getClose() >= d3.getHigh()) {
-				return true;
-			}
+		if (d4.getClosed() >= d0.getHigh() && d4.getClosed() >= d2.getHigh() && d4.getClosed() >= d3.getHigh()) {
+			return true;
 		}
 		return false;
 	}
 
 	// 明日收盘价超过前3日的最高价
 	public boolean check3dayPrice(double topPrice) {
-		DaliyBasicInfo d2 = dailyList.get(2);
-		if (d2.getTrade_date() <= lastDividendDate) {
-			TradeHistInfoDaliy d10 = listD30.get(0);
-			TradeHistInfoDaliy d12 = listD30.get(1);
-			TradeHistInfoDaliy d13 = listD30.get(2);
-			if (topPrice >= d10.getHigh() && topPrice >= d12.getHigh() && topPrice >= d13.getHigh()) {
-				return true;
-			}
-		} else {
-			DaliyBasicInfo d0 = dailyList.get(0);
-			DaliyBasicInfo d1 = dailyList.get(1);
-			if (topPrice >= d0.getHigh() && topPrice >= d1.getHigh() && topPrice >= d2.getHigh()) {
-				return true;
-			}
+		TradeHistInfoDaliy d10 = listD30.get(0);
+		TradeHistInfoDaliy d12 = listD30.get(1);
+		TradeHistInfoDaliy d13 = listD30.get(2);
+		if (topPrice >= d10.getHigh() && topPrice >= d12.getHigh() && topPrice >= d13.getHigh()) {
+			return true;
 		}
 		return false;
 	}

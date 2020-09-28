@@ -118,6 +118,11 @@ public class LineVol {
 		return false;
 	}
 
+	// 今天的量比昨天的量高
+	public boolean isShortVolThanYerteryDay() {
+		return dailyList.get(0).getVol() > dailyList.get(1).getVol();
+	}
+
 	public boolean isShortVolV2(double base) {
 		List<DaliyBasicInfo> localdailyList = new LinkedList<DaliyBasicInfo>();
 		localdailyList.add(dailyList.get(0));

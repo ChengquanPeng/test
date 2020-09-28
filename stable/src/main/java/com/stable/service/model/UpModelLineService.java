@@ -1,6 +1,5 @@
 package com.stable.service.model;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,7 +52,6 @@ import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.Monitoring;
 import com.stable.vo.bus.PriceLife;
-import com.stable.vo.bus.StockAvg;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 import com.stable.vo.up.strategy.ModelV1;
@@ -153,7 +151,6 @@ public class UpModelLineService {
 			log.warn("未获取到日交易daily_basic（每日指标）记录,tushare,日期={}", treadeDate);
 			throw new RuntimeException("交易日但未获取到数据");
 		}
-		List<StockAvg> avgList = Collections.synchronizedList(new LinkedList<StockAvg>());
 		List<StrategyListener> models = new LinkedList<StrategyListener>();
 
 		models.add(new V1SortStrategyListener(treadeDate, codeModelService));
@@ -199,7 +196,7 @@ public class UpModelLineService {
 					@Override
 					public void running() {
 						try {
-							runModels(cxt, models, avgList);
+							runModels(cxt, models);
 						} catch (Exception e) {
 							e.printStackTrace();
 							ErrorLogFileUitl.writeError(e, "", "", "");
@@ -210,10 +207,6 @@ public class UpModelLineService {
 				});
 			}
 			cunt.await();// 等待执行完成
-			log.info("avgList size:" + avgList.size());
-			if (avgList.size() > 0) {
-				avgService.saveStockAvg(avgList);
-			}
 			int v1cnt = 0;
 			for (int i = 0; i < models.size(); i++) {
 				StrategyListener sort = models.get(i);
@@ -242,9 +235,6 @@ public class UpModelLineService {
 			WxPushUtil.pushSystem1("Seq4=> " + treadeDate + " -> MV模型执行完成！ 开始时间:" + startTime + " 结束时间："
 					+ DateUtil.getTodayYYYYMMDDHHMMSS() + ", V1满足条件获取数量:" + v1cnt);
 		} catch (Exception e) {
-			if (avgList.size() > 0) {
-				avgService.saveStockAvg(avgList);
-			}
 			log.error(e.getMessage(), e);
 			throw new RuntimeException("数据处理异常", e);
 		}
@@ -254,7 +244,7 @@ public class UpModelLineService {
 		return daliyBasicHistroyService.queryListByCodeForModel(cxt.getCode(), cxt.getDate(), queryPage).getContent();
 	}
 
-	private void runModels(ModelContext cxt, List<StrategyListener> models, List<StockAvg> avgList) {
+	private void runModels(ModelContext cxt, List<StrategyListener> models) {
 		boolean isOk = true;
 		String code = cxt.getCode();
 		log.info("model version processing for code:{}", code);
@@ -275,16 +265,14 @@ public class UpModelLineService {
 		LineVol lineVol = null;
 		LineTickData lineTickData = null;
 		if (isOk) {
-			String lastDividendDate = redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0");
 
 			cxt.setToday(dailyList.get(0));// 包含全部信息-来自ES
 			// 均价
 			int lastDate = dailyList.get(dailyList.size() - 1).getTrade_date();
-			lineAvgPrice = new LineAvgPrice(avgService, cxt, lastDate, avgList, dailyList,
-					Integer.valueOf(lastDividendDate), daliyTradeHistroyService);
+			lineAvgPrice = new LineAvgPrice(avgService, cxt, lastDate, dailyList, daliyTradeHistroyService);
 			// 1强势:次数和差值:3/5/10/20/120/250天
 			linePrice = new LinePrice(strongService, cxt, dailyList, lineAvgPrice.todayAv, lastDate,
-					Integer.valueOf(lastDividendDate), daliyTradeHistroyService);
+					daliyTradeHistroyService);
 			lineVol = new LineVol(dailyList);
 			// 2交易方向:次数和差值:3/5/10/20/120/250天
 			// 3程序单:次数:3/5/10/20/120/250天

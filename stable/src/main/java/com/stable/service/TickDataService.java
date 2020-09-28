@@ -1,10 +1,7 @@
 package com.stable.service;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -34,7 +31,6 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
@@ -42,11 +38,7 @@ import com.stable.enums.StockAType;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTickDataBuySellInfoDao;
 import com.stable.job.MyCallable;
-import com.stable.service.model.data.AvgService;
-import com.stable.service.model.data.LineAvgPrice;
-import com.stable.service.model.data.LineVol;
 import com.stable.spider.eastmoney.EastmoneySpider;
-import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -87,10 +79,6 @@ public class TickDataService {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private TradeCalService tradeCalService;
-	@Autowired
-	private TushareSpider tushareSpider;
-	@Autowired
-	private AvgService avgService;
 
 	public static final Semaphore semp = new Semaphore(1);
 
@@ -863,143 +851,5 @@ public class TickDataService {
 			}
 			return s + "";
 		}
-	}
-
-	EsQueryPageReq queryPage = new EsQueryPageReq(10);
-
-	public TraceSortv1Vo check(String code, String trade_date, DaliyBasicInfo d2) {
-		try {
-			double topPrice = 0.0;
-			if (d2 == null) {
-				d2 = new DaliyBasicInfo();
-				d2.setCode(code);
-				JSONArray array2 = tushareSpider.getStockDaliyTrade(TushareSpider.formatCode(code), trade_date, null,
-						null);
-				d2.daily(array2.getJSONArray(0));
-
-				if (StockAType.isTop20(code)) {// 科创板20%涨跌幅
-					topPrice = CurrencyUitl.topPrice20(d2.getYesterdayPrice());
-				} else {
-					topPrice = CurrencyUitl.topPrice(d2.getYesterdayPrice(), false);
-				}
-			} else {
-				topPrice = CurrencyUitl.topPrice(d2.getYesterdayPrice(), false);// 涨停价格/历史记录
-			}
-
-			if (topPrice == d2.getClose()) {// 涨停的票
-				if (d2.getOpen() == topPrice) {// 一字板
-					log.info("TraceSortv1Vo procssing key={}{},一字板", d2.getCode(), d2.getTrade_date());
-					return null;
-				}
-				if (d2.getOpen() > CurrencyUitl.topPrice(d2.getYesterdayPrice(), true)) {// 开盘超过5%
-					log.info("TraceSortv1Vo procssing key={}{},开盘超5%", d2.getCode(), d2.getTrade_date());
-					return null;
-				}
-
-				/*
-				List<DaliyBasicInfo> dailyList = daliyBasicHistroyService.queryListByCode(d2.getCode(), 0,
-						d2.getTrade_date(), queryPage, SortOrder.DESC);
-				LineVol lineVol = new LineVol(dailyList);
-				if (!lineVol.isShortVol()) {// 缩量?
-					log.info("TraceSortv1Vo procssing key={}{},未缩量", d2.getCode(), d2.getTrade_date());
-					return null;
-				}
-				*/
-				// 未开板
-				List<String> lines = this.getFromTushare(d2.getCode(), d2.getTrade_date());
-				if (lines != null && lines.size() > 10) {
-					boolean checkPriceOpen = true;
-					List<TickData> tds = new LinkedList<TickData>();
-					for (String line : lines) {
-						tds.add(TickDataUitl.getDataObjectFromTushare(line));
-					}
-
-					// 第一次涨停价格
-					TickData firstTopPrice = null;
-					for (int i = 0; i < tds.size(); i++) {
-						TickData td = tds.get(i);
-						if (td.getPrice() == d2.getClose()) {
-							firstTopPrice = td;
-							break;
-						}
-					}
-					// 涨停之前的5分钟价格
-					int chkstime = getBeforeTime(firstTopPrice.getTime());
-					int chketime = firstTopPrice.getInttime();
-					List<TickData> befor5List = new LinkedList<TickData>();
-					for (int i = 0; i < tds.size(); i++) {
-						TickData td = tds.get(i);
-						if (td.getInttime() >= chkstime && td.getInttime() <= chketime) {
-							befor5List.add(td);
-						}
-						if (td.getInttime() > chketime && td.getPrice() < topPrice) {
-							checkPriceOpen = false;
-							break;
-						}
-					}
-					// 未开版
-					if (!checkPriceOpen) {
-						log.info("TraceSortv1Vo procssing key={}{},开板了", d2.getCode(), d2.getTrade_date());
-						return null;
-					}
-
-					double min = befor5List.stream().min(Comparator.comparingDouble(TickData::getPrice)).get()
-							.getPrice();
-					if (topPrice > CurrencyUitl.topPrice(min, true)) {// 是否5分钟之内涨停超过5%涨停？
-						TraceSortv1Vo tv = new TraceSortv1Vo();
-						//白马
-						LineAvgPrice avgprice = new LineAvgPrice(code, d2.getTrade_date(), avgService,
-								daliyBasicHistroyService);
-						if (avgprice.isWhiteHorseV2()) {
-							tv.setWhiteHorse(true);
-						}
-						//放量
-						List<DaliyBasicInfo> dailyList = daliyBasicHistroyService.queryListByCode(d2.getCode(), 0,
-								d2.getTrade_date(), queryPage, SortOrder.DESC);
-						LineVol lineVol = new LineVol(dailyList);
-						if (lineVol.isShortVol()) {// 缩量?
-							tv.setShortVol(true);
-						}
-						tv.setDaliyBasicInfo(d2);
-						tv.setFirstTopPrice(firstTopPrice);
-						log.info("TraceSortv1Vo get sample:{}", tv);
-						return tv;
-					} else {
-						log.info("TraceSortv1Vo procssing key={}{},未在5分钟整幅未超5%,{},{}", d2.getCode(), d2.getTrade_date(),
-								chkstime, chketime);
-					}
-				} else {
-					log.info("TraceSortv1Vo procssing key={}{},未获取到分时", d2.getCode(), d2.getTrade_date());
-				}
-			} else {
-				log.info("TraceSortv1Vo procssing key={}{},未涨停,{}", d2.getCode(), d2.getTrade_date(), topPrice);
-			}
-		} catch (Exception e) {
-			ErrorLogFileUitl.writeError(e, code, trade_date, ((d2 != null ? d2.getTrade_date() + "" : "")));
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	long diff1 = 5 * 60 * 1000;
-	long diff2 = (90 * 60 * 1000) + diff1;
-
-	private int getBeforeTime(String HHmmss) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		SimpleDateFormat sdf2 = new SimpleDateFormat("HHmmss");
-		try {
-			Date clockInTime = sdf.parse("1970-01-01 " + HHmmss);
-			Date nowTime = new Date(clockInTime.getTime() - diff1);
-			int r1 = Integer.valueOf(sdf2.format(nowTime));
-			if (r1 > 113001 && r1 < 130000) {// 调过午休时间s
-				Date nowTime2 = new Date(clockInTime.getTime() - diff2);
-				return Integer.valueOf(sdf2.format(nowTime2));
-			} else {
-				return r1;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return Integer.valueOf(HHmmss);
 	}
 }

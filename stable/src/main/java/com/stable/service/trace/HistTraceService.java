@@ -1,7 +1,6 @@
 package com.stable.service.trace;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
-import com.stable.constant.RedisConstant;
 import com.stable.enums.StockAType;
 import com.stable.es.dao.base.EsHistTraceDao;
 import com.stable.service.DaliyBasicHistroyService;
@@ -32,7 +30,6 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.FileWriteUitl;
 import com.stable.utils.LogFileUitl;
-import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.FinYjkb;
@@ -58,8 +55,6 @@ public class HistTraceService {
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
-	private RedisUtil redisUtil;
-	@Autowired
 	private AvgService avgService;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
@@ -79,7 +74,7 @@ public class HistTraceService {
 	EsQueryPageReq queryPage5 = new EsQueryPageReq(5);
 
 	/**
-	 * 右侧交易
+	 * 右侧交易：涨幅超4.5%以上
 	 */
 	public void sortv3(String startDate, String endDate) {
 		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
@@ -148,11 +143,6 @@ public class HistTraceService {
 			}
 			List<TraceSortv2Vo> codesamples = new LinkedList<TraceSortv2Vo>();
 
-			// 最后除权日期
-			int lastDividendDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
-			// code均线 (qfq)
-			List<StockAvg> avgSaveList = Collections.synchronizedList(new LinkedList<StockAvg>());
-
 			JSONArray array2 = tushareSpider.getStockDaliyTrade(s.getTs_code(), null, startDate, endDate);
 			if (array2 != null && array2.size() > 0) {
 				for (int ij = (array2.size() - 1); ij >= 0; ij--) {
@@ -162,25 +152,25 @@ public class HistTraceService {
 					int date = d2.getTrade_date();
 					log.info("code={},date={}", code, date);
 					try {
-						// 1.上涨且位超过8%
+						// 1.上涨且未超过8%
 						if (d2.getTodayChangeRate() > 4.5 && d2.getTodayChangeRate() <= 9.0) {
 							List<DaliyBasicInfo> dailyList = daliyBasicHistroyService
 									.queryListByCodeForModel(code, date, queryPage250).getContent();
 							LineVol lineVol = new LineVol(dailyList);
 							// 缩量
-							if (vb == 0 || lineVol.isShortVolV2(vb)) {// 2.没有超过5天均量1.3倍
-								LineAvgPrice lineAvg = new LineAvgPrice(code, date, avgService, lastDividendDate,
-										avgSaveList, dailyList);
-								if (lineAvg.feedData()) {
-									if (lineAvg.isWhiteHorseV2()) {
-										LinePrice linePrice = new LinePrice(code, date, daliyTradeHistroyService);
+							if (vb == 0 || (lineVol.isShortVolThanYerteryDay() && lineVol.isShortVolV2(vb))) {// 2.没有超过5天均量1.3倍,今天的量比昨天高
+								LinePrice linePrice = new LinePrice(code, date, daliyTradeHistroyService);
 
-										boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%
+								boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%
 //								boolean b5 = linePrice.check3dayPriceV2();// 6.对比3天-价
-										boolean b4 = linePrice.isLowClosePriceToday(d2);
-
-										if (b6 && !b4 && linePrice.oneYearCheck(oneYear, code, date)) {
-											saveOkRec(code, date, day, codesamples, d2);
+								boolean b4 = linePrice.isLowClosePriceToday(d2);
+								if (b6 && !b4) {
+									LineAvgPrice lineAvg = new LineAvgPrice(code, date, avgService, dailyList);
+									if (lineAvg.feedData()) {
+										if (lineAvg.isWhiteHorseV2()) {
+											if (linePrice.oneYearCheck(oneYear, code, date)) {
+												saveOkRec(code, date, day, codesamples, d2);
+											}
 										}
 									}
 								}
@@ -191,10 +181,6 @@ public class HistTraceService {
 						ErrorLogFileUitl.writeError(e, s.getCode(), code, date + "");
 					}
 				}
-			}
-
-			if (avgSaveList.size() > 0) {
-				avgService.saveStockAvg(avgSaveList);
 			}
 			samples.addAll(codesamples);
 			// ThreadsUtil.sleepSleep1Seconds();
@@ -267,6 +253,7 @@ public class HistTraceService {
 		}
 	}
 
+	// 一般涨幅，
 	public void v2Really(String startDate, String endDate, List<StockBaseInfo> codelist, int d, int oneYear, double vb,
 			String sysstart, int batch) {
 
@@ -287,11 +274,6 @@ public class HistTraceService {
 			}
 			List<TraceSortv2Vo> codesamples = new LinkedList<TraceSortv2Vo>();
 
-			// 最后除权日期
-			int lastDividendDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
-			// code均线 (qfq)
-			List<StockAvg> avgSaveList = Collections.synchronizedList(new LinkedList<StockAvg>());
-
 			JSONArray array2 = tushareSpider.getStockDaliyTrade(s.getTs_code(), null, startDate, endDate);
 			if (array2 != null && array2.size() > 0) {
 				for (int ij = (array2.size() - 1); ij >= 0; ij--) {
@@ -301,42 +283,44 @@ public class HistTraceService {
 					int date = d2.getTrade_date();
 					log.info("code={},date={}", code, date);
 					try {
-						// 1.上涨且位未超过8%
+						// 1.涨幅检查：上涨且位未超过8%
 						if (d2.getTodayChangeRate() > 0 && d2.getTodayChangeRate() <= 8.0) {
 							List<DaliyBasicInfo> dailyList = daliyBasicHistroyService
 									.queryListByCodeForModel(code, date, queryPage250).getContent();
 
 							LineVol lineVol = new LineVol(dailyList);
-							// 缩量
-							if (vb == 0 || lineVol.isShortVolV2(vb)) {// 2.没有超过5天均量1.3倍
-								LineAvgPrice lineAvg = new LineAvgPrice(code, date, avgService, lastDividendDate,
-										avgSaveList, dailyList);
-								if (lineAvg.feedData()) {
-									if (lineAvg.isWhiteHorseV2()) {
-										DaliyBasicInfo today = d2;
-										StockAvg av = lineAvg.todayAv;
-										// 3.一阳穿N线
-										if ((av.getAvgPriceIndex3() > today.getYesterdayPrice()
-												|| av.getAvgPriceIndex5() > today.getYesterdayPrice()
-												|| av.getAvgPriceIndex10() > today.getYesterdayPrice()
-												|| av.getAvgPriceIndex20() > today.getYesterdayPrice()
-												|| av.getAvgPriceIndex30() > today.getYesterdayPrice()//
-										)// 4.昨日收盘价在任意均线之下
-												&& (today.getClose() > av.getAvgPriceIndex3()
-														&& today.getClose() > av.getAvgPriceIndex5()
-														&& today.getClose() > av.getAvgPriceIndex10()
-														&& today.getClose() > av.getAvgPriceIndex20()
-														&& today.getClose() > av.getAvgPriceIndex30()//
-												)//
-										) {
-											LinePrice linePrice = new LinePrice(code, date, daliyTradeHistroyService);
+							// 量级检查:缩量
+							if (vb == 0 || (lineVol.isShortVolThanYerteryDay() && lineVol.isShortVolV2(vb))) {// 2.没有超过5天均量1.3倍,今天的量比昨天高
+								LinePrice linePrice = new LinePrice(code, date, daliyTradeHistroyService);
 
-											boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%
-											boolean b5 = linePrice.check3dayPriceV2();// 6.对比3天-价
-											boolean b4 = linePrice.isLowClosePriceToday(d2);// 上影线
-
-											if (b6 && b5 && !b4 && linePrice.oneYearCheck(oneYear, code, date)) {
-												saveOkRec(code, date, day, codesamples, d2);
+								boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%
+								boolean b5 = linePrice.check3dayPriceV2();// 6.对比3天-价
+								boolean b4 = linePrice.isLowClosePriceToday(d2);// 上影线
+								// 价格检查
+								if (b6 && b5 && !b4) {
+									LineAvgPrice lineAvg = new LineAvgPrice(code, date, avgService, dailyList);
+									// 均线
+									if (lineAvg.feedData()) {
+										if (lineAvg.isWhiteHorseV2()) {
+											DaliyBasicInfo today = d2;
+											StockAvg av = lineAvg.todayAv;
+											// 3.一阳穿N线
+											if ((av.getAvgPriceIndex3() > today.getYesterdayPrice()
+													|| av.getAvgPriceIndex5() > today.getYesterdayPrice()
+													|| av.getAvgPriceIndex10() > today.getYesterdayPrice()
+													|| av.getAvgPriceIndex20() > today.getYesterdayPrice()
+													|| av.getAvgPriceIndex30() > today.getYesterdayPrice()//
+											)// 4.昨日收盘价在任意均线之下
+													&& (today.getClose() > av.getAvgPriceIndex3()
+															&& today.getClose() > av.getAvgPriceIndex5()
+															&& today.getClose() > av.getAvgPriceIndex10()
+															&& today.getClose() > av.getAvgPriceIndex20()
+															&& today.getClose() > av.getAvgPriceIndex30()//
+													)//
+											) {
+												if (linePrice.oneYearCheck(oneYear, code, date)) {
+													saveOkRec(code, date, day, codesamples, d2);
+												}
 											}
 										}
 									}
@@ -352,10 +336,6 @@ public class HistTraceService {
 				}
 			} else {
 				log.info("V2获取样本{} 未获得数据", code);
-			}
-
-			if (avgSaveList.size() > 0) {
-				avgService.saveStockAvg(avgSaveList);
 			}
 			samples.addAll(codesamples);
 			// ThreadsUtil.thsSleepRandom();
@@ -394,8 +374,8 @@ public class HistTraceService {
 			t1.setDate(date);
 			//
 			List<TradeHistInfoDaliy> dailyList2 = new ArrayList<TradeHistInfoDaliy>();
-			List<TradeHistInfoDaliy> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastQfq(t1.getCode(), t1.getDate(),
-					0, queryPage6, SortOrder.ASC);// 返回的list是不可修改对象
+			List<TradeHistInfoDaliy> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastQfq(t1.getCode(),
+					t1.getDate(), 0, queryPage6, SortOrder.ASC);// 返回的list是不可修改对象
 			for (int i = 1; i < dailyList0.size(); i++) {
 				dailyList2.add(dailyList0.get(i));
 			}

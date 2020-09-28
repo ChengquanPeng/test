@@ -72,7 +72,7 @@ public class MonitoringService {
 	private Map<String, RealtimeDetailsAnalyzer> map = null;
 
 	public synchronized void startObservable() {
-		if (1 == 1) {
+		if (System.currentTimeMillis() > 0) {
 			return;
 		}
 		String date = DateUtil.getTodayYYYYMMDD();

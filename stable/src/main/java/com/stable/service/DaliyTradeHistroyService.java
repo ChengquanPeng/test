@@ -338,19 +338,36 @@ public class DaliyTradeHistroyService {
 		int qfqDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
 		List<TradeHistInfoDaliy> db = queryListByCode(code, startDate, endDate, queryPage, s);
 		boolean needFetch = false;
-		if (db != null) {
+		if (db != null && db.size() == queryPage.getPageSize()) {
 			for (TradeHistInfoDaliy r : db) {
 				if (r.getQfqDate() < qfqDate) {// 存的数据是前复权日期版本小于redis，不是最新的
 					needFetch = true;
 					break;
 				}
 			}
+			// 数据是否正确
 			if (!needFetch) {
-				return db;
+				if (s == SortOrder.DESC) {
+					if (endDate != 0 && db.get(0).getDate() != endDate) {
+						needFetch = true;
+					}
+					if (startDate != 0 && db.get(db.size() - 1).getDate() != startDate) {
+						needFetch = true;
+					}
+				} else {
+					if (endDate != 0 && db.get(db.size() - 1).getDate() != endDate) {
+						needFetch = true;
+					}
+					if (startDate != 0 && db.get(0).getDate() != startDate) {
+						needFetch = true;
+					}
+				}
 			}
+		} else {
+			needFetch = true;
 		}
 
-		if (needFetch || db == null) {
+		if (needFetch) {
 			String today = DateUtil.getTodayYYYYMMDD();
 			String json = redisUtil.get(code);
 			if (StringUtils.isNotBlank(json)) {
@@ -359,11 +376,12 @@ public class DaliyTradeHistroyService {
 					return queryListByCode(code, startDate, endDate, queryPage, s);
 				}
 			}
+			return null;
 		}
-		return null;
+		return db;
 	}
 
-	private List<TradeHistInfoDaliy> queryListByCode(String code, int startDate, int endDate, EsQueryPageReq queryPage,
+	public List<TradeHistInfoDaliy> queryListByCode(String code, int startDate, int endDate, EsQueryPageReq queryPage,
 			SortOrder s) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
