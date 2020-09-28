@@ -149,6 +149,16 @@ public class DaliyBasicHistroyService {
 		}
 	}
 
+	public DaliyBasicInfo spiderStockDaliyBasicForOne(String code, String start_date, String end_date) {
+		JSONObject data = tushareSpider.getStockDaliyBasic(TushareSpider.formatCode(code), null, start_date, end_date);
+		JSONArray array2 = data.getJSONArray("items");
+		if (array2 != null && array2.size() > 0) {
+			DaliyBasicInfo d2 = new DaliyBasicInfo(array2.getJSONArray(0));
+			return d2;
+		}
+		return new DaliyBasicInfo();
+	}
+
 	public void spiderStockDaliyBasic(String code, String start_date, String end_date) {
 		boolean hasMore = true;
 		String lastDate = end_date;

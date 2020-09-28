@@ -205,8 +205,8 @@ public class HistTraceService {
 		int total_all = samples.size();
 		if (total_all > 0) {
 			TraceSortv2StatVo stat = new TraceSortv2StatVo();
-			String filepath = FILE_FOLDER + "v3" + startDate + "_" + endDate + "_" + day + "_" + oneYear + "_" + vb
-					+ "_" + batch + ".log";
+			String filepath = FILE_FOLDER + "v3" + startDate + "_" + endDate + "_" + d + "_" + oneYear + "_" + vb + "_"
+					+ batch + ".log";
 			stat(filepath, stat, samples);
 			sendMessge("v3", batch, startDate, endDate, oneYear, d, vb, stat, total_all, sysstart);
 		} else {
@@ -366,8 +366,8 @@ public class HistTraceService {
 		int total_all = samples.size();
 		if (total_all > 0) {
 			TraceSortv2StatVo stat = new TraceSortv2StatVo();
-			String filepath = FILE_FOLDER + "v2" + startDate + "_" + endDate + "_" + day + "_" + oneYear + "_" + vb
-					+ "_" + batch + ".log";
+			String filepath = FILE_FOLDER + "v2" + startDate + "_" + endDate + "_" + d + "_" + oneYear + "_" + vb + "_"
+					+ batch + ".log";
 			stat(filepath, stat, samples);
 			sendMessge("v2", batch, startDate, endDate, oneYear, d, vb, stat, total_all, sysstart);
 		} else {
@@ -376,7 +376,7 @@ public class HistTraceService {
 		}
 	}
 
-	private void saveOkRec(String code, int date, int day, List<TraceSortv2Vo> codesamples, DaliyBasicInfo basic) {
+	private void saveOkRec(String code, int date, int day, List<TraceSortv2Vo> codesamples, DaliyBasicInfo d2) {
 		if (codesamples.size() > 0) {
 			TraceSortv2Vo tsv = codesamples.get(codesamples.size() - 1);
 			// 30天之前
@@ -416,6 +416,7 @@ public class HistTraceService {
 			t1.setMinPrice(minPrice);
 			t1.setSellPrice(dailyList0.get(dailyList0.size() - 1).getClosed());
 			t1.setBuyDayRate(d0.getTodayChangeRate());
+			DaliyBasicInfo basic = daliyBasicHistroyService.spiderStockDaliyBasicForOne(code, date + "", date + "");
 			t1.setDb(basic);
 
 			// 最新财务

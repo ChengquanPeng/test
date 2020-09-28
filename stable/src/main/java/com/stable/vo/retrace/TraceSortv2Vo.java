@@ -35,7 +35,7 @@ public class TraceSortv2Vo {
 				+ "," + db.getPe() + "," + db.getPe_ttm() + "," + db.getCirc_mv() + "," + db.getVolume_ratio() + ","
 				+ fin.getAnnDate() + "," + fin.getYyzsrtbzz() + "," + fin.getGsjlrtbzz() + ",";
 		if (kb == null && yg == null) {
-			msg += ",No,No,No";
+			msg += "No,No,No";
 		} else {
 			if (kb != null) {
 				msg += kb.getAnnDate() + "," + kb.getYyzsrtbzz() + "," + kb.getJlrtbzz();
