@@ -84,7 +84,7 @@ public class V2PRESortStrategyListener implements StrategyListener {
 //								|| av.getAvgPriceIndex30() > today.getClose()) {
 						if (linePrice.checkPriceBack6dayWhitTodayV2()) {// 回调过超10%
 							double topPrice = 0.0;
-							if (StockAType.isTop20(code)) {// 科创板20%涨跌幅
+							if (StockAType.isTop20(code, mc.getDate())) {// 科创板20%涨跌幅
 								topPrice = CurrencyUitl.topPrice20(today.getClose());
 							} else {
 								boolean isST = stockBasicService.getCodeName(code).contains("ST");

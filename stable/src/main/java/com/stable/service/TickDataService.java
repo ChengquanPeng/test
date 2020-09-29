@@ -569,7 +569,7 @@ public class TickDataService {
 		long ot = 0;
 		double topPrice;
 		double lowPrice;
-		if (StockAType.isTop20(code)) {// 科创板20%涨跌幅
+		if (StockAType.isTop20(code, date)) {// 科创板20%涨跌幅
 			topPrice = CurrencyUitl.topPrice20(yesterdayPrice);
 			lowPrice = CurrencyUitl.lowestPrice20(yesterdayPrice);
 		} else {

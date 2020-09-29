@@ -338,9 +338,15 @@ public class DaliyTradeHistroyService {
 		int qfqDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
 		List<TradeHistInfoDaliy> db = queryListByCode(code, startDate, endDate, queryPage, s);
 		boolean needFetch = false;
+//		log.info("{},qfqDate={}", code, qfqDate);
+//		log.info("db is null =" + (db == null));
+//		log.info("db.size =" + (db != null ? db.size() : 0));
+//		log.info("queryPage.getPageSize=" + queryPage.getPageSize());
+//		log.info("SortOrder=" + s.toString());
 		if (db != null && db.size() == queryPage.getPageSize()) {
 			for (TradeHistInfoDaliy r : db) {
 				if (qfqDate != 0 && r.getQfqDate() < qfqDate) {// 存的数据是前复权日期版本小于redis，不是最新的
+					log.info("{},TradeHistInfoDaliy date={},QfqDate={}", code, r.getDate(), r.getQfqDate());
 					needFetch = true;
 					break;
 				}
@@ -349,21 +355,26 @@ public class DaliyTradeHistroyService {
 			if (!needFetch) {
 				if (s == SortOrder.DESC) {
 					if (endDate != 0 && db.get(0).getDate() != endDate) {
+						log.info("endDate={},db-0={}", endDate, db.get(0).getDate());
 						needFetch = true;
 					}
 					if (startDate != 0 && db.get(db.size() - 1).getDate() != startDate) {
+						log.info("startDate={},db-last={}", startDate, db.get(db.size() - 1).getDate());
 						needFetch = true;
 					}
 				} else {
 					if (endDate != 0 && db.get(db.size() - 1).getDate() != endDate) {
+						log.info("endDate={},db-last={}", endDate, db.get(db.size() - 1).getDate());
 						needFetch = true;
 					}
 					if (startDate != 0 && db.get(0).getDate() != startDate) {
+						log.info("startDate={},db-0={}", endDate, db.get(0).getDate());
 						needFetch = true;
 					}
 				}
 			}
 		} else {
+			log.info("needFetch=true");
 			needFetch = true;
 		}
 

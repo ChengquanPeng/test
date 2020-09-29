@@ -191,8 +191,8 @@ public class HistTraceService {
 		int total_all = samples.size();
 		if (total_all > 0) {
 			TraceSortv2StatVo stat = new TraceSortv2StatVo();
-			String filepath = FILE_FOLDER + "v3" + startDate + "_" + endDate + "_" + d + "_" + oneYear + "_" + vb + "_"
-					+ batch + ".log";
+			String filepath = FILE_FOLDER + "v3_" + startDate + "_" + endDate + "_" + d + "_" + oneYear + "_" + vb + "_"
+					+ batch;
 			stat(filepath, stat, samples);
 			sendMessge("v3", batch, startDate, endDate, oneYear, d, vb, stat, total_all, sysstart);
 		} else {
@@ -346,8 +346,8 @@ public class HistTraceService {
 		int total_all = samples.size();
 		if (total_all > 0) {
 			TraceSortv2StatVo stat = new TraceSortv2StatVo();
-			String filepath = FILE_FOLDER + "v2" + startDate + "_" + endDate + "_" + d + "_" + oneYear + "_" + vb + "_"
-					+ batch + ".log";
+			String filepath = FILE_FOLDER + "v2_" + startDate + "_" + endDate + "_" + d + "_" + oneYear + "_" + vb + "_"
+					+ batch;
 			stat(filepath, stat, samples);
 			sendMessge("v2", batch, startDate, endDate, oneYear, d, vb, stat, total_all, sysstart);
 		} else {
@@ -405,36 +405,42 @@ public class HistTraceService {
 			// 最新快报&预告
 			int currYear = DateUtil.getYear(date);
 			int currJidu = DateUtil.getJidu(date);
-			FinYjkb ckb = financeService.getLastFinYjkbReport(code, date, currYear, currJidu);
-			if (ckb == null) {
-				FinYjyg cyg = financeService.getLastFinYjygReport(code, date, currYear, currJidu);
-				if (cyg == null) {
-					// 财务季度的最新快预告
+			// 当前季度的快预报（当前季度中后期）
+			if (!getLastKygb(t1, code, date, currYear, currJidu)) {
+				int preYear = currYear;
+				int preJidu = currJidu - 1;
+				if (preJidu == 0) {
+					preYear = preYear - 1;
+					preJidu = 4;
+				}
+				// 上季度的快预报（当前季度初期）
+				if (!getLastKygb(t1, code, date, preYear, preJidu)) {
 					int finYear = DateUtil.getYear(fin.getDate());
 					int finJidu = DateUtil.getJidu(fin.getDate());
-					FinYjkb prekb = financeService.getLastFinYjkbReport(code, date, finYear, finJidu);
-					if (prekb == null) {
-						FinYjyg precyg = financeService.getLastFinYjygReport(code, date, finYear, finJidu);
-						if (precyg != null) {
-							t1.setYg(precyg);
-						}
-					} else {
-						t1.setKb(prekb);
-					}
-				} else {
-					t1.setYg(cyg);
+					// 财务季度的快预报
+					getLastKygb(t1, code, date, finYear, finJidu);
 				}
-			} else {
-				t1.setKb(ckb);
 			}
-
-			// 最新快报是否当前季度？最新预告是否当前季度？最新快报财报当前季度？//TODO清缓存
-
 			codesamples.add(t1);
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, code, date + "", "");
 			e.printStackTrace();
 		}
+	}
+
+	private boolean getLastKygb(TraceSortv2Vo t1, String code, int date, int year, int jidu) {
+		FinYjkb ckb = financeService.getLastFinYjkbReport(code, date, year, jidu);
+		if (ckb == null) {
+			FinYjyg cyg = financeService.getLastFinYjygReport(code, date, year, jidu);
+			if (cyg != null) {
+				t1.setYg(cyg);
+				return true;
+			}
+		} else {
+			t1.setKb(ckb);
+			return true;
+		}
+		return false;
 	}
 
 	private void stat(String filepath, TraceSortv2StatVo stat, List<TraceSortv2Vo> samples) {
@@ -473,7 +479,7 @@ public class HistTraceService {
 			}
 		}
 		if (sb.length() > 0) {
-			LogFileUitl.writeLog(filepath, sb.toString());
+			LogFileUitl.writeLog(filepath + ".csv", sb.toString());
 		}
 	}
 

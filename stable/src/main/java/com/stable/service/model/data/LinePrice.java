@@ -22,7 +22,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class LinePrice {
-	private final static EsQueryPageReq queryPage = new EsQueryPageReq(30);
+	private final static EsQueryPageReq queryPage30 = new EsQueryPageReq(30);
 	private ModelContext cxt;
 	private List<DaliyBasicInfo> dailyList;
 	private List<TradeHistInfoDaliy> listD30;
@@ -46,10 +46,10 @@ public class LinePrice {
 		today = cxt.getToday();
 
 		code = cxt.getCode();
-		listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, lastDate, today.getTrade_date(), queryPage,
+		listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, today.getTrade_date(), queryPage30,
 				SortOrder.DESC);
 		if (listD30 == null || listD30.size() < 30) {
-			throw new RuntimeException(code + "获取复权数据从" + lastDate + "到" + today.getTrade_date() + "错误！");
+			throw new RuntimeException(code + "获取复权数据从0到" + today.getTrade_date() + "错误！");
 		}
 	}
 
@@ -282,9 +282,9 @@ public class LinePrice {
 	}
 
 	public boolean checkPriceBack6dayWhitTodayV2() {
-		listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, queryPage, SortOrder.DESC);
+		listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, queryPage30, SortOrder.DESC);
 		if (listD30 == null || listD30.size() < 30) {
-			throw new RuntimeException(code + "获取复权数据从" + lastDate + "到" + today.getTrade_date() + "错误！");
+			throw new RuntimeException(code + "获取复权数据从0到" + today.getTrade_date() + "错误！");
 		}
 		List<TradeHistInfoDaliy> highList = new ArrayList<TradeHistInfoDaliy>();
 		highList.add(listD30.get(3));
@@ -329,10 +329,10 @@ public class LinePrice {
 		if (oneyear == 0) {
 			return true;
 		}
-		List<TradeHistInfoDaliy> listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
+		List<TradeHistInfoDaliy> listD250 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
 				queryPage250, SortOrder.DESC);
-		TradeHistInfoDaliy dmax = listD30.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
-		TradeHistInfoDaliy dmin = listD30.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
+		TradeHistInfoDaliy dmax = listD250.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+		TradeHistInfoDaliy dmin = listD250.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
 		if (dmin.getDate() > dmax.getDate()) {// 先涨-后跌的情况
 			return false;
 		}

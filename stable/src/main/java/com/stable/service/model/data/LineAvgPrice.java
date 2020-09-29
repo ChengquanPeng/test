@@ -15,7 +15,7 @@ import com.stable.vo.spi.req.EsQueryPageReq;
 
 //@Log4j2
 public class LineAvgPrice {
-	private final static EsQueryPageReq queryPage = new EsQueryPageReq(30);
+	private final static EsQueryPageReq queryPage30 = new EsQueryPageReq(30);
 	// construction
 	private AvgService avgService;
 	private String code;
@@ -132,8 +132,8 @@ public class LineAvgPrice {
 		}
 		int whiteHorseTmp = 0;
 		int lastDate = dailyList.get(29).getTrade_date();// 第30个
-		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, lastDate,
-				today.getTrade_date(), queryPage, SortOrder.DESC);
+		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0,
+				today.getTrade_date(), queryPage30, SortOrder.DESC);
 		if (list == null || list.size() < 30) {
 			throw new RuntimeException(code + "获取复权数据从" + lastDate + "到" + today.getTrade_date() + "错误！");
 		}
