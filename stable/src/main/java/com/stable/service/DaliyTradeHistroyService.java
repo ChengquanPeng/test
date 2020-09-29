@@ -340,7 +340,7 @@ public class DaliyTradeHistroyService {
 		boolean needFetch = false;
 		if (db != null && db.size() == queryPage.getPageSize()) {
 			for (TradeHistInfoDaliy r : db) {
-				if (r.getQfqDate() < qfqDate) {// 存的数据是前复权日期版本小于redis，不是最新的
+				if (qfqDate != 0 && r.getQfqDate() < qfqDate) {// 存的数据是前复权日期版本小于redis，不是最新的
 					needFetch = true;
 					break;
 				}
