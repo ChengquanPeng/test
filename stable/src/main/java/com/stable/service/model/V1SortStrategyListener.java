@@ -63,7 +63,7 @@ public class V1SortStrategyListener implements StrategyListener {
 
 		StringBuffer detailDesc = new StringBuffer();
 		String dropOutMsg = "";
-		boolean isOk = true;
+		boolean isOk = false;
 		if (StringUtils.isBlank(mc.getBaseDataOk())) {
 			int baseScore = 0;
 			int strongScore = 0;
