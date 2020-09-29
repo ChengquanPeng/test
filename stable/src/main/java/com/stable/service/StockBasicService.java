@@ -1,5 +1,7 @@
 package com.stable.service;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,10 +80,6 @@ public class StockBasicService {
 	}
 
 	private final Semaphore semap = new Semaphore(1);
-
-	public void jobSynStockListAfterUpdateStatus() {
-
-	}
 
 	public ListenableFuture<Object> jobSynStockList(boolean isJob) {
 		try {
@@ -170,9 +168,17 @@ public class StockBasicService {
 		}
 		List<StockBaseInfo> copy = new LinkedList<StockBaseInfo>();
 		copy.addAll(LOCAL_ALL_ONLINE_LIST);
+		Collections.sort(copy, sort);
 		return copy;
 		// return dbStockBaseInfoDao.getListWithOnStauts();
 	}
+
+	private Comparator<StockBaseInfo> sort = new Comparator<StockBaseInfo>() {
+		@Override
+		public int compare(StockBaseInfo o1, StockBaseInfo o2) {
+			return o1.getCode().compareTo(o2.getCode());
+		}
+	};
 
 	/**
 	 * 上市超一年
