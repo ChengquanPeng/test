@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.stable.enums.StockAType;
 import com.stable.spider.tushare.TushareSpider;
 
 import lombok.extern.log4j.Log4j2;
@@ -23,45 +24,48 @@ public class StrongService {
 //	"399005.SZ","中小板指",
 //	"399006.SZ","创业板指",
 	private final String INDEX_SH = "000001.SH";
-	private final String INDEX_SZ1 = "399001.SZ";
-	private final String INDEX_SZ2 = "399005.SZ";
-	private final String INDEX_SZ3 = "399006.SZ";
+	private final String INDEX_SZ_MAIN = "399001.SZ";
+	private final String INDEX_SZ_CYB = "399006.SZ";
+	private final String INDEX_SH_KCB = "000688.SH";
+
+	private final String SH_START = StockAType.SHM.getStartWith();
+	private final String SH_KCB_START = StockAType.KCB.getStartWith();
+	private final String SZ_START = StockAType.SZM.getStartWith();
+	private final String SZ_CYB_START = StockAType.CYB.getStartWith();
 
 	private String getIndex(String code) {
-		if (code.startsWith("6")) {
+		if (code.startsWith(SH_START)) {
 			return INDEX_SH;
-		} else if (code.startsWith("000")) {
-			return INDEX_SZ1;
-		} else if (code.startsWith("001")) {
-			return INDEX_SZ1;
-		} else if (code.startsWith("002")) {
-			return INDEX_SZ2;
-		} else if (code.startsWith("3")) {
-			return INDEX_SZ3;
+		} else if (code.startsWith(SZ_START)) {
+			return INDEX_SZ_MAIN;
+		} else if (code.startsWith(SZ_CYB_START)) {
+			return INDEX_SZ_CYB;
+		} else if (code.startsWith(SH_KCB_START)) {
+			return INDEX_SH_KCB;
 		}
 		return null;
 	}
 
-	private Map<Integer, Double> M_SH = new ConcurrentHashMap<Integer, Double>();
-	private Map<Integer, Double> M_SZ1 = new ConcurrentHashMap<Integer, Double>();
-	private Map<Integer, Double> M_SZ2 = new ConcurrentHashMap<Integer, Double>();
-	private Map<Integer, Double> M_SZ3 = new ConcurrentHashMap<Integer, Double>();
+	private Map<Integer, Double> M_SH_MAIN = new ConcurrentHashMap<Integer, Double>();
+	private Map<Integer, Double> M_SZ_MAIN = new ConcurrentHashMap<Integer, Double>();
+	private Map<Integer, Double> M_SZ_CYB = new ConcurrentHashMap<Integer, Double>();
+	private Map<Integer, Double> M_SH_KCB = new ConcurrentHashMap<Integer, Double>();
 
 	public synchronized Map<Integer, Double> getIndexMap(String code, int chkDate, int startedDate) {
 		String index = this.getIndex(code);
 		Map<Integer, Double> cache = null;
 		switch (index) {
 		case INDEX_SH:
-			cache = M_SH;
+			cache = M_SH_MAIN;
 			break;
-		case INDEX_SZ1:
-			cache = M_SZ1;
+		case INDEX_SZ_MAIN:
+			cache = M_SZ_MAIN;
 			break;
-		case INDEX_SZ2:
-			cache = M_SZ2;
+		case INDEX_SZ_CYB:
+			cache = M_SZ_CYB;
 			break;
-		case INDEX_SZ3:
-			cache = M_SZ3;
+		case INDEX_SH_KCB:
+			cache = M_SH_KCB;
 			break;
 		}
 		Double id = cache.get(chkDate);
