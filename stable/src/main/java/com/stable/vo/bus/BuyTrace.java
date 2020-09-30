@@ -34,9 +34,11 @@ public class BuyTrace extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int buyModelType;// 人工还是机器
 	@Field(type = FieldType.Integer)
-	private int program;// 市场:1程序，2无程序
+	private int ver;// 版本
+	@Field(type = FieldType.Keyword)
+	private String subVer;// 版本
 
 	public void setId() {
-		id = code + buyDate;
+		id = code + buyDate + ver + subVer;
 	}
 }

@@ -15,12 +15,13 @@ import lombok.ToString;
 @Document(indexName = "monitoring")
 public class Monitoring {
 	@Id
+	private String id;
+	@Field(type = FieldType.Keyword)
 	private String code;
-
-	@Field(type = FieldType.Integer)
-	private int buy;// 买入监听
 	@Field(type = FieldType.Integer)
 	private int reqBuyDate;// 请求买人时间
 	@Field(type = FieldType.Integer)
-	private int lastMoniDate;// 最后监听日期
+	private int ver;// 版本
+	@Field(type = FieldType.Integer)
+	private int lastMoniDate = 0;// 最后监听日期,未0是未监听
 }

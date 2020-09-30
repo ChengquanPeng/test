@@ -293,9 +293,12 @@ public class DaliyBasicHistroyService {
 		return this.queryListByCode(code, date, fetchTickData, queryPage, SortOrder.DESC);
 	}
 
-	public DaliyBasicInfo queryLastest(String code) {
+	public DaliyBasicInfo queryLastest(String code, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		if (date > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("trade_date", date));
+		}
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(SortOrder.DESC);
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
@@ -304,6 +307,10 @@ public class DaliyBasicHistroyService {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+
+	public DaliyBasicInfo queryLastest(String code) {
+		return queryLastest(code, 0);
 	}
 
 	public List<DaliyBasicInfo> queryListByCodeForModel(String code, EsQueryPageReq queryPage) {

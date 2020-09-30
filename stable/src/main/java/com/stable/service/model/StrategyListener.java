@@ -7,6 +7,7 @@ import com.stable.service.model.data.LinePrice;
 import com.stable.service.model.data.LineTickData;
 import com.stable.service.model.data.LineVol;
 import com.stable.vo.ModelContext;
+import com.stable.vo.bus.Monitoring;
 import com.stable.vo.up.strategy.ModelV1;
 
 public interface StrategyListener {
@@ -17,4 +18,8 @@ public interface StrategyListener {
 			LineTickData lineTickData);
 
 	public List<ModelV1> getResultList();
+
+	public default List<Monitoring> getMonitoringList() {
+		return null;
+	}
 }

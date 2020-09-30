@@ -22,26 +22,6 @@ public class RealtimeDetailsResulter implements Runnable {
 	private ReentrantLock lock = new ReentrantLock();
 	private Map<String, RealtimeMsg> msgs = new ConcurrentHashMap<String, RealtimeMsg>();
 
-	public void addSellMessage(String msg) {
-
-	}
-
-	public void removeBuyMessage(String code) {
-		lock.lock();
-		try {
-			msgs.remove(code);
-		} finally {
-			lock.unlock();
-		}
-	}
-
-//String msg = "关注:" + code + " " + codeName + ",市场行为:" + (buytime ? "买入" : "卖出") + ",主力行为:"
-	// + (pg ? "Yes" : "No") + ",买入额:" +
-	// CurrencyUitl.covertToString(d.getBuyTotalAmt())
-	// + ",卖出额:" + CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
-	// + CurrencyUitl.covertToString(d.getTotalAmt()) + ",第一次提醒时间:" +
-	// firstTimeWarning
-	// + ",提醒次数:" + warningCnt + ",chkPrice:" + chkPrice + ",当前价格:" + nowPrice;
 	public void addBuyMessage(String code, RealtimeMsg msg) {
 		lock.lock();
 		try {
@@ -71,15 +51,6 @@ public class RealtimeDetailsResulter implements Runnable {
 				sb.append(BR);
 				int index = 1;
 				for (RealtimeMsg rm : list) {
-//					if (type == 1) {
-//						if ((rm.getChkVol1() * 1.3) < rm.getTotalVol() && (rm.getChkVol2() * 1.3) < rm.getTotalVol()) {// 半天的量》均值的半天或者整天的量
-//							continue;
-//						}
-//					} else if (type == 2) {
-//						if ((rm.getChkVol2() * 1.3) < rm.getTotalVol()) {// 整天的量》均值的半天或者整天的量
-//							continue;
-//						}
-//					}
 					sb.append("序号:").append(index).append(",").append(rm.toMessage()).append(BR);
 					index++;
 				}
@@ -97,18 +68,18 @@ public class RealtimeDetailsResulter implements Runnable {
 		String today = DateUtil.getTodayYYYYMMDD();
 		long now = new Date().getTime();
 
-		// 开盘一次
-		Date d1 = DateUtil.parseDate(today + "094000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
-		long d0940 = d1.getTime();
-		if (now <= d0940) {
-			ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
-				@Override
-				public void run() {
-					sendMsg(0);
-				}
-			}, d1);
-			log.info("scheduled Task with Time:{}", d1);
-		}
+//		// 开盘一次
+//		Date d1 = DateUtil.parseDate(today + "094000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
+//		long d0940 = d1.getTime();
+//		if (now <= d0940) {
+//			ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
+//				@Override
+//				public void run() {
+//					sendMsg(0);
+//				}
+//			}, d1);
+//			log.info("scheduled Task with Time:{}", d1);
+//		}
 
 		// 中午收盘一次
 		Date d2 = DateUtil.parseDate(today + "114000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
@@ -124,7 +95,7 @@ public class RealtimeDetailsResulter implements Runnable {
 		}
 
 		// 下午收盘一次
-		Date d3 = DateUtil.parseDate(today + "145000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
+		Date d3 = DateUtil.parseDate(today + "145300", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
 		long d1450 = d3.getTime();
 		if (now <= d1450) {
 			ScheduledWorker.scheduledTimeAndTask(new TimerTask() {

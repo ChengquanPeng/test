@@ -21,6 +21,7 @@ import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.FileWriteUitl;
 import com.stable.utils.SpringUtil;
 import com.stable.vo.ModelContext;
+import com.stable.vo.bus.Monitoring;
 import com.stable.vo.up.strategy.ModelV1;
 
 import lombok.extern.log4j.Log4j2;
@@ -161,7 +162,10 @@ public class V1SortStrategyListener implements StrategyListener {
 
 	// **评分
 
+	private int treadeDate;
+
 	public V1SortStrategyListener(int date, CodeModelService codeModelService) {
+		treadeDate = date;
 		this.codeModelService = codeModelService;
 		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "基本面评分", "短期强势", "主力行为" };
 		for (int i = 0; i < s.length; i++) {
@@ -262,5 +266,21 @@ public class V1SortStrategyListener implements StrategyListener {
 	@Override
 	public List<ModelV1> getResultList() {
 		return saveList;
+	}
+
+	@Override
+	public List<Monitoring> getMonitoringList() {
+		List<Monitoring> ml = new LinkedList<Monitoring>();
+		if (saveList.size() > 0) {
+			for (ModelV1 mv : saveList) {
+				Monitoring mt = new Monitoring();
+				mt.setCode(mv.getCode());
+				mt.setReqBuyDate(treadeDate);
+				mt.setVer(1);// V1
+				mt.setId(mt.getCode() + mt.getVer());// 各个模型版本监控不一样
+				ml.add(mt);
+			}
+		}
+		return ml;
 	}
 }

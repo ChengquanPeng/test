@@ -91,8 +91,8 @@ public class UpModelLineService {
 	@Autowired
 	private CodeModelService codeModelService;
 
-	private final EsQueryPageReq queryPage = new EsQueryPageReq(250);
-	private final EsQueryPageReq deleteQueryPage = new EsQueryPageReq(9999);
+	private final EsQueryPageReq queryPage250 = new EsQueryPageReq(250);
+	private final EsQueryPageReq deleteQueryPage9999 = new EsQueryPageReq(9999);
 
 	public synchronized void runJob(boolean isJob, int today) {
 		try {
@@ -128,7 +128,7 @@ public class UpModelLineService {
 					return;
 				}
 				log.info("processing date={}", today);
-				List<ModelV1> deleteall = getListByCode(null, today + "", null, null, null, deleteQueryPage, null);
+				List<ModelV1> deleteall = getListByCode(null, today + "", null, null, null, deleteQueryPage9999, null);
 				if (deleteall != null) {
 					log.info("删除当天{}记录条数{}", today, deleteall.size());
 					esModelV1Dao.deleteAll(deleteall);
@@ -208,6 +208,8 @@ public class UpModelLineService {
 			}
 			cunt.await();// 等待执行完成
 			int v1cnt = 0;
+
+			List<Monitoring> ml = new LinkedList<Monitoring>();
 			for (int i = 0; i < models.size(); i++) {
 				StrategyListener sort = models.get(i);
 				sort.fulshToFile();
@@ -215,22 +217,16 @@ public class UpModelLineService {
 					v1cnt = sort.getResultList().size();
 					esModelV1Dao.saveAll(sort.getResultList());
 				}
+				if (isJob) {
+					List<Monitoring> t = sort.getMonitoringList();
+					if (t != null && t.size() > 0) {
+						ml.addAll(t);
+					}
+				}
 			}
-//			if (isJob) {
-//				if (v2p.getResultList().size() > 0) {
-//					List<Monitoring> ml = new LinkedList<Monitoring>();
-//					for (ModelV1 mv : v2p.getResultList()) {
-//						Monitoring mt = new Monitoring();
-//						mt.setCode(mv.getCode());
-//						mt.setBuy(1);
-//						mt.setReqBuyDate(treadeDate);
-//						ml.add(mt);
-//					}
-//					if (ml.size() > 0) {
-//						monitoringDao.saveAll(ml);
-//					}
-//				}
-//			}
+			if (ml.size() > 0) {
+				monitoringDao.saveAll(ml);
+			}
 			log.info("MV1模型执行完成");
 			WxPushUtil.pushSystem1("Seq4=> " + treadeDate + " -> MV模型执行完成！ 开始时间:" + startTime + " 结束时间："
 					+ DateUtil.getTodayYYYYMMDDHHMMSS() + ", V1满足条件获取数量:" + v1cnt);
@@ -241,13 +237,14 @@ public class UpModelLineService {
 	}
 
 	private List<DaliyBasicInfo> getBasicList(ModelContext cxt) {
-		return daliyBasicHistroyService.queryListByCodeForModel(cxt.getCode(), cxt.getDate(), queryPage).getContent();
+		return daliyBasicHistroyService.queryListByCodeForModel(cxt.getCode(), cxt.getDate(), queryPage250)
+				.getContent();
 	}
 
 	private void runModels(ModelContext cxt, List<StrategyListener> models) {
 		boolean isOk = true;
 		String code = cxt.getCode();
-		//log.info("model version processing for code:{}", code);
+		// log.info("model version processing for code:{}", code);
 		if (!stockBasicService.online1Year(code)) {
 			cxt.setBaseDataOk("Online 上市不足1年");
 			isOk = false;
@@ -300,14 +297,27 @@ public class UpModelLineService {
 		}
 	}
 
-	public Set<Monitoring> getListByCode(EsQueryPageReq querypage) {
+	public List<Monitoring> getListByCodeForList(String code) {
+		Pageable pageable = PageRequest.of(queryPage250.getPageNum(), queryPage250.getPageSize());
+		List<Monitoring> r = new LinkedList<Monitoring>();
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("lastMoniDate").gt(0));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+		Page<Monitoring> page = monitoringDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			r.addAll(page.getContent());
+		}
+		return r;
+	}
+
+	public Set<Monitoring> getListByCodeForSet(EsQueryPageReq querypage) {
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
 		Set<Monitoring> r = new HashSet<Monitoring>();
-
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("buy", 1));
+		bqb.must(QueryBuilders.rangeQuery("lastMoniDate").gt(0));
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-
 		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
 		Page<Monitoring> page = monitoringDao.search(sq);
 		if (page != null && !page.isEmpty()) {

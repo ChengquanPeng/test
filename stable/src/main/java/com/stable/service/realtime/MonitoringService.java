@@ -18,7 +18,6 @@ import com.stable.es.dao.base.MonitoringDao;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
-import com.stable.service.TickDataService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.model.UpModelLineService;
@@ -32,10 +31,8 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BuyTrace;
-import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.Monitoring;
 import com.stable.vo.bus.TickData;
-import com.stable.vo.bus.TickDataBuySellInfo;
 import com.stable.vo.http.resp.ReportVo;
 import com.stable.vo.http.resp.ViewVo;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -52,8 +49,6 @@ public class MonitoringService {
 	private UpModelLineService upModelLineService;
 	@Autowired
 	private AvgService avgService;
-	@Autowired
-	private TickDataService tickDataService;
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
@@ -94,14 +89,14 @@ public class MonitoringService {
 			// 所有买卖Code List
 			Set<String> allCode = new HashSet<String>();
 			// 获取买入监听列表
-			Set<Monitoring> bList = upModelLineService.getListByCode(querypage);
+			Set<Monitoring> bList = upModelLineService.getListByCodeForSet(querypage);
 			if (bList == null) {
 				bList = new HashSet<Monitoring>();
 			}
 
 			// 获取卖出监听列表
-			List<BuyTrace> sList = buyTraceService.getListByCode("", 0, TradeType.BOUGHT.getCode(),
-					BuyModelType.B2.getCode(), querypage);
+			List<BuyTrace> sList = new LinkedList<BuyTrace>();
+			buyTraceService.getListByCode("", 0, TradeType.BOUGHT.getCode(), BuyModelType.B2.getCode(), querypage);
 
 			// 合并
 			bList.forEach(x -> {
@@ -111,11 +106,6 @@ public class MonitoringService {
 				for (BuyTrace bt : sList) {
 					if (!allCode.contains(bt.getCode())) {
 						allCode.add(bt.getCode());
-						// list add
-						Monitoring m = new Monitoring();
-						m.setCode(bt.getCode());
-						m.setBuy(0);// 卖出
-						bList.add(m);
 					}
 				}
 			}
@@ -126,23 +116,21 @@ public class MonitoringService {
 			int buytt = 0;
 			int selltt = 0;
 			int failtt = 0;
-			if (bList.size() > 0) {
+			if (allCode.size() > 0) {
 				// 启动监听线程
 				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
-				for (Monitoring x : bList) {
-					log.info(x);
+				for (String code : allCode) {
+					log.info(code);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
-					int r = task.init(x, resulter, daliyBasicHistroyService, avgService, tickDataService,
-							stockBasicService.getCodeName(x.getCode()), buyTraceService, daliyTradeHistroyService,
-							codeModelService);
+					int r = task.init(code, resulter, daliyBasicHistroyService, avgService,
+							stockBasicService.getCodeName(code), buyTraceService, daliyTradeHistroyService,
+							codeModelService, upModelLineService);
 					if (r == 1) {
 						new Thread(task).start();
 						list.add(task);
-						map.put(x.getCode(), task);
+						map.put(code, task);
 
-						if (x.getBuy() == 1) {
-							buytt++;
-						}
+						buytt += task.getBuyCnt();
 						selltt += task.getSellCnt();
 
 					} else {
@@ -181,7 +169,6 @@ public class MonitoringService {
 			// 修改监听状态
 			if (bList.size() > 0) {
 				bList.forEach(x -> {
-					x.setBuy(0);
 					x.setLastMoniDate(idate);
 				});
 				monitoringDao.saveAll(bList);
@@ -233,15 +220,7 @@ public class MonitoringService {
 		if (allTickData == null || allTickData.isEmpty()) {
 			return "没有找到今日数据";
 		}
-		DaliyBasicInfo ytdBasic = daliyBasicHistroyService.queryLastest(code);
-		TickDataBuySellInfo d = tickDataService.sumTickData2(code, 0, ytdBasic.getClose(), ytdBasic.getCirc_mv(),
-				allTickData, false);
-		boolean buytime = d.getBuyTimes() > d.getSellTimes();
-		boolean pg = d.getProgramRate() > 0;
-		return code + " " + stockBasicService.getCodeName(code) + "==>市场行为:" + (buytime ? "买入" : "卖出") + ",主力行为:"
-				+ (pg ? "Yes" : "No") + ",买入额:" + CurrencyUitl.covertToString(d.getBuyTotalAmt()) + ",卖出额:"
-				+ CurrencyUitl.covertToString(d.getSellTotalAmt()) + ",总交易额:"
-				+ CurrencyUitl.covertToString(d.getTotalAmt()) + " 当前信息(SINA):" + SinaRealtimeUitl.get(code);
+		return code + " " + stockBasicService.getCodeName(code) + "==> 当前信息(SINA):" + SinaRealtimeUitl.get(code);
 	}
 
 	public String sell(String code) {
@@ -271,9 +250,10 @@ public class MonitoringService {
 			bt.setBuyModelType(BuyModelType.B1.getCode());
 			bt.setBuyPrice(srt.getBuy1());
 			bt.setCode(code);
+			bt.setVer(0);
+			bt.setSubVer("人工");
 			bt.setId();
 			bt.setStatus(TradeType.BOUGHT.getCode());
-			bt.setProgram(tickDataService.hasProgram(code) ? 1 : 2);
 			buyTraceService.addToTrace(bt);
 			log.info("人工买已成交:{}" + bt);
 			return bt;

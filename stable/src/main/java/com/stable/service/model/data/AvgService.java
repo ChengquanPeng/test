@@ -155,24 +155,16 @@ public class AvgService {
 	}
 
 	public StockAvg queryListByCodeForRealtime(String code) {
-		try {
-			BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-			FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
-			NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-			SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
-			return stockAvgDao.search(sq).getContent().get(0);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+		return queryListByCodeForRealtime(code, 0);
 	}
 
 	public StockAvg queryListByCodeForRealtime(String code, int date) {
 		try {
 			BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-			bqb.must(QueryBuilders.matchPhraseQuery("date", date));
+			if (date > 0) {
+				bqb.must(QueryBuilders.matchPhraseQuery("date", date));
+			}
 			NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 			SearchQuery sq = queryBuilder.withQuery(bqb).build();
 			return stockAvgDao.search(sq).getContent().get(0);
