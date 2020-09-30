@@ -251,7 +251,7 @@ public class MonitoringService {
 			bt.setBuyPrice(srt.getBuy1());
 			bt.setCode(code);
 			bt.setVer(0);
-			bt.setSubVer("人工");
+			bt.setSubVer(0);
 			bt.setId();
 			bt.setStatus(TradeType.BOUGHT.getCode());
 			buyTraceService.addToTrace(bt);

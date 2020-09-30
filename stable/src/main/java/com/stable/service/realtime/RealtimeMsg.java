@@ -48,7 +48,7 @@ public class RealtimeMsg {
 		sb.append("关注:").append(code).append(BLANK).append(codeName).append(BLANK)//
 				.append(",基本评分:").append(baseScore).append(BLANK);//
 		for (String ver : m_ver) {
-			sb.append(",模型版本:V").append(ver).append(BLANK)//
+			sb.append(",模型版本:").append(ver).append(BLANK)//
 					.append(",第一次提醒时间:").append(m_firstTimeWarning.get(ver)).append(BLANK)//
 					.append(",提醒次数:").append(m_times.get(ver)).append(BLANK);//
 		}

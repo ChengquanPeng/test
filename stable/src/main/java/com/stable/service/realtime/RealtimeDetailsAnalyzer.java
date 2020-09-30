@@ -27,6 +27,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class RealtimeDetailsAnalyzer implements Runnable {
+	private long ONE_MIN = 1 * 60 * 1000;// 5MIN
 	private long FIVE_MIN = 5 * 60 * 1000;// 5MIN
 	private long WAIT_MIN = FIVE_MIN;
 	private String code;
@@ -109,7 +110,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		return topPrice;
 	}
 
-	private void autoBuy(int ver, String subVer, double buyPrice) {
+	private void autoBuy(int ver, int subVer, double buyPrice) {
 		if (waitingBuy && !needMoniSell) {// 已买入就不需要再买
 			log.info(code + codeName + ",buyPrice[" + buyPrice + "],涨停价格topPrice[" + topPrice + "]");
 			if (buyPrice > 0.0 && buyPrice < topPrice) {
@@ -157,27 +158,29 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					for (Monitoring m : monitorList) {
 						int ver = m.getVer();
 						if (ver == 1) {// 短线
-							String subVer = "v1";
-//							if("v1") { if("v2") {
+							int subVer = 1;
+//							if("v1") { if("v2") {//TODO
 							gotBuyBiz(ver, subVer, srt, now, d1450);
 						}
 					}
 				}
 
 				// 卖出
-				if (needMoniSell && (now > d1450)) {// 14:50 //TODO
-					if (buyTraces.size() > 0) {
-						// 止损卖出//最高点回调5%卖
-						List<BuyTrace> sells2 = new LinkedList<BuyTrace>();
-						for (int i = 0; i < buyTraces.size(); i++) {
-
-						}
-						if (sells2.size() > 0) {
-							buyTraces.removeAll(sells2);
-						}
-					}
+//				if (needMoniSell && (now > d1450)) {// 14:50 //TODO
+//					if (buyTraces.size() > 0) {
+//						// 止损卖出//最高点回调5%卖
+//						List<BuyTrace> sells2 = new LinkedList<BuyTrace>();
+//						for (int i = 0; i < buyTraces.size(); i++) {
+//
+//						}
+//						if (sells2.size() > 0) {
+//							buyTraces.removeAll(sells2);
+//						}
+//					}
+//				}
+				if (now > d1450) {
+					WAIT_MIN = ONE_MIN;
 				}
-
 				Thread.sleep(WAIT_MIN);
 			} catch (Exception e) {
 				if (!isPushedException) {
@@ -194,17 +197,27 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		}
 	}
 
-	private void gotBuyBiz(int ver, String subVer, SinaRealTime srt, long now, long d1450) {
+	private void gotBuyBiz(int ver, int subVer, SinaRealTime srt, long now, long d1450) {
 		RealtimeMsg rm = new RealtimeMsg();
 		rm.setCode(code);
 		rm.setCodeName(codeName);
 		rm.setBaseScore(codeBaseModel.getScore());
-		rm.addMessage(ver + subVer);
+		rm.addMessage(getModelVerName(ver, subVer));
 		resulter.addBuyMessage(code, rm);
 		log.info(rm);
 		if (now > d1450) {
 			autoBuy(ver, subVer, srt.getSell1());
 		}
+	}
+
+	private String getModelVerName(int ver, int subVer) {
+		if (1 == ver) {
+			String s0 = "短线";
+			if (1 == subVer) {
+				return s0 + "-V1";
+			}
+		}
+		return "";
 	}
 
 	private boolean isPushedException = false;
