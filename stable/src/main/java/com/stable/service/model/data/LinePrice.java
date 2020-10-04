@@ -164,12 +164,13 @@ public class LinePrice {
 	}
 
 	// 排除上影线
-	public boolean isLowClosePriceToday(DaliyBasicInfo today) {
-		if (today.getTodayChange() > 0) {
-			double diff = today.getHigh() - today.getYesterdayPrice();
+	public boolean isLowClosePriceToday(double todayChangeRate, double yesterdayPrice, double closedPrice,
+			double highPrice) {
+		if (todayChangeRate > 0) {
+			double diff = highPrice - yesterdayPrice;
 			double half = diff * 0.8;
-			double mid = CurrencyUitl.roundHalfUp(half) + today.getYesterdayPrice();
-			if (mid >= today.getClose()) {
+			double mid = CurrencyUitl.roundHalfUp(half) + yesterdayPrice;
+			if (mid >= closedPrice) {
 				return true;
 			}
 		}
@@ -325,10 +326,7 @@ public class LinePrice {
 
 	static EsQueryPageReq queryPage250 = new EsQueryPageReq(250);
 
-	public boolean oneYearCheck(int oneyear, String code, int date) {
-		if (oneyear == 0) {
-			return true;
-		}
+	public boolean oneYearCheck(String code, int date) {
 		List<TradeHistInfoDaliy> listD250 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
 				queryPage250, SortOrder.DESC);
 		TradeHistInfoDaliy dmax = listD250.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();

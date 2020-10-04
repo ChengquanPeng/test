@@ -43,7 +43,7 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.LogFileUitl;
-import com.stable.utils.MyRunnable;
+import com.stable.utils.TasksWorker2ndRunnable;
 import com.stable.utils.OSystemUtil;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.TasksWorker;
@@ -190,7 +190,7 @@ public class TickDataService {
 								for (DaliyBasicInfo d : list) {
 									int index = i++;
 									try {
-										TasksWorker2nd.add(new MyRunnable() {
+										TasksWorker2nd.add(new TasksWorker2ndRunnable() {
 											public void running() {
 												try {
 													log.info("running code:{},index:{}", d.getCode(), index);

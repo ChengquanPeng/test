@@ -5,17 +5,24 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.stable.constant.RedisConstant;
+import com.stable.es.dao.base.EsFinYjkbDao;
+import com.stable.es.dao.base.EsFinYjygDao;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
-import com.stable.utils.RedisUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.TickDataUitl;
 import com.stable.utils.WxPushUtil;
@@ -24,12 +31,19 @@ import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.TickData;
 
+import lombok.extern.log4j.Log4j2;
+
 @Component
+@Log4j2
 public class EastmoneySpider {
 	private static final String URL_FORMAT = "https://push2.eastmoney.com/api/qt/stock/details/get?secid=%s.%s&fields1=f1,f2,f3,f4,f5&fields2=f51,f52,f53,f54,f55&pos=-111125&";
-
 	@Autowired
-	private RedisUtil redisUtil;
+	private EsFinYjygDao esFinYjygDao;
+	@Autowired
+	private EsFinYjkbDao esFinYjkbDao;
+
+	// @Autowired
+	// private RedisUtil redisUtil;
 
 	public static int formatCode(String code) {
 		if (code.startsWith("6")) {
@@ -224,13 +238,16 @@ public class EastmoneySpider {
 	}
 
 	private void getYjkbByPage(String date1, List<FinYjkb> list) {
-		String last = redisUtil.get(RedisConstant.RDS_FIN_KUAIBAO_ + date1);
-		last = last == null ? "" : last;
-		String lastFromPage = null;
+		removeKb(date1);
+		// String last = redisUtil.get(RedisConstant.RDS_FIN_KUAIBAO_ + date1);
+		// last = last == null ? "" : last;
+//		String lastFromPage = null;
 		boolean chkIndor = true;
 
 		int page = 1;
 		int trytime = 0;
+		int tot_count = 0;
+		int act_count = 0;
 		do {
 			ThreadsUtil.sleepRandomSecBetween1And5();
 			String url1 = getYjkbUrl(date1, page);
@@ -241,6 +258,11 @@ public class EastmoneySpider {
 
 			if (objects.getBooleanValue("success")) {
 				JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
+				if (tot_count <= 0) {
+					tot_count = objects.getJSONObject("result").getIntValue("count");
+					log.info(date1 + " 快报页面获取到总数:" + tot_count);
+				}
+
 				for (int i = 0; i < datas.size(); i++) {
 					JSONObject data = datas.getJSONObject(i);
 					String date = data.getString("REPORT_DATE"); // 报告期
@@ -284,32 +306,42 @@ public class EastmoneySpider {
 					}
 					fy.setId();
 
-					if (chkIndor) {
-						if (last.equals(fy.getCode())) {
-							chkIndor = false;
-						} else {
-							list.add(fy);
-						}
-					}
-					if (lastFromPage == null) {
-						lastFromPage = fy.getCode();
-					}
+//					if (chkIndor) {
+//						if (last.equals(fy.getCode())) {
+//							chkIndor = false;
+//						} else {
+//							list.add(fy);
+//						}
+//					}
+//					if (lastFromPage == null) {
+//						lastFromPage = fy.getCode();
+//					}
+					log.info(fy);
+					list.add(fy);
+					act_count++;
+				}
+				if (tot_count > 0 && act_count >= tot_count) {
+					chkIndor = false;
 				}
 				page++;
 			} else {
+				log.info(date1 + " 快报页面未获取到总数");
 				trytime++;
 				if (trytime >= 3) {
 					chkIndor = false;
 				}
-				if (page > 1) {// 已经最后一页，无数据
+				if (act_count > 0 && page > 1) {// 已经最后一页，无数据
+					chkIndor = false;
+				}
+				if (tot_count > 0 && act_count >= tot_count) {
 					chkIndor = false;
 				}
 			}
 		} while (chkIndor);
 		// 设置最新
-		if (lastFromPage != null) {
-			redisUtil.set(RedisConstant.RDS_FIN_KUAIBAO_ + date1, lastFromPage);
-		}
+		// if (lastFromPage != null) {
+		// redisUtil.set(RedisConstant.RDS_FIN_KUAIBAO_ + date1, lastFromPage);
+		// }
 	}
 
 	private String getYjkbUrl(String date, int page) {
@@ -319,12 +351,15 @@ public class EastmoneySpider {
 	}
 
 	private void getYjygByPage(String date1, List<FinYjyg> list) {
-		String last = redisUtil.get(RedisConstant.RDS_FIN_YUGAO_ + date1);
-		last = last == null ? "" : last;
-		String lastFromPage = null;
+		removeYg(date1);
+//		String last = redisUtil.get(RedisConstant.RDS_FIN_YUGAO_ + date1);
+//		last = last == null ? "" : last;
+//		String lastFromPage = null;
 		boolean chkIndor = true;
 		int page = 1;
 		int trytime = 0;
+		int tot_count = 0;
+		int act_count = 0;
 		do {
 			ThreadsUtil.sleepRandomSecBetween1And5();
 			String url1 = getYjygUrl(date1, page);
@@ -334,6 +369,10 @@ public class EastmoneySpider {
 			JSONObject objects = JSON.parseObject(result);
 			if (objects.getBooleanValue("success")) {
 				JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
+				if (tot_count <= 0) {
+					tot_count = objects.getJSONObject("result").getIntValue("count");
+					log.info(date1 + " 预告页面获取到总数:" + tot_count);
+				}
 				for (int i = 0; i < datas.size(); i++) {
 					JSONObject data = datas.getJSONObject(i);
 					String date = data.getString("REPORTDATE"); // 报告期
@@ -373,32 +412,42 @@ public class EastmoneySpider {
 					}
 					fy.setId();
 
-					if (chkIndor) {
-						if (last.equals(fy.getCode())) {
-							chkIndor = false;
-						} else {
-							list.add(fy);
-						}
-					}
-					if (lastFromPage == null) {
-						lastFromPage = fy.getCode();
-					}
+//					if (chkIndor) {
+//						if (last.equals(fy.getCode())) {
+//							chkIndor = false;
+//						} else {
+//							list.add(fy);
+//						}
+//					}
+//					if (lastFromPage == null) {
+//						lastFromPage = fy.getCode();
+//					}
+					log.info(fy);
+					list.add(fy);
+					act_count++;
 				}
 				page++;
+				if (tot_count > 0 && act_count >= tot_count) {
+					chkIndor = false;
+				}
 			} else {
+				log.info(date1 + " 预告页面未获取到总数");
 				trytime++;
 				if (trytime >= 3) {
 					chkIndor = false;
 				}
-				if (page > 1) {// 已经最后一页，无数据
+				if (act_count > 0 && page > 1) {// 已经最后一页，无数据
+					chkIndor = false;
+				}
+				if (tot_count > 0 && act_count >= tot_count) {
 					chkIndor = false;
 				}
 			}
 		} while (chkIndor);
 		// 设置最新
-		if (lastFromPage != null) {
-			redisUtil.set(RedisConstant.RDS_FIN_YUGAO_ + date1, lastFromPage);
-		}
+//		if (lastFromPage != null) {
+//			redisUtil.set(RedisConstant.RDS_FIN_YUGAO_ + date1, lastFromPage);
+//		}
 	}
 
 	private String getYjygUrl(String date, int page) {
@@ -407,8 +456,70 @@ public class EastmoneySpider {
 				+ "%27)(IsLatest=%22T%22)&rt=" + System.currentTimeMillis();
 	}
 
+	private void removeKb(String date1) {
+		int date = DateUtil.convertDate2(date1);
+		int year = DateUtil.getYear(date);
+		int jidu = DateUtil.getJidu(date);
+
+		List<FinYjkb> kbs = getLastFinaceKbByReportDate(year, jidu);
+		if (kbs != null && kbs.size() > 0) {
+			for (FinYjkb kb : kbs) {
+				kb.setIsValid(0);
+			}
+			esFinYjkbDao.saveAll(kbs);
+		}
+	}
+
+	private void removeYg(String date1) {
+		int date = DateUtil.convertDate2(date1);
+		int year = DateUtil.getYear(date);
+		int jidu = DateUtil.getJidu(date);
+
+		List<FinYjyg> kbs = getLastFinaceYgByReportDate(year, jidu);
+		if (kbs != null && kbs.size() > 0) {
+			for (FinYjyg kb : kbs) {
+				kb.setIsValid(0);
+			}
+			esFinYjygDao.saveAll(kbs);
+		}
+	}
+
+	Pageable pageable = PageRequest.of(0, 9999);
+
+	private List<FinYjkb> getLastFinaceKbByReportDate(int year, int jidu) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.rangeQuery("year").gt(year));
+		bqb.must(QueryBuilders.rangeQuery("quarter").gt(jidu));
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+
+		Page<FinYjkb> page = esFinYjkbDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		return null;
+	}
+
+	public List<FinYjyg> getLastFinaceYgByReportDate(int year, int jidu) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.rangeQuery("year").gt(year));
+		bqb.must(QueryBuilders.rangeQuery("quarter").gt(jidu));
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+
+		Page<FinYjyg> page = esFinYjygDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		return null;
+	}
+
 	public static void main(String[] args) {
 //		EastmoneySpider.getNewFinanceAnalysis("000002", 0);
 //		String result = HttpUtil.doGet2(yjygBase);
+		EastmoneySpider es = new EastmoneySpider();
+		es.getFinYjkb();
 	}
 }

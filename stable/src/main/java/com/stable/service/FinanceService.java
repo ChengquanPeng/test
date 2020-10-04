@@ -228,6 +228,7 @@ public class FinanceService {
 		bqb.must(QueryBuilders.rangeQuery("annDate").lte(annDate));//
 		bqb.must(QueryBuilders.matchPhraseQuery("year", year));
 		bqb.must(QueryBuilders.matchPhraseQuery("quarter", jidu));
+		bqb.must(QueryBuilders.matchPhraseQuery("isValid", 1));
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
@@ -250,6 +251,7 @@ public class FinanceService {
 		bqb.must(QueryBuilders.rangeQuery("annDate").lte(annDate));//
 		bqb.must(QueryBuilders.matchPhraseQuery("year", year));
 		bqb.must(QueryBuilders.matchPhraseQuery("quarter", jidu));
+		bqb.must(QueryBuilders.matchPhraseQuery("isValid", 1));
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
@@ -288,6 +290,7 @@ public class FinanceService {
 	public FinYjkb getLastFinaceKbByReportDate(int currRptDate) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.rangeQuery("date").gt(currRptDate));
+		bqb.must(QueryBuilders.matchPhraseQuery("isValid", 1));
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.ASC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
@@ -303,6 +306,7 @@ public class FinanceService {
 	public FinYjyg getLastFinaceYgByReportDate(int currRptDate) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.rangeQuery("date").gt(currRptDate));
+		bqb.must(QueryBuilders.matchPhraseQuery("isValid", 1));
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.ASC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
@@ -327,6 +331,7 @@ public class FinanceService {
 					for (FinYjkb fy : list1) {
 						sb.append(stockBasicService.getCodeName(fy.getCode())).append(",");
 						fy.setUpdateDate(updateDate);
+						fy.setIsValid(1);
 					}
 					esFinYjkbDao.saveAll(list1);
 				}
@@ -334,6 +339,7 @@ public class FinanceService {
 					for (FinYjyg fy : list2) {
 						sb.append(stockBasicService.getCodeName(fy.getCode())).append(",");
 						fy.setUpdateDate(updateDate);
+						fy.setIsValid(1);
 					}
 					esFinYjygDao.saveAll(list2);
 				}

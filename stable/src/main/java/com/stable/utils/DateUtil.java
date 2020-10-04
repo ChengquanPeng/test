@@ -23,6 +23,18 @@ public class DateUtil {
 		}
 	}
 
+	public static int convertDate2(String yyyyMMdd) {
+		try {
+			SimpleDateFormat format2 = new SimpleDateFormat(YYYY_MM_DD2);
+			Date d = format2.parse(yyyyMMdd);
+			SimpleDateFormat format1 = new SimpleDateFormat(YYYY_MM_DD);
+			return Integer.valueOf(format1.format(d));
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new RuntimeException("ParseException:yyyyMMdd:" + yyyyMMdd);
+		}
+	}
+
 	public static String formatYYYYMMDD(Date date) {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
 		return format.format(date);

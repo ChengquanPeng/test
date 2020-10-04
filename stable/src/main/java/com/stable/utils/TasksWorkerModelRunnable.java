@@ -1,17 +1,17 @@
 package com.stable.utils;
 
-public abstract class MyRunnable implements Runnable {
+public abstract class TasksWorkerModelRunnable implements Runnable {
 
 	@Override
 	public void run() {
 		try {
-			TasksWorker2nd.semp.acquire();
+			TasksWorkerModel.semp.acquire();
 			running();
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, "", "", "");
 			e.printStackTrace();
 		} finally {
-			TasksWorker2nd.semp.release();
+			TasksWorkerModel.semp.release();
 		}
 	}
 

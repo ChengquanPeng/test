@@ -44,7 +44,7 @@ import com.stable.service.model.data.StrongService;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
-import com.stable.utils.MyRunnable;
+import com.stable.utils.TasksWorker2ndRunnable;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.WxPushUtil;
@@ -192,7 +192,7 @@ public class UpModelLineService {
 				cxt.setToday(d);// 未包含全部信息-来自Tushare
 				cxt.setGnDaliy(gn);
 
-				TasksWorker2nd.add(new MyRunnable() {
+				TasksWorker2nd.add(new TasksWorker2ndRunnable() {
 					@Override
 					public void running() {
 						try {

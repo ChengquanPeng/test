@@ -32,7 +32,7 @@ public class HistTrace extends EsBase {
 	@Field(type = FieldType.Double)
 	private double vol;
 	@Field(type = FieldType.Integer)
-	private int oneYear;// 1年未大涨
+	private int oneYear = 1;// 1年未大涨
 
 	// 结果
 

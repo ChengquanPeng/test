@@ -35,6 +35,8 @@ public class FinYjyg extends EsBase {
 	private int updateDate;// 更新日期
 	@Field(type = FieldType.Integer)
 	private int annDate;// 更新日期
+	@Field(type = FieldType.Integer)
+	private int isValid = 0;// 是否有效：1有效
 
 	public void setId() {
 		id = code + date;

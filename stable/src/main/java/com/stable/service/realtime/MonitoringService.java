@@ -124,7 +124,7 @@ public class MonitoringService {
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
 					int r = task.init(code, resulter, daliyBasicHistroyService, avgService,
 							stockBasicService.getCodeName(code), buyTraceService, daliyTradeHistroyService,
-							codeModelService, upModelLineService);
+							codeModelService, upModelLineService, monitoringDao);
 					if (r == 1) {
 						new Thread(task).start();
 						list.add(task);
@@ -164,14 +164,6 @@ public class MonitoringService {
 				if (t.getSelled() != null) {
 					selledList.add(t.getSelled());
 				}
-			}
-
-			// 修改监听状态
-			if (bList.size() > 0) {
-				bList.forEach(x -> {
-					x.setLastMoniDate(idate);
-				});
-				monitoringDao.saveAll(bList);
 			}
 			sendEndMessaget(buyedList, selledList);
 		} catch (Exception e) {

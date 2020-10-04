@@ -31,7 +31,7 @@ import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
-import com.stable.utils.MyRunnable;
+import com.stable.utils.TasksWorker2ndRunnable;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.TasksWorker2nd;
@@ -89,7 +89,7 @@ public class DaliyBasicHistroyService {
 				list.add(d);
 
 				int index = i;
-				TasksWorker2nd.add(new MyRunnable() {
+				TasksWorker2nd.add(new TasksWorker2ndRunnable() {
 					public void running() {
 						try {
 							log.info("<每日指标记录>正在处理code={}", d.getCode());

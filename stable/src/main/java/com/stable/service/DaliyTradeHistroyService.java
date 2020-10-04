@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -37,7 +38,7 @@ import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
-import com.stable.utils.MyRunnable;
+import com.stable.utils.TasksWorker2ndRunnable;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
@@ -180,7 +181,8 @@ public class DaliyTradeHistroyService {
 				// 2.是否需要更新缺失记录
 
 				String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
-				if (StringUtils.isBlank(yyyymmdd) || (!preDate.equals(yyyymmdd) && !yyyymmdd.equals(today))) {
+				if (StringUtils.isBlank(yyyymmdd) || (!preDate.equals(yyyymmdd) && !yyyymmdd.equals(today)
+						&& Integer.valueOf(yyyymmdd) < Integer.valueOf(today))) {//
 					log.info("代码code:{}重新获取记录", code);
 					String json = redisUtil.get(d.getCode());
 					// 第一次上市或者除权
@@ -188,7 +190,7 @@ public class DaliyTradeHistroyService {
 					if (base != null) {
 						yyyymmdd = base.getList_date();
 						String datep = yyyymmdd;
-						TasksWorker2nd.add(new MyRunnable() {
+						TasksWorker2nd.add(new TasksWorker2ndRunnable() {
 							public void running() {
 								try {
 									spiderDaliyTradeHistoryInfoFromIPOCenter(d.getCode(), datep, today, 0);
@@ -209,7 +211,7 @@ public class DaliyTradeHistroyService {
 				}
 			}
 			try {
-				cnt.await();
+				cnt.await(18, TimeUnit.HOURS);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -219,6 +221,7 @@ public class DaliyTradeHistroyService {
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
+			WxPushUtil.pushSystem1("前复权qfq获取异常，获取日期:" + today);
 		}
 		return 0;
 
@@ -355,26 +358,26 @@ public class DaliyTradeHistroyService {
 			if (!needFetch) {
 				if (s == SortOrder.DESC) {
 					if (endDate != 0 && db.get(0).getDate() != endDate) {
-						log.info("endDate={},db-0={}", endDate, db.get(0).getDate());
+						log.info(code + " endDate={},db-0={}", endDate, db.get(0).getDate());
 						needFetch = true;
 					}
 					if (startDate != 0 && db.get(db.size() - 1).getDate() != startDate) {
-						log.info("startDate={},db-last={}", startDate, db.get(db.size() - 1).getDate());
+						log.info(code + " startDate={},db-last={}", startDate, db.get(db.size() - 1).getDate());
 						needFetch = true;
 					}
 				} else {
 					if (endDate != 0 && db.get(db.size() - 1).getDate() != endDate) {
-						log.info("endDate={},db-last={}", endDate, db.get(db.size() - 1).getDate());
+						log.info(code + " endDate={},db-last={}", endDate, db.get(db.size() - 1).getDate());
 						needFetch = true;
 					}
 					if (startDate != 0 && db.get(0).getDate() != startDate) {
-						log.info("startDate={},db-0={}", endDate, db.get(0).getDate());
+						log.info(code + " startDate={},db-0={}", endDate, db.get(0).getDate());
 						needFetch = true;
 					}
 				}
 			}
 		} else {
-			log.info("needFetch=true");
+			log.info(code + " needFetch=true");
 			needFetch = true;
 		}
 

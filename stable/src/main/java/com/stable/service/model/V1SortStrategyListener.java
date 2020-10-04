@@ -76,7 +76,7 @@ public class V1SortStrategyListener implements StrategyListener {
 					if (lineAvgPrice.isWhiteHorseV2()) {
 						boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%
 						if (b6) {// 一年未涨
-							if (linePrice.oneYearCheck(1, mc.getCode(), mc.getDate())) {// 一年未涨
+							if (linePrice.oneYearCheck(mc.getCode(), mc.getDate())) {// 一年未涨
 								isOk = true;
 							} else {
 								dropOutMsg = "未一年未涨";

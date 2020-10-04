@@ -7,6 +7,7 @@ import java.util.List;
 import com.stable.enums.BuyModelType;
 import com.stable.enums.StockAType;
 import com.stable.enums.TradeType;
+import com.stable.es.dao.base.MonitoringDao;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.model.CodeModelService;
@@ -47,6 +48,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private BuyTrace selled;
 	private CodeBaseModel codeBaseModel;
 	RealtimeDetailsResulter resulter;
+	MonitoringDao monitoringDao;
 
 	public void stop() {
 		isRunning = false;
@@ -55,11 +57,12 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	public int init(String code, RealtimeDetailsResulter resulter, DaliyBasicHistroyService daliyBasicHistroyService,
 			AvgService avgService, String codeName, BuyTraceService buyTraceService,
 			DaliyTradeHistroyService daliyTradeHistroyService, CodeModelService codeModelService,
-			UpModelLineService upModelLineService) {
+			UpModelLineService upModelLineService, MonitoringDao monitoringDao) {
 		this.code = code;
 		this.codeName = codeName;
 		this.resulter = resulter;
 		this.buyTraceService = buyTraceService;
+		this.monitoringDao = monitoringDao;
 
 		SinaRealTime srt = SinaRealtimeUitl.get(code);
 		if (srt.getOpen() == 0.0) {
@@ -195,6 +198,13 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				}
 			}
 		}
+		// 监听完成，修改监听信息：
+		// 1.监听买入:监听状态
+		// 2.已买入-卖出:持有天数等待，是否完成卖出
+		long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
+		if ((now > d1450)) {
+			finTodayMoni();
+		}
 	}
 
 	private void gotBuyBiz(int ver, int subVer, SinaRealTime srt, long now, long d1450) {
@@ -229,4 +239,11 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	public BuyTrace getSelled() {
 		return selled; // TODO
 	}
+
+	private void finTodayMoni() {
+		// 修改监听状态
+//		monitoringDao.saveAll(bList);
+		// TODO
+	}
+
 }
