@@ -44,7 +44,11 @@ public class TraceSortv2Vo {
 				msg += yg.getAnnDate() + ",," + yg.getJlrtbzz();
 			}
 		}
-		msg += "," + fin.getAnnDate() + "," + fin.getYyzsrtbzz() + "," + fin.getGsjlrtbzz() + ",";
+		if (fin == null) {
+			msg += ",,,,";
+		} else {
+			msg += "," + fin.getAnnDate() + "," + fin.getYyzsrtbzz() + "," + fin.getGsjlrtbzz() + ",";
+		}
 		return msg;
 	}
 }

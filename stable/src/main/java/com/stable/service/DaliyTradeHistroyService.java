@@ -114,6 +114,7 @@ public class DaliyTradeHistroyService {
 		ListenableFuture<?> l = TasksWorker.getInstance().getService().submit(new Runnable() {
 			@Override
 			public void run() {
+				int sd = Integer.valueOf(today);
 				String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
 				try {
 					ImageStrategyListener sl = new ImageStrategyListener();
@@ -122,7 +123,7 @@ public class DaliyTradeHistroyService {
 						ModelContext mc = new ModelContext();
 						mc.setCode(d.getCode());
 						mc.setDate(d.getTrade_date());
-						if (stockBasicService.online1Year(mc.getCode())) {
+						if (stockBasicService.online1Year(mc.getCode(), sd)) {
 							String str = imageService.checkImg(mc.getCode(), mc.getDate());
 							if (StringUtils.isNotBlank(str)) {
 								if (str.contains(ImageService.MATCH_L2)) {

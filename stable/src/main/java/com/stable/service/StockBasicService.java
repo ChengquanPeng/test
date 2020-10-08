@@ -21,7 +21,6 @@ import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
-import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.WxPushUtil;
@@ -183,13 +182,13 @@ public class StockBasicService {
 	/**
 	 * 上市超一年
 	 */
-	public boolean online1Year(String code) {
+	public boolean online1Year(String code, int today) {
 		getCodeName(code);// 同步code
 		StockBaseInfo base = JSON.parseObject(redisUtil.get(code), StockBaseInfo.class);
 		String listDate = base.getList_date();
 		Integer year = Integer.valueOf(listDate.substring(0, 4));
 		Integer end = Integer.valueOf((year + 1 + "") + listDate.substring(4));
-		if (end <= Integer.valueOf(DateUtil.getTodayYYYYMMDD())) {
+		if (end <= today) {
 			return true;
 		}
 		return false;

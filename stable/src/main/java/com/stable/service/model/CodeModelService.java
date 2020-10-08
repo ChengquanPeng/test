@@ -178,7 +178,7 @@ public class CodeModelService {
 		// 财务
 		FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code, treadeDate);
 		if (fbi == null) {
-			boolean onlineYear = stockBasicService.online1Year(code);
+			boolean onlineYear = stockBasicService.online1Year(code, treadeDate);
 			if (onlineYear) {
 				ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, treadeDate + "", "Code Model错误");
 			} else {

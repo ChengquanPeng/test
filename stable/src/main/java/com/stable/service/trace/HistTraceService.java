@@ -190,6 +190,7 @@ public class HistTraceService {
 		}
 		double fmin = min;
 		double fmax = max;
+		int sd = Integer.valueOf(startDate);
 		// start..
 		log.info("codelist:" + codelist.size());
 		CountDownLatch cnt = new CountDownLatch(codelist.size());
@@ -200,7 +201,7 @@ public class HistTraceService {
 				continue;
 			}
 			String code = s.getCode();
-			boolean onlineYear = stockBasicService.online1Year(code);
+			boolean onlineYear = stockBasicService.online1Year(code, sd);
 			if (!onlineYear) {
 				cnt.countDown();
 				continue;
@@ -345,10 +346,13 @@ public class HistTraceService {
 				}
 				// 上季度的快预报（当前季度初期）
 				if (!getLastKygb(t1, code, date, preYear, preJidu)) {
-					int finYear = DateUtil.getYear(fin.getDate());
-					int finJidu = DateUtil.getJidu(fin.getDate());
+
 					// 财务季度的快预报
-					getLastKygb(t1, code, date, finYear, finJidu);
+					if (fin != null) {
+						int finYear = DateUtil.getYear(fin.getDate());
+						int finJidu = DateUtil.getJidu(fin.getDate());
+						getLastKygb(t1, code, date, finYear, finJidu);
+					}
 				}
 			}
 			return t1;

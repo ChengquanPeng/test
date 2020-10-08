@@ -196,7 +196,7 @@ public class UpModelLineService {
 					@Override
 					public void running() {
 						try {
-							runModels(cxt, models);
+							runModels(cxt, models, treadeDate);
 						} catch (Exception e) {
 							e.printStackTrace();
 							ErrorLogFileUitl.writeError(e, "", "", "");
@@ -241,11 +241,11 @@ public class UpModelLineService {
 				.getContent();
 	}
 
-	private void runModels(ModelContext cxt, List<StrategyListener> models) {
+	private void runModels(ModelContext cxt, List<StrategyListener> models, int treadeDate) {
 		boolean isOk = true;
 		String code = cxt.getCode();
 		// log.info("model version processing for code:{}", code);
-		if (!stockBasicService.online1Year(code)) {
+		if (!stockBasicService.online1Year(code, treadeDate)) {
 			cxt.setBaseDataOk("Online 上市不足1年");
 			isOk = false;
 		}
