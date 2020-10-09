@@ -47,12 +47,14 @@ public class AvgService {
 	@Autowired
 	private QfqUtil qfqUtil;
 
-	private List<StockAvg> getDPriceAvg(String code, int startDate, int endDate) {
+	private List<StockAvg> getSMA30(String code, int startDate, int endDate) {
 		List<StockAvg> rs = qfqUtil.getSMA5_30(code, startDate, endDate);
 		if (rs != null) {
 			return rs;
 		} else {
-			return getDPriceAvgFromTushar(code, startDate, endDate);
+			rs = getDPriceAvgFromTushar(code, startDate, endDate);
+			log.info("SMA-30 -> Thshare");
+			return rs;
 		}
 	}
 
@@ -157,7 +159,7 @@ public class AvgService {
 			List<TradeHistInfoDaliy> tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
 					queryPage300, SortOrder.ASC);
 			if (tradedaliylist != null) {
-				List<StockAvg> result = getDPriceAvg(code, tradedaliylist.get(0).getDate(), date);
+				List<StockAvg> result = getSMA30(code, tradedaliylist.get(0).getDate(), date);
 				if (result != null && result.size() > 0) {
 					stockAvgDao.saveAll(result);
 				}
