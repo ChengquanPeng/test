@@ -266,7 +266,7 @@ public class UpModelLineService {
 			cxt.setToday(dailyList.get(0));// 包含全部信息-来自ES
 			// 均价
 			int lastDate = dailyList.get(dailyList.size() - 1).getTrade_date();
-			lineAvgPrice = new LineAvgPrice(avgService, cxt, lastDate, dailyList, daliyTradeHistroyService);
+			lineAvgPrice = new LineAvgPrice(avgService, cxt, dailyList, daliyTradeHistroyService);
 			// 1强势:次数和差值:3/5/10/20/120/250天
 			linePrice = new LinePrice(strongService, cxt, dailyList, lineAvgPrice.todayAv, lastDate,
 					daliyTradeHistroyService);

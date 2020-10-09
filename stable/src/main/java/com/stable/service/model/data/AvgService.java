@@ -23,6 +23,7 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.PythonCallUtil;
+import com.stable.utils.QfqUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.StockAvg;
@@ -43,63 +44,21 @@ public class AvgService {
 	private EsStockAvgDao stockAvgDao;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
+	@Autowired
+	private QfqUtil qfqUtil;
 
-	public List<StockAvg> getWPriceAvg(String code, int startDate, int endDate) {
-		String params = TushareSpider.formatCode(code) + " " + startDate + " " + endDate + " qfq W";
-		boolean gotData = false;
-		List<String> lines = null;
-		int i = 0;
-		do {
-			lines = PythonCallUtil.callPythonScript(pythonFileName, params);
-			if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
-				if (i >= 3) {
-					log.warn("pythonFileName：{}，未获取到数据 params：{}", pythonFileName, code, params);
-					if (lines != null && !lines.isEmpty()) {
-						log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
-					}
-					ErrorLogFileUitl.writeError(new RuntimeException(), code, "未获取到均价信息", startDate + " " + endDate);
-					return null;
-				}
-				ThreadsUtil.sleepRandomSecBetween5And15();
-			} else {
-				gotData = true;
-			}
-			i++;
-		} while (!gotData);
-
-		try {
-			int lastDividendDate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-			List<StockAvg> list4 = new LinkedList<StockAvg>();
-			for (int j = 0; j < 4; j++) {
-				String[] strs = lines.get(j).replaceAll("nan", "0").split(",");
-				// code,date,3,5,10,20,30,120,250
-				// 600408.SH,20200403,2.2933,2.302,2.282,2.3255,2.297,2.2712,2.4559
-				StockAvg av = new StockAvg();
-				av.setCode(code);
-				av.setDate(Integer.valueOf(strs[1]));
-				av.setId();
-//				av.setAvgPriceIndex3(Double.valueOf(strs[2]));
-				av.setAvgPriceIndex5(Double.valueOf(strs[3]));
-				av.setAvgPriceIndex10(Double.valueOf(strs[4]));
-				av.setAvgPriceIndex20(Double.valueOf(strs[5]));
-				av.setAvgPriceIndex30(Double.valueOf(strs[6]));
-				av.setAvgPriceIndex60(Double.valueOf(strs[7]));
-				av.setAvgPriceIndex120(Double.valueOf(strs[8]));
-				av.setAvgPriceIndex250(Double.valueOf(strs[9]));
-				av.setLastDividendDate(lastDividendDate);
-				list4.add(av);
-			}
-			return list4;
-		} catch (Exception e) {
-			String msg = "获取到的数据:" + lines.get(0);
-//			log.error(msg);
-			throw new RuntimeException(msg, e);
+	private List<StockAvg> getDPriceAvg(String code, int startDate, int endDate) {
+		List<StockAvg> rs = qfqUtil.getSMA5_30(code, startDate, endDate);
+		if (rs != null) {
+			return rs;
+		} else {
+			return getDPriceAvgFromTushar(code, startDate, endDate);
 		}
 	}
 
 	// 比如5日均线，开始和结束日期参数跨度必须要超过5日。
 	// 本方法要超过250个交易日。
-	private List<StockAvg> getDPriceAvg(String code, int startDate, int endDate) {
+	private List<StockAvg> getDPriceAvgFromTushar(String code, int startDate, int endDate) {
 		String params = TushareSpider.formatCode(code) + " " + startDate + " " + endDate + " qfq D";
 		boolean gotData = false;
 		List<String> lines = null;
@@ -154,26 +113,6 @@ public class AvgService {
 		}
 	}
 
-	public StockAvg queryListByCodeForRealtime(String code) {
-		return queryListByCodeForRealtime(code, 0);
-	}
-
-	public StockAvg queryListByCodeForRealtime(String code, int date) {
-		try {
-			BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-			if (date > 0) {
-				bqb.must(QueryBuilders.matchPhraseQuery("date", date));
-			}
-			NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-			SearchQuery sq = queryBuilder.withQuery(bqb).build();
-			return stockAvgDao.search(sq).getContent().get(0);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
 	EsQueryPageReq queryPage300 = new EsQueryPageReq(300);
 	EsQueryPageReq queryPage30 = new EsQueryPageReq(30);
 
@@ -183,7 +122,7 @@ public class AvgService {
 	 * @param queryPage 最近的多少条，一般是30
 	 * @return
 	 */
-	public List<StockAvg> queryListByCodeForModelWithLastQfq(String code, int date) {
+	public List<StockAvg> queryListByCodeForModelWithLastQfqAnd30Records(String code, int date) {
 		int qfqDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
 		List<StockAvg> db = queryListByCodeForModel(code, qfqDate, queryPage30);
 		boolean needFetch = false;
@@ -196,8 +135,8 @@ public class AvgService {
 			}
 			if (!needFetch) {
 				// check 是否是正确的连续30天的数据
-				List<TradeHistInfoDaliy> tradedaliylist = daliyTradeHistroyService.queryListByCode(code, 0, date,
-						queryPage30, SortOrder.DESC);
+				List<TradeHistInfoDaliy> tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0,
+						date, queryPage30, SortOrder.DESC);
 				if (tradedaliylist != null) {
 					if (tradedaliylist.get(0).getDate() == db.get(0).getDate()
 							&& tradedaliylist.get(29).getDate() == db.get(29).getDate()) {
@@ -215,7 +154,7 @@ public class AvgService {
 		}
 
 		if (needFetch) {
-			List<TradeHistInfoDaliy> tradedaliylist = daliyTradeHistroyService.queryListByCode(code, 0, date,
+			List<TradeHistInfoDaliy> tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
 					queryPage300, SortOrder.ASC);
 			if (tradedaliylist != null) {
 				List<StockAvg> result = getDPriceAvg(code, tradedaliylist.get(0).getDate(), date);

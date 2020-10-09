@@ -17,22 +17,19 @@ public class LineAvgPrice {
 	// construction
 	private AvgService avgService;
 	private String code;
-	private int lastDate;
 	private int date;
 	private DaliyBasicInfo today;
 
 	private List<DaliyBasicInfo> dailyList;
 	// TEMP
 	private List<StockAvg> clist30;
-	private List<StockAvg> week4;
 	public StockAvg todayAv;
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 
-	public LineAvgPrice(AvgService avgService, ModelContext cxt, int lastDate, List<DaliyBasicInfo> dailyList,
+	public LineAvgPrice(AvgService avgService, ModelContext cxt, List<DaliyBasicInfo> dailyList,
 			DaliyTradeHistroyService daliyTradeHistroyService) {
 		this.avgService = avgService;
 		this.code = cxt.getCode();
-		this.lastDate = lastDate;
 		this.date = cxt.getDate();
 		this.dailyList = dailyList;
 		this.daliyTradeHistroyService = daliyTradeHistroyService;
@@ -46,26 +43,6 @@ public class LineAvgPrice {
 		this.dailyList = dailyList;
 	}
 
-	private boolean isWeekAvgGet = false;
-	private boolean isWeekAvgRes = false;
-
-	// 是否5日均线在30日线上，超过15天
-	public boolean isWeek4AvgOk() {
-		if (isWeekAvgGet) {
-			return isWeekAvgRes;
-		}
-		week4 = avgService.getWPriceAvg(code, lastDate, date);
-		// 排除下跌周期中，收盘不在W均线上
-		long count = week4.stream().filter(x -> {
-			return x.getAvgPriceIndex20() > x.getAvgPriceIndex30();
-		}).count();
-		if (count >= 2) {
-			isWeekAvgRes = true;
-		}
-		isWeekAvgGet = true;
-		return isWeekAvgRes;
-	}
-
 	private boolean isFeedDataGet = false;
 	private boolean isFeedDataGetRes = true;
 
@@ -74,7 +51,7 @@ public class LineAvgPrice {
 			return isFeedDataGetRes;
 		}
 		// 最近30条
-		clist30 = avgService.queryListByCodeForModelWithLastQfq(code, date);
+		clist30 = avgService.queryListByCodeForModelWithLastQfqAnd30Records(code, date);
 		todayAv = clist30.get(0);
 		isFeedDataGet = true;
 		return isFeedDataGetRes;

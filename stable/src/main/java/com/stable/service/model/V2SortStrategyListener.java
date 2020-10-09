@@ -103,10 +103,10 @@ public class V2SortStrategyListener implements StrategyListener {
 							if (b1 && !b2 && !b3 && b4 && b5 && b6) {
 								isOk = true;
 								avgScore = 100;
-								if (lineAvgPrice.isWeek4AvgOk()) {
-									avgScore += 10;
-									mv.setWeekOk(1);
-								}
+//								if (lineAvgPrice.isWeek4AvgOk()) {
+//									avgScore += 10;
+//									mv.setWeekOk(1);
+//								}
 								if (linePrice.isRange30pWith30days()) {
 									avgScore += 10;
 									mv.setIsRange30p(1);

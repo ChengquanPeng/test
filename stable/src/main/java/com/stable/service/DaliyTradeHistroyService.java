@@ -321,7 +321,7 @@ public class DaliyTradeHistroyService {
 
 	public List<DaliyTradeHistResp> queryListByCodeByWebPage(String code, EsQueryPageReq queryPage) {
 		List<DaliyTradeHistResp> res = new LinkedList<DaliyTradeHistResp>();
-		List<TradeHistInfoDaliy> list = this.queryListByCode(code, queryPage);
+		List<TradeHistInfoDaliy> list = this.queryListByCode(code, 0, 0, queryPage, SortOrder.DESC);
 		if (list != null) {
 			for (TradeHistInfoDaliy dh : list) {
 				DaliyTradeHistResp resp = new DaliyTradeHistResp();
@@ -331,10 +331,6 @@ public class DaliyTradeHistroyService {
 			}
 		}
 		return res;
-	}
-
-	public List<TradeHistInfoDaliy> queryListByCode(String code, EsQueryPageReq queryPage) {
-		return this.queryListByCode(code, 0, 0, queryPage, SortOrder.DESC);
 	}
 
 	public List<TradeHistInfoDaliy> queryListByCodeWithLastQfq(String code, int startDate, int endDate,
@@ -398,7 +394,7 @@ public class DaliyTradeHistroyService {
 		return db;
 	}
 
-	public List<TradeHistInfoDaliy> queryListByCode(String code, int startDate, int endDate, EsQueryPageReq queryPage,
+	private List<TradeHistInfoDaliy> queryListByCode(String code, int startDate, int endDate, EsQueryPageReq queryPage,
 			SortOrder s) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
