@@ -347,12 +347,17 @@ public class DaliyTradeHistroyService {
 //		log.info("db.size =" + (db != null ? db.size() : 0));
 //		log.info("queryPage.getPageSize=" + queryPage.getPageSize());
 //		log.info("SortOrder=" + s.toString());
-		if (db != null && db.size() == queryPage.getPageSize()) {
-			for (TradeHistInfoDaliy r : db) {
-				if (qfqDate != 0 && r.getQfqDate() < qfqDate) {// 存的数据是前复权日期版本小于redis，不是最新的
-					log.info("{},TradeHistInfoDaliy date={},QfqDate={}", code, r.getDate(), r.getQfqDate());
-					needFetch = true;
-					break;
+		if (db == null || db.size() <= 0 || (queryPage.getPageSize() < 9999 && db.size() != queryPage.getPageSize())) {
+			log.info(code + " needFetch=true");
+			needFetch = true;
+		} else {
+			if (qfqDate != 0) {
+				for (TradeHistInfoDaliy r : db) {
+					if (r.getQfqDate() < qfqDate) {// 存的数据是前复权日期版本小于redis，不是最新的
+						log.info("{},TradeHistInfoDaliy date={},QfqDate={}", code, r.getDate(), r.getQfqDate());
+						needFetch = true;
+						break;
+					}
 				}
 			}
 			// 数据是否正确
@@ -377,9 +382,6 @@ public class DaliyTradeHistroyService {
 					}
 				}
 			}
-		} else {
-			log.info(code + " needFetch=true");
-			needFetch = true;
 		}
 
 		if (needFetch) {

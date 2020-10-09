@@ -138,6 +138,12 @@
 			<version>1.5.0</version>
 		</dependency>
 
+		<!-- TA-Lib is a Technical Analysis Library. -->
+		<dependency>
+			<groupId>com.tictactec</groupId>
+			<artifactId>ta-lib</artifactId>
+			<version>0.4.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

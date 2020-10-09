@@ -1,12 +1,10 @@
 package com.stable.service.model.data;
 
-import java.util.Comparator;
 import java.util.List;
 
 import org.elasticsearch.search.sort.SortOrder;
 
 import com.stable.service.DaliyTradeHistroyService;
-import com.stable.utils.CurrencyUitl;
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockAvg;
@@ -152,8 +150,7 @@ public class LineAvgPrice {
 
 	// 各均线排列整齐
 	public boolean isAvgSort3T30() {
-		if (todayAv.getAvgPriceIndex3() >= todayAv.getAvgPriceIndex5()
-				&& todayAv.getAvgPriceIndex5() >= todayAv.getAvgPriceIndex10()
+		if (todayAv.getAvgPriceIndex5() >= todayAv.getAvgPriceIndex10()
 				&& todayAv.getAvgPriceIndex10() >= todayAv.getAvgPriceIndex20()
 				&& todayAv.getAvgPriceIndex20() >= todayAv.getAvgPriceIndex30()) {
 			return true;
@@ -171,8 +168,7 @@ public class LineAvgPrice {
 
 	public boolean isAvgSort20T30() {
 		// 20和30日均线>各均线
-		if (todayAv.getAvgPriceIndex3() >= todayAv.getAvgPriceIndex20()
-				&& todayAv.getAvgPriceIndex5() >= todayAv.getAvgPriceIndex20()
+		if (todayAv.getAvgPriceIndex5() >= todayAv.getAvgPriceIndex20()
 				&& todayAv.getAvgPriceIndex10() >= todayAv.getAvgPriceIndex20()
 				&& todayAv.getAvgPriceIndex20() >= todayAv.getAvgPriceIndex30()) {
 			return true;
@@ -180,23 +176,4 @@ public class LineAvgPrice {
 		return false;
 	}
 
-	// 横盘突破:需要看量
-	public boolean isRightUp() {
-		double maxAvg30 = clist30.stream().max(Comparator.comparingDouble(StockAvg::getAvgPriceIndex30)).get()
-				.getAvgPriceIndex30();
-		double minAvg30 = clist30.stream().min(Comparator.comparingDouble(StockAvg::getAvgPriceIndex30)).get()
-				.getAvgPriceIndex30();
-
-		double maxAvg3 = clist30.stream().max(Comparator.comparingDouble(StockAvg::getAvgPriceIndex3)).get()
-				.getAvgPriceIndex3();
-		double minAvg3 = clist30.stream().min(Comparator.comparingDouble(StockAvg::getAvgPriceIndex3)).get()
-				.getAvgPriceIndex3();
-
-		// 横盘突破:3日均线整幅10%以内， 30日均线振幅在5%以内
-		if (CurrencyUitl.topPrice(minAvg3, false) <= maxAvg3 && //
-				CurrencyUitl.topPrice(minAvg30, true) <= maxAvg30) {
-			return true;
-		}
-		return false;
-	}
 }

@@ -78,7 +78,7 @@ public class AvgService {
 				av.setCode(code);
 				av.setDate(Integer.valueOf(strs[1]));
 				av.setId();
-				av.setAvgPriceIndex3(Double.valueOf(strs[2]));
+//				av.setAvgPriceIndex3(Double.valueOf(strs[2]));
 				av.setAvgPriceIndex5(Double.valueOf(strs[3]));
 				av.setAvgPriceIndex10(Double.valueOf(strs[4]));
 				av.setAvgPriceIndex20(Double.valueOf(strs[5]));
@@ -134,7 +134,7 @@ public class AvgService {
 				av.setCode(code);
 				av.setDate(Integer.valueOf(strs[1]));
 				av.setId();
-				av.setAvgPriceIndex3(Double.valueOf(strs[2]));
+//				av.setAvgPriceIndex3(Double.valueOf(strs[2]));
 				av.setAvgPriceIndex5(Double.valueOf(strs[3]));
 				av.setAvgPriceIndex10(Double.valueOf(strs[4]));
 				av.setAvgPriceIndex20(Double.valueOf(strs[5]));

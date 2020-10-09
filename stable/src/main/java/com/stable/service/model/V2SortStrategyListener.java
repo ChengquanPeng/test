@@ -78,14 +78,12 @@ public class V2SortStrategyListener implements StrategyListener {
 									+ " 数据异常,today.getLow()<=0||today.getClose()<=0?");
 						}
 						// 一阳穿N线
-						if ((av.getAvgPriceIndex3() > today.getYesterdayPrice()
-								|| av.getAvgPriceIndex5() > today.getYesterdayPrice()
+						if ((av.getAvgPriceIndex5() > today.getYesterdayPrice()
 								|| av.getAvgPriceIndex10() > today.getYesterdayPrice()
 								|| av.getAvgPriceIndex20() > today.getYesterdayPrice()
 								|| av.getAvgPriceIndex30() > today.getYesterdayPrice()//
 						)// 昨日收盘价在任意均线之下
-								&& (today.getClose() > av.getAvgPriceIndex3()
-										&& today.getClose() > av.getAvgPriceIndex5()
+								&& (today.getClose() > av.getAvgPriceIndex5()
 										&& today.getClose() > av.getAvgPriceIndex10()
 										&& today.getClose() > av.getAvgPriceIndex20()
 										&& today.getClose() > av.getAvgPriceIndex30()//
@@ -118,11 +116,10 @@ public class V2SortStrategyListener implements StrategyListener {
 							}
 						} else {
 							log.info(
-									"code={},getYesterdayPrice={},getClose={},AvgPriceIndex3={},AvgPriceIndex5={},AvgPriceIndex10={}"
+									"code={},getYesterdayPrice={},getClose={},AvgPriceIndex5={},AvgPriceIndex10={}"
 											+ ",AvgPriceIndex20={},AvgPriceIndex30={}",
-									mc.getCode(), today.getYesterdayPrice(), today.getClose(), av.getAvgPriceIndex3(),
-									av.getAvgPriceIndex5(), av.getAvgPriceIndex10(), av.getAvgPriceIndex20(),
-									av.getAvgPriceIndex30());
+									mc.getCode(), today.getYesterdayPrice(), today.getClose(), av.getAvgPriceIndex5(),
+									av.getAvgPriceIndex10(), av.getAvgPriceIndex20(), av.getAvgPriceIndex30());
 							isOk = false;
 							dropOutMsg = "作日收盘价在任意均线之下,收盘在任意均线之上";
 						}

@@ -42,7 +42,7 @@ public class ImageService {
 	private String PRICE = "PRICE";
 	private String Volume = "Volume";
 
-	private final EsQueryPageReq all = new EsQueryPageReq(10000);
+	private final EsQueryPageReq all = new EsQueryPageReq(9999);
 	List<ImageChkGroup> list = new LinkedList<ImageChkGroup>();
 
 	@Autowired

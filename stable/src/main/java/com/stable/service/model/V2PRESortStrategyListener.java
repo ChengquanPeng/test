@@ -91,9 +91,8 @@ public class V2PRESortStrategyListener implements StrategyListener {
 								topPrice = CurrencyUitl.topPrice(today.getClose(), isST);
 							}
 							// 涨停价格可能超过各均线
-							if (topPrice > av.getAvgPriceIndex3() && topPrice > av.getAvgPriceIndex5()
-									&& topPrice > av.getAvgPriceIndex10() && topPrice > av.getAvgPriceIndex20()
-									&& topPrice > av.getAvgPriceIndex30()) {
+							if (topPrice > av.getAvgPriceIndex5() && topPrice > av.getAvgPriceIndex10()
+									&& topPrice > av.getAvgPriceIndex20() && topPrice > av.getAvgPriceIndex30()) {
 
 								if (linePrice.check3dayPrice(topPrice)) {// 涨停价：超过对比3天-价
 									isOk = true;

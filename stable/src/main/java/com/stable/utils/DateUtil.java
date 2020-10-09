@@ -139,6 +139,10 @@ public class DateUtil {
 		return format.format(date);
 	}
 
+	public static int getTodayIntYYYYMMDD() {
+		return Integer.valueOf(getTodayYYYYMMDD());
+	}
+
 	public static String getLastDayOfYearYYYYMMDD() {
 		int year = getCurYYYY();
 		return year + "1231";

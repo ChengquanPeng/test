@@ -270,13 +270,11 @@ public class HistTraceService {
 	private boolean isUpNline(boolean isV2, LineAvgPrice lineAvg, double yesterdayPrice, double closedPrice) {
 		if (isV2) {
 			StockAvg av = lineAvg.todayAv;
-			return (av.getAvgPriceIndex3() > yesterdayPrice || av.getAvgPriceIndex5() > yesterdayPrice
-					|| av.getAvgPriceIndex10() > yesterdayPrice || av.getAvgPriceIndex20() > yesterdayPrice
-					|| av.getAvgPriceIndex30() > yesterdayPrice//
+			return (av.getAvgPriceIndex5() > yesterdayPrice || av.getAvgPriceIndex10() > yesterdayPrice
+					|| av.getAvgPriceIndex20() > yesterdayPrice || av.getAvgPriceIndex30() > yesterdayPrice//
 			)// 4.昨日收盘价在任意均线之下
-					&& (closedPrice > av.getAvgPriceIndex3() && closedPrice > av.getAvgPriceIndex5()
-							&& closedPrice > av.getAvgPriceIndex10() && closedPrice > av.getAvgPriceIndex20()
-							&& closedPrice > av.getAvgPriceIndex30()//
+					&& (closedPrice > av.getAvgPriceIndex5() && closedPrice > av.getAvgPriceIndex10()
+							&& closedPrice > av.getAvgPriceIndex20() && closedPrice > av.getAvgPriceIndex30()//
 					);//
 		}
 		return true;
