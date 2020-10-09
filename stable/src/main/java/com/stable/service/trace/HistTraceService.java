@@ -81,8 +81,6 @@ public class HistTraceService {
 
 	public void sortv2(String startDate, String endDate) {
 		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-		String sysstart = DateUtil.getTodayYYYYMMDDHHMMSS();
-
 		if (StringUtils.isBlank(startDate)) {
 			startDate = "20200101";
 		}
@@ -114,7 +112,7 @@ public class HistTraceService {
 						for (double vb : volBases) {
 							for (int d : days) {
 								try {
-									reallymodelForJob(ver, sd, ed, d, vb, sysstart, batch);
+									reallymodelForJob(ver, sd, ed, d, vb, batch);
 									ThreadsUtil.sleepRandomSecBetween15And30();
 								} catch (Exception e) {
 									e.printStackTrace();
@@ -174,12 +172,12 @@ public class HistTraceService {
 	}
 
 	public synchronized void reallymodelForJob(String ver, String startDate, String endDate, int d, double vb,
-			String sysstart, int batch) {
-		reallymodelForRealTime(ver, startDate, endDate, d, vb, sysstart, batch);
+			int batch) {
+		reallymodelForRealTime(ver, startDate, endDate, d, vb, batch);
 	}
 
-	public void reallymodelForRealTime(String ver, String startDate, String endDate, int d, double vb, String sysstart,
-			int batch) {
+	public void reallymodelForRealTime(String ver, String startDate, String endDate, int d, double vb, int batch) {
+		String sysstart = DateUtil.getTodayYYYYMMDDHHMMSS();
 		boolean isV2 = "v2".equals(ver);
 		String version = (isV2 ? "v2" : "v3");
 		int day = d + 1;
@@ -381,6 +379,12 @@ public class HistTraceService {
 	}
 
 	private void stat(String filepath, TraceSortv2StatVo stat, List<TraceSortv2Vo> samples) {
+		// 日期排序
+		samples.sort(new Comparator<TraceSortv2Vo>() {
+			public int compare(TraceSortv2Vo o1, TraceSortv2Vo o2) {
+				return o1.getDate() - o2.getDate();
+			}
+		});
 		StringBuffer sb = new StringBuffer();
 		for (TraceSortv2Vo t1 : samples) {
 			sb.append(t1.toExcel()).append(FileWriteUitl.LINE_FILE);

@@ -25,7 +25,6 @@ public class RetraceController {
 		JsonResult r = new JsonResult();
 		try {
 			int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-			String sysstart = DateUtil.getTodayYYYYMMDDHHMMSS();
 			if (StringUtils.isBlank(startDate)) {
 				startDate = "20200101";
 			}
@@ -33,7 +32,7 @@ public class RetraceController {
 				endDate = DateUtil.getTodayYYYYMMDD();
 			}
 			log.info("startDate={},endDate={}", startDate, endDate);
-			histTraceService.reallymodelForJob(v, startDate, endDate, days, vb, sysstart, batch);
+			histTraceService.reallymodelForJob(v, startDate, endDate, days, vb, batch);
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
