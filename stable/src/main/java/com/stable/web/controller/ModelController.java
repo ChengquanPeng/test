@@ -29,6 +29,24 @@ public class ModelController {
 	/**
 	 * 执行模型
 	 */
+	@RequestMapping(value = "/reset", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> reset() {
+		JsonResult r = new JsonResult();
+		try {
+			codeModelService.reset();
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+
+	}
+
+	/**
+	 * 执行模型
+	 */
 	@RequestMapping(value = "/run", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> run(String startDate, String endDate) {
 		JsonResult r = new JsonResult();

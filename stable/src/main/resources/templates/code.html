@@ -23,7 +23,7 @@ trtd{
 <body>
 	<br/>------------------------------------------------------------<br/>
 	代码：<span th:text="${code}"></span>-<span th:text="${codeName}"></span>-分数：<b><span th:text="${codedetail.score}"></span></b>
-	-评分变化：<b><span th:text="${codedetail.upScore}"></span></b>-更新日期:<span th:text="${codedetail.udpateDate}"></span>
+	-评分变化：<b><span th:text="${codedetail.upScore}"></span></b>-最后更新日期:<span th:text="${codedetail.udpateDate}"></span>
 	<br/>------------------------------------------------------------<br/>
 	概念：<span th:each="cp: ${concepts}"><span th:text="${cp.conceptName}"></span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
 	<div><a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}}">同花顺基本信息=></a></div>

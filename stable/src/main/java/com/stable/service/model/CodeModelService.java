@@ -1,8 +1,10 @@
 package com.stable.service.model;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -101,7 +103,7 @@ public class CodeModelService {
 					log.info("CodeModel processing date={}", redisDate);
 					if (tradeCalService.isOpen(redisDate)) {
 						log.info("processing date={}", redisDate);
-						run(isJob, redisDate);
+						run(redisDate);
 					} else {
 						log.info("{}非交易日", redisDate);
 					}
@@ -121,7 +123,7 @@ public class CodeModelService {
 					log.info("{}非交易日", today);
 					return;
 				}
-				run(isJob, today);
+				run(today);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -130,27 +132,31 @@ public class CodeModelService {
 		}
 	}
 
-	private synchronized void run(boolean isJob, int treadeDate) {
+	private synchronized void run(int treadeDate) {
 		int updatedate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-		List<CodeBaseModel> listm = new LinkedList<CodeBaseModel>();
-		List<CodeBaseModelHist> listh = new LinkedList<CodeBaseModelHist>();
+		List<CodeBaseModel> listLast = new LinkedList<CodeBaseModel>();
+		List<CodeBaseModelHist> listHist = new LinkedList<CodeBaseModelHist>();
 		int oneYearAgo = DateUtil.getPreYear(treadeDate);
 		int nextYear = DateUtil.getNextYear(treadeDate);
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
+		Map<String, CodeBaseModel> histMap = getALLForMap();
 		for (StockBaseInfo s : codelist) {
 			try {
-				getSorce(s, treadeDate, oneYearAgo, nextYear, updatedate, listm, listh, true, null);
+				getSorce(s, treadeDate, oneYearAgo, nextYear, updatedate, listLast, listHist, true, null,
+						histMap.get(s.getCode()));
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
 			}
 		}
-		if (listm.size() > 0) {
-			codeBaseModelDao.saveAll(listm);
-			codeBaseModelHistDao.saveAll(listh);
+		if (listLast.size() > 0) {
+			codeBaseModelDao.saveAll(listLast);
+		}
+		if (listHist.size() > 0) {
+			codeBaseModelHistDao.saveAll(listHist);
 		}
 		log.info("CodeModel 模型执行完成");
-		WxPushUtil
-				.pushSystem1("Seq5=> CODE-MODEL " + treadeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listm.size());
+		WxPushUtil.pushSystem1(
+				"Seq5=> CODE-MODEL " + treadeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listHist.size());
 	}
 
 	public synchronized String run(String code) {
@@ -160,9 +166,11 @@ public class CodeModelService {
 		int oneYearAgo = DateUtil.getPreYear(updatedate);
 		int nextYear = DateUtil.getNextYear(updatedate);
 		StringBuffer res = new StringBuffer();
+//		Map<String, CodeBaseModel> histMap = getALLForMap();
+		CodeBaseModel lastOne = getLastOneByCode(code);
 		try {
 			StockBaseInfo s = JSON.parseObject(redisUtil.get(code), StockBaseInfo.class);
-			getSorce(s, updatedate, oneYearAgo, nextYear, updatedate, listm, listh, false, res);
+			getSorce(s, updatedate, oneYearAgo, nextYear, updatedate, listm, listh, false, res, lastOne);
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, "", "", "");
 		}
@@ -170,11 +178,10 @@ public class CodeModelService {
 	}
 
 	private void getSorce(StockBaseInfo s, int treadeDate, int oneYearAgo, int nextYear, int updatedate,
-			List<CodeBaseModel> listm, List<CodeBaseModelHist> listh, boolean isJob, StringBuffer sb) {
-
+			List<CodeBaseModel> listLast, List<CodeBaseModelHist> listHist, boolean isJob, StringBuffer sb,
+			CodeBaseModel lastOne) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
-		CodeBaseModel lastOne = getLastOneByCode(code);
 		// 财务
 		FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code, treadeDate);
 		if (fbi == null) {
@@ -389,22 +396,22 @@ public class CodeModelService {
 		newOne.setScore(finals);
 		newOne.setUdpateDate(updatedate);
 
-		boolean saveTodb = true;
+		boolean saveHist = true;
 		if (lastOne != null) {// 评分变化和季度
 			if (lastOne.getScore() == newOne.getScore() && lastOne.getCurrQuarter() == newOne.getCurrQuarter()) {
-				saveTodb = false;
+				saveHist = false;
 			} else {
 				newOne.setUpScore(finals - lastOne.getScore());
 			}
 		}
-		if (saveTodb) {
+		listLast.add(newOne);
+		if (saveHist) {
 			// copy history
 			CodeBaseModelHist hist = new CodeBaseModelHist();
 			BeanCopy.copy(newOne, hist);
 			newOne.setId(code);
 			hist.setId(code + treadeDate);
-			listm.add(newOne);
-			listh.add(hist);
+			listHist.add(hist);
 		}
 	}
 
@@ -453,14 +460,22 @@ public class CodeModelService {
 		return null;
 	}
 
-	public List<CodeBaseModel> getListByCode(int date, EsQueryPageReq querypage) {
+	public Map<String, CodeBaseModel> getALLForMap() {
+		List<CodeBaseModel> list = getALLForList();
+		Map<String, CodeBaseModel> map = new HashMap<String, CodeBaseModel>();
+		for (CodeBaseModel c : list) {
+			map.put(c.getCode(), c);
+		}
+		return map;
+	}
+
+	private List<CodeBaseModel> getALLForList() {
+		EsQueryPageReq querypage = new EsQueryPageReq(9999);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("date", date));
-		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
-		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).withSort(sort).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
 
 		Page<CodeBaseModel> page = codeBaseModelDao.search(sq);
 		if (page != null && !page.isEmpty()) {
@@ -468,6 +483,15 @@ public class CodeModelService {
 		}
 		log.info("no records CodeBaseModels");
 		return null;
+	}
+
+	// 重设分值为0为重跑
+	public void reset() {
+		List<CodeBaseModel> list = getALLForList();
+		for (CodeBaseModel c : list) {
+			c.setScore(0);
+		}
+		codeBaseModelDao.saveAll(list);
 	}
 
 	public List<CodeBaseModelHist> getListByCode(String code, EsQueryPageReq querypage) {
