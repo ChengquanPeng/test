@@ -23,6 +23,7 @@ public class StrongService {
 //	"399001.SZ","深证成指",
 //	"399005.SZ","中小板指",
 //	"399006.SZ","创业板指",
+	private int defaultDate = 20100101;
 	private final String INDEX_SH = "000001.SH";
 	private final String INDEX_SZ_MAIN = "399001.SZ";
 	private final String INDEX_SZ_CYB = "399006.SZ";
@@ -51,7 +52,11 @@ public class StrongService {
 	private Map<Integer, Double> M_SZ_CYB = new ConcurrentHashMap<Integer, Double>();
 	private Map<Integer, Double> M_SH_KCB = new ConcurrentHashMap<Integer, Double>();
 
-	public synchronized Map<Integer, Double> getIndexMap(String code, int chkDate, int startedDate) {
+	public Double getIndexPrice(String code, int chkDate) {
+		return getIndexMap(code, chkDate).get(chkDate);
+	}
+
+	public Map<Integer, Double> getIndexMap(String code, int chkDate) {
 		String index = this.getIndex(code);
 		Map<Integer, Double> cache = null;
 		switch (index) {
@@ -72,6 +77,7 @@ public class StrongService {
 		if (id != null) {
 			return cache;
 		}
+		int startedDate = chkDate < defaultDate ? chkDate : defaultDate;
 		JSONArray array = tushareSpider.getIndexDaily(index, startedDate);
 		if (array == null || array.size() <= 0) {
 			log.warn("未获取到tushareSpider.getIndexDaily(index)={}", index);

@@ -26,6 +26,7 @@ import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.data.LinePrice;
 import com.stable.service.model.data.LineVol;
+import com.stable.service.model.data.StrongService;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -67,6 +68,8 @@ public class HistTraceService {
 	private EsHistTraceDao esHistTraceDao;
 	@Autowired
 	private FinanceService financeService;
+	@Autowired
+	private StrongService strongService;
 
 	private String FILE_FOLDER = "/my/free/pvhtml/";
 
@@ -300,6 +303,7 @@ public class HistTraceService {
 			TraceSortv2Vo t1 = new TraceSortv2Vo();
 			t1.setCode(code);
 			t1.setDate(date);
+			t1.setMarketIndex(strongService.getIndexPrice(code, date));
 			//
 			List<TradeHistInfoDaliy> dailyList2 = new ArrayList<TradeHistInfoDaliy>();
 			// date=已收盘的日期

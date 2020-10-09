@@ -335,7 +335,7 @@ public class TushareSpider {
 	 */
 	private final String index_daily_fields = "trade_date,pct_chg,vol,amount";
 
-	public JSONArray getIndexDaily(String ts_code, int startedDate) {
+	public synchronized JSONArray getIndexDaily(String ts_code, int startedDate) {
 		try {
 			JSONObject json = new JSONObject();
 			json.put("api_name", "index_daily");

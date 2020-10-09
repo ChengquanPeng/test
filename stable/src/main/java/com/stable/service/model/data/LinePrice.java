@@ -28,7 +28,6 @@ public class LinePrice {
 	private List<TradeHistInfoDaliy> listD30;
 	private StockAvg todayAv;
 	private StrongService strongService;
-	private int lastDate;
 	private int date;
 	private String code;
 	private DaliyBasicInfo today;
@@ -36,13 +35,12 @@ public class LinePrice {
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 
 	public LinePrice(StrongService strongService, ModelContext cxt, List<DaliyBasicInfo> dailyList, StockAvg todayAv,
-			int lastDate, DaliyTradeHistroyService daliyTradeHistroyService) {
+			DaliyTradeHistroyService daliyTradeHistroyService) {
 		this.daliyTradeHistroyService = daliyTradeHistroyService;
 		this.cxt = cxt;
 		this.dailyList = dailyList;
 		this.todayAv = todayAv;
 		this.strongService = strongService;
-		this.lastDate = lastDate;
 		today = cxt.getToday();
 
 		code = cxt.getCode();
@@ -74,7 +72,7 @@ public class LinePrice {
 			return sr;
 		}
 		int sortStrong = 0;
-		Map<Integer, Double> cache = strongService.getIndexMap(cxt.getCode(), cxt.getDate(), lastDate);
+		Map<Integer, Double> cache = strongService.getIndexMap(cxt.getCode(), cxt.getDate());
 		int index = 5;
 		double base = 0d;
 		double stock = 0d;
