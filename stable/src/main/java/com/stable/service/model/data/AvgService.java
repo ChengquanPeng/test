@@ -50,6 +50,7 @@ public class AvgService {
 	private List<StockAvg> getSMA30(String code, int startDate, int endDate) {
 		List<StockAvg> rs = qfqUtil.getSMA5_30(code, startDate, endDate);
 		if (rs != null) {
+			log.info("SMA-30 -> code={},startDate={},endDate={},size={}", code, startDate, endDate, rs.size());
 			return rs;
 		} else {
 			rs = getDPriceAvgFromTushar(code, startDate, endDate);
@@ -115,7 +116,6 @@ public class AvgService {
 		}
 	}
 
-	EsQueryPageReq queryPage300 = new EsQueryPageReq(300);
 	EsQueryPageReq queryPage30 = new EsQueryPageReq(30);
 
 	/**
@@ -126,8 +126,9 @@ public class AvgService {
 	 */
 	public List<StockAvg> queryListByCodeForModelWithLastQfqAnd30Records(String code, int date) {
 		int qfqDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
-		List<StockAvg> db = queryListByCodeForModel(code, qfqDate, queryPage30);
+		List<StockAvg> db = queryListByCodeForModel(code, date, queryPage30);
 		boolean needFetch = false;
+		List<TradeHistInfoDaliy> tradedaliylist = null;
 		if (db != null && db.size() == 30) {
 			for (StockAvg r : db) {
 				if (qfqDate != 0 && r.getLastDividendDate() < qfqDate) {// 存的数据是前复权日期版本小于redis，不是最新的
@@ -137,8 +138,8 @@ public class AvgService {
 			}
 			if (!needFetch) {
 				// check 是否是正确的连续30天的数据
-				List<TradeHistInfoDaliy> tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0,
-						date, queryPage30, SortOrder.DESC);
+				tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, queryPage30,
+						SortOrder.DESC);
 				if (tradedaliylist != null) {
 					if (tradedaliylist.get(0).getDate() == db.get(0).getDate()
 							&& tradedaliylist.get(29).getDate() == db.get(29).getDate()) {
@@ -156,10 +157,13 @@ public class AvgService {
 		}
 
 		if (needFetch) {
-			List<TradeHistInfoDaliy> tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
-					queryPage300, SortOrder.ASC);
+			if (tradedaliylist == null) {
+				// 可能在上面已经初始化。
+				tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, queryPage30,
+						SortOrder.DESC);
+			}
 			if (tradedaliylist != null) {
-				List<StockAvg> result = getSMA30(code, tradedaliylist.get(0).getDate(), date);
+				List<StockAvg> result = getSMA30(code, tradedaliylist.get(tradedaliylist.size() - 1).getDate(), date);
 				if (result != null && result.size() > 0) {
 					stockAvgDao.saveAll(result);
 				}

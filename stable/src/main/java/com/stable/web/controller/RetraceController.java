@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.trace.HistTraceService;
 import com.stable.utils.DateUtil;
-import com.stable.utils.ThreadsUtil;
 import com.stable.vo.http.JsonResult;
 
 import lombok.extern.log4j.Log4j2;
@@ -56,7 +55,7 @@ public class RetraceController {
 				}
 			}).start();
 
-			ThreadsUtil.sleepRandomSecBetween5And15();
+//			ThreadsUtil.sleepRandomSecBetween5And15();
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {

@@ -114,8 +114,8 @@ public class HistTraceService {
 						for (double vb : volBases) {
 							for (int d : days) {
 								try {
-									ThreadsUtil.sleepRandomSecBetween15And30();
 									reallymodelForJob(ver, sd, ed, d, vb, sysstart, batch);
+									ThreadsUtil.sleepRandomSecBetween15And30();
 								} catch (Exception e) {
 									e.printStackTrace();
 									WxPushUtil.pushSystem1(
