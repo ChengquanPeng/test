@@ -144,7 +144,7 @@ public class HistTraceService {
 						.queryListByCodeForModel(code, date, queryPage250).getContent();
 				LineVol lineVol = new LineVol(dailyList);
 				// 缩量
-				if (vb == 0 || lineVol.isShortVolV2(vb)) {// 2.没有超过5天均量1.3倍,今天的量比昨天高
+				if (vb == 0 || lineVol.isShortVolV2(vb)) {// 2.没有超过5天均量1.3倍
 					LinePrice linePrice = new LinePrice(code, date, daliyTradeHistroyService);
 
 					boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%

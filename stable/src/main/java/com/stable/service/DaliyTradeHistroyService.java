@@ -184,7 +184,7 @@ public class DaliyTradeHistroyService {
 				String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
 				if (StringUtils.isBlank(yyyymmdd) || (!preDate.equals(yyyymmdd) && !yyyymmdd.equals(today)
 						&& Integer.valueOf(yyyymmdd) < Integer.valueOf(today))) {//
-					log.info("代码code:{}重新获取记录", code);
+					log.info("代码code:{}重新获取记录->redis-last:{},preDate:{},today:{}", code, yyyymmdd, preDate, today);
 					String json = redisUtil.get(d.getCode());
 					// 第一次上市或者除权
 					StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
