@@ -35,23 +35,40 @@ public class LineVol {
 		return false;
 	}
 
-	public boolean isShortVolV2(double base) {
+	public boolean isHighVol() {
 		List<DaliyBasicInfo> localdailyList = new LinkedList<DaliyBasicInfo>();
 		localdailyList.add(dailyList.get(0));
 		localdailyList.add(dailyList.get(1));
 		localdailyList.add(dailyList.get(2));
 		localdailyList.add(dailyList.get(3));
 		localdailyList.add(dailyList.get(4));
-		// 均值x1.3
-		long max = Double
-				.valueOf(localdailyList.stream().mapToLong(DaliyBasicInfo::getVol).sum() / localdailyList.size() * base)
-				.longValue();
+		// 总量
+		long total = 0;
 		for (DaliyBasicInfo d : localdailyList) {
-			if (d.getVol() > max) {
-				return false;
-			}
+			total += d.getVol();
 		}
-		return true;
+		// 均值*基数
+		long chkVol = Double.valueOf(total / 5.0 * 1.8).longValue();
+
+		return localdailyList.get(0).getVol() >= chkVol;
+	}
+
+	public boolean isShortVol(double base) {
+		List<DaliyBasicInfo> localdailyList = new LinkedList<DaliyBasicInfo>();
+		localdailyList.add(dailyList.get(0));
+		localdailyList.add(dailyList.get(1));
+		localdailyList.add(dailyList.get(2));
+		localdailyList.add(dailyList.get(3));
+		localdailyList.add(dailyList.get(4));
+		// 总量
+		long total = 0;
+		for (DaliyBasicInfo d : localdailyList) {
+			total += d.getVol();
+		}
+		// 均值*基数
+		long chkVol = Double.valueOf(total / 5.0 * base).longValue();
+
+		return localdailyList.get(0).getVol() < chkVol;
 	}
 
 }

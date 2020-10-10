@@ -106,7 +106,7 @@ public class HistTraceService {
 				try {
 					String[] versions = { "v2", "v3" };
 					int[] days = { 2, 3 };
-					double[] volBases = { 0, 1.2, 1.3 };
+					double[] volBases = { 0, 1.2, 1.3, 2 };
 //					int[] oneYearups = { 1 };// 1年未大涨的（TODO,第一波是否涨超30%？）
 					for (String ver : versions) {
 						for (double vb : volBases) {
@@ -143,10 +143,9 @@ public class HistTraceService {
 				List<DaliyBasicInfo> dailyList = daliyBasicHistroyService
 						.queryListByCodeForModel(code, date, queryPage250).getContent();
 				LineVol lineVol = new LineVol(dailyList);
-				// 是否检查量或缩量
-				if (vb == 0 || lineVol.isShortVolV2(vb)) {// 2.没有超过5天均量1.3倍
+				// 是否检查量(vb==0).或缩量(),或放量(vb==2)
+				if (vb == 0 || (vb != 2 && lineVol.isShortVol(vb) || (vb == 2 && (lineVol.isHighVol())))) {
 					LinePrice linePrice = new LinePrice(code, date, daliyTradeHistroyService);
-
 					boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%
 //					boolean b5 = linePrice.check3dayPriceV2();// 6.对比3天-价
 					boolean b4 = linePrice.isLowClosePriceToday(todayChangeRate, yesterdayPrice, closedPrice,
