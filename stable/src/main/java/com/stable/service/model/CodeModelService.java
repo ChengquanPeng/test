@@ -232,10 +232,8 @@ public class CodeModelService {
 			newOne.setFloatDate(sf.getFloatDate());// 解禁日期
 			newOne.setFloatRatio(sf.getFloatRatio());// 流通股份占总股本比率
 		}
-		int currRptDate = DateUtil.getDate(newOne.getCurrYear(), newOne.getCurrQuarter());
 		// 业绩快报(准确的)
-		FinYjkb yjkb = financeService.getLastFinaceKbByReportDate(currRptDate);
-		FinYjyg yjyg = financeService.getLastFinaceYgByReportDate(currRptDate);
+		FinYjkb yjkb = financeService.getLastFinaceKbByReportDate(code);
 		boolean hasKb = false;
 
 		newOne.setForestallYear(0);
@@ -246,7 +244,8 @@ public class CodeModelService {
 		double ystbzz = fbi.getYyzsrtbzz();
 		double jltbzz = fbi.getGsjlrtbzz();
 
-		if (yjkb != null) {// 业绩快报(准确的)
+		// 业绩快报(准确的)
+		if (yjkb != null) {
 			if ((newOne.getCurrYear() == yjkb.getYear() && newOne.getCurrQuarter() < yjkb.getQuarter())// 同一年，季度大于
 					|| (yjkb.getYear() > newOne.getCurrYear())) {// 不同年
 				newOne.setForestallYear(yjkb.getYear());
@@ -254,23 +253,26 @@ public class CodeModelService {
 				newOne.setForestallIncomeTbzz(yjkb.getYyzsrtbzz());
 				newOne.setForestallProfitTbzz(yjkb.getJlrtbzz());
 				hasKb = true;
-				if (yjkb.getYyzsrtbzz() != 0) {
+				if (yjkb.getYyzsrtbzz() != 0) {// 可能出现0的数据,则按财报进行计算
 					ystbzz = yjkb.getYyzsrtbzz();
 				}
-				if (yjkb.getJlrtbzz() != 0) {
+				if (yjkb.getJlrtbzz() != 0) {// 可能出现0的数据,则按财报进行计算
 					jltbzz = yjkb.getJlrtbzz();
 				}
 			}
 		}
-		// 业绩预告(类似天气预报，可能不准)
-		if (!hasKb && yjyg != null) {
-			if ((newOne.getCurrYear() == yjyg.getYear() && newOne.getCurrQuarter() < yjyg.getQuarter())// 同一年，季度大于
-					|| (yjyg.getYear() > newOne.getCurrYear())) {// 不同年
-				newOne.setForestallYear(yjyg.getYear());
-				newOne.setForestallQuarter(yjyg.getQuarter());
-				newOne.setForestallProfitTbzz(yjyg.getJlrtbzz());
-				if (yjyg.getJlrtbzz() != 0) {
-					jltbzz = yjyg.getJlrtbzz();
+		// 业绩预告(类似天气预报,可能不准)
+		if (!hasKb) {
+			FinYjyg yjyg = financeService.getLastFinaceYgByReportDate(code);
+			if (yjyg != null) {
+				if ((newOne.getCurrYear() == yjyg.getYear() && newOne.getCurrQuarter() < yjyg.getQuarter())// 同一年,季度大于
+						|| (yjyg.getYear() > newOne.getCurrYear())) {// 不同年
+					newOne.setForestallYear(yjyg.getYear());
+					newOne.setForestallQuarter(yjyg.getQuarter());
+					newOne.setForestallProfitTbzz(yjyg.getJlrtbzz());
+					if (yjyg.getJlrtbzz() != 0) {// 可能出现0的数据,则按财报进行计算
+						jltbzz = yjyg.getJlrtbzz();
+					}
 				}
 			}
 		}
@@ -404,12 +406,12 @@ public class CodeModelService {
 				newOne.setUpScore(finals - lastOne.getScore());
 			}
 		}
+		newOne.setId(code);
 		listLast.add(newOne);
 		if (saveHist) {
 			// copy history
 			CodeBaseModelHist hist = new CodeBaseModelHist();
 			BeanCopy.copy(newOne, hist);
-			newOne.setId(code);
 			hist.setId(code + treadeDate);
 			listHist.add(hist);
 		}

@@ -287,11 +287,11 @@ public class FinanceService {
 		return null;
 	}
 
-	public FinYjkb getLastFinaceKbByReportDate(int currRptDate) {
+	public FinYjkb getLastFinaceKbByReportDate(String code) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.rangeQuery("date").gt(currRptDate));
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.matchPhraseQuery("isValid", 1));
-		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.ASC);
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
@@ -303,11 +303,11 @@ public class FinanceService {
 		return null;
 	}
 
-	public FinYjyg getLastFinaceYgByReportDate(int currRptDate) {
+	public FinYjyg getLastFinaceYgByReportDate(String code) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.rangeQuery("date").gt(currRptDate));
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.matchPhraseQuery("isValid", 1));
-		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.ASC);
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
