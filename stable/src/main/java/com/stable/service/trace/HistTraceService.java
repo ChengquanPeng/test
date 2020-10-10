@@ -137,7 +137,7 @@ public class HistTraceService {
 	private TraceSortv2Vo runinner(String code, int date, double min, double max, int day, double vb, boolean isV2,
 			double todayChangeRate, double yesterdayPrice, double closedPrice, double highPrice) {
 		try {
-			log.info("code={},date={}", code, date);
+			// log.info("code={},date={}", code, date);
 			// 1.上涨且未超过8%
 			if (todayChangeRate >= min && todayChangeRate <= max) {
 				List<DaliyBasicInfo> dailyList = daliyBasicHistroyService
@@ -205,6 +205,7 @@ public class HistTraceService {
 				cnt.countDown();
 				continue;
 			}
+			log.info("retracing code={}", code);
 			try {
 				TasksWorkerModel.add(code, new TasksWorkerModelRunnable() {
 					public void running() {
