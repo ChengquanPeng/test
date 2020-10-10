@@ -69,50 +69,46 @@ public class V2PRESortStrategyListener implements StrategyListener {
 			int gnScore = 0;
 			// 均线
 			try {
-				if (lineAvgPrice.feedData()) {
-					if (lineAvgPrice.isWhiteHorseV2()) {
-						setDetail(detailDesc, "白马？");
-						mv.setWhiteHorse(1);// 白马？
-						DaliyBasicInfo today = mc.getToday();
-						StockAvg av = lineAvgPrice.todayAv;
-						String code = mc.getCode();
+				if (lineAvgPrice.isWhiteHorseV2()) {
+					setDetail(detailDesc, "白马？");
+					mv.setWhiteHorse(1);// 白马？
+					DaliyBasicInfo today = mc.getToday();
+					StockAvg av = lineAvgPrice.todayAv;
+					String code = mc.getCode();
 
-						// 收盘在任意均线之下，进入第二日监听列表
+					// 收盘在任意均线之下，进入第二日监听列表
 //						if (av.getAvgPriceIndex3() > today.getClose() || av.getAvgPriceIndex5() > today.getClose()
 //								|| av.getAvgPriceIndex10() > today.getClose()
 //								|| av.getAvgPriceIndex20() > today.getClose()
 //								|| av.getAvgPriceIndex30() > today.getClose()) {
-						if (linePrice.checkPriceBack6dayWhitTodayV2()) {// 回调过超10%
-							double topPrice = 0.0;
-							if (StockAType.isTop20(code, mc.getDate())) {// 科创板20%涨跌幅
-								topPrice = CurrencyUitl.topPrice20(today.getClose());
-							} else {
-								boolean isST = stockBasicService.getCodeName(code).contains("ST");
-								topPrice = CurrencyUitl.topPrice(today.getClose(), isST);
-							}
-							// 涨停价格可能超过各均线
-							if (topPrice > av.getAvgPriceIndex5() && topPrice > av.getAvgPriceIndex10()
-									&& topPrice > av.getAvgPriceIndex20() && topPrice > av.getAvgPriceIndex30()) {
+					if (linePrice.checkPriceBack6dayWhitTodayV2()) {// 回调过超10%
+						double topPrice = 0.0;
+						if (StockAType.isTop20(code, mc.getDate())) {// 科创板20%涨跌幅
+							topPrice = CurrencyUitl.topPrice20(today.getClose());
+						} else {
+							boolean isST = stockBasicService.getCodeName(code).contains("ST");
+							topPrice = CurrencyUitl.topPrice(today.getClose(), isST);
+						}
+						// 涨停价格可能超过各均线
+						if (topPrice > av.getAvgPriceIndex5() && topPrice > av.getAvgPriceIndex10()
+								&& topPrice > av.getAvgPriceIndex20() && topPrice > av.getAvgPriceIndex30()) {
 
-								if (linePrice.check3dayPrice(topPrice)) {// 涨停价：超过对比3天-价
-									isOk = true;
-								} else {
-									dropOutMsg = "涨停价格未超过前3日最高价";
-								}
+							if (linePrice.check3dayPrice(topPrice)) {// 涨停价：超过对比3天-价
+								isOk = true;
 							} else {
-								dropOutMsg = "涨停价格未超过各均线";
+								dropOutMsg = "涨停价格未超过前3日最高价";
 							}
 						} else {
-							dropOutMsg = "checkPriceBack6dayWhitToday";
+							dropOutMsg = "涨停价格未超过各均线";
 						}
+					} else {
+						dropOutMsg = "checkPriceBack6dayWhitToday";
+					}
 //						} else {
 //							dropOutMsg = "收盘不在任意均线之下";
 //						}
-					} else {
-						dropOutMsg = "非白马";
-					}
 				} else {
-					dropOutMsg = "未获取到均价";
+					dropOutMsg = "非白马";
 				}
 			} catch (Exception e) {
 				isOk = false;

@@ -65,26 +65,21 @@ public class V3SortStrategyListener implements StrategyListener {
 
 			// 均线
 			try {
-				if (lineAvgPrice.feedData()) {
-					if (lineAvgPrice.isWhiteHorseV2()) {
-						setDetail(detailDesc, "白马？");
-						mv.setWhiteHorse(1);// 白马？
-						DaliyBasicInfo today = mc.getToday();
-						if (today.getLow() <= 0 || today.getClose() <= 0) {
-							throw new RuntimeException(mc.getCode() + " " + mc.getDate()
-									+ " 数据异常,today.getLow()<=0||today.getClose()<=0?");
-						}
-						// 缩量
-						// 上涨
-						//
-
-					} else {
-						isOk = false;
-						dropOutMsg = "非白马";
+				if (lineAvgPrice.isWhiteHorseV2()) {
+					setDetail(detailDesc, "白马？");
+					mv.setWhiteHorse(1);// 白马？
+					DaliyBasicInfo today = mc.getToday();
+					if (today.getLow() <= 0 || today.getClose() <= 0) {
+						throw new RuntimeException(
+								mc.getCode() + " " + mc.getDate() + " 数据异常,today.getLow()<=0||today.getClose()<=0?");
 					}
+					// 缩量
+					// 上涨
+					//
+
 				} else {
 					isOk = false;
-					dropOutMsg = "未获取到均价-30D";
+					dropOutMsg = "非白马";
 				}
 			} catch (Exception e) {
 				isOk = false;

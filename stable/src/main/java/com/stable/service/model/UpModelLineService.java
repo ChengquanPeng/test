@@ -173,6 +173,11 @@ public class UpModelLineService {
 			CountDownLatch cunt = new CountDownLatch(allOnlieList.size());
 			for (int i = 0; i < allOnlieList.size(); i++) {
 				StockBaseInfo sbi = allOnlieList.get(i);
+				if (!stockBasicService.online1Year(sbi.getCode(), treadeDate)) {
+					log.info("{} 上市不足1年", sbi.getCode());
+					cunt.countDown();
+					continue;
+				}
 				DaliyBasicInfo d = todayDailyBasicMap.get(sbi.getCode());
 				if (d == null) {
 					log.info("{} 在{} 没进行交易,用历史数据再跑1次", sbi.getCode(), treadeDate);
@@ -242,39 +247,29 @@ public class UpModelLineService {
 	}
 
 	private void runModels(ModelContext cxt, List<StrategyListener> models, int treadeDate) {
-		boolean isOk = true;
-		String code = cxt.getCode();
 		// log.info("model version processing for code:{}", code);
-		if (!stockBasicService.online1Year(code, treadeDate)) {
-			cxt.setBaseDataOk("Online 上市不足1年");
-			isOk = false;
-		}
-		List<DaliyBasicInfo> dailyList = null;
-		if (isOk) {
-			dailyList = getBasicList(cxt);
-			if (dailyList == null || dailyList.size() < 5) {
-				cxt.setBaseDataOk("每日指标记录小于5条,checkStrong get size<5");
-				isOk = false;
-			}
+		List<DaliyBasicInfo> dailyList = getBasicList(cxt);
+		if (dailyList == null || dailyList.size() < 5) {
+			ErrorLogFileUitl.writeError(new RuntimeException("每日指标记录小于5条,checkStrong get size<5"), cxt.getCode(), "",
+					"");
+			return;
 		}
 		LineAvgPrice lineAvgPrice = null;
 		LinePrice linePrice = null;
 		LineVol lineVol = null;
 		LineTickData lineTickData = null;
-		if (isOk) {
 
-			cxt.setToday(dailyList.get(0));// 包含全部信息-来自ES
-			// 均价
-			lineAvgPrice = new LineAvgPrice(avgService, cxt, dailyList, daliyTradeHistroyService);
-			// 1强势:次数和差值:3/5/10/20/120/250天
-			linePrice = new LinePrice(strongService, cxt, dailyList, lineAvgPrice.todayAv, daliyTradeHistroyService);
-			lineVol = new LineVol(dailyList);
-			// 2交易方向:次数和差值:3/5/10/20/120/250天
-			// 3程序单:次数:3/5/10/20/120/250天
-			lineTickData = new LineTickData(cxt, dailyList, tickDataService);
-			lineTickData.tickDataInfo();// TickData数据
-			cxt.setPriceIndex(this.priceIndex(cxt.getToday()));
-		}
+		cxt.setToday(dailyList.get(0));// 包含全部信息-来自ES
+		// 均价
+		lineAvgPrice = new LineAvgPrice(avgService, cxt);
+		// 1强势:次数和差值:3/5/10/20/120/250天
+		linePrice = new LinePrice(strongService, cxt, dailyList, lineAvgPrice.todayAv, daliyTradeHistroyService);
+		lineVol = new LineVol(dailyList);
+		// 2交易方向:次数和差值:3/5/10/20/120/250天
+		// 3程序单:次数:3/5/10/20/120/250天
+		lineTickData = new LineTickData(cxt, dailyList, tickDataService);
+		lineTickData.tickDataInfo();// TickData数据
+		cxt.setPriceIndex(this.priceIndex(cxt.getToday()));
 		for (StrategyListener m : models) {
 			m.processingModelResult(cxt, lineAvgPrice, linePrice, lineVol, lineTickData);
 		}

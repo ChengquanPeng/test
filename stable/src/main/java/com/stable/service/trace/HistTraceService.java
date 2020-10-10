@@ -144,7 +144,7 @@ public class HistTraceService {
 						.queryListByCodeForModel(code, date, queryPage250).getContent();
 				LineVol lineVol = new LineVol(dailyList);
 				// 缩量
-				if (vb == 0 || (lineVol.isShortVolThanYerteryDay() && lineVol.isShortVolV2(vb))) {// 2.没有超过5天均量1.3倍,今天的量比昨天高
+				if (vb == 0 || lineVol.isShortVolV2(vb)) {// 2.没有超过5天均量1.3倍,今天的量比昨天高
 					LinePrice linePrice = new LinePrice(code, date, daliyTradeHistroyService);
 
 					boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%
@@ -152,13 +152,11 @@ public class HistTraceService {
 					boolean b4 = linePrice.isLowClosePriceToday(todayChangeRate, yesterdayPrice, closedPrice,
 							highPrice);// 上影线
 					if (b6 && !b4 && (isV2 ? linePrice.check3dayPriceV2() : true)) {
-						LineAvgPrice lineAvg = new LineAvgPrice(code, date, avgService, dailyList);
-						if (lineAvg.feedData()) {
-							if (lineAvg.isWhiteHorseV2()) {
-								if (isUpNline(isV2, lineAvg, yesterdayPrice, closedPrice)) {
-									if (linePrice.oneYearCheck(code, date)) {
-										return saveOkRec(code, date, day);
-									}
+						LineAvgPrice lineAvg = new LineAvgPrice(code, date, avgService);
+						if (lineAvg.isWhiteHorseV2()) {
+							if (isUpNline(isV2, lineAvg, yesterdayPrice, closedPrice)) {
+								if (linePrice.oneYearCheck(code, date)) {
+									return saveOkRec(code, date, day);
 								}
 							}
 						}

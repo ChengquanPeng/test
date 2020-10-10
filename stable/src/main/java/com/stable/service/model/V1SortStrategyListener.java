@@ -72,24 +72,19 @@ public class V1SortStrategyListener implements StrategyListener {
 
 			// 均线
 			try {
-				if (lineAvgPrice.feedData()) {
-					if (lineAvgPrice.isWhiteHorseV2()) {
-						boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%
-						if (b6) {// 一年未涨
-							if (linePrice.oneYearCheck(mc.getCode(), mc.getDate())) {// 一年未涨
-								isOk = true;
-							} else {
-								dropOutMsg = "未一年未涨";
-							}
+				if (lineAvgPrice.isWhiteHorseV2()) {
+					boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%
+					if (b6) {// 一年未涨
+						if (linePrice.oneYearCheck(mc.getCode(), mc.getDate())) {// 一年未涨
+							isOk = true;
 						} else {
-							dropOutMsg = "未回调过超10%";
+							dropOutMsg = "未一年未涨";
 						}
 					} else {
-						dropOutMsg = "非白马";
+						dropOutMsg = "未回调过超10%";
 					}
 				} else {
-					isOk = false;
-					dropOutMsg = "未获取到均价-30D";
+					dropOutMsg = "非白马";
 				}
 			} catch (Exception e) {
 				isOk = false;
