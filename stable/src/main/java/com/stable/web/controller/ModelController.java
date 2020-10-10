@@ -68,7 +68,7 @@ public class ModelController {
 	 * 执行模型（基本面)
 	 */
 	@RequestMapping(value = "/coderun", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> coderun(String startDate, String endDate) {
+	public ResponseEntity<JsonResult> coderun() {
 		JsonResult r = new JsonResult();
 		try {
 			codeModelService.reset();

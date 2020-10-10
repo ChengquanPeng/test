@@ -119,10 +119,6 @@ public class CodeModelService {
 				}
 			} else {// 手动某一天
 				log.info("CodeModel processing date={}", today);
-				if (!tradeCalService.isOpen(today)) {
-					log.info("{}非交易日", today);
-					return;
-				}
 				run(today);
 			}
 		} catch (Exception e) {
