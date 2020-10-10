@@ -110,14 +110,14 @@ public class HistTraceService {
 //					int[] oneYearups = { 1 };// 1年未大涨的（TODO,第一波是否涨超30%？）
 					for (String ver : versions) {
 						for (double vb : volBases) {
-							for (int d : days) {
+							for (int day : days) {
 								try {
-									reallymodelForJob(ver, sd, ed, d, vb, batch);
+									reallymodelForJob(ver, sd, ed, day, vb, batch);
 									ThreadsUtil.sleepRandomSecBetween15And30();
 								} catch (Exception e) {
 									e.printStackTrace();
 									WxPushUtil.pushSystem1(
-											versions + "样本区间:" + sd + " " + ed + "条件(" + (d) + "天期,交易量" + vb + ")样本出错");
+											versions + "样本区间:" + sd + " " + ed + "条件(" + day + "天期,交易量" + vb + ")样本出错");
 								}
 							} // for-days
 						} // for-volbase
@@ -143,7 +143,7 @@ public class HistTraceService {
 				List<DaliyBasicInfo> dailyList = daliyBasicHistroyService
 						.queryListByCodeForModel(code, date, queryPage250).getContent();
 				LineVol lineVol = new LineVol(dailyList);
-				// 缩量
+				// 是否检查量或缩量
 				if (vb == 0 || lineVol.isShortVolV2(vb)) {// 2.没有超过5天均量1.3倍
 					LinePrice linePrice = new LinePrice(code, date, daliyTradeHistroyService);
 
@@ -169,16 +169,15 @@ public class HistTraceService {
 		return null;
 	}
 
-	public synchronized void reallymodelForJob(String ver, String startDate, String endDate, int d, double vb,
+	public synchronized void reallymodelForJob(String ver, String startDate, String endDate, int day, double vb,
 			int batch) {
-		reallymodelForRealTime(ver, startDate, endDate, d, vb, batch);
+		reallymodelForRealTime(ver, startDate, endDate, day, vb, batch);
 	}
 
-	public void reallymodelForRealTime(String ver, String startDate, String endDate, int d, double vb, int batch) {
+	public void reallymodelForRealTime(String ver, String startDate, String endDate, int day, double vb, int batch) {
 		String sysstart = DateUtil.getTodayYYYYMMDDHHMMSS();
 		boolean isV2 = "v2".equals(ver);
 		String version = (isV2 ? "v2" : "v3");
-		int day = d + 1;
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 		List<TraceSortv2Vo> samples = Collections.synchronizedList(new LinkedList<TraceSortv2Vo>());
 		double min = 4.5;
@@ -192,6 +191,7 @@ public class HistTraceService {
 		int sd = Integer.valueOf(startDate);
 		// start..
 		log.info("codelist:" + codelist.size());
+		log.info("version={},day={},vb={},startDate={},endDate={}", version, day, vb, startDate, endDate);
 		CountDownLatch cnt = new CountDownLatch(codelist.size());
 		for (StockBaseInfo s : codelist) {
 			StockAType sa = StockAType.formatCode(s.getCode());
@@ -205,7 +205,6 @@ public class HistTraceService {
 				cnt.countDown();
 				continue;
 			}
-			log.info("retracing code={}", code);
 			try {
 				TasksWorkerModel.add(code, new TasksWorkerModelRunnable() {
 					public void running() {
@@ -221,9 +220,9 @@ public class HistTraceService {
 									DaliyBasicInfo d2 = new DaliyBasicInfo();
 									d2.setCode(code);
 									d2.daily(array2.getJSONArray(ij));
-									if (checkExist(codesamples, d2.getTrade_date(), day)) {
-										continue;
-									}
+//									if (checkExist(codesamples, d2.getTrade_date(), day)) {
+//										continue;
+//									}
 									TraceSortv2Vo t1 = runinner(d2.getCode(), d2.getTrade_date(), fmin, fmax, day, vb,
 											isV2, d2.getTodayChangeRate(), d2.getYesterdayPrice(), d2.getClose(),
 											d2.getHigh());
@@ -256,13 +255,13 @@ public class HistTraceService {
 		int total_all = samples.size();
 		if (total_all > 0) {
 			TraceSortv2StatVo stat = new TraceSortv2StatVo();
-			String filepath = FILE_FOLDER + version + "_" + startDate + "_" + endDate + "_" + d + "_" + +vb + "_"
+			String filepath = FILE_FOLDER + version + "_" + startDate + "_" + endDate + "_" + day + "_" + +vb + "_"
 					+ batch;
 			stat(filepath, stat, samples);
-			sendMessge(version, batch, startDate, endDate, d, vb, stat, total_all, sysstart);
+			sendMessge(version, batch, startDate, endDate, day, vb, stat, total_all, sysstart);
 		} else {
 			WxPushUtil.pushSystem1(
-					version + "样本区间:" + startDate + " " + endDate + "条件(" + (d) + "天期,交易量" + vb + ")样本数量:" + total_all);
+					version + "样本区间:" + startDate + " " + endDate + "条件(" + day + "天期,交易量" + vb + ")样本数量:" + total_all);
 		}
 
 	}
@@ -280,23 +279,22 @@ public class HistTraceService {
 		return true;
 	}
 
-	private boolean checkExist(List<TraceSortv2Vo> codesamples, int date, int day) {
-		if (codesamples != null && codesamples.size() > 0) {
-			TraceSortv2Vo tsv = codesamples.get(codesamples.size() - 1);
-			// tsv.getDate()：目前最后的日期
-			// tsv.getDate()+day：相加后的日期
-			// 相加后的日期：在这日期之前不允许存在
-			int day30 = Integer.valueOf(DateUtil.formatYYYYMMDD(DateUtil.addDate(tsv.getDate() + "", day)));
-			if (day30 > date) {// 30天之内存在则不能在作为样本
-				return true;
-			}
-		}
-		return false;
-	}
+//	private boolean checkExist(List<TraceSortv2Vo> codesamples, int date, int day) {
+//		if (codesamples != null && codesamples.size() > 0) {
+//			TraceSortv2Vo tsv = codesamples.get(codesamples.size() - 1);
+//			// tsv.getDate()：目前最后的日期
+//			// tsv.getDate()+day：相加后的日期
+//			// 相加后的日期：在这日期之前不允许存在
+//			int day30 = Integer.valueOf(DateUtil.formatYYYYMMDD(DateUtil.addDate(tsv.getDate() + "", day)));
+//			if (day30 > date) {// 30天之内存在则不能在作为样本
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 
 	private TraceSortv2Vo saveOkRec(String code, int date, int day) {
 		try {
-			EsQueryPageReq queryPage6 = new EsQueryPageReq(day);
 			TraceSortv2Vo t1 = new TraceSortv2Vo();
 			t1.setCode(code);
 			t1.setDate(date);
@@ -304,6 +302,7 @@ public class HistTraceService {
 			//
 			List<TradeHistInfoDaliy> dailyList2 = new ArrayList<TradeHistInfoDaliy>();
 			// date=已收盘的日期
+			EsQueryPageReq queryPage6 = new EsQueryPageReq(day + 1);// 为啥+1:queryListByCodeWithLastQfq 包含当天了。
 			List<TradeHistInfoDaliy> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, date, 0,
 					queryPage6, SortOrder.ASC);// 返回的list是不可修改对象
 			for (int i = 1; i < dailyList0.size(); i++) {
