@@ -114,7 +114,7 @@ public class DaliyTradeHistroyService {
 		ListenableFuture<?> l = TasksWorker.getInstance().getService().submit(new Runnable() {
 			@Override
 			public void run() {
-				int sd = Integer.valueOf(today);
+				int oneYearChkDate = Integer.valueOf(today);
 				String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
 				try {
 					ImageStrategyListener sl = new ImageStrategyListener();
@@ -123,7 +123,7 @@ public class DaliyTradeHistroyService {
 						ModelContext mc = new ModelContext();
 						mc.setCode(d.getCode());
 						mc.setDate(d.getTrade_date());
-						if (stockBasicService.online1Year(mc.getCode(), sd)) {
+						if (stockBasicService.online1YearChk(mc.getCode(), oneYearChkDate)) {
 							String str = imageService.checkImg(mc.getCode(), mc.getDate());
 							if (StringUtils.isNotBlank(str)) {
 								if (str.contains(ImageService.MATCH_L2)) {
@@ -357,7 +357,7 @@ public class DaliyTradeHistroyService {
 				}
 			}
 			// 数据是否正确
-			if (!needFetch) {
+			if (!needFetch && queryPage.getPageSize() < 9999) {
 				if (s == SortOrder.DESC) {
 					if (endDate != 0 && db.get(0).getDate() != endDate) {
 						log.info(code + " endDate={},db-0={}", endDate, db.get(0).getDate());
@@ -381,6 +381,9 @@ public class DaliyTradeHistroyService {
 		}
 
 		if (needFetch) {
+			log.info("code={},startDate={},endDate={},queryPage={},SortOrder={}", code, startDate, endDate,
+					queryPage.getPageSize(), s.toString());
+			new Exception().printStackTrace();
 			String today = DateUtil.getTodayYYYYMMDD();
 			String json = redisUtil.get(code);
 			if (StringUtils.isNotBlank(json)) {

@@ -21,6 +21,7 @@ import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.WxPushUtil;
@@ -180,15 +181,32 @@ public class StockBasicService {
 	};
 
 	/**
-	 * 上市超一年
+	 * 上市时间年限chk-1年
 	 */
-	public boolean online1Year(String code, int today) {
-		getCodeName(code);// 同步code
-		StockBaseInfo base = JSON.parseObject(redisUtil.get(code), StockBaseInfo.class);
+	public boolean online1YearChk(String code, int today) {
+		String json = redisUtil.get(code);
+		if (StringUtils.isBlank(json)) {
+			return false;
+		}
+		StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
 		String listDate = base.getList_date();
-		Integer year = Integer.valueOf(listDate.substring(0, 4));
-		Integer end = Integer.valueOf((year + 1 + "") + listDate.substring(4));
-		if (end <= today) {
+		if (today >= DateUtil.getNextYear(Integer.valueOf(listDate))) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 上市时间年限chk-2年
+	 */
+	public boolean online2YearChk(String code, int today) {
+		String json = redisUtil.get(code);
+		if (StringUtils.isBlank(json)) {
+			return false;
+		}
+		StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
+		String listDate = base.getList_date();
+		if (today >= DateUtil.getNext2Year(Integer.valueOf(listDate))) {
 			return true;
 		}
 		return false;

@@ -218,7 +218,7 @@ public class FinanceService {
 			log.info("page size={},last report fince code={},date={}", page.getContent().size(), code, f.getDate());
 			return f;
 		}
-		log.info("no last report fince code={}", code);
+		log.info("no last report fince code={},annDate={}", code, annDate);
 		return null;
 	}
 
@@ -241,7 +241,7 @@ public class FinanceService {
 			// page.getContent().size(), code, f.getDate());
 			return f;
 		}
-		log.info("no last report fince code={}", code);
+		log.info("no FinYjyg report fince code={},annDate={}", code, annDate);
 		return null;
 	}
 
@@ -264,7 +264,7 @@ public class FinanceService {
 			// page.getContent().size(), code, f.getDate());
 			return f;
 		}
-		log.info("no last report fince code={}", code);
+		log.info("no FinYjkb report fince code={},annDate={}", code, annDate);
 		return null;
 	}
 
@@ -283,7 +283,7 @@ public class FinanceService {
 			// page.getContent().size(), code, f.getDate());
 			return f;
 		}
-		log.info("no last report fince code={}", code);
+		log.info("no last report fince code={},now!", code);
 		return null;
 	}
 

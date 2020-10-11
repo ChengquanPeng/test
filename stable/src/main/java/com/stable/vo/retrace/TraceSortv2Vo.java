@@ -23,7 +23,7 @@ public class TraceSortv2Vo {
 	// ---大盘
 	private double marketIndex;
 
-	private DaliyBasicInfo db;
+	private DaliyBasicInfo basic;
 	private FinanceBaseInfo fin;
 	private FinYjkb kb;
 	private FinYjyg yg;
@@ -36,7 +36,8 @@ public class TraceSortv2Vo {
 				+ (sellPrice > buyPrice ? 1 : 0) + "," + actProfit + "," + maxPrice + "," + //
 				minPrice + "," + (CurrencyUitl.cutProfit(buyPrice, minPrice)) + "," + //
 				minLowPrice + "," + (CurrencyUitl.cutProfit(buyPrice, minLowPrice)) + "," + //
-				db.getPe() + "," + db.getPe_ttm() + "," + db.getCirc_mv() + "," + db.getVolume_ratio() + ",";
+				basic.getPe() + "," + basic.getPe_ttm() + "," + CurrencyUitl.covertToString(basic.getCirc_mv()) + ","
+				+ basic.getVolume_ratio() + ",";
 		if (kb == null && yg == null) {
 			msg += ",,";
 		} else {

@@ -5,9 +5,9 @@ import java.util.Map;
 
 import com.stable.utils.CurrencyUitl;
 
-import lombok.Data;
+import lombok.ToString;
 
-@Data
+@ToString
 public class TraceSortv2StatVo {
 	// 理论最高总盈亏
 	double totalProfit = 0.0;
@@ -122,4 +122,75 @@ public class TraceSortv2StatVo {
 		}
 	}
 
+	public double getTotalProfit() {
+		return totalProfit;
+	}
+
+	public void setTotalProfit(double totalProfit) {
+		this.totalProfit = totalProfit;
+	}
+
+	public double getTotalLoss() {
+		return totalLoss;
+	}
+
+	public void setTotalLoss(double totalLoss) {
+		this.totalLoss = totalLoss;
+	}
+
+	public int getCnt_up() {
+		return cnt_up;
+	}
+
+	public void setCnt_up(int cnt_up) {
+		this.cnt_up = cnt_up;
+	}
+
+	public int getCnt_down() {
+		return cnt_down;
+	}
+
+	public void setCnt_down(int cnt_down) {
+		this.cnt_down = cnt_down;
+	}
+
+	public int getAct_cnt_up() {
+		return act_cnt_up;
+	}
+
+	public void setAct_cnt_up(int act_cnt_up) {
+		this.act_cnt_up = act_cnt_up;
+	}
+
+	public double getAct_totalProfit() {
+		return act_totalProfit;
+	}
+
+	public void setAct_totalProfit(double act_totalProfit) {
+		this.act_totalProfit = act_totalProfit;
+	}
+
+	public Map<Integer, Integer> getMap_act() {
+		return map_act;
+	}
+
+	public void setMap_act(Map<Integer, Integer> map_act) {
+		this.map_act = map_act;
+	}
+
+	public Map<Integer, Integer> getMap_LowClosedPrice() {
+		return map_LowClosedPrice;
+	}
+
+	public void setMap_LowClosedPrice(Map<Integer, Integer> map_LowClosedPrice) {
+		this.map_LowClosedPrice = map_LowClosedPrice;
+	}
+
+	public Map<Integer, Integer> getMap_MinLowPrice() {
+		return map_MinLowPrice;
+	}
+
+	public void setMap_MinLowPrice(Map<Integer, Integer> map_MinLowPrice) {
+		this.map_MinLowPrice = map_MinLowPrice;
+	}
 }

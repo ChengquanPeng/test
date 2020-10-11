@@ -6,6 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.stable.constant.Constant;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 public class CurrencyUitl {
 
 	private static final String YI = "亿";
@@ -155,15 +158,20 @@ public class CurrencyUitl {
 	 * 涨停价格3
 	 */
 	public final static double cutProfit(double buyPrice, double soldPrice) {
-		if (soldPrice > buyPrice) {
-			double per = ((soldPrice - buyPrice) / buyPrice) * 100;
-			return new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-		} else if (soldPrice < buyPrice) {
-			double per = ((buyPrice - soldPrice) / buyPrice) * 100;
-			per = 0.0 - per;
-			return new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-		} else {
-			return 0.0;
+		try {
+			if (soldPrice > buyPrice) {
+				double per = ((soldPrice - buyPrice) / buyPrice) * 100;
+				return new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+			} else if (soldPrice < buyPrice) {
+				double per = ((buyPrice - soldPrice) / buyPrice) * 100;
+				per = 0.0 - per;
+				return new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+			} else {
+				return 0.0;
+			}
+		} catch (Exception e) {
+			log.info("buyPrice={},soldPrice={}", buyPrice, soldPrice);
+			throw new RuntimeException(e);
 		}
 	}
 

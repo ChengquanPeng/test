@@ -233,6 +233,16 @@ public class DateUtil {
 		return Integer.valueOf(formatYYYYMMDD(py));
 	}
 
+	// 去2年
+	public static int getPre2Year(int yyyyMMdd) {
+//		Date date = new Date();//获取当前时间    
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(parseDate(yyyyMMdd));
+		calendar.add(Calendar.YEAR, -2);// 当前时间减去一年，即一年前的时间    
+		Date py = calendar.getTime();// 获取一年前的时间，或者一个月前的时间  
+		return Integer.valueOf(formatYYYYMMDD(py));
+	}
+
 //明年
 	public static int getNextYear(int yyyyMMdd) {
 //		Date date = new Date();//获取当前时间    
@@ -243,9 +253,19 @@ public class DateUtil {
 		return Integer.valueOf(formatYYYYMMDD(py));
 	}
 
+	// 明2年
+	public static int getNext2Year(int yyyyMMdd) {
+//			Date date = new Date();//获取当前时间    
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(parseDate(yyyyMMdd));
+		calendar.add(Calendar.YEAR, 2);// 当前时间减去一年，即一年前的时间    
+		Date py = calendar.getTime();// 获取一年前的时间，或者一个月前的时间  
+		return Integer.valueOf(formatYYYYMMDD(py));
+	}
+
 	public static void main(String[] args) {
-		System.err.println(getCurrJiduEndDate(20200101));
-		System.err.println(getCurrJiduEndDate(20200421));
+		System.err.println(getNext2Year(20200501));
+		System.err.println(getPre2Year(20200421));
 		System.err.println(getCurrJiduEndDate(20201121));
 	}
 }

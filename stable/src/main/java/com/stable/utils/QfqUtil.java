@@ -30,7 +30,7 @@ public class QfqUtil {
 	public List<StockAvg> getSMA5_30(String code, int startDate, int endDate) {
 		// 倒序的结果列表
 		List<TradeHistInfoDaliy> temp = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, startDate,
-				queryPage30, SortOrder.DESC);
+				queryPage30, SortOrder.DESC);// startDate:开始日期的前30个交易日
 
 		if (temp.size() != 30) {
 			throw new RuntimeException(

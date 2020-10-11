@@ -173,7 +173,7 @@ public class UpModelLineService {
 			CountDownLatch cunt = new CountDownLatch(allOnlieList.size());
 			for (int i = 0; i < allOnlieList.size(); i++) {
 				StockBaseInfo sbi = allOnlieList.get(i);
-				if (!stockBasicService.online1Year(sbi.getCode(), treadeDate)) {
+				if (!stockBasicService.online1YearChk(sbi.getCode(), treadeDate)) {
 					log.info("{} 上市不足1年", sbi.getCode());
 					cunt.countDown();
 					continue;

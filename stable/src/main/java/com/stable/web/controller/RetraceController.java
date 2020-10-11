@@ -24,15 +24,42 @@ public class RetraceController {
 	public ResponseEntity<JsonResult> sortv1(String startDate, String endDate, int days, double vb, String v) {
 		JsonResult r = new JsonResult();
 		try {
-			int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-			if (StringUtils.isBlank(startDate)) {
-				startDate = "20200101";
-			}
-			if (StringUtils.isBlank(endDate)) {
-				endDate = DateUtil.getTodayYYYYMMDD();
-			}
 			log.info("startDate={},endDate={}", startDate, endDate);
-			histTraceService.reallymodelForJob(v, startDate, endDate, days, vb, batch);
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+					String s = startDate;
+					if (StringUtils.isBlank(startDate)) {
+						s = "20200101";
+					}
+					String e = endDate;
+					if (StringUtils.isBlank(endDate)) {
+						e = DateUtil.getTodayYYYYMMDD();
+					}
+					histTraceService.reallymodelForJob(v, s, e, days, vb, batch);
+				}
+			}).start();
+			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	@RequestMapping(value = "/middle", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> middle(String startDate, String endDate) {
+		JsonResult r = new JsonResult();
+		try {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					histTraceService.middle();
+				}
+			}).start();
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
@@ -51,6 +78,28 @@ public class RetraceController {
 				@Override
 				public void run() {
 					histTraceService.sortv2(startDate, endDate);
+				}
+			}).start();
+
+//			ThreadsUtil.sleepRandomSecBetween5And15();
+			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	@RequestMapping(value = "/sortv1", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> sortv1(double min, double max, String startDate) {
+		JsonResult r = new JsonResult();
+		try {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					histTraceService.sortv1(min, max, startDate);
 				}
 			}).start();
 
