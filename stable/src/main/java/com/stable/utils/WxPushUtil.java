@@ -57,12 +57,12 @@ public class WxPushUtil {
 
 	public static void main(String[] args) {
 		Set<String> uids = new HashSet<String>();
-		uids.add("UID_QNfInsOVwTvTsYTQsjJB2KUL52VI");
-		uids.add("UID_HgYWkLePDYzlvAhTMlD4AaUCEUhl");
+		//uids.add("");
+		//uids.add("");
 		Message message = new Message();
-		message.setAppToken("AT_X5jTnRko4rhQ4dmoS7ntwBN79BxATk3r");
+		message.setAppToken("");
 		message.setContentType(Message.CONTENT_TYPE_TEXT);
-		message.setContent("不加限制的自由是很可怕的，因为很容易让任何人滑向深渊。-- 彭成全 " + DateUtil.getTodayYYYYMMDDHHMMSS());
+		message.setContent("不加限制的自由是很可怕的，因为很容易让任何人滑向深渊。-- " + DateUtil.getTodayYYYYMMDDHHMMSS());
 		message.setUids(uids);
 		message.setUrl(null);
 		System.err.println(WxPusher.send(message).getData().get(0).getStatus());

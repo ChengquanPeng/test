@@ -16,6 +16,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsStockAvgDao;
 import com.stable.service.DaliyTradeHistroyService;
@@ -116,8 +117,6 @@ public class AvgService {
 		}
 	}
 
-	EsQueryPageReq queryPage30 = new EsQueryPageReq(30);
-
 	/**
 	 * @param code
 	 * @param date      截止日期
@@ -125,11 +124,15 @@ public class AvgService {
 	 * @return
 	 */
 	public List<StockAvg> queryListByCodeForModelWithLastQfqAnd30Records(String code, int date) {
+		return queryListByCodeForModelWithLastQfq(code, date, EsQueryPageUtil.queryPage30);
+	}
+
+	public List<StockAvg> queryListByCodeForModelWithLastQfq(String code, int date, EsQueryPageReq queryPage) {
 		int qfqDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
-		List<StockAvg> db = queryListByCodeForModel(code, date, queryPage30);
+		List<StockAvg> db = queryListByCodeForModel(code, date, queryPage);
 		boolean needFetch = false;
 		List<TradeHistInfoDaliy> tradedaliylist = null;
-		if (db != null && db.size() == 30) {
+		if (db != null && db.size() == queryPage.getPageSize()) {
 			for (StockAvg r : db) {
 				if (qfqDate != 0 && r.getLastDividendDate() < qfqDate) {// 存的数据是前复权日期版本小于redis，不是最新的
 					needFetch = true;
@@ -138,11 +141,12 @@ public class AvgService {
 			}
 			if (!needFetch) {
 				// check 是否是正确的连续30天的数据
-				tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, queryPage30,
+				tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, queryPage,
 						SortOrder.DESC);
 				if (tradedaliylist != null) {
 					if (tradedaliylist.get(0).getDate() == db.get(0).getDate()
-							&& tradedaliylist.get(29).getDate() == db.get(29).getDate()) {
+							&& tradedaliylist.get(queryPage.getPageSize() - 1).getDate() == db
+									.get(queryPage.getPageSize() - 1).getDate()) {
 						return db;
 					} else {
 						needFetch = true;
@@ -159,7 +163,7 @@ public class AvgService {
 		if (needFetch) {
 			if (tradedaliylist == null) {
 				// 可能在上面已经初始化。
-				tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, queryPage30,
+				tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, queryPage,
 						SortOrder.DESC);
 			}
 			if (tradedaliylist != null) {

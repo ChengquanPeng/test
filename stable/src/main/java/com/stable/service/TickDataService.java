@@ -32,6 +32,7 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.enums.StockAType;
@@ -92,9 +93,7 @@ public class TickDataService {
 	}
 
 	public void resetTickDataStatus() {
-		EsQueryPageReq queryPage = new EsQueryPageReq();
-		queryPage.setPageNum(1);
-		queryPage.setPageSize(1000);
+		EsQueryPageReq queryPage = EsQueryPageUtil.queryPage9999;
 		boolean condition = true;
 		int times = 1;
 		do {
@@ -162,7 +161,8 @@ public class TickDataService {
 						int todaydate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 						Map<String, Integer> todayAlready = new ConcurrentHashMap<String, Integer>();
 						if (isJobSource) {
-							List<TickDataBuySellInfo> l = list(null, todaydate + "", null, new EsQueryPageReq(9999));
+							List<TickDataBuySellInfo> l = list(null, todaydate + "", null,
+									EsQueryPageUtil.queryPage9999);
 							if (l != null && l.size() > 0) {
 								l.stream().forEach(x -> {
 									todayAlready.put(x.getCode(), 1);
@@ -301,13 +301,10 @@ public class TickDataService {
 		return res;
 	}
 
-	EsQueryPageReq qp = new EsQueryPageReq(10);
-
 	// 最新的10日中，有10条
 	public boolean hasProgram(String code) {
-		int pageNum = qp.getPageNum();
-		int size = qp.getPageSize();
-		Pageable pageable = PageRequest.of(pageNum, size);
+		EsQueryPageReq qp = EsQueryPageUtil.queryPage10;
+		Pageable pageable = PageRequest.of(qp.getPageNum(), qp.getPageSize());
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
@@ -396,7 +393,7 @@ public class TickDataService {
 			List<TraceSortv1Vo> listsv = new LinkedList<TraceSortv1Vo>();
 			int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 			if (tradeCalService.isOpen(date)) {
-				EsQueryPageReq queryPage = new EsQueryPageReq(9000);
+				EsQueryPageReq queryPage = EsQueryPageUtil.queryPage9999;
 
 				String lastDate = tradeCalService.getPretradeDate(date + "");
 				List<DaliyBasicInfo> basics = daliyBasicHistroyService

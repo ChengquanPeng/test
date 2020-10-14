@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.BuyModelType;
 import com.stable.enums.StockAType;
 import com.stable.enums.TradeType;
@@ -80,7 +81,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 		// 卖出
 		List<BuyTrace> bts = buyTraceService.getListByCode(code, 0, TradeType.BOUGHT.getCode(),
-				BuyModelType.B2.getCode(), MonitoringService.querypage);
+				BuyModelType.B2.getCode(), EsQueryPageUtil.queryPage9999);
 		if (bts != null && bts.size() > 0) {
 			buyTraces.addAll(bts);
 			needMoniSell = true;

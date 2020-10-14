@@ -69,7 +69,7 @@ public class V2PRESortStrategyListener implements StrategyListener {
 			int gnScore = 0;
 			// 均线
 			try {
-				if (lineAvgPrice.isWhiteHorseV2()) {
+				if (lineAvgPrice.isWhiteHorseV2(mc.getCode(), mc.getDate())) {
 					setDetail(detailDesc, "白马？");
 					mv.setWhiteHorse(1);// 白马？
 					DaliyBasicInfo today = mc.getToday();

@@ -159,7 +159,9 @@ public class CurrencyUitl {
 	 */
 	public final static double cutProfit(double buyPrice, double soldPrice) {
 		try {
-			if (soldPrice > buyPrice) {
+			if (buyPrice == 0.0) {
+				return 0.0;
+			} else if (soldPrice > buyPrice) {
 				double per = ((soldPrice - buyPrice) / buyPrice) * 100;
 				return new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 			} else if (soldPrice < buyPrice) {
@@ -184,8 +186,17 @@ public class CurrencyUitl {
 	}
 
 	public static void main(String[] args) {
-		System.err.println(CurrencyUitl.covertToLong("-10亿"));
-		System.err.println(CurrencyUitl.covertToLong("10亿"));
+		// System.err.println(CurrencyUitl.covertToLong("-10亿"));
+		// System.err.println(CurrencyUitl.covertToLong("10亿"));
+		double buyPrice = 0.0;
+		double soldPrice = 2.1;
+		System.err.println((0.0 - 2.1));
+		System.err.println((soldPrice - buyPrice));
+		System.err.println((soldPrice - buyPrice) / buyPrice);
+		double per = ((soldPrice - buyPrice) / buyPrice) * 100;
+		System.err.println(per);
+		System.err.println(
+				new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
 //		System.err.println(CurrencyUitl.covertToLong("4082万"));
 //		System.err.println(CurrencyUitl.covertToLong("1.1万亿"));
 //		System.err.println(CurrencyUitl.covertToString(997));

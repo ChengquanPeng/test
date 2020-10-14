@@ -8,13 +8,13 @@ import java.util.Map;
 
 import org.elasticsearch.search.sort.SortOrder;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockAvg;
 import com.stable.vo.bus.TradeHistInfoDaliy;
-import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +22,6 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class LinePrice {
-	private final static EsQueryPageReq queryPage30 = new EsQueryPageReq(30);
 	private ModelContext cxt;
 	private List<DaliyBasicInfo> dailyList;
 	private List<TradeHistInfoDaliy> listD30;
@@ -44,8 +43,8 @@ public class LinePrice {
 		today = cxt.getToday();
 
 		code = cxt.getCode();
-		listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, today.getTrade_date(), queryPage30,
-				SortOrder.DESC);
+		listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, today.getTrade_date(),
+				EsQueryPageUtil.queryPage30, SortOrder.DESC);
 		if (listD30 == null || listD30.size() < 30) {
 			throw new RuntimeException(code + "获取复权数据从0到" + today.getTrade_date() + "错误！");
 		}
@@ -161,14 +160,14 @@ public class LinePrice {
 		return isHighOrLowVolTodayRes;
 	}
 
-	// 排除上影线
+	// 是否上影线
 	public boolean isLowClosePriceToday(double todayChangeRate, double yesterdayPrice, double closedPrice,
 			double highPrice) {
 		if (todayChangeRate > 0) {
 			double diff = highPrice - yesterdayPrice;
-			double half = diff * 0.8;
-			double mid = CurrencyUitl.roundHalfUp(half) + yesterdayPrice;
-			if (mid >= closedPrice) {
+			double base = diff * 0.8;
+			double chkPrice = CurrencyUitl.roundHalfUp(base) + yesterdayPrice;
+			if (chkPrice > closedPrice) {
 				return true;
 			}
 		}
@@ -281,7 +280,8 @@ public class LinePrice {
 	}
 
 	public boolean checkPriceBack6dayWhitTodayV2() {
-		listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, queryPage30, SortOrder.DESC);
+		listD30 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, EsQueryPageUtil.queryPage30,
+				SortOrder.DESC);
 		if (listD30 == null || listD30.size() < 30) {
 			throw new RuntimeException(code + "获取复权数据从0到" + today.getTrade_date() + "错误！");
 		}
@@ -322,11 +322,12 @@ public class LinePrice {
 		return false;
 	}
 
-	static EsQueryPageReq queryPage250 = new EsQueryPageReq(250);
-
+	/**
+	 * 一年涨幅未超过xx
+	 */
 	public boolean oneYearCheck(String code, int date) {
 		List<TradeHistInfoDaliy> listD250 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
-				queryPage250, SortOrder.DESC);
+				EsQueryPageUtil.queryPage250, SortOrder.DESC);
 		TradeHistInfoDaliy dmax = listD250.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
 		TradeHistInfoDaliy dmin = listD250.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
 		if (dmin.getDate() > dmax.getDate()) {// 先涨-后跌的情况
@@ -340,7 +341,30 @@ public class LinePrice {
 		} else {
 			log.info("code={},checkDate={},maxprice={},maxpriceDate={},mixprice={},maxpriceDate={}", //
 					code, date, maxPrice, dmax.getDate(), minPrice, dmin.getDate());
+			return true;
 		}
-		return true;
 	}
+
+	/**
+	 * 8个月新高，涨幅未超55%
+	 */
+	public boolean priceCheckForMiddle(String code, int date) {
+		List<TradeHistInfoDaliy> listD160 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
+				EsQueryPageUtil.queryPage160, SortOrder.DESC);
+		TradeHistInfoDaliy dmax = listD160.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+		TradeHistInfoDaliy dmin = listD160.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
+		double maxPrice = dmax.getHigh();
+		if (listD160.get(0).getHigh() >= maxPrice) {
+			double minPrice = dmin.getLow();
+			if (CurrencyUitl.cutProfit(minPrice, maxPrice) > 55.0) {
+				return false;
+			} else {
+				log.info("code={},checkDate={},maxprice={},maxpriceDate={},mixprice={},maxpriceDate={}", //
+						code, date, maxPrice, dmax.getDate(), minPrice, dmin.getDate());
+				return true;
+			}
+		} // else 不是新高
+		return false;
+	}
+
 }

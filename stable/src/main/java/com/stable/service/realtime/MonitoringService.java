@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.BuyModelType;
 import com.stable.enums.TradeType;
 import com.stable.es.dao.base.MonitoringDao;
@@ -35,7 +36,6 @@ import com.stable.vo.bus.Monitoring;
 import com.stable.vo.bus.TickData;
 import com.stable.vo.http.resp.ReportVo;
 import com.stable.vo.http.resp.ViewVo;
-import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -62,8 +62,6 @@ public class MonitoringService {
 	@Autowired
 	private CodeModelService codeModelService;
 
-	static final EsQueryPageReq querypage = new EsQueryPageReq(1000);
-
 	private Map<String, RealtimeDetailsAnalyzer> map = null;
 
 	public synchronized void startObservable() {
@@ -89,14 +87,15 @@ public class MonitoringService {
 			// 所有买卖Code List
 			Set<String> allCode = new HashSet<String>();
 			// 获取买入监听列表
-			Set<Monitoring> bList = upModelLineService.getListByCodeForSet(querypage);
+			Set<Monitoring> bList = upModelLineService.getListByCodeForSet(EsQueryPageUtil.queryPage9999);
 			if (bList == null) {
 				bList = new HashSet<Monitoring>();
 			}
 
 			// 获取卖出监听列表
 			List<BuyTrace> sList = new LinkedList<BuyTrace>();
-			buyTraceService.getListByCode("", 0, TradeType.BOUGHT.getCode(), BuyModelType.B2.getCode(), querypage);
+			buyTraceService.getListByCode("", 0, TradeType.BOUGHT.getCode(), BuyModelType.B2.getCode(),
+					EsQueryPageUtil.queryPage9999);
 
 			// 合并
 			bList.forEach(x -> {
@@ -219,7 +218,7 @@ public class MonitoringService {
 		SinaRealTime srt = SinaRealtimeUitl.get(code);
 		if (srt != null && srt.getSell1() > 0.0) {
 			List<BuyTrace> list = buyTraceService.getListByCode(code, 0, TradeType.BOUGHT.getCode(),
-					BuyModelType.B1.getCode(), querypage);
+					BuyModelType.B1.getCode(), EsQueryPageUtil.queryPage9999);
 			if (list != null) {
 				for (BuyTrace bt : list) {
 					bt.setSoldDate(Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
@@ -285,7 +284,8 @@ public class MonitoringService {
 			pv.setType("全部");
 		}
 
-		List<BuyTrace> list = buyTraceService.getListByCode("", buydate, status, buyModelType, querypage);
+		List<BuyTrace> list = buyTraceService.getListByCode("", buydate, status, buyModelType,
+				EsQueryPageUtil.queryPage9999);
 		List<ViewVo> l = new LinkedList<ViewVo>();
 		if (list != null) {
 			int allc = 0;// 总数

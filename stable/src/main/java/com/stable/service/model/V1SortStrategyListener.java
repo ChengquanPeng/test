@@ -72,7 +72,7 @@ public class V1SortStrategyListener implements StrategyListener {
 
 			// 均线
 			try {
-				if (lineAvgPrice.isWhiteHorseV2()) {
+				if (lineAvgPrice.isWhiteHorseV2(mc.getCode(), mc.getDate())) {
 					boolean b6 = linePrice.checkPriceBack6dayWhitTodayV2();// 5.回调过超10%
 					if (b6) {// 一年未涨
 						if (linePrice.oneYearCheck(mc.getCode(), mc.getDate())) {// 一年未涨
@@ -95,7 +95,7 @@ public class V1SortStrategyListener implements StrategyListener {
 
 			if (isOk) {
 				// 量
-				if (lineVol.isHighVolToday20Percent()) {// 换手率超过30%
+				if (mc.getToday().getTurnover_rate_f() >= 20) {// 换手率超过30%
 					dropOutMsg = "换手率超过20%";
 					isOk = false;
 				}

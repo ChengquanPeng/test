@@ -22,6 +22,7 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsCodeBaseModelDao;
 import com.stable.es.dao.base.EsCodeBaseModelHistDao;
@@ -85,8 +86,6 @@ public class CodeModelService {
 	private EsConceptDao esConceptDao;
 	@Autowired
 	private EsCodeConceptDao esCodeConceptDao;
-
-	private final EsQueryPageReq queryPage8 = new EsQueryPageReq(8);
 
 	public synchronized void runJob(boolean isJob, int today) {
 		try {
@@ -415,10 +414,8 @@ public class CodeModelService {
 
 	private void processingFinance(CodeBaseModel base) {
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(base.getCode(), base.getDate(),
-				queryPage8);
-
+				EsQueryPageUtil.queryPage8);
 		FinanceAnalyzer fa = new FinanceAnalyzer();
-
 		for (FinanceBaseInfo fbi : fbis) {
 			fa.putJidu1(fbi);
 		}
@@ -468,7 +465,7 @@ public class CodeModelService {
 	}
 
 	private List<CodeBaseModel> getALLForList() {
-		EsQueryPageReq querypage = new EsQueryPageReq(9999);
+		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
@@ -585,7 +582,7 @@ public class CodeModelService {
 	}
 
 	private String getConceptId(String conceptId) {
-		EsQueryPageReq querypage = new EsQueryPageReq(1);
+		EsQueryPageReq querypage = EsQueryPageUtil.queryPage1;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(conceptId)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", conceptId));
@@ -607,7 +604,7 @@ public class CodeModelService {
 	}
 
 	private List<String> listCodeByCodeConceptId(String conceptId) {
-		EsQueryPageReq querypage = new EsQueryPageReq(1000);
+		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		conceptId = getConceptId(conceptId);
 		if (StringUtils.isNotBlank(conceptId)) {

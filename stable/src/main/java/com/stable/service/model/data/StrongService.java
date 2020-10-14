@@ -52,6 +52,19 @@ public class StrongService {
 	private Map<Integer, Double> M_SZ_CYB = new ConcurrentHashMap<Integer, Double>();
 	private Map<Integer, Double> M_SH_KCB = new ConcurrentHashMap<Integer, Double>();
 
+	// == 大盘涨跌 ==
+	public boolean checkMarketPrice(int mp, String code, int chkDate) {
+		if (mp == 0) {
+			return true;
+		}
+		double dateRate = getIndexPrice(code, chkDate);
+		if (mp == 1) {
+			return dateRate > 0;
+		}
+		return dateRate < 0;
+	}
+	// == 大盘涨跌 ==
+
 	public Double getIndexPrice(String code, int chkDate) {
 		return getIndexMap(code, chkDate).get(chkDate);
 	}

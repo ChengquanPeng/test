@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
@@ -33,7 +34,6 @@ public class CodeController {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private ConceptService conceptService;
-	private EsQueryPageReq querypage = new EsQueryPageReq(10);
 
 	/**
 	 * 个股当前状态
@@ -45,7 +45,7 @@ public class CodeController {
 			model.addAttribute("codedetail", cbm);
 			model.addAttribute("code", code);
 			model.addAttribute("codeName", stockBasicService.getCodeName(code));
-			model.addAttribute("histList", codeModelService.getListByCode(code, querypage));
+			model.addAttribute("histList", codeModelService.getListByCode(code, EsQueryPageUtil.queryPage10));
 			model.addAttribute("concepts", conceptService.getCodeConcept(code));
 
 			String kb = "";

@@ -149,8 +149,22 @@ public class DaliyBasicHistroyService {
 		}
 	}
 
-	public DaliyBasicInfo spiderStockDaliyBasicForOne(String code, String start_date, String end_date) {
-		JSONObject data = tushareSpider.getStockDaliyBasic(TushareSpider.formatCode(code), null, start_date, end_date);
+	public DaliyBasicInfo getDaliyBasicInfoByDate(String code, int date) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.matchPhraseQuery("trade_date", date));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(SortOrder.DESC);
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+		try {
+			return esDaliyBasicInfoDao.search(sq).getContent().get(0);
+		} catch (Exception e) {
+			return spiderStockDaliyBasicForOne(code, date + "");
+		}
+	}
+
+	private DaliyBasicInfo spiderStockDaliyBasicForOne(String code, String date) {
+		JSONObject data = tushareSpider.getStockDaliyBasic(TushareSpider.formatCode(code), null, date, date);
 		JSONArray array2 = data.getJSONArray("items");
 		if (array2 != null && array2.size() > 0) {
 			DaliyBasicInfo d2 = new DaliyBasicInfo(array2.getJSONArray(0));

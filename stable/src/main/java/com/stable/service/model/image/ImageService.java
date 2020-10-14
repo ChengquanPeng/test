@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.utils.DateUtil;
@@ -42,7 +43,7 @@ public class ImageService {
 	private String PRICE = "PRICE";
 	private String Volume = "Volume";
 
-	private final EsQueryPageReq all = new EsQueryPageReq(9999);
+	private final EsQueryPageReq all = EsQueryPageUtil.queryPage9999;
 	List<ImageChkGroup> list = new LinkedList<ImageChkGroup>();
 
 	@Autowired
@@ -128,7 +129,8 @@ public class ImageService {
 	}
 
 	public int getSize(String code, int startDate, int endDate) {
-		return daliyTradeHistroyService.queryListByCodeWithLastQfq(code, startDate, endDate, all, SortOrder.DESC).size();
+		return daliyTradeHistroyService.queryListByCodeWithLastQfq(code, startDate, endDate, all, SortOrder.DESC)
+				.size();
 	}
 
 	/**

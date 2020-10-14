@@ -24,6 +24,7 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsModelV1Dao;
 import com.stable.es.dao.base.MonitoringDao;
@@ -91,8 +92,8 @@ public class UpModelLineService {
 	@Autowired
 	private CodeModelService codeModelService;
 
-	private final EsQueryPageReq queryPage250 = new EsQueryPageReq(250);
-	private final EsQueryPageReq deleteQueryPage9999 = new EsQueryPageReq(9999);
+	private final EsQueryPageReq queryPage250 = EsQueryPageUtil.queryPage250;
+	private final EsQueryPageReq deleteQueryPage9999 = EsQueryPageUtil.queryPage9999;
 
 	public synchronized void runJob(boolean isJob, int today) {
 		try {
@@ -261,10 +262,10 @@ public class UpModelLineService {
 
 		cxt.setToday(dailyList.get(0));// 包含全部信息-来自ES
 		// 均价
-		lineAvgPrice = new LineAvgPrice(avgService, cxt);
+		lineAvgPrice = new LineAvgPrice(avgService);
 		// 1强势:次数和差值:3/5/10/20/120/250天
 		linePrice = new LinePrice(strongService, cxt, dailyList, lineAvgPrice.todayAv, daliyTradeHistroyService);
-		lineVol = new LineVol(dailyList);
+		lineVol = new LineVol(cxt.getCode(), cxt.getDate(), daliyTradeHistroyService);
 		// 2交易方向:次数和差值:3/5/10/20/120/250天
 		// 3程序单:次数:3/5/10/20/120/250天
 		lineTickData = new LineTickData(cxt, dailyList, tickDataService);

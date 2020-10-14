@@ -2,11 +2,11 @@ package com.stable.service.model.data;
 
 import java.util.List;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.TickDataService;
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TickDataBuySellInfo;
-import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -25,8 +25,6 @@ public class LineTickData {
 
 	// 2交易方向:次数和差值:3/5/10/20/120/250天
 	// 3程序单:次数:3/5/10/20/120/250天
-	private final EsQueryPageReq queryPage = new EsQueryPageReq(5);
-
 	private boolean isTickDataInfoGet = false;
 	private boolean isTickDataInfoRes = false;
 
@@ -36,7 +34,7 @@ public class LineTickData {
 		}
 		DaliyBasicInfo firstFiveDate = dailyList.get(4);
 		List<TickDataBuySellInfo> list = tickDataService.listForModel(cxt.getCode(), firstFiveDate.getTrade_date(),
-				cxt.getDate(), queryPage);
+				cxt.getDate(), EsQueryPageUtil.queryPage5);
 		if (list == null || list.size() < 5) {
 			log.error("size < 5");
 			isTickDataInfoRes = false;

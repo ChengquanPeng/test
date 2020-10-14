@@ -57,7 +57,7 @@ public class RetraceController {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					histTraceService.middle();
+					histTraceService.middle(startDate, endDate);
 				}
 			}).start();
 			r.setResult(JsonResult.OK);
@@ -93,13 +93,13 @@ public class RetraceController {
 	}
 
 	@RequestMapping(value = "/sortv1", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> sortv1(double min, double max, String startDate) {
+	public ResponseEntity<JsonResult> sortv1(double min, double max, String startDate, String endDate) {
 		JsonResult r = new JsonResult();
 		try {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					histTraceService.sortv1(min, max, startDate);
+					histTraceService.sortv1(min, max, startDate, endDate);
 				}
 			}).start();
 

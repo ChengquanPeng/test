@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeConceptDao;
 import com.stable.es.dao.base.EsConceptDailyDao;
 import com.stable.es.dao.base.EsConceptDao;
@@ -101,9 +102,8 @@ public class ThsSpider {
 		}
 	}
 
-	EsQueryPageReq querypage = new EsQueryPageReq(1000);
-
 	private void deleteCodeConcept(Concept cp) {
+		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(cp.getId())) {
 			bqb.must(QueryBuilders.matchPhraseQuery("conceptId", cp.getId()));

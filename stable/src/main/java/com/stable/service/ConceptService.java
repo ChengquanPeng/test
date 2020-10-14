@@ -17,6 +17,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeConceptDao;
 import com.stable.es.dao.base.EsConceptDailyDao;
 import com.stable.utils.CurrencyUitl;
@@ -53,10 +54,9 @@ public class ConceptService {
 		}
 	}
 
-	EsQueryPageReq queryPage = new EsQueryPageReq(100);
-	Pageable pageable = PageRequest.of(queryPage.getPageNum(), queryPage.getPageSize());
-
 	public List<CodeConcept> getCodeConcept(String code) {
+		EsQueryPageReq queryPage = EsQueryPageUtil.queryPage100;
+		Pageable pageable = PageRequest.of(queryPage.getPageNum(), queryPage.getPageSize());
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
@@ -65,7 +65,7 @@ public class ConceptService {
 	}
 
 	private List<ConceptDaily> getTopConcepts(int date) {
-		EsQueryPageReq queryPage = new EsQueryPageReq(10);
+		EsQueryPageReq queryPage = EsQueryPageUtil.queryPage10;
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
 		Pageable pageable = PageRequest.of(pageNum, size);
@@ -110,7 +110,7 @@ public class ConceptService {
 	}
 
 	private List<CodeConcept> getCodes(String conceptId) {
-		EsQueryPageReq queryPage = new EsQueryPageReq(1000);
+		EsQueryPageReq queryPage = EsQueryPageUtil.queryPage9999;
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
 		Pageable pageable = PageRequest.of(pageNum, size);

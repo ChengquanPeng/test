@@ -7,10 +7,10 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.vo.bus.StockAvg;
 import com.stable.vo.bus.TradeHistInfoDaliy;
-import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -21,8 +21,6 @@ public class QfqUtil {
 	private final int PERIODS_AVERAGE_20 = 20;
 	private final int PERIODS_AVERAGE_10 = 10;
 	private final int PERIODS_AVERAGE_5 = 5;
-	private EsQueryPageReq queryPage30 = new EsQueryPageReq(30);
-	private EsQueryPageReq queryPage9999 = new EsQueryPageReq(9999);
 
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
@@ -30,14 +28,14 @@ public class QfqUtil {
 	public List<StockAvg> getSMA5_30(String code, int startDate, int endDate) {
 		// 倒序的结果列表
 		List<TradeHistInfoDaliy> temp = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, startDate,
-				queryPage30, SortOrder.DESC);// startDate:开始日期的前30个交易日
+				EsQueryPageUtil.queryPage30, SortOrder.DESC);// startDate:开始日期的前30个交易日
 
 		if (temp.size() != 30) {
 			throw new RuntimeException(
 					"计算错误,前面30个交易日获取数据错误,code=" + code + ",startDate=" + startDate + ",endDate=" + endDate);
 		}
 		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code,
-				temp.get(temp.size() - 1).getDate(), endDate, queryPage9999, SortOrder.DESC);
+				temp.get(temp.size() - 1).getDate(), endDate, EsQueryPageUtil.queryPage9999, SortOrder.DESC);
 		double[] closePrice = new double[list.size()];
 		// 顺序的收盘价数组
 		int j = 0;
@@ -113,8 +111,8 @@ public class QfqUtil {
 
 	public StockAvg getSMA5_30(String code, int date) {
 		// 倒序的结果列表
-		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, queryPage30,
-				SortOrder.DESC);
+		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
+				EsQueryPageUtil.queryPage30, SortOrder.DESC);
 		if (list.size() != 30) {
 			throw new RuntimeException("计算错误,前面30个交易日获取数据错误.code=" + code + ",date=" + date);
 		}
