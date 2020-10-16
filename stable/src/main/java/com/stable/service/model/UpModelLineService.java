@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -212,7 +213,9 @@ public class UpModelLineService {
 					}
 				});
 			}
-			cunt.await();// 等待执行完成
+			if (!cunt.await(12, TimeUnit.HOURS)) {// 等待执行完成
+				log.info("模型执行完成超时异常==>" + treadeDate);
+			}
 			int v1cnt = 0;
 
 			List<Monitoring> ml = new LinkedList<Monitoring>();

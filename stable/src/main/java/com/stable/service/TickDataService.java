@@ -220,7 +220,9 @@ public class TickDataService {
 									}
 								}
 								try {
-									cnt.await();
+									if (!cnt.await(12, TimeUnit.HOURS)) {// 等待执行完成
+										log.info("每日TickData超时异常==>" + date);
+									}
 								} catch (InterruptedException e) {
 									e.printStackTrace();
 								}

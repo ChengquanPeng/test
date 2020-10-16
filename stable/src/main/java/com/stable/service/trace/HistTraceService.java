@@ -209,7 +209,9 @@ public class HistTraceService {
 								});
 							}
 							try {
-								cnt.await();
+								if (!cnt.await(12, TimeUnit.HOURS)) {// 等待执行完成
+									log.info("模型执行完成超时异常==>" + version);
+								}
 							} catch (InterruptedException ex) {
 								ex.printStackTrace();
 							}
@@ -408,7 +410,9 @@ public class HistTraceService {
 			}
 		}
 		try {
-			cnt.await();
+			if (!cnt.await(12, TimeUnit.HOURS)) {// 等待执行完成
+				log.info("模型执行完成超时异常==>" + version);
+			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -757,7 +761,9 @@ public class HistTraceService {
 							});
 						}
 						try {
-							cnt.await();
+							if (!cnt.await(12, TimeUnit.HOURS)) {// 等待执行完成
+								log.info("模型执行完成超时异常==>" + version);
+							}
 						} catch (InterruptedException ex) {
 							ex.printStackTrace();
 						}

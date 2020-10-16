@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -129,7 +130,9 @@ public class DaliyBasicHistroyService {
 				});
 			}
 			esDaliyBasicInfoDao.saveAll(list);
-			cnt.await();
+			if (!cnt.await(12, TimeUnit.HOURS)) {// 等待执行完成
+				log.info("每日指标记录超时异常==>" + today);
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return 0;
