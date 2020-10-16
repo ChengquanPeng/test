@@ -210,6 +210,7 @@ public class DaliyTradeHistroyService {
 						});
 					} else {
 						log.info("代码code:{} 未获取到StockBaseInfo", code);
+						cnt.countDown();
 					}
 				} else {
 					log.info("代码:{},不需要重新更新记录,上个交易日期 preDate:{},上次更新日期:{},最后更新日期:{},index={}", code, preDate, yyyymmdd,
@@ -220,7 +221,9 @@ public class DaliyTradeHistroyService {
 				}
 			}
 			try {
-				cnt.await(18, TimeUnit.HOURS);
+				if (!cnt.await(12, TimeUnit.HOURS)) {
+					WxPushUtil.pushSystem1("前复权qfq获取超时异常==>日期:" + today);
+				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

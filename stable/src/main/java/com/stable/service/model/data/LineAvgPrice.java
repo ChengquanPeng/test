@@ -41,11 +41,39 @@ public class LineAvgPrice {
 		return isWhiteHorseV2Res;
 	}
 
-	public boolean isWhiteHorseV3ForMiddle(String code, int date) {
+//	public boolean isWhiteHorseV3ForMiddle(String code, int date) {
+//		// 最近10条
+//		List<StockAvg> clist10 = avgService.queryListByCodeForModelWithLastQfq(code, date, EsQueryPageUtil.queryPage10);
+//		// todayAv = clist10.get(0);
+//		int whiteHorseTmp = 0;
+//		for (int i = 0; i < 10; i++) {
+//			if (clist10.get(i).getAvgPriceIndex20() >= clist10.get(i).getAvgPriceIndex30()) {
+//				whiteHorseTmp++;
+//			}
+//		}
+//		if (whiteHorseTmp >= 9) {
+//			return true;
+//		}
+//		return false;
+//	}
+
+	public boolean isWhiteHorseV3ForMiddleSort(String code, int highDate) {
 		// 最近10条
-		List<StockAvg> clist10 = avgService.queryListByCodeForModelWithLastQfq(code, date, EsQueryPageUtil.queryPage10);
+		List<StockAvg> clist10 = avgService.queryListByCodeForModelWithLastQfq(code, highDate,
+				EsQueryPageUtil.queryPage10);
 		// todayAv = clist10.get(0);
 		int whiteHorseTmp = 0;
+		for (int i = 0; i < 3; i++) {
+			if (clist10.get(i).getAvgPriceIndex5() >= clist10.get(i).getAvgPriceIndex10()
+					&& clist10.get(i).getAvgPriceIndex10() >= clist10.get(i).getAvgPriceIndex20()
+					&& clist10.get(i).getAvgPriceIndex20() >= clist10.get(i).getAvgPriceIndex30()) {
+				whiteHorseTmp++;
+			}
+		}
+		if (whiteHorseTmp >= 3) {
+			return true;
+		}
+		whiteHorseTmp = 0;
 		for (int i = 0; i < 10; i++) {
 			if (clist10.get(i).getAvgPriceIndex20() >= clist10.get(i).getAvgPriceIndex30()) {
 				whiteHorseTmp++;
@@ -57,12 +85,13 @@ public class LineAvgPrice {
 		return false;
 	}
 
-	public boolean isStable(String code, int date) {
-		List<StockAvg> clist10 = avgService.queryListByCodeForModelWithLastQfq(code, date, EsQueryPageUtil.queryPage10);
-		StockAvg sa0 = clist10.get(0);
-		StockAvg sa1 = clist10.get(1);
-		if (sa1.getAvgPriceIndex5() >= sa0.getAvgPriceIndex5()// 5日线企稳
-				&& sa1.getAvgPriceIndex5() > sa1.getAvgPriceIndex10()) {// 5日线>10日线
+	public boolean isStable(String code, int buyDate) {
+		List<StockAvg> clist10 = avgService.queryListByCodeForModelWithLastQfq(code, buyDate,
+				EsQueryPageUtil.queryPage10);
+		StockAvg buy = clist10.get(0);// 买入日期
+		StockAvg sa1 = clist10.get(1);// 前日
+		if (buy.getAvgPriceIndex5() >= sa1.getAvgPriceIndex5()// 5日线企稳
+				&& buy.getAvgPriceIndex5() > buy.getAvgPriceIndex10()) {// 5日线>10日线
 			return true;
 		}
 		return false;

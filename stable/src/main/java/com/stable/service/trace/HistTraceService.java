@@ -742,63 +742,9 @@ public class HistTraceService {
 											if (date < twoYearChkDate) {
 												continue;
 											}
-											double todayChangeRate = td.getTodayChangeRate();
-											try {
-												LinePrice linePrice = new LinePrice(code, date,
-														daliyTradeHistroyService);
-												if (todayChangeRate >= 9.5 && td.getHigh() == td.getClosed()// 涨停
-														&& !linePrice.isLowClosePriceToday(todayChangeRate,
-																td.getYesterdayPrice(), td.getClosed(), td.getHigh())) {// 是否上影线
-													DaliyBasicInfo basic = daliyBasicHistroyService
-															.getDaliyBasicInfoByDate(code, date);
-													EsQueryPageReq queryPage = null;
-													if (basic.getCirc_mv() > 5000000) {// >500亿
-														queryPage = EsQueryPageUtil.queryPage10;
-													} else if (basic.getCirc_mv() > 1000000) {// >100亿 / 大盘股:流通市值小于100亿
-														queryPage = EsQueryPageUtil.queryPage8;
-													} else {
-														// 小盘股
-														queryPage = EsQueryPageUtil.queryPage5;
-													}
-													List<TradeHistInfoDaliy> findHigh = daliyTradeHistroyService
-															.queryListByCodeWithLastQfq(code, date, 0, queryPage,
-																	SortOrder.ASC);// 返回的list是不可修改对象
-													TradeHistInfoDaliy highDaliy = findHighDate(findHigh);
-													if (highDaliy != null) {
-														int hiDate = highDaliy.getDate();
-														// 8个月新高，涨幅未超55%
-														if (linePrice.priceCheckForMiddle(code, hiDate)) {
-															LineAvgPrice lineAvg = new LineAvgPrice(avgService);
-															if (lineAvg.isWhiteHorseV3ForMiddle(code, hiDate)) {// 10日线的白马
-																TradeHistInfoDaliyNofq buyDate = findBuyDate(code,
-																		hiDate, rate);
-																if (buyDate != null) {
-																	TraceSortv2Vo t1 = saveOkRec(code,
-																			buyDate.getDate(), day);
-																	if (t1 != null) {
-																		samples.add(t1);
-																	} else {
-																		log.info(
-																				"middle error : {},{},buyDate={},TraceSortv2Vo  is null",
-																				code, date, buyDate.getDate());
-																	}
-																} else {
-																	log.info("middle error : {},{},buyDate  is null",
-																			code, date);
-																}
-															} else {
-																log.info("middle error : {},{},10日线不是白马", code, date);
-															}
-														} else {
-															log.info("middle error : {},{},8个月新高，涨幅超55%", code, date);
-														}
-													} else {
-														log.info("middle error : {},{},highDaliy is null", code, date);
-													}
-												}
-											} catch (Exception e) {
-												e.printStackTrace();
-												ErrorLogFileUitl.writeError(e, code, date + "", "");
+											TraceSortv2Vo t1 = middleRunning(code, date, td, rate, day);
+											if (t1 != null) {
+												samples.add(t1);
 											}
 										}
 									} catch (Exception e) {
@@ -877,8 +823,8 @@ public class HistTraceService {
 	}
 
 	// 中线-最高交易日后的企稳和第一个3.5%以上
-	private TradeHistInfoDaliyNofq findBuyDate(String code, int date, double rate) {
-		List<TradeHistInfoDaliyNofq> listNofq = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, date, 0,
+	private TradeHistInfoDaliyNofq findBuyDate(String code, int hiDate, double rate) {
+		List<TradeHistInfoDaliyNofq> listNofq = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, hiDate, 0,
 				EsQueryPageUtil.queryPage30, SortOrder.ASC);// 往后的30个交易日
 		TradeHistInfoDaliyNofq highDaliy = listNofq.get(0);
 		TradeHistInfoDaliyNofq beforeDate = null;
@@ -886,7 +832,7 @@ public class HistTraceService {
 			if (d.getTodayChangeRate() >= rate && d.getClosed() < highDaliy.getHigh()) {// 涨幅3.5%,切收盘价格小于最高价（说明有回撤）。
 				if (beforeDate != null && beforeDate.getTodayChangeRate() < d.getTodayChangeRate()) {// 今日涨幅大于昨天涨幅
 					LineAvgPrice lineAvg = new LineAvgPrice(avgService);
-					if (lineAvg.isStable(code, beforeDate.getDate())) {// 企稳
+					if (lineAvg.isStable(code, d.getDate())) {// 企稳
 						return d;
 					}
 				}
@@ -894,5 +840,82 @@ public class HistTraceService {
 			beforeDate = d;
 		}
 		return null;
+	}
+
+	private TraceSortv2Vo middleRunning(String code, int date, TradeHistInfoDaliyNofq td, double rate, int day) {
+		double todayChangeRate = td.getTodayChangeRate();
+		try {
+			LinePrice linePrice = new LinePrice(code, date, daliyTradeHistroyService);
+			if (todayChangeRate >= 9.5 && td.getHigh() == td.getClosed()// 涨停
+					&& !linePrice.isLowClosePriceToday(todayChangeRate, td.getYesterdayPrice(), td.getClosed(),
+							td.getHigh())) {// 是否上影线
+				DaliyBasicInfo basic = daliyBasicHistroyService.getDaliyBasicInfoByDate(code, date);
+				EsQueryPageReq queryPage = null;
+				if (basic.getCirc_mv() > 5000000) {// >500亿
+					queryPage = EsQueryPageUtil.queryPage10;
+				} else if (basic.getCirc_mv() > 1000000) {// >100亿 / 大盘股:流通市值小于100亿
+					queryPage = EsQueryPageUtil.queryPage8;
+				} else {
+					// 小盘股
+					queryPage = EsQueryPageUtil.queryPage5;
+				}
+				List<TradeHistInfoDaliy> findHigh = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, date, 0,
+						queryPage, SortOrder.ASC);// 返回的list是不可修改对象
+				TradeHistInfoDaliy highDaliy = findHighDate(findHigh);
+				if (highDaliy != null) {
+					int hiDate = highDaliy.getDate();
+					// 8个月新高，涨幅未超55%
+					if (linePrice.priceCheckForMiddle(code, hiDate)) {
+						LineAvgPrice lineAvg = new LineAvgPrice(avgService);
+						if (lineAvg.isWhiteHorseV3ForMiddleSort(code, hiDate)) {// 10日线的白马
+							TradeHistInfoDaliyNofq buyDate = findBuyDate(code, hiDate, rate);
+							if (buyDate != null) {
+								TraceSortv2Vo t1 = saveOkRec(code, buyDate.getDate(), day);
+								if (t1 != null) {
+									return t1;
+								} else {
+									log.info("middle error : {},{},buyDate={},TraceSortv2Vo  is null", code, date,
+											buyDate.getDate());
+								}
+							} else {
+								log.info("middle error : {},{},buyDate  is null", code, date);
+							}
+						} else {
+							log.info("middle error : {},{},10日线不是白马", code, date);
+						}
+					} else {
+						log.info("middle error : {},{},8个月新高，涨幅超55%", code, date);
+					}
+				} else {
+					log.info("middle error : {},{},highDaliy is null", code, date);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			ErrorLogFileUitl.writeError(e, code, date + "", "");
+		}
+		return null;
+	}
+
+//	@PostConstruct
+	public void test1() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				String code = "600050";
+				int date = 20161011;
+				double rate = 3.5;
+				int day = 5;
+				List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code,
+						date, date, EsQueryPageUtil.queryPage9999, SortOrder.ASC);
+				if (dailyList0 != null && dailyList0.size() > 0) {
+					TradeHistInfoDaliyNofq td = dailyList0.get(0);
+					TraceSortv2Vo tv = middleRunning(code, date, td, rate, day);
+					log.info(tv);
+				} else {
+					log.info("dailyList0 is null");
+				}
+			}
+		}).start();
 	}
 }
