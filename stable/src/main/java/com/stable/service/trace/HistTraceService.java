@@ -777,10 +777,23 @@ public class HistTraceService {
 																			buyDate.getDate(), day);
 																	if (t1 != null) {
 																		samples.add(t1);
+																	} else {
+																		log.info(
+																				"middle error : {},{},buyDate={},TraceSortv2Vo  is null",
+																				code, date, buyDate.getDate());
 																	}
+																} else {
+																	log.info("middle error : {},{},buyDate  is null",
+																			code, date);
 																}
+															} else {
+																log.info("middle error : {},{},10日线不是白马", code, date);
 															}
+														} else {
+															log.info("middle error : {},{},8个月新高，涨幅超55%", code, date);
 														}
+													} else {
+														log.info("middle error : {},{},highDaliy is null", code, date);
 													}
 												}
 											} catch (Exception e) {
