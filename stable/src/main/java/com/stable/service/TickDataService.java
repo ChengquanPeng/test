@@ -396,15 +396,14 @@ public class TickDataService {
 			int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 			if (tradeCalService.isOpen(date)) {
 				EsQueryPageReq queryPage = EsQueryPageUtil.queryPage9999;
-
 				String lastDate = tradeCalService.getPretradeDate(date + "");
 				List<DaliyBasicInfo> basics = daliyBasicHistroyService
 						.queryListByCode("", lastDate, "", queryPage, SortOrder.ASC).getContent();
 				int size = basics.size();
-				log.info("total size:{}", size);
-				int index = 1;
+				log.info("basics total size:{}", size);
 				int succ = 0;
-				for (DaliyBasicInfo d : basics) {
+				for (int index = 0; index < basics.size(); index++) {
+					DaliyBasicInfo d = basics.get(index);
 					log.info("fetch TickData From EasyMoney,code={},index={}", d.getCode(), index);
 					List<String> lines = EastmoneySpider.getRealtimeTickByJob(d.getCode());
 					if (lines != null) {
@@ -415,9 +414,8 @@ public class TickDataService {
 							succ++;
 						}
 					}
-					index++;
 				}
-				WxPushUtil.pushSystem1("东方财富完成tickdata获取,total succ=" + succ);
+				WxPushUtil.pushSystem1(date + " 东方财富完成tickdata获取,total succ=" + succ);
 				processSortv1(listsv);
 			} else {
 				log.info("now={}非工作日", date);

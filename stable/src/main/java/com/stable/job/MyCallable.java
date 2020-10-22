@@ -2,6 +2,7 @@ package com.stable.job;
 
 import java.util.Date;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
@@ -16,7 +17,8 @@ import lombok.extern.log4j.Log4j2;
 public abstract class MyCallable implements Callable<Object> {
 	private RunLogBizTypeEnum biz;
 	private RunCycleEnum cycle;
-	//private RunLogService service = SpringUtil.getBean("RunLogService", RunLogService.class);
+	// private RunLogService service = SpringUtil.getBean("RunLogService",
+	// RunLogService.class);
 	private String remark = "";
 
 	public MyCallable(RunLogBizTypeEnum biz, RunCycleEnum cycle) {
@@ -41,7 +43,19 @@ public abstract class MyCallable implements Callable<Object> {
 		rl.setStatus(0);
 		rl.setRemark(remark);
 		rl.setCreateDate(new Date());
-		//service.addLog(rl);
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					TimeUnit.HOURS.sleep(12);
+					WxPushUtil.pushSystem1(">>>执行超时异常<<< " + cycle.getName() + " " + biz.getBtypeName() + " 开始时间:"
+							+ rl.getStartTime() + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
+				} catch (Exception e) {
+				}
+			}
+		});
+		t.start();
+		// service.addLog(rl);
 		try {
 			Object result = mycall();
 			rl.setStatus(1);
@@ -56,7 +70,8 @@ public abstract class MyCallable implements Callable<Object> {
 		} finally {
 			rl.setEndTime(DateUtil.getTodayYYYYMMDDHHMMSS());
 			pushWx(rl.getStatus(), rl.getStartTime(), rl.getEndTime());
-			//service.addLog(rl);
+			// service.addLog(rl);
+			t.interrupt();
 		}
 		return null;
 	}

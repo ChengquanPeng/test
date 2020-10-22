@@ -17,10 +17,12 @@ public class WxPushUtil {
 
 	private static String appToken;
 	private static String myUid;
+	private static String env;
 	static {
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
-		appToken = efc.getAppToken();
-		myUid = efc.getMyUid();
+		appToken = efc.getAppToken().trim();
+		myUid = efc.getMyUid().trim();
+		env = " from " + efc.getEnv().trim() + " ";
 		log.info("appToken={},myUid={}", appToken, myUid);
 	}
 
@@ -37,7 +39,7 @@ public class WxPushUtil {
 			Message message = new Message();
 			message.setAppToken(appToken);
 			message.setContentType(contentType);
-			message.setContent(content + " 微信推送时间:" + DateUtil.getTodayYYYYMMDDHHMMSS());
+			message.setContent(content + env + DateUtil.getTodayYYYYMMDDHHMMSS());
 			if (isMyId) {
 				message.setUid(myUid);
 			} else {
@@ -57,8 +59,8 @@ public class WxPushUtil {
 
 	public static void main(String[] args) {
 		Set<String> uids = new HashSet<String>();
-		//uids.add("");
-		//uids.add("");
+		// uids.add("");
+		// uids.add("");
 		Message message = new Message();
 		message.setAppToken("");
 		message.setContentType(Message.CONTENT_TYPE_TEXT);

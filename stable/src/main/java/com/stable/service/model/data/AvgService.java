@@ -119,17 +119,22 @@ public class AvgService {
 
 	/**
 	 * @param code
-	 * @param date      截止日期
+	 * @param endDate      截止日期
 	 * @param queryPage 最近的多少条，一般是30
 	 * @return
 	 */
-	public List<StockAvg> queryListByCodeForModelWithLastQfqAnd30Records(String code, int date) {
-		return queryListByCodeForModelWithLastQfq(code, date, EsQueryPageUtil.queryPage30);
+	public List<StockAvg> queryListByCodeForModelWithLastQfqAnd30Records(String code, int endDate) {
+		return queryListByCodeForModelWithLastQfq(code, 0, endDate, EsQueryPageUtil.queryPage30);
 	}
 
-	public List<StockAvg> queryListByCodeForModelWithLastQfq(String code, int date, EsQueryPageReq queryPage) {
+	public List<StockAvg> queryListByCodeForModelWithLastQfq(String code, int endDate, EsQueryPageReq queryPage) {
+		return queryListByCodeForModelWithLastQfq(code, 0, endDate, queryPage);
+	}
+
+	public List<StockAvg> queryListByCodeForModelWithLastQfq(String code, int startDate, int endDate,
+			EsQueryPageReq queryPage) {
 		int qfqDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
-		List<StockAvg> db = queryListByCodeForModel(code, date, queryPage);
+		List<StockAvg> db = queryListByCodeForModel(code, startDate, endDate, queryPage);
 		boolean needFetch = false;
 		List<TradeHistInfoDaliy> tradedaliylist = null;
 		if (db != null && db.size() == queryPage.getPageSize()) {
@@ -141,8 +146,8 @@ public class AvgService {
 			}
 			if (!needFetch) {
 				// check 是否是正确的连续30天的数据
-				tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, queryPage,
-						SortOrder.DESC);
+				tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, startDate, endDate,
+						queryPage, SortOrder.DESC);
 				if (tradedaliylist != null) {
 					if (tradedaliylist.get(0).getDate() == db.get(0).getDate()
 							&& tradedaliylist.get(queryPage.getPageSize() - 1).getDate() == db
@@ -163,11 +168,12 @@ public class AvgService {
 		if (needFetch) {
 			if (tradedaliylist == null) {
 				// 可能在上面已经初始化。
-				tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date, queryPage,
-						SortOrder.DESC);
+				tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, startDate, endDate,
+						queryPage, SortOrder.DESC);
 			}
 			if (tradedaliylist != null) {
-				List<StockAvg> result = getSMA30(code, tradedaliylist.get(tradedaliylist.size() - 1).getDate(), date);
+				List<StockAvg> result = getSMA30(code, tradedaliylist.get(tradedaliylist.size() - 1).getDate(),
+						endDate);
 				if (result != null && result.size() > 0) {
 					stockAvgDao.saveAll(result);
 				}
@@ -177,16 +183,18 @@ public class AvgService {
 		return null;
 	}
 
-	private List<StockAvg> queryListByCodeForModel(String code, int date, EsQueryPageReq queryPage) {
+	private List<StockAvg> queryListByCodeForModel(String code, int startDate, int endDate, EsQueryPageReq queryPage) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
 //		log.info("queryPage code={},trade_date={},pageNum={},size={}", code, date, pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		bqb.must(QueryBuilders.rangeQuery("date").lte(date));
+		if (startDate > 0) {
+			bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));
+		}
+		bqb.must(QueryBuilders.rangeQuery("date").lte(endDate));
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
-
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 		return stockAvgDao.search(sq).getContent();

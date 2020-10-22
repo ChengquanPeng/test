@@ -10,6 +10,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +83,7 @@ public class HistTraceService {
 	public static final Semaphore sempAll = new Semaphore(1);
 
 	public void sortv1(double min, double max, String startDate, String endDate) {
-		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD_NOspit());
 		if (StringUtils.isBlank(startDate)) {
 			startDate = "20200101";
 		}
@@ -247,7 +249,7 @@ public class HistTraceService {
 	}
 
 	public void sortv2(String startDate, String endDate) {
-		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD_NOspit());
 		if (StringUtils.isBlank(startDate)) {
 			startDate = "20200101";
 		}
@@ -518,12 +520,14 @@ public class HistTraceService {
 			t1.setCode(code);
 			t1.setDate(date);
 			t1.setMarketIndex(strongService.getIndexPrice(code, date));
-			//
-			List<TradeHistInfoDaliy> dailyList2 = new ArrayList<TradeHistInfoDaliy>();
+
 			// date=已收盘的日期
 			EsQueryPageReq queryPage6 = new EsQueryPageReq(day + 1);// 为啥+1:queryListByCodeWithLastQfq 包含当天了。
 			List<TradeHistInfoDaliy> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, date, 0,
 					queryPage6, SortOrder.ASC);// 返回的list是不可修改对象
+
+			// 除去当天的交易日来算
+			List<TradeHistInfoDaliy> dailyList2 = new ArrayList<TradeHistInfoDaliy>();
 			for (int i = 1; i < dailyList0.size(); i++) {
 				dailyList2.add(dailyList0.get(i));
 			}
@@ -595,7 +599,7 @@ public class HistTraceService {
 		return false;
 	}
 
-	private String title = "代码,日期,当日涨幅,当日大盘涨幅,买入价,卖出价,是否盈利,盈利多少,最高收盘价,最低收盘价,最低价幅度,最低价,最低价幅度,市盈率(静),市盈率(TTM),"
+	private String title = "代码,日期,当日涨幅,当日大盘涨幅,一定亏损,是否盈利,买入价,卖出价,盈利多少,最高收盘价,最低收盘价,最低价幅度,最低价,最低价幅度,市盈率(静),市盈率(TTM),"
 			+ "流通市值(万元),量比,最近财务快预告日期,营业同比增长,净利同比增长,最新财务公告日期,营业同比增长,净利同比增长,";
 
 	private void stat(String filepath, TraceSortv2StatVo stat, List<TraceSortv2Vo> samples) {
@@ -639,7 +643,7 @@ public class HistTraceService {
 			}
 		}
 		if (sb.length() > 0) {
-			LogFileUitl.writeLog(filepath + ".csv", sb.toString());
+			LogFileUitl.writeFileWithGBK(filepath + ".csv", sb.toString());
 		}
 	}
 
@@ -687,7 +691,7 @@ public class HistTraceService {
 	}
 
 	public void middle(String startDate, String endDate) {
-		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD_NOspit());
 		if (StringUtils.isBlank(startDate)) {
 			startDate = "20200101";
 		}
@@ -710,6 +714,7 @@ public class HistTraceService {
 			e1.printStackTrace();
 		}
 		int[] days = { 5 };
+		double maxRate = 7.5;
 		double[] rates = { 3.5 };
 		int op = 0;
 		int mp = 0;
@@ -719,7 +724,8 @@ public class HistTraceService {
 					List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 					log.info("codelist:" + codelist.size());
 					String sysstart = DateUtil.getTodayYYYYMMDDHHMMSS();
-					String detailOther = ",rate=" + rate + ",day=" + day;
+					String detailOther = ",rate=" + rate + ",day=" + day
+							+ ",轻微上影线+短线获利小+买入日振幅小+买入日涨幅小,根据流通市值动态回踩天数且过滤前面5个交易日，最高日前面涨停不能过大,最高日收盘价比最低价回踩5%以上，bugversion20201022-1";
 					log.info("startDate={},endDate={},{}", startDate, endDate, detailOther);
 					try {
 						List<TraceSortv2Vo> samples = Collections.synchronizedList(new LinkedList<TraceSortv2Vo>());
@@ -741,14 +747,22 @@ public class HistTraceService {
 										List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService
 												.queryListByCodeWithLastNofq(code, sd, ed,
 														EsQueryPageUtil.queryPage9999, SortOrder.ASC);// 返回的list是不可修改对象
+										int lastBuyDate = 0;
 										for (TradeHistInfoDaliyNofq td : dailyList0) {
 											int date = td.getDate();
-											if (date < twoYearChkDate) {
-												continue;
-											}
-											TraceSortv2Vo t1 = middleRunning(code, date, td, rate, day);
-											if (t1 != null) {
-												samples.add(t1);
+											try {
+												if (date < twoYearChkDate) {
+													continue;
+												}
+												TraceSortv2Vo t1 = middleRunning(code, date, td, rate, maxRate, day);
+												if (t1 != null && lastBuyDate != t1.getDate()) {
+													t1.setZhangtingDate(date);
+													samples.add(t1);
+													lastBuyDate = t1.getDate();// 不能存在同样的样本
+												}
+											} catch (Exception e) {
+												ErrorLogFileUitl.writeError(e, code, sd + "", ed + " " + date);
+												e.printStackTrace();
 											}
 										}
 									} catch (Exception e) {
@@ -820,61 +834,151 @@ public class HistTraceService {
 	// == 高低开 ==
 
 	// 中线-涨停后的最高交易日（最高日不是当天->涨停就回撤了; 也不是最后1天->一直在拉升）
-	private TradeHistInfoDaliy findHighDate(List<TradeHistInfoDaliy> list) {
-		TradeHistInfoDaliy dmax = list.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
-		if (dmax.getDate() != list.get(0).getDate() && dmax.getDate() != list.get(list.size() - 1).getDate()) {
-			return dmax;
+	private TradeHistInfoDaliy findHighDate(String code, int date, int codeType, EsQueryPageReq queryPage) {
+		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, date, 0, queryPage,
+				SortOrder.ASC);// 返回的list是不可修改对象
+
+		for (int i = 0; i < 3; i++) {
+			TradeHistInfoDaliy dmax = list.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+			if (dmax.getDate() != list.get(0).getDate() && dmax.getDate() != list.get(list.size() - 1).getDate()) {
+				if (dmax.getClosed() <= dmax.getHigh()
+						&& CurrencyUitl.cutProfit(dmax.getClosed(), dmax.getHigh()) > 7.0) {
+					continue; // 非常严重的上影线
+				} else {
+					return dmax;
+				}
+			}
 		}
+
 		return null;
 	}
 
-	// 中线-最高交易日后的企稳和第一个3.5%以上
-	private TradeHistInfoDaliyNofq findBuyDate(String code, int hiDate, double rate) {
-		List<TradeHistInfoDaliyNofq> listNofq = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, hiDate, 0,
-				EsQueryPageUtil.queryPage30, SortOrder.ASC);// 往后的30个交易日
-		TradeHistInfoDaliyNofq highDaliy = listNofq.get(0);
+	// 中线-最高交易日后的企稳和第一个3.5%以上，回踩
+	private TradeHistInfoDaliyNofq findBuyDate(String code, int topDate, int hiDate, double minRate, double maxRate,
+			EsQueryPageReq buyDateQueryPage, int codeType) {
+
+		// 1.往前的30个交易日涨幅和后面几个交易日，涨幅不能过大
+		List<TradeHistInfoDaliyNofq> listbefor = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, topDate,
+				EsQueryPageUtil.queryPage30, SortOrder.DESC);//
+		List<TradeHistInfoDaliyNofq> listafter = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, topDate, 0,
+				EsQueryPageUtil.queryPage6, SortOrder.ASC);//
+		List<TradeHistInfoDaliyNofq> listAll = new ArrayList<TradeHistInfoDaliyNofq>();
+		listAll.addAll(listbefor);
+		listAll.addAll(listafter);
+
+		double highPice = 0.0;
+		double lowPice = 0.0;
+		if (codeType == 1) {// 小盘股震荡大
+			highPice = listAll.stream().max(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getHigh)).get()
+					.getHigh();
+			lowPice = listAll.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getLow)).get().getLow();
+		} else {
+			highPice = listAll.stream().max(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getClosed)).get()
+					.getClosed();
+			lowPice = listAll.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getClosed)).get()
+					.getClosed();
+		}
+
+		if (CurrencyUitl.cutProfit(lowPice, highPice) >= 30) {// (包含了涨停日)
+			return null;
+		}
+
+		// 2.往后的交易日回踩企稳和第一个3.5%以上，回踩
+		List<TradeHistInfoDaliyNofq> listNofqAfter = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, hiDate,
+				0, buyDateQueryPage, SortOrder.ASC);// 往后的N个交易日
+		TradeHistInfoDaliyNofq endDaliy = listNofqAfter.get(listNofqAfter.size() - 1);
 		TradeHistInfoDaliyNofq beforeDate = null;
-		for (TradeHistInfoDaliyNofq d : listNofq) {
-			if (d.getTodayChangeRate() >= rate && d.getClosed() < highDaliy.getHigh()) {// 涨幅3.5%,切收盘价格小于最高价（说明有回撤）。
-				if (beforeDate != null && beforeDate.getTodayChangeRate() < d.getTodayChangeRate()) {// 今日涨幅大于昨天涨幅
-					LineAvgPrice lineAvg = new LineAvgPrice(avgService);
-					if (lineAvg.isStable(code, d.getDate())) {// 企稳
+		double lowestPrice = 100000.0;
+		LinePrice linePrice = new LinePrice(code, hiDate, daliyTradeHistroyService);
+		LineAvgPrice lineAvg = new LineAvgPrice(avgService);
+		List<StockAvg> chkBackList = null;
+
+		for (int i = 0; i < listNofqAfter.size(); i++) {
+			TradeHistInfoDaliyNofq d = listNofqAfter.get(i);
+			if (i >= 5 // 前面5个交易日不参与
+					&& d.getTodayChangeRate() >= minRate && d.getTodayChangeRate() <= maxRate // 最高涨幅
+					&& d.getClosed() > d.getOpen()// 收盘一定大于开盘价
+			// && CurrencyUitl.cutProfit(d.getLow(), d.getHigh()) <= maxRate
+			) {// 最高振幅
+				// 最高涨幅和涨幅的限制，可能在熊市会过滤较多风险股。
+				if (!linePrice.isLowClosePriceToday(d.getTodayChangeRate(), d.getYesterdayPrice(), d.getClosed(),
+						d.getOpen(), 0.6) // 不是严重上影线
+						&& beforeDate != null && beforeDate.getTodayChangeRate() < d.getTodayChangeRate()// 今日涨幅大于昨天涨幅
+						&& CurrencyUitl.cutProfit(lowestPrice, d.getHigh()) < 15.0// 最高日回调后的短期获利较小
+
+				) {
+					if (chkBackList == null) {
+						chkBackList = avgService.queryListByCodeForModelWithLastQfq(code, hiDate, endDaliy.getDate(),
+								buyDateQueryPage);
+					}
+					// 5日线回踩
+					int cnt = 0;
+					double befVal = 0;
+					for (int j = chkBackList.size() - 1; j >= 0; j--) {// 返回的结果是倒序
+						StockAvg sa = chkBackList.get(j);
+						if (sa.getDate() > d.getDate() || cnt >= 4) {
+							break;
+						}
+						if (befVal >= sa.getAvgPriceIndex5()) {
+							cnt++;
+						} else {
+							cnt = 0;// 重置，需要连续回调
+						}
+						befVal = sa.getAvgPriceIndex5();
+					}
+					if (cnt >= 4 && lineAvg.isStable(code, d.getDate())) {// 企稳
 						return d;
 					}
 				}
 			}
 			beforeDate = d;
+			if (beforeDate.getLow() < lowestPrice) {
+				lowestPrice = beforeDate.getLow();
+			}
 		}
 		return null;
 	}
 
-	private TraceSortv2Vo middleRunning(String code, int date, TradeHistInfoDaliyNofq td, double rate, int day) {
+	public static void main(String[] args) {
+		System.err.println(CurrencyUitl.cutProfit(10.0, 10.5));
+	}
+
+	private TraceSortv2Vo middleRunning(String code, int date, TradeHistInfoDaliyNofq td, double rate, double maxRate,
+			int day) {
 		double todayChangeRate = td.getTodayChangeRate();
 		try {
+
 			LinePrice linePrice = new LinePrice(code, date, daliyTradeHistroyService);
 			if (todayChangeRate >= 9.5 && td.getHigh() == td.getClosed()// 涨停
 					&& !linePrice.isLowClosePriceToday(todayChangeRate, td.getYesterdayPrice(), td.getClosed(),
 							td.getHigh())) {// 是否上影线
 				DaliyBasicInfo basic = daliyBasicHistroyService.getDaliyBasicInfoByDate(code, date);
-				EsQueryPageReq queryPage = null;
+				EsQueryPageReq queryPage = null;// 短期高点
+				EsQueryPageReq buyDateQueryPage = null;
+				int codeType = 0;
 				if (basic.getCirc_mv() > 5000000) {// >500亿
-					queryPage = EsQueryPageUtil.queryPage10;
+					queryPage = EsQueryPageUtil.queryPage15;
+					buyDateQueryPage = EsQueryPageUtil.queryPage35;
+					codeType = 3;// 大盘股
 				} else if (basic.getCirc_mv() > 1000000) {// >100亿 / 大盘股:流通市值小于100亿
-					queryPage = EsQueryPageUtil.queryPage8;
+					queryPage = EsQueryPageUtil.queryPage10;
+					buyDateQueryPage = EsQueryPageUtil.queryPage25;
+					codeType = 2;// 中盘股
 				} else {
 					// 小盘股
-					queryPage = EsQueryPageUtil.queryPage5;
+					queryPage = EsQueryPageUtil.queryPage10;
+					buyDateQueryPage = EsQueryPageUtil.queryPage20;
+					codeType = 1;// 小盘股
 				}
-				List<TradeHistInfoDaliy> findHigh = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, date, 0,
-						queryPage, SortOrder.ASC);// 返回的list是不可修改对象
-				TradeHistInfoDaliy highDaliy = findHighDate(findHigh);
+				TradeHistInfoDaliy highDaliy = findHighDate(code, date, codeType, queryPage);
 				if (highDaliy != null) {
 					int hiDate = highDaliy.getDate();
 					// 8个月新高，涨幅未超55%
 					if (linePrice.priceCheckForMiddle(code, hiDate)) {
 						LineAvgPrice lineAvg = new LineAvgPrice(avgService);
 						if (lineAvg.isWhiteHorseV3ForMiddleSort(code, hiDate)) {// 10日线的白马
-							TradeHistInfoDaliyNofq buyDate = findBuyDate(code, hiDate, rate);
+							TradeHistInfoDaliyNofq buyDate = findBuyDate(code, date, hiDate, rate, maxRate,
+									buyDateQueryPage, codeType);
 							if (buyDate != null) {
 								TraceSortv2Vo t1 = saveOkRec(code, buyDate.getDate(), day);
 								if (t1 != null) {
@@ -890,7 +994,7 @@ public class HistTraceService {
 							log.info("middle error : {},{},10日线不是白马", code, date);
 						}
 					} else {
-						log.info("middle error : {},{},8个月新高，涨幅超55%", code, date);
+
 					}
 				} else {
 					log.info("middle error : {},{},highDaliy is null", code, date);
@@ -903,24 +1007,34 @@ public class HistTraceService {
 		return null;
 	}
 
-//	@PostConstruct
+	@PostConstruct
 	public void test1() {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				String code = "600050";
-				int date = 20161011;
-				double rate = 3.5;
-				int day = 5;
-				List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code,
-						date, date, EsQueryPageUtil.queryPage9999, SortOrder.ASC);
-				if (dailyList0 != null && dailyList0.size() > 0) {
-					TradeHistInfoDaliyNofq td = dailyList0.get(0);
-					TraceSortv2Vo tv = middleRunning(code, date, td, rate, day);
-					log.info(tv);
-				} else {
-					log.info("dailyList0 is null");
-				}
+//				String code = "600789";
+//				int date = 20191231;
+//				String code = "600050";
+//				int date = 20161011;
+				String code = "002170";
+//				int date = 20200210;
+//
+//				double rate = 3.5;
+//				int day = 5;
+//				List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code,
+//						date, date, EsQueryPageUtil.queryPage9999, SortOrder.ASC);
+//				if (dailyList0 != null && dailyList0.size() > 0) {
+//					TradeHistInfoDaliyNofq td = dailyList0.get(0);
+//					TraceSortv2Vo tv = middleRunning(code, date, td, rate, 7.5, day);
+//					log.info(tv);
+//				} else {
+//					log.info("dailyList0 is null");
+//				}
+				middle("20200101", "20200930");
+				middle("20190101", "20191231");
+				middle("20180101", "20181231");
+				middle("20170101", "20171231");
+				middle("20160101", "20161231");
 			}
 		}).start();
 	}

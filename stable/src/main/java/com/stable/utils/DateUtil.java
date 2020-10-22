@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class DateUtil {
+	public static final String YYYY_MM_DD_HH_NO_SPIT = "yyyyMMddHH";
 	public static final String YYYY_MM_DD_HH_MM_SS_NO_SPIT = "yyyyMMddHHmmss";
 	public static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
 	public static final String YYYY_MM_DD = "yyyyMMdd";
@@ -87,6 +88,11 @@ public class DateUtil {
 
 	public static String getTodayYYYYMMDDHHMMSS_NOspit() {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS_NO_SPIT);
+		return format.format(new Date());
+	}
+
+	public static String getTodayYYYYMMDD_NOspit() {
+		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD_HH_NO_SPIT);
 		return format.format(new Date());
 	}
 

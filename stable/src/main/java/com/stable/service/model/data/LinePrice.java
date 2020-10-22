@@ -162,16 +162,22 @@ public class LinePrice {
 
 	// 是否上影线
 	public boolean isLowClosePriceToday(double todayChangeRate, double yesterdayPrice, double closedPrice,
-			double highPrice) {
+			double highPrice, double baseLine) {
 		if (todayChangeRate > 0) {
 			double diff = highPrice - yesterdayPrice;
-			double base = diff * 0.8;
+			double base = diff * baseLine;
 			double chkPrice = CurrencyUitl.roundHalfUp(base) + yesterdayPrice;
 			if (chkPrice > closedPrice) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	// 是否上影线
+	public boolean isLowClosePriceToday(double todayChangeRate, double yesterdayPrice, double closedPrice,
+			double highPrice) {
+		return isLowClosePriceToday(todayChangeRate, yesterdayPrice, closedPrice, highPrice, 0.8);
 	}
 
 	public static void main(String[] args) {
@@ -351,19 +357,26 @@ public class LinePrice {
 	public boolean priceCheckForMiddle(String code, int date) {
 		List<TradeHistInfoDaliy> listD160 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
 				EsQueryPageUtil.queryPage160, SortOrder.DESC);
-		TradeHistInfoDaliy dmax = listD160.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
-		TradeHistInfoDaliy dmin = listD160.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
-		double maxPrice = dmax.getHigh();
-		if (listD160.get(0).getHigh() >= maxPrice) {
-			double minPrice = dmin.getLow();
-			if (CurrencyUitl.cutProfit(minPrice, maxPrice) > 55.0) {
+		TradeHistInfoDaliy dmax = listD160.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed))
+				.get();
+		TradeHistInfoDaliy dmin = listD160.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed))
+				.get();
+		double maxPrice = dmax.getClosed();
+		if (listD160.get(0).getClosed() >= maxPrice) {
+			double minPrice = dmin.getClosed();
+			double profit = CurrencyUitl.cutProfit(minPrice, maxPrice);
+			if (profit > 50.0) {
+				log.info(
+						"middle error :code={},checkDate={},maxprice={},maxpriceDate={},mixprice={},maxpriceDate={}  8个月新高({})，涨幅超50%",
+						code, date, maxPrice, dmax.getDate(), minPrice, dmin.getDate(), profit);
 				return false;
 			} else {
-				log.info("code={},checkDate={},maxprice={},maxpriceDate={},mixprice={},maxpriceDate={}", //
-						code, date, maxPrice, dmax.getDate(), minPrice, dmin.getDate());
+				log.info("code={},checkDate={},maxprice={},maxpriceDate={},mixprice={},maxpriceDate={},profit={}", code,
+						date, maxPrice, dmax.getDate(), minPrice, dmin.getDate(), profit);
 				return true;
 			}
 		} // else 不是新高
+		log.info("code={},checkDate={},不是新高", code, date);
 		return false;
 	}
 

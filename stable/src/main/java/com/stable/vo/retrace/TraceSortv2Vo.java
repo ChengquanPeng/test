@@ -28,16 +28,18 @@ public class TraceSortv2Vo {
 	private FinYjkb kb;
 	private FinYjyg yg;
 
+	private int zhangtingDate;
+
 	public String toExcel() {
 		actProfit = CurrencyUitl.cutProfit(buyPrice, sellPrice);
-		// 代码,日期,当日涨幅,当日大盘涨幅,买入价,卖出价,是否盈利,盈利多少,最高收盘价,最低收盘价,最低价幅度,最低价,最低价幅度,市盈率(静),市盈率(TTM),
+		// 代码,日期,当日涨幅,当日大盘涨幅,一定亏损,是否盈利,买入价,卖出价,盈利多少,最高收盘价,最低收盘价,最低价幅度,最低价,最低价幅度,市盈率(静),市盈率(TTM),
 		// 流通市值(万元),量比,最近财务快预告日期,营业同比增长,净利同比增长,最新财务公告日期,营业同比增长,净利同比增长,
-		String msg = code + "," + date + "," + buyDayRate + "," + marketIndex + "," + buyPrice + "," + sellPrice + ","
-				+ (sellPrice > buyPrice ? 1 : 0) + "," + actProfit + "," + maxPrice + "," + //
-				minPrice + "," + (CurrencyUitl.cutProfit(buyPrice, minPrice)) + "," + //
+		String msg = code + "," + date + "," + buyDayRate + "," + marketIndex + "," + (maxPrice <= buyPrice ? 1 : 0)//
+				+ "," + (sellPrice > buyPrice ? 1 : 0) + "," + buyPrice + "," + sellPrice + "," + actProfit + ","//
+				+ maxPrice + "," + minPrice + "," + (CurrencyUitl.cutProfit(buyPrice, minPrice)) + "," + //
 				minLowPrice + "," + (CurrencyUitl.cutProfit(buyPrice, minLowPrice)) + "," + //
-				basic.getPe() + "," + basic.getPe_ttm() + "," + CurrencyUitl.covertToString(basic.getCirc_mv()) + ","
-				+ basic.getVolume_ratio() + ",";
+				basic.getPe() + "," + basic.getPe_ttm() + "," + CurrencyUitl.covertToString(basic.getCirc_mv() * 10000)
+				+ "," + basic.getVolume_ratio() + ",";
 		if (kb == null && yg == null) {
 			msg += ",,";
 		} else {
@@ -52,6 +54,7 @@ public class TraceSortv2Vo {
 		} else {
 			msg += "," + fin.getAnnDate() + "," + fin.getYyzsrtbzz() + "," + fin.getGsjlrtbzz() + ",";
 		}
+		msg += "," + zhangtingDate;
 		return msg;
 	}
 }
