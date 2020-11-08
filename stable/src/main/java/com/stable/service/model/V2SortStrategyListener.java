@@ -24,7 +24,7 @@ import com.stable.utils.FileWriteUitl;
 import com.stable.utils.SpringUtil;
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
-import com.stable.vo.bus.StockAvg;
+import com.stable.vo.bus.StockAvgBase;
 import com.stable.vo.up.strategy.ModelV1;
 
 import lombok.extern.log4j.Log4j2;
@@ -70,7 +70,7 @@ public class V2SortStrategyListener implements StrategyListener {
 					setDetail(detailDesc, "白马？");
 					mv.setWhiteHorse(1);// 白马？
 					DaliyBasicInfo today = mc.getToday();
-					StockAvg av = lineAvgPrice.todayAv;
+					StockAvgBase av = lineAvgPrice.todayAv;
 
 					if (today.getLow() <= 0 || today.getClose() <= 0) {
 						throw new RuntimeException(

@@ -10,8 +10,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +44,7 @@ import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.HistTrace;
-import com.stable.vo.bus.StockAvg;
+import com.stable.vo.bus.StockAvgBase;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
@@ -434,7 +432,7 @@ public class HistTraceService {
 
 	private boolean isUpNline(boolean isV2, LineAvgPrice lineAvg, double yesterdayPrice, double closedPrice) {
 		if (isV2) {
-			StockAvg av = lineAvg.todayAv;
+			StockAvgBase av = lineAvg.todayAv;
 			return (av.getAvgPriceIndex5() > yesterdayPrice || av.getAvgPriceIndex10() > yesterdayPrice
 					|| av.getAvgPriceIndex20() > yesterdayPrice || av.getAvgPriceIndex30() > yesterdayPrice//
 			)// 4.昨日收盘价在任意均线之下
@@ -713,8 +711,8 @@ public class HistTraceService {
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
-		int[] days = { 5 };
-		double maxRate = 7.5;
+		int[] days = { 3 };
+		double maxRate = 6.5;
 		double[] rates = { 3.5 };
 		int op = 0;
 		int mp = 0;
@@ -725,7 +723,7 @@ public class HistTraceService {
 					log.info("codelist:" + codelist.size());
 					String sysstart = DateUtil.getTodayYYYYMMDDHHMMSS();
 					String detailOther = ",rate=" + rate + ",day=" + day
-							+ ",轻微上影线+短线获利小+买入日振幅小+买入日涨幅小,根据流通市值动态回踩天数且过滤前面5个交易日，最高日前面涨停不能过大,最高日收盘价比最低价回踩5%以上，bugversion20201022-1";
+							+ ",轻微上影线+短线获利小+买入日振幅小+买入日涨幅小,根据流通市值动态回踩天数且过滤前面5个交易日，最高日前面涨停不能过大,最高日收盘价比最低价回踩5%以上，去掉半年新高";
 					log.info("startDate={},endDate={},{}", startDate, endDate, detailOther);
 					try {
 						List<TraceSortv2Vo> samples = Collections.synchronizedList(new LinkedList<TraceSortv2Vo>());
@@ -891,7 +889,7 @@ public class HistTraceService {
 		double lowestPrice = 100000.0;
 		LinePrice linePrice = new LinePrice(code, hiDate, daliyTradeHistroyService);
 		LineAvgPrice lineAvg = new LineAvgPrice(avgService);
-		List<StockAvg> chkBackList = null;
+		List<StockAvgBase> chkBackList = null;
 
 		for (int i = 0; i < listNofqAfter.size(); i++) {
 			TradeHistInfoDaliyNofq d = listNofqAfter.get(i);
@@ -908,14 +906,14 @@ public class HistTraceService {
 
 				) {
 					if (chkBackList == null) {
-						chkBackList = avgService.queryListByCodeForModelWithLastQfq(code, hiDate, endDaliy.getDate(),
-								buyDateQueryPage);
+						chkBackList = avgService.queryListByCodeForModelWithLast(code, hiDate, endDaliy.getDate(),
+								buyDateQueryPage, true);
 					}
 					// 5日线回踩
 					int cnt = 0;
 					double befVal = 0;
 					for (int j = chkBackList.size() - 1; j >= 0; j--) {// 返回的结果是倒序
-						StockAvg sa = chkBackList.get(j);
+						StockAvgBase sa = chkBackList.get(j);
 						if (sa.getDate() > d.getDate() || cnt >= 4) {
 							break;
 						}
@@ -1007,7 +1005,7 @@ public class HistTraceService {
 		return null;
 	}
 
-	@PostConstruct
+	// @PostConstruct
 	public void test1() {
 		new Thread(new Runnable() {
 			@Override
@@ -1016,7 +1014,7 @@ public class HistTraceService {
 //				int date = 20191231;
 //				String code = "600050";
 //				int date = 20161011;
-				String code = "002170";
+//				String code = "002170";
 //				int date = 20200210;
 //
 //				double rate = 3.5;
@@ -1035,6 +1033,9 @@ public class HistTraceService {
 				middle("20180101", "20181231");
 				middle("20170101", "20171231");
 				middle("20160101", "20161231");
+				middle("20110101", "20111231");
+				middle("20120101", "20121231");
+				middle("20130101", "20131231");
 			}
 		}).start();
 	}

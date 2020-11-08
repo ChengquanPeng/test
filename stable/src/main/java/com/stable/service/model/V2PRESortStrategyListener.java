@@ -26,7 +26,7 @@ import com.stable.utils.FileWriteUitl;
 import com.stable.utils.SpringUtil;
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
-import com.stable.vo.bus.StockAvg;
+import com.stable.vo.bus.StockAvgBase;
 import com.stable.vo.up.strategy.ModelV1;
 
 import lombok.extern.log4j.Log4j2;
@@ -73,7 +73,7 @@ public class V2PRESortStrategyListener implements StrategyListener {
 					setDetail(detailDesc, "白马？");
 					mv.setWhiteHorse(1);// 白马？
 					DaliyBasicInfo today = mc.getToday();
-					StockAvg av = lineAvgPrice.todayAv;
+					StockAvgBase av = lineAvgPrice.todayAv;
 					String code = mc.getCode();
 
 					// 收盘在任意均线之下，进入第二日监听列表

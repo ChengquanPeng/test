@@ -20,7 +20,6 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
-import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.TradeCal;
 
 import lombok.extern.log4j.Log4j2;
@@ -66,7 +65,13 @@ public class TradeCalService {
 		});
 	}
 
-	private void fetchCal(String start_date, String end_date) {
+	// 整年的日历
+	private synchronized void fetchCal(String date) {
+		int year = DateUtil.getYear(Integer.valueOf(date));
+		fetchCal(year + "0101", year + "1231");
+	}
+
+	private synchronized void fetchCal(String start_date, String end_date) {
 		JSONArray array = tushareSpider.getTradeCal(start_date, end_date);
 		int cnt = 0;
 		if (array != null && array.size() > 0) {
@@ -92,7 +97,9 @@ public class TradeCalService {
 		} else {
 			log.warn("未获取到交易日历");
 		}
-		WxPushUtil.pushSystem1(start_date + " " + end_date + "获取交易日历条数=" + cnt);
+		String msg = start_date + " " + end_date + "获取交易日历条数=" + cnt;
+		log.info(msg);
+		// WxPushUtil.pushSystem1(msg);
 	}
 
 	public boolean isOpen(int date) {
@@ -106,9 +113,19 @@ public class TradeCalService {
 	public String getPretradeDate(String date) {
 		String s = redisUtil.get(RedisConstant.RDS_TRADE_CAL_ + date);
 		if (StringUtils.isBlank(s)) {
-			fetchCal(date, date);
+			fetchCal(date);
 			return redisUtil.get(RedisConstant.RDS_TRADE_CAL_ + date);
 		}
 		return s;
+	}
+
+	public int getPretradeDate(int d) {
+		String date = d + "";
+		String s = redisUtil.get(RedisConstant.RDS_TRADE_CAL_ + date);
+		if (StringUtils.isBlank(s)) {
+			fetchCal(date);
+			return Integer.valueOf(redisUtil.get(RedisConstant.RDS_TRADE_CAL_ + date));
+		}
+		return Integer.valueOf(s);
 	}
 }

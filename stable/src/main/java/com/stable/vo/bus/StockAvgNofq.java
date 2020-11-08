@@ -12,9 +12,9 @@ import lombok.ToString;
 @ToString
 @Getter
 @Setter
-@Document(indexName = "stock_avg")
-public class StockAvg extends EsBase implements StockAvgBase {
-	private static final long serialVersionUID = 107721876820773361L;
+@Document(indexName = "stock_avg_nofq")
+public class StockAvgNofq extends EsBase implements StockAvgBase {
+	private static final long serialVersionUID = 107721876820773362L;
 	@Id
 	private String id;
 	@Field(type = FieldType.Text)
@@ -42,5 +42,4 @@ public class StockAvg extends EsBase implements StockAvgBase {
 	public void setId() {
 		id = code + date;
 	}
-
 }

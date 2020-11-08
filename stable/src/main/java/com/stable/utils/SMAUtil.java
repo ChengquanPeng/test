@@ -10,13 +10,16 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.vo.bus.StockAvg;
+import com.stable.vo.bus.StockAvgBase;
+import com.stable.vo.bus.StockAvgNofq;
 import com.stable.vo.bus.TradeHistInfoDaliy;
+import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 
 import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
-public class QfqUtil {
+public class SMAUtil {
 	private final int PERIODS_AVERAGE_30 = 30;
 	private final int PERIODS_AVERAGE_20 = 20;
 	private final int PERIODS_AVERAGE_10 = 10;
@@ -25,23 +28,48 @@ public class QfqUtil {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 
-	public List<StockAvg> getSMA5_30(String code, int startDate, int endDate) {
-		// 倒序的结果列表
-		List<TradeHistInfoDaliy> temp = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, startDate,
-				EsQueryPageUtil.queryPage30, SortOrder.DESC);// startDate:开始日期的前30个交易日
+	public List<StockAvgBase> getSMA5_30(String code, int startDate, int endDate, boolean isQfq) {
+		double[] closePrice;
+		List<TradeHistInfoDaliy> fqlist = null;
+		List<TradeHistInfoDaliyNofq> nfqlist = null;
+		if (isQfq) {
+			// 倒序的结果列表
+			List<TradeHistInfoDaliy> temp = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, startDate,
+					EsQueryPageUtil.queryPage30, SortOrder.DESC);// startDate:开始日期的前30个交易日
 
-		if (temp.size() != 30) {
-			throw new RuntimeException(
-					"计算错误,前面30个交易日获取数据错误,code=" + code + ",startDate=" + startDate + ",endDate=" + endDate);
-		}
-		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code,
-				temp.get(temp.size() - 1).getDate(), endDate, EsQueryPageUtil.queryPage9999, SortOrder.DESC);
-		double[] closePrice = new double[list.size()];
-		// 顺序的收盘价数组
-		int j = 0;
-		for (int i = list.size() - 1; i >= 0; i--) {
-			closePrice[i] = list.get(j).getClosed();
-			j++;
+			if (temp.size() != 30) {
+				throw new RuntimeException(
+						"计算错误,前面30个交易日获取数据错误,code=" + code + ",startDate=" + startDate + ",endDate=" + endDate);
+			}
+			fqlist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, temp.get(temp.size() - 1).getDate(),
+					endDate, EsQueryPageUtil.queryPage9999, SortOrder.DESC);
+			closePrice = new double[fqlist.size()];
+
+			// 顺序的收盘价数组
+			int j = 0;
+			for (int i = fqlist.size() - 1; i >= 0; i--) {
+				closePrice[i] = fqlist.get(j).getClosed();
+				j++;
+			}
+		} else {
+			// 倒序的结果列表
+			List<TradeHistInfoDaliyNofq> temp = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, startDate,
+					EsQueryPageUtil.queryPage30, SortOrder.DESC);// startDate:开始日期的前30个交易日
+
+			if (temp.size() != 30) {
+				throw new RuntimeException(
+						"计算错误,前面30个交易日获取数据错误,code=" + code + ",startDate=" + startDate + ",endDate=" + endDate);
+			}
+			nfqlist = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, temp.get(temp.size() - 1).getDate(),
+					endDate, EsQueryPageUtil.queryPage9999, SortOrder.DESC);
+			closePrice = new double[nfqlist.size()];
+
+			// 顺序的收盘价数组
+			int j = 0;
+			for (int i = nfqlist.size() - 1; i >= 0; i--) {
+				closePrice[i] = nfqlist.get(j).getClosed();
+				j++;
+			}
 		}
 
 		// 顺序的结果
@@ -51,17 +79,29 @@ public class QfqUtil {
 			double[] avg20 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_20);
 			double[] avg10 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_10);
 			double[] avg5 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_5);
-
+			List<StockAvgBase> rs = new LinkedList<StockAvgBase>();
 			// 倒序列表
-			List<StockAvg> rs = new LinkedList<StockAvg>();
-			for (TradeHistInfoDaliy td : list) {
-				if (td.getDate() >= startDate) {
-					StockAvg sa = new StockAvg();
-					sa.setCode(code);
-					sa.setDate(td.getDate());
-					sa.setLastDividendDate(dividendDate);
-					sa.setId();
-					rs.add(sa);
+			if (isQfq) {
+				for (TradeHistInfoDaliy td : fqlist) {
+					if (td.getDate() >= startDate) {
+						StockAvg sa = new StockAvg();
+						sa.setCode(code);
+						sa.setDate(td.getDate());
+						sa.setLastDividendDate(dividendDate);
+						sa.setId();
+						rs.add(sa);
+					}
+				}
+			} else {
+				for (TradeHistInfoDaliyNofq td : nfqlist) {
+					if (td.getDate() >= startDate) {
+						StockAvgNofq sa = new StockAvgNofq();
+						sa.setCode(code);
+						sa.setDate(td.getDate());
+						sa.setLastDividendDate(dividendDate);
+						sa.setId();
+						rs.add(sa);
+					}
 				}
 			}
 			int index = rs.size() - 1;

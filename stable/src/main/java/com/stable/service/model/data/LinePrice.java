@@ -13,7 +13,7 @@ import com.stable.service.DaliyTradeHistroyService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
-import com.stable.vo.bus.StockAvg;
+import com.stable.vo.bus.StockAvgBase;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 
 import lombok.Getter;
@@ -25,7 +25,7 @@ public class LinePrice {
 	private ModelContext cxt;
 	private List<DaliyBasicInfo> dailyList;
 	private List<TradeHistInfoDaliy> listD30;
-	private StockAvg todayAv;
+	private StockAvgBase todayAv;
 	private StrongService strongService;
 	private int date;
 	private String code;
@@ -33,8 +33,12 @@ public class LinePrice {
 	// 除权
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 
-	public LinePrice(StrongService strongService, ModelContext cxt, List<DaliyBasicInfo> dailyList, StockAvg todayAv,
-			DaliyTradeHistroyService daliyTradeHistroyService) {
+	public LinePrice() {
+
+	}
+
+	public LinePrice(StrongService strongService, ModelContext cxt, List<DaliyBasicInfo> dailyList,
+			StockAvgBase todayAv, DaliyTradeHistroyService daliyTradeHistroyService) {
 		this.daliyTradeHistroyService = daliyTradeHistroyService;
 		this.cxt = cxt;
 		this.dailyList = dailyList;
@@ -356,7 +360,7 @@ public class LinePrice {
 	 */
 	public boolean priceCheckForMiddle(String code, int date) {
 		List<TradeHistInfoDaliy> listD160 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
-				EsQueryPageUtil.queryPage160, SortOrder.DESC);
+				EsQueryPageUtil.queryPage120, SortOrder.DESC);
 		TradeHistInfoDaliy dmax = listD160.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed))
 				.get();
 		TradeHistInfoDaliy dmin = listD160.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed))
@@ -365,9 +369,9 @@ public class LinePrice {
 		if (listD160.get(0).getClosed() >= maxPrice) {
 			double minPrice = dmin.getClosed();
 			double profit = CurrencyUitl.cutProfit(minPrice, maxPrice);
-			if (profit > 50.0) {
+			if (profit > 55.0) {
 				log.info(
-						"middle error :code={},checkDate={},maxprice={},maxpriceDate={},mixprice={},maxpriceDate={}  8个月新高({})，涨幅超50%",
+						"middle error :code={},checkDate={},maxprice={},maxpriceDate={},mixprice={},maxpriceDate={}  6个月新高({})，涨幅超55%",
 						code, date, maxPrice, dmax.getDate(), minPrice, dmin.getDate(), profit);
 				return false;
 			} else {
