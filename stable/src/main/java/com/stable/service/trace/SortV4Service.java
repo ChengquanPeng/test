@@ -358,7 +358,7 @@ public class SortV4Service {
 						log.info(version + " 获取样本数:" + total_all);
 						if (total_all > 0) {
 							TraceSortv2StatVo stat = new TraceSortv2StatVo();
-							String filepath = FILE_FOLDER + version + "_" + startDate + "_" + ed + "_" + batch;
+							String filepath = FILE_FOLDER + version + "_" + batch + "_" + startDate + "_" + ed;
 							stat(filepath, stat, samples);
 							sendMessge(version, batch, startDate, ed + "", 0, 0, stat, total_all, sysstart, detailOther,
 									op, mp);
@@ -467,7 +467,7 @@ public class SortV4Service {
 		double lowPice = nlist.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getClosed)).get()
 				.getClosed();
 		if (CurrencyUitl.topPrice(lowPice, false) >= highPice) {
-			 return true;
+			return true;
 			// 前一天收盘价比前面几天的最高价还高--过滤
 //			TradeHistInfoDaliyNofq last = nlist.get(0);
 //			nlist.remove(0);

@@ -219,8 +219,8 @@ public class HistTraceService {
 							log.info(version + " 获取样本数:" + total_all);
 							if (total_all > 0) {
 								TraceSortv2StatVo stat = new TraceSortv2StatVo();
-								String filepath = FILE_FOLDER + version + "_" + startDate + "_" + ed + "_" + day + "_"
-										+ +vb + "_" + batch;
+								String filepath = FILE_FOLDER + version + "_" + batch + "_" + startDate + "_" + ed + "_"
+										+ day + "_" + +vb;
 								stat(filepath, stat, samples);
 								sendMessge(version, batch, startDate, ed + "", day, vb, stat, total_all, sysstart,
 										detailOther, op, mp);
@@ -420,8 +420,8 @@ public class HistTraceService {
 		log.info(version + "获取样本数:" + total_all);
 		if (total_all > 0) {
 			TraceSortv2StatVo stat = new TraceSortv2StatVo();
-			String filepath = FILE_FOLDER + version + "_" + startDate + "_" + endDate + "_" + day + "_" + +vb + "_"
-					+ batch;
+			String filepath = FILE_FOLDER + version + "_" + batch + "_" + startDate + "_" + endDate + "_" + day + "_"
+					+ vb;
 			stat(filepath, stat, samples);
 			sendMessge(version, batch, startDate, endDate, day, vb, stat, total_all, sysstart, other, 0, 0);
 		} else {
@@ -783,7 +783,7 @@ public class HistTraceService {
 						log.info(version + " 获取样本数:" + total_all);
 						if (total_all > 0) {
 							TraceSortv2StatVo stat = new TraceSortv2StatVo();
-							String filepath = FILE_FOLDER + version + "_" + startDate + "_" + ed + "_" + batch;
+							String filepath = FILE_FOLDER + version + "_" + batch + "_" + startDate + "_" + ed;
 							stat(filepath, stat, samples);
 							sendMessge(version, batch, startDate, ed + "", 0, 0, stat, total_all, sysstart, detailOther,
 									op, mp);
