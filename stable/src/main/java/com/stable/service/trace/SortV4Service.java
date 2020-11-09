@@ -436,7 +436,7 @@ public class SortV4Service {
 	 */
 	public boolean isTradeOkBefor5(String code, int date, boolean isTrace) {
 		EsQueryPageReq req = EsQueryPageUtil.queryPage6;
-		if (isTrace) {
+		if (!isTrace) {
 			req = EsQueryPageUtil.queryPage5;
 		}
 		List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,

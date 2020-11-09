@@ -91,7 +91,7 @@ public class LineAvgPrice {
 
 	public boolean isWhiteHorseForSortV4(String code, int date, boolean isTrace) {
 		EsQueryPageReq req = EsQueryPageUtil.queryPage6;
-		if (isTrace) {
+		if (!isTrace) {
 			req = EsQueryPageUtil.queryPage5;
 		}
 		// 最近5条
@@ -132,9 +132,9 @@ public class LineAvgPrice {
 		if (whiteHorseTmp >= 3) {
 			for (int i = 0; i < clist10.size(); i++) {
 				StockAvgBase sa = clist10.get(i);
-//				if (isTrace && sa.getDate() == date) {
-//					continue;
-//				}
+				if (isTrace && sa.getDate() == date) {
+					continue;
+				}
 				List<Double> l = Arrays.asList(sa.getAvgPriceIndex5(), sa.getAvgPriceIndex10(), sa.getAvgPriceIndex20(),
 						sa.getAvgPriceIndex30());
 				double max2 = l.stream().max((p1, p2) -> p1.compareTo(p2)).get();
