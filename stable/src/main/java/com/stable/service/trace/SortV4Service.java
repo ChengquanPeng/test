@@ -39,7 +39,6 @@ import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
-import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.HistTrace;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
@@ -383,23 +382,18 @@ public class SortV4Service {
 	}
 
 	public static void main(String[] args) {
-		LinePrice linePrice = new LinePrice();
-		System.err.println(linePrice.isLowClosePriceToday(1, 15.64, 16.51, 17.2, 0.5));
 	}
 
-	private TraceSortv2Vo middleRunningsortv4(String code, int date, TradeHistInfoDaliyNofq td, double rate,
+	private TraceSortv2Vo middleRunningsortv4(String code, int date, TradeHistInfoDaliyNofq td, double minRate,
 			double maxRate, int day) {
 		double todayChangeRate = td.getTodayChangeRate();
 		try {
-
-			LinePrice linePrice = new LinePrice(code, date, daliyTradeHistroyService);
-			if (todayChangeRate >= rate && todayChangeRate <= maxRate && !linePrice
-					.isLowClosePriceToday(todayChangeRate, td.getYesterdayPrice(), td.getClosed(), td.getHigh(), 0.5)) {// 是否严重上影线
-				LineAvgPrice lineAvg = new LineAvgPrice(avgService);
+			if (isTodayPriceOk(minRate, maxRate, todayChangeRate, td.getYesterdayPrice(), td.getClosed(),
+					td.getHigh())) {// 是否严重上影线
 				// 1.前5个交易日,收盘价未超过10%
-				if (isTradeOkBefor5(code, date)) {
+				if (isTradeOkBefor5(code, date, true)) {
 					// 2.均线支持
-					if (lineAvg.isWhiteHorseForSortV4(code, date)) {// 10日线的白马TODO 均线用不复权试试
+					if (isWhiteHorseForSortV4(code, date, true)) {// 10日线的白马TODO 均线用不复权试试
 						TraceSortv2Vo t1 = saveOkRec(code, date, day);
 						if (t1 != null) {
 							return t1;
@@ -419,20 +413,75 @@ public class SortV4Service {
 		return null;
 	}
 
-	private boolean isTradeOkBefor5(String code, int date) {
+	/**
+	 * 1.tody price check
+	 */
+	public boolean isTodayPriceOk(double minRate, double maxRate, double todayChangeRate, double yesterdayPrice,
+			double closedPrice, double hightPrice) {
+		LinePrice linePrice = new LinePrice();
+		return (todayChangeRate >= minRate && todayChangeRate <= maxRate
+				&& !linePrice.isLowClosePriceToday(todayChangeRate, yesterdayPrice, closedPrice, hightPrice, 0.5));
+	}
+
+	/**
+	 * 2.均线
+	 */
+	public boolean isWhiteHorseForSortV4(String code, int date, boolean isTrace) {
+		LineAvgPrice lineAvg = new LineAvgPrice(avgService);
+		return lineAvg.isWhiteHorseForSortV4(code, date, isTrace);
+	}
+
+	/**
+	 * 3.前面交易
+	 */
+	public boolean isTradeOkBefor5(String code, int date, boolean isTrace) {
+		EsQueryPageReq req = EsQueryPageUtil.queryPage6;
+		if (isTrace) {
+			req = EsQueryPageUtil.queryPage5;
+		}
 		List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
-				EsQueryPageUtil.queryPage6, SortOrder.DESC);// 返回的list是不可修改对象
+				req, SortOrder.DESC);// 返回的list是不可修改对象
 		List<TradeHistInfoDaliyNofq> nlist = new ArrayList<TradeHistInfoDaliyNofq>();
 		for (TradeHistInfoDaliyNofq td : dailyList0) {
 			nlist.add(td);
 		}
-		nlist.remove(0);// 移除当天
+
+		if (isTrace) {// 实时不需要调用这个
+			TradeHistInfoDaliyNofq today = nlist.get(0);
+			nlist.remove(0);// 移除当天
+
+			double total = 0.0;
+			for (TradeHistInfoDaliyNofq d : nlist) {
+				total += d.getVolume();
+			}
+			// 均值*基数
+			double chkVol = Double.valueOf(total / nlist.size() * 1.8);
+			if (today.getVolume() > chkVol) {
+				log.info("当日明显放量近1倍 {},{}", code, date);
+				// 明显放量的不能买
+				return false;
+			}
+		}
 		double highPice = nlist.stream().max(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getClosed)).get()
 				.getClosed();
 		double lowPice = nlist.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getClosed)).get()
 				.getClosed();
 		if (CurrencyUitl.topPrice(lowPice, false) >= highPice) {
-			return true;
+			 return true;
+			// 前一天收盘价比前面几天的最高价还高--过滤
+//			TradeHistInfoDaliyNofq last = nlist.get(0);
+//			nlist.remove(0);
+//			boolean isPriceOk = false;
+//			for (TradeHistInfoDaliyNofq td : nlist) {
+//				if (td.getHigh() > last.getClosed()) {
+//					isPriceOk = true;
+//					break;
+//				}
+//			}
+//			if (!isPriceOk) {
+//				log.info("前一天的收盘价比前面几天的最高价还高 {},{}", code, date);
+//			}
+//			return isPriceOk;
 		}
 		log.info("前五交易日振幅过大{},{},highPice={},lowPice={}", code, date, highPice, lowPice);
 		return false;
@@ -450,22 +499,22 @@ public class SortV4Service {
 //				String code = "300750";
 //				int date = 20200929;
 
-				String code = "600109";
-				int date = 20201105;
-
-				double rate = 3.5;
-				int day = 5;
-				List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code,
-						date, date, EsQueryPageUtil.queryPage9999, SortOrder.ASC);
-				if (dailyList0 != null && dailyList0.size() > 0) {
-					TradeHistInfoDaliyNofq td = dailyList0.get(0);
-					TraceSortv2Vo tv = middleRunningsortv4(code, date, td, rate, 7.5, day);
-					log.info(tv);
-				} else {
-					log.info("dailyList0 is null");
-				}
-//				sortv4("20200101", "20201031");
-//				sortv4("20190101", "20191231");
+//				String code = "600109";
+//				int date = 20201105;
+//
+//				double rate = 3.5;
+//				int day = 5;
+//				List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code,
+//						date, date, EsQueryPageUtil.queryPage9999, SortOrder.ASC);
+//				if (dailyList0 != null && dailyList0.size() > 0) {
+//					TradeHistInfoDaliyNofq td = dailyList0.get(0);
+//					TraceSortv2Vo tv = middleRunningsortv4(code, date, td, rate, 7.5, day);
+//					log.info(tv);
+//				} else {
+//					log.info("dailyList0 is null");
+//				}
+				sortv4("20200101", "20201031");
+				sortv4("20190101", "20191231");
 //				sortv4("20180101", "20181231");
 //				sortv4("20170101", "20171231");
 //				sortv4("20160101", "20161231");

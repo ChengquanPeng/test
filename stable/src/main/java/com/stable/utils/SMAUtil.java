@@ -149,7 +149,7 @@ public class SMAUtil {
 		}
 	}
 
-	public StockAvg getSMA5_30(String code, int date) {
+	private StockAvg getSMA5_30(String code, int date) {
 		// 倒序的结果列表
 		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
 				EsQueryPageUtil.queryPage30, SortOrder.DESC);

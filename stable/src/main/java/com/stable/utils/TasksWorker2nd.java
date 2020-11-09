@@ -35,7 +35,7 @@ public class TasksWorker2nd {
 		} else {
 			try {
 //				System.err.println(Thread.currentThread().getId() + ":waiting");
-				TimeUnit.SECONDS.sleep(20);
+				TimeUnit.SECONDS.sleep(1);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

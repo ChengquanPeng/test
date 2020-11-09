@@ -7,6 +7,7 @@ import java.util.List;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.StockAvgBase;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
 //@Log4j2
 public class LineAvgPrice {
@@ -88,15 +89,18 @@ public class LineAvgPrice {
 		return false;
 	}
 
-	public boolean isWhiteHorseForSortV4(String code, int date) {
-		// 最近10条
-		List<StockAvgBase> clist10 = avgService.queryListByCodeForModelWithLast(code, date, EsQueryPageUtil.queryPage6,
-				false);
+	public boolean isWhiteHorseForSortV4(String code, int date, boolean isTrace) {
+		EsQueryPageReq req = EsQueryPageUtil.queryPage6;
+		if (isTrace) {
+			req = EsQueryPageUtil.queryPage5;
+		}
+		// 最近5条
+		List<StockAvgBase> clist10 = avgService.queryListByCodeForModelWithLast(code, date, req, false);
 		// 前面几天(未企稳)均线最高价和最低价振幅超5%,排除掉
 		List<Double> price = new ArrayList<Double>(20);
 		for (int i = 0; i < clist10.size(); i++) {
 			StockAvgBase sa = clist10.get(i);
-			if (sa.getDate() == date) {
+			if (isTrace && sa.getDate() == date) {
 				continue;
 			}
 			price.add(sa.getAvgPriceIndex5());
@@ -109,10 +113,11 @@ public class LineAvgPrice {
 		if (CurrencyUitl.cutProfit(min, max) > 5) {
 			return false;
 		}
+		// 20日均线在30日之上
 		int whiteHorseTmp = 0;
 		for (int i = 0; i < clist10.size(); i++) {
 			StockAvgBase sa = clist10.get(i);
-			if (sa.getDate() == date) {
+			if (isTrace && sa.getDate() == date) {
 				continue;
 			}
 			if (clist10.get(i).getAvgPriceIndex20() >= clist10.get(i).getAvgPriceIndex30()) {
@@ -123,9 +128,13 @@ public class LineAvgPrice {
 			return true;
 		}
 
+		// 各均线在2.5%之内波动
 		if (whiteHorseTmp >= 3) {
 			for (int i = 0; i < clist10.size(); i++) {
 				StockAvgBase sa = clist10.get(i);
+//				if (isTrace && sa.getDate() == date) {
+//					continue;
+//				}
 				List<Double> l = Arrays.asList(sa.getAvgPriceIndex5(), sa.getAvgPriceIndex10(), sa.getAvgPriceIndex20(),
 						sa.getAvgPriceIndex30());
 				double max2 = l.stream().max((p1, p2) -> p1.compareTo(p2)).get();

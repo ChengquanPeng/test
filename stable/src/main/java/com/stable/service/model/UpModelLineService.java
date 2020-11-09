@@ -43,6 +43,7 @@ import com.stable.service.model.data.LinePrice;
 import com.stable.service.model.data.LineTickData;
 import com.stable.service.model.data.LineVol;
 import com.stable.service.model.data.StrongService;
+import com.stable.service.trace.SortV4Service;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -92,6 +93,8 @@ public class UpModelLineService {
 	private MonitoringDao monitoringDao;
 	@Autowired
 	private CodeModelService codeModelService;
+	@Autowired
+	private SortV4Service sortV4Service;
 
 	private final EsQueryPageReq queryPage250 = EsQueryPageUtil.queryPage250;
 	private final EsQueryPageReq deleteQueryPage9999 = EsQueryPageUtil.queryPage9999;
@@ -154,8 +157,8 @@ public class UpModelLineService {
 			throw new RuntimeException("交易日但未获取到数据");
 		}
 		List<StrategyListener> models = new LinkedList<StrategyListener>();
-
-		models.add(new V1SortStrategyListener(treadeDate, codeModelService));
+		models.add(new SortV4PREStrategyListener(treadeDate, codeModelService, sortV4Service));
+		// models.add(new V1SortStrategyListener(treadeDate, codeModelService));
 		// models.add(new V2SortStrategyListener(treadeDate));
 		// models.add(new V2PRESortStrategyListener(treadeDate));
 		if (models.size() <= 0) {
