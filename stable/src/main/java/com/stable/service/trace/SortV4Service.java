@@ -418,9 +418,11 @@ public class SortV4Service {
 	 */
 	public boolean isTodayPriceOk(double minRate, double maxRate, double todayChangeRate, double yesterdayPrice,
 			double closedPrice, double hightPrice) {
-		LinePrice linePrice = new LinePrice();
-		return (todayChangeRate >= minRate && todayChangeRate <= maxRate
-				&& !linePrice.isLowClosePriceToday(todayChangeRate, yesterdayPrice, closedPrice, hightPrice, 0.5));
+		if (todayChangeRate >= minRate && todayChangeRate <= maxRate) {
+			LinePrice linePrice = new LinePrice();
+			return !linePrice.isLowClosePriceToday(todayChangeRate, yesterdayPrice, closedPrice, hightPrice, 0.5);
+		}
+		return false;
 	}
 
 	/**

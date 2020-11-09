@@ -6,9 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.stable.config.SpringConfig;
-import com.stable.constant.Constant;
 import com.stable.enums.ModelType;
-import com.stable.service.ConceptService.ConceptInfo;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.data.LinePrice;
@@ -46,9 +44,9 @@ public class SortV4PREStrategyListener implements StrategyListener {
 	private CodeModelService codeModelService;
 	private SortV4Service sortV4Service;
 
-	private void setDetail(StringBuffer detailDesc, String desc) {
-		detailDesc.append(desc).append(Constant.DOU_HAO);
-	}
+//	private void setDetail(StringBuffer detailDesc, String desc) {
+//		detailDesc.append(desc).append(Constant.DOU_HAO);
+//	}
 
 	public void processingModelResult(ModelContext mc, LineAvgPrice lineAvgPrice, LinePrice linePrice, LineVol lineVol,
 			LineTickData lineTickData) {
@@ -59,7 +57,7 @@ public class SortV4PREStrategyListener implements StrategyListener {
 		mv.setModelType(ModelType.V4.getCode());
 		mv.setId(mv.getModelType() + mv.getCode() + mv.getDate());
 
-		StringBuffer detailDesc = new StringBuffer();
+//		StringBuffer detailDesc = new StringBuffer();
 		String dropOutMsg = "";
 		boolean isOk = false;
 		int baseScore = 0;
@@ -71,6 +69,10 @@ public class SortV4PREStrategyListener implements StrategyListener {
 		String code = mc.getCode();
 		int date = mc.getDate();
 		// 策略
+		if (!stockBasicService.online2YearChk(code, date)) {// 最后日需要满足2年
+			log.info("{} 上市不足2年", code);
+			return;
+		}
 		if (sortV4Service.isTradeOkBefor5(code, date, false)) {
 			if (sortV4Service.isWhiteHorseForSortV4(code, date, false)) {
 				isOk = true;
@@ -83,25 +85,25 @@ public class SortV4PREStrategyListener implements StrategyListener {
 
 		if (isOk) {
 			if (!lineTickData.tickDataInfo()) {
-				setDetail(detailDesc, "每日指标记录小于5条,checkStrong get size<5");
+//				setDetail(detailDesc, "每日指标记录小于5条,checkStrong get size<5");
 				dropOutMsg += "每日指标记录小于5条,checkStrong get size<5";
 			}
 			StrongResult sr = linePrice.strongScore();
 			strongScore = sr.getStrongScore();
-			if (strongScore > 0) {
-				setDetail(detailDesc, sr.getStrongDetail());
-			}
+//			if (strongScore > 0) {
+//				setDetail(detailDesc, sr.getStrongDetail());
+//			}
 			pgmScore = mc.getSortPgm() * 5;// 3.程序单
 
 			// 概念板块
-			List<ConceptInfo> list = mc.getGnDaliy().get(mv.getCode());
-			if (list != null) {
-				for (int i = 0; i < list.size(); i++) {
-					ConceptInfo x = list.get(i);
-					gnScore += x.getRanking();
-					setDetail(detailDesc, x.toString());
-				}
-			}
+//			List<ConceptInfo> list = mc.getGnDaliy().get(mv.getCode());
+//			if (list != null) {
+//				for (int i = 0; i < list.size(); i++) {
+//					ConceptInfo x = list.get(i);
+//					gnScore += x.getRanking();
+//					setDetail(detailDesc, x.toString());
+//				}
+//			}
 			baseScore = codeModelService.getLastOneByCode(mc.getCode()).getScore();
 			mv.setAvgScore(baseScore);
 			mv.setSortStrong(strongScore);
@@ -123,6 +125,7 @@ public class SortV4PREStrategyListener implements StrategyListener {
 	// **评分
 
 	private int treadeDate;
+	private StockBasicService stockBasicService;
 
 	public SortV4PREStrategyListener(int date, CodeModelService codeModelService, SortV4Service sortV4Service) {
 		treadeDate = date;
@@ -133,12 +136,13 @@ public class SortV4PREStrategyListener implements StrategyListener {
 			header += this.getHTMLTH(s[i]);
 		}
 		header += "</tr>" + FileWriteUitl.LINE_FILE;
+		stockBasicService = SpringUtil.getBean(StockBasicService.class);
 	}
 
 	public void fulshToFile() {
 		log.info("saveList size:{}", saveList.size());
 		if (saveList.size() > 0) {
-			StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
+
 			sort(saveList);
 			SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 
@@ -148,8 +152,9 @@ public class SortV4PREStrategyListener implements StrategyListener {
 
 			for (ModelV1 mv : saveList) {
 				String code = mv.getCode();
-				sb.append("<tr>").append(getHTML(index)).append(getHTML_SN(code)).append(getHTML(sbs.getCodeName(code)))
-						.append(getHTML(mv.getDate())).append(getHTML(mv.getScore())).append(getHTML(mv.getAvgScore()))
+				sb.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))
+						.append(getHTML(stockBasicService.getCodeName(code))).append(getHTML(mv.getDate()))
+						.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgScore()))
 						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm())).append("</tr>")
 						.append(FileWriteUitl.LINE_FILE);
 

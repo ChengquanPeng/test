@@ -61,10 +61,12 @@ public class MonitoringService {
 	private MonitoringDao monitoringDao;
 	@Autowired
 	private CodeModelService codeModelService;
-
 	private Map<String, RealtimeDetailsAnalyzer> map = null;
+	@Autowired
+	private MonitoringSortV4Service monitoringSortV4Service;
 
 	public synchronized void startObservable() {
+		monitoringSortV4Service.startObservable();
 		if (System.currentTimeMillis() > 0) {
 			return;
 		}

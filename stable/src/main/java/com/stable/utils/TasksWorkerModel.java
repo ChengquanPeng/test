@@ -22,7 +22,7 @@ public class TasksWorkerModel {
 	private static ListeningExecutorService service = MoreExecutors
 			.listeningDecorator(Executors.newFixedThreadPool(WORKS_NUM));
 
-	public static synchronized ListenableFuture<?> add(String code, TasksWorkerModelRunnable task) throws Exception {
+	public static synchronized ListenableFuture<?> add(String code, TasksWorkerModelRunnable task) {
 		// log.info("in code:" + code);
 		if (getAvailablePermits()) {
 			// log.info("got permit:" + code);

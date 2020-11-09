@@ -54,6 +54,18 @@ public class ConceptService {
 		}
 	}
 
+	public String getCodeConceptForCode(String code) {
+		List<CodeConcept> list = getCodeConcept(code);
+		if (list != null) {
+			StringBuffer sb = new StringBuffer();
+			for (CodeConcept cc : list) {
+				sb.append(cc.getConceptName()).append(" ");
+			}
+			return sb.toString();
+		}
+		return "";
+	}
+
 	public List<CodeConcept> getCodeConcept(String code) {
 		EsQueryPageReq queryPage = EsQueryPageUtil.queryPage100;
 		Pageable pageable = PageRequest.of(queryPage.getPageNum(), queryPage.getPageSize());
