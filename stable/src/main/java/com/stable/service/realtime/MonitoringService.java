@@ -66,10 +66,17 @@ public class MonitoringService {
 	private MonitoringSortV4Service monitoringSortV4Service;
 
 	public synchronized void startObservable() {
-		monitoringSortV4Service.startObservable();
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				monitoringSortV4Service.startObservable();
+			}
+		}).start();
 		if (System.currentTimeMillis() > 0) {
 			return;
 		}
+		
 		String date = DateUtil.getTodayYYYYMMDD();
 		int idate = Integer.valueOf(date);
 		if (!tradeCalService.isOpen(idate)) {

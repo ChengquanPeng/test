@@ -34,6 +34,12 @@ public class MyApplicationRunner implements ApplicationRunner {
 //        for (String arg : sourceArgs) {
 //            System.out.print(arg + " ");
 //        }
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				realtimeJob.execute(null);
+			}
+		}).start();
 		if (OSystemUtil.isWindows()) {
 			printUrl();
 			return;
@@ -43,12 +49,6 @@ public class MyApplicationRunner implements ApplicationRunner {
 //		financeService.jobSpiderFirstFinaceHistoryInfo();
 //		financeService.jobSpiderFinaceHistoryInfo();
 
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				realtimeJob.execute(null);
-			}
-		}).start();
 	}
 
 	private void printUrl() {

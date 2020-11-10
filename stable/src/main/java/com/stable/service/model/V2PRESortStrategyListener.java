@@ -34,7 +34,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class V2PRESortStrategyListener implements StrategyListener {
 	private String header = "<table border='1' cellspacing='0' cellpadding='0'><tr>";
-	private String endder = "</table><script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script>";
+	private String endder = "</table><script type='text/javascript' src='/html/static/addsinaurl.js'></script>";
 
 	private Map<String, String> result = new ConcurrentHashMap<String, String>();
 

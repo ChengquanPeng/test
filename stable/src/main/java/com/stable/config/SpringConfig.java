@@ -42,4 +42,7 @@ public class SpringConfig {
 	@Value("${model.image.floder}")
 	private String modelImageFloder;
 
+	@Value("${program.html.folder}")
+	private String pubFloder;
+
 }

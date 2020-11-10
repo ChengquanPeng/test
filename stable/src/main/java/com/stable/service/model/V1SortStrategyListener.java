@@ -29,7 +29,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class V1SortStrategyListener implements StrategyListener {
 	private String header = "<table border='1' cellspacing='0' cellpadding='0'><tr>";
-	private String endder = "</table><script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script>";
+	private String endder = "</table><script type='text/javascript' src='/html/static/addsinaurl.js'></script>";
 
 	// 不OK List
 	// private List<ModelContext> mcs = Collections.synchronizedList(new

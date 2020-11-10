@@ -9,6 +9,7 @@ import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,8 @@ import com.stable.config.SpringConfig;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.ModelType;
 import com.stable.service.ConceptService;
+import com.stable.service.DaliyBasicHistroyService;
+import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.UpModelLineService;
@@ -30,7 +33,9 @@ import com.stable.utils.ScheduledWorker;
 import com.stable.utils.SpringUtil;
 import com.stable.utils.TasksWorkerModel;
 import com.stable.utils.TasksWorkerModelRunnable;
+import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.up.strategy.ModelV1;
 
 import lombok.extern.log4j.Log4j2;
@@ -46,11 +51,12 @@ public class MonitoringSortV4Service {
 	private SortV4Service sortV4Service;
 	@Autowired
 	private ConceptService conceptService;
+	@Autowired
+	private DaliyTradeHistroyService daliyTradeHistroyService;
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
 
 	public synchronized void startObservable() {
-		if (System.currentTimeMillis() > 0) {
-			return;
-		}
 		String date = DateUtil.getTodayYYYYMMDD();
 		int idate = Integer.valueOf(date);
 		if (!tradeCalService.isOpen(idate)) {
@@ -66,7 +72,7 @@ public class MonitoringSortV4Service {
 
 		String observableDate = tradeCalService.getPretradeDate(date);
 		try {
-			log.info("observableDate:" + observableDate);
+			log.info("observableDate sortV4:" + observableDate);
 			// 获取买入监听列表
 			List<ModelV1> bList = upModelLineService.getListByCode(null, observableDate, null, null, null,
 					EsQueryPageUtil.queryPage9999, ModelType.V4.getCode());
@@ -76,19 +82,56 @@ public class MonitoringSortV4Service {
 				return;
 			}
 
-			Date d2 = DateUtil.parseDate(date + "145000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
-			long d1140 = d2.getTime();
-			if (now <= d1140) {
+			// 定点刷新及通知
+			Date msgtime = DateUtil.parseDate(date + "145000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
+			long d145000 = msgtime.getTime();
+			if (now <= d145000) {
 				ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
 					@Override
 					public void run() {
 						start(bList);
+						int sz = start(bList).size();
+						WxPushUtil.pushSystem1("sortV4 实时分析已经生成总数:" + sz);
 					}
-				}, d2);
-				log.info("scheduled Task with Time:{}", d2);
-			} else {
-				start(bList);
+				}, msgtime);
+				log.info("scheduled Task with Time:{}", msgtime);
 			}
+			// 盘中5分钟刷新
+			long d1130 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+					DateUtil.parseDate(date + "113000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+			long d1300 = DateUtil.parseDate(date + "130100", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT).getTime();
+			long end = DateUtil.parseDate(date + "150000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT).getTime();
+			while (true) {
+				now = new Date().getTime();
+				if (now >= end) {
+					break;
+				}
+				start(bList);
+				if (d1130 <= now && now <= d1300) {
+					long from3 = new Date().getTime();
+					int millis = (int) ((d1300 - from3));
+					if (millis > 0) {
+						log.info("sortv4 中场休息。");
+						Thread.sleep(millis);
+					}
+				} else {
+					ThreadsUtil.sleep(5, TimeUnit.MINUTES);
+				}
+			}
+			// ScheduledWorker.addScheduled(command, 5, TimeUnit.MINUTES);
+
+//			long d1140 = d2.getTime();
+//			if (now <= d1140) {
+//				ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
+//					@Override
+//					public void run() {
+//						start(bList);
+//					}
+//				}, d2);
+//				log.info("scheduled Task with Time:{}", d2);
+//			} else {
+//				start(bList);
+//			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -99,7 +142,7 @@ public class MonitoringSortV4Service {
 	private double minRate = 3.5;
 	private double maxRate = 6.5;
 
-	private void start(List<ModelV1> bList) {
+	private List<ModelSortV4> start(List<ModelV1> bList) {
 		List<ModelSortV4> oklist = Collections.synchronizedList(new LinkedList<ModelSortV4>());
 		CountDownLatch cnt = new CountDownLatch(bList.size());
 		for (ModelV1 ss : bList) {
@@ -122,6 +165,25 @@ public class MonitoringSortV4Service {
 						if (sortV4Service.isTodayPriceOk(minRate, maxRate, todayChangeRate, yesterdayPrice, closedPrice,
 								srt.getHigh())) {
 							if (sortV4Service.isTradeOkBefor5(code, ss.getDate(), false)) {
+
+								List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService
+										.queryListByCodeWithLastNofq(code, 0, ss.getDate(), EsQueryPageUtil.queryPage5,
+												SortOrder.DESC);// 返回的list是不可修改对象
+
+								long deal = srt.getDealNums() / 100;
+
+								double total = 0.0;
+								for (TradeHistInfoDaliyNofq d : dailyList0) {
+									total += d.getVolume();
+								}
+								// 均值*基数
+								double chkVol = Double.valueOf(total / dailyList0.size() * 1.75);
+								if (deal > chkVol) {
+									log.info("今日明显放量近1倍 {},", code);
+									// 明显放量的不能买
+									return;
+								}
+
 								if (sortV4Service.isWhiteHorseForSortV4(code, ss.getDate(), false)) {
 									ModelSortV4 v4 = new ModelSortV4();
 									BeanCopy.copy(ss, v4);
@@ -151,14 +213,14 @@ public class MonitoringSortV4Service {
 			ex.printStackTrace();
 		}
 		fulshToFile(oklist);
-		WxPushUtil.pushSystem1("sortV4 实时分析已经生成总数:" + oklist.size());
+		return oklist;
 	}
 
 	private String header = "<table border='1' cellspacing='0' cellpadding='0'><tr>";
-	private String endder = "</table><script type='text/javascript' src='/tkhtml/static/addsinaurl.js'></script>";
+	private String endder = "</table><script type='text/javascript' src='/html/static/addsinaurl.js'></script>";
 
 	public MonitoringSortV4Service() {
-		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "基本面评分", "短期强势", "主力行为", "今日涨幅", "概念" };
+		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "基本面评分", "短期强势", "主力行为", "流通市值", "今日涨幅", "概念" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
 		}
@@ -182,6 +244,9 @@ public class MonitoringSortV4Service {
 				sb.append("<tr>").append(getHTML(index)).append(getHTML_SN(code)).append(getHTML(sbs.getCodeName(code)))
 						.append(getHTML(mv.getDate())).append(getHTML(mv.getScore())).append(getHTML(mv.getAvgScore()))
 						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
+						.append(getHTML(CurrencyUitl.covertToString(
+								daliyBasicHistroyService.getDaliyBasicInfoByDate(code, mv.getDate()).getCirc_mv()
+										* 10000)))
 						.append(getHTML(mv.getTodayChange())).append(getHTML(mv.getGn())).append("</tr>")
 						.append(FileWriteUitl.LINE_FILE);
 
@@ -196,7 +261,8 @@ public class MonitoringSortV4Service {
 			sb.append(endder);
 			// sb2.append(endder);
 
-			String filepath = efc.getModelV1SortFloder() + "sortv4.html";
+//			String filepath = efc.getModelV1SortFloder() + "sortv4today.html";
+			String filepath = efc.getPubFloder() + "sortv4today.html";
 			FileWriteUitl fw = new FileWriteUitl(filepath, true);
 			fw.writeLine(sb.toString());
 			fw.close();

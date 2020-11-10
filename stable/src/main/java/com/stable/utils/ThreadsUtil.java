@@ -24,6 +24,14 @@ public class ThreadsUtil {
 		}
 	}
 
+	public static void sleep(long time, TimeUnit unit) {
+		try {
+			unit.sleep(time);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void sleepRandomSecBetween1And2() {
 		try {
 			// 随机休息1-2s
