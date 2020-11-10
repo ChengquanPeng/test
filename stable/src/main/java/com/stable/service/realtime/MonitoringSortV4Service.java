@@ -1,5 +1,6 @@
 package com.stable.service.realtime;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -15,13 +16,16 @@ import org.springframework.stereotype.Service;
 
 import com.stable.config.SpringConfig;
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.enums.BuyModelType;
 import com.stable.enums.ModelType;
+import com.stable.enums.TradeType;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.UpModelLineService;
+import com.stable.service.trace.BuyTraceService;
 import com.stable.service.trace.SortV4Service;
 import com.stable.spider.sina.SinaRealTime;
 import com.stable.spider.sina.SinaRealtimeUitl;
@@ -35,6 +39,7 @@ import com.stable.utils.TasksWorkerModel;
 import com.stable.utils.TasksWorkerModelRunnable;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.BuyTrace;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.up.strategy.ModelV1;
 
@@ -55,11 +60,13 @@ public class MonitoringSortV4Service {
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
+	@Autowired
+	private BuyTraceService buyTraceService;
 
 	public synchronized void startObservable() {
 		String date = DateUtil.getTodayYYYYMMDD();
-		int idate = Integer.valueOf(date);
-		if (!tradeCalService.isOpen(idate)) {
+		int today = Integer.valueOf(date);
+		if (!tradeCalService.isOpen(today)) {
 			WxPushUtil.pushSystem1("非交易日结束监听");
 			return;
 		}
@@ -69,7 +76,7 @@ public class MonitoringSortV4Service {
 			log.info("now > isAlivingMillis,已超时");
 			return;
 		}
-
+		int cnt = 0;
 		String observableDate = tradeCalService.getPretradeDate(date);
 		try {
 			log.info("observableDate sortV4:" + observableDate);
@@ -101,18 +108,18 @@ public class MonitoringSortV4Service {
 					DateUtil.parseDate(date + "113000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 			Date dt13 = DateUtil.parseDate(date + "130100", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
 			long d1300 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(dt13);
-			long end = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
-					DateUtil.parseDate(date + "150000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 
 			long d1450 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(msgtime);
-			long d1457 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
-					DateUtil.parseDate(date + "145700", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+			long d1455 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+					DateUtil.parseDate(date + "145500", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+
+			List<ModelSortV4> oklist = null;
 			while (true) {
 				now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
-				if (now >= end) {
+				if (now >= d1455) {
 					break;
 				}
-				start(bList);
+				oklist = start(bList);
 				if (d1130 <= now && now <= d1300) {
 					long from3 = new Date().getTime();
 					long millis = (dt13.getTime() - from3);
@@ -121,7 +128,7 @@ public class MonitoringSortV4Service {
 						Thread.sleep(millis);
 					}
 				} else {
-					if (d1450 <= now && now <= d1457) {
+					if (d1450 <= now && now <= d1455) {
 						ThreadsUtil.sleep(1, TimeUnit.MINUTES);
 					} else {
 						ThreadsUtil.sleep(5, TimeUnit.MINUTES);
@@ -143,11 +150,73 @@ public class MonitoringSortV4Service {
 //				start(bList);
 //			}
 
+			if (oklist != null) {
+				List<BuyTrace> bts = new ArrayList<BuyTrace>();
+				for (ModelSortV4 v4 : oklist) {
+					if (v4.getBuyPirce() > 0) {
+						BuyTrace bt = new BuyTrace();
+						bt.setBuyDate(today);
+						bt.setBuyModelType(BuyModelType.B2.getCode());
+						bt.setBuyPrice(v4.getBuyPirce());
+						bt.setCode(v4.getCode());
+						bt.setStatus(TradeType.BOUGHT.getCode());
+						bt.setVer(ModelType.V4.getCode());
+						bt.setSubVer(0);
+						bt.setId();
+						bts.add(bt);
+					}
+				}
+				if (bts.size() > 0) {
+					buyTraceService.addToTrace(bts);
+					cnt = bts.size();
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 		}
-		log.info("sort v4 结束");
+		WxPushUtil.pushSystem1("sortV4 模型监听结束,买入笔数:" + cnt);
+	}
+
+	public void autoSell(int today) {
+		int day = 3;
+		int ds = day + 1;
+		String p1 = tradeCalService.getPretradeDate(today + "");
+		String p2 = tradeCalService.getPretradeDate(p1);
+		String p3 = tradeCalService.getPretradeDate(p2);
+		int chkDate = Integer.valueOf(p3);
+		List<BuyTrace> bts = buyTraceService.getListByCode(null, 0, TradeType.BOUGHT.getCode(),
+				BuyModelType.B2.getCode(), ModelType.V4.getCode(), EsQueryPageUtil.queryPage9999);
+		int cnt = 0;
+		if (bts != null && bts.size() > 0) {
+			List<BuyTrace> upb = new ArrayList<BuyTrace>();
+			for (BuyTrace bt : bts) {
+				if (bt.getBuyDate() <= chkDate) {
+					// date=已收盘的日期
+					List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(
+							bt.getCode(), bt.getBuyDate(), 0, EsQueryPageUtil.queryPage9999, SortOrder.ASC);// 返回的list是不可修改对象
+					if (dailyList0.size() >= ds) {
+						// 除去当天的交易日来算
+						List<TradeHistInfoDaliyNofq> dailyList2 = new ArrayList<TradeHistInfoDaliyNofq>();
+						for (int i = 1; i < dailyList0.size(); i++) {
+							dailyList2.add(dailyList0.get(i));
+						}
+						// i=0;是当天
+						TradeHistInfoDaliyNofq d0 = dailyList0.get(day);
+						bt.setSoldDate(today);
+						bt.setSoldPrice(d0.getClosed());
+						bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
+						bt.setStatus(TradeType.SOLD.getCode());
+						upb.add(bt);
+					}
+				}
+			}
+			if (upb.size() > 0) {
+				buyTraceService.addToTrace(upb);
+				cnt = upb.size();
+			}
+		}
+		WxPushUtil.pushSystem1("sortV4 模型自动卖出笔数:" + cnt);
 	}
 
 	private double minRate = 3.5;
@@ -184,7 +253,7 @@ public class MonitoringSortV4Service {
 								total += d.getVolume();
 							}
 							// 均值*基数
-							double chkVol = Double.valueOf(total / dailyList0.size() * 1.75);
+							double chkVol = Double.valueOf(total / dailyList0.size() * 1.8);
 							if (deal > chkVol) {
 								log.info("今日明显放量近1倍 {},", code);
 								// 明显放量的不能买
@@ -194,6 +263,7 @@ public class MonitoringSortV4Service {
 								if (sortV4Service.isWhiteHorseForSortV4(code, ss.getDate(), false)) {
 									ModelSortV4 v4 = new ModelSortV4();
 									BeanCopy.copy(ss, v4);
+									v4.setBuyPirce(srt.getSell1());
 									v4.setTodayChange(todayChangeRate);
 									v4.setGn(conceptService.getCodeConceptForCode(code));
 									oklist.add(v4);

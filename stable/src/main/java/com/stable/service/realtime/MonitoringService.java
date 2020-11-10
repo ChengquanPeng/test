@@ -76,7 +76,7 @@ public class MonitoringService {
 		if (System.currentTimeMillis() > 0) {
 			return;
 		}
-		
+
 		String date = DateUtil.getTodayYYYYMMDD();
 		int idate = Integer.valueOf(date);
 		if (!tradeCalService.isOpen(idate)) {
@@ -103,7 +103,7 @@ public class MonitoringService {
 
 			// 获取卖出监听列表
 			List<BuyTrace> sList = new LinkedList<BuyTrace>();
-			buyTraceService.getListByCode("", 0, TradeType.BOUGHT.getCode(), BuyModelType.B2.getCode(),
+			buyTraceService.getListByCode("", 0, TradeType.BOUGHT.getCode(), BuyModelType.B2.getCode(), 0,
 					EsQueryPageUtil.queryPage9999);
 
 			// 合并
@@ -227,7 +227,7 @@ public class MonitoringService {
 		SinaRealTime srt = SinaRealtimeUitl.get(code);
 		if (srt != null && srt.getSell1() > 0.0) {
 			List<BuyTrace> list = buyTraceService.getListByCode(code, 0, TradeType.BOUGHT.getCode(),
-					BuyModelType.B1.getCode(), EsQueryPageUtil.queryPage9999);
+					BuyModelType.B1.getCode(), 0, EsQueryPageUtil.queryPage9999);
 			if (list != null) {
 				for (BuyTrace bt : list) {
 					bt.setSoldDate(Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
@@ -293,7 +293,7 @@ public class MonitoringService {
 			pv.setType("全部");
 		}
 
-		List<BuyTrace> list = buyTraceService.getListByCode("", buydate, status, buyModelType,
+		List<BuyTrace> list = buyTraceService.getListByCode("", buydate, status, buyModelType, 0,
 				EsQueryPageUtil.queryPage9999);
 		List<ViewVo> l = new LinkedList<ViewVo>();
 		if (list != null) {

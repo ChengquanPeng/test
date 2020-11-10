@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 public class ModelSortV4 extends ModelV1 {
 
+	private double buyPirce;
 	private double todayChange;
 	private String gn;
 }

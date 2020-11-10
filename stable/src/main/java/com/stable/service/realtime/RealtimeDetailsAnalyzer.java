@@ -81,7 +81,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 		// 卖出
 		List<BuyTrace> bts = buyTraceService.getListByCode(code, 0, TradeType.BOUGHT.getCode(),
-				BuyModelType.B2.getCode(), EsQueryPageUtil.queryPage9999);
+				BuyModelType.B2.getCode(), 0, EsQueryPageUtil.queryPage9999);
 		if (bts != null && bts.size() > 0) {
 			buyTraces.addAll(bts);
 			needMoniSell = true;

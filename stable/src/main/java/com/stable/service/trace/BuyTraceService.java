@@ -37,13 +37,13 @@ public class BuyTraceService {
 		esBuyTraceDao.saveAll(bts);
 	}
 
-	public List<BuyTrace> getListByCode(String code, int buyDate, int status, int buyModelType,
+	public List<BuyTrace> getListByCode(String code, int buyDate, int status, int buyModelType, int ver,
 			EsQueryPageReq querypage) {
 		FieldSortBuilder sort = SortBuilders.fieldSort("buyDate").unmappedType("integer").order(SortOrder.DESC);
-		return getListByCode(code, buyDate, status, buyModelType, querypage, sort);
+		return getListByCode(code, buyDate, status, buyModelType, ver, querypage, sort);
 	}
 
-	public List<BuyTrace> getListByCode(String code, int buyDate, int status, int buyModelType,
+	public List<BuyTrace> getListByCode(String code, int buyDate, int status, int buyModelType, int ver,
 			EsQueryPageReq querypage, FieldSortBuilder sort) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
@@ -58,6 +58,9 @@ public class BuyTraceService {
 		}
 		if (buyModelType > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("buyModelType", buyModelType));
+		}
+		if (ver > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("ver", ver));
 		}
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
