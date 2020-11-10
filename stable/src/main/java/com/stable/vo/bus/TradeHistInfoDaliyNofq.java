@@ -39,10 +39,10 @@ public class TradeHistInfoDaliyNofq extends EsBase {
 	// 最低价
 	@Field(type = FieldType.Double)
 	private double low;
-	// 交易量(手)
+	// 交易量(股)
 	@Field(type = FieldType.Double)
 	private double volume;
-	// 交易金额(千元)
+	// 交易金额(元)
 	@Field(type = FieldType.Double)
 	private double amt;
 	// 昨收

@@ -103,6 +103,10 @@ public class MonitoringSortV4Service {
 			long d1300 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(dt13);
 			long end = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
 					DateUtil.parseDate(date + "150000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+
+			long d1450 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(msgtime);
+			long d1457 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+					DateUtil.parseDate(date + "145700", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 			while (true) {
 				now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
 				if (now >= end) {
@@ -117,7 +121,11 @@ public class MonitoringSortV4Service {
 						Thread.sleep(millis);
 					}
 				} else {
-					ThreadsUtil.sleep(5, TimeUnit.MINUTES);
+					if (d1450 <= now && now <= d1457) {
+						ThreadsUtil.sleep(1, TimeUnit.MINUTES);
+					} else {
+						ThreadsUtil.sleep(5, TimeUnit.MINUTES);
+					}
 				}
 			}
 			// ScheduledWorker.addScheduled(command, 5, TimeUnit.MINUTES);
@@ -139,6 +147,7 @@ public class MonitoringSortV4Service {
 			e.printStackTrace();
 		} finally {
 		}
+		log.info("sort v4 结束");
 	}
 
 	private double minRate = 3.5;
@@ -166,26 +175,22 @@ public class MonitoringSortV4Service {
 						double todayChangeRate = CurrencyUitl.cutProfit(yesterdayPrice, closedPrice);
 						if (sortV4Service.isTodayPriceOk(minRate, maxRate, todayChangeRate, yesterdayPrice, closedPrice,
 								srt.getHigh())) {
+							List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService
+									.queryListByCodeWithLastNofq(code, 0, ss.getDate(), EsQueryPageUtil.queryPage5,
+											SortOrder.DESC);// 返回的list是不可修改对象
+							long deal = srt.getDealNums();
+							double total = 0.0;
+							for (TradeHistInfoDaliyNofq d : dailyList0) {
+								total += d.getVolume();
+							}
+							// 均值*基数
+							double chkVol = Double.valueOf(total / dailyList0.size() * 1.75);
+							if (deal > chkVol) {
+								log.info("今日明显放量近1倍 {},", code);
+								// 明显放量的不能买
+								return;
+							}
 							if (sortV4Service.isTradeOkBefor5(code, ss.getDate(), false)) {
-
-								List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService
-										.queryListByCodeWithLastNofq(code, 0, ss.getDate(), EsQueryPageUtil.queryPage5,
-												SortOrder.DESC);// 返回的list是不可修改对象
-
-								long deal = srt.getDealNums() / 100;
-
-								double total = 0.0;
-								for (TradeHistInfoDaliyNofq d : dailyList0) {
-									total += d.getVolume();
-								}
-								// 均值*基数
-								double chkVol = Double.valueOf(total / dailyList0.size() * 1.75);
-								if (deal > chkVol) {
-									log.info("今日明显放量近1倍 {},", code);
-									// 明显放量的不能买
-									return;
-								}
-
 								if (sortV4Service.isWhiteHorseForSortV4(code, ss.getDate(), false)) {
 									ModelSortV4 v4 = new ModelSortV4();
 									BeanCopy.copy(ss, v4);
@@ -219,7 +224,9 @@ public class MonitoringSortV4Service {
 	}
 
 	private String header = "<table border='1' cellspacing='0' cellpadding='0'><tr>";
-	private String endder = "</table><script type='text/javascript' src='/html/static/addsinaurl.js'></script>";
+	// private String endder = "</table><script type='text/javascript'
+	// src='/html/static/addsinaurl.js'></script>";
+	private String endder = "</table>";
 
 	public MonitoringSortV4Service() {
 		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "基本面评分", "短期强势", "主力行为", "流通市值", "今日涨幅", "概念" };
@@ -232,15 +239,17 @@ public class MonitoringSortV4Service {
 	public void fulshToFile(List<ModelSortV4> saveList) {
 
 		log.info("saveList size:{}", saveList.size());
+
+		StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
+		sort(saveList);
+		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
+
+		StringBuffer sb = new StringBuffer();
+		sb.append("<div>更新时间:" + DateUtil.getTodayYYYYMMDDHHMMSS() + "</div>");
+		sb.append(header);
+		// StringBuffer sb2 = new StringBuffer(header);
+		int index = 1;
 		if (saveList.size() > 0) {
-			StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
-			sort(saveList);
-			SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
-
-			StringBuffer sb = new StringBuffer(header);
-			// StringBuffer sb2 = new StringBuffer(header);
-			int index = 1;
-
 			for (ModelSortV4 mv : saveList) {
 				String code = mv.getCode();
 				sb.append("<tr>").append(getHTML(index)).append(getHTML_SN(code)).append(getHTML(sbs.getCodeName(code)))
@@ -260,20 +269,20 @@ public class MonitoringSortV4Service {
 //						.append(getHTML(result.get(code))).append("</tr>").append(FileWriteUitl.LINE_FILE);
 				index++;
 			}
-			sb.append(endder);
-			// sb2.append(endder);
+		}
+		sb.append(endder);
+		// sb2.append(endder);
 
 //			String filepath = efc.getModelV1SortFloder() + "sortv4today.html";
-			String filepath = efc.getPubFloder() + "sortv4today.html";
-			FileWriteUitl fw = new FileWriteUitl(filepath, true);
-			fw.writeLine(sb.toString());
-			fw.close();
+		String filepath = efc.getPubFloder() + "sortv4today.html";
+		FileWriteUitl fw = new FileWriteUitl(filepath, true);
+		fw.writeLine(sb.toString());
+		fw.close();
 
 //			String filepath2 = efc.getModelV1SortFloderDesc() + "sortv1.html";
 //			FileWriteUitl fw2 = new FileWriteUitl(filepath2, true);
 //			fw2.writeLine(sb2.toString());
 //			fw2.close();
-		}
 
 		// fulshToFile2();
 	}

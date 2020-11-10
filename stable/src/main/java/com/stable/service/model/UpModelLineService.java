@@ -147,6 +147,9 @@ public class UpModelLineService {
 			ErrorLogFileUitl.writeError(e, "模型运行异常", "", "");
 			WxPushUtil.pushSystem1("模型运行异常..");
 		}
+		if (isJob) {
+			sortV4Service.sortv4(today + "", today + "");
+		}
 	}
 
 	private void run(boolean isJob, int treadeDate) {
