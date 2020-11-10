@@ -99,17 +99,19 @@ public class MonitoringSortV4Service {
 			// 盘中5分钟刷新
 			long d1130 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
 					DateUtil.parseDate(date + "113000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
-			long d1300 = DateUtil.parseDate(date + "130100", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT).getTime();
-			long end = DateUtil.parseDate(date + "150000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT).getTime();
+			Date dt13 = DateUtil.parseDate(date + "130100", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
+			long d1300 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(dt13);
+			long end = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+					DateUtil.parseDate(date + "150000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 			while (true) {
-				now = new Date().getTime();
+				now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
 				if (now >= end) {
 					break;
 				}
 				start(bList);
 				if (d1130 <= now && now <= d1300) {
 					long from3 = new Date().getTime();
-					int millis = (int) ((d1300 - from3));
+					long millis = (dt13.getTime() - from3);
 					if (millis > 0) {
 						log.info("sortv4 中场休息。");
 						Thread.sleep(millis);
