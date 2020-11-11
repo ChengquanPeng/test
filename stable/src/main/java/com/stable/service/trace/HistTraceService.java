@@ -237,7 +237,7 @@ public class HistTraceService {
 					} // for-volbase
 				} // for-marketPrice
 			} // for-openPrice
-			WxPushUtil.pushSystem1(version + "样本完成！" + sd + " " + ed);
+			//WxPushUtil.pushSystem1(version + "样本完成！" + sd + " " + ed);
 		} catch (Exception e) {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1(version + "样本出错！" + sd + " " + ed);
@@ -286,7 +286,7 @@ public class HistTraceService {
 					} // for-days
 				} // for-volbase
 			} // versions
-			WxPushUtil.pushSystem1("V2 样本完成！" + sd + " " + ed);
+			//WxPushUtil.pushSystem1("V2 样本完成！" + sd + " " + ed);
 		} catch (Exception e) {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1("V2 样本出错！" + sd + " " + ed);
@@ -797,7 +797,7 @@ public class HistTraceService {
 					}
 				}
 			}
-			WxPushUtil.pushSystem1(version + "样本完成！" + sd + " " + ed);
+		//	WxPushUtil.pushSystem1(version + "样本完成！" + sd + " " + ed);
 		} catch (Exception e) {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1(version + "样本出错！" + sd + " " + ed);

@@ -372,7 +372,7 @@ public class SortV4Service {
 					}
 				}
 			}
-			WxPushUtil.pushSystem1(version + "样本完成！" + sd + " " + ed);
+			//WxPushUtil.pushSystem1(version + "样本完成！" + sd + " " + ed);
 		} catch (Exception e) {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1(version + "样本出错！" + sd + " " + ed);
