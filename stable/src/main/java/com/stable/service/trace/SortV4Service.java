@@ -357,11 +357,19 @@ public class SortV4Service {
 						int total_all = samples.size();
 						log.info(version + " 获取样本数:" + total_all);
 						if (total_all > 0) {
-							TraceSortv2StatVo stat = new TraceSortv2StatVo();
-							String filepath = FILE_FOLDER + version + "_" + batch + "_" + startDate + "_" + ed;
-							stat(filepath, stat, samples);
-							sendMessge(version, batch, startDate, ed + "", 0, 0, stat, total_all, sysstart, detailOther,
-									op, mp);
+							if (startDate.equals(endDate)) {// 每日晚间
+								StringBuffer sb = new StringBuffer();
+								for (TraceSortv2Vo t1 : samples) {
+									sb.append(t1.getCode()).append(" ");
+								}
+								WxPushUtil.pushSystem1(version + "样本区间:" + sd + " " + ed + " 获取样本:" + sb.toString());
+							} else {
+								TraceSortv2StatVo stat = new TraceSortv2StatVo();
+								String filepath = FILE_FOLDER + version + "_" + batch + "_" + startDate + "_" + ed;
+								stat(filepath, stat, samples);
+								sendMessge(version, batch, startDate, ed + "", 0, 0, stat, total_all, sysstart,
+										detailOther, op, mp);
+							}
 						} else {
 							WxPushUtil.pushSystem1(version + "样本区间:" + sd + " " + ed + " 获取样本数为0");
 						}
@@ -372,7 +380,7 @@ public class SortV4Service {
 					}
 				}
 			}
-			//WxPushUtil.pushSystem1(version + "样本完成！" + sd + " " + ed);
+			// WxPushUtil.pushSystem1(version + "样本完成！" + sd + " " + ed);
 		} catch (Exception e) {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1(version + "样本出错！" + sd + " " + ed);

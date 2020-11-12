@@ -237,6 +237,26 @@ public class EastmoneySpider {
 		return list;
 	}
 
+	private JSONObject getHttpRest(String url1, String start) {
+		int i = 0;
+		while (true) {
+			try {
+				String result = HttpUtil.doGet2(url1);
+				result = result.substring(start.length());
+				result = result.substring(0, result.length() - 1);
+				JSONObject objects = JSON.parseObject(result);
+				return objects;
+			} catch (Exception e) {
+				e.printStackTrace();
+				i++;
+				if (i > 3) {
+					throw new RuntimeException(e);
+				}
+				ThreadsUtil.sleepRandomSecBetween15And30();
+			}
+		}
+	}
+
 	private void getYjkbByPage(String date1, List<FinYjkb> list) {
 		removeKb(date1);
 		// String last = redisUtil.get(RedisConstant.RDS_FIN_KUAIBAO_ + date1);
@@ -251,10 +271,7 @@ public class EastmoneySpider {
 		do {
 			ThreadsUtil.sleepRandomSecBetween1And5();
 			String url1 = getYjkbUrl(date1, page);
-			String result = HttpUtil.doGet2(url1);
-			result = result.substring("var BEzQbtii=".length());
-			result = result.substring(0, result.length() - 1);
-			JSONObject objects = JSON.parseObject(result);
+			JSONObject objects = getHttpRest(url1, "var BEzQbtii=");
 
 			if (objects.getBooleanValue("success")) {
 				JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
@@ -363,10 +380,7 @@ public class EastmoneySpider {
 		do {
 			ThreadsUtil.sleepRandomSecBetween1And5();
 			String url1 = getYjygUrl(date1, page);
-			String result = HttpUtil.doGet2(url1);
-			result = result.substring("var MRtZkjmw=".length());
-			result = result.substring(0, result.length() - 1);
-			JSONObject objects = JSON.parseObject(result);
+			JSONObject objects = getHttpRest(url1, "var MRtZkjmw=");
 			if (objects.getBooleanValue("success")) {
 				JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
 				if (tot_count <= 0) {
