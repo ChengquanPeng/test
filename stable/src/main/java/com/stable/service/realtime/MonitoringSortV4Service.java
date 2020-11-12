@@ -110,13 +110,13 @@ public class MonitoringSortV4Service {
 			long d1300 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(dt13);
 
 			long d1450 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(msgtime);
-			long d1455 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
-					DateUtil.parseDate(date + "145500", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+			long d145730 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+					DateUtil.parseDate(date + "145730", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 
 			List<ModelSortV4> oklist = null;
 			while (true) {
 				now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
-				if (now >= d1455) {
+				if (now >= d145730) {
 					break;
 				}
 				oklist = start(bList);
@@ -128,7 +128,7 @@ public class MonitoringSortV4Service {
 						Thread.sleep(millis);
 					}
 				} else {
-					if (d1450 <= now && now <= d1455) {
+					if (d1450 <= now && now <= d145730) {
 						ThreadsUtil.sleep(1, TimeUnit.MINUTES);
 					} else {
 						ThreadsUtil.sleep(5, TimeUnit.MINUTES);
