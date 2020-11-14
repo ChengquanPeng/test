@@ -94,7 +94,7 @@ public class LineAvgPrice {
 		if (!isTrace) {
 			req = EsQueryPageUtil.queryPage5;
 		}
-		// 最近5条
+		// 最近5条-倒序
 		List<StockAvgBase> clist10 = avgService.queryListByCodeForModelWithLast(code, date, req, false);
 		// 前面几天(未企稳)均线最高价和最低价振幅超5%,排除掉
 		List<Double> price = new ArrayList<Double>(20);
@@ -124,28 +124,50 @@ public class LineAvgPrice {
 				whiteHorseTmp++;
 			}
 		}
-		if (whiteHorseTmp >= 5) {
-			return true;
-		}
+		if (whiteHorseTmp >= 4) {
 
-		// 各均线在2.5%之内波动
-		if (whiteHorseTmp >= 3) {
+			// 是否上升趋势
+
+			whiteHorseTmp = 0;
+			double check = 0;// 后一个交易日
 			for (int i = 0; i < clist10.size(); i++) {
 				StockAvgBase sa = clist10.get(i);
 				if (isTrace && sa.getDate() == date) {
 					continue;
 				}
-				List<Double> l = Arrays.asList(sa.getAvgPriceIndex5(), sa.getAvgPriceIndex10(), sa.getAvgPriceIndex20(),
-						sa.getAvgPriceIndex30());
-				double max2 = l.stream().max((p1, p2) -> p1.compareTo(p2)).get();
-				double min2 = l.stream().min((p1, p2) -> p1.compareTo(p2)).get();
-
-				if (CurrencyUitl.cutProfit(min2, max2) > 2.5) {
-					return false;
+				// 当天
+				double c = clist10.get(i).getAvgPriceIndex30();
+				if (check == 0) {
+					check = c;
 				}
+				if (check >= c) {// 后一个交易日大于前一个交易日，上升趋势
+					whiteHorseTmp++;
+				}
+				check = c;
 			}
-			return true;
+			if (whiteHorseTmp >= 4) {
+				return true;
+			}
 		}
+
+//		// 各均线在2.5%之内波动
+//		if (whiteHorseTmp >= 3) {
+//			for (int i = 0; i < clist10.size(); i++) {
+//				StockAvgBase sa = clist10.get(i);
+//				if (isTrace && sa.getDate() == date) {
+//					continue;
+//				}
+//				List<Double> l = Arrays.asList(sa.getAvgPriceIndex5(), sa.getAvgPriceIndex10(), sa.getAvgPriceIndex20(),
+//						sa.getAvgPriceIndex30());
+//				double max2 = l.stream().max((p1, p2) -> p1.compareTo(p2)).get();
+//				double min2 = l.stream().min((p1, p2) -> p1.compareTo(p2)).get();
+//
+//				if (CurrencyUitl.cutProfit(min2, max2) > 2.5) {
+//					return false;
+//				}
+//			}
+//			return true;
+//		}
 		return false;
 	}
 

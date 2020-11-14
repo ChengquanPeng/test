@@ -60,6 +60,10 @@ public class LinePrice {
 		this.daliyTradeHistroyService = daliyTradeHistroyService;
 	}
 
+	public LinePrice(DaliyTradeHistroyService daliyTradeHistroyService) {
+		this.daliyTradeHistroyService = daliyTradeHistroyService;
+	}
+
 	@Getter
 	@Setter
 	public class StrongResult {
@@ -356,7 +360,7 @@ public class LinePrice {
 	}
 
 	/**
-	 * 8个月新高，涨幅未超55%
+	 * 新高，涨幅未超55%
 	 */
 	public boolean priceCheckForMiddle(String code, int date) {
 		List<TradeHistInfoDaliy> listD160 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
@@ -384,4 +388,29 @@ public class LinePrice {
 		return false;
 	}
 
+	double chekcdouble = 55.0;
+
+	// 半年涨幅未超过1倍
+	public boolean priceCheckForSortV4(String code, int date) {
+		List<TradeHistInfoDaliy> listD180 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
+				EsQueryPageUtil.queryPage180, SortOrder.DESC);
+		TradeHistInfoDaliy dmax = listD180.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+		TradeHistInfoDaliy dmin = listD180.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
+		double maxPrice = dmax.getHigh();
+		double minPrice = dmin.getLow();
+
+		if (dmax.getDate() > dmin.getDate()) {
+			double profit = CurrencyUitl.cutProfit(minPrice, maxPrice);
+			if (profit > chekcdouble) {// 80
+				log.info("sortv4 error :code={},checkDate={},9个月涨幅超{}%", code, date, chekcdouble);
+				return false;
+			} else {
+				// log.info("code={},checkDate={},maxprice={},maxpriceDate={},mixprice={},maxpriceDate={},profit={}",
+				// code,
+				// date, maxPrice, dmax.getDate(), minPrice, dmin.getDate(), profit);
+				return true;
+			}
+		}
+		return true;
+	}
 }

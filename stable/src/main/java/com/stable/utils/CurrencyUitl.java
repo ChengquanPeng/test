@@ -23,10 +23,8 @@ public class CurrencyUitl {
 		return result;
 	}
 
-	public final static int roundHalfUpWhithPercent(double price) {
-		int result = new BigDecimal(new Double(price * 100).toString()).setScale(0, BigDecimal.ROUND_HALF_UP)
-				.intValue();
-		return result;
+	public final static double roundHalfUpWhithPercent(double price) {
+		return new BigDecimal(new Double(price * 100).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
 
 	public final static Long covertToLong(String str) {
@@ -188,15 +186,15 @@ public class CurrencyUitl {
 	public static void main(String[] args) {
 		// System.err.println(CurrencyUitl.covertToLong("-10亿"));
 		// System.err.println(CurrencyUitl.covertToLong("10亿"));
-		double buyPrice = 0.0;
-		double soldPrice = 2.1;
-		System.err.println((0.0 - 2.1));
-		System.err.println((soldPrice - buyPrice));
-		System.err.println((soldPrice - buyPrice) / buyPrice);
-		double per = ((soldPrice - buyPrice) / buyPrice) * 100;
-		System.err.println(per);
-		System.err.println(
-				new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+//		double buyPrice = 0.0;
+//		double soldPrice = 2.1;
+//		System.err.println((0.0 - 2.1));
+//		System.err.println((soldPrice - buyPrice));
+//		System.err.println((soldPrice - buyPrice) / buyPrice);
+//		double per = ((soldPrice - buyPrice) / buyPrice) * 100;
+//		System.err.println(per);
+//		System.err.println(
+//				new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
 //		System.err.println(CurrencyUitl.covertToLong("4082万"));
 //		System.err.println(CurrencyUitl.covertToLong("1.1万亿"));
 //		System.err.println(CurrencyUitl.covertToString(997));

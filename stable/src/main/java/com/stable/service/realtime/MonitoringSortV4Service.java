@@ -6,7 +6,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -88,7 +90,8 @@ public class MonitoringSortV4Service {
 				log.info("获取买入监听列表空observableDate={}", observableDate);
 				return;
 			}
-
+			Map<String, Integer> yesterdayCondi = new ConcurrentHashMap<String, Integer>();
+			Map<String, Integer> stopset = new ConcurrentHashMap<String, Integer>();
 			// 定点刷新及通知
 			Date msgtime = DateUtil.parseDate(date + "145000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
 			long d145000 = msgtime.getTime();
@@ -96,8 +99,7 @@ public class MonitoringSortV4Service {
 				ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
 					@Override
 					public void run() {
-						start(bList);
-						int sz = start(bList).size();
+						int sz = start(bList, yesterdayCondi, stopset).size();
 						WxPushUtil.pushSystem1("sortV4 实时分析已经生成总数:" + sz);
 					}
 				}, msgtime);
@@ -114,12 +116,13 @@ public class MonitoringSortV4Service {
 					DateUtil.parseDate(date + "145730", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 
 			List<ModelSortV4> oklist = null;
+
 			while (true) {
 				now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
 				if (now >= d145730) {
 					break;
 				}
-				oklist = start(bList);
+				oklist = start(bList, yesterdayCondi, stopset);
 				if (d1130 <= now && now <= d1300) {
 					long from3 = new Date().getTime();
 					long millis = (dt13.getTime() - from3);
@@ -178,109 +181,91 @@ public class MonitoringSortV4Service {
 		WxPushUtil.pushSystem1("sortV4 模型监听结束,买入笔数:" + cnt);
 	}
 
-	public void autoSell(int today) {
-		int day = 3;
-		int ds = day + 1;
-		String p1 = tradeCalService.getPretradeDate(today + "");
-		String p2 = tradeCalService.getPretradeDate(p1);
-		String p3 = tradeCalService.getPretradeDate(p2);
-		int chkDate = Integer.valueOf(p3);
-		List<BuyTrace> bts = buyTraceService.getListByCode(null, 0, TradeType.BOUGHT.getCode(),
-				BuyModelType.B2.getCode(), ModelType.V4.getCode(), EsQueryPageUtil.queryPage9999);
-		int cnt = 0;
-		if (bts != null && bts.size() > 0) {
-			List<BuyTrace> upb = new ArrayList<BuyTrace>();
-			for (BuyTrace bt : bts) {
-				if (bt.getBuyDate() <= chkDate) {
-					// date=已收盘的日期
-					List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(
-							bt.getCode(), bt.getBuyDate(), 0, EsQueryPageUtil.queryPage9999, SortOrder.ASC);// 返回的list是不可修改对象
-					if (dailyList0.size() >= ds) {
-						// 除去当天的交易日来算
-						List<TradeHistInfoDaliyNofq> dailyList2 = new ArrayList<TradeHistInfoDaliyNofq>();
-						for (int i = 1; i < dailyList0.size(); i++) {
-							dailyList2.add(dailyList0.get(i));
-						}
-						// i=0;是当天
-						TradeHistInfoDaliyNofq d0 = dailyList0.get(day);
-						bt.setSoldDate(today);
-						bt.setSoldPrice(d0.getClosed());
-						bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
-						bt.setStatus(TradeType.SOLD.getCode());
-						upb.add(bt);
-					}
-				}
-			}
-			if (upb.size() > 0) {
-				buyTraceService.addToTrace(upb);
-				cnt = upb.size();
-			}
-		}
-		WxPushUtil.pushSystem1("sortV4 模型自动卖出笔数:" + cnt);
-	}
-
 	private double minRate = 3.5;
 	private double maxRate = 6.5;
 
-	private List<ModelSortV4> start(List<ModelV1> bList) {
+	private List<ModelSortV4> start(List<ModelV1> bList, Map<String, Integer> yesterdayCondi,
+			Map<String, Integer> stopset) {
 		List<ModelSortV4> oklist = Collections.synchronizedList(new LinkedList<ModelSortV4>());
 		CountDownLatch cnt = new CountDownLatch(bList.size());
 		for (ModelV1 ss : bList) {
 			String code = ss.getCode();
-			TasksWorkerModel.add(code, new TasksWorkerModelRunnable() {
-				@Override
-				public void running() {
-					try {
-						SinaRealTime srt = SinaRealtimeUitl.get(code);
-						if (srt.getOpen() == 0.0) {
-							log.info("{} SINA 今日停牌", code);
-							return;
-						}
-						double yesterdayPrice = srt.getYesterday();
-						double closedPrice = srt.getNow();
-						if (closedPrice < yesterdayPrice) {
-							log.info("{} closedPrice={},yesterdayPrice={},下跌", code, closedPrice, yesterdayPrice);
-						}
-						double todayChangeRate = CurrencyUitl.cutProfit(yesterdayPrice, closedPrice);
-						if (sortV4Service.isTodayPriceOk(minRate, maxRate, todayChangeRate, yesterdayPrice, closedPrice,
-								srt.getHigh())) {
-							List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService
-									.queryListByCodeWithLastNofq(code, 0, ss.getDate(), EsQueryPageUtil.queryPage5,
-											SortOrder.DESC);// 返回的list是不可修改对象
-							long deal = srt.getDealNums();
-							double total = 0.0;
-							for (TradeHistInfoDaliyNofq d : dailyList0) {
-								total += d.getVolume();
-							}
-							// 均值*基数
-							double chkVol = Double.valueOf(total / dailyList0.size() * 1.8);
-							if (deal > chkVol) {
-								log.info("今日明显放量近1倍 {},", code);
-								// 明显放量的不能买
+			int date = ss.getDate();
+			if (!stopset.containsKey(code)) {
+				TasksWorkerModel.add(code, new TasksWorkerModelRunnable() {
+					@Override
+					public void running() {
+						try {
+							SinaRealTime srt = SinaRealtimeUitl.get(code);
+							if (srt.getOpen() == 0.0) {
+								log.info("{} SINA 今日停牌", code);
+								stopset.put(code, 1);
 								return;
 							}
-							if (sortV4Service.isTradeOkBefor5(code, ss.getDate(), false)) {
-								if (sortV4Service.isWhiteHorseForSortV4(code, ss.getDate(), false)) {
-									ModelSortV4 v4 = new ModelSortV4();
-									BeanCopy.copy(ss, v4);
-									v4.setBuyPirce(srt.getSell1());
-									v4.setTodayChange(todayChangeRate);
-									v4.setGn(conceptService.getCodeConceptForCode(code));
-									oklist.add(v4);
-								} else {
-									log.info("{} 均线支持不合适", code, todayChangeRate);
-								}
-							} else {
-								log.info("{} 前5个交易日不合适", code, todayChangeRate);
+							double yesterdayPrice = srt.getYesterday();
+							double closedPrice = srt.getNow();
+							if (closedPrice < yesterdayPrice) {
+								log.info("{} closedPrice={},yesterdayPrice={},下跌", code, closedPrice, yesterdayPrice);
+								return;
 							}
-						} else {
-							log.info("{} todayChangeRate={},价格不合适", code, todayChangeRate);
+							double todayChangeRate = CurrencyUitl.cutProfit(yesterdayPrice, closedPrice);
+							if (todayChangeRate >= minRate) {
+								Integer checked = yesterdayCondi.get(code);
+								if (checked == null) {
+									checked = 0;
+									if (sortV4Service.isTradeOkBefor5ForPrice(code, date, false)) {
+										if (sortV4Service.isWhiteHorseForSortV4(code, date, false)) {
+											checked = 1;
+										} else {
+											log.info("{} 均线支持不合适", code, todayChangeRate);
+										}
+									} else {
+										log.info("{} 前5个交易日不合适", code, todayChangeRate);
+									}
+									yesterdayCondi.put(code, checked);
+								}
+								if (checked == 1) {
+									if (sortV4Service.isTodayPriceOk(minRate, maxRate, todayChangeRate, yesterdayPrice,
+											closedPrice, srt.getHigh())) {
+
+										ModelSortV4 v4 = new ModelSortV4();
+										BeanCopy.copy(ss, v4);
+										v4.setBuyPirce(srt.getSell1());
+										v4.setTodayChange(todayChangeRate);
+										v4.setGn(conceptService.getCodeConceptForCode(code));
+
+										// 是否放量
+										if (sortV4Service.isTradeOkBefor5ForVol(code, date, false, yesterdayPrice,
+												srt.getHigh(), srt.getDealNums())) {
+											v4.setIsOk(1);
+										} else {
+											v4.setIsOk(4);
+										}
+										oklist.add(v4);
+
+									} else {
+										log.info("{} todayChangeRate={},价格涨幅过大或上影线", code, todayChangeRate);
+										ModelSortV4 v4 = new ModelSortV4();
+										BeanCopy.copy(ss, v4);
+										v4.setBuyPirce(srt.getSell1());
+										v4.setTodayChange(todayChangeRate);
+										v4.setGn(conceptService.getCodeConceptForCode(code));
+										v4.setIsOk(todayChangeRate > maxRate ? 2 : 3);
+										oklist.add(v4);
+									}
+								}
+
+							} else {
+								log.info("{} todayChangeRate={},价格不满足最低", code, todayChangeRate);
+							}
+						} finally {
+							cnt.countDown();
 						}
-					} finally {
-						cnt.countDown();
 					}
-				}
-			});
+				});
+			} else {
+				cnt.countDown();
+			}
 		}
 		try {
 			if (!cnt.await(6, TimeUnit.MINUTES)) {// 等待执行完成
@@ -299,7 +284,7 @@ public class MonitoringSortV4Service {
 	private String endder = "</table>";
 
 	public MonitoringSortV4Service() {
-		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "基本面评分", "短期强势", "主力行为", "流通市值", "今日涨幅", "概念" };
+		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "基本面评分", "短期强势", "主力行为", "流通市值", "今日涨幅", "OK", "概念" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
 		}
@@ -315,7 +300,7 @@ public class MonitoringSortV4Service {
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 
 		StringBuffer sb = new StringBuffer();
-		sb.append("<div>更新时间:" + DateUtil.getTodayYYYYMMDDHHMMSS() + "</div>");
+		sb.append("<div>更新时间:" + DateUtil.getTodayYYYYMMDDHHMMSS() + " 其他条件:高位、热门股等等</div><br/>");
 		sb.append(header);
 		// StringBuffer sb2 = new StringBuffer(header);
 		int index = 1;
@@ -328,8 +313,8 @@ public class MonitoringSortV4Service {
 						.append(getHTML(CurrencyUitl.covertToString(
 								daliyBasicHistroyService.getDaliyBasicInfoByDate(code, mv.getDate()).getCirc_mv()
 										* 10000)))
-						.append(getHTML(mv.getTodayChange())).append(getHTML(mv.getGn())).append("</tr>")
-						.append(FileWriteUitl.LINE_FILE);
+						.append(getHTML(mv.getTodayChange())).append(getHTML(mv.getIsOk())).append(getHTML(mv.getGn()))
+						.append("</tr>").append(FileWriteUitl.LINE_FILE);
 
 //				sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))
 //						.append(getHTML(sbs.getCodeName(code))).append(getHTML(mv.getDate()))
@@ -376,5 +361,46 @@ public class MonitoringSortV4Service {
 
 	private String getHTMLTH(Object text) {
 		return "<th>" + text + "</th>";
+	}
+
+	public void autoSell(int today) {
+		int day = 3;
+		int ds = day + 1;
+		String p1 = tradeCalService.getPretradeDate(today + "");
+		String p2 = tradeCalService.getPretradeDate(p1);
+		String p3 = tradeCalService.getPretradeDate(p2);
+		int chkDate = Integer.valueOf(p3);
+		List<BuyTrace> bts = buyTraceService.getListByCode(null, 0, TradeType.BOUGHT.getCode(),
+				BuyModelType.B2.getCode(), ModelType.V4.getCode(), EsQueryPageUtil.queryPage9999);
+		int cnt = 0;
+		if (bts != null && bts.size() > 0) {
+			List<BuyTrace> upb = new ArrayList<BuyTrace>();
+			for (BuyTrace bt : bts) {
+				if (bt.getBuyDate() <= chkDate) {
+					// date=已收盘的日期
+					List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(
+							bt.getCode(), bt.getBuyDate(), 0, EsQueryPageUtil.queryPage9999, SortOrder.ASC);// 返回的list是不可修改对象
+					if (dailyList0.size() >= ds) {
+						// 除去当天的交易日来算
+						List<TradeHistInfoDaliyNofq> dailyList2 = new ArrayList<TradeHistInfoDaliyNofq>();
+						for (int i = 1; i < dailyList0.size(); i++) {
+							dailyList2.add(dailyList0.get(i));
+						}
+						// i=0;是当天
+						TradeHistInfoDaliyNofq d0 = dailyList0.get(day);
+						bt.setSoldDate(today);
+						bt.setSoldPrice(d0.getClosed());
+						bt.setProfit(CurrencyUitl.cutProfit(bt.getBuyPrice(), bt.getSoldPrice()));
+						bt.setStatus(TradeType.SOLD.getCode());
+						upb.add(bt);
+					}
+				}
+			}
+			if (upb.size() > 0) {
+				buyTraceService.addToTrace(upb);
+				cnt = upb.size();
+			}
+		}
+		WxPushUtil.pushSystem1("sortV4 模型自动卖出笔数:" + cnt);
 	}
 }

@@ -73,7 +73,7 @@ public class SortV4PREStrategyListener implements StrategyListener {
 			log.info("{} 上市不足2年", code);
 			return;
 		}
-		if (sortV4Service.isTradeOkBefor5(code, date, false)) {
+		if (sortV4Service.isTradeOkBefor5ForPrice(code, date, false)) {
 			if (sortV4Service.isWhiteHorseForSortV4(code, date, false)) {
 				isOk = true;
 			} else {
