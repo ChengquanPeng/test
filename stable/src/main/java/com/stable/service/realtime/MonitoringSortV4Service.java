@@ -1,10 +1,7 @@
 package com.stable.service.realtime;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
@@ -41,6 +38,7 @@ import com.stable.utils.TasksWorkerModel;
 import com.stable.utils.TasksWorkerModelRunnable;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.SortV4Reslt;
 import com.stable.vo.bus.BuyTrace;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.up.strategy.ModelV1;
@@ -115,14 +113,14 @@ public class MonitoringSortV4Service {
 			long d145730 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
 					DateUtil.parseDate(date + "145730", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 
-			List<ModelSortV4> oklist = null;
+			SortV4Reslt v4rest = null;
 
 			while (true) {
 				now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
 				if (now >= d145730) {
 					break;
 				}
-				oklist = start(bList, yesterdayCondi, stopset);
+				v4rest = start(bList, yesterdayCondi, stopset);
 				if (d1130 <= now && now <= d1300) {
 					long from3 = new Date().getTime();
 					long millis = (dt13.getTime() - from3);
@@ -152,7 +150,7 @@ public class MonitoringSortV4Service {
 //			} else {
 //				start(bList);
 //			}
-
+			List<ModelSortV4> oklist = v4rest.getLn().get(1);
 			if (oklist != null) {
 				List<BuyTrace> bts = new ArrayList<BuyTrace>();
 				for (ModelSortV4 v4 : oklist) {
@@ -184,9 +182,8 @@ public class MonitoringSortV4Service {
 	private double minRate = 3.5;
 	private double maxRate = 6.5;
 
-	private List<ModelSortV4> start(List<ModelV1> bList, Map<String, Integer> yesterdayCondi,
-			Map<String, Integer> stopset) {
-		List<ModelSortV4> oklist = Collections.synchronizedList(new LinkedList<ModelSortV4>());
+	private SortV4Reslt start(List<ModelV1> bList, Map<String, Integer> yesterdayCondi, Map<String, Integer> stopset) {
+		SortV4Reslt oklist = new SortV4Reslt();
 		CountDownLatch cnt = new CountDownLatch(bList.size());
 		for (ModelV1 ss : bList) {
 			String code = ss.getCode();
@@ -235,11 +232,15 @@ public class MonitoringSortV4Service {
 										v4.setGn(conceptService.getCodeConceptForCode(code));
 
 										// 是否放量
+										
 										if (sortV4Service.isTradeOkBefor5ForVol(code, date, false, yesterdayPrice,
 												srt.getHigh(), srt.getDealNums())) {
-											v4.setIsOk(1);
+//											if(sortV4Service.priceCheckForSortV4(code, date)) {
+//												
+//											}
+											v4.setLevel(1);
 										} else {
-											v4.setIsOk(4);
+											v4.setLevel(4);
 										}
 										oklist.add(v4);
 
@@ -250,7 +251,7 @@ public class MonitoringSortV4Service {
 										v4.setBuyPirce(srt.getSell1());
 										v4.setTodayChange(todayChangeRate);
 										v4.setGn(conceptService.getCodeConceptForCode(code));
-										v4.setIsOk(todayChangeRate > maxRate ? 2 : 3);
+										v4.setLevel(todayChangeRate > maxRate ? 2 : 3);
 										oklist.add(v4);
 									}
 								}
@@ -284,19 +285,18 @@ public class MonitoringSortV4Service {
 	private String endder = "</table>";
 
 	public MonitoringSortV4Service() {
-		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "基本面评分", "短期强势", "主力行为", "流通市值", "今日涨幅", "OK", "概念" };
+		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "基本面评分", "短期强势", "主力行为", "流通市值", "今日涨幅", "分级(1,2-涨,3,4-量)",
+				"概念" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
 		}
 		header += "</tr>" + FileWriteUitl.LINE_FILE;
 	}
 
-	public void fulshToFile(List<ModelSortV4> saveList) {
-
+	public void fulshToFile(SortV4Reslt saveList) {
 		log.info("saveList size:{}", saveList.size());
-
+		saveList.sort();
 		StockBasicService sbs = SpringUtil.getBean(StockBasicService.class);
-		sort(saveList);
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 
 		StringBuffer sb = new StringBuffer();
@@ -305,16 +305,18 @@ public class MonitoringSortV4Service {
 		// StringBuffer sb2 = new StringBuffer(header);
 		int index = 1;
 		if (saveList.size() > 0) {
-			for (ModelSortV4 mv : saveList) {
-				String code = mv.getCode();
-				sb.append("<tr>").append(getHTML(index)).append(getHTML_SN(code)).append(getHTML(sbs.getCodeName(code)))
-						.append(getHTML(mv.getDate())).append(getHTML(mv.getScore())).append(getHTML(mv.getAvgScore()))
-						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
-						.append(getHTML(CurrencyUitl.covertToString(
-								daliyBasicHistroyService.getDaliyBasicInfoByDate(code, mv.getDate()).getCirc_mv()
-										* 10000)))
-						.append(getHTML(mv.getTodayChange())).append(getHTML(mv.getIsOk())).append(getHTML(mv.getGn()))
-						.append("</tr>").append(FileWriteUitl.LINE_FILE);
+			for (List<ModelSortV4> ln : saveList.getLn().values()) {
+				for (ModelSortV4 mv : ln) {
+					String code = mv.getCode();
+					sb.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))
+							.append(getHTML(sbs.getCodeName(code))).append(getHTML(mv.getDate()))
+							.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgScore()))
+							.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
+							.append(getHTML(CurrencyUitl.covertToString(
+									daliyBasicHistroyService.getDaliyBasicInfoByDate(code, mv.getDate()).getCirc_mv()
+											* 10000)))
+							.append(getHTML(mv.getTodayChange())).append(getHTML(mv.getLevel()))
+							.append(getHTML(mv.getGn())).append("</tr>").append(FileWriteUitl.LINE_FILE);
 
 //				sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))
 //						.append(getHTML(sbs.getCodeName(code))).append(getHTML(mv.getDate()))
@@ -322,7 +324,8 @@ public class MonitoringSortV4Service {
 //						.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
 //						.append(getHTML(mv.getSortWay())).append(getHTML(mv.getPriceIndex()))
 //						.append(getHTML(result.get(code))).append("</tr>").append(FileWriteUitl.LINE_FILE);
-				index++;
+					index++;
+				}
 			}
 		}
 		sb.append(endder);
@@ -340,15 +343,6 @@ public class MonitoringSortV4Service {
 //			fw2.close();
 
 		// fulshToFile2();
-	}
-
-	private void sort(List<ModelSortV4> set) {
-		Collections.sort(set, new Comparator<ModelSortV4>() {
-			@Override
-			public int compare(ModelSortV4 o1, ModelSortV4 o2) {
-				return o2.getScore() - o1.getScore();
-			}
-		});
 	}
 
 	private String getHTML(Object text) {

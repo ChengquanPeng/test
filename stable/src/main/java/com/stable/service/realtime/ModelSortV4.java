@@ -12,5 +12,5 @@ public class ModelSortV4 extends ModelV1 {
 	private double buyPirce;
 	private double todayChange;
 	private String gn;
-	private int isOk = 0;
+	private int level = 0;
 }

@@ -388,7 +388,7 @@ public class LinePrice {
 		return false;
 	}
 
-	double chekcdouble = 55.0;
+	double chekcdouble = 80.0;
 
 	// 半年涨幅未超过1倍
 	public boolean priceCheckForSortV4(String code, int date) {
