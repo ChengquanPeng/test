@@ -96,23 +96,7 @@ public class LineAvgPrice {
 		}
 		// 最近5条-倒序
 		List<StockAvgBase> clist10 = avgService.queryListByCodeForModelWithLast(code, date, req, false);
-		// 前面几天(未企稳)均线最高价和最低价振幅超5%,排除掉
-		List<Double> price = new ArrayList<Double>(20);
-		for (int i = 0; i < clist10.size(); i++) {
-			StockAvgBase sa = clist10.get(i);
-			if (isTrace && sa.getDate() == date) {
-				continue;
-			}
-			price.add(sa.getAvgPriceIndex5());
-			price.add(sa.getAvgPriceIndex10());
-			price.add(sa.getAvgPriceIndex20());
-			price.add(sa.getAvgPriceIndex30());
-		}
-		double max = price.stream().max((p1, p2) -> p1.compareTo(p2)).get();
-		double min = price.stream().min((p1, p2) -> p1.compareTo(p2)).get();
-		if (CurrencyUitl.cutProfit(min, max) > 5) {
-			return false;
-		}
+
 		// 20日均线在30日之上
 		int whiteHorseTmp = 0;
 		for (int i = 0; i < clist10.size(); i++) {
@@ -124,10 +108,11 @@ public class LineAvgPrice {
 				whiteHorseTmp++;
 			}
 		}
+		if (whiteHorseTmp >= 5) {
+			return true;
+		}
 		if (whiteHorseTmp >= 4) {
-
 			// 是否上升趋势
-
 			whiteHorseTmp = 0;
 			double check = 0;// 后一个交易日
 			for (int i = 0; i < clist10.size(); i++) {
@@ -146,6 +131,23 @@ public class LineAvgPrice {
 				check = c;
 			}
 			if (whiteHorseTmp >= 4) {
+				// 前面几天(未企稳)均线最高价和最低价振幅超5%,排除掉
+				List<Double> price = new ArrayList<Double>(20);
+				for (int i = 0; i < clist10.size(); i++) {
+					StockAvgBase sa = clist10.get(i);
+					if (isTrace && sa.getDate() == date) {
+						continue;
+					}
+					price.add(sa.getAvgPriceIndex5());
+					price.add(sa.getAvgPriceIndex10());
+					price.add(sa.getAvgPriceIndex20());
+					price.add(sa.getAvgPriceIndex30());
+				}
+				double max = price.stream().max((p1, p2) -> p1.compareTo(p2)).get();
+				double min = price.stream().min((p1, p2) -> p1.compareTo(p2)).get();
+				if (CurrencyUitl.cutProfit(min, max) > 5) {
+					return false;
+				}
 				return true;
 			}
 		}

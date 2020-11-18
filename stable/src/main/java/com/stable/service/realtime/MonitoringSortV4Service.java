@@ -110,14 +110,14 @@ public class MonitoringSortV4Service {
 			long d1300 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(dt13);
 
 			long d1450 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(msgtime);
-			long d145730 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
-					DateUtil.parseDate(date + "145730", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+			long d145800 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+					DateUtil.parseDate(date + "145800", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 
 			SortV4Reslt v4rest = null;
 
 			while (true) {
 				now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
-				if (now >= d145730) {
+				if (now >= d145800) {
 					break;
 				}
 				v4rest = start(bList, yesterdayCondi, stopset);
@@ -129,7 +129,7 @@ public class MonitoringSortV4Service {
 						Thread.sleep(millis);
 					}
 				} else {
-					if (d1450 <= now && now <= d145730) {
+					if (d1450 <= now && now <= d145800) {
 						ThreadsUtil.sleep(1, TimeUnit.MINUTES);
 					} else {
 						ThreadsUtil.sleep(5, TimeUnit.MINUTES);
@@ -179,7 +179,7 @@ public class MonitoringSortV4Service {
 		WxPushUtil.pushSystem1("sortV4 模型监听结束,买入笔数:" + cnt);
 	}
 
-	private double minRate = 3.5;
+	private double minRate = 3.2;
 	private double maxRate = 6.5;
 
 	private SortV4Reslt start(List<ModelV1> bList, Map<String, Integer> yesterdayCondi, Map<String, Integer> stopset) {
@@ -232,7 +232,7 @@ public class MonitoringSortV4Service {
 										v4.setGn(conceptService.getCodeConceptForCode(code));
 
 										// 是否放量
-										
+
 										if (sortV4Service.isTradeOkBefor5ForVol(code, date, false, yesterdayPrice,
 												srt.getHigh(), srt.getDealNums())) {
 //											if(sortV4Service.priceCheckForSortV4(code, date)) {

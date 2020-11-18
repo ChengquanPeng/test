@@ -402,7 +402,8 @@ public class LinePrice {
 		if (dmax.getDate() > dmin.getDate()) {
 			double profit = CurrencyUitl.cutProfit(minPrice, maxPrice);
 			if (profit > chekcdouble) {// 80
-				log.info("sortv4 error :code={},checkDate={},9个月涨幅超{}%", code, date, chekcdouble);
+				log.info("sortv4 error :code={},checkDate={},9个月涨幅超{}%>>> ({}){} -> ({}){} = {}%", code, date,
+						chekcdouble, dmin.getDate(), minPrice, dmax.getDate(), maxPrice, profit);
 				return false;
 			} else {
 				// log.info("code={},checkDate={},maxprice={},maxpriceDate={},mixprice={},maxpriceDate={},profit={}",
