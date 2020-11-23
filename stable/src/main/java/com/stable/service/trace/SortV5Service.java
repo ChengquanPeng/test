@@ -51,7 +51,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
-public class SortV4Service {
+public class SortV5Service {
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -266,7 +266,9 @@ public class SortV4Service {
 		);
 	}
 
-	public void sortv4(String startDate, String endDate) {
+	String version = "sortv5";
+
+	public void sortv5(String startDate, String endDate) {
 		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD_NOspit());
 		if (StringUtils.isBlank(startDate)) {
 			startDate = "20200101";
@@ -278,7 +280,6 @@ public class SortV4Service {
 		}
 		int sd = Integer.valueOf(startDate);
 		int ed = Integer.valueOf(endDate);
-		String version = "sortv4";
 		try {
 			boolean getLock = sempAll.tryAcquire(10, TimeUnit.HOURS);
 			if (!getLock) {
@@ -300,8 +301,7 @@ public class SortV4Service {
 					List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 					log.info("codelist:" + codelist.size());
 					String sysstart = DateUtil.getTodayYYYYMMDDHHMMSS();
-					String detailOther = ",rate=" + rate + ",day=" + day
-							+ ",严格20-30均线支撑(上升趋势v1),短期高位(200亿不检查),短线高位(80),还原企稳检查";
+					String detailOther = ",rate=" + rate + ",day=" + day + ",严格20-30均线支撑(上升趋势v1),长安汽车版本(5exist)";
 					log.info("startDate={},endDate={},{}", startDate, endDate, detailOther);
 					try {
 						List<TraceSortv2Vo> samples = Collections.synchronizedList(new LinkedList<TraceSortv2Vo>());
@@ -331,7 +331,7 @@ public class SortV4Service {
 												if (date < twoYearChkDate) {
 													continue;
 												}
-												TraceSortv2Vo t1 = middleRunningsortv4(code, date, td, rate, maxRate,
+												TraceSortv2Vo t1 = middleRunningsortv5(code, date, td, rate, maxRate,
 														day);
 												if (t1 != null && !isExist(codesamples, date, day)) {
 													t1.setZhangtingDate(date);
@@ -369,7 +369,7 @@ public class SortV4Service {
 								for (TraceSortv2Vo t1 : samples) {
 									sb.append(t1.getCode()).append(" ");
 								}
-								WxPushUtil.pushSystem1(version + "样本区间:" + sd + " " + ed + " 获取样本代码:" + sb.toString());
+								WxPushUtil.pushSystem1(version + "样本区间:" + sd + " " + ed + " 获取样本:" + sb.toString());
 							} else {
 								TraceSortv2StatVo stat = new TraceSortv2StatVo();
 								String filepath = FILE_FOLDER + version + "_" + batch + "_" + startDate + "_" + ed;
@@ -399,7 +399,7 @@ public class SortV4Service {
 	public static void main(String[] args) {
 	}
 
-	private TraceSortv2Vo middleRunningsortv4(String code, int date, TradeHistInfoDaliyNofq td, double minRate,
+	private TraceSortv2Vo middleRunningsortv5(String code, int date, TradeHistInfoDaliyNofq td, double minRate,
 			double maxRate, int day) {
 		double todayChangeRate = td.getTodayChangeRate();
 		try {
@@ -407,18 +407,15 @@ public class SortV4Service {
 			// 如果第二天价格最高价低于昨天收盘价，则注意风险。
 			if (isTodayPriceOk(minRate, maxRate, todayChangeRate, td.getYesterdayPrice(), td.getClosed(),
 					td.getHigh())) {// 是否严重上影线
-				// 1.前5个交易日,收盘价未超过10%
-				if (isTradeOkBefor5ForPrice(code, date, true) && isTradeOkBefor5ForVol(code, date, true, 0, 0, 0)) {
+				// 1.前交易日价格限制,收盘价未超过10%
+				if (isTradeOkBefor10ForPrice(code, date, true)) {
 					// 2.均线支持
-					if (isWhiteHorseForSortV4(code, date, true)) {// 10日线的白马TODO 均线用不复权试试
-						// 3.是否短期高位
-						if (priceCheckForSortV4(code, date)) {
-							TraceSortv2Vo t1 = saveOkRec(code, date, day);
-							if (t1 != null) {
-								return t1;
-							} else {
-								log.info("middle error : {},{},buyDate={},TraceSortv2Vo  is null", code, date, date);
-							}
+					if (isWhiteHorseForSortV5(code, date, true)) {// 10日线的白马TODO 均线用不复权试试
+						TraceSortv2Vo t1 = saveOkRec(code, date, 5);
+						if (t1 != null) {
+							return t1;
+						} else {
+							log.info("middle error : {},{},buyDate={},TraceSortv2Vo  is null", code, date, date);
 						}
 					} else {
 						log.info("middle error : {},{},5日线不是白马", code, date);
@@ -439,8 +436,10 @@ public class SortV4Service {
 	public boolean isTodayPriceOk(double minRate, double maxRate, double todayChangeRate, double yesterdayPrice,
 			double closedPrice, double hightPrice) {
 		if (todayChangeRate >= minRate && todayChangeRate <= maxRate) {
-			LinePrice linePrice = new LinePrice();
-			return !linePrice.isLowClosePriceToday(todayChangeRate, yesterdayPrice, closedPrice, hightPrice, 0.5);
+			// LinePrice linePrice = new LinePrice();
+			// return !linePrice.isLowClosePriceToday(todayChangeRate, yesterdayPrice,
+			// closedPrice, hightPrice, 0.5);
+			return true;
 		}
 		return false;
 	}
@@ -462,9 +461,10 @@ public class SortV4Service {
 	/**
 	 * 2.均线
 	 */
-	public boolean isWhiteHorseForSortV4(String code, int date, boolean isTrace) {
+	public boolean isWhiteHorseForSortV5(String code, int date, boolean isTrace) {
 		LineAvgPrice lineAvg = new LineAvgPrice(avgService);
-		return lineAvg.isWhiteHorseForSortV4(code, date, isTrace);
+//		return lineAvg.isWhiteHorseForSortV5(code, date, isTrace);
+		return lineAvg.isWhiteHorseForSortV5_V1(code, date, isTrace);
 	}
 
 	/**
@@ -482,10 +482,10 @@ public class SortV4Service {
 	/**
 	 * 3.前面交易-价格
 	 */
-	public boolean isTradeOkBefor5ForPrice(String code, int date, boolean isTrace) {
-		EsQueryPageReq req = EsQueryPageUtil.queryPage6;
+	public boolean isTradeOkBefor10ForPrice(String code, int date, boolean isTrace) {
+		EsQueryPageReq req = EsQueryPageUtil.queryPage11;
 		if (!isTrace) {
-			req = EsQueryPageUtil.queryPage5;
+			req = EsQueryPageUtil.queryPage10;
 		}
 		List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
 				req, SortOrder.DESC);// 返回的list是不可修改对象
@@ -498,28 +498,103 @@ public class SortV4Service {
 			// TradeHistInfoDaliyNofq today = nlist.get(0);
 			nlist.remove(0);// 移除当天
 		}
-		double highPice = nlist.stream().max(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getClosed)).get()
-				.getClosed();
-		double lowPice = nlist.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getClosed)).get()
-				.getClosed();
-		if (CurrencyUitl.topPrice(lowPice, false) >= highPice) {
-			return true;
-			// 前一天收盘价比前面几天的最高价还高--过滤
-//			TradeHistInfoDaliyNofq last = nlist.get(0);
-//			nlist.remove(0);
-//			boolean isPriceOk = false;
-//			for (TradeHistInfoDaliyNofq td : nlist) {
-//				if (td.getHigh() > last.getClosed()) {
-//					isPriceOk = true;
-//					break;
-//				}
-//			}
-//			if (!isPriceOk) {
-//				log.info("前一天的收盘价比前面几天的最高价还高 {},{}", code, date);
-//			}
-//			return isPriceOk;
+
+		// 最高价
+		TradeHistInfoDaliyNofq highDate = nlist.stream()
+				.max(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getHigh)).get();
+
+		// 最低价
+		TradeHistInfoDaliyNofq lowDate = nlist.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getLow))
+				.get();
+
+		if (highDate.getDate() >= lowDate.getDate()) {
+			log.info("最低价-最高价日期不符合 {},{}", code, date);
+			return false;
 		}
-		log.info("前五交易日振幅过大{},{},highPice={},lowPice={}", code, date, highPice, lowPice);
+
+		double lowPice = lowDate.getLow();
+		double highPice = highDate.getHigh();
+		// 回踩超过10%以上
+		if (CurrencyUitl.topPrice(lowPice, false) < highPice) {
+			TradeHistInfoDaliyNofq lastday = nlist.get(0);
+			// 最低价是否盈利超过10%
+			if (CurrencyUitl.topPrice(lowDate.getLow(), false) >= lastday.getClosed()) {
+				List<TradeHistInfoDaliyNofq> dailyList2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0,
+						highDate.getDate(), EsQueryPageUtil.queryPage10, SortOrder.DESC);// 返回的list是不可修改对象
+				TradeHistInfoDaliyNofq highDate2 = dailyList2.stream()
+						.max(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getHigh)).get();
+				// 不是同一天，表明还有新的高价
+				if (highDate.getDate() != highDate2.getDate()) {
+					if (CurrencyUitl.cutProfit(highDate.getHigh(), highDate2.getHigh()) > 2) {
+						log.info("最高价上还更高价 {},{}", code, date);
+						return false;
+					}
+				}
+				// 最低价v2
+				TradeHistInfoDaliyNofq lowDate2 = dailyList2.stream()
+						.min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getLow)).get();
+				double chkprice = CurrencyUitl.lowestPrice20(highPice);
+				// 3.最高价前面涨幅超20%
+				if (lowDate2.getLow() <= chkprice) {
+					return true;
+				}
+				log.info("盈利未超20% {},{},chkprice={},lowPice={}", code, date, chkprice, lowDate2.getLow());
+				return false;
+			}
+			log.info("低点反弹区间过大{},{},highPice={},lowPice={}", code, date, lastday.getClosed(), lowDate.getLow());
+			return false;
+		}
+		log.info("高点回踩幅度较小{},{},highPice={},lowPice={}", code, date, highPice, lowPice);
+		return false;
+	}
+
+	/**
+	 * 3.前面交易-价格
+	 */
+	public boolean isTradeOkBefor10ForPriceV1(String code, int date, boolean isTrace) {
+		EsQueryPageReq req = EsQueryPageUtil.queryPage11;
+		if (!isTrace) {
+			req = EsQueryPageUtil.queryPage10;
+		}
+		List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
+				req, SortOrder.DESC);// 返回的list是不可修改对象
+		List<TradeHistInfoDaliyNofq> nlist = new ArrayList<TradeHistInfoDaliyNofq>();
+		for (TradeHistInfoDaliyNofq td : dailyList0) {
+			nlist.add(td);
+		}
+		// 实时不需要调用这个
+		if (isTrace) {
+			// TradeHistInfoDaliyNofq today = nlist.get(0);
+			nlist.remove(0);// 移除当天
+		}
+
+		TradeHistInfoDaliyNofq lowDate = nlist.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getLow))
+				.get();
+
+		TradeHistInfoDaliyNofq highDate = lowDate;
+
+		// 最低日以前的最高日
+		for (TradeHistInfoDaliyNofq td : dailyList0) {
+			if (td.getDate() < lowDate.getDate()) {
+				if (td.getHigh() > highDate.getHigh()) {
+					highDate = td;
+				}
+			}
+		}
+		double lowPice = lowDate.getLow();
+		double highPice = highDate.getHigh();
+		// 回踩超过10%以上
+		if (CurrencyUitl.topPrice(lowPice, false) < highPice) {
+			TradeHistInfoDaliyNofq lastday = nlist.get(0);
+			// 最低价是否盈利超过10%
+			if (CurrencyUitl.topPrice(lowDate.getLow(), false) >= lastday.getClosed()) {
+
+				return true;
+			}
+			log.info("低点反弹区间过大{},{},highPice={},lowPice={}", code, date, lastday.getClosed(), lowDate.getLow());
+			return false;
+		}
+		log.info("高点回踩幅度较小{},{},highPice={},lowPice={}", code, date, highPice, lowPice);
 		return false;
 	}
 
@@ -622,29 +697,11 @@ public class SortV4Service {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-//				String code = "600789";
-//				int date = 20191231;
-//				String code = "603477";
-//				int date = 20201030;
-//				String code = "300750";
-//				int date = 20200929;
 
-//				String code = "000625";
-//				int date = 20201113;
-//
-//				double rate = 3.5;
-//				int day = 3;
-//				List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code,
-//						date, date, EsQueryPageUtil.queryPage9999, SortOrder.ASC);
-//				if (dailyList0 != null && dailyList0.size() > 0) {
-//					TradeHistInfoDaliyNofq td = dailyList0.get(0);
-//					TraceSortv2Vo tv = middleRunningsortv4(code, date, td, rate, 7.5, day);
-//					log.info(tv);
-//				} else {
-//					log.info("dailyList0 is null");
-//				}
+//				testlocal();
 
-//				sortv4("20200101", "20201031");
+				sortv5("20200101", "20201116");
+
 //				sortv4("20190101", "20191231");
 //				sortv4("20180101", "20181231");
 //				sortv4("20170101", "20171231");
@@ -654,5 +711,28 @@ public class SortV4Service {
 //				sortv4("20130101", "20131231");
 			}
 		}).start();
+	}
+
+	public void testlocal() {
+//		String code = "600789";
+//		int date = 20200117;
+//		String code = "603477";
+//		int date = 20201030;
+//		String code = "300750";
+//		int date = 20200929;
+
+		String code = "000625";
+		int date = 20201113;
+		double rate = 3.5;
+		int day = 3;
+		List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, date, date,
+				EsQueryPageUtil.queryPage9999, SortOrder.ASC);
+		if (dailyList0 != null && dailyList0.size() > 0) {
+			TradeHistInfoDaliyNofq td = dailyList0.get(0);
+			TraceSortv2Vo tv = middleRunningsortv5(code, date, td, rate, 7.5, day);
+			log.info(tv);
+		} else {
+			log.info("dailyList0 is null");
+		}
 	}
 }

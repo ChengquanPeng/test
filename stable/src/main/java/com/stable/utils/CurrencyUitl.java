@@ -145,6 +145,13 @@ public class CurrencyUitl {
 		return result;
 	}
 
+	public final static double lowestPrice18(double preClosedPrice) {
+		preClosedPrice = preClosedPrice - preClosedPrice * 0.18;
+		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
+				.doubleValue();
+		return result;
+	}
+
 	public final static double lowestPrice20(double preClosedPrice) {
 		preClosedPrice = preClosedPrice - preClosedPrice * 0.2;
 		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)

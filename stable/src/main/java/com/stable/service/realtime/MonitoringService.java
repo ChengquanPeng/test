@@ -80,7 +80,7 @@ public class MonitoringService {
 		String date = DateUtil.getTodayYYYYMMDD();
 		int idate = Integer.valueOf(date);
 		if (!tradeCalService.isOpen(idate)) {
-			WxPushUtil.pushSystem1("非交易日结束监听");
+			//WxPushUtil.pushSystem1("非交易日结束监听");
 			return;
 		}
 		long now = new Date().getTime();

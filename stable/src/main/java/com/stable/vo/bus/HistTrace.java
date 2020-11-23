@@ -27,6 +27,7 @@ public class HistTrace extends EsBase {
 	private int endDate;
 	@Field(type = FieldType.Text)
 	private String version;
+
 	@Field(type = FieldType.Integer)
 	private int days;
 	@Field(type = FieldType.Double)
@@ -50,6 +51,8 @@ public class HistTrace extends EsBase {
 	private double totalProfit = 0.0;
 	@Field(type = FieldType.Double)
 	private double totalLoss = 0.0;
+	@Field(type = FieldType.Text)
+	private String other;
 
 	@Field(type = FieldType.Text) // 实际被套区间
 	private String lossSettAct;
@@ -57,8 +60,5 @@ public class HistTrace extends EsBase {
 	private String lossSettClosedPrice;
 	@Field(type = FieldType.Text)
 	private String lossSettLowPrice;// 理论最低价被套区间
-
-	@Field(type = FieldType.Text)
-	private String other;
 
 }

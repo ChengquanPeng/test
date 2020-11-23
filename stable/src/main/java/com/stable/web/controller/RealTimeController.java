@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.realtime.MonitoringService;
+import com.stable.service.realtime.MonitoringSortV4Service;
 import com.stable.vo.http.JsonResult;
 
 @RequestMapping("/realtime")
@@ -15,7 +16,6 @@ public class RealTimeController {
 
 	@Autowired
 	private MonitoringService monitoringService;
-
 
 	/**
 	 * 交易详情
@@ -77,6 +77,27 @@ public class RealTimeController {
 		JsonResult r = new JsonResult();
 		try {
 			r.setResult(monitoringService.sell(code));
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	@Autowired
+	private MonitoringSortV4Service monitoringSortV4Service;
+
+	/**
+	 * sortV4标记是否符合
+	 */
+	@RequestMapping(value = "/sortv4sign", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> sortsign(String code, Integer sg) {
+		JsonResult r = new JsonResult();
+		try {
+			monitoringSortV4Service.signCodeOk(code, sg);
+			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

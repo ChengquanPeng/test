@@ -41,6 +41,10 @@ public class DateUtil {
 		return format.format(date);
 	}
 
+	public static int formatYYYYMMDDReturnInt(Date date) {
+		return Integer.valueOf(formatYYYYMMDD(date));
+	}
+
 	public static Date parseDate(int yyyyMMdd) {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
 		try {

@@ -40,6 +40,7 @@ import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.SortV4Reslt;
 import com.stable.vo.bus.BuyTrace;
+import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.up.strategy.ModelV1;
 
@@ -63,11 +64,14 @@ public class MonitoringSortV4Service {
 	@Autowired
 	private BuyTraceService buyTraceService;
 
+	private Map<String, Integer> sign = new ConcurrentHashMap<String, Integer>();
+
 	public synchronized void startObservable() {
+		sign.clear();
 		String date = DateUtil.getTodayYYYYMMDD();
 		int today = Integer.valueOf(date);
 		if (!tradeCalService.isOpen(today)) {
-			WxPushUtil.pushSystem1("非交易日结束监听");
+			// WxPushUtil.pushSystem1("非交易日结束监听");
 			return;
 		}
 		long now = new Date().getTime();
@@ -90,6 +94,7 @@ public class MonitoringSortV4Service {
 			}
 			Map<String, Integer> yesterdayCondi = new ConcurrentHashMap<String, Integer>();
 			Map<String, Integer> stopset = new ConcurrentHashMap<String, Integer>();
+
 			// 定点刷新及通知
 			Date msgtime = DateUtil.parseDate(date + "145000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
 			long d145000 = msgtime.getTime();
@@ -280,13 +285,12 @@ public class MonitoringSortV4Service {
 	}
 
 	private String header = "<table border='1' cellspacing='0' cellpadding='0'><tr>";
-	// private String endder = "</table><script type='text/javascript'
-	// src='/html/static/addsinaurl.js'></script>";
-	private String endder = "</table>";
+	private String endder = "</table><script type='text/javascript' src='/html/static/addrlurl.js'></script>";
+//	private String endder = "</table>";
 
 	public MonitoringSortV4Service() {
-		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "基本面评分", "短期强势", "主力行为", "流通市值", "今日涨幅", "分级(1,2-涨,3,4-量)",
-				"概念" };
+		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "基本面评分", "短期强势", "主力行为", "流通市值", "市盈率(静/ttm)", "今日涨幅",
+				"分级(1,2-涨,3,4-量)", "标记", "概念" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
 		}
@@ -308,15 +312,16 @@ public class MonitoringSortV4Service {
 			for (List<ModelSortV4> ln : saveList.getLn().values()) {
 				for (ModelSortV4 mv : ln) {
 					String code = mv.getCode();
+					DaliyBasicInfo basic = daliyBasicHistroyService.getDaliyBasicInfoByDate(code, mv.getDate());
 					sb.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))
 							.append(getHTML(sbs.getCodeName(code))).append(getHTML(mv.getDate()))
 							.append(getHTML(mv.getScore())).append(getHTML(mv.getAvgScore()))
 							.append(getHTML(mv.getSortStrong())).append(getHTML(mv.getSortPgm()))
-							.append(getHTML(CurrencyUitl.covertToString(
-									daliyBasicHistroyService.getDaliyBasicInfoByDate(code, mv.getDate()).getCirc_mv()
-											* 10000)))
+							.append(getHTML(CurrencyUitl.covertToString(basic.getCirc_mv() * 10000)))
+							.append(getHTML(basic.getPe() + "/" + basic.getPe_ttm()))
 							.append(getHTML(mv.getTodayChange())).append(getHTML(mv.getLevel()))
-							.append(getHTML(mv.getGn())).append("</tr>").append(FileWriteUitl.LINE_FILE);
+							.append(getSignUrl(code)).append(getHTML(mv.getGn())).append("</tr>")
+							.append(FileWriteUitl.LINE_FILE);
 
 //				sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))
 //						.append(getHTML(sbs.getCodeName(code))).append(getHTML(mv.getDate()))
@@ -345,12 +350,25 @@ public class MonitoringSortV4Service {
 		// fulshToFile2();
 	}
 
+	private String getSignUrl(String code) {
+		Integer s = sign.get(code);
+		if (s == null) {
+			return getHTML_myrt(code);
+		} else {
+			return getHTML(s);
+		}
+	}
+
 	private String getHTML(Object text) {
 		return "<td>" + text + "</td>";
 	}
 
 	private String getHTML_SN(Object text) {
 		return "<td class='sn'>" + text + "</td>";
+	}
+
+	private String getHTML_myrt(Object text) {
+		return "<td class='myrt'>" + text + "</td>";
 	}
 
 	private String getHTMLTH(Object text) {
@@ -396,5 +414,9 @@ public class MonitoringSortV4Service {
 			}
 		}
 		WxPushUtil.pushSystem1("sortV4 模型自动卖出笔数:" + cnt);
+	}
+
+	public void signCodeOk(String code, Integer s) {
+		sign.put(code, s);
 	}
 }
