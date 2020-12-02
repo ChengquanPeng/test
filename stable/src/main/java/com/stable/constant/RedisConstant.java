@@ -25,4 +25,9 @@ public class RedisConstant {
 	public static final String RDS_FIN_YUGAO_ = "RDS_FIN_YUGAO_";
 	// 快报
 	public static final String RDS_FIN_KUAIBAO_ = "RDS_FIN_KUAIBAO_";
+
+	// 关注度
+	public static final String RDS_ATTENTION_DATE = "RDS_ATTENTION_DATE";
+	public static final String RDS_ATTENTION_DATE_DONE_ = "RDS_ATTENTION_DATE_DONE_";
+	public static final String RDS_ATTENTION_DATE_CODE = "RDS_ATTENTION_DATE_CODE";
 }

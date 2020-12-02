@@ -12,6 +12,7 @@ public enum RunLogBizTypeEnum {
 	TICK_DATA(9, "分笔数据"),
 	SHARE_FLOAT(10, "解禁"),
 	FINACE_FRIST(11, "预告-快报"), 
+	CODE_ATTENTION(12, "关注度"), 
 	RETRACE_SH_FIVEDAY(9100, "短线-5日反转");
 
 	public int bcode;
