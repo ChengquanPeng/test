@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import com.stable.job.RealtimeJob;
+import com.stable.service.CodeAttentionService;
 import com.stable.utils.OSystemUtil;
 import com.stable.utils.SpringUtil;
 import com.stable.utils.WxPushUtil;
@@ -24,6 +25,8 @@ import com.stable.utils.WxPushUtil;
 public class MyApplicationRunner implements ApplicationRunner {
 	@Autowired
 	private RealtimeJob realtimeJob;
+	@Autowired
+	private CodeAttentionService codeAttentionService;
 	// @Autowired
 	// private FinanceService financeService;
 
@@ -45,6 +48,7 @@ public class MyApplicationRunner implements ApplicationRunner {
 			return;
 		}
 		WxPushUtil.pushSystem1("系统正常启动");
+		codeAttentionService.fetchAll();
 
 //		financeService.jobSpiderFirstFinaceHistoryInfo();
 //		financeService.jobSpiderFinaceHistoryInfo();

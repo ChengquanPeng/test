@@ -45,7 +45,9 @@ public class CodeAttentionService {
 		TasksWorker.getInstance().getService()
 				.submit(new MyCallable(RunLogBizTypeEnum.CODE_ATTENTION, RunCycleEnum.DAY) {
 					public Object mycall() {
+						log.info("关注度抓包-开始");
 						attentionSpider.start();
+						log.info("关注度抓包-结束");
 						return null;
 					}
 
@@ -70,6 +72,7 @@ public class CodeAttentionService {
 		if (page != null && !page.isEmpty()) {
 			List<CodeAttentionHish> list = page.getContent();
 			return list.stream().max(Comparator.comparingDouble(CodeAttentionHish::getRank)).get();
+			// return list;
 		}
 		return null;
 	}

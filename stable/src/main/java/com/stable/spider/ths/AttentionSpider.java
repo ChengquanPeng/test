@@ -1,14 +1,18 @@
 package com.stable.spider.ths;
 
 import java.time.Duration;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.constant.RedisConstant;
+import com.stable.es.dao.base.CodeAttentionHishDao;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.utils.DateUtil;
@@ -16,6 +20,7 @@ import com.stable.utils.HttpUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.CodeAttentionHish;
 import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -35,6 +40,8 @@ public class AttentionSpider {
 	private RedisUtil redisUtil;
 	@Autowired
 	private TradeCalService tradeCalService;
+	@Autowired
+	private CodeAttentionHishDao codeAttentionHishDao;
 	// @Autowired
 	// private CodeAttentionHishDao codeAttentionHishDao;
 
@@ -71,7 +78,6 @@ public class AttentionSpider {
 	}
 
 	public void start() {
-
 		try {
 			int today = DateUtil.getTodayIntYYYYMMDD();
 			int date = Integer.valueOf(getDate());// 上次日期;
@@ -82,13 +88,20 @@ public class AttentionSpider {
 			int doneDate = 0;
 
 			if (tradeCalService.isOpen(today)) {
-				boolean isDateDone = DONE.equals(getDateDone(date));
-				log.info("日期:{} 是工作日,最后抓包日期{},状态isDateDone:{}", today, date, isDateDone);
+				log.info("日期:{} 是工作日,最后抓包日期{}", today, date);
 				if (today == date) {
+					boolean isDateDone = DONE.equals(getDateDone(date));
 					if (isDateDone) {
 						log.info("当天已完成");
 						return;// 当天已完成
 					} else {
+						long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
+						long d220000 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+								DateUtil.parseDate(today + "220000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+						if (now < d220000) {
+							log.info("当天未完成-但时间未到,return");
+							return;
+						}
 						log.info("当天未完成");
 						starting = false;// 当天未完成
 					}
@@ -98,11 +111,10 @@ public class AttentionSpider {
 				}
 				doneDate = today;
 			} else {
-				boolean isDateDone = DONE.equals(getDateDone(date));
-				log.info("日期:{} 是周末,最后抓包日期{},状态isDateDone:{}", today, date, isDateDone);
-
+				log.info("日期:{} 是周末,最后抓包日期{}", today, date);
 				int predate = tradeCalService.getPretradeDate(today);
 				if (predate == date) {// 是最后日期
+					boolean isDateDone = DONE.equals(getDateDone(date));
 					if (isDateDone) {
 						log.info("最后一个交易日已完成");
 						return;// 上个交易日已完成
@@ -116,7 +128,7 @@ public class AttentionSpider {
 				}
 				doneDate = predate;
 			}
-
+			List<CodeAttentionHish> list = new LinkedList<CodeAttentionHish>();
 			List<StockBaseInfo> listcode = stockBasicService.getAllOnStatusList();// 顺序列表
 			for (StockBaseInfo s : listcode) {
 				String code = s.getCode();
@@ -125,8 +137,12 @@ public class AttentionSpider {
 				}
 				if (starting) {
 					// 开始抓包。。。
-					if (fetchWapper(code)) {
+					if (fetchWapper(code, list)) {
 						setDateCode(code);
+						if (list.size() > 1000) {
+							codeAttentionHishDao.saveAll(list);
+							list.clear();
+						}
 					}
 				} else {
 					if (lastCode.equals(code)) {
@@ -135,20 +151,25 @@ public class AttentionSpider {
 				}
 			}
 			setDate(doneDate + "", true);// 已完成
+			if (list.size() > 0) {
+				codeAttentionHishDao.saveAll(list);
+				list.clear();
+			}
+			WxPushUtil.pushSystem1("关注度正常完成");
 		} catch (Exception e) {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1("关注度出错:" + e.getMessage());
 		}
 	}
 
-	private boolean fetchWapper(String code) {
+	private boolean fetchWapper(String code, List<CodeAttentionHish> list) {
 		int trytime = 0;
 
 		do {
 			trytime++;
 			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 			try {
-				fetch(code);
+				fetch(code, list);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -157,12 +178,38 @@ public class AttentionSpider {
 		return false;
 	}
 
-	private void fetch(String code) {
+	public int getCurrent(String code) {
+		try {
+			String url = String.format(baseUrl, code, System.currentTimeMillis());
+			JSONObject json = HttpUtil.doGet(url);
+			if (json.getString("status_msg").equalsIgnoreCase("ok")) {
+				JSONObject data = json.getJSONObject("data");
+				return data.getIntValue("rank");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	private void fetch(String code, List<CodeAttentionHish> list) {
 		String url = String.format(baseUrl, code, System.currentTimeMillis());
 		JSONObject json = HttpUtil.doGet(url);
 		if (json.getString("status_msg").equalsIgnoreCase("ok")) {
-			// JSONObject data = json.getJSONObject("data");
-
+			JSONObject data = json.getJSONObject("data");
+			JSONObject history = data.getJSONObject("history");
+			JSONArray date = history.getJSONArray("date");
+			JSONArray rank = history.getJSONArray("rank");
+			for (int i = 0; i < date.size(); i++) {
+				CodeAttentionHish ch = new CodeAttentionHish();
+				ch.setCode(code);
+				ch.setDate(date.getIntValue(i));
+				ch.setRank(rank.getIntValue(i));
+				ch.setId();
+//				System.err.println(ch);
+				list.add(ch);
+//				System.err.println(date.getString(i) + " " + rank.getString(i));
+			}
 		}
 	}
 
@@ -175,5 +222,8 @@ public class AttentionSpider {
 //		String url = String.format(baseUrl, "600109", System.currentTimeMillis());
 //		System.err.println(url);
 //		System.err.println(HttpUtil.doGet(url));
+
+		AttentionSpider as = new AttentionSpider();
+		as.fetch("600109", new LinkedList<CodeAttentionHish>());
 	}
 }

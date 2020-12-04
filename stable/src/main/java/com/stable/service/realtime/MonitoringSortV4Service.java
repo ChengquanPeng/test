@@ -18,6 +18,7 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.BuyModelType;
 import com.stable.enums.ModelType;
 import com.stable.enums.TradeType;
+import com.stable.service.CodeAttentionService;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
@@ -40,6 +41,7 @@ import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.SortV4Reslt;
 import com.stable.vo.bus.BuyTrace;
+import com.stable.vo.bus.CodeAttentionHish;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.up.strategy.ModelV1;
@@ -63,11 +65,15 @@ public class MonitoringSortV4Service {
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private BuyTraceService buyTraceService;
+	@Autowired
+	private CodeAttentionService codeAttentionService;
 
 	private Map<String, Integer> sign = new ConcurrentHashMap<String, Integer>();
+	private Map<String, CodeAttentionHish> codeAttention = new ConcurrentHashMap<String, CodeAttentionHish>();
 
 	public synchronized void startObservable() {
 		sign.clear();
+		codeAttention.clear();
 		String date = DateUtil.getTodayYYYYMMDD();
 		int today = Integer.valueOf(date);
 		if (!tradeCalService.isOpen(today)) {
@@ -284,13 +290,29 @@ public class MonitoringSortV4Service {
 		return oklist;
 	}
 
+	private String getCodeAttention(String code) {
+		CodeAttentionHish ch = null;
+		if (codeAttention.containsKey(code)) {
+			ch = codeAttention.get(code);
+		} else {
+			ch = codeAttentionService.get30DayHighAttentionDay(code);
+			if (ch == null) {
+				ch = new CodeAttentionHish();
+				ch.setDate(DateUtil.getTodayIntYYYYMMDD());
+				ch.setRank(9999);
+			}
+			codeAttention.put(code, ch);
+		}
+		return "<td>" + ch.getDate() + "最高" + ch.getRank() + "</td>";
+	}
+
 	private String header = "<table border='1' cellspacing='0' cellpadding='0'><tr>";
 	private String endder = "</table><script type='text/javascript' src='/html/static/addrlurl.js'></script>";
 //	private String endder = "</table>";
 
 	public MonitoringSortV4Service() {
 		String[] s = { "序号", "代码", "简称", "日期", "综合评分", "基本面评分", "短期强势", "主力行为", "流通市值", "市盈率(静/ttm)", "今日涨幅",
-				"分级(1,2-涨,3,4-量)", "标记", "概念" };
+				"分级(1,2-涨,3,4-量)", "标记", "关注度", "概念" };
 		for (int i = 0; i < s.length; i++) {
 			header += this.getHTMLTH(s[i]);
 		}
@@ -320,8 +342,8 @@ public class MonitoringSortV4Service {
 							.append(getHTML(CurrencyUitl.covertToString(basic.getCirc_mv() * 10000)))
 							.append(getHTML(basic.getPe() + "/" + basic.getPe_ttm()))
 							.append(getHTML(mv.getTodayChange())).append(getHTML(mv.getLevel()))
-							.append(getSignUrl(code)).append(getHTML(mv.getGn())).append("</tr>")
-							.append(FileWriteUitl.LINE_FILE);
+							.append(getSignUrl(code)).append(getCodeAttention(code)).append(getHTML(mv.getGn()))
+							.append("</tr>").append(FileWriteUitl.LINE_FILE);
 
 //				sb2.append("<tr>").append(getHTML(index)).append(getHTML_SN(code))
 //						.append(getHTML(sbs.getCodeName(code))).append(getHTML(mv.getDate()))
@@ -364,7 +386,7 @@ public class MonitoringSortV4Service {
 	}
 
 	private String getHTML_SN(Object text) {
-		return "<td class='sn'>" + text + "</td>";
+		return "<td class='sn'> " + text + " </td>";
 	}
 
 	private String getHTML_myrt(Object text) {
