@@ -28,12 +28,13 @@
 		registry-center-ref="regCenter" cron="0 26 9 ? * 2,3,4,5,6 *"
 		sharding-item-parameters="0=a" description="每日9点32执行任务(实时)"
 		sharding-total-count="1" overwrite="true" />
-		
+	
+	<!-- 
 	<job:simple id="TickDataJobFromEastmoneyTickDataJob"
 		class="com.stable.job.TickDataJobFromEastmoneyTickData"
 		registry-center-ref="regCenter" cron="0 25 15 ? * 2,3,4,5,6 *"
 		sharding-item-parameters="0=a" description="每日晚上15点25执行任务(东方财富Tick)"
-		sharding-total-count="1" overwrite="true" />
+		sharding-total-count="1" overwrite="true" /> -->
 
 	<job:simple id="EveryWorkingDayJobThsGn"
 		class="com.stable.job.EveryWorkingDayJobThsGn"

@@ -31,11 +31,12 @@ import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.spider.xq.XqDailyBaseSpider;
 import com.stable.utils.DateUtil;
-import com.stable.utils.TasksWorker2ndRunnable;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.TasksWorker2nd;
+import com.stable.utils.TasksWorker2ndRunnable;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockBaseInfo;
@@ -65,6 +66,9 @@ public class DaliyBasicHistroyService {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private TickDataService tickDataService;
+	@Autowired
+	private XqDailyBaseSpider xqDailyBaseSpider;
+
 	@Value("${tick.data.start.date}")
 	public String startDate;
 
@@ -130,6 +134,7 @@ public class DaliyBasicHistroyService {
 				});
 			}
 			esDaliyBasicInfoDao.saveAll(list);
+			xqDailyBaseSpider.fetchAll(list);
 			if (!cnt.await(12, TimeUnit.HOURS)) {// 等待执行完成
 				log.info("每日指标记录超时异常==>" + today);
 			}
@@ -223,7 +228,8 @@ public class DaliyBasicHistroyService {
 				log.info("每日*定时任务 daily_basic [end],result={}", result);
 				if (result != 0) {
 					WxPushUtil.pushSystem1("Seq1=>正常执行=>daily_basic(每日指标),日期=" + today + ",数量:" + result);
-					nextTickDataJob();
+					//nextTickDataJob();
+					nextTradeHistroyJob();
 				} else {
 					WxPushUtil.pushSystem1("异常执行Seq1=>daily_basic(每日指标),日期=" + today + ",数量:0,以后的链条不会被执行");
 				}

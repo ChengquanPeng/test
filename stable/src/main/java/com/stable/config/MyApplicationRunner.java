@@ -37,9 +37,11 @@ public class MyApplicationRunner implements ApplicationRunner {
 //        for (String arg : sourceArgs) {
 //            System.out.print(arg + " ");
 //        }
+		
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
+				codeAttentionService.fetchAll();
 				realtimeJob.execute(null);
 			}
 		}).start();
@@ -48,7 +50,7 @@ public class MyApplicationRunner implements ApplicationRunner {
 			return;
 		}
 		WxPushUtil.pushSystem1("系统正常启动");
-		codeAttentionService.fetchAll();
+		
 
 //		financeService.jobSpiderFirstFinaceHistoryInfo();
 //		financeService.jobSpiderFinaceHistoryInfo();

@@ -128,6 +128,9 @@ public class AttentionSpider {
 				}
 				doneDate = predate;
 			}
+			if (lastCode == null || DONE.equals(lastCode)) {
+				starting = true;
+			}
 			List<CodeAttentionHish> list = new LinkedList<CodeAttentionHish>();
 			List<StockBaseInfo> listcode = stockBasicService.getAllOnStatusList();// 顺序列表
 			for (StockBaseInfo s : listcode) {
@@ -145,7 +148,7 @@ public class AttentionSpider {
 						}
 					}
 				} else {
-					if (lastCode.equals(code)) {
+					if (code.equals(lastCode)) {
 						starting = true;
 					}
 				}
@@ -164,12 +167,13 @@ public class AttentionSpider {
 
 	private boolean fetchWapper(String code, List<CodeAttentionHish> list) {
 		int trytime = 0;
-
+		log.info("抓包:{}", code);
 		do {
 			trytime++;
-			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+			ThreadsUtil.sleepRandomSecBetween1And5(trytime);
 			try {
 				fetch(code, list);
+				return true;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
