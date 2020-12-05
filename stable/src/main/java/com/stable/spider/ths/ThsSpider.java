@@ -163,6 +163,7 @@ public class ThsSpider {
 	private void synchConceptDaliy(int date, Map<String, Concept> m) {
 		List<ConceptDaily> list = new LinkedList<ConceptDaily>();
 		try {
+			// int c = 0;
 			List<String> keys = new ArrayList<String>(m.keySet());
 			for (int i = 0; i < keys.size(); i++) {
 				int trytime = 0;
@@ -231,9 +232,8 @@ public class ThsSpider {
 					}
 				} while (!fetched);
 			}
-			int cnt = list.size();
 			saveConceptDaily(list);
-			WxPushUtil.pushSystem1("同花顺板块交易记录同步成功,需求抓取总是[" + keys.size() + "],实际成功总数:[" + cnt + "]");
+			log.info("同花顺板块交易记录同步成功,需求抓取总是[" + keys.size() + "],实际成功总数:[" + list.size() + "]");
 		} catch (Exception e) {
 			saveConceptDaily(list);
 			e.printStackTrace();
@@ -392,8 +392,10 @@ public class ThsSpider {
 				saveCodeConcept(codelist);
 			}
 		}
-
-		WxPushUtil.pushSystem1("同花顺板块同步成功,同步概念[" + cntList + "],概念相关股票[" + cntCodelist + "]"
+		if (newGn.length() > 0) {
+			WxPushUtil.pushSystem1("同花顺获取到新概念:" + newGn.toString());
+		}
+		log.info("同花顺板块同步成功,同步概念[" + cntList + "],概念相关股票[" + cntCodelist + "]"
 				+ (newGn.length() > 0 ? ",获取到新概念:" + newGn.toString() : ""));
 	}
 

@@ -1,6 +1,7 @@
 package com.stable.spider.xq;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,15 +49,24 @@ public class XqDailyBaseSpider {
 
 			@Override
 			public void run() {
-				int c = 0;
-				for (DaliyBasicInfo b : list) {
-					if (dofetch(b)) {
-						c++;
+				try {
+
+					List<DaliyBasicInfo> upd = new LinkedList<DaliyBasicInfo>();
+					for (DaliyBasicInfo b : list) {
+						if (dofetch(b)) {
+							upd.add(b);
+						}
 					}
+					if (upd.size() > 0) {
+						esDaliyBasicInfoDao.saveAll(list);
+					}
+					if (upd.size() != list.size()) {
+						WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + list.size() + "},实际成功数:" + upd.size());
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包出错");
 				}
-				esDaliyBasicInfoDao.saveAll(list);
-				WxPushUtil.pushSystem1(
-						"雪球=>每日指标-市盈率记录抓包完成:{" + (list.size() == c) + "},期望:{" + list.size() + "},成功:" + c);
 			}
 		}).start();
 	}
@@ -93,50 +103,50 @@ public class XqDailyBaseSpider {
 							try {
 								b.setPe_d(Double.valueOf(s.split(SPLIT)[1]));
 							} catch (Exception e) {
-								b.setPe(-1);
+								b.setPe_d(-1);
 							}
 						} else if (s.contains(F3)) {// "市盈率(TTM)";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
 								b.setPe_ttm(Double.valueOf(s.split(SPLIT)[1]));
 							} catch (Exception e) {
-								b.setPe(-1);
+								b.setPe_ttm(-1);
 							}
 						} else if (s.contains(F4)) {// "市净率";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
 								b.setPb(Double.valueOf(s.split(SPLIT)[1]));
 							} catch (Exception e) {
-								b.setPe(-1);
+								b.setPb(-1);
 							}
 						} else {
 
 						}
 					}
 				}
-				return true;
+				if (b.getPb() != 0.0d) {
+					return true;
+				}
 				// System.err.println(boardInfos.asText());
 			} catch (Exception e2) {
 				e2.printStackTrace();
-				trytime++;
-				ThreadsUtil.sleepRandomSecBetween1And5(trytime);
-				if (trytime >= 10) {
-					fetched = true;
-					e2.printStackTrace();
-					WxPushUtil.pushSystem1("雪球每日信息出错(pe,pe-ttm),code={}" + code + ",url=" + url);
-				}
 			} finally {
 				htmlunitSpider.close();
+			}
+
+			trytime++;
+			ThreadsUtil.sleepRandomSecBetween1And5(trytime);
+			if (trytime >= 10) {
+				fetched = true;
+				WxPushUtil.pushSystem1("雪球每日信息出错(pe,pe-ttm),code={}" + code + ",url=" + url);
 			}
 		} while (!fetched);
 		return false;
 	}
 
 	public static void main(String[] args) {
-		XqDailyBaseSpider x = new XqDailyBaseSpider();
-		DaliyBasicInfo b = new DaliyBasicInfo();
-		b.setCode("600109");
-		x.dofetch(b);
-		System.err.println(b);
+		// XqDailyBaseSpider x = new XqDailyBaseSpider();
+		// DaliyBasicInfo b = new DaliyBasicInfo();
+		// System.err.println(b.getPb());
 	}
 }

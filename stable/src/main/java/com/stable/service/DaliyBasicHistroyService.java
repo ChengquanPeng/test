@@ -228,7 +228,7 @@ public class DaliyBasicHistroyService {
 				log.info("每日*定时任务 daily_basic [end],result={}", result);
 				if (result != 0) {
 					WxPushUtil.pushSystem1("Seq1=>正常执行=>daily_basic(每日指标),日期=" + today + ",数量:" + result);
-					//nextTickDataJob();
+					// nextTickDataJob();
 					nextTradeHistroyJob();
 				} else {
 					WxPushUtil.pushSystem1("异常执行Seq1=>daily_basic(每日指标),日期=" + today + ",数量:0,以后的链条不会被执行");
@@ -238,7 +238,8 @@ public class DaliyBasicHistroyService {
 		});
 	}
 
-	private void nextTickDataJob() {
+	@Deprecated // tickdata 任务已停止
+	protected void nextTickDataJob() {
 		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
 			@Override
 			public Object call() throws Exception {

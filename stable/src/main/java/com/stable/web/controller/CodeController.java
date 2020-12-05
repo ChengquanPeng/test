@@ -47,6 +47,7 @@ public class CodeController {
 			model.addAttribute("codeName", stockBasicService.getCodeName(code));
 			model.addAttribute("histList", codeModelService.getListByCode(code, EsQueryPageUtil.queryPage10));
 			model.addAttribute("concepts", conceptService.getCodeConcept(code));
+			model.addAttribute("codeBasic", stockBasicService.getCode(code));
 
 			String kb = "";
 			if (cbm.getForestallQuarter() > 0) {

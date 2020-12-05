@@ -20,6 +20,7 @@ import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.job.MyCallable;
+import com.stable.spider.ths.ThsPlateSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
@@ -31,9 +32,6 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * 基本信息
- * 
- * @author roy
- *
  */
 @Service
 @Log4j2
@@ -45,6 +43,8 @@ public class StockBasicService {
 	private EsStockBaseInfoDao esStockBaseInfoDao;
 	@Autowired
 	private RedisUtil redisUtil;
+	@Autowired
+	private ThsPlateSpider thsPlateSpider;
 	// @Autowired
 	// private DbStockBaseInfoDao dbStockBaseInfoDao;
 
@@ -79,6 +79,15 @@ public class StockBasicService {
 		return name;
 	}
 
+	public StockBaseInfo getCode(String code) {
+		String json = redisUtil.get(code);
+		if (StringUtils.isNotBlank(json)) {
+			StockBaseInfo old = JSON.parseObject(json, StockBaseInfo.class);
+			return old;
+		}
+		return new StockBaseInfo();
+	}
+
 	private final Semaphore semap = new Semaphore(1);
 
 	public ListenableFuture<Object> jobSynStockList(boolean isJob) {
@@ -98,7 +107,7 @@ public class StockBasicService {
 							List<StockBaseInfo> list = new LinkedList<StockBaseInfo>();
 							for (int i = 0; i < array.size(); i++) {
 								StockBaseInfo base = new StockBaseInfo(array.getJSONArray(i), batchNo);
-								synBaseStockInfo(base);
+								synBaseStockInfo(base, false);
 								list.add(base);
 							}
 							int cnt = 0;
@@ -121,6 +130,8 @@ public class StockBasicService {
 								if (removelist.size() > 0) {
 									esStockBaseInfoDao.saveAll(removelist);
 								}
+								// 更新同花顺
+								thsPlateSpider.fetchAll(false);
 							}
 							log.info("同步股票列表[end]");
 							LOCAL_ALL_ONLINE_LIST.clear();// 清空缓存
@@ -137,8 +148,19 @@ public class StockBasicService {
 		return jobSynStockList(false);
 	}
 
-	public void synBaseStockInfo(StockBaseInfo base) {
+	public void synBaseStockInfo(StockBaseInfo base, boolean updateTHSinfo) {
 		// esStockBaseInfoDao.save(base);
+
+		if (!updateTHSinfo) {// 部门字段来自同花顺
+			String json = redisUtil.get(base.getCode());
+			if (StringUtils.isNotBlank(json)) {
+				StockBaseInfo old = JSON.parseObject(json, StockBaseInfo.class);
+				base.setThsIndustry(old.getThsIndustry());
+				base.setThsLightspot(old.getThsLightspot());
+				base.setThsMainBiz(old.getThsMainBiz());
+			}
+		}
+
 		redisUtil.set(base.getCode(), base);
 		// dbStockBaseInfoDao.saveOrUpdate(base);
 		CODE_NAME_MAP_LOCAL_HASH.put(base.getCode(), base.getName());

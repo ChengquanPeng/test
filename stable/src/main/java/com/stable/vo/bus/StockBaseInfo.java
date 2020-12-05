@@ -18,51 +18,55 @@ import lombok.ToString;
 @ToString
 @Document(indexName = "stock_base_info")
 public class StockBaseInfo extends EsBase {
-//	ts_code	str	TS代码
-//	symbol	str	股票代码
-//	name	str	股票名称
-//	area	str	所在地域
-//	industry	str	所属行业
-//	fullname	str	股票全称
-//	enname	str	英文全称
-//	market	str	市场类型 （主板/中小板/创业板）
-//	exchange	str	交易所代码
-//	curr_type	str	交易货币
-//	list_status	str	上市状态： L上市 D退市 P暂停上市
-//	list_date	str	上市日期
-//	delist_date	str	退市日期
-//	is_hs	str	是否沪深港通标的，N否 H沪股通 S深股通
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 4910896688001534666L;
+	// 股票代码
 	@Id
 	private String code;
 	@Field(type = FieldType.Text)
 	private String ts_code;
+	// 股票名称
 	@Field(type = FieldType.Text)
 	private String name;
+	// 同花顺行业
+	@Field(type = FieldType.Text)
+	private String thsIndustry;
+	// 同花顺-主营
+	@Field(type = FieldType.Text)
+	private String thsMainBiz;
+	// 同花顺-亮点
+	@Field(type = FieldType.Text)
+	private String thsLightspot;
+	// 地区
 	@Field(type = FieldType.Text)
 	private String area;
+	// 所属行业-细分行业
 	@Field(type = FieldType.Text)
 	private String industry;
+	// 全称
 	@Field(type = FieldType.Text)
 	private String fullname;
+	// 英文全称
 	@Field(type = FieldType.Text)
 	private String enname;
+	// 市场类型 （主板/中小板/创业板/科创板/CDR）
 	@Field(type = FieldType.Text)
 	private String market;
+	// 交易所代码
 	@Field(type = FieldType.Text)
 	private String exchange;
+	// 交易货币
 	@Field(type = FieldType.Text)
 	private String curr_type;
+	// 上市状态： L上市 D退市 P暂停上市
 	@Field(type = FieldType.Text)
 	private String list_status;
+	// 上市日期
 	@Field(type = FieldType.Text)
 	private String list_date;
+	// 退市日期
 	@Field(type = FieldType.Text)
 	private String delist_date;
+	// 是否沪深港通标的，N否 H沪股通 S深股通
 	@Field(type = FieldType.Text)
 	private String is_hs;
 	@Field(type = FieldType.Long)
