@@ -71,7 +71,7 @@ public class CodeAttentionService {
 		Page<CodeAttentionHish> page = codeAttentionHishDao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			List<CodeAttentionHish> list = page.getContent();
-			return list.stream().max(Comparator.comparingDouble(CodeAttentionHish::getRank)).get();
+			return list.stream().min(Comparator.comparingDouble(CodeAttentionHish::getRank)).get();
 			// return list;
 		}
 		return null;

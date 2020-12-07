@@ -88,6 +88,7 @@ public class AttentionSpider {
 			int doneDate = 0;
 
 			if (tradeCalService.isOpen(today)) {
+				doneDate = today;
 				log.info("日期:{} 是工作日,最后抓包日期{}", today, date);
 				if (today == date) {
 					boolean isDateDone = DONE.equals(getDateDone(date));
@@ -106,10 +107,27 @@ public class AttentionSpider {
 						starting = false;// 当天未完成
 					}
 				} else {
+					int predate = tradeCalService.getPretradeDate(today);
+					if (predate == date) {// 最后日期
+						boolean isDateDone = DONE.equals(getDateDone(date));
+						if (isDateDone) {
+							long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
+							long d220000 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+									DateUtil.parseDate(today + "220000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+							if (now < d220000) {// 上个交易日已完成
+								log.info("最后一个交易日已完成,当天未完成-但时间未到,return");
+								return;
+							}
+							log.info("每周一收盘开始");
+						} else {
+							log.info("最后一个交易日未完成");
+							starting = false;// 上个交易日未完成
+							doneDate = predate;
+						}
+					}
 					setDate(today + "", false);// 新的开始
 					log.info("非当天,重新开始");
 				}
-				doneDate = today;
 			} else {
 				log.info("日期:{} 是周末,最后抓包日期{}", today, date);
 				int predate = tradeCalService.getPretradeDate(today);
