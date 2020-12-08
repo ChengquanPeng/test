@@ -29,6 +29,7 @@ import com.stable.es.dao.base.EsCodeBaseModelHistDao;
 import com.stable.es.dao.base.EsCodeConceptDao;
 import com.stable.es.dao.base.EsConceptDao;
 import com.stable.service.BuyBackService;
+import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
 import com.stable.service.PledgeStatService;
@@ -36,6 +37,7 @@ import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.data.FinanceAnalyzer;
+import com.stable.service.trace.MiddleSortV1Service;
 import com.stable.utils.BeanCopy;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -46,6 +48,7 @@ import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.CodeConcept;
 import com.stable.vo.bus.Concept;
+import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.DividendHistory;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
@@ -62,6 +65,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class CodeModelService {
 
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private DividendService dividendService;
 	@Autowired
@@ -86,6 +91,8 @@ public class CodeModelService {
 	private EsConceptDao esConceptDao;
 	@Autowired
 	private EsCodeConceptDao esCodeConceptDao;
+	@Autowired
+	private MiddleSortV1Service middleSortV1Service;
 
 	public synchronized void runJob(boolean isJob, int today) {
 		try {
@@ -149,9 +156,11 @@ public class CodeModelService {
 		if (listHist.size() > 0) {
 			codeBaseModelHistDao.saveAll(listHist);
 		}
+		middleSortV1Service.start(listLast);
 		log.info("CodeModel 模型执行完成");
 		WxPushUtil.pushSystem1(
 				"Seq5=> CODE-MODEL " + treadeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listHist.size());
+
 	}
 
 	public synchronized String run(String code) {
@@ -230,6 +239,7 @@ public class CodeModelService {
 		// 业绩快报(准确的)
 		FinYjkb yjkb = financeService.getLastFinaceKbByReportDate(code);
 		boolean hasKb = false;
+		boolean hasYg = false;
 
 		newOne.setForestallYear(0);
 		newOne.setForestallQuarter(0);
@@ -257,11 +267,13 @@ public class CodeModelService {
 			}
 		}
 		// 业绩预告(类似天气预报,可能不准)
+		FinYjyg yjyg = null;
 		if (!hasKb) {
-			FinYjyg yjyg = financeService.getLastFinaceYgByReportDate(code);
+			yjyg = financeService.getLastFinaceYgByReportDate(code);
 			if (yjyg != null) {
 				if ((newOne.getCurrYear() == yjyg.getYear() && newOne.getCurrQuarter() < yjyg.getQuarter())// 同一年,季度大于
 						|| (yjyg.getYear() > newOne.getCurrYear())) {// 不同年
+					hasYg = true;
 					newOne.setForestallYear(yjyg.getYear());
 					newOne.setForestallQuarter(yjyg.getQuarter());
 					newOne.setForestallProfitTbzz(yjyg.getJlrtbzz());
@@ -272,7 +284,7 @@ public class CodeModelService {
 			}
 		}
 
-		processingFinance(newOne);
+		processingFinance(newOne, hasKb ? yjkb : null, hasYg ? yjyg : null);
 		if (bb != null) {
 			// 股东大会通过/实施/完成
 		} else {
@@ -412,7 +424,7 @@ public class CodeModelService {
 		}
 	}
 
-	private void processingFinance(CodeBaseModel base) {
+	private void processingFinance(CodeBaseModel base, FinYjkb yjkb, FinYjyg yjyg) {
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(base.getCode(), base.getDate(),
 				EsQueryPageUtil.queryPage8);
 		FinanceAnalyzer fa = new FinanceAnalyzer();
@@ -439,6 +451,18 @@ public class CodeModelService {
 		base.setProfitDownQuarter(fa.getCurrJidu().getGsjlrtbzz() < 0 ? -1 : 0);// 最近季度利润下降TODO//科技类，故事类不看此指标
 		base.setProfitDown2Quarter(fa.profitDown2Quarter() == 1 ? -2 : 0);// 最近2季度都同比下降
 		base.setProfitDown2Year(fa.profitDown2Year() == 1 ? -5 : 0);// 年报连续亏损年数？（可能退市）
+
+		// 是否符合中线、1.市盈率和ttm在50以内
+		DaliyBasicInfo basic = daliyBasicHistroyService.getDaliyBasicInfoByDate(base.getCode(), base.getDate());
+		if (basic.getPe() > 0 && basic.getPe() < 50 && basic.getPe_ttm() < 50) {
+			// 当前季度和上季度增长,营收20%
+			if (fa.getCurrJidu().getYyzsrtbzz() >= 20.0 && fa.getPrevJidu().getYyzsrtbzz() >= 20.0) {
+				// 当前季度和上季度增长,净利15%
+				if (fa.getCurrJidu().getGsjlrtbzz() >= 15.0 && fa.getPrevJidu().getGsjlrtbzz() >= 15.0) {
+					base.setMidOk(1);
+				}
+			}
+		}
 	}
 
 	public CodeBaseModel getLastOneByCode(String code) {

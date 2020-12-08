@@ -1,20 +1,17 @@
 package com.stable.service.trace;
 
-import java.util.concurrent.Semaphore;
-
-import javax.annotation.PostConstruct;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.stable.es.dao.base.EsHistTraceDao;
-import com.stable.service.DaliyBasicHistroyService;
-import com.stable.service.DaliyTradeHistroyService;
-import com.stable.service.FinanceService;
-import com.stable.service.StockBasicService;
-import com.stable.service.TradeCalService;
+import com.stable.service.CodePoolService;
 import com.stable.service.model.data.AvgService;
-import com.stable.service.model.data.StrongService;
+import com.stable.service.model.data.LineAvgPrice;
+import com.stable.vo.bus.CodeBaseModel;
+import com.stable.vo.bus.CodePool;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -26,43 +23,39 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MiddleSortV1Service {
 	@Autowired
-	private StockBasicService stockBasicService;
-	@Autowired
-	private DaliyBasicHistroyService daliyBasicHistroyService;
+	private CodePoolService codePoolService;
 	@Autowired
 	private AvgService avgService;
-	@Autowired
-	private DaliyTradeHistroyService daliyTradeHistroyService;
-	@Autowired
-	private EsHistTraceDao esHistTraceDao;
-	@Autowired
-	private FinanceService financeService;
-	@Autowired
-	private StrongService strongService;
-	@Autowired
-	private TradeCalService tradeCalService;
 
-	private String FILE_FOLDER = "/my/free/pvhtml/";
+	private String OK = "系统默认OK";
+	private String NOT_OK = "系统默认NOT_OK";
 
-	public static final Semaphore sempAll = new Semaphore(1);
-
-	@PostConstruct
-	public void test1() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-
-//				testlocal();
-
-//				sortv4("20190101", "20191231");
-//				sortv4("20180101", "20181231");
-//				sortv4("20170101", "20171231");
-//				sortv4("20160101", "20161231");
-//				sortv4("20110101", "20111231");
-//				sortv4("20120101", "20121231");
-//				sortv4("20130101", "20131231");
+	public synchronized void start(List<CodeBaseModel> listLast) {
+		Map<String, CodePool> map = codePoolService.getCodePoolMap();
+		List<CodePool> list = new LinkedList<CodePool>();
+		LineAvgPrice lvp = new LineAvgPrice(avgService);
+		log.info("codelist:" + listLast.size());
+		for (CodeBaseModel m : listLast) {
+			String code = m.getCode();
+			CodePool c = map.get(code);
+			if (c == null) {
+				c = new CodePool();
+				c.setCode(code);
 			}
-		}).start();
+			c.setMidChkDate(m.getDate());
+			c.setMidOk(0);
+			c.setMidRemark(NOT_OK);
+			// 业绩支撑
+			if (m.getMidOk() == 1) {
+				// 均线支持
+				if (lvp.isWhiteHorseForMid(code, m.getDate())) {
+					c.setMidOk(1);
+					c.setMidRemark(OK);
+				}
+			}
+			list.add(c);
+		}
+		codePoolService.saveAll(list);
 	}
 
 }

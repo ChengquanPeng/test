@@ -273,33 +273,22 @@ public class LineAvgPrice {
 		return false;
 	}
 
-	public boolean isWhiteHorseForSortV5(String code, int date, boolean isTrace) {
-		EsQueryPageReq req = EsQueryPageUtil.queryPage11;
-		if (!isTrace) {
-			req = EsQueryPageUtil.queryPage10;
-		}
+	public boolean isWhiteHorseForMid(String code, int date) {
+		EsQueryPageReq req = EsQueryPageUtil.queryPage30;
 		// 最近30条-倒序
 		List<StockAvgBase> clist10 = avgService.queryListByCodeForModelWithLast(code, date, req, false);
 		// 20日均线在30日之上
 		int whiteHorseTmp = 0;
 		for (int i = 0; i < clist10.size(); i++) {
-			StockAvgBase sa = clist10.get(i);
-			if (isTrace && sa.getDate() == date) {
-				continue;
-			}
 			if (clist10.get(i).getAvgPriceIndex20() >= clist10.get(i).getAvgPriceIndex30()) {
 				whiteHorseTmp++;
 			}
 		}
-		if (whiteHorseTmp >= 9) {
+		if (whiteHorseTmp >= 25) {
 			// 是否上升趋势
 			whiteHorseTmp = 0;
 			double check = clist10.get(0).getAvgPriceIndex30();// 后一个交易日
 			for (int i = 0; i < clist10.size(); i++) {
-				StockAvgBase sa = clist10.get(i);
-				if (isTrace && sa.getDate() == date) {
-					continue;
-				}
 				// 当天
 				double c = clist10.get(i).getAvgPriceIndex30();
 				if (check >= c) {// 后一个交易日大于前一个交易日，上升趋势
@@ -307,7 +296,7 @@ public class LineAvgPrice {
 				}
 				check = c;
 			}
-			if (whiteHorseTmp >= 9) {
+			if (whiteHorseTmp >= 28) {
 				return true;
 			}
 		}

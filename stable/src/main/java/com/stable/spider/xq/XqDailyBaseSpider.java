@@ -50,7 +50,6 @@ public class XqDailyBaseSpider {
 			@Override
 			public void run() {
 				try {
-
 					List<DaliyBasicInfo> upd = new LinkedList<DaliyBasicInfo>();
 					for (DaliyBasicInfo b : list) {
 						if (dofetch(b)) {
@@ -60,6 +59,7 @@ public class XqDailyBaseSpider {
 					if (upd.size() > 0) {
 						esDaliyBasicInfoDao.saveAll(list);
 					}
+					log.info("雪球=>每日指标-市盈率完成,期望数:{" + list.size() + "},实际成功数:" + upd.size());
 					if (upd.size() != list.size()) {
 						WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + list.size() + "},实际成功数:" + upd.size());
 					}
@@ -77,7 +77,7 @@ public class XqDailyBaseSpider {
 		boolean fetched = false;
 		String url = String.format(BASE_URL, formatCode2(code));
 		do {
-			ThreadsUtil.sleepRandomSecBetween1And5();
+			ThreadsUtil.sleepRandomSecBetween1And2();
 			HtmlPage page = null;
 			HtmlElement body = null;
 			try {

@@ -38,7 +38,6 @@ public class ThsPlateSpider {
 
 	public void fetchAll(boolean updateAll) {
 		new Thread(new Runnable() {
-
 			@Override
 			public void run() {
 				try {
@@ -87,7 +86,7 @@ public class ThsPlateSpider {
 				// System.err.println(hy.asText());
 				b.setThsIndustry(hy.asText().trim());
 				HtmlElement e2 = profile.getElementsByAttribute("span", "class", "tip f14 fl core-view-text").get(0);// 公司亮点
-				b.setThsLightspot(e2.getAttribute("title"));
+				b.setThsLightspot(e2.asText().trim());
 				DomElement e3 = profile.getElementsByAttribute("span", "class", "tip f14 fl main-bussiness-text").get(0)
 						.getFirstElementChild();// 主营业务
 				b.setThsMainBiz(e3.getAttribute("title"));
