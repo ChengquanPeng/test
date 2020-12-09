@@ -43,13 +43,13 @@ public class MiddleSortV1Service {
 				c.setCode(code);
 			}
 			c.setMidChkDate(m.getDate());
-			c.setMidOk(0);
+			c.setInMid(0);
 			c.setMidRemark(NOT_OK);
 			// 业绩支撑
 			if (m.getMidOk() == 1) {
 				// 均线支持
 				if (lvp.isWhiteHorseForMid(code, m.getDate())) {
-					c.setMidOk(1);
+					c.setInMid(1);
 					c.setMidRemark(OK);
 				}
 			}

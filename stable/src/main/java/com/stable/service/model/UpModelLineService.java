@@ -151,7 +151,7 @@ public class UpModelLineService {
 			WxPushUtil.pushSystem1("模型运行异常..");
 		}
 		if (isJob) {
-			sortV4Service.sortv4(today + "", today + "");
+			//sortV4Service.sortv4(today + "", today + "");
 			monitoringSortV4Service.autoSell(today);
 		}
 	}

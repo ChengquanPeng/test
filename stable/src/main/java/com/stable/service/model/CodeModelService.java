@@ -1,6 +1,5 @@
 package com.stable.service.model;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.stable.constant.EsQueryPageUtil;
-import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsCodeBaseModelDao;
 import com.stable.es.dao.base.EsCodeBaseModelHistDao;
 import com.stable.es.dao.base.EsCodeConceptDao;
@@ -35,7 +33,6 @@ import com.stable.service.FinanceService;
 import com.stable.service.PledgeStatService;
 import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
-import com.stable.service.TradeCalService;
 import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.trace.MiddleSortV1Service;
 import com.stable.utils.BeanCopy;
@@ -86,47 +83,17 @@ public class CodeModelService {
 	@Autowired
 	private ShareFloatService shareFloatService;
 	@Autowired
-	private TradeCalService tradeCalService;
-	@Autowired
 	private EsConceptDao esConceptDao;
 	@Autowired
 	private EsCodeConceptDao esCodeConceptDao;
 	@Autowired
 	private MiddleSortV1Service middleSortV1Service;
 
-	public synchronized void runJob(boolean isJob, int today) {
+	public synchronized void runJob(boolean isJob, int date) {
 		try {
-			if (isJob) {
-				int redisDate = 0;
-				String strDate = redisUtil.get(RedisConstant.RDS_MODEL_BASE_DATE);
-				if (StringUtils.isBlank(strDate)) {// 无缓存，从当天开始
-					redisDate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-				} else {// 缓存的日期是已经执行过，需要+1天
-					Date d = DateUtil.addDate(strDate, 1);
-					redisDate = Integer.valueOf(DateUtil.formatYYYYMMDD(d));
-				}
-				while (true) {
-					log.info("CodeModel processing date={}", redisDate);
-					if (tradeCalService.isOpen(redisDate)) {
-						log.info("processing date={}", redisDate);
-						run(redisDate);
-					} else {
-						log.info("{}非交易日", redisDate);
-					}
-					// 缓存已经处理的日期
-					redisUtil.set(RedisConstant.RDS_MODEL_BASE_DATE, redisDate);
-					// 新增一天
-					Date d1 = DateUtil.addDate(redisDate + "", 1);
-					redisDate = Integer.valueOf(DateUtil.formatYYYYMMDD(d1));
-					if (redisDate > today) {
-						log.info("CodeModel today:{},date:{} 循环结束", today, redisDate);
-						break;
-					}
-				}
-			} else {// 手动某一天
-				log.info("CodeModel processing date={}", today);
-				run(today);
-			}
+			date = DateUtil.getTodayIntYYYYMMDD();
+			log.info("CodeModel processing date={}", date);
+			run(date);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "CodeModel模型运行异常", "", "");
