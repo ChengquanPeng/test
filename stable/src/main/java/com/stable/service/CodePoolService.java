@@ -157,16 +157,16 @@ public class CodePoolService {
 		return null;
 	}
 
-	public List<CodePoolResp> getListForWeb(String code, int orderBy, String conceptId, String conceptName, int asc,
-			int baseLevel, int inMid, int midOk, int sortOk, int manualOk, double pe, double pettm, double pb,
+	public List<CodePoolResp> getListForWeb(String code, String conceptId, String conceptName, int asc, int baseLevel,
+			int inMid, int midOk, int sortOk, int manualOk, double pe, double pettm, double pb,
 			EsQueryPageReq querypage) {
 		log.info(
-				"CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={},conceptId={},conceptName={},baseLevel={},inMid={},midOk={},sortOk={},manualOk={},pe={},pettm={},pb={}",
-				code, orderBy, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName, baseLevel,
-				inMid, midOk, sortOk, manualOk, pe, pettm, pb);
+				"CodeBaseModel getListForWeb code={},asc={},num={},size={},conceptId={},conceptName={},baseLevel={},inMid={},midOk={},sortOk={},manualOk={},pe={},pettm={},pb={}",
+				code, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName, baseLevel, inMid,
+				midOk, sortOk, manualOk, pe, pettm, pb);
 
-		List<CodePool> list = getList(code, orderBy, conceptId, conceptName, asc, baseLevel, inMid, midOk, sortOk,
-				manualOk, pe, pettm, pb, querypage);
+		List<CodePool> list = getList(code, conceptId, conceptName, asc, baseLevel, inMid, midOk, sortOk, manualOk, pe,
+				pettm, pb, querypage);
 		List<CodePoolResp> res = new LinkedList<CodePoolResp>();
 		if (list != null) {
 			for (CodePool dh : list) {
@@ -179,9 +179,8 @@ public class CodePoolService {
 		return res;
 	}
 
-	public List<CodePool> getList(String code, int orderBy, String conceptId, String conceptName, int asc,
-			int baseLevel, int inMid, int midOk, int sortOk, int manualOk, double pe, double pettm, double pb,
-			EsQueryPageReq querypage) {
+	public List<CodePool> getList(String code, String conceptId, String conceptName, int asc, int baseLevel, int inMid,
+			int midOk, int sortOk, int manualOk, double pe, double pettm, double pb, EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
