@@ -109,10 +109,6 @@ public class CodeBaseModel extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int udpateDate;
 
-	// 中线是否OK
-	@Field(type = FieldType.Integer)
-	private int midOk = 0;
-
 	public String getKeyString() {
 		return "[code=" + code + ",currYear=" + currYear + ", currQuarter=" + currQuarter + ", lastDividendDate="
 				+ lastDividendDate + ", lastBackDate=" + lastBackDate + ", endDate=" + endDate + ", floatDate="

@@ -27,6 +27,7 @@ import com.stable.es.dao.base.EsCodeBaseModelHistDao;
 import com.stable.es.dao.base.EsCodeConceptDao;
 import com.stable.es.dao.base.EsConceptDao;
 import com.stable.service.BuyBackService;
+import com.stable.service.CodePoolService;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
@@ -34,7 +35,6 @@ import com.stable.service.PledgeStatService;
 import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.FinanceAnalyzer;
-import com.stable.service.trace.MiddleSortV1Service;
 import com.stable.utils.BeanCopy;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -44,6 +44,7 @@ import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.CodeConcept;
+import com.stable.vo.bus.CodePool;
 import com.stable.vo.bus.Concept;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.DividendHistory;
@@ -87,7 +88,12 @@ public class CodeModelService {
 	@Autowired
 	private EsCodeConceptDao esCodeConceptDao;
 	@Autowired
-	private MiddleSortV1Service middleSortV1Service;
+	private CodePoolService codePoolService;
+//	@Autowired
+//	private AvgService avgService;
+//
+//	private String OK = "系统默认OK";
+//	private String NOT_OK = "系统默认NOT_OK";
 
 	public synchronized void runJob(boolean isJob, int date) {
 		try {
@@ -109,10 +115,12 @@ public class CodeModelService {
 		int nextYear = DateUtil.getNextYear(treadeDate);
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 		Map<String, CodeBaseModel> histMap = getALLForMap();
+		Map<String, CodePool> map = codePoolService.getCodePoolMap();
+		List<CodePool> list = new LinkedList<CodePool>();
 		for (StockBaseInfo s : codelist) {
 			try {
 				getSorce(s, treadeDate, oneYearAgo, nextYear, updatedate, listLast, listHist, true, null,
-						histMap.get(s.getCode()));
+						histMap.get(s.getCode()), list, map);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
 			}
@@ -123,7 +131,27 @@ public class CodeModelService {
 		if (listHist.size() > 0) {
 			codeBaseModelHistDao.saveAll(listHist);
 		}
-		middleSortV1Service.start(listLast);
+		if (list.size() > 0) {
+			// LineAvgPrice lvp = new LineAvgPrice(avgService);
+			log.info("codelist:" + listLast.size());
+
+//			for (CodePool m : list) {
+//				try {
+//					String code = m.getCode();
+//					// 业绩支撑
+//					if (m.getMidOk() == 1) {
+//						// 均线支持
+//						if (lvp.isWhiteHorseForMid(code, m.get)) {
+//							c.setMidOk(1);
+//							c.setMidRemark(OK);
+//						}
+//					}
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+			codePoolService.saveAll(list);
+		}
 		log.info("CodeModel 模型执行完成");
 		WxPushUtil.pushSystem1(
 				"Seq5=> CODE-MODEL " + treadeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listHist.size());
@@ -139,9 +167,11 @@ public class CodeModelService {
 		StringBuffer res = new StringBuffer();
 //		Map<String, CodeBaseModel> histMap = getALLForMap();
 		CodeBaseModel lastOne = getLastOneByCode(code);
+		Map<String, CodePool> map = new HashMap<String, CodePool>();
+		List<CodePool> list = new LinkedList<CodePool>();
 		try {
 			StockBaseInfo s = JSON.parseObject(redisUtil.get(code), StockBaseInfo.class);
-			getSorce(s, updatedate, oneYearAgo, nextYear, updatedate, listm, listh, false, res, lastOne);
+			getSorce(s, updatedate, oneYearAgo, nextYear, updatedate, listm, listh, false, res, lastOne, list, map);
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, "", "", "");
 		}
@@ -150,7 +180,7 @@ public class CodeModelService {
 
 	private void getSorce(StockBaseInfo s, int treadeDate, int oneYearAgo, int nextYear, int updatedate,
 			List<CodeBaseModel> listLast, List<CodeBaseModelHist> listHist, boolean isJob, StringBuffer sb,
-			CodeBaseModel lastOne) {
+			CodeBaseModel lastOne, List<CodePool> list, Map<String, CodePool> map) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
 		// 财务
@@ -164,6 +194,15 @@ public class CodeModelService {
 			}
 			return;
 		}
+		CodePool c = map.get(code);
+		if (c == null) {
+			c = new CodePool();
+			c.setCode(code);
+		}
+		c.setMidChkDate(treadeDate);
+		c.setInMid(0);
+		list.add(c);
+
 		CodeBaseModel newOne = new CodeBaseModel();
 		newOne.setCode(code);
 		newOne.setDate(treadeDate);
@@ -251,7 +290,7 @@ public class CodeModelService {
 			}
 		}
 
-		processingFinance(newOne, hasKb ? yjkb : null, hasYg ? yjyg : null);
+		processingFinance(c, newOne, hasKb ? yjkb : null, hasYg ? yjyg : null);
 		if (bb != null) {
 			// 股东大会通过/实施/完成
 		} else {
@@ -391,7 +430,7 @@ public class CodeModelService {
 		}
 	}
 
-	private void processingFinance(CodeBaseModel base, FinYjkb yjkb, FinYjyg yjyg) {
+	private void processingFinance(CodePool c, CodeBaseModel base, FinYjkb yjkb, FinYjyg yjyg) {
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(base.getCode(), base.getDate(),
 				EsQueryPageUtil.queryPage8);
 		FinanceAnalyzer fa = new FinanceAnalyzer();
@@ -421,15 +460,24 @@ public class CodeModelService {
 
 		// 是否符合中线、1.市盈率和ttm在50以内
 		DaliyBasicInfo basic = daliyBasicHistroyService.getDaliyBasicInfoByDate(base.getCode(), base.getDate());
-		if (basic.getPe() > 0 && basic.getPe() < 50 && basic.getPe_ttm() < 50) {
-			// 当前季度和上季度增长,营收20%
-			if (fa.getCurrJidu().getYyzsrtbzz() >= 20.0 && fa.getPrevJidu().getYyzsrtbzz() >= 20.0) {
-				// 当前季度和上季度增长,净利15%
-				if (fa.getCurrJidu().getGsjlrtbzz() >= 15.0 && fa.getPrevJidu().getGsjlrtbzz() >= 15.0) {
-					base.setMidOk(1);
+
+		if (fa.getCurrJidu().getYyzsrtbzz() >= 1.0 && fa.getPrevJidu().getYyzsrtbzz() >= 1.0) {// 连续2季度营收增长
+			// 当前季度和上季度增长,净利15%
+			if (fa.getCurrJidu().getYyzsrtbzz() >= 10.0 && fa.getPrevJidu().getYyzsrtbzz() >= 10.0) {
+				if (fa.getCurrJidu().getGsjlrtbzz() >= 10.0 && fa.getPrevJidu().getGsjlrtbzz() >= 10.0) {
+					c.setInMid(1);
+
+					double d = fa.getCurrJidu().getYyzsrtbzz();
+					if (fa.getCurrJidu().getGsjlrtbzz() < d) {
+						d = fa.getCurrJidu().getGsjlrtbzz();
+					}
+					c.setBaseLevel(Double.valueOf(d).intValue());
 				}
 			}
 		}
+		c.setPb(basic.getPb());
+		c.setPe(basic.getPe());
+		c.setPe_ttm(basic.getPe_ttm());
 	}
 
 	public CodeBaseModel getLastOneByCode(String code) {

@@ -68,11 +68,11 @@ public class ModelController {
 	 * 执行模型（基本面)
 	 */
 	@RequestMapping(value = "/coderun", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> coderun() {
+	public ResponseEntity<JsonResult> coderun(String date) {
 		JsonResult r = new JsonResult();
 		try {
 			codeModelService.reset();
-			codeModelService.runJob(false, DateUtil.getTodayIntYYYYMMDD());
+			codeModelService.runJob(false, Integer.valueOf(date));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

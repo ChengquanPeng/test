@@ -18,6 +18,16 @@ public class CodePool {
 	private String code;
 	@Field(type = FieldType.Integer)
 	private int updateDate = 0;
+	// 营收净利level
+	@Field(type = FieldType.Integer)
+	private int baseLevel = 0;
+
+	@Field(type = FieldType.Double)
+	private double pe;// float 市盈率（总市值/净利润）
+	@Field(type = FieldType.Double)
+	private double pe_ttm;// float 市盈率（TTM）
+	@Field(type = FieldType.Double)
+	private double pb;// float 市净率（总市值/净资产）
 
 	// ---------------------------
 	// 是否加入监听
