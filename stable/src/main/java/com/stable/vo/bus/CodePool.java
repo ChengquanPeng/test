@@ -23,6 +23,11 @@ public class CodePool {
 	private int baseLevel = 0;
 
 	@Field(type = FieldType.Double)
+	private double kbygys; // 营业总收入同比增长(%)
+	@Field(type = FieldType.Double)
+	private double kbygjl; // 归属净利润同比增长(%)
+
+	@Field(type = FieldType.Double)
 	private double pe;// float 市盈率（总市值/净利润）
 	@Field(type = FieldType.Double)
 	private double pe_ttm;// float 市盈率（TTM）

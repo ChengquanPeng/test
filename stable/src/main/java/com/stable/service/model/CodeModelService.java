@@ -133,7 +133,7 @@ public class CodeModelService {
 		}
 		if (list.size() > 0) {
 			// LineAvgPrice lvp = new LineAvgPrice(avgService);
-			log.info("codelist:" + listLast.size());
+			log.info("code coop list:" + list.size());
 
 //			for (CodePool m : list) {
 //				try {
@@ -199,9 +199,10 @@ public class CodeModelService {
 			c = new CodePool();
 			c.setCode(code);
 		}
-		c.setMidChkDate(treadeDate);
-		c.setInMid(0);
 		list.add(c);
+		c.setInMid(0);
+		c.setMidOk(0);
+		c.setMidChkDate(treadeDate);
 
 		CodeBaseModel newOne = new CodeBaseModel();
 		newOne.setCode(code);
@@ -462,18 +463,26 @@ public class CodeModelService {
 		DaliyBasicInfo basic = daliyBasicHistroyService.getDaliyBasicInfoByDate(base.getCode(), base.getDate());
 
 		if (fa.getCurrJidu().getYyzsrtbzz() >= 1.0 && fa.getPrevJidu().getYyzsrtbzz() >= 1.0) {// 连续2季度营收增长
+			c.setInMid(1);
 			// 当前季度和上季度增长,净利15%
 			if (fa.getCurrJidu().getYyzsrtbzz() >= 10.0 && fa.getPrevJidu().getYyzsrtbzz() >= 10.0) {
 				if (fa.getCurrJidu().getGsjlrtbzz() >= 10.0 && fa.getPrevJidu().getGsjlrtbzz() >= 10.0) {
-					c.setInMid(1);
-
 					double d = fa.getCurrJidu().getYyzsrtbzz();
 					if (fa.getCurrJidu().getGsjlrtbzz() < d) {
 						d = fa.getCurrJidu().getGsjlrtbzz();
 					}
 					c.setBaseLevel(Double.valueOf(d).intValue());
+					c.setMidOk(1);
 				}
 			}
+		}
+		c.setKbygjl(0);
+		c.setKbygys(0);
+		if (yjkb != null) {
+			c.setKbygys(yjkb.getYyzsrtbzz());
+			c.setKbygjl(yjkb.getJlrtbzz());
+		} else if (yjyg != null) {
+			c.setKbygjl(yjyg.getJlrtbzz());
 		}
 		c.setPb(basic.getPb());
 		c.setPe(basic.getPe());
