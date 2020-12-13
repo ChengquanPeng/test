@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
@@ -162,12 +163,25 @@ public class DaliyBasicHistroyService {
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.matchPhraseQuery("trade_date", date));
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(SortOrder.DESC);
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+
+		SearchQuery sq = queryBuilder.withQuery(bqb).build();
 		try {
 			return esDaliyBasicInfoDao.search(sq).getContent().get(0);
 		} catch (Exception e) {
-			return spiderStockDaliyBasicForOne(code, date + "");
+			e.printStackTrace();
+			Pageable pageable = PageRequest.of(EsQueryPageUtil.queryPage1.getPageNum(),
+					EsQueryPageUtil.queryPage1.getPageSize());
+			bqb = QueryBuilders.boolQuery();
+			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+			bqb.must(QueryBuilders.rangeQuery("trade_date").lte(date));
+			FieldSortBuilder sort = SortBuilders.fieldSort("trade_date").unmappedType("integer").order(SortOrder.DESC);
+			sq = queryBuilder.withQuery(bqb).withPageable(pageable).withSort(sort).build();
+			try {
+				return esDaliyBasicInfoDao.search(sq).getContent().get(0);
+			} catch (Exception e2) {
+				e2.printStackTrace();
+				return spiderStockDaliyBasicForOne(code, date + "");
+			}
 		}
 	}
 

@@ -570,10 +570,21 @@ public class CodeModelService {
 		return null;
 	}
 
-	public List<CodeBaseModel> getList(String code, int orderBy, String conceptId, int asc, EsQueryPageReq querypage) {
+	public List<CodeBaseModel> getList(String code, int orderBy, String conceptId, String conceptName, int asc,
+			EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		} else if (StringUtils.isNotBlank(conceptId)) {
+			List<String> list = listCodeByCodeConceptId(conceptId);
+			if (list != null) {
+				bqb.must(QueryBuilders.termsQuery("code", list));
+			}
+		} else if (StringUtils.isNotBlank(conceptName)) {
+			List<String> list = listCodeByCodeConceptName(conceptName);
+			if (list.size() > 0) {
+				bqb.must(QueryBuilders.termsQuery("code", list));
+			}
 		}
 		String field = "score";
 		if (orderBy == 2) {
@@ -583,12 +594,7 @@ public class CodeModelService {
 		if (asc == 2) {
 			order = SortOrder.ASC;
 		}
-		if (StringUtils.isNotBlank(conceptId)) {
-			List<String> list = listCodeByCodeConceptId(conceptId);
-			if (list != null) {
-				bqb.must(QueryBuilders.termsQuery("code", list));
-			}
-		}
+
 		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
@@ -603,12 +609,12 @@ public class CodeModelService {
 		return null;
 	}
 
-	public List<CodeBaseModelResp> getListForWeb(String code, int orderBy, String conceptId, int asc,
-			EsQueryPageReq querypage) {
-		log.info("CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={},conceptId={}", code, orderBy,
-				asc, querypage.getPageNum(), querypage.getPageSize(), conceptId);
+	public List<CodeBaseModelResp> getListForWeb(String code, int orderBy, String conceptId, String conceptName,
+			int asc, EsQueryPageReq querypage) {
+		log.info("CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={},conceptId={},conceptName={}",
+				code, orderBy, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName);
 
-		List<CodeBaseModel> list = getList(code, orderBy, conceptId, asc, querypage);
+		List<CodeBaseModel> list = getList(code, orderBy, conceptId, conceptName, asc, querypage);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {
 			for (CodeBaseModel dh : list) {
@@ -651,7 +657,19 @@ public class CodeModelService {
 
 	}
 
-	private List<String> listCodeByCodeConceptId(String conceptId) {
+	public List<String> listCodeByCodeConceptName(String conceptName) {
+		List<String> codes = new LinkedList<String>();
+		List<StockBaseInfo> l = stockBasicService.getAllOnStatusList();
+		conceptName = conceptName.trim();
+		for (StockBaseInfo s : l) {
+			if (s.getThsIndustry().contains(conceptName)) {
+				codes.add(s.getCode());
+			}
+		}
+		return codes;
+	}
+
+	public List<String> listCodeByCodeConceptId(String conceptId) {
 		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		conceptId = getConceptId(conceptId);

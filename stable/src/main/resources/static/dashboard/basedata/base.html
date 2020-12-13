@@ -29,6 +29,7 @@
 							<option value="1" selected="selected">综合评分</option>
 							<option value="2">评分变化</option>
 						</select>
+						板块名称：<input type="text" class="form-control" id="conceptName"> 
 						概念id：<input type="text" class="form-control" id="conceptId"> 
 						倒序排序:<input type="checkbox" id="asc" name="asc" checked="checked" />
 					<span lass="input-group-btn"> <button class="btn btn-default" type="button" id="queryAction"> Go!</button> </span>
@@ -94,6 +95,8 @@
 							param.orderBy = gsort;
 							param.asc = 1;
 							param.conceptId = $('#conceptId').val();
+							param.conceptName = $('#conceptName').val();
+							
 							if(!document.getElementById("asc").checked){
 								param.asc = 2;
 							}

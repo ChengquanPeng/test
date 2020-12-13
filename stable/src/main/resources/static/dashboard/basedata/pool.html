@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>Dashboard Template for Bootstrap</title>
+
+<!-- Bootstrap core CSS -->
+<link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
+</head>
+
+<body>
+	<div id="header"></div>
+	<div class="container-fluid">
+		<div class="row">
+			<div id="menu"></div>
+			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
+			<div class="col-lg-7">
+				<div class="input-group">
+					股票代码：<input type="text" class="form-control" id="queryCode">
+					营收净利幅度:<input type="text" class="form-control" id="baseLevel">
+					营收净利正增长Y:<input type="checkbox" id="inMid" name="inMid" checked="checked" /> 
+					营收净利监听Y:<input type="checkbox" id="midOk" name="midOk" checked="checked" /> 
+					短线监听Y:<input type="checkbox" id="sortOk" name="sortOk" checked="checked" /> 
+					手动监听Y:<input type="checkbox" id="manualOk" name="manualOk" checked="checked" />
+				</div>
+				<div class="input-group">
+					PE(市盈率):<input type="text" class="form-control" id="pe">
+					PE(市盈率TTM):<input type="text" class="form-control" id="pettm">
+					PB(市净率):<input type="text" class="form-control" id="pb">
+					板块名称：<input type="text" class="form-control" id="conceptName">
+					概念id：<input type="text" class="form-control" id="conceptId">
+					倒序排序:<input type="checkbox" id="asc" name="asc" checked="checked" />
+					<span lass="input-group-btn">
+						<button class="btn btn-default" type="button" id="queryAction">
+							Go!</button>
+					</span>
+				</div>
+			</div>
+
+			<div id="rptList" style="width: 100%; hight: 100%; float: left；">
+				<table class="table table-hover" id="cusTable">
+				</table>
+			</div>
+			</main>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="/web/libs/js/jquery-3.1.1.slim.min.js"
+		integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/js/tether.min.js"
+		integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap.min.js"></script>
+	<script src="/web/libs/js/common.js"></script>
+	<script src="/web/libs/js/jquery.js"></script>
+	<script src="/web/libs/js/dashboard/index.js"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
+	<script src="/web/libs/js/dashboard/basedata.js"></script>
+	<script type="text/javascript">
+		$("#header").load("/web/header.html")
+		addActive("m_pool");
+		$('#cusTable').bootstrapTable('destroy');
+		function loadData() {
+			$('#cusTable').bootstrapTable('destroy');
+			$("#cusTable")
+					.bootstrapTable(
+							{
+								method : "get", //使用get请求到服务器获取数据  
+								url : "/web/codemodel/list", //获取数据的Servlet地址  
+								striped : true, //表格显示条纹  
+								pagination : true, //启动分页
+								cache : false,
+								pageSize : 20, //每页显示的记录数  
+								//pageNumber:1, //当前第几页  
+								pageList : [ 10, 15, 20, 50 ], //记录数可选列表  
+								search : false, //是否启用查询  
+								//showColumns: true,  //显示下拉框勾选要显示的列  
+								//showRefresh: true,  //显示刷新按钮  
+								sidePagination : "server", //表示服务端请求
+								//设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder  
+								//设置为limit可以获取limit, offset, search, sort, order  
+								queryParamsType : "undefined",
+								queryParams : function queryParams(params) { //设置查询参数  
+									var code = $('#queryCode').val();
+									//var gsort = $('#gsort').val();
+
+									var param = {
+										pageNum : params.pageNumber,
+										pageSize : params.pageSize,
+									};
+									param.code = code;
+									//param.orderBy = gsort;
+									param.asc = 1;
+									param.conceptId = $('#conceptId').val();
+									param.conceptName = $('#conceptName').val();
+
+									param.inMid = 0;
+									param.midOk = 0;
+									param.sortOk = 0;
+									param.manualOk = 0;
+
+									if (!document.getElementById("asc").checked) {
+										param.asc = 2;
+									}
+									if (!document.getElementById("inMid").checked) {
+										param.inMid = 1;
+									}
+									if (!document.getElementById("midOk").checked) {
+										param.midOk = 1;
+									}
+									if (!document.getElementById("sortOk").checked) {
+										param.sortOk = 1;
+									}
+									if (!document.getElementById("manualOk").checked) {
+										param.manualOk = 1;
+									}
+									param.baseLevel = $('#baseLevel').val();
+									param.pe = $('#pe').val();
+									param.pettm = $('#pettm').val();
+									param.pb = $('#pb').val();
+									return param;
+								},
+								columns : [
+										{
+											field : 'code',
+											title : '代码',
+											formatter : function(value, row,
+													index) {
+												var actions = [];
+												actions.push('<a target="_blank" href="/web/code/' + value + '">' + value + '</a>');
+												return actions.join('');
+											}
+										}, {
+											field : 'codeName',
+											title : '名称'
+										}, {
+											field : 'baseLevel',
+											title : '营收净利增幅'
+										}, {
+											field : 'pe',
+											title : 'pe(市盈率)'
+										}, {
+											field : 'currQuarter',
+											title : 'pe-ttm(市盈率)'
+										}, {
+											field : 'score',
+											title : 'pb(市净率)'
+										}, {
+											field : 'inMid',
+											title : '营收净利正增长'
+										}, {
+											field : 'midOk',
+											title : '营收净利监听'
+										}, {
+											field : 'sortOk',
+											title : '短线监听'
+										}, {
+											field : 'manualOk',
+											title : '手动监听'
+										}, {
+											field : 'kbygys',
+											title : '最新营收快预报'
+										}  {
+											field : 'kbygjl',
+											title : '最新净利快预报'
+										} ],
+								responseHandler : function responseHandler(res) {
+
+									var s1 = JSON.stringify(res.result);
+									var s2 = '{"total":9999,"rows":' + s1 + '}';
+									//alert(s2);
+									return eval('(' + s2 + ')')
+								},
+								onLoadSuccess : function() { //加载成功时执行
+									$("#rptList").show();
+								},
+								onLoadError : function() { //加载失败时执行  
+									alert("加载数据失败");
+								}
+							});
+		}
+
+		$("#queryAction").click(function() {
+			//alert("abc");
+			loadData()
+		});
+		loadData();
+	</script>
+</body>
+</html>
