@@ -23,14 +23,10 @@
 		<div class="row">
 			<div id="menu"></div>
 			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
-			<div class="col-lg-7">
+			<div class="col-lg-9">
 				<div class="input-group">
 					股票代码：<input type="text" class="form-control" id="queryCode">
-					营收净利幅度:<input type="text" class="form-control" id="baseLevel">
-					营收净利正增长Y:<input type="checkbox" id="inMid" name="inMid" checked="checked" /> 
-					营收净利监听Y:<input type="checkbox" id="midOk" name="midOk" checked="checked" /> 
-					短线监听Y:<input type="checkbox" id="sortOk" name="sortOk" checked="checked" /> 
-					手动监听Y:<input type="checkbox" id="manualOk" name="manualOk" checked="checked" />
+					营收净利增长幅度:<input type="text" class="form-control" id="baseLevel">
 				</div>
 				<div class="input-group">
 					PE(市盈率):<input type="text" class="form-control" id="pe">
@@ -38,6 +34,14 @@
 					PB(市净率):<input type="text" class="form-control" id="pb">
 					板块名称：<input type="text" class="form-control" id="conceptName">
 					概念id：<input type="text" class="form-control" id="conceptId">
+				</div>
+				<div class="input-group">
+					营收净利OK:<input type="checkbox" id="inMid" name="inMid"  /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					YS-JL监听Y:<input type="checkbox" id="midOk" name="midOk" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					短线监听Y:<input type="checkbox" id="sortOk" name="sortOk" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					手动监听Y:<input type="checkbox" id="manualOk" name="manualOk" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				</div>
+				<div class="input-group">
 					倒序排序:<input type="checkbox" id="asc" name="asc" checked="checked" />
 					<span lass="input-group-btn">
 						<button class="btn btn-default" type="button" id="queryAction">
@@ -148,34 +152,34 @@
 											title : '名称'
 										}, {
 											field : 'baseLevel',
-											title : '营收净利增幅'
+											title : 'YS-JL增幅'
 										}, {
 											field : 'pe',
-											title : 'pe(市盈率)'
+											title : 'pe市盈率'
 										}, {
 											field : 'currQuarter',
-											title : 'pe-ttm(市盈率)'
+											title : 'pe-ttm'
 										}, {
 											field : 'score',
-											title : 'pb(市净率)'
+											title : 'pb市净率'
 										}, {
 											field : 'inMid',
-											title : '营收净利正增长'
+											title : '营收净利OK'
 										}, {
 											field : 'midOk',
-											title : '营收净利监听'
+											title : '中线监听'
 										}, {
 											field : 'sortOk',
 											title : '短线监听'
 										}, {
 											field : 'manualOk',
-											title : '手动监听'
+											title : '人工监听'
 										}, {
 											field : 'kbygys',
-											title : '最新营收快预报'
+											title : 'Last-YS-快预报'
 										}, {
 											field : 'kbygjl',
-											title : '最新净利快预报'
+											title : 'Last-YS-快预报'
 										} ],
 								responseHandler : function responseHandler(res) {
 
