@@ -98,7 +98,7 @@ public class AttentionSpider {
 					} else {
 						long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
 						long d220000 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
-								DateUtil.parseDate(today + "220000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+								DateUtil.parseDate(today + "230000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 						if (now < d220000) {
 							log.info("当天未完成-但时间未到,return");
 							return;
