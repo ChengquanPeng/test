@@ -36,10 +36,12 @@
 					概念id：<input type="text" class="form-control" id="conceptId">
 				</div>
 				<div class="input-group">
+					疑似大牛:<input type="checkbox" id="suspectBigBoss" name="suspectBigBoss"  /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					营收净利OK:<input type="checkbox" id="inMid" name="inMid"  /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					YS-JL监听Y:<input type="checkbox" id="midOk" name="midOk" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					短线监听Y:<input type="checkbox" id="sortOk" name="sortOk" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					手动监听Y:<input type="checkbox" id="manualOk" name="manualOk" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					业绩连续增长季度数：<input type="text" class="form-control" id="jiduc">
 				</div>
 				<div class="input-group">
 					倒序排序:<input type="checkbox" id="asc" name="asc" checked="checked" />
@@ -115,26 +117,32 @@
 									param.midOk = 0;
 									param.sortOk = 0;
 									param.manualOk = 0;
+									
 
 									if (!document.getElementById("asc").checked) {
 										param.asc = 2;
 									}
-									if (!document.getElementById("inMid").checked) {
+									if (document.getElementById("suspectBigBoss").checked) {
+										param.suspectBigBoss = 1;
+									}
+									if (document.getElementById("inMid").checked) {
 										param.inMid = 1;
 									}
-									if (!document.getElementById("midOk").checked) {
+									if (document.getElementById("midOk").checked) {
 										param.midOk = 1;
 									}
-									if (!document.getElementById("sortOk").checked) {
+									if (document.getElementById("sortOk").checked) {
 										param.sortOk = 1;
 									}
-									if (!document.getElementById("manualOk").checked) {
+									if (document.getElementById("manualOk").checked) {
 										param.manualOk = 1;
 									}
 									param.baseLevel = $('#baseLevel').val();
 									param.pe = $('#pe').val();
 									param.pettm = $('#pettm').val();
 									param.pb = $('#pb').val();
+									param.jiduc = $('#jiduc').val();
+									
 									return param;
 								},
 								columns : [
@@ -157,14 +165,20 @@
 											field : 'pe',
 											title : 'pe市盈率'
 										}, {
-											field : 'currQuarter',
+											field : 'pe_ttm',
 											title : 'pe-ttm'
 										}, {
-											field : 'score',
+											field : 'pb',
 											title : 'pb市净率'
 										}, {
 											field : 'inMid',
 											title : '营收净利OK'
+										}, {
+											field : 'suspectBigBoss',
+											title : '疑似大牛'
+										}, {
+											field : 'yjlx',
+											title : '连续业绩'
 										}, {
 											field : 'midOk',
 											title : '中线监听'

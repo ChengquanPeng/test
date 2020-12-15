@@ -34,6 +34,13 @@ public class CodePool {
 	@Field(type = FieldType.Double)
 	private double pb;// float 市净率（总市值/净资产）
 
+	@Field(type = FieldType.Integer)
+	private int suspectBigBoss; // 疑似大牛
+	@Field(type = FieldType.Integer)
+	private int continYj1;// 连续不间断业绩季度
+	@Field(type = FieldType.Integer)
+	private int continYj2;// 允许间段1个季度业绩
+
 	// ---------------------------
 	// 是否加入监听
 	@Field(type = FieldType.Integer)

@@ -35,6 +35,7 @@ import com.stable.service.PledgeStatService;
 import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.FinanceAnalyzer;
+import com.stable.service.trace.MiddleSortV1Service;
 import com.stable.utils.BeanCopy;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -62,7 +63,8 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class CodeModelService {
-
+	@Autowired
+	private CodePoolService codePoolService;
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
@@ -88,12 +90,7 @@ public class CodeModelService {
 	@Autowired
 	private EsCodeConceptDao esCodeConceptDao;
 	@Autowired
-	private CodePoolService codePoolService;
-//	@Autowired
-//	private AvgService avgService;
-//
-//	private String OK = "系统默认OK";
-//	private String NOT_OK = "系统默认NOT_OK";
+	private MiddleSortV1Service middleSortV1Service;
 
 	public synchronized void runJob(boolean isJob, int date) {
 		try {
@@ -131,27 +128,7 @@ public class CodeModelService {
 		if (listHist.size() > 0) {
 			codeBaseModelHistDao.saveAll(listHist);
 		}
-		if (list.size() > 0) {
-			// LineAvgPrice lvp = new LineAvgPrice(avgService);
-			log.info("code coop list:" + list.size());
-
-//			for (CodePool m : list) {
-//				try {
-//					String code = m.getCode();
-//					// 业绩支撑
-//					if (m.getMidOk() == 1) {
-//						// 均线支持
-//						if (lvp.isWhiteHorseForMid(code, m.get)) {
-//							c.setMidOk(1);
-//							c.setMidRemark(OK);
-//						}
-//					}
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-			codePoolService.saveAll(list);
-		}
+		middleSortV1Service.start(list);
 		log.info("CodeModel 模型执行完成");
 		WxPushUtil.pushSystem1(
 				"Seq5=> CODE-MODEL " + treadeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listHist.size());
@@ -203,6 +180,7 @@ public class CodeModelService {
 		c.setInMid(0);
 		c.setMidOk(0);
 		c.setMidChkDate(treadeDate);
+		c.setUpdateDate(treadeDate);
 
 		CodeBaseModel newOne = new CodeBaseModel();
 		newOne.setCode(code);
@@ -433,7 +411,7 @@ public class CodeModelService {
 
 	private void processingFinance(CodePool c, CodeBaseModel base, FinYjkb yjkb, FinYjyg yjyg) {
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(base.getCode(), base.getDate(),
-				EsQueryPageUtil.queryPage8);
+				EsQueryPageUtil.queryPage9999);
 		FinanceAnalyzer fa = new FinanceAnalyzer();
 		for (FinanceBaseInfo fbi : fbis) {
 			fa.putJidu1(fbi);
@@ -487,6 +465,43 @@ public class CodeModelService {
 		c.setPb(basic.getPb());
 		c.setPe(basic.getPe());
 		c.setPe_ttm(basic.getPe_ttm());
+		// 业绩连续
+		int continueJidu1 = 0;
+		int continueJidu2 = 0;
+		boolean cj1 = true;
+		int cj2 = 0;
+		double high = 0.0;
+		for (FinanceBaseInfo fbi : fbis) {
+			if (cj1 && fbi.getYyzsrtbzz() >= 1.0 && fbi.getGsjlrtbzz() >= 1.0) {// 连续季度增长
+				continueJidu1++;
+				if (fbi.getYyzsrtbzz() > high) {
+					high = fbi.getYyzsrtbzz();
+				}
+				if (fbi.getGsjlrtbzz() > high) {
+					high = fbi.getGsjlrtbzz();
+				}
+			} else {
+				cj1 = false;
+			}
+			if (cj2 <= 1 && fbi.getYyzsrtbzz() >= 1.0 && fbi.getGsjlrtbzz() >= 1.0) {// 允许一次断连续
+				continueJidu2++;
+
+				if (fbi.getYyzsrtbzz() > high) {
+					high = fbi.getYyzsrtbzz();
+				}
+				if (fbi.getGsjlrtbzz() > high) {
+					high = fbi.getGsjlrtbzz();
+				}
+			} else {
+				cj2++;
+			}
+		}
+		if (high < 25) {// 如果连续的几个季度ys/jl增速都小于25，则不考虑。
+			continueJidu1 = 0;
+			continueJidu2 = 0;
+		}
+		c.setContinYj1(continueJidu1);
+		c.setContinYj2(continueJidu2);
 	}
 
 	public CodeBaseModel getLastOneByCode(String code) {

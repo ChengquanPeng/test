@@ -1,16 +1,14 @@
 package com.stable.service.trace;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.stable.service.CodePoolService;
-import com.stable.service.model.data.AvgService;
-import com.stable.service.model.data.LineAvgPrice;
-import com.stable.vo.bus.CodeBaseModel;
+import com.stable.service.DaliyTradeHistroyService;
+import com.stable.service.model.data.LinePrice;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.CodePool;
 
 import lombok.extern.log4j.Log4j2;
@@ -23,8 +21,38 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MiddleSortV1Service {
 
-	public synchronized void start(List<CodePool> listLast) {
+	@Autowired
+	private CodePoolService codePoolService;
+	@Autowired
+	private DaliyTradeHistroyService daliyTradeHistroyService;
+//
+	private String OK = "基本面OK,疑是建仓";
+//	private String NOT_OK = "系统默认NOT_OK";
 
+	private double chkdouble = 55.0;
+
+	public synchronized void start(List<CodePool> list) {
+		log.info("code coop list:" + list.size());
+		StringBuffer msg = new StringBuffer();
+		if (list.size() > 0) {
+			LinePrice lp = new LinePrice(daliyTradeHistroyService);
+			for (CodePool m : list) {
+				if (m.getContinYj1() >= 3 || m.getContinYj2() >= 3) {
+					// 半年整幅未超过50%
+					if (lp.priceCheckForMid(m.getCode(), m.getUpdateDate(), chkdouble)) {
+						if (m.getSuspectBigBoss() == 0) {
+							msg.append(m.getCode()).append(",");
+						}
+						m.setSuspectBigBoss(1);
+						m.setMidRemark(OK);
+					}
+				}
+			}
+			codePoolService.saveAll(list);
+			if (msg.length() > 0) {
+				WxPushUtil.pushSystem1("新发现疑似主力建仓票:" + msg.toString());
+			}
+		}
 	}
 
 }

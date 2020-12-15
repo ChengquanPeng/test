@@ -141,7 +141,7 @@ public class CodePoolService {
 		log.info("queryPage pageNum={},size={}", pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		// 监听列表
+		// 监听列表 should OR 或 查询
 		bqb.must(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("midOk", 1))
 				.should(QueryBuilders.matchQuery("sortOk", 1)).should(QueryBuilders.matchQuery("manualOk", 1)));
 
@@ -158,21 +158,22 @@ public class CodePoolService {
 	}
 
 	public List<CodePoolResp> getListForWeb(String code, String conceptId, String conceptName, int asc, int baseLevel,
-			int inMid, int midOk, int sortOk, int manualOk, double pe, double pettm, double pb,
-			EsQueryPageReq querypage) {
+			int inMid, int midOk, int sortOk, int manualOk, int suspectBigBoss, double pe, double pettm, double pb,
+			EsQueryPageReq querypage, int jiduc) {
 		log.info(
 				"CodeBaseModel getListForWeb code={},asc={},num={},size={},conceptId={},conceptName={},baseLevel={},inMid={},midOk={},sortOk={},manualOk={},pe={},pettm={},pb={}",
 				code, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName, baseLevel, inMid,
 				midOk, sortOk, manualOk, pe, pettm, pb);
 
-		List<CodePool> list = getList(code, conceptId, conceptName, asc, baseLevel, inMid, midOk, sortOk, manualOk, pe,
-				pettm, pb, querypage);
+		List<CodePool> list = getList(code, conceptId, conceptName, asc, baseLevel, inMid, midOk, sortOk, manualOk,
+				suspectBigBoss, pe, pettm, pb, querypage, jiduc);
 		List<CodePoolResp> res = new LinkedList<CodePoolResp>();
 		if (list != null) {
 			for (CodePool dh : list) {
 				CodePoolResp resp = new CodePoolResp();
 				BeanUtils.copyProperties(dh, resp);
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
+				resp.setYjlx(dh.getContinYj1() + "/" + dh.getContinYj2());
 				res.add(resp);
 			}
 		}
@@ -180,7 +181,8 @@ public class CodePoolService {
 	}
 
 	public List<CodePool> getList(String code, String conceptId, String conceptName, int asc, int baseLevel, int inMid,
-			int midOk, int sortOk, int manualOk, double pe, double pettm, double pb, EsQueryPageReq querypage) {
+			int midOk, int sortOk, int manualOk, int suspectBigBoss, double pe, double pettm, double pb,
+			EsQueryPageReq querypage, int jiduc) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -195,8 +197,12 @@ public class CodePoolService {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			}
 		}
+		if (jiduc > 0) {
+			bqb.must(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("continYj1", jiduc))
+					.should(QueryBuilders.matchQuery("continYj2", jiduc)));
+		}
 		if (baseLevel > 0) {
-			bqb.must(QueryBuilders.rangeQuery("baseLevel").gte(baseLevel));
+			bqb.must(QueryBuilders.rangeQuery("baseLevel").gt(0).gte(baseLevel));
 		}
 		if (inMid > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("inMid", 1));
@@ -210,14 +216,17 @@ public class CodePoolService {
 		if (manualOk > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("manualOk", 1));
 		}
+		if (suspectBigBoss > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("suspectBigBoss", 1));
+		}
 		if (pe > 0) {
-			bqb.must(QueryBuilders.rangeQuery("pe").lte(pe));
+			bqb.must(QueryBuilders.rangeQuery("pe").gt(0).lte(pe));
 		}
 		if (pettm > 0) {
-			bqb.must(QueryBuilders.rangeQuery("pe_ttm").lte(pettm));
+			bqb.must(QueryBuilders.rangeQuery("pe_ttm").gt(0).lte(pettm));
 		}
 		if (pb > 0) {
-			bqb.must(QueryBuilders.rangeQuery("pb").lte(pb));
+			bqb.must(QueryBuilders.rangeQuery("pb").gt(0).lte(pb));
 		}
 		SortOrder order = SortOrder.DESC;
 		if (asc == 2) {
