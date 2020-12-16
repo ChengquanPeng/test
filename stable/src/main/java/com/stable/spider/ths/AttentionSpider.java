@@ -112,9 +112,9 @@ public class AttentionSpider {
 						boolean isDateDone = DONE.equals(getDateDone(date));
 						if (isDateDone) {
 							long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
-							long d220000 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
-									DateUtil.parseDate(today + "220000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
-							if (now < d220000) {// 上个交易日已完成
+							long d230000 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+									DateUtil.parseDate(today + "230000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+							if (now < d230000) {// 上个交易日已完成
 								log.info("最后一个交易日已完成,当天未完成-但时间未到,return");
 								return;
 							}

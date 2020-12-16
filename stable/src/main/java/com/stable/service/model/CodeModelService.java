@@ -472,27 +472,48 @@ public class CodeModelService {
 		int continueJidu2 = 0;
 		boolean cj1 = true;
 		int cj2 = 0;
-		double high = 0.0;
+		List<Double> high = new LinkedList<Double>();
+		List<Double> high2 = new LinkedList<Double>();
 		for (FinanceBaseInfo fbi : fbis) {
 			if (cj1 && fbi.getYyzsrtbzz() >= 1.0 && fbi.getGsjlrtbzz() >= 1.0) {// 连续季度增长
 				continueJidu1++;
-				if (fbi.getYyzsrtbzz() > high) {
-					high = fbi.getYyzsrtbzz();
-				}
-
+				high.add(fbi.getYyzsrtbzz());
 			} else {
 				cj1 = false;
 			}
 			if (cj2 <= 1 && fbi.getYyzsrtbzz() >= 1.0 && fbi.getGsjlrtbzz() >= 1.0) {// 允许一次断连续
 				continueJidu2++;
-				if (fbi.getYyzsrtbzz() > high) {
-					high = fbi.getYyzsrtbzz();
-				}
+				high2.add(fbi.getYyzsrtbzz());
 			} else {
 				cj2++;
 			}
 		}
-		if (high < 21) {// 如果连续的几个季度ys增速都小于25，则不考虑。
+		boolean isok = false;
+		if (continueJidu1 > 3 || continueJidu2 > 5) {
+			if (continueJidu1 > 3) {
+				int cn = 0;
+				for (Double h : high) {// 连续超过25%的次数超过一半
+					if (h > 25.0) {
+						cn++;
+					}
+				}
+				if (cn * 2 > continueJidu1) {
+					isok = true;
+				}
+			} else if (continueJidu2 > 5) {
+				int cn = 0;
+				for (Double h : high2) {
+					if (h > 25.0) {
+						cn++;
+					}
+				}
+				if (cn * 2 > continueJidu1) {
+					isok = true;
+				}
+			}
+		}
+
+		if (isok) {// 如果连续的几个季度ys增速都小于25，则不考虑。
 			continueJidu1 = 0;
 			continueJidu2 = 0;
 		}
