@@ -87,6 +87,15 @@ public class DaliyBasicInfo extends EsBase {
 	@Field(type = FieldType.Double)
 	private double amt;
 
+	@Field(type = FieldType.Double)
+	private double xq_pe;// float 市盈率（动态）
+	@Field(type = FieldType.Double)
+	private double xq_pe_d;// float 市盈率（动态）
+	@Field(type = FieldType.Double)
+	private double xq_pe_ttm;// float 市盈率（TTM）
+	@Field(type = FieldType.Double)
+	private double xq_pb;// float 市净率（总市值/净资产）
+
 	@Field(type = FieldType.Integer)
 	private int fetchTickData = -1;// 是否有fetch tick Data
 
@@ -184,5 +193,33 @@ public class DaliyBasicInfo extends EsBase {
 		this.todayChangeRate = Double.valueOf(arr.getString(i++));// pct_chg
 		this.vol = Double.valueOf((Double.valueOf(arr.getString(i++)) * 100)).longValue();// 成交量 （手）
 		this.amt = Double.valueOf((Double.valueOf(arr.getString(i++)) * 1000)).longValue();// 成交额 （千元）
+	}
+
+	public double getPe() {
+		if (xq_pe != -1) {
+			return xq_pe;
+		}
+		return pe;
+	}
+
+	public double getPe_d() {
+		if (xq_pe_d != -1) {
+			return xq_pe_d;
+		}
+		return pe_d;
+	}
+
+	public double getPe_ttm() {
+		if (xq_pe_ttm != -1) {
+			return xq_pe_ttm;
+		}
+		return pe_ttm;
+	}
+
+	public double getPb() {
+		if (xq_pb != -1) {
+			return xq_pb;
+		}
+		return pb;
 	}
 }

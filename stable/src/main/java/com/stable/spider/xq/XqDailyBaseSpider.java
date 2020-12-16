@@ -72,6 +72,11 @@ public class XqDailyBaseSpider {
 	}
 
 	private boolean dofetch(DaliyBasicInfo b) {
+		b.setXq_pe(-1);
+		b.setXq_pe_d(-1);
+		b.setXq_pe_ttm(-1);
+		b.setXq_pb(-1);
+
 		String code = b.getCode();
 		int trytime = 0;
 		boolean fetched = false;
@@ -94,30 +99,26 @@ public class XqDailyBaseSpider {
 						if (s.contains(F1)) {// "市盈率(静)";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
-								b.setPe(Double.valueOf(s.split(SPLIT)[1]));
+								b.setXq_pe(Double.valueOf(s.split(SPLIT)[1]));
 							} catch (Exception e) {
-								b.setPe(-1);
 							}
 						} else if (s.contains(F2)) {// "市盈率(动)";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
-								b.setPe_d(Double.valueOf(s.split(SPLIT)[1]));
+								b.setXq_pe_d(Double.valueOf(s.split(SPLIT)[1]));
 							} catch (Exception e) {
-								b.setPe_d(-1);
 							}
 						} else if (s.contains(F3)) {// "市盈率(TTM)";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
-								b.setPe_ttm(Double.valueOf(s.split(SPLIT)[1]));
+								b.setXq_pe_ttm(Double.valueOf(s.split(SPLIT)[1]));
 							} catch (Exception e) {
-								b.setPe_ttm(-1);
 							}
 						} else if (s.contains(F4)) {// "市净率";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
-								b.setPb(Double.valueOf(s.split(SPLIT)[1]));
+								b.setXq_pb(Double.valueOf(s.split(SPLIT)[1]));
 							} catch (Exception e) {
-								b.setPb(-1);
 							}
 						} else {
 

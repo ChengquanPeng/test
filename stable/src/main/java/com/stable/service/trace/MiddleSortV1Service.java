@@ -29,7 +29,7 @@ public class MiddleSortV1Service {
 	private String OK = "基本面OK,疑是建仓";
 //	private String NOT_OK = "系统默认NOT_OK";
 
-	private double chkdouble = 55.0;
+	private double chkdouble = 80.0;// 10跌倒5.x
 
 	public synchronized void start(List<CodePool> list) {
 		log.info("code coop list:" + list.size());
@@ -38,7 +38,7 @@ public class MiddleSortV1Service {
 			LinePrice lp = new LinePrice(daliyTradeHistroyService);
 			for (CodePool m : list) {
 				if (m.getContinYj1() >= 3 || m.getContinYj2() >= 3) {
-					// 半年整幅未超过50%
+					// 1年整幅未超过80%
 					if (lp.priceCheckForMid(m.getCode(), m.getUpdateDate(), chkdouble)) {
 						if (m.getSuspectBigBoss() == 0) {
 							msg.append(m.getCode()).append(",");

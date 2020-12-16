@@ -466,6 +466,8 @@ public class CodeModelService {
 		c.setPe(basic.getPe());
 		c.setPe_ttm(basic.getPe_ttm());
 		// 业绩连续
+
+//		if (CurrencyUitl.isLess200Yi(basic)) {// 小于200亿
 		int continueJidu1 = 0;
 		int continueJidu2 = 0;
 		boolean cj1 = true;
@@ -477,31 +479,26 @@ public class CodeModelService {
 				if (fbi.getYyzsrtbzz() > high) {
 					high = fbi.getYyzsrtbzz();
 				}
-				if (fbi.getGsjlrtbzz() > high) {
-					high = fbi.getGsjlrtbzz();
-				}
+
 			} else {
 				cj1 = false;
 			}
 			if (cj2 <= 1 && fbi.getYyzsrtbzz() >= 1.0 && fbi.getGsjlrtbzz() >= 1.0) {// 允许一次断连续
 				continueJidu2++;
-
 				if (fbi.getYyzsrtbzz() > high) {
 					high = fbi.getYyzsrtbzz();
-				}
-				if (fbi.getGsjlrtbzz() > high) {
-					high = fbi.getGsjlrtbzz();
 				}
 			} else {
 				cj2++;
 			}
 		}
-		if (high < 25) {// 如果连续的几个季度ys/jl增速都小于25，则不考虑。
+		if (high < 21) {// 如果连续的几个季度ys增速都小于25，则不考虑。
 			continueJidu1 = 0;
 			continueJidu2 = 0;
 		}
 		c.setContinYj1(continueJidu1);
 		c.setContinYj2(continueJidu2);
+//		}
 	}
 
 	public CodeBaseModel getLastOneByCode(String code) {

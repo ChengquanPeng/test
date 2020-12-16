@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import org.apache.commons.lang3.StringUtils;
 
 import com.stable.constant.Constant;
+import com.stable.vo.bus.DaliyBasicInfo;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -188,6 +189,13 @@ public class CurrencyUitl {
 		}
 		double per = (Double.valueOf(yes) / Double.valueOf(total)) * 100;
 		return new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+	}
+
+	public final static boolean isLess200Yi(DaliyBasicInfo basic) {
+		if (basic.getCirc_mv() < 2000000) {//
+			return true;
+		}
+		return false;
 	}
 
 	public static void main(String[] args) {

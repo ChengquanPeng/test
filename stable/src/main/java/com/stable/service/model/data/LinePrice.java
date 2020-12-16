@@ -418,7 +418,7 @@ public class LinePrice {
 	// 半年整幅未超过50%
 	public boolean priceCheckForMid(String code, int date, double chkdouble) {
 		List<TradeHistInfoDaliy> listD180 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
-				EsQueryPageUtil.queryPage120, SortOrder.DESC);
+				EsQueryPageUtil.queryPage250, SortOrder.DESC);
 		TradeHistInfoDaliy dmax = listD180.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
 		TradeHistInfoDaliy dmin = listD180.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
 		double maxPrice = dmax.getHigh();
