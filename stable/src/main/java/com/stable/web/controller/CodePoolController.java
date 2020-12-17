@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.CodePoolService;
+import com.stable.service.trace.MiddleSortV1Service;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -17,6 +18,8 @@ public class CodePoolController {
 
 	@Autowired
 	private CodePoolService codePoolService;
+	@Autowired
+	private MiddleSortV1Service middleSortV1Service;
 
 	/**
 	 * 根据code
@@ -34,6 +37,24 @@ public class CodePoolController {
 					StringUtils.isNotBlank(pettm) ? Double.valueOf(pettm) : 0,
 					StringUtils.isNotBlank(pb) ? Double.valueOf(pb) : 0, page,
 					StringUtils.isNotBlank(jiduc) ? Integer.valueOf(jiduc) : 0));
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * findBigBoss
+	 */
+	@RequestMapping(value = "/findBigBoss", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> findBigBoss() {
+		JsonResult r = new JsonResult();
+		try {
+			middleSortV1Service.startManul();
+			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

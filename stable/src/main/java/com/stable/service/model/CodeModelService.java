@@ -34,6 +34,7 @@ import com.stable.service.FinanceService;
 import com.stable.service.PledgeStatService;
 import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
+import com.stable.service.TradeCalService;
 import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.trace.MiddleSortV1Service;
 import com.stable.utils.BeanCopy;
@@ -63,6 +64,8 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class CodeModelService {
+	@Autowired
+	private TradeCalService tradeCalService;
 	@Autowired
 	private CodePoolService codePoolService;
 	@Autowired
@@ -171,16 +174,6 @@ public class CodeModelService {
 			}
 			return;
 		}
-		CodePool c = map.get(code);
-		if (c == null) {
-			c = new CodePool();
-			c.setCode(code);
-		}
-		list.add(c);
-		c.setInMid(0);
-		c.setMidOk(0);
-		c.setMidChkDate(treadeDate);
-		c.setUpdateDate(treadeDate);
 
 		CodeBaseModel newOne = new CodeBaseModel();
 		newOne.setCode(code);
@@ -269,7 +262,7 @@ public class CodeModelService {
 			}
 		}
 
-		processingFinance(c, newOne, hasKb ? yjkb : null, hasYg ? yjyg : null);
+		processingFinance(list, map, newOne, hasKb ? yjkb : null, hasYg ? yjyg : null);
 		if (bb != null) {
 			// 股东大会通过/实施/完成
 		} else {
@@ -409,7 +402,8 @@ public class CodeModelService {
 		}
 	}
 
-	private void processingFinance(CodePool c, CodeBaseModel base, FinYjkb yjkb, FinYjyg yjyg) {
+	private void processingFinance(List<CodePool> list, Map<String, CodePool> map, CodeBaseModel base, FinYjkb yjkb,
+			FinYjyg yjyg) {
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(base.getCode(), base.getDate(),
 				EsQueryPageUtil.queryPage9999);
 		FinanceAnalyzer fa = new FinanceAnalyzer();
@@ -437,9 +431,45 @@ public class CodeModelService {
 		base.setProfitDown2Quarter(fa.profitDown2Quarter() == 1 ? -2 : 0);// 最近2季度都同比下降
 		base.setProfitDown2Year(fa.profitDown2Year() == 1 ? -5 : 0);// 年报连续亏损年数？（可能退市）
 
-		// 是否符合中线、1.市盈率和ttm在50以内
-		DaliyBasicInfo basic = daliyBasicHistroyService.getDaliyBasicInfoByDate(base.getCode(), base.getDate());
+		findBigBoss(base.getCode(), base.getDate(), list, map, fbis, fa, yjkb, yjyg);
+	}
 
+	public List<CodePool> findBigBoss() {
+		int today = DateUtil.getTodayIntYYYYMMDD();
+		int treadeDate = tradeCalService.getPretradeDate(today);
+		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
+		Map<String, CodePool> map = codePoolService.getCodePoolMap();
+		List<CodePool> list = new LinkedList<CodePool>();
+		for (StockBaseInfo s : codelist) {
+			try {
+				List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(s.getCode(), treadeDate,
+						EsQueryPageUtil.queryPage9999);
+				FinanceAnalyzer fa = new FinanceAnalyzer();
+				for (FinanceBaseInfo fbi : fbis) {
+					fa.putJidu1(fbi);
+				}
+				findBigBoss(s.getCode(), treadeDate, list, map, fbis, fa, null, null);
+			} catch (Exception e) {
+				ErrorLogFileUitl.writeError(e, "", "", "");
+			}
+		}
+		return list;
+	}
+
+	private void findBigBoss(String code, int treadeDate, List<CodePool> list, Map<String, CodePool> map,
+			List<FinanceBaseInfo> fbis, FinanceAnalyzer fa, FinYjkb yjkb, FinYjyg yjyg) {
+		CodePool c = map.get(code);
+		if (c == null) {
+			c = new CodePool();
+			c.setCode(code);
+		}
+		list.add(c);
+		c.setInMid(0);
+		c.setMidOk(0);
+		c.setMidChkDate(treadeDate);
+		c.setUpdateDate(treadeDate);
+		// 是否符合中线、1.市盈率和ttm在50以内
+		DaliyBasicInfo basic = daliyBasicHistroyService.getDaliyBasicInfoByDate(code, treadeDate);
 		if (fa.getCurrJidu().getYyzsrtbzz() >= 1.0 && fa.getPrevJidu().getYyzsrtbzz() >= 1.0) {// 连续2季度营收增长
 			c.setInMid(1);
 			// 当前季度和上季度增长,净利15%
@@ -513,7 +543,7 @@ public class CodeModelService {
 			}
 		}
 
-		if (isok) {// 如果连续的几个季度ys增速都小于25，则不考虑。
+		if (!isok) {// 如果连续的几个季度ys增速都小于25，则不考虑。
 			continueJidu1 = 0;
 			continueJidu2 = 0;
 		}

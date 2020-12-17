@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.service.CodePoolService;
 import com.stable.service.DaliyTradeHistroyService;
+import com.stable.service.model.CodeModelService;
 import com.stable.service.model.data.LinePrice;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.CodePool;
@@ -20,7 +21,8 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class MiddleSortV1Service {
-
+	@Autowired
+	private CodeModelService codeModelService;
 	@Autowired
 	private CodePoolService codePoolService;
 	@Autowired
@@ -55,4 +57,11 @@ public class MiddleSortV1Service {
 		}
 	}
 
+	public synchronized void startManul() {
+		List<CodePool> list = codeModelService.findBigBoss();
+		for (CodePool m : list) {
+			m.setSuspectBigBoss(0);
+		}
+		this.start(list);
+	}
 }
