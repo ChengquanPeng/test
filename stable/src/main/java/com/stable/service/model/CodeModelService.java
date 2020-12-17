@@ -437,6 +437,7 @@ public class CodeModelService {
 	public List<CodePool> findBigBoss() {
 		int today = DateUtil.getTodayIntYYYYMMDD();
 		int treadeDate = tradeCalService.getPretradeDate(today);
+		log.info("today={},treadeDate={}", today, treadeDate);
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 		Map<String, CodePool> map = codePoolService.getCodePoolMap();
 		List<CodePool> list = new LinkedList<CodePool>();
@@ -444,11 +445,13 @@ public class CodeModelService {
 			try {
 				List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(s.getCode(), treadeDate,
 						EsQueryPageUtil.queryPage9999);
-				FinanceAnalyzer fa = new FinanceAnalyzer();
-				for (FinanceBaseInfo fbi : fbis) {
-					fa.putJidu1(fbi);
+				if (fbis != null && fbis.size() > 0) {
+					FinanceAnalyzer fa = new FinanceAnalyzer();
+					for (FinanceBaseInfo fbi : fbis) {
+						fa.putJidu1(fbi);
+					}
+					findBigBoss(s.getCode(), treadeDate, list, map, fbis, fa, null, null);
 				}
-				findBigBoss(s.getCode(), treadeDate, list, map, fbis, fa, null, null);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
 			}
