@@ -461,6 +461,7 @@ public class CodeModelService {
 
 	private void findBigBoss(String code, int treadeDate, List<CodePool> list, Map<String, CodePool> map,
 			List<FinanceBaseInfo> fbis, FinanceAnalyzer fa, FinYjkb yjkb, FinYjyg yjyg) {
+		log.info("findBigBoss code:{}", code);
 		CodePool c = map.get(code);
 		if (c == null) {
 			c = new CodePool();
