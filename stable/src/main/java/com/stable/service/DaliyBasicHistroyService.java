@@ -169,7 +169,7 @@ public class DaliyBasicHistroyService {
 			return esDaliyBasicInfoDao.search(sq).getContent().get(0);
 		} catch (Exception e) {
 			log.error("code={},date={},", code, date);
-			e.printStackTrace();
+			// e.printStackTrace();
 			Pageable pageable = PageRequest.of(EsQueryPageUtil.queryPage1.getPageNum(),
 					EsQueryPageUtil.queryPage1.getPageSize());
 			bqb = QueryBuilders.boolQuery();

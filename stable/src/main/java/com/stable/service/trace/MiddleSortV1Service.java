@@ -39,7 +39,8 @@ public class MiddleSortV1Service {
 		if (list.size() > 0) {
 			LinePrice lp = new LinePrice(daliyTradeHistroyService);
 			for (CodePool m : list) {
-				if (m.getContinYj1() >= 3 || m.getContinYj2() >= 3) {
+				m.setSuspectBigBoss(0);
+				if (m.isIsok()) {
 					// 1年整幅未超过80%
 					if (lp.priceCheckForMid(m.getCode(), m.getUpdateDate(), chkdouble)) {
 						if (m.getSuspectBigBoss() == 0) {
@@ -58,10 +59,6 @@ public class MiddleSortV1Service {
 	}
 
 	public synchronized void startManul() {
-		List<CodePool> list = codeModelService.findBigBoss();
-		for (CodePool m : list) {
-			m.setSuspectBigBoss(0);
-		}
-		this.start(list);
+		this.start(codeModelService.findBigBoss());
 	}
 }

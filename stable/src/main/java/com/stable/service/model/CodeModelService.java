@@ -541,16 +541,12 @@ public class CodeModelService {
 						cn++;
 					}
 				}
-				if (cn * 2 > continueJidu1) {
+				if (cn * 2 > continueJidu2) {
 					isok = true;
 				}
 			}
 		}
-
-		if (!isok) {// 如果连续的几个季度ys增速都小于25，则不考虑。
-			continueJidu1 = 0;
-			continueJidu2 = 0;
-		}
+		c.setIsok(isok);
 		c.setContinYj1(continueJidu1);
 		c.setContinYj2(continueJidu2);
 //		}

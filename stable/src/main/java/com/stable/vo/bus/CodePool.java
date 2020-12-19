@@ -1,5 +1,7 @@
 package com.stable.vo.bus;
 
+import java.beans.Transient;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -34,6 +36,7 @@ public class CodePool {
 	@Field(type = FieldType.Double)
 	private double pb;// float 市净率（总市值/净资产）
 
+	private boolean isok = false; // 疑似大牛
 	@Field(type = FieldType.Integer)
 	private int suspectBigBoss; // 疑似大牛
 	@Field(type = FieldType.Integer)
@@ -71,4 +74,15 @@ public class CodePool {
 
 	@Field(type = FieldType.Text)
 	private String remark;
+
+	@Transient
+	public boolean isIsok() {
+		return isok;
+	}
+
+	@Transient
+	public void setIsok(boolean isok) {
+		this.isok = isok;
+	}
+
 }
