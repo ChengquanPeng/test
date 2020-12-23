@@ -26,14 +26,15 @@ public class CodePoolController {
 	 */
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> list(String code, int asc, String conceptId, String conceptName, String baseLevel,
-			int inMid, int midOk, int sortOk, int manualOk, int suspectBigBoss, String pe, String pettm, String pb,
+			int inMid, int midOk, int sortOk, int manualOk, String suspectBigBoss, String pe, String pettm, String pb,
 			String jiduc, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
 
 			r.setResult(codePoolService.getListForWeb(code, conceptId, conceptName, asc,
 					StringUtils.isNotBlank(baseLevel) ? Integer.valueOf(baseLevel) : 0, inMid, midOk, sortOk, manualOk,
-					suspectBigBoss, StringUtils.isNotBlank(pe) ? Double.valueOf(pe) : 0,
+					StringUtils.isNotBlank(suspectBigBoss) ? Integer.valueOf(suspectBigBoss) : 0,
+					StringUtils.isNotBlank(pe) ? Double.valueOf(pe) : 0,
 					StringUtils.isNotBlank(pettm) ? Double.valueOf(pettm) : 0,
 					StringUtils.isNotBlank(pb) ? Double.valueOf(pb) : 0, page,
 					StringUtils.isNotBlank(jiduc) ? Integer.valueOf(jiduc) : 0));

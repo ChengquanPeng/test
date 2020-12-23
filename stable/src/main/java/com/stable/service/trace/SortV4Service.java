@@ -617,13 +617,13 @@ public class SortV4Service {
 
 	}
 
-	@PostConstruct
+//	@PostConstruct
 	public void test1() {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-//				String code = "600789";
-//				int date = 20191231;
+				String code = "600789";
+				int date = 20200117;
 //				String code = "603477";
 //				int date = 20201030;
 //				String code = "300750";
@@ -632,17 +632,17 @@ public class SortV4Service {
 //				String code = "000625";
 //				int date = 20201113;
 //
-//				double rate = 3.5;
-//				int day = 3;
-//				List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code,
-//						date, date, EsQueryPageUtil.queryPage9999, SortOrder.ASC);
-//				if (dailyList0 != null && dailyList0.size() > 0) {
-//					TradeHistInfoDaliyNofq td = dailyList0.get(0);
-//					TraceSortv2Vo tv = middleRunningsortv4(code, date, td, rate, 7.5, day);
-//					log.info(tv);
-//				} else {
-//					log.info("dailyList0 is null");
-//				}
+				double rate = 3.5;
+				int day = 3;
+				List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code,
+						date, date, EsQueryPageUtil.queryPage9999, SortOrder.ASC);
+				if (dailyList0 != null && dailyList0.size() > 0) {
+					TradeHistInfoDaliyNofq td = dailyList0.get(0);
+					TraceSortv2Vo tv = middleRunningsortv4(code, date, td, rate, 7.5, day);
+					log.info(tv);
+				} else {
+					log.info("dailyList0 is null");
+				}
 
 //				sortv4("20200101", "20201031");
 //				sortv4("20190101", "20191231");
