@@ -55,16 +55,16 @@ public class ThsSpider {
 	private EsConceptDailyDao esConceptDailyDao;
 	@Autowired
 	private HtmlunitSpider htmlunitSpider;
-
 	// private static final String FIN_RPT_URL =
 	// "http://basic.10jqka.com.cn/%s/finance.html";
 
 	private String GN_LIST = "http://q.10jqka.com.cn/gn/index/field/addtime/order/desc/page/%s/ajax/1/";
-	private static int ths = 1;
+	private static int ths = 1;// 同花顺概念
+	private static int thsHye = 2;// 同花顺行业
 	private static String START_THS = "THS";
 	private static String SPIT = "/";
-	private static Map<String, Concept> allmap = new HashMap<String, Concept>();
-	static {
+//	private static Map<String, Concept> allmap = new HashMap<String, Concept>();
+//	static {
 //		for (int i = 0; i < ConAll.all.length; i++) {
 //			String[] string = ConAll.all[i].split(",");
 //			String url = string[0];
@@ -79,7 +79,7 @@ public class ThsSpider {
 //			cp.setName(name);
 //			allmap.put(cp.getCode(), cp);
 //		}
-	}
+//	}
 
 //	private String host = "http://127.0.0.1:8081";
 //	private String host = "http://106.52.95.147:9999";
@@ -95,7 +95,7 @@ public class ThsSpider {
 		}
 	}
 
-	private void saveConcept(List<Concept> list) {
+	public void saveConcept(List<Concept> list) {
 		if (list.size() > 0) {
 			esConceptDao.saveAll(list);
 			list.clear();
@@ -148,102 +148,6 @@ public class ThsSpider {
 			log.info("非交易日");
 			return;
 		}
-		Map<String, Concept> m = synchGnAndCode();
-		if (m == null) {
-			try {
-				Thread.sleep(Duration.ofMinutes(5).toMillis());
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			m = getAllAliasCode();
-		}
-		synchConceptDaliy(date, m);
-	}
-
-	private void synchConceptDaliy(int date, Map<String, Concept> m) {
-		List<ConceptDaily> list = new LinkedList<ConceptDaily>();
-		try {
-			// int c = 0;
-			List<String> keys = new ArrayList<String>(m.keySet());
-			for (int i = 0; i < keys.size(); i++) {
-				int trytime = 0;
-				Concept cp = m.get(keys.get(i));
-				log.info("抓包：" + cp.getName());
-				if (BRK.contains(cp.getName())) {
-					log.info(BRK + ">>" + cp.getName());
-					// 首发新股
-					continue;
-				}
-				boolean fetched = false;
-				do {
-					ThreadsUtil.sleepRandomSecBetween5And15();
-					HtmlPage page = null;
-					HtmlElement body = null;
-					try {
-						log.info(cp.getHref());
-						page = htmlunitSpider.getHtmlPageFromUrl(cp.getHref());
-						body = page.getBody();
-						HtmlElement boardInfos = body.getElementsByAttribute("div", "class", "board-infos").get(0);
-						Iterator<DomElement> it = boardInfos.getChildElements().iterator();
-						ConceptDaily cd = new ConceptDaily();
-						cd.setOpen(Double.valueOf(it.next().getLastElementChild().asText()));// 今开
-						cd.setYesterday(Double.valueOf(it.next().getLastElementChild().asText()));// 昨收
-						cd.setLow(Double.valueOf(it.next().getLastElementChild().asText()));// 最低
-						cd.setHigh(Double.valueOf(it.next().getLastElementChild().asText()));// 最高
-						cd.setVol(Double.valueOf(it.next().getLastElementChild().asText()));// 成交量(万手)
-						cd.setTodayChange(Double.valueOf(it.next().getLastElementChild().asText().replace("%", "")));// 板块涨幅
-						cd.setRanking(Integer.valueOf(it.next().getLastElementChild().asText().split(SPIT)[0]));// 涨幅排名
-						cd.setUpdownNum(it.next().getLastElementChild().asText());// 涨跌家数
-						cd.setInComeMoney(Double.valueOf(it.next().getLastElementChild().asText()));// 资金净流入(亿)
-						cd.setAmt(Double.valueOf(it.next().getLastElementChild().asText()));// 成交额(亿)
-						Iterator<DomElement> it2 = body.getElementsByAttribute("div", "class", "board-hq").get(0)
-								.getChildElements().iterator();
-						it2.next();
-						cd.setClose(Double.valueOf(it2.next().asText()));// 收盘
-						fetched = true;
-						cd.setConceptId(cp.getId());
-						cd.setDate(date);
-						cd.setId();
-						log.info(cd);
-						list.add(cd);
-					} catch (Exception e2) {
-						boolean esistingHeading = false;
-						if (body != null) {
-							try {
-								body.getElementsByAttribute("div", "class", "heading").get(0);
-								esistingHeading = true;// 概念下线导致的异常
-							} catch (Exception e) {
-							}
-						}
-						if (!esistingHeading) {
-							e2.printStackTrace();
-							trytime++;
-							ThreadsUtil.sleepRandomSecBetween15And30(trytime);
-							if (trytime >= 10) {
-								fetched = true;
-								e2.printStackTrace();
-								WxPushUtil.pushSystem1("同花顺概念-每日交易出错," + cp.getName() + ",url=" + cp.getHref());
-							}
-						} else {
-							fetched = true;
-						}
-					} finally {
-						htmlunitSpider.close();
-					}
-				} while (!fetched);
-			}
-			int c = list.size();
-			saveConceptDaily(list);
-			log.info("同花顺板块交易记录同步成功,需求抓取总是[" + keys.size() + "],实际成功总数:[" + c + "]");
-		} catch (Exception e) {
-			saveConceptDaily(list);
-			e.printStackTrace();
-			WxPushUtil.pushSystem1("同花顺概念-每日交易出错 end");
-			throw new RuntimeException(e);
-		}
-	}
-
-	private Map<String, Concept> synchGnAndCode() {
 		Date today = new Date();
 		Calendar c = Calendar.getInstance();
 		c.setTime(today);
@@ -253,6 +157,114 @@ public class ThsSpider {
 			log.info("今日非周五");
 			isFirday = false;
 		}
+		Map<String, Concept> m = synchGnAndCode(isFirday);
+		if (m == null) {
+			try {
+				Thread.sleep(Duration.ofMinutes(5).toMillis());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			m = getAllAliasCode();
+		}
+		synchConceptDaliy(date, m);
+		try {
+			Thread.sleep(Duration.ofMinutes(5).toMillis());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		dofetchHye(isFirday);
+	}
+
+	private void synchConceptDaliy(int date, Map<String, Concept> m) {
+		try {
+			int c = 0;
+			List<String> keys = new ArrayList<String>(m.keySet());
+			for (int i = 0; i < keys.size(); i++) {
+
+				Concept cp = m.get(keys.get(i));
+				log.info("抓包：" + cp.getName());
+				if (BRK.contains(cp.getName())) {
+					log.info(BRK + ">>" + cp.getName());
+					// 首发新股
+					continue;
+				}
+				c += getConceptDaily(cp, cp.getHref(), date);
+			}
+//			int c = list.size();
+			log.info("同花顺板块交易记录同步成功,需求抓取总是[" + keys.size() + "],实际成功总数:[" + c + "]");
+		} catch (Exception e) {
+			// saveConceptDaily(list);
+			e.printStackTrace();
+			WxPushUtil.pushSystem1("同花顺概念-每日交易出错 end");
+			throw new RuntimeException(e);
+		}
+	}
+
+	public int getConceptDaily(Concept cp, String url, int date) {
+		List<ConceptDaily> list = new LinkedList<ConceptDaily>();
+		int trytime = 0;
+		boolean fetched = false;
+		do {
+			ThreadsUtil.sleepRandomSecBetween5And15();
+			HtmlPage page = null;
+			HtmlElement body = null;
+			try {
+				log.info(url);
+				page = htmlunitSpider.getHtmlPageFromUrl(url);
+				body = page.getBody();
+				HtmlElement boardInfos = body.getElementsByAttribute("div", "class", "board-infos").get(0);
+				Iterator<DomElement> it = boardInfos.getChildElements().iterator();
+				ConceptDaily cd = new ConceptDaily();
+				cd.setOpen(Double.valueOf(it.next().getLastElementChild().asText()));// 今开
+				cd.setYesterday(Double.valueOf(it.next().getLastElementChild().asText()));// 昨收
+				cd.setLow(Double.valueOf(it.next().getLastElementChild().asText()));// 最低
+				cd.setHigh(Double.valueOf(it.next().getLastElementChild().asText()));// 最高
+				cd.setVol(Double.valueOf(it.next().getLastElementChild().asText()));// 成交量(万手)
+				cd.setTodayChange(Double.valueOf(it.next().getLastElementChild().asText().replace("%", "")));// 板块涨幅
+				cd.setRanking(Integer.valueOf(it.next().getLastElementChild().asText().split(SPIT)[0]));// 涨幅排名
+				cd.setUpdownNum(it.next().getLastElementChild().asText());// 涨跌家数
+				cd.setInComeMoney(Double.valueOf(it.next().getLastElementChild().asText()));// 资金净流入(亿)
+				cd.setAmt(Double.valueOf(it.next().getLastElementChild().asText()));// 成交额(亿)
+				Iterator<DomElement> it2 = body.getElementsByAttribute("div", "class", "board-hq").get(0)
+						.getChildElements().iterator();
+				it2.next();
+				cd.setClose(Double.valueOf(it2.next().asText()));// 收盘
+				fetched = true;
+				cd.setConceptId(cp.getId());
+				cd.setDate(date);
+				cd.setId();
+				log.info(cd);
+				list.add(cd);
+			} catch (Exception e2) {
+				boolean esistingHeading = false;
+				if (body != null) {
+					try {
+						body.getElementsByAttribute("div", "class", "heading").get(0);
+						esistingHeading = true;// 概念下线导致的异常
+					} catch (Exception e) {
+					}
+				}
+				if (!esistingHeading) {
+					e2.printStackTrace();
+					trytime++;
+					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+					if (trytime >= 10) {
+						fetched = true;
+						e2.printStackTrace();
+						WxPushUtil.pushSystem1("同花顺概念-每日交易出错," + cp.getName() + ",url=" + url);
+					}
+				} else {
+					fetched = true;
+				}
+			} finally {
+				htmlunitSpider.close();
+			}
+		} while (!fetched);
+		saveConceptDaily(list);
+		return list.size();
+	}
+
+	private Map<String, Concept> synchGnAndCode(boolean isFirday) {
 		Map<String, Concept> map = null;
 		try {
 			map = getAllAliasCode();
@@ -267,7 +279,6 @@ public class ThsSpider {
 
 	public void getGnList(boolean isFirday, Map<String, Concept> map) {
 		List<Concept> list = new LinkedList<Concept>();
-		List<CodeConcept> codelist = new LinkedList<CodeConcept>();
 		int cntList = 0;
 		int cntCodelist = 0;
 		int limit = 1;
@@ -328,13 +339,8 @@ public class ThsSpider {
 					}
 					if (fetchNext) {
 						getAliasCdoe(cp, map);
-						getSubCodeList(cp, codelist);
-						deleteCodeConcept(cp);
+						cntCodelist += getSubCodeList(GN_CODE_LIST, cp, ths);
 						list.add(cp);
-						if (codelist.size() > 100) {
-							cntCodelist += codelist.size();
-							saveCodeConcept(codelist);
-						}
 						if (list.size() >= 100) {
 							cntList += list.size();
 							saveConcept(list);
@@ -360,10 +366,6 @@ public class ThsSpider {
 						cntList += list.size();
 						saveConcept(list);
 					}
-					if (codelist.size() > 0) {
-						cntCodelist += codelist.size();
-						saveCodeConcept(codelist);
-					}
 					throw new RuntimeException(e);
 				}
 
@@ -372,26 +374,23 @@ public class ThsSpider {
 			}
 		} while (index <= end);
 
-		try {
-			for (String id : allmap.keySet()) {
-				log.info("!map.contains name={},? {}", allmap.get(id).getName(), (!map.containsKey(id)));
-				if (!map.containsKey(id)) {
-					Concept cp = allmap.get(id);
-					getAliasCdoe(cp, map);
-					getSubCodeList(cp, codelist);
-					list.add(cp);
-					log.info("获取到新概念:" + cp.getName());
-				}
-			}
-		} finally {
-			if (list.size() > 0) {
-				cntList += list.size();
-				saveConcept(list);
-			}
-			if (codelist.size() > 0) {
-				cntCodelist += codelist.size();
-				saveCodeConcept(codelist);
-			}
+//		try {
+//			for (String id : allmap.keySet()) {
+//				log.info("!map.contains name={},? {}", allmap.get(id).getName(), (!map.containsKey(id)));
+//				if (!map.containsKey(id)) {
+//					Concept cp = allmap.get(id);
+//					getAliasCdoe(cp, map);
+//					getSubCodeList(GN_CODE_LIST, cp, codelist, ths);
+//					list.add(cp);
+//					log.info("获取到新概念:" + cp.getName());
+//				}
+//			}
+//		} finally {
+//			
+//		}
+		if (list.size() > 0) {
+			cntList += list.size();
+			saveConcept(list);
 		}
 		if (newGn.length() > 0) {
 			WxPushUtil.pushSystem1("同花顺获取到新概念:" + newGn.toString());
@@ -427,7 +426,8 @@ public class ThsSpider {
 		}
 	}
 
-	private void getSubCodeList(Concept cp, List<CodeConcept> codelist) {
+	public int getSubCodeList(String urlbase, Concept cp, int type) {
+		List<CodeConcept> codelist = new LinkedList<CodeConcept>();
 		int updateTime = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		int index = 1;
 		int end = 0;
@@ -436,7 +436,7 @@ public class ThsSpider {
 		do {
 			ThreadsUtil.sleepRandomSecBetween5And15();
 
-			String url = String.format(GN_CODE_LIST, index, cp.getCode());
+			String url = String.format(urlbase, index, cp.getCode());
 			log.info(url);
 			DomElement table = null;
 			HtmlPage page = null;
@@ -446,7 +446,7 @@ public class ThsSpider {
 				table = page.getBody().getFirstElementChild();
 				DomElement tbody = table.getLastElementChild();
 				if (tbody.asText().contains("暂无成份股数据")) {
-					return;
+					return 0;
 				}
 				Iterator<DomElement> trs = tbody.getChildElements().iterator();
 				while (trs.hasNext()) {
@@ -458,31 +458,122 @@ public class ThsSpider {
 					cc.setCode(tr.next().asText());// code
 					cc.setConceptId(cp.getId());
 					cc.setConceptName(cp.getName());
-					cc.setType(ths);
+					cc.setType(type);
 					cc.setId(cp.getId() + cc.getCode());
 					codelist.add(cc);
 					log.info(cc);
 					stcnt++;
 				}
 				index++;
-				if (cp.getCnt() > 10 && end == 0) {
+				if (end == 0) {
 					String pageInfo = page.getElementById("m-page").getLastElementChild().asText();
 					end = Integer.valueOf(pageInfo.split(SPIT)[1]);
 				}
 				trytime = 0;
 				cp.setCnt(stcnt);
 			} catch (Exception e) {
+				// e.printStackTrace();
 				trytime++;
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 				if (trytime >= 10) {
 					e.printStackTrace();
 					log.info(page.asText());
-					WxPushUtil.pushSystem1("同花顺概念-成分股抓包出错,url=" + url);
-					throw new RuntimeException(e);
+					WxPushUtil.pushSystem1("同花顺行业概念-成分股抓包出错,url=" + url);
+					// throw new RuntimeException(e);
 				}
 			} finally {
 				htmlunitSpider.close();
 			}
 		} while (index <= end);
+		if (codelist.size() > 0) {
+			deleteCodeConcept(cp);
+			saveCodeConcept(codelist);
+		}
+		return codelist.size();
+	}
+
+	private String urlb = "http://q.10jqka.com.cn/thshy/index/field/199112/order/desc/page/%s/ajax/1/";
+	private String urlSubBase = "http://q.10jqka.com.cn/thshy/detail/field/199112/order/desc/page/%s/ajax/1/code/%s";
+
+	public void dofetchHye(boolean isFirday) {
+		List<Concept> list = new LinkedList<Concept>();
+		int date = DateUtil.getTodayIntYYYYMMDD();
+		for (int j = 1; j <= 10; j++) {// 翻页
+			int trytime = 0;
+			boolean fetched = false;
+			String url = String.format(urlb, j);
+			do {
+				HtmlPage page = null;
+				HtmlElement body = null;
+				try {
+					log.info(url);
+					page = htmlunitSpider.getHtmlPageFromUrl(url);
+					body = page.getBody();// table
+					DomElement tbody = body.getFirstElementChild().getLastElementChild();
+					if (tbody.getChildElementCount() > 0) {
+						Iterator<DomElement> it = tbody.getChildElements().iterator();
+						while (it.hasNext()) {
+							DomElement tr = it.next();
+							// 序号 板块 涨跌幅(%) 总成交量（万手） 总成交额（亿元） 净流入（亿元） 上涨家数 下跌家数 均价 领涨股 最新价 涨跌幅(%)
+							Iterator<DomElement> tds = tr.getChildElements().iterator();
+							tds.next();// 序号
+							DomElement td1 = tds.next();// 板块名字/连接
+							String name = td1.asText();
+							String href = td1.getFirstElementChild().getAttribute("href");
+							String code = href.split("code")[1].replaceAll("/", "");
+							// System.err.println(href + " " + code + " " + name);
+							Concept cp = new Concept();
+							cp.setId(ThsSpider.START_THS + code);
+							cp.setCode(code);
+							cp.setHref(href);
+							cp.setName(name);
+							cp.setDate(date);
+							cp.setAliasCode(code);
+							cp.setType(ThsSpider.thsHye);
+							if (isFirday) {
+								getSubCodeList(urlSubBase, cp, ThsSpider.thsHye);
+							}
+							//
+							tds.next();// 涨跌幅(%)
+							tds.next();// 总成交量（万手）
+							tds.next();// 总成交额（亿元）
+							tds.next();// 净流入（亿元）
+							tds.next();// 上涨家数
+							tds.next();// 下跌家数
+							tds.next();// 均价
+							tds.next();// 领涨股
+							tds.next();// 最新价
+							cp.setCnt(0);
+							//
+							getConceptDaily(cp, href, date);
+							// System.err.println(cp);
+							// return true;
+							list.add(cp);
+						}
+						// System.err.println(tbody.asText());
+						fetched = true;
+					} else {
+						if (j > 2) {
+							return;
+						}
+					}
+
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				} finally {
+					htmlunitSpider.close();
+				}
+				ThreadsUtil.sleepRandomSecBetween1And5(trytime);
+				if (!fetched) {
+					trytime++;
+					if (trytime >= 5) {
+						fetched = true;
+						WxPushUtil.pushSystem1("同花顺-行业抓包出错，url=" + url);
+					}
+				}
+			} while (!fetched);
+			// ThreadsUtil.sleepRandomSecBetween1And5(trytime);
+		}
+		saveConcept(list);
 	}
 }

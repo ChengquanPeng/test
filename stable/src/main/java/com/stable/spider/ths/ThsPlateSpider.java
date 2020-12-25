@@ -32,7 +32,6 @@ public class ThsPlateSpider {
 	@Autowired
 	private EsStockBaseInfoDao esStockBaseInfoDao;
 	private String BASE_URL = "http://basic.10jqka.com.cn/%s/";
-
 	@Autowired
 	private StockBasicService stockBasicService;
 
@@ -45,14 +44,13 @@ public class ThsPlateSpider {
 					List<StockBaseInfo> upd = new LinkedList<StockBaseInfo>();
 					int needUpd = 0;
 					for (StockBaseInfo b : list) {
-						if (updateAll || StringUtils.isBlank(b.getThsIndustry())
-								|| StringUtils.isBlank(b.getThsLightspot()) || StringUtils.isBlank(b.getThsMainBiz())) {
+						if (updateAll || StringUtils.isBlank(b.getThsLightspot())
+								|| StringUtils.isBlank(b.getThsMainBiz())) {
 							needUpd++;
 							if (dofetch(b)) {
 								upd.add(b);
 							}
 						}
-
 					}
 					if (upd.size() > 0) {
 						esStockBaseInfoDao.saveAll(list);
@@ -62,7 +60,7 @@ public class ThsPlateSpider {
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					WxPushUtil.pushSystem1("同花顺-行业，亮点，主营-抓包出错");
+					WxPushUtil.pushSystem1("同花顺-亮点，主营-抓包出错");
 				}
 			}
 		}).start();
@@ -82,9 +80,9 @@ public class ThsPlateSpider {
 				page = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url);
 				body = page.getBody();
 				HtmlElement profile = body.getElementsByAttribute("div", "id", "profile").get(0);// profile
-				HtmlElement hy = profile.getElementsByAttribute("span", "class", "tip f14").get(0);// 所属申万行业
-				// System.err.println(hy.asText());
-				b.setThsIndustry(hy.asText().trim());
+//				HtmlElement hy = profile.getElementsByAttribute("span", "class", "tip f14").get(0);// 所属申万行业
+//				//System.err.println(hy.asText());
+//				b.setThsIndustry(hy.asText().trim());
 				HtmlElement e2 = profile.getElementsByAttribute("span", "class", "tip f14 fl core-view-text").get(0);// 公司亮点
 				b.setThsLightspot(e2.asText().trim());
 				DomElement e3 = profile.getElementsByAttribute("span", "class", "tip f14 fl main-bussiness-text").get(0)
@@ -110,7 +108,7 @@ public class ThsPlateSpider {
 			ThreadsUtil.sleepRandomSecBetween1And5(trytime);
 			if (trytime >= 5) {
 				fetched = true;
-				WxPushUtil.pushSystem1("同花顺-行业，亮点，主营出错出错code={}" + code + ",url=" + url);
+				WxPushUtil.pushSystem1("同花顺-亮点，主营出错出错code=" + code + ",url=" + url);
 			}
 		} while (!fetched);
 		return false;
@@ -118,9 +116,8 @@ public class ThsPlateSpider {
 
 	public static void main(String[] args) {
 		ThsPlateSpider tp = new ThsPlateSpider();
-		StockBaseInfo b = new StockBaseInfo();
-		b.setCode("601686");
-		tp.dofetch(b);
-		System.err.println(b);
+		tp.htmlunitSpider = new HtmlunitSpider();
+		// tp.dofetchHye(false);
+		System.err.println();
 	}
 }
