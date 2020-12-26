@@ -12,20 +12,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Component;
 
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeConceptDao;
 import com.stable.es.dao.base.EsConceptDailyDao;
 import com.stable.es.dao.base.EsConceptDao;
@@ -37,7 +29,6 @@ import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.CodeConcept;
 import com.stable.vo.bus.Concept;
 import com.stable.vo.bus.ConceptDaily;
-import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -95,39 +86,26 @@ public class ThsSpider {
 		}
 	}
 
-	public void saveConcept(List<Concept> list) {
-		if (list.size() > 0) {
-			esConceptDao.saveAll(list);
-			list.clear();
-		}
-	}
-
-	private void deleteCodeConcept(Concept cp) {
-		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		if (StringUtils.isNotBlank(cp.getId())) {
-			bqb.must(QueryBuilders.matchPhraseQuery("conceptId", cp.getId()));
-			NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-			Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
-			SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
-			Page<CodeConcept> page = esCodeConceptDao.search(sq);
-			if (page != null && !page.isEmpty()) {
-				List<CodeConcept> list = page.getContent();
-				esCodeConceptDao.deleteAll(list);
-				log.info("CodeConcept delete size:{}", list.size());
-			} else {
-				log.info("no records CodeConcept");
-			}
-		} else {
-			throw new RuntimeException("cp.getId is null");
-		}
-	}
-
 	private void saveCodeConcept(List<CodeConcept> list) {
 		if (list.size() > 0) {
 			esCodeConceptDao.saveAll(list);
 			list.clear();
 		}
+	}
+
+	public void saveConcept(List<Concept> list) {
+		if (list.size() > 0) {
+			int update = DateUtil.getTodayIntYYYYMMDD();
+			for (Concept cp : list) {
+				cp.setUpdateDate(update);
+			}
+			esConceptDao.saveAll(list);
+			list.clear();
+		}
+	}
+
+	private void deleteAllCodeConcept() {
+		esCodeConceptDao.deleteAll();
 	}
 
 	private Map<String, Concept> getAllAliasCode() {
@@ -156,6 +134,8 @@ public class ThsSpider {
 		if (weekday != 6) {
 			log.info("今日非周五");
 			isFirday = false;
+		} else {
+			deleteAllCodeConcept();
 		}
 		Map<String, Concept> m = synchGnAndCode(isFirday);
 		if (m == null) {
@@ -282,9 +262,6 @@ public class ThsSpider {
 		int cntList = 0;
 		int cntCodelist = 0;
 		int limit = 1;
-		if (isFirday) {
-//			limit = 3;
-		}
 
 		StringBuffer newGn = new StringBuffer();
 
@@ -297,7 +274,6 @@ public class ThsSpider {
 			HtmlPage page = null;
 			try {
 				ThreadsUtil.sleepRandomSecBetween5And15();
-//				header.put(REFERER, refer);
 				page = htmlunitSpider.getHtmlPageFromUrl(url);
 				table = page.getBody().getFirstElementChild();
 
@@ -337,7 +313,7 @@ public class ThsSpider {
 							fetchNext = true;
 						}
 					}
-					if (fetchNext) {
+					if (isFirday || fetchNext) {
 						getAliasCdoe(cp, map);
 						cntCodelist += getSubCodeList(GN_CODE_LIST, cp, ths);
 						list.add(cp);
@@ -353,8 +329,11 @@ public class ThsSpider {
 					end = Integer.valueOf(pageInfo.split(SPIT)[1]);
 				}
 				trytime = 0;
-				if (index > limit) {// 最多3页
-					break;
+
+				if (!isFirday) {
+					if (index > limit) {// 最多3页
+						break;
+					}
 				}
 			} catch (Exception e) {
 				trytime++;
@@ -486,7 +465,6 @@ public class ThsSpider {
 			}
 		} while (index <= end);
 		if (codelist.size() > 0) {
-			deleteCodeConcept(cp);
 			saveCodeConcept(codelist);
 		}
 		return codelist.size();

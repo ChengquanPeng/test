@@ -34,4 +34,6 @@ public class Concept extends EsBase {
 	private int cnt;
 	@Field(type = FieldType.Text)
 	private String aliasCode;
+	@Field(type = FieldType.Integer)
+	private int updateDate;
 }
