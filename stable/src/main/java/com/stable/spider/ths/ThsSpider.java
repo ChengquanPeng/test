@@ -498,7 +498,9 @@ public class ThsSpider {
 	public void dofetchHye(boolean isFirday) {
 		List<Concept> list = new LinkedList<Concept>();
 		int date = DateUtil.getTodayIntYYYYMMDD();
-		for (int j = 1; j <= 10; j++) {// 翻页
+		int j = 1;
+		boolean isbraek = false;
+		for (;;) {// 翻页
 			int trytime = 0;
 			boolean fetched = false;
 			String url = String.format(urlb, j);
@@ -531,7 +533,7 @@ public class ThsSpider {
 							cp.setAliasCode(code);
 							cp.setType(ThsSpider.thsHye);
 							if (isFirday) {
-								getSubCodeList(urlSubBase, cp, ThsSpider.thsHye);
+								cp.setCnt(getSubCodeList(urlSubBase, cp, ThsSpider.thsHye));
 							}
 							//
 							tds.next();// 涨跌幅(%)
@@ -543,7 +545,6 @@ public class ThsSpider {
 							tds.next();// 均价
 							tds.next();// 领涨股
 							tds.next();// 最新价
-							cp.setCnt(0);
 							//
 							getConceptDaily(cp, href, date);
 							// System.err.println(cp);
@@ -554,7 +555,8 @@ public class ThsSpider {
 						fetched = true;
 					} else {
 						if (j > 2) {
-							return;
+							isbraek = true;
+							break;
 						}
 					}
 
@@ -573,7 +575,13 @@ public class ThsSpider {
 				}
 			} while (!fetched);
 			// ThreadsUtil.sleepRandomSecBetween1And5(trytime);
+			j++;
+			if (isbraek) {
+				break;
+			}
 		}
+		int c = list.size();
 		saveConcept(list);
+		log.info("saveConcept size:{}", c);
 	}
 }

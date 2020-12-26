@@ -89,7 +89,7 @@ public class ThsPlateSpider {
 						.getFirstElementChild();// 主营业务
 				b.setThsMainBiz(e3.getAttribute("title"));
 
-				if (StringUtils.isBlank(b.getThsIndustry()) || StringUtils.isBlank(b.getThsLightspot())
+				if (StringUtils.isBlank(b.getThsLightspot())
 						|| StringUtils.isBlank(b.getThsMainBiz())) {
 					log.info("code={},getThsIndustry={},getThsLightspot={},getThsMainBiz={},trytime={}", code,
 							b.getThsIndustry(), b.getThsLightspot(), b.getThsMainBiz(), trytime);
