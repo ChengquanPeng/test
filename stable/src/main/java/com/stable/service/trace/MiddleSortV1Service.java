@@ -7,8 +7,13 @@ import org.springframework.stereotype.Service;
 
 import com.stable.service.CodePoolService;
 import com.stable.service.DaliyTradeHistroyService;
+import com.stable.service.StockBasicService;
+import com.stable.service.TradeCalService;
 import com.stable.service.model.CodeModelService;
+import com.stable.service.model.data.AvgService;
+import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.data.LinePrice;
+import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.CodePool;
 
@@ -27,42 +32,63 @@ public class MiddleSortV1Service {
 	private CodePoolService codePoolService;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
+	@Autowired
+	private AvgService avgService;
+	@Autowired
+	private TradeCalService tradeCalService;
+	@Autowired
+	private StockBasicService stockBasicService;
 //
 	private String OK = "基本面OK,疑是建仓";
+
 //	private String NOT_OK = "系统默认NOT_OK";
 
 	private double chkdouble = 80.0;// 10跌倒5.x
 
-	public synchronized void start(List<CodePool> list) {
+	public synchronized void start(int treadeDate, List<CodePool> list) {
+		LineAvgPrice avg = new LineAvgPrice(avgService);
 		log.info("code coop list:" + list.size());
 		StringBuffer msg = new StringBuffer();
 		StringBuffer msg2 = new StringBuffer();
 		if (list.size() > 0) {
 			LinePrice lp = new LinePrice(daliyTradeHistroyService);
 			for (CodePool m : list) {
+				String code = m.getCode();
+				boolean onlineYear = stockBasicService.online1YearChk(code, treadeDate);
+				if (!onlineYear) {
+					log.info("{},Online 上市不足1年", code);
+					continue;
+				}
 				boolean isBigBoss = false;
 				if (m.isIsok()) {
 					// 1年整幅未超过80%
-					if (lp.priceCheckForMid(m.getCode(), m.getUpdateDate(), chkdouble)) {
+					if (lp.priceCheckForMid(code, m.getUpdateDate(), chkdouble)) {
 						isBigBoss = true;
 					}
 				}
-
-				// --
+				// 是否大牛
 				if (isBigBoss) {
 					if (m.getSuspectBigBoss() == 0) {
-						msg.append(m.getCode()).append(",");
+						msg.append(code).append(",");
 					}
-					m.setMidRemark(OK);
+					m.setRemark(OK);
 					m.setSuspectBigBoss(1);
+					m.setMonitor(1);// 监听:0不监听，1大牛，2中线，3人工
 				} else {
 					if (m.getSuspectBigBoss() == 1) {
-						msg2.append(m.getCode()).append(",");
+						msg2.append(code).append(",");
 					}
 					m.setSuspectBigBoss(0);
-					m.setMidRemark("");
 				}
 
+				// 是否中线(60日线)
+				if (m.getMonitor() <= 0) {
+					if (avg.isWhiteHorseForMidV2(code, treadeDate)) {
+						m.setInmid(1);
+					} else {
+						m.setInmid(0);
+					}
+				}
 			}
 			codePoolService.saveAll(list);
 			if (msg.length() > 0) {
@@ -75,6 +101,8 @@ public class MiddleSortV1Service {
 	}
 
 	public synchronized void startManul() {
-		this.start(codeModelService.findBigBoss());
+		int date = DateUtil.getTodayIntYYYYMMDD();
+		date = tradeCalService.getPretradeDate(date);
+		this.start(date, codeModelService.findBigBoss(date));
 	}
 }

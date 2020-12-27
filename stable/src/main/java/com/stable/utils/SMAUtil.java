@@ -20,6 +20,7 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class SMAUtil {
+	private final int PERIODS_AVERAGE_60 = 60;
 	private final int PERIODS_AVERAGE_30 = 30;
 	private final int PERIODS_AVERAGE_20 = 20;
 	private final int PERIODS_AVERAGE_10 = 10;
@@ -149,58 +150,135 @@ public class SMAUtil {
 		}
 	}
 
-	private StockAvg getSMA5_30(String code, int date) {
-		// 倒序的结果列表
-		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
-				EsQueryPageUtil.queryPage30, SortOrder.DESC);
-		if (list.size() != 30) {
-			throw new RuntimeException("计算错误,前面30个交易日获取数据错误.code=" + code + ",date=" + date);
-		}
-		double[] closePrice = new double[list.size()];
-		// 顺序的收盘价数组
-		int j = 0;
-		for (int i = list.size() - 1; i >= 0; i--) {
-			closePrice[i] = list.get(j).getClosed();
-			j++;
-		}
+	public List<StockAvgBase> getSMA5_60(String code, int startDate, int endDate, boolean isQfq) {
+		double[] closePrice;
+		List<TradeHistInfoDaliy> fqlist = null;
+		List<TradeHistInfoDaliyNofq> nfqlist = null;
+		if (isQfq) {
+			// 倒序的结果列表
+			List<TradeHistInfoDaliy> temp = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, startDate,
+					EsQueryPageUtil.queryPage60, SortOrder.DESC);// startDate:开始日期的前60个交易日
 
-		double[] out = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_30);
-		if (out != null) {
-			StockAvg sa = new StockAvg();
-			sa.setCode(code);
-			sa.setDate(date);
-			sa.setId();
-			sa.setLastDividendDate(DateUtil.getTodayIntYYYYMMDD());
-			// 第一个数
-			sa.setAvgPriceIndex30(CurrencyUitl.roundHalfUp(out[0]));
+			if (temp.size() != 60) {
+				throw new RuntimeException(
+						"计算错误,前面60个交易日获取数据错误,code=" + code + ",startDate=" + startDate + ",endDate=" + endDate);
+			}
+			fqlist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, temp.get(temp.size() - 1).getDate(),
+					endDate, EsQueryPageUtil.queryPage9999, SortOrder.DESC);
+			closePrice = new double[fqlist.size()];
 
-			double[] out20 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_20);
-			for (int i = out20.length - 1; i >= 0; i--) {
-				if (out20[i] != 0.0) {
-					// 倒数最后一个不为0的数
-					sa.setAvgPriceIndex20(CurrencyUitl.roundHalfUp(out20[i]));
-					break;
-				}
+			// 顺序的收盘价数组
+			int j = 0;
+			for (int i = fqlist.size() - 1; i >= 0; i--) {
+				closePrice[i] = fqlist.get(j).getClosed();
+				j++;
 			}
-			double[] out10 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_10);
-			for (int i = out10.length - 1; i >= 0; i--) {
-				if (out10[i] != 0.0) {
-					// 倒数最后一个不为0的数
-					sa.setAvgPriceIndex10(CurrencyUitl.roundHalfUp(out10[i]));
-					break;
-				}
-			}
-			double[] out5 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_5);
-			for (int i = out5.length - 1; i >= 0; i--) {
-				if (out5[i] != 0.0) {
-					// 倒数最后一个不为0的数
-					sa.setAvgPriceIndex5(CurrencyUitl.roundHalfUp(out5[i]));
-					break;
-				}
-			}
-			return sa;
 		} else {
-			log.info("均线计算错误,code={},date={}", code, date);
+			// 倒序的结果列表
+			List<TradeHistInfoDaliyNofq> temp = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, startDate,
+					EsQueryPageUtil.queryPage60, SortOrder.DESC);// startDate:开始日期的前30个交易日
+
+			if (temp.size() != 60) {
+				throw new RuntimeException(
+						"计算错误,前面60个交易日获取数据错误,code=" + code + ",startDate=" + startDate + ",endDate=" + endDate);
+			}
+			nfqlist = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, temp.get(temp.size() - 1).getDate(),
+					endDate, EsQueryPageUtil.queryPage9999, SortOrder.DESC);
+			closePrice = new double[nfqlist.size()];
+
+			// 顺序的收盘价数组
+			int j = 0;
+			for (int i = nfqlist.size() - 1; i >= 0; i--) {
+				closePrice[i] = nfqlist.get(j).getClosed();
+				j++;
+			}
+		}
+
+		// 顺序的结果
+		double[] avg60 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_60);
+		if (avg60 != null) {
+			int dividendDate = DateUtil.getTodayIntYYYYMMDD();
+			double[] avg30 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_30);
+			double[] avg20 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_20);
+			double[] avg10 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_10);
+			double[] avg5 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_5);
+			List<StockAvgBase> rs = new LinkedList<StockAvgBase>();
+			// 倒序列表
+			if (isQfq) {
+				for (TradeHistInfoDaliy td : fqlist) {
+					if (td.getDate() >= startDate) {
+						StockAvg sa = new StockAvg();
+						sa.setCode(code);
+						sa.setDate(td.getDate());
+						sa.setLastDividendDate(dividendDate);
+						sa.setId();
+						rs.add(sa);
+					}
+				}
+			} else {
+				for (TradeHistInfoDaliyNofq td : nfqlist) {
+					if (td.getDate() >= startDate) {
+						StockAvgNofq sa = new StockAvgNofq();
+						sa.setCode(code);
+						sa.setDate(td.getDate());
+						sa.setLastDividendDate(dividendDate);
+						sa.setId();
+						rs.add(sa);
+					}
+				}
+			}
+			int index = rs.size() - 1;
+			for (int i = 0; i < avg60.length; i++) {// 结果顺序开始
+				if (avg60[i] != 0.0) {// 最后有60个为0数字
+					if (index >= 0) {
+						rs.get(index).setAvgPriceIndex60(CurrencyUitl.roundHalfUp(avg60[i]));
+						index--;
+					}
+				}
+			}
+
+			int endIndex = rs.size() - 1;
+
+			index = 0;
+			for (int i = avg30.length - 1; i >= 0; i--) {// 结果倒序开始
+				if (avg30[i] != 0.0) {
+					if (index >= 0 && index <= endIndex) {// 倒数最后一个不为0的数开始,list最大值结束。
+						rs.get(index).setAvgPriceIndex30(CurrencyUitl.roundHalfUp(avg30[i]));
+						index++;
+					}
+				}
+			}
+
+			index = 0;
+			for (int i = avg20.length - 1; i >= 0; i--) {// 结果倒序开始
+				if (avg20[i] != 0.0) {
+					if (index >= 0 && index <= endIndex) {// 倒数最后一个不为0的数开始,list最大值结束。
+						rs.get(index).setAvgPriceIndex20(CurrencyUitl.roundHalfUp(avg20[i]));
+						index++;
+					}
+				}
+			}
+			index = 0;
+			for (int i = avg10.length - 1; i >= 0; i--) {// 结果倒序开始
+				if (avg10[i] != 0.0) {// 最后有N个为0数字
+					if (index >= 0 && index <= endIndex) {// 倒数最后一个不为0的数开始,list最大值结束。
+						rs.get(index).setAvgPriceIndex10(CurrencyUitl.roundHalfUp(avg10[i]));
+						index++;
+					}
+				}
+			}
+			index = 0;
+			for (int i = avg5.length - 1; i >= 0; i--) {// 结果倒序开始
+				if (avg5[i] != 0.0) {// 最后有N个为0数字
+					if (index >= 0 && index <= endIndex) {// 倒数最后一个不为0的数开始,list最大值结束。
+						rs.get(index).setAvgPriceIndex5(CurrencyUitl.roundHalfUp(avg5[i]));
+						index++;
+					}
+				}
+			}
+			return rs;
+		} else {
+			log.info("多日均线计算错误,code={},startDate={},startDate={}", code, startDate, endDate);
 			return null;
 		}
 	}
@@ -208,22 +286,10 @@ public class SMAUtil {
 //	@PostConstruct
 //	private void test() {
 //		System.err.println("前复权测试");
-//		List<StockAvg> out = getSMA5_30("002928", 20180926, 20200930);
-//		for (StockAvg sa : out) {
-//			System.err.println(sa);
+//		List<StockAvgBase> out = getSMA5_60("000505", 20180926, 20201225, true);
+//		for (StockAvgBase sa : out) {
+//			System.err.println(sa.getDate() + " " + sa.getAvgPriceIndex30() + " " + sa.getAvgPriceIndex60());
 //		}
-//
-//		System.err.println(getSMA5_30("002928", 20180927));
-//		System.err.println(getSMA5_30("002928", 20180928));
 //	}
 
-	public static void main(String[] args) {
-		double d1 = 51.04499999999999;
-		double d2 = 51.214999999999996;
-		double d3 = 51.495999999999995;
-
-		System.err.println(CurrencyUitl.roundHalfUp(d1));
-		System.err.println(CurrencyUitl.roundHalfUp(d2));
-		System.err.println(CurrencyUitl.roundHalfUp(d3));
-	}
 }

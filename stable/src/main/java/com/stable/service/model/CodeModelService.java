@@ -34,7 +34,6 @@ import com.stable.service.FinanceService;
 import com.stable.service.PledgeStatService;
 import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
-import com.stable.service.TradeCalService;
 import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.trace.MiddleSortV1Service;
 import com.stable.utils.BeanCopy;
@@ -64,8 +63,6 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class CodeModelService {
-	@Autowired
-	private TradeCalService tradeCalService;
 	@Autowired
 	private CodePoolService codePoolService;
 	@Autowired
@@ -97,7 +94,6 @@ public class CodeModelService {
 
 	public synchronized void runJob(boolean isJob, int date) {
 		try {
-			date = DateUtil.getTodayIntYYYYMMDD();
 			log.info("CodeModel processing date={}", date);
 			run(date);
 		} catch (Exception e) {
@@ -131,7 +127,7 @@ public class CodeModelService {
 		if (listHist.size() > 0) {
 			codeBaseModelHistDao.saveAll(listHist);
 		}
-		middleSortV1Service.start(list);
+		middleSortV1Service.start(treadeDate, list);
 		log.info("CodeModel 模型执行完成");
 		WxPushUtil.pushSystem1(
 				"Seq5=> CODE-MODEL " + treadeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listHist.size());
@@ -434,10 +430,8 @@ public class CodeModelService {
 		findBigBoss(base.getCode(), base.getDate(), list, map, fbis, fa, yjkb, yjyg);
 	}
 
-	public List<CodePool> findBigBoss() {
-		int today = DateUtil.getTodayIntYYYYMMDD();
-		int treadeDate = tradeCalService.getPretradeDate(today);
-		log.info("today={},treadeDate={}", today, treadeDate);
+	public List<CodePool> findBigBoss(int treadeDate) {
+		log.info("treadeDate={}", treadeDate);
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 		Map<String, CodePool> map = codePoolService.getCodePoolMap();
 		List<CodePool> list = new LinkedList<CodePool>();
@@ -468,26 +462,13 @@ public class CodeModelService {
 			c.setCode(code);
 		}
 		list.add(c);
-		c.setInMid(0);
-		c.setMidOk(0);
-		c.setMidChkDate(treadeDate);
 		c.setUpdateDate(treadeDate);
 		// 是否符合中线、1.市盈率和ttm在50以内
 		DaliyBasicInfo basic = daliyBasicHistroyService.getDaliyBasicInfoByDate(code, treadeDate);
-		if (fa.getCurrJidu().getYyzsrtbzz() >= 1.0 && fa.getPrevJidu().getYyzsrtbzz() >= 1.0) {// 连续2季度营收增长
-			c.setInMid(1);
-			// 当前季度和上季度增长,净利15%
-			if (fa.getCurrJidu().getYyzsrtbzz() >= 10.0 && fa.getPrevJidu().getYyzsrtbzz() >= 10.0) {
-				if (fa.getCurrJidu().getGsjlrtbzz() >= 10.0 && fa.getPrevJidu().getGsjlrtbzz() >= 10.0) {
-					double d = fa.getCurrJidu().getYyzsrtbzz();
-					if (fa.getCurrJidu().getGsjlrtbzz() < d) {
-						d = fa.getCurrJidu().getGsjlrtbzz();
-					}
-					c.setBaseLevel(Double.valueOf(d).intValue());
-					c.setMidOk(1);
-				}
-			}
-		}
+		c.setPb(basic.getPb());
+		c.setPe(basic.getPe());
+		c.setPe_ttm(basic.getPe_ttm());
+
 		c.setKbygjl(0);
 		c.setKbygys(0);
 		if (yjkb != null) {
@@ -496,12 +477,8 @@ public class CodeModelService {
 		} else if (yjyg != null) {
 			c.setKbygjl(yjyg.getJlrtbzz());
 		}
-		c.setPb(basic.getPb());
-		c.setPe(basic.getPe());
-		c.setPe_ttm(basic.getPe_ttm());
-		// 业绩连续
 
-//		if (CurrencyUitl.isLess200Yi(basic)) {// 小于200亿
+		// 业绩连续
 		int continueJidu1 = 0;
 		int continueJidu2 = 0;
 		boolean cj1 = true;
@@ -549,7 +526,6 @@ public class CodeModelService {
 		c.setIsok(isok);
 		c.setContinYj1(continueJidu1);
 		c.setContinYj2(continueJidu2);
-//		}
 	}
 
 	public CodeBaseModel getLastOneByCode(String code) {
@@ -633,13 +609,13 @@ public class CodeModelService {
 		return null;
 	}
 
-	public List<CodeBaseModel> getList(String code, int orderBy, String conceptId, String conceptName, int asc,
+	public List<CodeBaseModel> getList(String code, int orderBy, String aliasCode, String conceptName, int asc,
 			EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		} else if (StringUtils.isNotBlank(conceptId)) {
-			List<String> list = listCodeByCodeConceptId(conceptId);
+		} else if (StringUtils.isNotBlank(aliasCode)) {
+			List<String> list = listCodeByCodeConceptId(aliasCode);
 			if (list != null) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			}
@@ -698,11 +674,11 @@ public class CodeModelService {
 		return res;
 	}
 
-	private String getConceptId(String conceptId) {
+	private String getConceptId(String aliasCode) {
 		EsQueryPageReq querypage = EsQueryPageUtil.queryPage1;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		if (StringUtils.isNotBlank(conceptId)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", conceptId));
+		if (StringUtils.isNotBlank(aliasCode)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", aliasCode));
 		} else {
 			return null;
 		}
@@ -715,7 +691,7 @@ public class CodeModelService {
 		if (page != null && !page.isEmpty()) {
 			return page.getContent().get(0).getId();
 		}
-		log.info("no records aliasCode:{}", conceptId);
+		log.info("no records aliasCode:{}", aliasCode);
 		return null;
 
 	}
@@ -732,10 +708,10 @@ public class CodeModelService {
 		return codes;
 	}
 
-	public List<String> listCodeByCodeConceptId(String conceptId) {
+	public List<String> listCodeByCodeConceptId(String aliasCode) {
 		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		conceptId = getConceptId(conceptId);
+		String conceptId = getConceptId(aliasCode);
 		if (StringUtils.isNotBlank(conceptId)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("conceptId", conceptId));
 		} else {

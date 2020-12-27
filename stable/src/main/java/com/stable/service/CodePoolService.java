@@ -44,39 +44,38 @@ public class CodePoolService {
 	@Autowired
 	private StockBasicService stockBasicService;
 
-	public void addMid(String code, int inout) {
+	public void delMonit(String code, String remark) {
 		CodePool c = getCodePool(code);
-		c.setMidOk(inout);
 		c.setUpdateDate(DateUtil.getTodayIntYYYYMMDD());
-		if (inout == 1) {
-			c.setMidRemark(c.getUpdateDate() + " 系统中线");
-		} else {
-			c.setMidRemark("");
-		}
-
-		codePoolDao.save(c);
-	}
-
-	public void addSortV4(String code, int inout) {
-		CodePool c = getCodePool(code);
-		c.setSortOk(inout);
-		c.setUpdateDate(DateUtil.getTodayIntYYYYMMDD());
-		if (inout == 1) {
-			c.setSortV4Remark(c.getUpdateDate() + " sort v4 短线");
-		} else {
-			c.setSortV4Remark("");
-		}
-		codePoolDao.save(c);
-	}
-
-	public void addManual(String code, int inout, String remark) {
-		CodePool c = getCodePool(code);
-		c.setManualOk(inout);
-		c.setUpdateDate(DateUtil.getTodayIntYYYYMMDD());
-		if (inout == 1) {
-			c.setRemark(c.getUpdateDate() + " " + remark);
-		} else {
+		c.setMonitor(0);
+		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
+		} else {
+			c.setRemark(remark + c.getUpdateDate());
+		}
+		codePoolDao.save(c);
+	}
+
+	public void addMid(String code, String remark) {
+		CodePool c = getCodePool(code);
+		c.setUpdateDate(DateUtil.getTodayIntYYYYMMDD());
+		c.setMonitor(2);
+		if (StringUtils.isBlank(remark)) {
+			c.setRemark("");
+		} else {
+			c.setRemark(remark + c.getUpdateDate());
+		}
+		codePoolDao.save(c);
+	}
+
+	public void addManual(String code, String remark) {
+		CodePool c = getCodePool(code);
+		c.setUpdateDate(DateUtil.getTodayIntYYYYMMDD());
+		c.setMonitor(3);
+		if (StringUtils.isBlank(remark)) {
+			c.setRemark("");
+		} else {
+			c.setRemark(remark + c.getUpdateDate());
 		}
 		codePoolDao.save(c);
 	}
@@ -157,16 +156,15 @@ public class CodePoolService {
 		return null;
 	}
 
-	public List<CodePoolResp> getListForWeb(String code, String conceptId, String conceptName, int asc, int baseLevel,
-			int inMid, int midOk, int sortOk, int manualOk, int suspectBigBoss, double pe, double pettm, double pb,
-			EsQueryPageReq querypage, int jiduc) {
+	public List<CodePoolResp> getListForWeb(String code, String aliasCode, int asc, int monitor, int monitoreq,
+			int suspectBigBoss, int inmid, double pe, double pettm, double pb, EsQueryPageReq querypage, int jiduc) {
 		log.info(
-				"CodeBaseModel getListForWeb code={},asc={},num={},size={},conceptId={},conceptName={},baseLevel={},inMid={},midOk={},sortOk={},manualOk={},pe={},pettm={},pb={}",
-				code, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName, baseLevel, inMid,
-				midOk, sortOk, manualOk, pe, pettm, pb);
+				"CodeBaseModel getListForWeb code={},asc={},num={},size={},aliasCode={},monitor={},monitoreq={},pe={},pettm={},pb={}",
+				code, asc, querypage.getPageNum(), querypage.getPageSize(), aliasCode, monitor, monitoreq, pe, pettm,
+				pb);
 
-		List<CodePool> list = getList(code, conceptId, conceptName, asc, baseLevel, inMid, midOk, sortOk, manualOk,
-				suspectBigBoss, pe, pettm, pb, querypage, jiduc);
+		List<CodePool> list = getList(code, aliasCode, asc, monitor, monitoreq, suspectBigBoss, inmid, pe, pettm, pb,
+				querypage, jiduc);
 		List<CodePoolResp> res = new LinkedList<CodePoolResp>();
 		if (list != null) {
 			for (CodePool dh : list) {
@@ -174,26 +172,36 @@ public class CodePoolService {
 				BeanUtils.copyProperties(dh, resp);
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
 				resp.setYjlx(dh.getContinYj1() + "/" + dh.getContinYj2());
+				resp.setMonitorDesc(getDesc(dh.getMonitor()));
 				res.add(resp);
 			}
 		}
 		return res;
 	}
 
-	public List<CodePool> getList(String code, String conceptId, String conceptName, int asc, int baseLevel, int inMid,
-			int midOk, int sortOk, int manualOk, int suspectBigBoss, double pe, double pettm, double pb,
-			EsQueryPageReq querypage, int jiduc) {
+	private String getDesc(int mo) {
+		switch (mo) {
+		case 1:
+			return "疑似大牛";
+		case 2:
+			return "中线";
+		case 3:
+			return "人工";
+		case 4:
+			return "短线";
+		default:
+			return "无";
+		}
+	}
+
+	public List<CodePool> getList(String code, String aliasCode, int asc, int monitor, int monitoreq,
+			int suspectBigBoss, int inmid, double pe, double pettm, double pb, EsQueryPageReq querypage, int jiduc) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		} else if (StringUtils.isNotBlank(conceptId)) {
-			List<String> list = this.codeModelService.listCodeByCodeConceptId(conceptId);
+		} else if (StringUtils.isNotBlank(aliasCode)) {
+			List<String> list = this.codeModelService.listCodeByCodeConceptId(aliasCode);
 			if (list != null) {
-				bqb.must(QueryBuilders.termsQuery("code", list));
-			}
-		} else if (StringUtils.isNotBlank(conceptName)) {
-			List<String> list = this.codeModelService.listCodeByCodeConceptName(conceptName);
-			if (list.size() > 0) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			}
 		}
@@ -201,23 +209,17 @@ public class CodePoolService {
 			bqb.must(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("continYj1", jiduc))
 					.should(QueryBuilders.matchQuery("continYj2", jiduc)));
 		}
-		if (baseLevel > 0) {
-			bqb.must(QueryBuilders.rangeQuery("baseLevel").gt(0).gte(baseLevel));
+		if (monitor > 0) {
+			bqb.must(QueryBuilders.rangeQuery("monitor").gt(0));
 		}
-		if (inMid > 0) {
-			bqb.must(QueryBuilders.matchPhraseQuery("inMid", 1));
-		}
-		if (midOk > 0) {
-			bqb.must(QueryBuilders.matchPhraseQuery("midOk", 1));
-		}
-		if (sortOk > 0) {
-			bqb.must(QueryBuilders.matchPhraseQuery("sortOk", 1));
-		}
-		if (manualOk > 0) {
-			bqb.must(QueryBuilders.matchPhraseQuery("manualOk", 1));
+		if (monitoreq > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("monitor", monitoreq));
 		}
 		if (suspectBigBoss > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("suspectBigBoss", 1));
+		}
+		if (inmid > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("inmid", 1));
 		}
 		if (pe > 0) {
 			bqb.must(QueryBuilders.rangeQuery("pe").gt(0).lte(pe));
@@ -233,7 +235,7 @@ public class CodePoolService {
 			order = SortOrder.ASC;
 		}
 
-		FieldSortBuilder sort = SortBuilders.fieldSort("baseLevel").unmappedType("integer").order(order);
+		FieldSortBuilder sort = SortBuilders.fieldSort("pe_ttm").unmappedType("integer").order(order);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());

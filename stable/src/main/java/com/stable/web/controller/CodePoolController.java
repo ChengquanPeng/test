@@ -25,15 +25,16 @@ public class CodePoolController {
 	 * 根据code
 	 */
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> list(String code, int asc, String conceptId, String conceptName, String baseLevel,
-			int inMid, int midOk, int sortOk, int manualOk, String suspectBigBoss, String pe, String pettm, String pb,
-			String jiduc, EsQueryPageReq page) {
+	public ResponseEntity<JsonResult> list(String code, int asc, String conceptId, String conceptName, int monitor,
+			String monitoreq, String suspectBigBoss, String inmid, String pe, String pettm, String pb, String jiduc,
+			EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
 
-			r.setResult(codePoolService.getListForWeb(code, conceptId, conceptName, asc,
-					StringUtils.isNotBlank(baseLevel) ? Integer.valueOf(baseLevel) : 0, inMid, midOk, sortOk, manualOk,
+			r.setResult(codePoolService.getListForWeb(code, conceptId, asc, monitor,
+					StringUtils.isNotBlank(monitoreq) ? Integer.valueOf(monitoreq) : 0,
 					StringUtils.isNotBlank(suspectBigBoss) ? Integer.valueOf(suspectBigBoss) : 0,
+					StringUtils.isNotBlank(inmid) ? Integer.valueOf(inmid) : 0,
 					StringUtils.isNotBlank(pe) ? Double.valueOf(pe) : 0,
 					StringUtils.isNotBlank(pettm) ? Double.valueOf(pettm) : 0,
 					StringUtils.isNotBlank(pb) ? Double.valueOf(pb) : 0, page,
@@ -65,4 +66,18 @@ public class CodePoolController {
 		return ResponseEntity.ok(r);
 	}
 
+	@RequestMapping(value = "/delMonit")
+	public void delMonit(String code, String remark) {
+		codePoolService.delMonit(code, remark);
+	}
+
+	@RequestMapping(value = "/addMid")
+	public void addMid(String code, String remark) {
+		codePoolService.addMid(code, remark);
+	}
+
+	@RequestMapping(value = "/addManual")
+	public void addManual(String code, String remark) {
+		codePoolService.addManual(code, remark);
+	}
 }

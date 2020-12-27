@@ -15,6 +15,46 @@
 
 <!-- Custom styles for this template -->
 <link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
+<style type="text/css">
+body {
+	margin: 0px;
+}
+
+.zhezhao {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	background: #000;
+	width: 100%;
+	height: 100%;
+	opacity: 0.5;
+}
+
+.tankuang {
+	position: relative;
+	background: #fff;
+	width: 30%;
+	height: 30%;
+	border-radius: 5px;
+	margin: 5% auto;
+}
+
+#header {
+	height: 40px;
+}
+
+#header-right {
+	position: absolute;
+	width: 25px;
+	height: 25px;
+	border-radius: 5px;
+	background: red;
+	color: #fff;
+	right: 5px;
+	top: 5px;
+	text-align: center;
+}
+</style>
 </head>
 
 <body>
@@ -26,21 +66,26 @@
 			<div class="col-lg-9">
 				<div class="input-group">
 					股票代码：<input type="text" class="form-control" id="queryCode">
-					营收净利增长幅度:<input type="text" class="form-control" id="baseLevel">
 				</div>
 				<div class="input-group">
 					PE(市盈率):<input type="text" class="form-control" id="pe">
 					PE(市盈率TTM):<input type="text" class="form-control" id="pettm">
 					PB(市净率):<input type="text" class="form-control" id="pb">
-					板块名称：<input type="text" class="form-control" id="conceptName">
-					概念id：<input type="text" class="form-control" id="conceptId">
+					板块/概念(aliasCode)：<input type="text" class="form-control"
+						id="conceptId">
 				</div>
 				<div class="input-group">
-					疑似大牛:<input type="checkbox" id="suspectBigBoss" name="suspectBigBoss"  /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					营收净利OK:<input type="checkbox" id="inMid" name="inMid"  /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					YS-JL监听Y:<input type="checkbox" id="midOk" name="midOk" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					短线监听Y:<input type="checkbox" id="sortOk" name="sortOk" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					手动监听Y:<input type="checkbox" id="manualOk" name="manualOk" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					疑似大牛:<input type="checkbox" id="suspectBigBoss"
+						name="suspectBigBoss" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					是否监听:<input type="checkbox" id="monitor" name="monitor" />
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 监听类型:<select id="monitoreq">
+						<option value="0">无</option>
+						<option value="1">疑似大牛</option>
+						<option value="2">中线</option>
+						<option value="3">人工</option>
+						<option value="4">短线</option>
+					</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 是否中线:<input type="checkbox"
+						id="inmid" name="inmid" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					业绩连续增长季度数：<input type="text" class="form-control" id="jiduc">
 				</div>
 				<div class="input-group">
@@ -111,38 +156,28 @@
 									//param.orderBy = gsort;
 									param.asc = 1;
 									param.conceptId = $('#conceptId').val();
-									param.conceptName = $('#conceptName').val();
-
-									param.inMid = 0;
-									param.midOk = 0;
-									param.sortOk = 0;
-									param.manualOk = 0;
-									
+									param.monitor = 0;
+									param.inmid = 0;
 
 									if (!document.getElementById("asc").checked) {
 										param.asc = 2;
 									}
-									if (document.getElementById("suspectBigBoss").checked) {
+									if (document
+											.getElementById("suspectBigBoss").checked) {
 										param.suspectBigBoss = 1;
 									}
-									if (document.getElementById("inMid").checked) {
-										param.inMid = 1;
+									if (document.getElementById("monitor").checked) {
+										param.monitor = 1;
 									}
-									if (document.getElementById("midOk").checked) {
-										param.midOk = 1;
+									if (document.getElementById("inmid").checked) {
+										param.inmid = 1;
 									}
-									if (document.getElementById("sortOk").checked) {
-										param.sortOk = 1;
-									}
-									if (document.getElementById("manualOk").checked) {
-										param.manualOk = 1;
-									}
-									param.baseLevel = $('#baseLevel').val();
+									param.monitoreq = $('#monitoreq').val();
 									param.pe = $('#pe').val();
 									param.pettm = $('#pettm').val();
 									param.pb = $('#pb').val();
 									param.jiduc = $('#jiduc').val();
-									
+
 									return param;
 								},
 								columns : [
@@ -152,48 +187,73 @@
 											formatter : function(value, row,
 													index) {
 												var actions = [];
-												actions.push('<a target="_blank" href="/web/code/' + value + '">' + value + '</a>');
+												actions
+														.push('<a target="_blank" href="/web/code/' + value + '">'
+																+ value
+																+ '</a>');
 												return actions.join('');
 											}
-										}, {
+										},
+										{
 											field : 'codeName',
 											title : '名称'
-										}, {
-											field : 'baseLevel',
-											title : 'YS-JL增幅'
-										}, {
-											field : 'pe',
-											title : 'pe市盈率'
-										}, {
-											field : 'pe_ttm',
-											title : 'pe-ttm'
-										}, {
-											field : 'pb',
-											title : 'pb市净率'
-										}, {
-											field : 'inMid',
-											title : '营收净利OK'
-										}, {
+										},
+										{
+											field : 'monitorDesc',
+											title : '监听类型'
+										},
+										{
 											field : 'suspectBigBoss',
 											title : '疑似大牛'
-										}, {
+										},
+										{
+											field : 'inmid',
+											title : '中线Y'
+										},
+										{
 											field : 'yjlx',
 											title : '连续业绩'
-										}, {
-											field : 'midOk',
-											title : '中线监听'
-										}, {
-											field : 'sortOk',
-											title : '短线监听'
-										}, {
-											field : 'manualOk',
-											title : '人工监听'
-										}, {
-											field : 'kbygys',
-											title : 'Last-YS-快预报'
-										}, {
-											field : 'kbygjl',
-											title : 'Last-YS-快预报'
+										},
+										{
+											field : 'pe',
+											title : 'pe市盈'
+										},
+										{
+											field : 'pe_ttm',
+											title : 'pe-ttm'
+										},
+										{
+											field : 'pb',
+											title : 'pb市净'
+										},
+										{
+											field : 'remark',
+											title : '备注'
+										},
+										{
+											field : 'monitor',
+											title : '操作',
+											formatter : function(value, row,
+													index) {
+												if (value == 0) {
+													return "<a href='#' onclick='dianwo1(\""
+															+ row.code
+															+ "\",\""
+															+ row.remark
+															+ "\")'>中线</a>"
+															+ "&nbsp;<a href='#' onclick='dianwo2(\""
+															+ row.code
+															+ "\",\""
+															+ row.remark
+															+ "\")'>人工</a>";
+												} else {
+													return "<a href='#' onclick='dianwo3(\""
+															+ row.code
+															+ "\",\""
+															+ row.remark
+															+ "\")'>移除</a>";
+												}
+											}
 										} ],
 								responseHandler : function responseHandler(res) {
 
@@ -216,6 +276,52 @@
 			loadData()
 		});
 		loadData();
+	</script>
+	<script type="text/javascript">
+		function dianwo1(code, remark) {
+			var remark = prompt(code + " 加入中线监听备注", remark + "中线");
+			//
+			$.ajax({
+				url : "/web/codePool/addMid", //访问地址--action地址
+				type : "post", //提交方式
+				data : {
+					code : code,
+					remark : remark
+				}, //提交给服务器的数据
+				success : function(reData) { //回调函数的处理方式
+					alert("已加入");
+				}
+			});
+		}
+		function dianwo2(code, remark) {
+			var remark = prompt(code + " 人工加入监听备注", remark + " 人工");
+			//
+			$.ajax({
+				url : "/web/codePool/addManual", //访问地址--action地址
+				type : "post", //提交方式
+				data : {
+					code : code,
+					remark : remark
+				}, //提交给服务器的数据
+				success : function(reData) { //回调函数的处理方式
+					alert("已加入");
+				}
+			});
+		}
+		function dianwo3(code, remark) {
+			var remark = prompt(code + " 移除监听", remark + " 移除");
+			$.ajax({
+				url : "/web/codePool/delMonit", //访问地址--action地址
+				type : "post", //提交方式
+				data : {
+					code : code,
+					remark : remark
+				}, //提交给服务器的数据
+				success : function(reData) { //回调函数的处理方式
+					alert("已移除");
+				}
+			});
+		}
 	</script>
 </body>
 </html>

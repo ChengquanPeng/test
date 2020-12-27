@@ -13,4 +13,5 @@ public class CodePoolResp extends CodePool {
 	private String incomeShow;
 	private String profitShow;
 	private String yjlx;
+	private String monitorDesc;
 }

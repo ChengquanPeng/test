@@ -20,9 +20,6 @@ public class CodePool {
 	private String code;
 	@Field(type = FieldType.Integer)
 	private int updateDate = 0;
-	// 营收净利level
-	@Field(type = FieldType.Integer)
-	private int baseLevel = 0;
 
 	@Field(type = FieldType.Double)
 	private double kbygys; // 营业总收入同比增长(%)
@@ -43,37 +40,14 @@ public class CodePool {
 	private int continYj1;// 连续不间断业绩季度
 	@Field(type = FieldType.Integer)
 	private int continYj2;// 允许间段1个季度业绩
-
 	// ---------------------------
-	// 是否加入监听
+	// 监听:0不监听，1大牛，2中线，3人工，4短线
 	@Field(type = FieldType.Integer)
-	private int midOk = 0;
-	// 加入日期
-	@Field(type = FieldType.Text)
-	private String midRemark;
-
-	// 是否满足中线要求
-	@Field(type = FieldType.Integer)
-	private int inMid = 0;
-
-	// 检查日期
-	@Field(type = FieldType.Integer)
-	private int midChkDate = 0;
-	// -----------------------------
-
-	// --------------sortV4------
-	@Field(type = FieldType.Integer)
-	private int sortOk = 0;
-	// 加入日期
-	@Field(type = FieldType.Text)
-	private String sortV4Remark;
-
-	// ------------ manual--人工手动---
-	@Field(type = FieldType.Integer)
-	private int manualOk = 0;
-
+	private int monitor = 0;
 	@Field(type = FieldType.Text)
 	private String remark;
+	@Field(type = FieldType.Integer)
+	private int inmid = 0;// 符合中线
 
 	@Transient
 	public boolean isIsok() {

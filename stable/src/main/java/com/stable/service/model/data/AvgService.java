@@ -58,11 +58,25 @@ public class AvgService {
 	private List<StockAvgBase> getSMA30(String code, int startDate, int endDate, boolean isQfq) {
 		List<StockAvgBase> rs = smaUtil.getSMA5_30(code, startDate, endDate, isQfq);
 		if (rs != null) {
-			log.info("SMA-30 -> code={},startDate={},endDate={},size={}", code, startDate, endDate, rs.size());
+			log.info("SMA-30 -> From 本地计算 code={},startDate={},endDate={},size={}", code, startDate, endDate,
+					rs.size());
 			return rs;
 		} else {
 			rs = getDPriceAvgFromTushar(code, startDate, endDate, isQfq);
-			log.info("SMA-30 -> Thshare");
+			log.info("SMA-30 -> From Thshare");
+			return rs;
+		}
+	}
+
+	private List<StockAvgBase> getSMA60(String code, int startDate, int endDate, boolean isQfq) {
+		List<StockAvgBase> rs = smaUtil.getSMA5_60(code, startDate, endDate, isQfq);
+		if (rs != null) {
+			log.info("SMA-60 -> From 本地计算 code={},startDate={},endDate={},size={}", code, startDate, endDate,
+					rs.size());
+			return rs;
+		} else {
+			rs = getDPriceAvgFromTushar(code, startDate, endDate, isQfq);
+			log.info("SMA-60 -> From Thshare");
 			return rs;
 		}
 	}
@@ -245,6 +259,29 @@ public class AvgService {
 				}
 				return result;
 			}
+		}
+		return null;
+	}
+
+	public List<StockAvgBase> queryListByCodeForModelWithLast60(String code, int endDate, EsQueryPageReq queryPage,
+			boolean isQfq) {
+		int sd = 0;
+		if (isQfq) {
+			List<TradeHistInfoDaliy> tradedaliylist = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0,
+					endDate, queryPage, SortOrder.DESC);
+			if (tradedaliylist != null) {
+				sd = tradedaliylist.get(tradedaliylist.size() - 1).getDate();
+			}
+		} else {
+			List<TradeHistInfoDaliyNofq> tradedaliylistNofq = daliyTradeHistroyService.queryListByCodeWithLastNofq(code,
+					0, endDate, queryPage, SortOrder.DESC);
+			if (tradedaliylistNofq != null) {
+				sd = tradedaliylistNofq.get(tradedaliylistNofq.size() - 1).getDate();
+			}
+		}
+		if (sd > 0) {
+			List<StockAvgBase> result = getSMA60(code, sd, endDate, isQfq);
+			return result;
 		}
 		return null;
 	}

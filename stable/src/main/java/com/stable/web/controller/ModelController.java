@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.stable.service.TradeCalService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.model.UpModelLineService;
 import com.stable.utils.DateUtil;
@@ -25,6 +26,8 @@ public class ModelController {
 	private UpModelLineService upLevel1Service;
 	@Autowired
 	private CodeModelService codeModelService;
+	@Autowired
+	private TradeCalService tradeCalService;
 
 	/**
 	 * 执行模型（交易面）
@@ -71,8 +74,10 @@ public class ModelController {
 	public ResponseEntity<JsonResult> coderun() {
 		JsonResult r = new JsonResult();
 		try {
+			int date = DateUtil.getTodayIntYYYYMMDD();
+			date = tradeCalService.getPretradeDate(date);
 			// codeModelService.reset();
-			codeModelService.runJob(false, 0);
+			codeModelService.runJob(false, date);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
