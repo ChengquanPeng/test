@@ -49,6 +49,7 @@ public class MiddleSortV1Service {
 		LineAvgPrice avg = new LineAvgPrice(avgService);
 		log.info("code coop list:" + list.size());
 		StringBuffer msg = new StringBuffer();
+		StringBuffer mid = new StringBuffer();
 		StringBuffer msg2 = new StringBuffer();
 		if (list.size() > 0) {
 			LinePrice lp = new LinePrice(daliyTradeHistroyService);
@@ -82,17 +83,25 @@ public class MiddleSortV1Service {
 				}
 
 				// 是否中线(60日线)
-				if (m.getMonitor() <= 0) {
-					if (avg.isWhiteHorseForMidV2(code, treadeDate)) {
-						m.setInmid(1);
-					} else {
-						m.setInmid(0);
+				if (avg.isWhiteHorseForMidV2(code, treadeDate)) {
+					if (m.getInmid() == 0) {
+						mid.append(code).append(",");
 					}
+					m.setInmid(1);
+				} else {
+					m.setInmid(0);
 				}
 			}
 			codePoolService.saveAll(list);
-			if (msg.length() > 0) {
-				WxPushUtil.pushSystem1("新发现疑似主力建仓票:" + msg.toString());
+			if (msg.length() > 0 || mid.length() > 0) {
+				if (msg.length() > 0) {
+					msg.insert(0, "新发现疑似主力建仓票:");
+				}
+				if (mid.length() > 0) {
+					mid.insert(0, "新发现中线票:");
+				}
+				msg.append(mid.toString());
+				WxPushUtil.pushSystem1(msg.toString());
 			}
 			if (msg2.length() > 0) {
 				WxPushUtil.pushSystem1("踢出主力建仓票:" + msg2.toString());

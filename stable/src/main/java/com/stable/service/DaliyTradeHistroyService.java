@@ -35,6 +35,7 @@ import com.stable.job.MyCallable;
 import com.stable.service.model.ImageStrategyListener;
 import com.stable.service.model.UpModelLineService;
 import com.stable.service.model.image.ImageService;
+import com.stable.service.trace.SortV5Service;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
@@ -86,6 +87,8 @@ public class DaliyTradeHistroyService {
 	private EsModelV1Dao esModelV1Dao;
 	@Autowired
 	private UpModelLineService upLevel1Service;
+	@Autowired
+	private SortV5Service sortV5Service;
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -693,9 +696,9 @@ public class DaliyTradeHistroyService {
 							if (tradeCalService.isOpen(date)) {
 								int succ = spiderTodayDaliyTrade(today);
 								if (succ > 0) {
-									WxPushUtil.pushSystem1("Seq3=>正常执行=>日K复权任务,succ=" + succ);
+									WxPushUtil.pushSystem1("Seq2=>正常执行=>日K复权任务,succ=" + succ);
 								} else {
-									WxPushUtil.pushSystem1("异常执行Seq3=>日K复权任务,succ=0");
+									WxPushUtil.pushSystem1("异常执行Seq2=>日K复权任务,succ=0");
 								}
 							} else {
 								log.info("非工作日。");
@@ -722,9 +725,26 @@ public class DaliyTradeHistroyService {
 					}
 					upLevel1Service.runJob(true, Integer.valueOf(today));
 				} finally {
-					log.info("等待图片模型执行");
+					// log.info("等待图片模型执行");
 					// nextImageJob(today);
+					log.info("等待code pool 执行");
+					nextCodePool(today);
 				}
+				return null;
+			}
+		});
+	}
+
+	public void nextCodePool(String today) {
+		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
+			@Override
+			public Object call() throws Exception {
+				try {
+					TimeUnit.MINUTES.sleep(10);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				sortV5Service.sortv5(Integer.valueOf(today));
 				return null;
 			}
 		});

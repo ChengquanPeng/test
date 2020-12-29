@@ -10,8 +10,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +19,6 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsHistTraceDao;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
-import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.data.AvgService;
@@ -37,8 +34,6 @@ import com.stable.utils.TasksWorkerModel;
 import com.stable.utils.TasksWorkerModelRunnable;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
-import com.stable.vo.bus.FinYjkb;
-import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.HistTrace;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
@@ -62,8 +57,6 @@ public class SortV4Service {
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private EsHistTraceDao esHistTraceDao;
-	@Autowired
-	private FinanceService financeService;
 	@Autowired
 	private StrongService strongService;
 	@Autowired
@@ -157,21 +150,6 @@ public class SortV4Service {
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	private boolean getLastKygb(TraceSortv2Vo t1, String code, int date, int year, int jidu) {
-		FinYjkb ckb = financeService.getLastFinYjkbReport(code, date, year, jidu);
-		if (ckb == null) {
-			FinYjyg cyg = financeService.getLastFinYjygReport(code, date, year, jidu);
-			if (cyg != null) {
-				t1.setYg(cyg);
-				return true;
-			}
-		} else {
-			t1.setKb(ckb);
-			return true;
-		}
-		return false;
 	}
 
 	private String title = "代码,日期,当日涨幅,当日大盘涨幅,一定亏损,是否盈利,买入价,卖出价,盈利多少,最高收盘价,最低收盘价,最低价幅度,最低价,最低价幅度,市盈率(静),市盈率(TTM),"

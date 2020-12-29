@@ -248,4 +248,21 @@ public class CodePoolService {
 		log.info("no records CodeBaseModels");
 		return null;
 	}
+
+	public List<CodePool> queryForSortV5(List<Integer> pa) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.termsQuery("monitor", pa));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		Pageable pageable = PageRequest.of(EsQueryPageUtil.queryPage9999.getPageNum(),
+				EsQueryPageUtil.queryPage9999.getPageSize());
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+
+		Page<CodePool> page = codePoolDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		log.info("queryForSortV5 no records CodeBaseModels");
+		return null;
+
+	}
 }
