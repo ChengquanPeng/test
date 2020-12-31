@@ -34,6 +34,7 @@ public class SortV5Service {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 
+	// 箱体新高（3个月新高，短期有8%的涨幅）
 	public void sortv5(int tradeDate) {
 		StringBuffer msg = new StringBuffer();
 		List<Integer> pa = new ArrayList<Integer>();// 1大牛，2中线，3人工，4短线
@@ -55,7 +56,7 @@ public class SortV5Service {
 	}
 
 	/**
-	 * 1.tody price check,3个月新高，短期有8%的涨幅
+	 * 1.3个月新高，短期有9.5%的涨幅
 	 */
 	private boolean isTodayPriceOk(String code, int date) {
 		EsQueryPageReq page = EsQueryPageUtil.queryPage60;
@@ -77,7 +78,7 @@ public class SortV5Service {
 			List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0,
 					daliy.getTrade_date(), EsQueryPageUtil.queryPage5, SortOrder.DESC);
 			for (TradeHistInfoDaliyNofq r : l2) {
-				if (r.getTodayChangeRate() > 7.5) {
+				if (r.getTodayChangeRate() >= 9.5) {
 					return true;
 				}
 			}

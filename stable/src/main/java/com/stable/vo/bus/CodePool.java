@@ -48,6 +48,8 @@ public class CodePool {
 	private String remark;
 	@Field(type = FieldType.Integer)
 	private int inmid = 0;// 符合中线
+	@Field(type = FieldType.Integer)
+	private int sortMode6 = 0;// 符合短线
 
 	@Transient
 	public boolean isIsok() {

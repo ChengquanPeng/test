@@ -36,6 +36,7 @@ import com.stable.service.model.ImageStrategyListener;
 import com.stable.service.model.UpModelLineService;
 import com.stable.service.model.image.ImageService;
 import com.stable.service.trace.SortV5Service;
+import com.stable.service.trace.SortV6Service;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
@@ -89,6 +90,8 @@ public class DaliyTradeHistroyService {
 	private UpModelLineService upLevel1Service;
 	@Autowired
 	private SortV5Service sortV5Service;
+	@Autowired
+	private SortV6Service sortV6Service;
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -744,7 +747,35 @@ public class DaliyTradeHistroyService {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				sortV5Service.sortv5(Integer.valueOf(today));
+				try {
+					sortV5Service.sortv5(Integer.valueOf(today));
+				} finally {
+					// log.info("等待图片模型执行");
+					// nextImageJob(today);
+					log.info("等待 短线模型6 执行");
+					nextSortMode6(today);
+				}
+				return null;
+			}
+		});
+	}
+
+	public void nextSortMode6(String today) {
+		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
+			@Override
+			public Object call() throws Exception {
+				try {
+					TimeUnit.MINUTES.sleep(10);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				try {
+					sortV6Service.sortv6(Integer.valueOf(today));
+				} finally {
+					// log.info("等待图片模型执行");
+					// nextImageJob(today);
+					// log.info("等待code pool 执行");
+				}
 				return null;
 			}
 		});

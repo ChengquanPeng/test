@@ -9,6 +9,7 @@ public class EsQueryPageUtil {
 	public static final EsQueryPageReq queryPage2 = new EsQueryPageReq(2);
 	public static final EsQueryPageReq queryPage20 = new EsQueryPageReq(20);
 	public static final EsQueryPageReq queryPage25 = new EsQueryPageReq(25);
+	public static final EsQueryPageReq queryPage45 = new EsQueryPageReq(45);
 	public static final EsQueryPageReq queryPage5 = new EsQueryPageReq(5);
 	public static final EsQueryPageReq queryPage6 = new EsQueryPageReq(6);
 	public static final EsQueryPageReq queryPage60 = new EsQueryPageReq(60);

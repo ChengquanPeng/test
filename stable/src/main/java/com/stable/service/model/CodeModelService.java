@@ -103,19 +103,19 @@ public class CodeModelService {
 		}
 	}
 
-	private synchronized void run(int treadeDate) {
+	private synchronized void run(int tradeDate) {
 		int updatedate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		List<CodeBaseModel> listLast = new LinkedList<CodeBaseModel>();
 		List<CodeBaseModelHist> listHist = new LinkedList<CodeBaseModelHist>();
-		int oneYearAgo = DateUtil.getPreYear(treadeDate);
-		int nextYear = DateUtil.getNextYear(treadeDate);
+		int oneYearAgo = DateUtil.getPreYear(tradeDate);
+		int nextYear = DateUtil.getNextYear(tradeDate);
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 		Map<String, CodeBaseModel> histMap = getALLForMap();
 		Map<String, CodePool> map = codePoolService.getCodePoolMap();
 		List<CodePool> list = new LinkedList<CodePool>();
 		for (StockBaseInfo s : codelist) {
 			try {
-				getSorce(s, treadeDate, oneYearAgo, nextYear, updatedate, listLast, listHist, true, null,
+				getSorce(s, tradeDate, oneYearAgo, nextYear, updatedate, listLast, listHist, true, null,
 						histMap.get(s.getCode()), list, map);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
@@ -127,10 +127,10 @@ public class CodeModelService {
 		if (listHist.size() > 0) {
 			codeBaseModelHistDao.saveAll(listHist);
 		}
-		middleSortV1Service.start(treadeDate, list);
+		middleSortV1Service.start(tradeDate, list);
 		log.info("CodeModel 模型执行完成");
 		WxPushUtil.pushSystem1(
-				"Seq5=> CODE-MODEL " + treadeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listHist.size());
+				"Seq5=> CODE-MODEL " + tradeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listHist.size());
 
 	}
 

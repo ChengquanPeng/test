@@ -240,8 +240,12 @@ public class ThsSpider {
 				htmlunitSpider.close();
 			}
 		} while (!fetched);
-		saveConceptDaily(list);
-		return list.size();
+		if (list.size() > 0) {
+			saveConceptDaily(list);
+			return 1;
+		} else {
+			return 0;
+		}
 	}
 
 	private Map<String, Concept> synchGnAndCode(boolean isFirday) {
@@ -464,10 +468,11 @@ public class ThsSpider {
 				htmlunitSpider.close();
 			}
 		} while (index <= end);
+		int cnt = codelist.size();
 		if (codelist.size() > 0) {
 			saveCodeConcept(codelist);
 		}
-		return codelist.size();
+		return cnt;
 	}
 
 	private String urlb = "http://q.10jqka.com.cn/thshy/index/field/199112/order/desc/page/%s/ajax/1/";
