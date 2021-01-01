@@ -51,6 +51,9 @@ public class CodePool {
 	@Field(type = FieldType.Integer)
 	private int sortMode6 = 0;// 符合短线
 
+	@Field(type = FieldType.Integer)
+	private int score = 0;// 分数
+
 	@Transient
 	public boolean isIsok() {
 		return isok;

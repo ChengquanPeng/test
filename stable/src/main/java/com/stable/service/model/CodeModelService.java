@@ -258,7 +258,7 @@ public class CodeModelService {
 			}
 		}
 
-		processingFinance(list, map, newOne, hasKb ? yjkb : null, hasYg ? yjyg : null);
+		processingFinance(list, map, newOne, hasKb ? yjkb : null, hasYg ? yjyg : null, lastOne);
 		if (bb != null) {
 			// 股东大会通过/实施/完成
 		} else {
@@ -398,9 +398,9 @@ public class CodeModelService {
 		}
 	}
 
-	private void processingFinance(List<CodePool> list, Map<String, CodePool> map, CodeBaseModel base, FinYjkb yjkb,
-			FinYjyg yjyg) {
-		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(base.getCode(), base.getDate(),
+	private void processingFinance(List<CodePool> list, Map<String, CodePool> map, CodeBaseModel newOne, FinYjkb yjkb,
+			FinYjyg yjyg, CodeBaseModel lastOne) {
+		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(newOne.getCode(), newOne.getDate(),
 				EsQueryPageUtil.queryPage9999);
 		FinanceAnalyzer fa = new FinanceAnalyzer();
 		for (FinanceBaseInfo fbi : fbis) {
@@ -408,26 +408,26 @@ public class CodeModelService {
 		}
 		// log.info(fa.printInfo());
 		// 营收(科技类,故事类主要指标)
-		base.setIncomeUpYear(fa.getCurrYear().getYyzsrtbzz() > 0 ? 1 : 0);// 年报连续营收持续增长
-		base.setIncomeUpQuarter(fa.getCurrJidu().getYyzsrtbzz() > 0 ? 1 : 0);// 最近季度同比增长
-		base.setIncomeUp2Quarter(fa.incomeUp2Quarter());// 最近2个季度同比持续增长？
+		newOne.setIncomeUpYear(fa.getCurrYear().getYyzsrtbzz() > 0 ? 1 : 0);// 年报连续营收持续增长
+		newOne.setIncomeUpQuarter(fa.getCurrJidu().getYyzsrtbzz() > 0 ? 1 : 0);// 最近季度同比增长
+		newOne.setIncomeUp2Quarter(fa.incomeUp2Quarter());// 最近2个季度同比持续增长？
 
 		// 利润(传统行业,销售行业主要指标)
-		base.setProfitUpYear(fa.getCurrYear().getGsjlrtbzz() > 0 ? 1 : 0);// 归属净利润年报持续增长
-		base.setProfitUpQuarter(fa.getCurrJidu().getGsjlrtbzz() > 0 ? 1 : 0);// 归属净利润最近季度同比增长
-		base.setProfitUp2Quarter(fa.profitUp2Quarter());// 最近2个季度同比持续增长？
+		newOne.setProfitUpYear(fa.getCurrYear().getGsjlrtbzz() > 0 ? 1 : 0);// 归属净利润年报持续增长
+		newOne.setProfitUpQuarter(fa.getCurrJidu().getGsjlrtbzz() > 0 ? 1 : 0);// 归属净利润最近季度同比增长
+		newOne.setProfitUp2Quarter(fa.profitUp2Quarter());// 最近2个季度同比持续增长？
 
 		// 营收地雷
-		base.setIncomeDownYear(fa.getCurrYear().getYyzsrtbzz() < 0 ? -1 : 0);// 年营收同比下降
-		base.setIncomeDownQuarter(fa.getCurrJidu().getYyzsrtbzz() < 0 ? -1 : 0);// 季度营收同比下降
-		base.setIncomeDown2Quarter(fa.incomeDown2Quarter() == 1 ? -2 : 0);// 最近2个季度同比下降
+		newOne.setIncomeDownYear(fa.getCurrYear().getYyzsrtbzz() < 0 ? -1 : 0);// 年营收同比下降
+		newOne.setIncomeDownQuarter(fa.getCurrJidu().getYyzsrtbzz() < 0 ? -1 : 0);// 季度营收同比下降
+		newOne.setIncomeDown2Quarter(fa.incomeDown2Quarter() == 1 ? -2 : 0);// 最近2个季度同比下降
 		// 利润地雷
-		base.setProfitDownYear(fa.getCurrYear().getGsjlrtbzz() < 0 ? -1 : 0);// 最近年报同比下降TODO//科技类，故事类不看此指标
-		base.setProfitDownQuarter(fa.getCurrJidu().getGsjlrtbzz() < 0 ? -1 : 0);// 最近季度利润下降TODO//科技类，故事类不看此指标
-		base.setProfitDown2Quarter(fa.profitDown2Quarter() == 1 ? -2 : 0);// 最近2季度都同比下降
-		base.setProfitDown2Year(fa.profitDown2Year() == 1 ? -5 : 0);// 年报连续亏损年数？（可能退市）
+		newOne.setProfitDownYear(fa.getCurrYear().getGsjlrtbzz() < 0 ? -1 : 0);// 最近年报同比下降TODO//科技类，故事类不看此指标
+		newOne.setProfitDownQuarter(fa.getCurrJidu().getGsjlrtbzz() < 0 ? -1 : 0);// 最近季度利润下降TODO//科技类，故事类不看此指标
+		newOne.setProfitDown2Quarter(fa.profitDown2Quarter() == 1 ? -2 : 0);// 最近2季度都同比下降
+		newOne.setProfitDown2Year(fa.profitDown2Year() == 1 ? -5 : 0);// 年报连续亏损年数？（可能退市）
 
-		findBigBoss(base.getCode(), base.getDate(), list, map, fbis, fa, yjkb, yjyg);
+		findBigBoss(newOne.getCode(), newOne.getDate(), list, map, fbis, fa, yjkb, yjyg, lastOne);
 	}
 
 	public List<CodePool> findBigBoss(int treadeDate) {
@@ -444,7 +444,7 @@ public class CodeModelService {
 					for (FinanceBaseInfo fbi : fbis) {
 						fa.putJidu1(fbi);
 					}
-					findBigBoss(s.getCode(), treadeDate, list, map, fbis, fa, null, null);
+					findBigBoss(s.getCode(), treadeDate, list, map, fbis, fa, null, null, null);
 				}
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
@@ -454,12 +454,15 @@ public class CodeModelService {
 	}
 
 	private void findBigBoss(String code, int treadeDate, List<CodePool> list, Map<String, CodePool> map,
-			List<FinanceBaseInfo> fbis, FinanceAnalyzer fa, FinYjkb yjkb, FinYjyg yjyg) {
+			List<FinanceBaseInfo> fbis, FinanceAnalyzer fa, FinYjkb yjkb, FinYjyg yjyg, CodeBaseModel lastOne) {
 		log.info("findBigBoss code:{}", code);
 		CodePool c = map.get(code);
 		if (c == null) {
 			c = new CodePool();
 			c.setCode(code);
+		}
+		if (lastOne != null) {
+			c.setScore(lastOne.getScore());
 		}
 		list.add(c);
 		c.setUpdateDate(treadeDate);

@@ -235,7 +235,6 @@ body {
 											title : '操作',
 											formatter : function(value, row,
 													index) {
-												if (value == 0) {
 													return "<a href='#' onclick='dianwo1(\""
 															+ row.code
 															+ "\",\""
@@ -245,9 +244,8 @@ body {
 															+ row.code
 															+ "\",\""
 															+ row.remark
-															+ "\")'>人工</a>";
-												} else {
-													return "<a href='#' onclick='dianwo3(\""
+															+ "\")'>人工</a>"
+															+ "&nbsp;<a href='#' onclick='dianwo3(\""
 															+ row.code
 															+ "\",\""
 															+ row.remark

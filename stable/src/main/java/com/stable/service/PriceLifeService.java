@@ -21,10 +21,14 @@ import com.alibaba.fastjson.JSON;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.utils.RedisUtil;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.PriceLife;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 
+import lombok.extern.log4j.Log4j2;
+
 @Service
+@Log4j2
 public class PriceLifeService {
 
 	private Map<String, PriceLife> localCash = new ConcurrentHashMap<String, PriceLife>();
@@ -37,10 +41,11 @@ public class PriceLifeService {
 	 * 实时更新价格
 	 */
 	public void checkAndSetPrice(TradeHistInfoDaliy hist) {
-		PriceLife pl = this.getPriceLife(hist.getCode());
+		String code = hist.getCode();
+		PriceLife pl = this.getPriceLife(code);
 		if (pl == null) {
 			pl = new PriceLife();
-			pl.setCode(hist.getCode());
+			pl.setCode(code);
 			pl.setHighDate(hist.getDate());
 			pl.setHighest(hist.getHigh());
 			pl.setLowDate(hist.getDate());
@@ -58,6 +63,38 @@ public class PriceLifeService {
 			pl.setLowDate(hist.getDate());
 			pl.setLowest(hist.getLow());
 			saveToCache(pl);
+		}
+		if ("601001".equals(code)) {
+			log.info("pl == null ? {}:{}", (pl == null), (pl != null ? pl : "null 对象"));
+			log.info("hist.getHigh({}) > pl.getHighest({})", hist.getHigh(), pl.getHighest());
+			log.info("hist.getLow({}) < pl.getLowest({})", hist.getLow(), pl.getLowest());
+			WxPushUtil.pushSystem1("PriceLifeService.checkAndSetPrice 601001 日志断点");
+		}
+
+		int index = priceIndex(pl, code, hist.getClosed());
+		redisUtil.set(RedisConstant.RDS_PRICE_LIFE_INDEX_ + code, index + "");
+	}
+
+	// 收盘价介于最高价和最低价的index
+	public int priceIndex(String code, double price) {
+		PriceLife pl = getPriceLife(code);
+		return priceIndex(pl, code, price);
+	}
+
+	public int getLastIndex(String code) {
+		return Integer.valueOf(redisUtil.get(RedisConstant.RDS_PRICE_LIFE_INDEX_ + code, "100"));
+	}
+
+	private int priceIndex(PriceLife pl, String code, double price) {
+		if (pl == null || price <= pl.getLowest()) {
+			return 0;
+		} else if (price >= pl.getHighest()) {
+			return 100;
+		} else {
+			double base = pl.getHighest() - pl.getLowest();
+			double diff = price - pl.getLowest();
+			int present = Double.valueOf(diff / base * 100).intValue();
+			return present;
 		}
 	}
 

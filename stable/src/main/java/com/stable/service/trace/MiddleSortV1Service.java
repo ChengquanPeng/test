@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.service.CodePoolService;
 import com.stable.service.DaliyTradeHistroyService;
+import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.CodeModelService;
@@ -26,6 +27,8 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class MiddleSortV1Service {
+	@Autowired
+	private PriceLifeService priceLifeService;
 	@Autowired
 	private CodeModelService codeModelService;
 	@Autowired
@@ -83,7 +86,7 @@ public class MiddleSortV1Service {
 				}
 
 				// 是否中线(60日线)
-				if (avg.isWhiteHorseForMidV2(code, treadeDate)) {
+				if (priceLifeService.getLastIndex(code) >= 80 && avg.isWhiteHorseForMidV2(code, treadeDate)) {
 					if (m.getInmid() == 0) {
 						mid.append(code).append(",");
 					}

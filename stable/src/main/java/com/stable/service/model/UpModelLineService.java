@@ -55,7 +55,6 @@ import com.stable.utils.WxPushUtil;
 import com.stable.vo.ModelContext;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.Monitoring;
-import com.stable.vo.bus.PriceLife;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 import com.stable.vo.up.strategy.ModelV1;
@@ -151,7 +150,7 @@ public class UpModelLineService {
 			WxPushUtil.pushSystem1("模型运行异常..");
 		}
 		if (isJob) {
-			//sortV4Service.sortv4(today + "", today + "");
+			// sortV4Service.sortv4(today + "", today + "");
 			monitoringSortV4Service.autoSell(today);
 		}
 	}
@@ -283,24 +282,9 @@ public class UpModelLineService {
 		// 3程序单:次数:3/5/10/20/120/250天
 		lineTickData = new LineTickData(cxt, dailyList, tickDataService);
 		lineTickData.tickDataInfo();// TickData数据
-		cxt.setPriceIndex(this.priceIndex(cxt.getToday()));
+		cxt.setPriceIndex(priceLifeService.priceIndex(cxt.getToday().getCode(), cxt.getToday().getClose()));
 		for (StrategyListener m : models) {
 			m.processingModelResult(cxt, lineAvgPrice, linePrice, lineVol, lineTickData);
-		}
-	}
-
-	// 收盘价介于最高价和最低价的index
-	private int priceIndex(DaliyBasicInfo b) {
-		PriceLife pl = priceLifeService.getPriceLife(b.getCode());
-		if (pl == null || b.getClose() <= pl.getLowest()) {
-			return 0;
-		} else if (b.getClose() >= pl.getHighest()) {
-			return 100;
-		} else {
-			double base = pl.getHighest() - pl.getLowest();
-			double diff = b.getClose() - pl.getLowest();
-			int present = Double.valueOf(diff / base * 100).intValue();
-			return present;
 		}
 	}
 

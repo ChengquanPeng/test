@@ -36,7 +36,6 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class CodePoolService {
-
 	@Autowired
 	private EsCodePoolDao codePoolDao;
 	@Autowired
@@ -235,7 +234,7 @@ public class CodePoolService {
 			order = SortOrder.ASC;
 		}
 
-		FieldSortBuilder sort = SortBuilders.fieldSort("pe_ttm").unmappedType("integer").order(order);
+		FieldSortBuilder sort = SortBuilders.fieldSort("score").unmappedType("integer").order(order);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());

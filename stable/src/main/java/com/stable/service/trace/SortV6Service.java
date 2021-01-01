@@ -87,7 +87,7 @@ public class SortV6Service {
 		}
 		codePoolService.saveAll(list);
 		if (msg.length() > 0) {
-			WxPushUtil.pushSystem1("短线模型6(拉升回调):" + msg.toString());
+			WxPushUtil.pushSystem1("短线模型6(前期3-50%吸筹，深度回踩突然涨停后再2-3个交易日回踩拉起):" + msg.toString());
 		}
 	}
 
@@ -121,13 +121,16 @@ public class SortV6Service {
 			for (TradeHistInfoDaliyNofq r : asc) {
 				if (r.getDate() > topDate.getDate() && c <= 5) {
 					c++;
-					if (c == 1) {// 涨停第二天：是否直接低开低走
-						if (topDate.getClosed() > r.getHigh()) {
-							log.info("{} 涨停日 :{}，第二日:{} 第二天开走", code, topDate.getDate(), r.getDate());
-							return null;
-						}
+//					if (c == 1) {// 涨停第二天：是否直接低开低走
+//						if (topDate.getClosed() > r.getHigh()) {
+//							log.info("{} 涨停日 :{}，第二日:{} 第二天低开低走", code, topDate.getDate(), r.getDate());
+//							return null;
+//						}
+//					}
+					if (r.getClosed() < topDate.getYesterdayPrice()) {
+						log.info("{} {} 回调过多", code, date);
+						return null;
 					}
-
 					if (r.getClosed() < topDate.getClosed()) {
 						priceOK = true;
 						break;
@@ -135,7 +138,7 @@ public class SortV6Service {
 				}
 			}
 		} else {
-			log.info("{} 最近15个工作日无大涨交易", code);
+			log.info("{} {} 最近15个工作日无大涨交易", code, date);
 		}
 
 		if (priceOK) {
@@ -158,25 +161,43 @@ public class SortV6Service {
 			boolean hasBfTop = false;
 			if (bfTopDatePrice > topDate.getHigh()) {
 				double bfLowPrice = 999999999.99;
+				double bfLowPrice2 = 0.0;
 				for (TradeHistInfoDaliyNofq r : l3) {
-					if (r.getDate() < bfTopDate.getDate()) {
+					if (r.getDate() < bfTopDate.getDate()) {// 高点以前的拉升
 						if (r.getLow() < bfLowPrice) {
 							bfLowPrice = r.getLow();
 						}
 						if (r.getTodayChangeRate() >= 9.5) {
 							hasBfTop = true;
 						}
+					} else if (r.getDate() > bfTopDate.getDate() && r.getDate() < topDate.getDate()) {// 高点以后的回调
+						if (bfLowPrice2 == 0.0 || bfLowPrice2 > r.getLow()) {
+							bfLowPrice2 = r.getLow();
+						}
 					}
 				}
 				// 有涨停且是否有超过30%的拉升
 				double persent = CurrencyUitl.cutProfit(bfLowPrice, bfTopDatePrice);
-				if (hasBfTop && persent >= 30.0) {
-					return topDate;
+				double persent2 = CurrencyUitl.cutProfit(bfLowPrice2, bfTopDatePrice);
+				if (hasBfTop && persent >= 30.0 && persent <= 65.0 && persent2 >= 18.0
+						&& topDate.getClosed() < bfTopDatePrice) {
+					// 吸货之前的高点，未超过80%的整幅
+					List<TradeHistInfoDaliy> l4 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0,
+							topDate.getDate(), EsQueryPageUtil.queryPage100, SortOrder.DESC);
+					double maxPrice = l4.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
+							.getHigh();
+					double minPrice = l4.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get()
+							.getLow();
+
+					double persent3 = CurrencyUitl.cutProfit(minPrice, maxPrice);
+					if (persent3 <= 65.0) {
+						return topDate;
+					}
 				}
 			}
-
+			log.info("{} {} 无明显吸货嫌疑", code, date);
 		} else {
-			log.info("{} 无回调", code);
+			log.info("{} {} 无回调", code, date);
 		}
 		return null;
 	}
@@ -222,20 +243,6 @@ public class SortV6Service {
 	private String FILE_FOLDER = "/my/free/pvhtml/";
 
 	public static final Semaphore sempAll = new Semaphore(1);
-
-//	private boolean checkExist(List<TraceSortv2Vo> codesamples, int date, int day) {
-//		if (codesamples != null && codesamples.size() > 0) {
-//			TraceSortv2Vo tsv = codesamples.get(codesamples.size() - 1);
-//			// tsv.getDate()：目前最后的日期
-//			// tsv.getDate()+day：相加后的日期
-//			// 相加后的日期：在这日期之前不允许存在
-//			int day30 = Integer.valueOf(DateUtil.formatYYYYMMDD(DateUtil.addDate(tsv.getDate() + "", day)));
-//			if (day30 > date) {// 30天之内存在则不能在作为样本
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
 
 	private TraceSortv2Vo saveOkRec(String code, int date, int day) {
 		try {
@@ -401,7 +408,7 @@ public class SortV6Service {
 		);
 	}
 
-	private void sortv6(String startDate, String endDate) {
+	public void sortv6(String startDate, String endDate) {
 		int batch = Integer.valueOf(DateUtil.getTodayYYYYMMDD_NOspit());
 		if (StringUtils.isBlank(startDate)) {
 			startDate = "20200101";
@@ -424,7 +431,7 @@ public class SortV6Service {
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
-		int[] days = { 3, 5 };
+		int[] days = { 5 };
 		int op = 0;
 		int mp = 0;
 		try {
@@ -445,6 +452,9 @@ public class SortV6Service {
 							cnt.countDown();
 							continue;
 						}
+//						if (!"300661".equals(code)) {
+//							continue;
+//						}
 						TasksWorkerModel.add(code, new TasksWorkerModelRunnable() {
 							@Override
 							public void running() {
@@ -462,11 +472,7 @@ public class SortV6Service {
 											if (date < twoYearChkDate) {
 												continue;
 											}
-											TraceSortv2Vo t1 = middleRunningsortv6(code, date, day);
-											if (t1 != null && !isExist(codesamples, date, 30)) {
-												t1.setZhangtingDate(date);
-												codesamples.add(t1);
-											}
+											middleRunningsortv6(codesamples, code, date, day);
 										} catch (Exception e) {
 											ErrorLogFileUitl.writeError(e, code, sd + "", ed + " " + date);
 											e.printStackTrace();
@@ -502,10 +508,11 @@ public class SortV6Service {
 							WxPushUtil.pushSystem1(version + "样本区间:" + sd + " " + ed + " 获取样本代码:" + sb.toString());
 						} else {
 							TraceSortv2StatVo stat = new TraceSortv2StatVo();
-							String filepath = FILE_FOLDER + version + "_" + batch + "_" + startDate + "_" + ed;
+							String filepath = FILE_FOLDER + version + "_" + batch + "_" + startDate + "_" + ed + "_"
+									+ day;
 							stat(filepath, stat, samples);
-							sendMessge(version, batch, startDate, ed + "", 0, 0, stat, total_all, sysstart, detailOther,
-									op, mp);
+							sendMessge(version, batch, startDate, ed + "", day, 0, stat, total_all, sysstart,
+									detailOther, op, mp);
 						}
 					} else {
 						WxPushUtil.pushSystem1(version + "样本区间:" + sd + " " + ed + " 获取样本数为0");
@@ -528,9 +535,9 @@ public class SortV6Service {
 	public static void main(String[] args) {
 	}
 
-	EsQueryPageReq req00 = EsQueryPageUtil.queryPage11;
+	EsQueryPageReq req00 = EsQueryPageUtil.queryPage6;
 
-	private TraceSortv2Vo middleRunningsortv6(String code, int date, int day) {
+	private TraceSortv2Vo middleRunningsortv6(List<TraceSortv2Vo> codesamples, String code, int date, int day) {
 		try {
 			TradeHistInfoDaliyNofq topDate = is15DayTodayPriceOk(code, date);
 			if (isWhiteHorseForSortV6(topDate)) {
@@ -538,9 +545,13 @@ public class SortV6Service {
 				List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code,
 						topDate.getDate(), 0, req00, SortOrder.ASC);
 				for (TradeHistInfoDaliyNofq r : dailyList0) {
-					if (r.getDate() > topDate.getDate() && r.getTodayChangeRate() > 0
+					if (r.getDate() >= date && r.getDate() > topDate.getDate() && r.getTodayChangeRate() > 3.0
 							&& r.getClosed() > topDate.getClosed()) {
 						TraceSortv2Vo t1 = saveOkRec(code, r.getDate(), day);// find buy Date
+						if (t1 != null && !isExist(codesamples, r.getDate(), 30)) {
+							t1.setZhangtingDate(date);
+							codesamples.add(t1);
+						}
 						return t1;
 					}
 				}
@@ -763,12 +774,22 @@ public class SortV6Service {
 //				} else {
 //					log.info("dailyList0 is null");
 //				}
+//
+//				String code = "600798";
+//				int date = 20201218;
+//				String code = "002765";
+//				int date = 20201231;
+//				if (isWhiteHorseForSortV6(is15DayTodayPriceOk(code, date))) {
+//					log.info("{} 满足条件", code);
+//				} else {
+//					log.info("{} 不满足条件", code);
+//				}
 
-				sortv6("20200101", "20201120");
-				sortv6("20190101", "20191231");
-				sortv6("20180101", "20181231");
-				sortv6("20170101", "20171231");
-				sortv6("20160101", "20161231");
+				sortv6("20200101", "20201225");
+//				sortv6("20190101", "20191231");
+//				sortv6("20180101", "20181231");
+//				sortv6("20170101", "20171231");
+//				sortv6("20160101", "20161231");
 //				sortv4("20110101", "20111231");
 //				sortv4("20120101", "20121231");
 //				sortv4("20130101", "20131231");
