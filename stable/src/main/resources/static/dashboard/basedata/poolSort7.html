@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>Dashboard Template for Bootstrap</title>
+
+<!-- Bootstrap core CSS -->
+<link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
+<style type="text/css">
+body {
+	margin: 0px;
+}
+
+.zhezhao {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	background: #000;
+	width: 100%;
+	height: 100%;
+	opacity: 0.5;
+}
+
+.tankuang {
+	position: relative;
+	background: #fff;
+	width: 30%;
+	height: 30%;
+	border-radius: 5px;
+	margin: 5% auto;
+}
+
+#header {
+	height: 40px;
+}
+
+#header-right {
+	position: absolute;
+	width: 25px;
+	height: 25px;
+	border-radius: 5px;
+	background: red;
+	color: #fff;
+	right: 5px;
+	top: 5px;
+	text-align: center;
+}
+</style>
+</head>
+
+<body>
+	<div id="header"></div>
+	<div class="container-fluid">
+		<div class="row">
+			<div id="menu"></div>
+			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
+			<div class="col-lg-9">
+				<div class="input-group">
+					股票代码：<input type="text" class="form-control" id="queryCode">
+				</div>
+				<div class="input-group">
+					<span lass="input-group-btn">
+						<button class="btn btn-default" type="button" id="queryAction">
+							Go!</button>
+					</span>
+				</div>
+			</div>
+
+			<div id="rptList" style="width: 100%; hight: 100%; float: left；">
+				<table class="table table-hover" id="cusTable">
+				</table>
+			</div>
+			</main>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="/web/libs/js/jquery-3.1.1.slim.min.js"
+		integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/js/tether.min.js"
+		integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap.min.js"></script>
+	<script src="/web/libs/js/common.js"></script>
+	<script src="/web/libs/js/jquery.js"></script>
+	<script src="/web/libs/js/dashboard/index.js"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
+	<script src="/web/libs/js/dashboard/basedata.js"></script>
+	<script type="text/javascript">
+		$("#header").load("/web/header.html")
+		addActive("m_pool_s7");
+		$('#cusTable').bootstrapTable('destroy');
+		function loadData() {
+			$('#cusTable').bootstrapTable('destroy');
+			$("#cusTable")
+					.bootstrapTable(
+							{
+								method : "get", //使用get请求到服务器获取数据  
+								url : "/web/codePool/list", //获取数据的Servlet地址  
+								striped : true, //表格显示条纹  
+								pagination : true, //启动分页
+								cache : false,
+								pageSize : 20, //每页显示的记录数  
+								//pageNumber:1, //当前第几页  
+								pageList : [ 10, 15, 20, 50 ], //记录数可选列表  
+								search : false, //是否启用查询  
+								//showColumns: true,  //显示下拉框勾选要显示的列  
+								//showRefresh: true,  //显示刷新按钮  
+								sidePagination : "server", //表示服务端请求
+								//设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder  
+								//设置为limit可以获取limit, offset, search, sort, order  
+								queryParamsType : "undefined",
+								queryParams : function queryParams(params) { //设置查询参数  
+									var code = $('#queryCode').val();
+									//var gsort = $('#gsort').val();
+
+									var param = {
+										pageNum : params.pageNumber,
+										pageSize : params.pageSize,
+									};
+									param.code = code;
+									//param.orderBy = gsort;
+									param.asc = 1;
+									param.conceptId = "";
+									param.monitor = 0;
+									param.inmid = "";
+									param.asc = 1;
+									param.suspectBigBoss = "";
+									param.monitor = "";
+									param.inmid = "";
+									param.monitoreq = "";
+									param.pe = "";
+									param.pettm = "";
+									param.pb = "";
+									param.jiduc = "";
+									param.sortv6 = "";
+									param.sortv7 = "1";
+
+									return param;
+								},
+								columns : [
+										{
+											field : 'code',
+											title : '代码',
+											formatter : function(value, row,
+													index) {
+												var actions = [];
+												actions
+														.push('<a target="_blank" href="/web/code/' + value + '">'
+																+ value
+																+ '</a>');
+												return actions.join('');
+											}
+										},
+										{
+											field : 'codeName',
+											title : '名称'
+										},
+										{
+											field : 'sort7Desc',
+											title : '状态'
+										},
+										{
+											field : 'suspectBigBoss',
+											title : '疑似大牛'
+										},
+										{
+											field : 'yjlx',
+											title : '连续业绩'
+										},
+										{
+											field : 'pe',
+											title : 'pe市盈'
+										},
+										{
+											field : 'pe_ttm',
+											title : 'pe-ttm'
+										},
+										{
+											field : 'pb',
+											title : 'pb市净'
+										},
+										{
+											field : 'sortMode7Remark',
+											title : '备注'
+										},
+										{
+											field : 'monitor',
+											title : '操作',
+											formatter : function(value, row,
+													index) {
+													return "<a href='#' onclick='dianwo1(\""
+															+ row.code
+															+ "\",\""
+															+ row.remark
+															+ "\")'>确认</a>"
+															+ "&nbsp;<a href='#' onclick='dianwo2(\""
+															+ row.code
+															+ "\",\""
+															+ row.remark
+															+ "\")'>不符合</a>"
+															+ "&nbsp;<a href='#' onclick='dianwo3(\""
+															+ row.code
+															+ "\",\""
+															+ row.remark
+															+ "\")'>移除</a>";
+												}
+											}
+										} ],
+								responseHandler : function responseHandler(res) {
+
+									var s1 = JSON.stringify(res.result);
+									var s2 = '{"total":9999,"rows":' + s1 + '}';
+									//alert(s2);
+									return eval('(' + s2 + ')')
+								},
+								onLoadSuccess : function() { //加载成功时执行
+									$("#rptList").show();
+								},
+								onLoadError : function() { //加载失败时执行  
+									alert("加载数据失败");
+								}
+							});
+		}
+
+		$("#queryAction").click(function() {
+			//alert("abc");
+			loadData()
+		});
+		loadData();
+	</script>
+	<script type="text/javascript">
+		function dianwo1(code, remark) {
+			var remark = prompt(code + " 确定疑似箱体突破", remark + "确定疑似箱体突破");
+			//
+			$.ajax({
+				url : "/web/codePool/addSortV7", //访问地址--action地址
+				type : "post", //提交方式
+				data : {
+					code : code,
+					st : 2,
+					remark : remark
+				}, //提交给服务器的数据
+				success : function(reData) { //回调函数的处理方式
+					alert("已加入");
+				}
+			});
+		}
+		function dianwo2(code, remark) {
+			var remark = prompt(code + " 不符合条件", remark + " 不符合条件");
+			//
+			$.ajax({
+				url : "/web/codePool/addSortV7", //访问地址--action地址
+				type : "post", //提交方式
+				data : {
+					code : code,
+					st : 3,
+					remark : remark
+				}, //提交给服务器的数据
+				success : function(reData) { //回调函数的处理方式
+					alert("已加入");
+				}
+			});
+		}
+		function dianwo3(code, remark) {
+			var remark = prompt(code + " 重置", "重置");
+			$.ajax({
+				url : "/web/codePool/addSortV7", //访问地址--action地址
+				type : "post", //提交方式
+				data : {
+					code : code,
+					st : 0,
+					remark : remark
+				}, //提交给服务器的数据
+				success : function(reData) { //回调函数的处理方式
+					alert("已重置");
+				}
+			});
+		}
+	</script>
+</body>
+</html>

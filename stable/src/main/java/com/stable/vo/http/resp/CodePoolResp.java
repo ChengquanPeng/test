@@ -14,4 +14,6 @@ public class CodePoolResp extends CodePool {
 	private String profitShow;
 	private String yjlx;
 	private String monitorDesc;
+	private String sort6Desc;
+	private String sort7Desc;
 }

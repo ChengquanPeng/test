@@ -79,6 +79,30 @@ public class CodePoolService {
 		codePoolDao.save(c);
 	}
 
+	public void addSortV6(String code, int st, String remark) {
+		CodePool c = getCodePool(code);
+		c.setUpdateDate(DateUtil.getTodayIntYYYYMMDD());
+		c.setSortMode6(st);
+		if (StringUtils.isBlank(remark)) {
+			c.setSortMode6Remark("");
+		} else {
+			c.setSortMode6Remark(remark + c.getUpdateDate());
+		}
+		codePoolDao.save(c);
+	}
+
+	public void addSortV7(String code, int st, String remark) {
+		CodePool c = getCodePool(code);
+		c.setUpdateDate(DateUtil.getTodayIntYYYYMMDD());
+		c.setSortMode7(st);
+		if (StringUtils.isBlank(remark)) {
+			c.setSortMode7Remark("");
+		} else {
+			c.setSortMode7Remark(remark + c.getUpdateDate());
+		}
+		codePoolDao.save(c);
+	}
+
 	public CodePool getCodePool(String code) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -156,14 +180,15 @@ public class CodePoolService {
 	}
 
 	public List<CodePoolResp> getListForWeb(String code, String aliasCode, int asc, int monitor, int monitoreq,
-			int suspectBigBoss, int inmid, double pe, double pettm, double pb, EsQueryPageReq querypage, int jiduc) {
+			int suspectBigBoss, int inmid, double pe, double pettm, double pb, EsQueryPageReq querypage, int jiduc,
+			int sortv6, int sortv7) {
 		log.info(
 				"CodeBaseModel getListForWeb code={},asc={},num={},size={},aliasCode={},monitor={},monitoreq={},pe={},pettm={},pb={}",
 				code, asc, querypage.getPageNum(), querypage.getPageSize(), aliasCode, monitor, monitoreq, pe, pettm,
 				pb);
 
 		List<CodePool> list = getList(code, aliasCode, asc, monitor, monitoreq, suspectBigBoss, inmid, pe, pettm, pb,
-				querypage, jiduc);
+				querypage, jiduc, sortv6, sortv7);
 		List<CodePoolResp> res = new LinkedList<CodePoolResp>();
 		if (list != null) {
 			for (CodePool dh : list) {
@@ -172,12 +197,26 @@ public class CodePoolService {
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
 				resp.setYjlx(dh.getContinYj1() + "/" + dh.getContinYj2());
 				resp.setMonitorDesc(getDesc(dh.getMonitor()));
+				resp.setSort6Desc(getDesc2(dh.getSortMode6()));
+				resp.setSort7Desc(getDesc2(dh.getSortMode7()));
 				res.add(resp);
 			}
 		}
 		return res;
 	}
-
+	private String getDesc2(int mo) {
+		switch (mo) {
+		case 1:
+			return "待审核";
+		case 2:
+			return "疑似";
+		case 3:
+			return "不符合";
+		default:
+			return "无";
+		}
+	}
+	
 	private String getDesc(int mo) {
 		switch (mo) {
 		case 1:
@@ -194,7 +233,8 @@ public class CodePoolService {
 	}
 
 	public List<CodePool> getList(String code, String aliasCode, int asc, int monitor, int monitoreq,
-			int suspectBigBoss, int inmid, double pe, double pettm, double pb, EsQueryPageReq querypage, int jiduc) {
+			int suspectBigBoss, int inmid, double pe, double pettm, double pb, EsQueryPageReq querypage, int jiduc,
+			int sortv6, int sortv7) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -203,6 +243,12 @@ public class CodePoolService {
 			if (list != null) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			}
+		}
+		if (sortv6 > 0) {
+			bqb.must(QueryBuilders.rangeQuery("sortMode6").gt(0));
+		}
+		if (sortv7 > 0) {
+			bqb.must(QueryBuilders.rangeQuery("sortMode7").gt(0));
 		}
 		if (jiduc > 0) {
 			bqb.must(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("continYj1", jiduc))

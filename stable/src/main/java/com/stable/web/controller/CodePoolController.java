@@ -27,7 +27,7 @@ public class CodePoolController {
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> list(String code, int asc, String conceptId, String conceptName, int monitor,
 			String monitoreq, String suspectBigBoss, String inmid, String pe, String pettm, String pb, String jiduc,
-			EsQueryPageReq page) {
+			String sortv6, String sortv7, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
 
@@ -38,7 +38,9 @@ public class CodePoolController {
 					StringUtils.isNotBlank(pe) ? Double.valueOf(pe) : 0,
 					StringUtils.isNotBlank(pettm) ? Double.valueOf(pettm) : 0,
 					StringUtils.isNotBlank(pb) ? Double.valueOf(pb) : 0, page,
-					StringUtils.isNotBlank(jiduc) ? Integer.valueOf(jiduc) : 0));
+					StringUtils.isNotBlank(jiduc) ? Integer.valueOf(jiduc) : 0,
+					StringUtils.isNotBlank(sortv6) ? Integer.valueOf(sortv6) : 0,
+					StringUtils.isNotBlank(sortv7) ? Integer.valueOf(sortv7) : 0));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -79,5 +81,15 @@ public class CodePoolController {
 	@RequestMapping(value = "/addManual")
 	public void addManual(String code, String remark) {
 		codePoolService.addManual(code, remark);
+	}
+
+	@RequestMapping(value = "/addSortV6")
+	public void addSortV6(String code, int st, String remark) {
+		codePoolService.addSortV6(code, st, remark);
+	}
+
+	@RequestMapping(value = "/addSortV7")
+	public void addSortV7(String code, int st, String remark) {
+		codePoolService.addSortV7(code, st, remark);
 	}
 }

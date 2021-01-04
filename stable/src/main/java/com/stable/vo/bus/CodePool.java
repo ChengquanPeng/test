@@ -48,8 +48,15 @@ public class CodePool {
 	private String remark;
 	@Field(type = FieldType.Integer)
 	private int inmid = 0;// 符合中线
+	
 	@Field(type = FieldType.Integer)
-	private int sortMode6 = 0;// 符合短线
+	private int sortMode6 = 0;// 符合短线 //短线模型6(前期3-50%吸筹，深度回踩突然涨停后再2-5个交易日回踩拉起,涨停日不放量，超过涨停价格后买入，买入2内未大幅拉升放弃
+	@Field(type = FieldType.Integer)
+	private int sortMode7 = 0;// 突破箱体震荡  --//0未知，1待确认，2确认，3，不符合
+	@Field(type = FieldType.Text)
+	private String sortMode6Remark;
+	@Field(type = FieldType.Text)
+	private String sortMode7Remark;
 
 	@Field(type = FieldType.Integer)
 	private int score = 0;// 分数

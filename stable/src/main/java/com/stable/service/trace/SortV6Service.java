@@ -26,8 +26,6 @@ import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.data.AvgService;
-import com.stable.service.model.data.LineAvgPrice;
-import com.stable.service.model.data.LinePrice;
 import com.stable.service.model.data.StrongService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -64,6 +62,7 @@ public class SortV6Service {
 
 	public void sortv6(int tradeDate) {
 		StringBuffer msg = new StringBuffer();
+		StringBuffer msg2 = new StringBuffer();
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 		Map<String, CodePool> map = codePoolService.getCodePoolMap();
 		List<CodePool> list = new LinkedList<CodePool>();
@@ -75,19 +74,35 @@ public class SortV6Service {
 				continue;
 			}
 			CodePool cp = map.get(code);
+
+			// 短线模型6
 			if (isWhiteHorseForSortV6(is15DayTodayPriceOk(code, tradeDate))) {
-				if (cp != null) {
-					cp.setSortMode6(1);
+				if (cp.getSortMode6() == 0) {
 					msg.append(code).append(",");
+					cp.setSortMode6(1);
 				}
+
 			} else {
 				cp.setSortMode6(0);
+			}
+			// 短线模型7（箱体震荡新高，是否有波浪走势）
+			if (isWhiteHorseForSortV7(code, tradeDate)) {
+				if (cp.getSortMode7() == 0) {
+					msg2.append(code).append(",");
+					cp.setSortMode7(1);
+				}
+			} else {
+				cp.setSortMode7(0);
 			}
 			list.add(cp);
 		}
 		codePoolService.saveAll(list);
 		if (msg.length() > 0) {
-			WxPushUtil.pushSystem1("短线模型6(前期3-50%吸筹，深度回踩突然涨停后再2-3个交易日回踩拉起):" + msg.toString());
+			WxPushUtil.pushSystem1(
+					"短线模型6(前期3-50%吸筹，深度回踩突然涨停后再2-5个交易日回踩拉起,涨停日不放量，超过涨停价格后买入，买入2内未大幅拉升放弃):" + msg.toString());
+		}
+		if (msg2.length() > 0) {
+			WxPushUtil.pushSystem1("短线模型7(箱体震荡新高,是否有波浪走势):" + msg2.toString());
 		}
 	}
 
@@ -179,18 +194,21 @@ public class SortV6Service {
 				// 有涨停且是否有超过30%的拉升
 				double persent = CurrencyUitl.cutProfit(bfLowPrice, bfTopDatePrice);
 				double persent2 = CurrencyUitl.cutProfit(bfLowPrice2, bfTopDatePrice);
-				if (hasBfTop && persent >= 30.0 && persent <= 65.0 && persent2 >= 18.0
+				// log.info("{} {} {}", bfLowPrice, bfTopDatePrice, persent);
+				if (hasBfTop && persent >= 25.0 && persent <= 50.0 && persent2 >= 18.0
 						&& topDate.getClosed() < bfTopDatePrice) {
-					// 吸货之前的高点，未超过80%的整幅
+					// 吸货之前的高点，未超过35%的整幅
 					List<TradeHistInfoDaliy> l4 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0,
-							topDate.getDate(), EsQueryPageUtil.queryPage100, SortOrder.DESC);
+							l3.get(l3.size() - 1).getDate(), EsQueryPageUtil.queryPage100, SortOrder.DESC);
 					double maxPrice = l4.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
 							.getHigh();
 					double minPrice = l4.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get()
 							.getLow();
 
+					// log.info("{} {} ", minPrice, maxPrice);
+
 					double persent3 = CurrencyUitl.cutProfit(minPrice, maxPrice);
-					if (persent3 <= 65.0) {
+					if (persent3 <= 50.0 && isTradeOkBefor5ForVol(code, topDate.getDate())) {
 						return topDate;
 					}
 				}
@@ -218,6 +236,40 @@ public class SortV6Service {
 			}
 			log.info("{} 均线不满足", code);
 		}
+		return false;
+	}
+
+	/**
+	 * 箱体新高
+	 */
+	private boolean isWhiteHorseForSortV7(String code, int date) {
+		List<TradeHistInfoDaliy> l1 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
+				EsQueryPageUtil.queryPage5, SortOrder.DESC);
+		TradeHistInfoDaliy maxDate = l1.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed)).get();
+
+		List<TradeHistInfoDaliy> l2 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0,
+				l1.get(l1.size() - 1).getDate(), EsQueryPageUtil.queryPage120, SortOrder.DESC);// 用5个交易日的最后一个
+
+		List<TradeHistInfoDaliy> l3 = new LinkedList<TradeHistInfoDaliy>();
+		for (TradeHistInfoDaliy r : l2) {
+			l3.add(r);
+		}
+		l3.remove(0);// 移除当天
+		TradeHistInfoDaliy maxDate2 = l3.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+		// 是否半年收盘新高
+		if (maxDate.getDate() != maxDate2.getDate() && maxDate.getClosed() > maxDate2.getHigh()) {
+			double maxPrice = maxDate2.getHigh();
+			TradeHistInfoDaliy td = l3.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
+			double minPrice = td.getLow();
+
+			double persent3 = CurrencyUitl.cutProfit(minPrice, maxPrice);
+			log.info("{} {},min:{}->{} max:{}->{} 半年整幅{}%", code, date, td.getDate(), td.getLow(), maxDate2.getDate(),
+					maxDate2.getHigh(), persent3);
+			if (persent3 <= 40.0) {
+				return true;
+			}
+		}
+		log.info("{} {} 最近5个交易日收盘不是半年新高", code, date);
 		return false;
 	}
 
@@ -532,9 +584,6 @@ public class SortV6Service {
 		}
 	}
 
-	public static void main(String[] args) {
-	}
-
 	EsQueryPageReq req00 = EsQueryPageUtil.queryPage6;
 
 	private TraceSortv2Vo middleRunningsortv6(List<TraceSortv2Vo> codesamples, String code, int date, int day) {
@@ -564,18 +613,6 @@ public class SortV6Service {
 		return null;
 	}
 
-	/**
-	 * 1.tody price check
-	 */
-	public boolean isTodayPriceOk(double minRate, double maxRate, double todayChangeRate, double yesterdayPrice,
-			double closedPrice, double hightPrice) {
-		if (todayChangeRate >= minRate && todayChangeRate <= maxRate) {
-			LinePrice linePrice = new LinePrice();
-			return !linePrice.isLowClosePriceToday(todayChangeRate, yesterdayPrice, closedPrice, hightPrice, 0.5);
-		}
-		return false;
-	}
-
 	private boolean isExist(List<TraceSortv2Vo> codesamples, int date, int day) {
 		if (codesamples.size() > 0) {
 			TraceSortv2Vo tsv = codesamples.get(codesamples.size() - 1);
@@ -591,128 +628,10 @@ public class SortV6Service {
 	}
 
 	/**
-	 * 2.均线
-	 */
-	public boolean isWhiteHorseForSortV4(String code, int date, boolean isTrace) {
-		LineAvgPrice lineAvg = new LineAvgPrice(avgService);
-		return lineAvg.isWhiteHorseForSortV4(code, date, isTrace);
-	}
-
-	/**
-	 * 6.短期高位
-	 */
-	public boolean priceCheckForSortV4(String code, int date) {
-//		DaliyBasicInfo basic = daliyBasicHistroyService.getDaliyBasicInfoByDate(code, date);
-//		if (basic.getCirc_mv() > 2000000) {// 超过200亿流通市值不用看(船大掉头难,是主流资本,非主力资本)
-//			return true;
-//		}
-		LinePrice lineAvg = new LinePrice(daliyTradeHistroyService);
-		return lineAvg.priceCheckForSortV4(code, date);
-	}
-
-	/**
-	 * 3.前面交易-价格
-	 */
-	public boolean isTradeOkBefor5ForPrice(String code, int date, boolean isTrace) {
-		EsQueryPageReq req = EsQueryPageUtil.queryPage6;
-		if (!isTrace) {
-			req = EsQueryPageUtil.queryPage5;
-		}
-		List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
-				req, SortOrder.DESC);// 返回的list是不可修改对象
-		List<TradeHistInfoDaliyNofq> nlist = new ArrayList<TradeHistInfoDaliyNofq>();
-		for (TradeHistInfoDaliyNofq td : dailyList0) {
-			nlist.add(td);
-		}
-		// 实时不需要调用这个
-		if (isTrace) {
-			// TradeHistInfoDaliyNofq today = nlist.get(0);
-			nlist.remove(0);// 移除当天
-		}
-		double highPice = nlist.stream().max(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getClosed)).get()
-				.getClosed();
-		double lowPice = nlist.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getClosed)).get()
-				.getClosed();
-		if (CurrencyUitl.topPrice(lowPice, false) >= highPice) {
-			return true;
-			// 前一天收盘价比前面几天的最高价还高--过滤
-//			TradeHistInfoDaliyNofq last = nlist.get(0);
-//			nlist.remove(0);
-//			boolean isPriceOk = false;
-//			for (TradeHistInfoDaliyNofq td : nlist) {
-//				if (td.getHigh() > last.getClosed()) {
-//					isPriceOk = true;
-//					break;
-//				}
-//			}
-//			if (!isPriceOk) {
-//				log.info("前一天的收盘价比前面几天的最高价还高 {},{}", code, date);
-//			}
-//			return isPriceOk;
-		}
-		log.info("前五交易日振幅过大{},{},highPice={},lowPice={}", code, date, highPice, lowPice);
-		return false;
-	}
-
-	public boolean isTradeOkBefor5ForPricetemp(String code, int date, boolean isTrace) {
-		EsQueryPageReq req = EsQueryPageUtil.queryPage6;
-		if (!isTrace) {
-			req = EsQueryPageUtil.queryPage5;
-		}
-		List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
-				req, SortOrder.DESC);// 返回的list是不可修改对象
-		List<TradeHistInfoDaliyNofq> lowList = new ArrayList<TradeHistInfoDaliyNofq>();
-		for (int i = 0; i < dailyList0.size(); i++) {
-			if (isTrace && i == 0) {// 实时不需要调用这个-移除当天
-				continue;
-			}
-			lowList.add(dailyList0.get(i));
-		}
-		// 找出最低收盘价的一天
-		TradeHistInfoDaliyNofq lowDate = lowList.stream()
-				.min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getClosed)).get();
-
-		// 过滤最低收盘价之前的交易
-		List<TradeHistInfoDaliyNofq> highList = new ArrayList<TradeHistInfoDaliyNofq>();
-		for (TradeHistInfoDaliyNofq td : lowList) {
-			if (td.getDate() >= lowDate.getDate()) {
-				highList.add(td);
-			}
-		}
-		double lowPice = lowDate.getClosed();
-		double highPice = highList.stream().max(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getClosed)).get()
-				.getClosed();
-
-		if (CurrencyUitl.topPrice(lowPice, false) >= highPice) {
-			return true;
-			// 前一天收盘价比前面几天的最高价还高--过滤
-//			TradeHistInfoDaliyNofq last = nlist.get(0);
-//			nlist.remove(0);
-//			boolean isPriceOk = false;
-//			for (TradeHistInfoDaliyNofq td : nlist) {
-//				if (td.getHigh() > last.getClosed()) {
-//					isPriceOk = true;
-//					break;
-//				}
-//			}
-//			if (!isPriceOk) {
-//				log.info("前一天的收盘价比前面几天的最高价还高 {},{}", code, date);
-//			}
-//			return isPriceOk;
-		}
-		log.info("前五交易日振幅过大{},{},highPice={},lowPice={}", code, date, highPice, lowPice);
-		return false;
-	}
-
-	/**
 	 * 5.前面交易-交易量
 	 */
-	public boolean isTradeOkBefor5ForVol(String code, int date, boolean isTrace, double yesterdayPrice, double high,
-			double vol) {
+	public boolean isTradeOkBefor5ForVol(String code, int date) {
 		EsQueryPageReq req = EsQueryPageUtil.queryPage6;
-		if (!isTrace) {
-			req = EsQueryPageUtil.queryPage5;
-		}
 		List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
 				req, SortOrder.DESC);// 返回的list是不可修改对象
 		List<TradeHistInfoDaliyNofq> nlist = new ArrayList<TradeHistInfoDaliyNofq>();
@@ -720,20 +639,12 @@ public class SortV6Service {
 			nlist.add(td);
 		}
 
-		if (isTrace) {
-			// 实时不需要调用这个
-			TradeHistInfoDaliyNofq today = nlist.get(0);
-			nlist.remove(0);// 移除当天
-			yesterdayPrice = today.getYesterdayPrice();
-			high = today.getHigh();
-			vol = today.getVolume();
-		}
+		// 实时不需要调用这个
+		TradeHistInfoDaliyNofq today = nlist.get(0);
+		nlist.remove(0);// 移除当天
+		double vol = today.getVolume();
 		double total = 0.0;
-		double zhangfuTop = CurrencyUitl.cutProfit(yesterdayPrice, high);
 		int endIndx = nlist.size();// 涨幅较大，计算5天
-		if (zhangfuTop < 6) {// 涨幅较小，计算3天
-			endIndx = 3;
-		}
 		for (int i = 0; i < endIndx; i++) {
 			total += nlist.get(i).getVolume();
 		}
@@ -785,6 +696,7 @@ public class SortV6Service {
 //					log.info("{} 不满足条件", code);
 //				}
 
+				sortv6(20201231);
 				sortv6("20200101", "20201225");
 //				sortv6("20190101", "20191231");
 //				sortv6("20180101", "20181231");
@@ -793,6 +705,14 @@ public class SortV6Service {
 //				sortv4("20110101", "20111231");
 //				sortv4("20120101", "20121231");
 //				sortv4("20130101", "20131231");
+
+//				String code = "600789";
+//				int date = 20191231;
+//				if (isWhiteHorseForSortV7(code, date)) {
+//					log.info("{} 满足条件", code);
+//				} else {
+//					log.info("{} 不满足条件", code);
+//				}
 			}
 		}).start();
 	}
