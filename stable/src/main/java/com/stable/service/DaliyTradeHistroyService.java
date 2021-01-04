@@ -35,7 +35,6 @@ import com.stable.job.MyCallable;
 import com.stable.service.model.ImageStrategyListener;
 import com.stable.service.model.UpModelLineService;
 import com.stable.service.model.image.ImageService;
-import com.stable.service.trace.SortV5Service;
 import com.stable.service.trace.SortV6Service;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
@@ -88,8 +87,6 @@ public class DaliyTradeHistroyService {
 	private EsModelV1Dao esModelV1Dao;
 	@Autowired
 	private UpModelLineService upLevel1Service;
-	@Autowired
-	private SortV5Service sortV5Service;
 	@Autowired
 	private SortV6Service sortV6Service;
 
@@ -730,29 +727,7 @@ public class DaliyTradeHistroyService {
 				} finally {
 					// log.info("等待图片模型执行");
 					// nextImageJob(today);
-					log.info("等待code pool 执行");
-					nextCodePool(today);
-				}
-				return null;
-			}
-		});
-	}
-
-	public void nextCodePool(String today) {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			@Override
-			public Object call() throws Exception {
-				try {
-					TimeUnit.MINUTES.sleep(10);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				try {
-					sortV5Service.sortv5(Integer.valueOf(today));
-				} finally {
-					// log.info("等待图片模型执行");
-					// nextImageJob(today);
-					log.info("等待 短线模型6 执行");
+					log.info("等待 sort mode 执行");
 					nextSortMode6(today);
 				}
 				return null;
