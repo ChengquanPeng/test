@@ -1,11 +1,9 @@
 package com.stable.service.realtime;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,14 +13,9 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.BuyModelType;
 import com.stable.enums.TradeType;
-import com.stable.es.dao.base.MonitoringDao;
-import com.stable.service.DaliyBasicHistroyService;
-import com.stable.service.DaliyTradeHistroyService;
+import com.stable.service.CodePoolService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
-import com.stable.service.model.CodeModelService;
-import com.stable.service.model.UpModelLineService;
-import com.stable.service.model.data.AvgService;
 import com.stable.service.trace.BuyTraceService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.sina.SinaRealTime;
@@ -32,7 +25,7 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BuyTrace;
-import com.stable.vo.bus.Monitoring;
+import com.stable.vo.bus.CodePool;
 import com.stable.vo.bus.TickData;
 import com.stable.vo.http.resp.ReportVo;
 import com.stable.vo.http.resp.ViewVo;
@@ -43,24 +36,15 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MonitoringService {
 	private static final String BR = "</br>";
+
+	@Autowired
+	private CodePoolService codePoolService;
 	@Autowired
 	private TradeCalService tradeCalService;
-	@Autowired
-	private UpModelLineService upModelLineService;
-	@Autowired
-	private AvgService avgService;
-	@Autowired
-	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
 	private BuyTraceService buyTraceService;
-	@Autowired
-	private DaliyTradeHistroyService daliyTradeHistroyService;
-	@Autowired
-	private MonitoringDao monitoringDao;
-	@Autowired
-	private CodeModelService codeModelService;
 	private Map<String, RealtimeDetailsAnalyzer> map = null;
 	@Autowired
 	private MonitoringSortV4Service monitoringSortV4Service;
@@ -73,14 +57,13 @@ public class MonitoringService {
 				monitoringSortV4Service.startObservable();
 			}
 		}).start();
-		if (System.currentTimeMillis() > 0) {
-			return;
-		}
-
+//		if (System.currentTimeMillis() > 0) {
+//			return;
+//		}
 		String date = DateUtil.getTodayYYYYMMDD();
 		int idate = Integer.valueOf(date);
 		if (!tradeCalService.isOpen(idate)) {
-			//WxPushUtil.pushSystem1("非交易日结束监听");
+			// WxPushUtil.pushSystem1("非交易日结束监听");
 			return;
 		}
 		long now = new Date().getTime();
@@ -90,56 +73,27 @@ public class MonitoringService {
 			return;
 		}
 
-		String observableDate = tradeCalService.getPretradeDate(date);
 		try {
-			log.info("observableDate:" + observableDate);
 			// 所有买卖Code List
-			Set<String> allCode = new HashSet<String>();
 			// 获取买入监听列表
-			Set<Monitoring> bList = upModelLineService.getListByCodeForSet(EsQueryPageUtil.queryPage9999);
-			if (bList == null) {
-				bList = new HashSet<Monitoring>();
-			}
-
-			// 获取卖出监听列表
-			List<BuyTrace> sList = new LinkedList<BuyTrace>();
-			buyTraceService.getListByCode("", 0, TradeType.BOUGHT.getCode(), BuyModelType.B2.getCode(), 0,
-					EsQueryPageUtil.queryPage9999);
-
-			// 合并
-			bList.forEach(x -> {
-				allCode.add(x.getCode());
-			});
-			if (sList != null) {
-				for (BuyTrace bt : sList) {
-					if (!allCode.contains(bt.getCode())) {
-						allCode.add(bt.getCode());
-					}
-				}
-			}
+			List<CodePool> allCode = codePoolService.getPoolListForMonitor();
 
 			List<RealtimeDetailsAnalyzer> list = new LinkedList<RealtimeDetailsAnalyzer>();
 			RealtimeDetailsResulter resulter = new RealtimeDetailsResulter();
 
-			int buytt = 0;
-			int selltt = 0;
 			int failtt = 0;
 			if (allCode.size() > 0) {
 				// 启动监听线程
 				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
-				for (String code : allCode) {
+				for (CodePool cp : allCode) {
+					String code = cp.getCode();
 					log.info(code);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
-					int r = task.init(code, resulter, daliyBasicHistroyService, avgService,
-							stockBasicService.getCodeName(code), buyTraceService, daliyTradeHistroyService,
-							codeModelService, upModelLineService, monitoringDao);
+					int r = task.init(code, cp, resulter, stockBasicService.getCodeName(code));
 					if (r == 1) {
 						new Thread(task).start();
 						list.add(task);
 						map.put(code, task);
-
-						buytt += task.getBuyCnt();
-						selltt += task.getSellCnt();
 
 					} else {
 						if (r < 0) {
@@ -153,27 +107,28 @@ public class MonitoringService {
 				}
 			}
 
-			WxPushUtil.pushSystem1("交易日" + observableDate + "开始监听实时交易，监听总数:[" + bList.size() + "],实际总数[" + list.size()
-					+ "],买入[" + buytt + "],卖出[" + selltt + "],监听失败[" + failtt + "]");
+			WxPushUtil.pushSystem1(
+					"交易日监听实时交易，监听总数:[" + allCode.size() + "],实际总数[" + list.size() + "],监听失败[" + failtt + "]");
 
 			long from3 = new Date().getTime();
 			int millis = (int) ((isAlivingMillis - from3));
 			if (millis > 0) {
 				Thread.sleep(millis);
 			}
-			List<BuyTrace> buyedList = new LinkedList<BuyTrace>();
-			List<BuyTrace> selledList = new LinkedList<BuyTrace>();
+			// List<BuyTrace> buyedList = new LinkedList<BuyTrace>();
+			// List<BuyTrace> selledList = new LinkedList<BuyTrace>();
 			// 到点停止所有线程
 			for (RealtimeDetailsAnalyzer t : list) {
 				t.stop();
-				if (t.getBuyed() != null) {
-					buyedList.add(t.getBuyed());
-				}
-				if (t.getSelled() != null) {
-					selledList.add(t.getSelled());
-				}
+//				if (t.getBuyed() != null) {
+//					buyedList.add(t.getBuyed());
+//				}
+//				if (t.getSelled() != null) {
+//					selledList.add(t.getSelled());
+//				}
 			}
-			sendEndMessaget(buyedList, selledList);
+			WxPushUtil.pushSystem2Html("交易日结束监听!");
+			// sendEndMessaget(buyedList, selledList);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -181,7 +136,7 @@ public class MonitoringService {
 		}
 	}
 
-	private void sendEndMessaget(List<BuyTrace> buyedList, List<BuyTrace> selledList) {
+	public void sendEndMessaget(List<BuyTrace> buyedList, List<BuyTrace> selledList) {
 		StringBuffer sb = new StringBuffer("交易日结束监听,买入数量[" + buyedList.size() + "],卖出数量[" + selledList.size() + "]");
 		sb.append(BR);
 		int index = 1;

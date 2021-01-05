@@ -54,7 +54,7 @@ public class RealtimeDetailsResulter implements Runnable {
 					sb.append("序号:").append(index).append(",").append(rm.toMessage()).append(BR);
 					index++;
 				}
-				sb.append("请关注量(同花顺)，提防上影线，高开低走等, 链接:http://106.52.95.147:9999/web/realtime/buy?stop?detail?code=");
+				sb.append("股票池+3.5%预警");
 				WxPushUtil.pushSystem2Html(sb.toString());
 				msgs = new ConcurrentHashMap<String, RealtimeMsg>();
 			}

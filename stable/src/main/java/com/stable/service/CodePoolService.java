@@ -21,6 +21,7 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.enums.CodeModeType;
 import com.stable.es.dao.base.EsCodePoolDao;
 import com.stable.service.model.CodeModelService;
 import com.stable.utils.DateUtil;
@@ -157,20 +158,17 @@ public class CodePoolService {
 	/**
 	 * 监听列表
 	 */
-	public List<CodePool> getPoolList() {
+	public List<CodePool> getPoolListForMonitor() {
 		int pageNum = EsQueryPageUtil.queryPage9999.getPageNum();
 		int size = EsQueryPageUtil.queryPage9999.getPageSize();
 		log.info("queryPage pageNum={},size={}", pageNum, size);
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		// 监听列表 should OR 或 查询
-		bqb.must(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("midOk", 1))
-				.should(QueryBuilders.matchQuery("sortOk", 1)).should(QueryBuilders.matchQuery("manualOk", 1)));
-
-		FieldSortBuilder sort = SortBuilders.fieldSort("updateDate").unmappedType("integer").order(SortOrder.DESC);
+		bqb.must(QueryBuilders.rangeQuery("monitor").gt(0));
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
 
 		Page<CodePool> page = codePoolDao.search(sq);
 		if (page != null && !page.isEmpty()) {
@@ -196,7 +194,7 @@ public class CodePoolService {
 				BeanUtils.copyProperties(dh, resp);
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
 				resp.setYjlx(dh.getContinYj1() + "/" + dh.getContinYj2());
-				resp.setMonitorDesc(getDesc(dh.getMonitor()));
+				resp.setMonitorDesc(CodeModeType.getCodeName(dh.getMonitor()));
 				resp.setSort6Desc(getDesc2(dh.getSortMode6()));
 				resp.setSort7Desc(getDesc2(dh.getSortMode7()));
 				res.add(resp);
@@ -204,6 +202,7 @@ public class CodePoolService {
 		}
 		return res;
 	}
+
 	private String getDesc2(int mo) {
 		switch (mo) {
 		case 1:
@@ -212,21 +211,6 @@ public class CodePoolService {
 			return "疑似";
 		case 3:
 			return "不符合";
-		default:
-			return "无";
-		}
-	}
-	
-	private String getDesc(int mo) {
-		switch (mo) {
-		case 1:
-			return "疑似大牛";
-		case 2:
-			return "中线";
-		case 3:
-			return "人工";
-		case 4:
-			return "短线";
 		default:
 			return "无";
 		}

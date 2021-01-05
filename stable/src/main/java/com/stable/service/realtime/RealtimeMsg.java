@@ -1,10 +1,5 @@
 package com.stable.service.realtime;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.stable.utils.DateUtil;
@@ -18,40 +13,25 @@ public class RealtimeMsg {
 	private String code;
 	private String codeName;
 	private int baseScore;
+	private String modeName;
+	private String firstTimeWarning;
+	private int times;
 
-	public void addMessage(String verAndSubVer) {
+	public void tiggerMessage() {
 		// 1
-		m_ver.add(verAndSubVer);
-		// 2
-		String firstTimeWarning = m_firstTimeWarning.get(verAndSubVer);
 		if (StringUtils.isBlank(firstTimeWarning)) {
-			m_firstTimeWarning.put(verAndSubVer, DateUtil.getTodayYYYYMMDDHHMMSS());
+			firstTimeWarning = DateUtil.getTodayYYYYMMDDHHMMSS();
 		}
-
-		// 3
-		Integer times = m_times.get(verAndSubVer);
-		if (times == null) {
-			times = 1;
-		} else {
-			times = times + 1;
-		}
-		m_times.put(verAndSubVer, times);
+		times++;
 	}
-
-	// V-
-	private Set<String> m_ver = new HashSet<String>();
-	private Map<String, String> m_firstTimeWarning = new HashMap<String, String>();
-	private Map<String, Integer> m_times = new HashMap<String, Integer>();
 
 	public String toMessage() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("关注:").append(code).append(BLANK).append(codeName).append(BLANK)//
 				.append(",基本评分:").append(baseScore).append(BLANK);//
-		for (String ver : m_ver) {
-			sb.append(",模型版本:").append(ver).append(BLANK)//
-					.append(",第一次提醒时间:").append(m_firstTimeWarning.get(ver)).append(BLANK)//
-					.append(",提醒次数:").append(m_times.get(ver)).append(BLANK);//
-		}
+		sb.append(",模型版本:").append(code).append(BLANK)//
+				.append(",第一次提醒时间:").append(firstTimeWarning).append(BLANK)//
+				.append(",提醒次数:").append(times).append(BLANK);//
 		return sb.toString();
 	}
 }
