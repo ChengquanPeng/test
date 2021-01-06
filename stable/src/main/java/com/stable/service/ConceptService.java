@@ -30,7 +30,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * 概念
+ * 板块/概念
  */
 @Service
 @Log4j2

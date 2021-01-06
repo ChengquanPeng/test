@@ -109,9 +109,9 @@ public class CodeBaseModel extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int udpateDate;
 
-	public String getKeyString() {
-		return "[code=" + code + ",currYear=" + currYear + ", currQuarter=" + currQuarter + ", lastDividendDate="
-				+ lastDividendDate + ", lastBackDate=" + lastBackDate + ", endDate=" + endDate + ", floatDate="
-				+ floatDate + ", forestallYear=" + forestallYear + ", forestallQuarter=" + forestallQuarter + "]";
-	}
+	@Field(type = FieldType.Double)
+	private double syltbzj;// 加权净资产收益率+同比增加
+	@Field(type = FieldType.Double)
+	private double syldjd;// 加权净资产收益率+单季度百分比
+
 }

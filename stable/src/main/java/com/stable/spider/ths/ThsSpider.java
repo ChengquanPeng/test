@@ -15,6 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -22,6 +24,7 @@ import com.stable.es.dao.base.EsCodeConceptDao;
 import com.stable.es.dao.base.EsConceptDailyDao;
 import com.stable.es.dao.base.EsConceptDao;
 import com.stable.service.TradeCalService;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
@@ -52,6 +55,7 @@ public class ThsSpider {
 	private String GN_LIST = "http://q.10jqka.com.cn/gn/index/field/addtime/order/desc/page/%s/ajax/1/";
 	private static int ths = 1;// 同花顺概念
 	private static int thsHye = 2;// 同花顺行业
+	private static int ths884 = 3;// 同花顺概念2
 	private static String START_THS = "THS";
 	private static String SPIT = "/";
 //	private static Map<String, Concept> allmap = new HashMap<String, Concept>();
@@ -153,6 +157,7 @@ public class ThsSpider {
 			e.printStackTrace();
 		}
 		dofetchHye(isFirday);
+		dofetchThs884xxx(isFirday);
 	}
 
 	private void synchConceptDaliy(int date, Map<String, Concept> m) {
@@ -177,6 +182,72 @@ public class ThsSpider {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1("同花顺概念-每日交易出错 end");
 			throw new RuntimeException(e);
+		}
+	}
+
+	Map<String, String> header;
+	private String d884 = "http://d.10jqka.com.cn/v4/line/bk_%s/01/today.js?t=%s";
+
+	private String start = "quotebridge_v4_line_bk_881109_01_today({'bk_881109':";
+	private double ex = 10000 * 100;
+
+	public int getConceptDailyFor884(Concept cp) {
+		if (header == null) {
+			header = new HashMap<String, String>();
+			header.put("Host", "d.10jqka.com.cn");
+			header.put("Referer", "http://q.10jqka.com.cn/");
+		}
+		int trytime = 0;
+		boolean fetched = false;
+		List<ConceptDaily> list = new LinkedList<ConceptDaily>();
+		String url = String.format(d884, cp.getCode(), System.currentTimeMillis());
+		ThreadsUtil.sleepRandomSecBetween1And5();
+		do {
+			try {
+				HtmlPage page = htmlunitSpider.getHtmlPageFromUrl(url, header);
+				HtmlElement body = page.getBody();
+//				String res = HttpUtil.doGet2(url, header);
+				String res = body.asText();
+				System.err.println(res);
+				// System.err.println(res.substring(start.length(), res.length() - 2));
+				JSONObject json = JSON.parseObject(res.substring(start.length(), res.length() - 2));
+				ConceptDaily cd = new ConceptDaily();
+				cd.setOpen(json.getDouble("7"));// 今开
+//				cd.setYesterday(Double.valueOf(it.next().getLastElementChild().asText()));// 昨收
+				cd.setLow(json.getDouble("9"));// 最低
+				cd.setHigh(json.getDouble("8"));// 最高
+				cd.setVol(CurrencyUitl.roundHalfUp(json.getDouble("13") / ex));// 成交量(万手)
+//				cd.setTodayChange(Double.valueOf(it.next().getLastElementChild().asText().replace("%", "")));// 板块涨幅
+//				cd.setRanking(Integer.valueOf(it.next().getLastElementChild().asText().split(SPIT)[0]));// 涨幅排名
+//				cd.setUpdownNum(it.next().getLastElementChild().asText());// 涨跌家数
+//				cd.setInComeMoney(Double.valueOf(it.next().getLastElementChild().asText()));// 资金净流入(亿)
+				cd.setAmt(CurrencyUitl.covertToString2(json.getDouble("19")));// 成交额(亿)
+				cd.setClose(json.getDouble("11"));// 收盘
+				cd.setConceptId(cp.getId());
+				cd.setDate(json.getIntValue("1"));
+				cd.setId();
+				cp.setName(json.getString("name"));
+				log.info(cd);
+				list.add(cd);
+				fetched = true;
+			} catch (Exception e2) {
+				e2.printStackTrace();
+				trytime++;
+				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+				if (trytime >= 10) {
+					fetched = true;
+					e2.printStackTrace();
+					WxPushUtil.pushSystem1("同花顺概念-每日交易出错884," + cp.getName() + ",url=" + url);
+				}
+			} finally {
+				htmlunitSpider.close();
+			}
+		} while (!fetched);
+		if (list.size() > 0) {
+			saveConceptDaily(list);
+			return 1;
+		} else {
+			return 0;
 		}
 	}
 
@@ -566,5 +637,32 @@ public class ThsSpider {
 		int c = list.size();
 		saveConcept(list);
 		log.info("saveConcept size:{}", c);
+	}
+
+	// 884001-884191
+	private int end884 = 884191;
+	private String url884 = "http://q.10jqka.com.cn/thshy/detail/code/%s/";
+
+	public void dofetchThs884xxx(boolean isFirday) {
+		List<Concept> list = new LinkedList<Concept>();
+		int date = DateUtil.getTodayIntYYYYMMDD();
+		for (int code = 884001; code <= end884; code++) {
+			Concept cp = new Concept();
+			cp.setId(ThsSpider.START_THS + code);
+			cp.setCode(code + "");
+			cp.setHref(String.format(url884, code));
+			cp.setName(cp.getCode());
+			cp.setDate(date);
+			cp.setAliasCode(cp.getCode());
+			cp.setType(ThsSpider.ths884);
+			getConceptDailyFor884(cp);
+			if (isFirday) {
+				cp.setCnt(getSubCodeList(urlSubBase, cp, ThsSpider.ths884));
+				list.add(cp);
+			}
+		}
+		int c = list.size();
+		saveConcept(list);
+		log.info("dofetchThs884xxx size:{}", c);
 	}
 }

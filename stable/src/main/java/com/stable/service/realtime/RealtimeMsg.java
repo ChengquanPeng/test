@@ -29,7 +29,7 @@ public class RealtimeMsg {
 		StringBuffer sb = new StringBuffer();
 		sb.append("关注:").append(code).append(BLANK).append(codeName).append(BLANK)//
 				.append(",基本评分:").append(baseScore).append(BLANK);//
-		sb.append(",模型版本:").append(code).append(BLANK)//
+		sb.append(",模型版本:").append(modeName).append(BLANK)//
 				.append(",第一次提醒时间:").append(firstTimeWarning).append(BLANK)//
 				.append(",提醒次数:").append(times).append(BLANK);//
 		return sb.toString();

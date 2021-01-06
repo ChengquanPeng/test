@@ -160,8 +160,11 @@ public class CodeModelService {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
 		// 财务
-		FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code, treadeDate);
-		if (fbi == null) {
+		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(code, treadeDate,
+				EsQueryPageUtil.queryPage9999);
+		// FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code,
+		// treadeDate);
+		if (fbis == null) {
 			boolean onlineYear = stockBasicService.online1YearChk(code, treadeDate);
 			if (onlineYear) {
 				ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, treadeDate + "", "Code Model错误");
@@ -170,7 +173,11 @@ public class CodeModelService {
 			}
 			return;
 		}
-
+		FinanceAnalyzer fa = new FinanceAnalyzer();
+		for (FinanceBaseInfo fbi : fbis) {
+			fa.putJidu1(fbi);
+		}
+		FinanceBaseInfo fbi = fa.getCurrJidu();
 		CodeBaseModel newOne = new CodeBaseModel();
 		newOne.setCode(code);
 		newOne.setDate(treadeDate);
@@ -258,7 +265,7 @@ public class CodeModelService {
 			}
 		}
 
-		processingFinance(list, map, newOne, hasKb ? yjkb : null, hasYg ? yjyg : null, lastOne);
+		processingFinance(list, map, newOne, hasKb ? yjkb : null, hasYg ? yjyg : null, lastOne, fa, fbis);
 		if (bb != null) {
 			// 股东大会通过/实施/完成
 		} else {
@@ -399,13 +406,8 @@ public class CodeModelService {
 	}
 
 	private void processingFinance(List<CodePool> list, Map<String, CodePool> map, CodeBaseModel newOne, FinYjkb yjkb,
-			FinYjyg yjyg, CodeBaseModel lastOne) {
-		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(newOne.getCode(), newOne.getDate(),
-				EsQueryPageUtil.queryPage9999);
-		FinanceAnalyzer fa = new FinanceAnalyzer();
-		for (FinanceBaseInfo fbi : fbis) {
-			fa.putJidu1(fbi);
-		}
+			FinYjyg yjyg, CodeBaseModel lastOne, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
+
 		// log.info(fa.printInfo());
 		// 营收(科技类,故事类主要指标)
 		newOne.setIncomeUpYear(fa.getCurrYear().getYyzsrtbzz() > 0 ? 1 : 0);// 年报连续营收持续增长
@@ -427,7 +429,22 @@ public class CodeModelService {
 		newOne.setProfitDown2Quarter(fa.profitDown2Quarter() == 1 ? -2 : 0);// 最近2季度都同比下降
 		newOne.setProfitDown2Year(fa.profitDown2Year() == 1 ? -5 : 0);// 年报连续亏损年数？（可能退市）
 
+		// newOne
+		evaluateStep1(newOne, fa, fbis);
 		findBigBoss(newOne.getCode(), newOne.getDate(), list, map, fbis, fa, yjkb, yjyg, lastOne);
+	}
+
+	private void evaluateStep1(CodeBaseModel newOne, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
+		FinanceBaseInfo currJidu = fa.getCurrJidu();
+		newOne.setSyldjd(currJidu.getJqjzcsyl() / currJidu.getQuarter());// 单季度？
+		double t = 0.0;
+		int fpyear = currJidu.getYear() - 1;
+		for (FinanceBaseInfo ft : fbis) {
+			if (ft.getYear() == fpyear && ft.getQuarter() == currJidu.getQuarter()) {
+				t = ft.getJqjzcsyl();
+			}
+		}
+		newOne.setSyltbzj(currJidu.getJqjzcsyl() - t);// 同比增加？
 	}
 
 	public List<CodePool> findBigBoss(int treadeDate) {

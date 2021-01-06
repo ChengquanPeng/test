@@ -89,6 +89,28 @@ public class CurrencyUitl {
 		return String.valueOf(l);
 	}
 
+	public final static double covertToString2(Double l) {
+		if (l == null) {
+			return 0;
+		}
+		if (l > 100000000) {
+			BigDecimal b = new BigDecimal(l);
+			return b.divide(YI_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+		} else if (l > 10000) {
+			BigDecimal b = new BigDecimal(l);
+			return b.divide(WAN_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+		} else if (l >= 0) {
+
+		} else if (-100000000 > l) {
+			BigDecimal b = new BigDecimal(Math.abs(l));
+			return Double.valueOf("-" + b.divide(YI_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+		} else if (-10000 > l) {
+			BigDecimal b = new BigDecimal(Math.abs(l));
+			return Double.valueOf("-" + b.divide(WAN_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+		}
+		return l;
+	}
+
 	// 3%
 	public final static double topPrice3p(double preClosedPrice) {
 		preClosedPrice = preClosedPrice * 1.03;
