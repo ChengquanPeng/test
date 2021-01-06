@@ -77,7 +77,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					rm.tiggerMessage();
 					resulter.addBuyMessage(code, rm);
 					if (waitSend) {
-						WxPushUtil.pushSystem1(code + " " + codeName + " 涨幅超过3.5%");
+						WxPushUtil.pushSystem1(code + " " + codeName + " " + rm.getModeName() + " 涨幅超过3.5%");
 						waitSend = false;
 					}
 				}

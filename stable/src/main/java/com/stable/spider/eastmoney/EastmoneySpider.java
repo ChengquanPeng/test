@@ -177,6 +177,21 @@ public class EastmoneySpider {
 				newFinanceAnalysis.setKfjlr(kfjlr);
 			} catch (Exception e) {
 			}
+			try {
+				Double jqjzcsyl = data.getDouble("jqjzcsyl"); // 加权净资产收益率(%)
+				newFinanceAnalysis.setJqjzcsyl(jqjzcsyl);
+			} catch (Exception e) {
+			}
+			try {
+				Double tbjzcsyl = data.getDouble("tbjzcsyl"); // 摊薄净资产收益率(%)
+				newFinanceAnalysis.setTbjzcsyl(tbjzcsyl);
+			} catch (Exception e) {
+			}
+			try {
+				Double mgjyxjl = data.getDouble("mgjyxjl");
+				newFinanceAnalysis.setMgjyxjl(mgjyxjl);
+			} catch (Exception e) {
+			}
 			list.add(newFinanceAnalysis);
 		}
 		return list;
@@ -533,7 +548,11 @@ public class EastmoneySpider {
 	public static void main(String[] args) {
 //		EastmoneySpider.getNewFinanceAnalysis("000002", 0);
 //		String result = HttpUtil.doGet2(yjygBase);
-		EastmoneySpider es = new EastmoneySpider();
-		es.getFinYjkb();
+//		EastmoneySpider es = new EastmoneySpider();
+//		es.getFinYjkb();
+		List<FinanceBaseInfo> l = EastmoneySpider.getNewFinanceAnalysis("603707", 0);
+		for (FinanceBaseInfo r : l) {
+			System.err.println(r);
+		}
 	}
 }
