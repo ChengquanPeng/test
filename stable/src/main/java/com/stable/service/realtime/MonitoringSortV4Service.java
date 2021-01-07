@@ -38,7 +38,6 @@ import com.stable.utils.SpringUtil;
 import com.stable.utils.TasksWorkerModel;
 import com.stable.utils.TasksWorkerModelRunnable;
 import com.stable.utils.ThreadsUtil;
-import com.stable.utils.WxPushUtil;
 import com.stable.vo.SortV4Reslt;
 import com.stable.vo.bus.BuyTrace;
 import com.stable.vo.bus.CodeAttentionHish;
@@ -86,7 +85,7 @@ public class MonitoringSortV4Service {
 			log.info("now > isAlivingMillis,已超时");
 			return;
 		}
-		int cnt = 0;
+//		int cnt = 0;
 		String observableDate = tradeCalService.getPretradeDate(date);
 		try {
 			log.info("observableDate sortV4:" + observableDate);
@@ -108,8 +107,8 @@ public class MonitoringSortV4Service {
 				ScheduledWorker.scheduledTimeAndTask(new TimerTask() {
 					@Override
 					public void run() {
-						int sz = start(bList, yesterdayCondi, stopset).size();
-						WxPushUtil.pushSystem1("sortV4 实时分析已经生成总数:" + sz);
+						start(bList, yesterdayCondi, stopset).size();
+						// WxPushUtil.pushSystem1("sortV4 实时分析已经生成总数:" + sz);
 					}
 				}, msgtime);
 				log.info("scheduled Task with Time:{}", msgtime);
@@ -180,14 +179,14 @@ public class MonitoringSortV4Service {
 				}
 				if (bts.size() > 0) {
 					buyTraceService.addToTrace(bts);
-					cnt = bts.size();
+//					cnt = bts.size();
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 		}
-		WxPushUtil.pushSystem1("sortV4 模型监听结束,买入笔数:" + cnt);
+//		WxPushUtil.pushSystem1("sortV4 模型监听结束,买入笔数:" + cnt);
 	}
 
 	private double minRate = 3.2;
@@ -406,7 +405,7 @@ public class MonitoringSortV4Service {
 		int chkDate = Integer.valueOf(p3);
 		List<BuyTrace> bts = buyTraceService.getListByCode(null, 0, TradeType.BOUGHT.getCode(),
 				BuyModelType.B2.getCode(), ModelType.V4.getCode(), EsQueryPageUtil.queryPage9999);
-		int cnt = 0;
+		// int cnt = 0;
 		if (bts != null && bts.size() > 0) {
 			List<BuyTrace> upb = new ArrayList<BuyTrace>();
 			for (BuyTrace bt : bts) {
@@ -432,10 +431,10 @@ public class MonitoringSortV4Service {
 			}
 			if (upb.size() > 0) {
 				buyTraceService.addToTrace(upb);
-				cnt = upb.size();
+				// cnt = upb.size();
 			}
 		}
-		WxPushUtil.pushSystem1("sortV4 模型自动卖出笔数:" + cnt);
+		// WxPushUtil.pushSystem1("sortV4 模型自动卖出笔数:" + cnt);
 	}
 
 	public void signCodeOk(String code, Integer s) {

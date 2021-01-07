@@ -127,7 +127,7 @@ public class MonitoringService {
 //					selledList.add(t.getSelled());
 //				}
 			}
-			WxPushUtil.pushSystem2Html("交易日结束监听!");
+//			WxPushUtil.pushSystem2Html("交易日结束监听!");
 			// sendEndMessaget(buyedList, selledList);
 		} catch (Exception e) {
 			e.printStackTrace();
