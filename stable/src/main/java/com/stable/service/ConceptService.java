@@ -67,7 +67,7 @@ public class ConceptService {
 	}
 
 	public List<CodeConcept> getCodeConcept(String code) {
-		EsQueryPageReq queryPage = EsQueryPageUtil.queryPage100;
+		EsQueryPageReq queryPage = EsQueryPageUtil.queryPage9999;
 		Pageable pageable = PageRequest.of(queryPage.getPageNum(), queryPage.getPageSize());
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));

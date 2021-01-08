@@ -115,7 +115,7 @@ public class ThsSpider {
 	private Map<String, Concept> getAllAliasCode() {
 		Map<String, Concept> m = new HashMap<String, Concept>();
 		esConceptDao.findAll().forEach(x -> {
-			if (StringUtils.isNotBlank(x.getAliasCode()) && !"null".equals(x.getAliasCode())) {
+			if (StringUtils.isNotBlank(x.getAliasCode2()) && !"null".equals(x.getAliasCode2())) {
 				m.put(x.getCode(), x);
 				log.info(x);
 			}
@@ -406,7 +406,7 @@ public class ThsSpider {
 				trytime = 0;
 
 				if (!isFirday) {
-					if (index > limit) {// 最多3页
+					if (index > limit) {
 						break;
 					}
 				}
@@ -457,7 +457,7 @@ public class ThsSpider {
 
 	private void getAliasCdoe(Concept cp, Map<String, Concept> map) {
 		if (map.containsKey(cp.getCode())) {
-			cp.setAliasCode(map.get(cp.getCode()).getAliasCode());
+			cp.setAliasCode2(map.get(cp.getCode()).getAliasCode2());
 			return;
 		}
 		ThreadsUtil.sleepRandomSecBetween5And15();
@@ -468,7 +468,7 @@ public class ThsSpider {
 			String aliasCode = page.getElementById("clid").getAttribute("value");
 			log.info("{} get AliasCode code:{}", cp.getName(), aliasCode);
 			if (StringUtils.isNotBlank(aliasCode) && !"null".equals(aliasCode)) {
-				cp.setAliasCode(aliasCode);
+				cp.setAliasCode2(aliasCode);
 				map.put(cp.getCode(), cp);
 			}
 		} catch (Exception e) {
@@ -584,7 +584,7 @@ public class ThsSpider {
 							cp.setHref(href);
 							cp.setName(name);
 							cp.setDate(date);
-							cp.setAliasCode(code);
+							cp.setAliasCode2(code);
 							cp.setType(ThsSpider.thsHye);
 							if (isFirday) {
 								cp.setCnt(getSubCodeList(urlSubBase, cp, ThsSpider.thsHye));
@@ -647,13 +647,17 @@ public class ThsSpider {
 		List<Concept> list = new LinkedList<Concept>();
 		int date = DateUtil.getTodayIntYYYYMMDD();
 		for (int code = 884001; code <= end884; code++) {
+			if (code == 884038 || code == 884061 || code == 884102 || code == 884103 || code == 884104 || code == 884108
+					|| code == 884166 || code == 884170 || code == 884175) {
+				continue;
+			}
 			Concept cp = new Concept();
 			cp.setId(ThsSpider.START_THS + code);
 			cp.setCode(code + "");
 			cp.setHref(String.format(url884, code));
 			cp.setName(cp.getCode());
 			cp.setDate(date);
-			cp.setAliasCode(cp.getCode());
+			cp.setAliasCode2(cp.getCode());
 			cp.setType(ThsSpider.ths884);
 			getConceptDailyFor884(cp);
 			if (isFirday) {

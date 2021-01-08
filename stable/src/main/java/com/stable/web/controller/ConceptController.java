@@ -37,7 +37,7 @@ public class ConceptController {
 		try {
 			Map<String, Concept> m = new HashMap<String, Concept>();
 			esConceptDao.findAll().forEach(x -> {
-				if (StringUtils.isNotBlank(x.getAliasCode()) && !"null".equals(x.getAliasCode())) {
+				if (StringUtils.isNotBlank(x.getAliasCode2()) && !"null".equals(x.getAliasCode2())) {
 					m.put(x.getCode(), x);
 				}
 			});

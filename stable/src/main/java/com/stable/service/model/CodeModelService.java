@@ -698,7 +698,7 @@ public class CodeModelService {
 		EsQueryPageReq querypage = EsQueryPageUtil.queryPage1;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(aliasCode)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", aliasCode));
+			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode2", aliasCode));
 		} else {
 			return null;
 		}
