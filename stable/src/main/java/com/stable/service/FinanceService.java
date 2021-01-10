@@ -160,6 +160,9 @@ public class FinanceService {
 				resp.setYyzsrtbzz(dh.getYyzsrtbzz());
 				resp.setGsjlrtbzz(dh.getGsjlrtbzz());
 				resp.setKfjlrtbzz(dh.getKfjlrtbzz());
+				resp.setJqjzcsyl(dh.getJqjzcsyl());
+				resp.setMgjyxjl(dh.getMgjyxjl());
+				resp.setMll(dh.getMll());
 				res.add(resp);
 			}
 		}

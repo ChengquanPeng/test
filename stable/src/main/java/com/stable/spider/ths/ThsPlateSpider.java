@@ -12,6 +12,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.service.StockBasicService;
+import com.stable.spider.eastmoney.EastmoneyCompanySpider;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
@@ -34,6 +35,8 @@ public class ThsPlateSpider {
 	private String BASE_URL = "http://basic.10jqka.com.cn/%s/";
 	@Autowired
 	private StockBasicService stockBasicService;
+	@Autowired
+	private EastmoneyCompanySpider eastmoneyCompanySpider;
 
 	public void fetchAll(boolean updateAll) {
 		new Thread(new Runnable() {
@@ -43,13 +46,22 @@ public class ThsPlateSpider {
 					List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 					List<StockBaseInfo> upd = new LinkedList<StockBaseInfo>();
 					int needUpd = 0;
+
 					for (StockBaseInfo b : list) {
+						boolean updateCache = false;
 						if (updateAll || StringUtils.isBlank(b.getThsLightspot())
 								|| StringUtils.isBlank(b.getThsMainBiz())) {
 							needUpd++;
 							if (dofetch(b)) {
 								upd.add(b);
+								updateCache = true;
 							}
+						}
+						if (updateAll) {
+							eastmoneyCompanySpider.getCompanyInfo(b);
+						}
+						if (updateAll || updateCache) {
+							stockBasicService.synBaseStockInfo(b, true);
 						}
 					}
 					if (upd.size() > 0) {
@@ -89,12 +101,10 @@ public class ThsPlateSpider {
 						.getFirstElementChild();// 主营业务
 				b.setThsMainBiz(e3.getAttribute("title"));
 
-				if (StringUtils.isBlank(b.getThsLightspot())
-						|| StringUtils.isBlank(b.getThsMainBiz())) {
+				if (StringUtils.isBlank(b.getThsLightspot()) || StringUtils.isBlank(b.getThsMainBiz())) {
 					log.info("code={},getThsIndustry={},getThsLightspot={},getThsMainBiz={},trytime={}", code,
 							b.getThsIndustry(), b.getThsLightspot(), b.getThsMainBiz(), trytime);
 				} else {
-					stockBasicService.synBaseStockInfo(b, true);
 					return true;
 				}
 

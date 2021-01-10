@@ -15,6 +15,9 @@ public class FinanceBaseInfoResp {
 	private double yyzsrtbzz; // 营业总收入同比增长(%)
 	private double gsjlrtbzz; // 归属净利润同比增长(%)
 	private double kfjlrtbzz; // 扣非净利润同比增长(%)
+	private double jqjzcsyl; // 加权净资产收益率(%) -加权净资产收益率=当期净利润/当期加权平均净资产
+	private double mgjyxjl; // 每股经营现金流
+	private double mll; // 毛利率
 
 	public void setEndType(int year, int q) {
 		if (q == 4) {

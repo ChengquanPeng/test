@@ -73,6 +73,10 @@ public class StockBaseInfo extends EsBase {
 	private Date updDate;
 	@Field(type = FieldType.Long)
 	private Long updBatchNo;
+	@Field(type = FieldType.Text)
+	private String oldName;// 曾用名
+	@Field(type = FieldType.Text)
+	private String webSite;// 网站
 
 	public StockBaseInfo() {
 

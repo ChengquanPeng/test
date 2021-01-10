@@ -158,6 +158,8 @@ public class StockBasicService {
 				base.setThsIndustry(old.getThsIndustry());
 				base.setThsLightspot(old.getThsLightspot());
 				base.setThsMainBiz(old.getThsMainBiz());
+				base.setOldName(old.getOldName());
+				base.setWebSite(old.getWebSite());
 			}
 		}
 

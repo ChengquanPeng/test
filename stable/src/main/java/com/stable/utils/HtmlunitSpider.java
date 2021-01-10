@@ -96,7 +96,24 @@ public class HtmlunitSpider {
 			return null;
 		}
 	}
-	
+
+	public HtmlPage getHtmlPageFromUrlWithoutJs(String url, Map<String, String> header) {
+		WebClient webclient = createWithoutJs();
+		try {
+			if (header != null) {
+				header.keySet().forEach(key -> {
+					webclient.addRequestHeader(key, header.get(key));
+				});
+			}
+			tl.set(webclient);
+			return webclient.getPage(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Http 页面异常，链接地址:" + url);
+			return null;
+		}
+	}
+
 	public HtmlPage getHtmlPageFromUrlWithoutJs(String url) {
 		WebClient webclient = createWithoutJs();
 		try {
@@ -108,7 +125,7 @@ public class HtmlunitSpider {
 			return null;
 		}
 	}
-	
+
 	private WebClient createWithoutJs() {
 		WebClient webClient = new WebClient();
 		webClient = new WebClient(BrowserVersion.CHROME);// 新建一个模拟谷歌Chrome浏览器的浏览器客户端对象

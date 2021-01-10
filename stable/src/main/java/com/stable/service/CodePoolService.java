@@ -38,6 +38,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class CodePoolService {
 	@Autowired
+	private ConceptService conceptService;
+	@Autowired
 	private EsCodePoolDao codePoolDao;
 	@Autowired
 	private CodeModelService codeModelService;
@@ -223,7 +225,7 @@ public class CodePoolService {
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		} else if (StringUtils.isNotBlank(aliasCode)) {
-			List<String> list = this.codeModelService.listCodeByCodeConceptId(aliasCode);
+			List<String> list = this.conceptService.listCodeByAliasCode(aliasCode);
 			if (list != null) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			}

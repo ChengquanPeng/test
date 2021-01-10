@@ -24,19 +24,20 @@ import com.alibaba.fastjson.JSON;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeBaseModelDao;
 import com.stable.es.dao.base.EsCodeBaseModelHistDao;
-import com.stable.es.dao.base.EsCodeConceptDao;
-import com.stable.es.dao.base.EsConceptDao;
 import com.stable.service.BuyBackService;
 import com.stable.service.CodePoolService;
+import com.stable.service.ConceptService;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
 import com.stable.service.PledgeStatService;
 import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
+import com.stable.service.TradeCalService;
 import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.trace.MiddleSortV1Service;
 import com.stable.utils.BeanCopy;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
@@ -44,9 +45,7 @@ import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
-import com.stable.vo.bus.CodeConcept;
 import com.stable.vo.bus.CodePool;
-import com.stable.vo.bus.Concept;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.DividendHistory;
 import com.stable.vo.bus.FinYjkb;
@@ -63,6 +62,8 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class CodeModelService {
+	@Autowired
+	private TradeCalService tradeCalService;
 	@Autowired
 	private CodePoolService codePoolService;
 	@Autowired
@@ -86,15 +87,12 @@ public class CodeModelService {
 	@Autowired
 	private ShareFloatService shareFloatService;
 	@Autowired
-	private EsConceptDao esConceptDao;
-	@Autowired
-	private EsCodeConceptDao esCodeConceptDao;
+	private ConceptService conceptService;
 	@Autowired
 	private MiddleSortV1Service middleSortV1Service;
 
 	public synchronized void runJob(boolean isJob, int date) {
 		try {
-			log.info("CodeModel processing date={}", date);
 			run(date);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -104,6 +102,11 @@ public class CodeModelService {
 	}
 
 	private synchronized void run(int tradeDate) {
+		log.info("CodeModel processing request date={}", tradeDate);
+		if (!tradeCalService.isOpen(tradeDate)) {
+			tradeDate = tradeCalService.getPretradeDate(tradeDate);
+		}
+		log.info("Actually processing request date={}", tradeDate);
 		int updatedate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		List<CodeBaseModel> listLast = new LinkedList<CodeBaseModel>();
 		List<CodeBaseModelHist> listHist = new LinkedList<CodeBaseModelHist>();
@@ -436,7 +439,7 @@ public class CodeModelService {
 
 	private void evaluateStep1(CodeBaseModel newOne, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
 		FinanceBaseInfo currJidu = fa.getCurrJidu();
-		newOne.setSyldjd(currJidu.getJqjzcsyl() / currJidu.getQuarter());// 单季度？
+		newOne.setSyldjd(CurrencyUitl.roundHalfUp(currJidu.getJqjzcsyl() / (double) currJidu.getQuarter()));// 单季度？
 		double t = 0.0;
 		int fpyear = currJidu.getYear() - 1;
 		for (FinanceBaseInfo ft : fbis) {
@@ -444,7 +447,7 @@ public class CodeModelService {
 				t = ft.getJqjzcsyl();
 			}
 		}
-		newOne.setSyltbzj(currJidu.getJqjzcsyl() - t);// 同比增加？
+		newOne.setSyltbzj(CurrencyUitl.roundHalfUp(currJidu.getJqjzcsyl() - t));// 同比增加？
 	}
 
 	public List<CodePool> findBigBoss(int treadeDate) {
@@ -635,7 +638,7 @@ public class CodeModelService {
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		} else if (StringUtils.isNotBlank(aliasCode)) {
-			List<String> list = listCodeByCodeConceptId(aliasCode);
+			List<String> list = conceptService.listCodeByAliasCode(aliasCode);
 			if (list != null) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			}
@@ -694,28 +697,6 @@ public class CodeModelService {
 		return res;
 	}
 
-	private String getConceptId(String aliasCode) {
-		EsQueryPageReq querypage = EsQueryPageUtil.queryPage1;
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		if (StringUtils.isNotBlank(aliasCode)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode2", aliasCode));
-		} else {
-			return null;
-		}
-		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
-
-		Page<Concept> page = esConceptDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent().get(0).getId();
-		}
-		log.info("no records aliasCode:{}", aliasCode);
-		return null;
-
-	}
-
 	public List<String> listCodeByCodeConceptName(String conceptName) {
 		List<String> codes = new LinkedList<String>();
 		List<StockBaseInfo> l = stockBasicService.getAllOnStatusList();
@@ -728,30 +709,4 @@ public class CodeModelService {
 		return codes;
 	}
 
-	public List<String> listCodeByCodeConceptId(String aliasCode) {
-		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		String conceptId = getConceptId(aliasCode);
-		if (StringUtils.isNotBlank(conceptId)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("conceptId", conceptId));
-		} else {
-			return null;
-		}
-
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
-		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
-
-		Page<CodeConcept> page = esCodeConceptDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			List<CodeConcept> list = page.getContent();
-			List<String> codes = new LinkedList<String>();
-			for (CodeConcept cc : list) {
-				codes.add(cc.getCode());
-			}
-			return codes;
-		}
-		log.info("no records listCodeByCodeConceptId:{}", conceptId);
-		return null;
-	}
 }

@@ -179,17 +179,22 @@ public class EastmoneySpider {
 			}
 			try {
 				Double jqjzcsyl = data.getDouble("jqjzcsyl"); // 加权净资产收益率(%)
-				newFinanceAnalysis.setJqjzcsyl(jqjzcsyl);
+				newFinanceAnalysis.setJqjzcsyl(CurrencyUitl.roundHalfUp(jqjzcsyl));
 			} catch (Exception e) {
 			}
 			try {
 				Double tbjzcsyl = data.getDouble("tbjzcsyl"); // 摊薄净资产收益率(%)
-				newFinanceAnalysis.setTbjzcsyl(tbjzcsyl);
+				newFinanceAnalysis.setTbjzcsyl(CurrencyUitl.roundHalfUp(tbjzcsyl));
 			} catch (Exception e) {
 			}
 			try {
 				Double mgjyxjl = data.getDouble("mgjyxjl");
-				newFinanceAnalysis.setMgjyxjl(mgjyxjl);
+				newFinanceAnalysis.setMgjyxjl(CurrencyUitl.roundHalfUp(mgjyxjl));
+			} catch (Exception e) {
+			}
+			try {
+				Double mll = data.getDouble("mll");
+				newFinanceAnalysis.setMll(CurrencyUitl.roundHalfUp(mll));
 			} catch (Exception e) {
 			}
 			list.add(newFinanceAnalysis);

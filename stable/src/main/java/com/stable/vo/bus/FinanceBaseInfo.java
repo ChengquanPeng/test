@@ -48,6 +48,8 @@ public class FinanceBaseInfo extends EsBase {
 	private double tbjzcsyl; // 摊薄净资产收益率(%) -摊薄净资产收益率=报告期净利润/期末净资产
 	@Field(type = FieldType.Double)
 	private double mgjyxjl; // 每股经营现金流
+	@Field(type = FieldType.Double)
+	private double mll; // 毛利率
 
 	public FinanceBaseInfo() {
 

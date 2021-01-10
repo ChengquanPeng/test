@@ -40,6 +40,8 @@ import lombok.extern.log4j.Log4j2;
 public class ThsSpider {
 	private static final String BRK = "跳过首发新股";
 	@Autowired
+	private ThsHolderSpider thsHolderSpider;
+	@Autowired
 	private TradeCalService tradeCalService;
 	@Autowired
 	private EsConceptDao esConceptDao;
@@ -138,9 +140,15 @@ public class ThsSpider {
 		if (weekday != 6) {
 			log.info("今日非周五");
 			isFirday = false;
-		} else {
+		}
+		startinner(date, isFirday);
+	}
+
+	private void startinner(int date, boolean isFirday) {
+		if (isFirday) {
 			deleteAllCodeConcept();
 		}
+
 		Map<String, Concept> m = synchGnAndCode(isFirday);
 		if (m == null) {
 			try {
@@ -158,7 +166,18 @@ public class ThsSpider {
 		}
 		dofetchHye(isFirday);
 		dofetchThs884xxx(isFirday);
+		thsHolderSpider.dofetchHolder(isFirday);
 	}
+
+//	@PostConstruct
+//	private void test() {
+//		new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				startinner(Integer.valueOf(DateUtil.getTodayYYYYMMDD()), true);
+//			}
+//		}).start();
+//	}
 
 	private void synchConceptDaliy(int date, Map<String, Concept> m) {
 		try {

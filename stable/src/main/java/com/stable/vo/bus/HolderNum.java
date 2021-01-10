@@ -12,29 +12,24 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-@Document(indexName = "concept")
-public class Concept extends EsBase {
+@Document(indexName = "holder_num")
+public class HolderNum extends EsBase {
+
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 8129067850969692849L;
+	private static final long serialVersionUID = 3583785305111756892L;
+	/**
+	 * 
+	 */
 	@Id
 	private String id;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String code;
-	@Field(type = FieldType.Text)
-	private String name;
 	@Field(type = FieldType.Integer)
 	private int date;
 	@Field(type = FieldType.Integer)
-	private int type;
-	@Field(type = FieldType.Text)
-	private String href;
-	@Field(type = FieldType.Integer)
-	private int cnt;
-	@Field(type = FieldType.Keyword)
-	private String aliasCode2;
-	@Field(type = FieldType.Integer)
-	private int updateDate;
-
+	private int num;
+	@Field(type = FieldType.Double)
+	private double avgPrice;
 }
