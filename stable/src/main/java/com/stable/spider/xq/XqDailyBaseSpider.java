@@ -11,10 +11,13 @@ import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
+import com.stable.service.FinanceService;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
+import com.stable.vo.bus.FinanceBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -26,6 +29,8 @@ public class XqDailyBaseSpider {
 	private HtmlunitSpider htmlunitSpider;// = new HtmlunitSpider();
 	@Autowired
 	private EsDaliyBasicInfoDao esDaliyBasicInfoDao;
+	@Autowired
+	private FinanceService financeService;
 
 	private String F1 = "市盈率(静)";
 	private String F2 = "市盈率(动)";
@@ -54,6 +59,17 @@ public class XqDailyBaseSpider {
 					for (DaliyBasicInfo b : list) {
 						if (dofetch(b)) {
 							upd.add(b);
+						}
+						// 市赚率
+						// 市盈率/净资产收益率（PE/ROE）
+						FinanceBaseInfo fbi = financeService.getLastFinaceReport(b.getCode());
+						if (fbi != null && fbi.getJqjzcsyl() != 0.0 && b.getXq_pe_ttm() > 0) {
+							if (fbi.getSyldjd() != 0) {
+								b.setSzl(CurrencyUitl.roundHalfUp(b.getXq_pe_ttm() / fbi.getSyldjd()));
+							} else {
+								double syldjd = CurrencyUitl.roundHalfUp(fbi.getJqjzcsyl() / (double) fbi.getQuarter());
+								b.setSzl(CurrencyUitl.roundHalfUp(b.getXq_pe_ttm() / syldjd));
+							}
 						}
 					}
 					if (upd.size() > 0) {
@@ -149,5 +165,6 @@ public class XqDailyBaseSpider {
 		// XqDailyBaseSpider x = new XqDailyBaseSpider();
 		// DaliyBasicInfo b = new DaliyBasicInfo();
 		// System.err.println(b.getPb());
+		System.err.println(100.0 / (-1));
 	}
 }

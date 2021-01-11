@@ -95,35 +95,33 @@ public class TushareSpider {
 	 * 
 	 * @return
 	 */
-	private final String stock_company_sh_fields = "ts_code,chairman,manager,secretary,reg_capital,setup_date,province,city,introduction,website,email,office,employees,main_business,business_scope";
-
-	public JSONArray getStockShCompany() {
-		JSONObject json = new JSONObject();
-		json.put("api_name", "stock_company");
-		json.put("params", JSON.parse("{'exchange':'SSE'}"));
-		json.put("fields", stock_company_sh_fields);
-		String result = post(json);
-		JSONObject data = JSON.parseObject(result);
-		JSONArray items = data.getJSONObject("data").getJSONArray("items");
-		return items;
-	}
-
+//	private final String stock_company_sh_fields = "ts_code,chairman,manager,secretary,reg_capital,setup_date,province,city,introduction,website,email,office,employees,main_business,business_scope";
+//
+//	public JSONArray getStockShCompany() {
+//		JSONObject json = new JSONObject();
+//		json.put("api_name", "stock_company");
+//		json.put("params", JSON.parse("{'exchange':'SSE'}"));
+//		json.put("fields", stock_company_sh_fields);
+//		String result = post(json);
+//		JSONObject data = JSON.parseObject(result);
+//		JSONArray items = data.getJSONObject("data").getJSONArray("items");
+//		return items;
+//	}
 	/**
 	 * 获取深圳公司基础信息
 	 */
-
-	private final String stock_company_sz_fields = "ts_code,chairman,manager,secretary,reg_capital,setup_date,province,city,introduction,website,email,office,employees,main_business,business_scope";
-
-	public JSONArray getStockSZCompany() {
-		JSONObject json = new JSONObject();
-		json.put("api_name", "stock_company");
-		json.put("params", JSON.parse("{'exchange':'SZSE'}"));
-		json.put("fields", stock_company_sz_fields);
-		String result = post(json);
-		JSONObject data = JSON.parseObject(result);
-		JSONArray items = data.getJSONObject("data").getJSONArray("items");
-		return items;
-	}
+//	private final String stock_company_sz_fields = "ts_code,chairman,manager,secretary,reg_capital,setup_date,province,city,introduction,website,email,office,employees,main_business,business_scope";
+//
+//	public JSONArray getStockSZCompany() {
+//		JSONObject json = new JSONObject();
+//		json.put("api_name", "stock_company");
+//		json.put("params", JSON.parse("{'exchange':'SZSE'}"));
+//		json.put("fields", stock_company_sz_fields);
+//		String result = post(json);
+//		JSONObject data = JSON.parseObject(result);
+//		JSONArray items = data.getJSONObject("data").getJSONArray("items");
+//		return items;
+//	}
 
 	/**
 	 * 得到前10大持有人

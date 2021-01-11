@@ -95,6 +95,8 @@ public class DaliyBasicInfo extends EsBase {
 	private double xq_pe_ttm;// float 市盈率（TTM）
 	@Field(type = FieldType.Double)
 	private double xq_pb;// float 市净率（总市值/净资产）
+	@Field(type = FieldType.Double)
+	private double szl;// float 市赚率 市盈率/净资产收益率（PE/ROE）
 
 	@Field(type = FieldType.Integer)
 	private int fetchTickData = -1;// 是否有fetch tick Data

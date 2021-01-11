@@ -180,6 +180,8 @@ public class EastmoneySpider {
 			try {
 				Double jqjzcsyl = data.getDouble("jqjzcsyl"); // 加权净资产收益率(%)
 				newFinanceAnalysis.setJqjzcsyl(CurrencyUitl.roundHalfUp(jqjzcsyl));
+				newFinanceAnalysis
+						.setSyldjd(CurrencyUitl.roundHalfUp(jqjzcsyl / (double) newFinanceAnalysis.getQuarter()));
 			} catch (Exception e) {
 			}
 			try {

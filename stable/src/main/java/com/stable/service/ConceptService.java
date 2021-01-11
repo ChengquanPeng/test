@@ -146,7 +146,8 @@ public class ConceptService {
 		EsQueryPageReq querypage = EsQueryPageUtil.queryPage1;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(aliasCode)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode2", aliasCode));
+			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", aliasCode));
+//			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode2", aliasCode));
 		} else {
 			return null;
 		}
@@ -196,11 +197,17 @@ public class ConceptService {
 
 	@PostConstruct
 	private void test() {
-		String aliasCode = "885883";
-		System.err.println(getConceptId(aliasCode));
-		List<String> l = listCodeByAliasCode(aliasCode);
-		for (String s : l) {
-			System.err.println(getConceptId(s));
-		}
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				String aliasCode = "885876";
+				System.err.println(getConceptId(aliasCode));
+				List<String> l = listCodeByAliasCode(aliasCode);
+				for (String s : l) {
+					System.err.println(s);
+				}
+				System.err.println(l.size());
+			}
+		}).start();
 	}
 }
