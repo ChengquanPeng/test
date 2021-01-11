@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.config.SpringConfig;
 import com.stable.service.BuyBackService;
-import com.stable.service.CodeAttentionService;
 import com.stable.service.DividendService;
 import com.stable.service.model.CodeModelService;
 import com.stable.utils.DateUtil;
@@ -31,8 +30,6 @@ public class EveryDayJob extends MySimpleJob {
 	private BuyBackService buyBackService;
 	@Autowired
 	private CodeModelService codeModelService;
-	@Autowired
-	private CodeAttentionService codeAttentionService;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
@@ -51,7 +48,7 @@ public class EveryDayJob extends MySimpleJob {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		codeAttentionService.fetchAll();
+		// codeAttentionService.fetchAll();
 		codeModelService.runJob(true, Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
 	}
 }
