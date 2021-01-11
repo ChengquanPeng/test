@@ -117,7 +117,7 @@ public class ThsSpider {
 	private Map<String, Concept> getAllAliasCode() {
 		Map<String, Concept> m = new HashMap<String, Concept>();
 		esConceptDao.findAll().forEach(x -> {
-			if (StringUtils.isNotBlank(x.getAliasCode2()) && !"null".equals(x.getAliasCode2())) {
+			if (x.getType() == ths && StringUtils.isNotBlank(x.getAliasCode2()) && !"null".equals(x.getAliasCode2())) {
 				m.put(x.getCode(), x);
 				log.info(x);
 			}
@@ -152,6 +152,7 @@ public class ThsSpider {
 		Map<String, Concept> m = synchGnAndCode(isFirday);
 		if (m == null) {
 			try {
+				log.info("休眠5分钟-概念");
 				Thread.sleep(Duration.ofMinutes(5).toMillis());
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -160,12 +161,25 @@ public class ThsSpider {
 		}
 		synchConceptDaliy(date, m);
 		try {
+			log.info("休眠5分钟-同花顺行业");
 			Thread.sleep(Duration.ofMinutes(5).toMillis());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		dofetchHye(isFirday);
+		try {
+			log.info("休眠5分钟-884板块");
+			Thread.sleep(Duration.ofMinutes(5).toMillis());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		dofetchThs884xxx(isFirday);
+		try {
+			log.info("休眠5分钟-持股");
+			Thread.sleep(Duration.ofMinutes(5).toMillis());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		thsHolderSpider.dofetchHolder(isFirday);
 	}
 
@@ -174,7 +188,9 @@ public class ThsSpider {
 //		new Thread(new Runnable() {
 //			@Override
 //			public void run() {
-//				startinner(Integer.valueOf(DateUtil.getTodayYYYYMMDD()), true);
+//				// startinner(Integer.valueOf(DateUtil.getTodayYYYYMMDD()), true);
+//				dofetchHye(false);
+//				dofetchThs884xxx(false);
 //			}
 //		}).start();
 //	}
@@ -186,9 +202,10 @@ public class ThsSpider {
 			for (int i = 0; i < keys.size(); i++) {
 
 				Concept cp = m.get(keys.get(i));
-				log.info("抓包：" + cp.getName());
+				log.info("抓包1：" + cp.getName());
 				if (BRK.contains(cp.getName())) {
 					log.info(BRK + ">>" + cp.getName());
+					c++;
 					// 首发新股
 					continue;
 				}
@@ -227,7 +244,7 @@ public class ThsSpider {
 				HtmlElement body = page.getBody();
 //				String res = HttpUtil.doGet2(url, header);
 				String res = body.asText();
-				System.err.println(res);
+//				System.err.println(res);
 				// System.err.println(res.substring(start.length(), res.length() - 2));
 				JSONObject json = JSON.parseObject(res.substring(start.length(), res.length() - 2));
 				ConceptDaily cd = new ConceptDaily();
@@ -273,13 +290,14 @@ public class ThsSpider {
 	public int getConceptDaily(Concept cp, String url, int date) {
 		List<ConceptDaily> list = new LinkedList<ConceptDaily>();
 		int trytime = 0;
+		int r = 0;
 		boolean fetched = false;
 		do {
 			ThreadsUtil.sleepRandomSecBetween5And15();
 			HtmlPage page = null;
 			HtmlElement body = null;
 			try {
-				log.info(url);
+				log.info("getConceptDaily:" + url);
 				page = htmlunitSpider.getHtmlPageFromUrl(url);
 				body = page.getBody();
 				HtmlElement boardInfos = body.getElementsByAttribute("div", "class", "board-infos").get(0);
@@ -311,6 +329,7 @@ public class ThsSpider {
 					try {
 						body.getElementsByAttribute("div", "class", "heading").get(0);
 						esistingHeading = true;// 概念下线导致的异常
+						r = 1;
 					} catch (Exception e) {
 					}
 				}
@@ -334,7 +353,7 @@ public class ThsSpider {
 			saveConceptDaily(list);
 			return 1;
 		} else {
-			return 0;
+			return r;
 		}
 	}
 
@@ -581,7 +600,7 @@ public class ThsSpider {
 				HtmlPage page = null;
 				HtmlElement body = null;
 				try {
-					log.info(url);
+					log.info("dofetchHye:" + url);
 					page = htmlunitSpider.getHtmlPageFromUrl(url);
 					body = page.getBody();// table
 					DomElement tbody = body.getFirstElementChild().getLastElementChild();
@@ -663,6 +682,7 @@ public class ThsSpider {
 	private String url884 = "http://q.10jqka.com.cn/thshy/detail/code/%s/";
 
 	public void dofetchThs884xxx(boolean isFirday) {
+		log.info("dofetchThs884xxx start");
 		List<Concept> list = new LinkedList<Concept>();
 		int date = DateUtil.getTodayIntYYYYMMDD();
 		for (int code = 884001; code <= end884; code++) {
