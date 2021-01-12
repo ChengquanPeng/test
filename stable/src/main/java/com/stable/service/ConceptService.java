@@ -5,8 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -51,7 +49,6 @@ public class ConceptService {
 	@Getter
 	@Setter
 	public class ConceptInfo {
-
 		private String name;
 		private int ranking;
 		private double todayChange;
@@ -74,6 +71,9 @@ public class ConceptService {
 		return "";
 	}
 
+	/**
+	 * code 获取相关概率，板块
+	 */
 	public List<CodeConcept> getCodeConcept(String code) {
 		EsQueryPageReq queryPage = EsQueryPageUtil.queryPage9999;
 		Pageable pageable = PageRequest.of(queryPage.getPageNum(), queryPage.getPageSize());
@@ -142,12 +142,12 @@ public class ConceptService {
 		return esCodeConceptDao.search(sq).getContent();
 	}
 
-	private Concept getConceptId(String aliasCode) {
+	public Concept getConceptId(String aliasCode) {
 		EsQueryPageReq querypage = EsQueryPageUtil.queryPage1;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(aliasCode)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", aliasCode));
-//			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode2", aliasCode));
+//			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", aliasCode));
+			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode2", aliasCode));
 		} else {
 			return null;
 		}
@@ -164,7 +164,10 @@ public class ConceptService {
 		return null;
 	}
 
-	public List<String> listCodeByAliasCode(String aliasCode) {
+	/**
+	 * 根据板块/概率获取相关股票
+	 */
+	public List<String> listCodesByAliasCode(String aliasCode) {
 		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		Concept cp = getConceptId(aliasCode);
@@ -193,21 +196,5 @@ public class ConceptService {
 		}
 		log.info("no records listCodeByCodeConceptId:{}", conceptId);
 		return null;
-	}
-
-	@PostConstruct
-	private void test() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				String aliasCode = "885876";
-				System.err.println(getConceptId(aliasCode));
-				List<String> l = listCodeByAliasCode(aliasCode);
-				for (String s : l) {
-					System.err.println(s);
-				}
-				System.err.println(l.size());
-			}
-		}).start();
 	}
 }

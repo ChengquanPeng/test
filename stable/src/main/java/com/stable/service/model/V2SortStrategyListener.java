@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.stable.config.SpringConfig;
 import com.stable.constant.Constant;
 import com.stable.enums.ModelType;
-import com.stable.service.ConceptService.ConceptInfo;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.data.LinePrice;
@@ -147,15 +146,6 @@ public class V2SortStrategyListener implements StrategyListener {
 				pgmScore = mc.getSortPgm() * 5;// 3.程序单
 				wayScore = mc.getSortWay() * 5;// 4.交易方向
 
-				// 概念板块
-				List<ConceptInfo> list = mc.getGnDaliy().get(mv.getCode());
-				if (list != null) {
-					for (int i = 0; i < list.size(); i++) {
-						ConceptInfo x = list.get(i);
-						gnScore += x.getRanking();
-						setDetail(detailDesc, x.toString());
-					}
-				}
 				result.put(mv.getCode(), detailDesc.toString());
 			} else {
 				log.info("code={},dropOutMsg={}", mc.getCode(), dropOutMsg);

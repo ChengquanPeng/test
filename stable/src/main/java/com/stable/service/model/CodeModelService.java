@@ -638,7 +638,7 @@ public class CodeModelService {
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		} else if (StringUtils.isNotBlank(aliasCode)) {
-			List<String> list = conceptService.listCodeByAliasCode(aliasCode);
+			List<String> list = conceptService.listCodesByAliasCode(aliasCode);
 			if (list != null) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			}

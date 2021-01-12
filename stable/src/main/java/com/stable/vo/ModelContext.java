@@ -1,9 +1,5 @@
 package com.stable.vo;
 
-import java.util.List;
-import java.util.Map;
-
-import com.stable.service.ConceptService.ConceptInfo;
 import com.stable.vo.bus.DaliyBasicInfo;
 
 import lombok.Getter;
@@ -20,7 +16,7 @@ public class ModelContext {
 	DaliyBasicInfo today;
 	private String baseDataOk = "";
 	private int priceIndex = 0;
-	private Map<String, List<ConceptInfo>> gnDaliy;
+	// private Map<String, List<ConceptInfo>> gnDaliy;
 
 	private int score;
 	private boolean base30Avg;
@@ -75,14 +71,6 @@ public class ModelContext {
 
 	public void setPriceIndex(int priceIndex) {
 		this.priceIndex = priceIndex;
-	}
-
-	public Map<String, List<ConceptInfo>> getGnDaliy() {
-		return gnDaliy;
-	}
-
-	public void setGnDaliy(Map<String, List<ConceptInfo>> gnDaliy) {
-		this.gnDaliy = gnDaliy;
 	}
 
 	public int getScore() {

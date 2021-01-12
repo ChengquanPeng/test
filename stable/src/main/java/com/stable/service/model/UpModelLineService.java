@@ -29,8 +29,6 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsModelV1Dao;
 import com.stable.es.dao.base.MonitoringDao;
-import com.stable.service.ConceptService;
-import com.stable.service.ConceptService.ConceptInfo;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.PriceLifeService;
@@ -85,8 +83,6 @@ public class UpModelLineService {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private TushareSpider tushareSpider;
-	@Autowired
-	private ConceptService conceptService;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
@@ -171,7 +167,6 @@ public class UpModelLineService {
 			return;
 		}
 		try {
-			Map<String, List<ConceptInfo>> gn = conceptService.getDailyMap(treadeDate);
 			int size = array.size();
 			log.info("{}获取到每日指标记录条数={}", treadeDate, size);
 			Map<String, DaliyBasicInfo> todayDailyBasicMap = new HashMap<String, DaliyBasicInfo>();
@@ -206,7 +201,6 @@ public class UpModelLineService {
 				cxt.setCode(d.getCode());
 				cxt.setDate(d.getTrade_date());
 				cxt.setToday(d);// 未包含全部信息-来自Tushare
-				cxt.setGnDaliy(gn);
 
 				TasksWorker2nd.add(new TasksWorker2ndRunnable() {
 					@Override

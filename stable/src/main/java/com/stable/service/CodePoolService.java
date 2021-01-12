@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.CodeModeType;
 import com.stable.es.dao.base.EsCodePoolDao;
-import com.stable.service.model.CodeModelService;
 import com.stable.utils.DateUtil;
 import com.stable.vo.bus.CodePool;
 import com.stable.vo.http.resp.CodePoolResp;
@@ -41,8 +40,6 @@ public class CodePoolService {
 	private ConceptService conceptService;
 	@Autowired
 	private EsCodePoolDao codePoolDao;
-	@Autowired
-	private CodeModelService codeModelService;
 	@Autowired
 	private StockBasicService stockBasicService;
 
@@ -225,7 +222,7 @@ public class CodePoolService {
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		} else if (StringUtils.isNotBlank(aliasCode)) {
-			List<String> list = this.conceptService.listCodeByAliasCode(aliasCode);
+			List<String> list = this.conceptService.listCodesByAliasCode(aliasCode);
 			if (list != null) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			}
