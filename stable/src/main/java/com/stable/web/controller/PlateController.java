@@ -20,10 +20,10 @@ public class PlateController {
 	 * 板块分析
 	 */
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> list(String aliasCode, String codes) {
+	public ResponseEntity<JsonResult> list(String aliasCode, String codes, String sort) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(plateService.plateAnalyse(aliasCode, codes));
+			r.setResult(plateService.plateAnalyse(aliasCode, codes, Integer.valueOf(sort)));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

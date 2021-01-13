@@ -33,7 +33,7 @@ public class PlateService {
 	@Autowired
 	private FinanceService financeService;
 
-	public List<PlateResp> plateAnalyse(String aliasCode, String codes) {
+	public List<PlateResp> plateAnalyse(String aliasCode, String codes, int sort) {
 		List<PlateResp> rl = new LinkedList<PlateResp>();
 		List<String> list = null;
 		Concept cp = null;
@@ -61,20 +61,29 @@ public class PlateService {
 //				<option value="2">资产收益率(季报)</option>
 //				<option value="3">毛利率(季报)</option>
 				PlateResp r = new PlateResp();
-				FinanceBaseInfo fbi = financeService.getLastFinaceReport(code);
+				List<FinanceBaseInfo> l2 = financeService.getLastFinaceReport4Quarter(code);
+				FinanceBaseInfo fbi = l2.get(0);
 				DaliyBasicInfo d = daliyBasicHistroyService.queryLastest(code);
-				if (d != null && d.getSzl() != 0) {
+				if (d != null && d.getSzl() > 0) {// 排除负数
+					log.info("{},szl:{}", d.getCode(), d.getSzl());
+					r.setT1(d.getSzl());
 					t1 += d.getSzl();
 					c1++;
-					r.setT1(d.getSzl());
 				}
 				if (fbi != null) {
-					if (fbi.getSyldjd() != 0) {
-						t2 += fbi.getSyldjd();
-						c2++;
-						r.setT2(fbi.getSyldjd());
+//					log.info(fbi);
+
+					double t = 0.0;
+					int tc = 0;
+					for (FinanceBaseInfo f : l2) {
+						t += f.getJqjzcsyl();
+						tc += f.getQuarter();
 					}
-					if (fbi.getMll() != 0) {
+					r.setT2(CurrencyUitl.roundHalfUp(t / (double) tc));
+					r.setT2s(CurrencyUitl.roundHalfUp(fbi.getJqjzcsyl() / (double) fbi.getQuarter()));
+					t2 += r.getT2();
+					c2++;
+					if (fbi.getMll() > 0) {// 排除负数
 						r.setT3(CurrencyUitl.roundHalfUp(fbi.getMll() / (double) fbi.getQuarter()));
 						t3 += r.getT3();
 						c3++;
@@ -113,37 +122,81 @@ public class PlateService {
 				PlateResp r = rl.get(i);
 				r.setRanking2(i + 1);
 			}
-			sort1(rl);
+			sort11(rl);// 先正序排序
+			sort12(rl);// 在把负数放最后
 			for (int i = 0; i < rl.size(); i++) {
 				PlateResp r = rl.get(i);
 				r.setRanking1(i + 1);
+			}
+			// 默认是1
+			if (sort == 2) {
+				sort2(rl);
+			} else if (sort == 3) {
+				sort3(rl);
 			}
 		}
 		return rl;
 	}
 
-	public void sort1(List<PlateResp> rl) {
+	public static void main(String[] args) {
+		List<PlateResp> rl = new LinkedList<PlateResp>();
+		for (int i = 10; i >= -2; i--) {
+			PlateResp r = new PlateResp();
+			r.setT1((double) i);
+			rl.add(r);
+		}
+		sort11(rl);
+		sort12(rl);
+		for (PlateResp r : rl) {
+			System.err.println(r.getT1());
+		}
+	}
+
+	// 先正序排序
+	public static void sort11(List<PlateResp> rl) {
 		Collections.sort(rl, new Comparator<PlateResp>() {
 			@Override
 			public int compare(PlateResp o1, PlateResp o2) {
-				return o2.getT1() - o1.getT1() > 0 ? 1 : -1;
+				if (o1.getT1() == o2.getT1()) {
+					return 0;
+				}
+				return o1.getT1() - o2.getT1() > 0 ? -1 : 1;
 			}
 		});
 	}
 
-	public void sort2(List<PlateResp> rl) {
+	// 在把负数放最后
+	public static void sort12(List<PlateResp> rl) {
 		Collections.sort(rl, new Comparator<PlateResp>() {
 			@Override
 			public int compare(PlateResp o1, PlateResp o2) {
+				if (o1.getT1() <= 0) {// 最后
+					return 1;
+				}
+				return -1;
+			}
+		});
+	}
+
+	public static void sort2(List<PlateResp> rl) {
+		Collections.sort(rl, new Comparator<PlateResp>() {
+			@Override
+			public int compare(PlateResp o1, PlateResp o2) {
+				if (o1.getT2() == o2.getT2()) {
+					return 0;
+				}
 				return o2.getT2() - o1.getT2() > 0 ? 1 : -1;
 			}
 		});
 	}
 
-	public void sort3(List<PlateResp> rl) {
+	public static void sort3(List<PlateResp> rl) {
 		Collections.sort(rl, new Comparator<PlateResp>() {
 			@Override
 			public int compare(PlateResp o1, PlateResp o2) {
+				if (o1.getT3() == o2.getT3()) {
+					return 0;
+				}
 				return o2.getT3() - o1.getT3() > 0 ? 1 : -1;
 			}
 		});

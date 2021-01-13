@@ -15,6 +15,7 @@ public class PlateResp {
 
 	double t1 = 0.0;
 	double t2 = 0.0;
+	double t2s = 0.0;
 	double t3 = 0.0;
 
 	int ranking1 = 0;

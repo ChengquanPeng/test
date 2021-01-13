@@ -271,6 +271,27 @@ public class FinanceService {
 		return null;
 	}
 
+	Pageable pageable4 = PageRequest.of(0, 4);
+
+	/**
+	 * 最近4个季度
+	 */
+	public List<FinanceBaseInfo> getLastFinaceReport4Quarter(String code) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable4).build();
+		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+			// log.info("page size={},last report fince code={},date={}",
+			// page.getContent().size(), code, f.getDate());
+		}
+		log.info("no last report fince code={},now!", code);
+		return null;
+	}
+
 	public FinanceBaseInfo getLastFinaceReport(String code) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));

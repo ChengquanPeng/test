@@ -67,6 +67,11 @@ body {
 				<div class="input-group">
 					板块/概念(aliasCode)：<input type="text" class="form-control"
 						id="aliasCode">
+					&nbsp;排序:<select id="sort1">
+								<option value="1">市赚率(股价)</option>
+								<option value="2">资产收益率(季报)</option>
+								<option value="3">毛利率(季报)</option>
+								</select>
 				</div>
 				<div class="input-group">
 					股票代码组：<input type="text" class="form-control" id="codes">
@@ -134,7 +139,8 @@ body {
 									};
 									param.aliasCode = $('#aliasCode').val();
 									param.codes = $('#codes').val();
-
+									param.sort = $('#sort1').val();
+									
 									return param;
 								},
 								columns : [
@@ -164,9 +170,16 @@ body {
 										},
 										{
 											field : 'inmid',
-											title : '资产收益率<br/>报告期',
+											title : '资产收益率<br/>TTM(4季度平均)',
 											formatter : function(value, row,index) {
 												return row.t2+" avg:"+row.avgt2+" rank:"+row.ranking2;
+											}
+										},
+										{
+											field : 'inmid',
+											title : '资产收益率<br/>本年季度平均',
+											formatter : function(value, row,index) {
+												return row.t2s;
 											}
 										},
 										{

@@ -15,8 +15,9 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class RealtimeDetailsAnalyzer implements Runnable {
-	private long ONE_MIN = 1 * 60 * 1000;// 5MIN
-	private long FIVE_MIN = 5 * 60 * 1000;// 5MIN
+	private static final long ONE_MIN = 1 * 60 * 1000;// 5MIN
+	private static final long FIVE_MIN = 5 * 60 * 1000;// 5MIN
+	private static final long TEN_MIN = 10 * 60 * 1000;// 5MIN
 	private long WAIT_MIN = FIVE_MIN;
 	private String code;
 	private String codeName;
@@ -26,6 +27,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	MonitoringDao monitoringDao;
 	CodePool cp;
 	private boolean waitSend = true;
+	private boolean chkCodeClosed = false;
 
 	public void stop() {
 		isRunning = false;
@@ -39,14 +41,27 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 		SinaRealTime srt = SinaRealtimeUitl.get(code);
 		if (srt.getOpen() == 0.0) {
-			log.info("{} {} SINA 今日停牌", code, codeName);
-			WxPushUtil.pushSystem1(code + " " + codeName + "今日停牌");
-			return 0;
+			log.info("{} {} SINA 今日疑似停牌或者可能没有集合竞价", code, codeName);
+			// WxPushUtil.pushSystem1(code + " " + codeName + "今日疑似停牌或者可能没有集合竞价");
+			chkCodeClosed = true;
 		}
 		return 1;
 	}
 
 	public void run() {
+		if (chkCodeClosed) {
+			try {
+				Thread.sleep(TEN_MIN);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			SinaRealTime srt = SinaRealtimeUitl.get(code);
+			if (srt.getOpen() == 0.0) {
+				log.info("{} {} SINA 今日停牌", code, codeName);
+				WxPushUtil.pushSystem1(code + " " + codeName + "今日停牌");
+				return;
+			}
+		}
 		long d1130 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
 				DateUtil.parseDate(today + "113000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 		Date date = DateUtil.parseDate(today + "130100", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
