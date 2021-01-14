@@ -119,4 +119,7 @@ public class CodeBaseModel extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int sylType;// 收益率类型:1:自身收益率增长,2: 年收益率超过5.0%*4=20%,4:同时包含12
 
+	// 股东人数(变化：幅度+次数）
+	@Field(type = FieldType.Double)
+	private double holderChange;
 }

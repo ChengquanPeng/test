@@ -16,20 +16,11 @@ import lombok.ToString;
 @ToString
 @Document(indexName = "holder_percent")
 public class HolderPercent extends EsBase {
-//ts_code	str	Y	TS代码
-//	ann_date	str	Y	公告日期
-//	end_date	str	Y	截止日期
-//	proc	str	Y	进度
-//	exp_date	str	Y	过期日期
-//	vol	float	Y	回购数量
-//	amount	float	Y	回购金额
-//	high_limit	float	Y	回购最高价
-//	low_limit	float	Y	回购最低价
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 3583785305111756892L;
+	private static final long serialVersionUID = 3583785305211756892L;
 	/**
 	 * 
 	 */

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.service.ChipsService;
 import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
@@ -34,6 +35,8 @@ public class CodeController {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private ConceptService conceptService;
+	@Autowired
+	private ChipsService chipsService;
 
 	/**
 	 * 个股当前状态
@@ -48,6 +51,8 @@ public class CodeController {
 			model.addAttribute("histList", codeModelService.getListByCode(code, EsQueryPageUtil.queryPage10));
 			model.addAttribute("concepts", conceptService.getCodeConcept(code));
 			model.addAttribute("codeBasic", stockBasicService.getCode(code));
+			model.addAttribute("topThree", chipsService.getLastHolderPercent(code));
+			
 
 			String kb = "";
 			if (cbm.getForestallQuarter() > 0) {

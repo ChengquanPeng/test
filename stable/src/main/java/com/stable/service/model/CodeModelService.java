@@ -25,6 +25,7 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeBaseModelDao;
 import com.stable.es.dao.base.EsCodeBaseModelHistDao;
 import com.stable.service.BuyBackService;
+import com.stable.service.ChipsService;
 import com.stable.service.CodePoolService;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyBasicHistroyService;
@@ -90,6 +91,8 @@ public class CodeModelService {
 	private MiddleSortV1Service middleSortV1Service;
 	@Autowired
 	private PlateService plateService;
+	@Autowired
+	private ChipsService chipsService;
 
 	public synchronized void runJob(boolean isJob, int date) {
 		try {
@@ -321,6 +324,9 @@ public class CodeModelService {
 				newOne.setUpScore(finals - lastOne.getScore());
 			}
 		}
+		// 其他
+		newOne.setHolderChange(chipsService.holderNumAnalyse(code));
+
 		newOne.setId(code);
 		listLast.add(newOne);
 		if (saveHist) {
