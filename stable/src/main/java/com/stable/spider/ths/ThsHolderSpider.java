@@ -1,5 +1,6 @@
 package com.stable.spider.ths;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -17,6 +18,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsHolderNumDao;
 import com.stable.es.dao.base.EsHolderPercentDao;
 import com.stable.service.StockBasicService;
+import com.stable.service.TradeCalService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HtmlunitSpider;
@@ -35,6 +37,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ThsHolderSpider {
 	@Autowired
+	private TradeCalService tradeCalService;
+	@Autowired
 	private EsHolderNumDao esHolderNumDao;
 	@Autowired
 	private EsHolderPercentDao esHolderPercentDao;
@@ -42,15 +46,31 @@ public class ThsHolderSpider {
 	private HtmlunitSpider htmlunitSpider;
 	@Autowired
 	private StockBasicService stockBasicService;
-	// 884001-884191
 	private String urlbase = "http://basic.10jqka.com.cn/%s/holder.html?t=%s";
 	private String host = "http://basic.10jqka.com.cn/";
 	Map<String, String> header;
 
-	public void dofetchHolder(boolean isFirday) {
-		if (!isFirday) {
-			return;
-		}
+	public void dofetchHolder() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
+					if (tradeCalService.isOpen(date)) {
+						dofetchHolderInner(date);
+					} else {
+						log.info("{} 非交易日", date);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					ErrorLogFileUitl.writeError(e, "同花顺股东人数异常运行异常..", "", "");
+					WxPushUtil.pushSystem1("同花顺股东人数异常运行异常");
+				}
+			}
+		}).start();
+	}
+
+	private void dofetchHolderInner(int date) {
 		if (header == null) {
 			header = new HashMap<String, String>();
 		}
@@ -76,14 +96,14 @@ public class ThsHolderSpider {
 		if (hps.size() > 0) {
 			esHolderPercentDao.saveAll(hps);
 		}
-		WxPushUtil.pushSystem1("股东研究抓包同花顺已完成");
+		WxPushUtil.pushSystem1(date + " 股东研究抓包同花顺已完成");
 	}
 
 	private void dofetchHolderInner(String code, List<HolderNum> hns, List<HolderPercent> hps) {
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(urlbase, code, System.currentTimeMillis());
-		ThreadsUtil.sleepRandomSecBetween1And5();
+		ThreadsUtil.sleepRandomSecBetween15And30();
 		do {
 			try {
 				log.info(url);

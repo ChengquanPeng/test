@@ -132,7 +132,7 @@ public class CodeController {
 	public ResponseEntity<JsonResult> showsorce(@PathVariable(value = "code") String code) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(codeModelService.run(code));
+			r.setResult(codeModelService.runByCode(code));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

@@ -40,8 +40,6 @@ import lombok.extern.log4j.Log4j2;
 public class ThsSpider {
 	private static final String BRK = "跳过首发新股";
 	@Autowired
-	private ThsHolderSpider thsHolderSpider;
-	@Autowired
 	private TradeCalService tradeCalService;
 	@Autowired
 	private EsConceptDao esConceptDao;
@@ -174,13 +172,6 @@ public class ThsSpider {
 			e.printStackTrace();
 		}
 		dofetchThs884xxx(isFirday);
-		try {
-			log.info("休眠5分钟-持股");
-			Thread.sleep(Duration.ofMinutes(5).toMillis());
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		thsHolderSpider.dofetchHolder(isFirday);
 	}
 
 //	@PostConstruct

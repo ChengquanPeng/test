@@ -93,7 +93,7 @@ public class CodeModelService {
 
 	public synchronized void runJob(boolean isJob, int date) {
 		try {
-			run(date);
+			runByJob(date);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "CodeModel模型运行异常", "", "");
@@ -101,7 +101,7 @@ public class CodeModelService {
 		}
 	}
 
-	private synchronized void run(int tradeDate) {
+	private synchronized void runByJob(int tradeDate) {
 		log.info("CodeModel processing request date={}", tradeDate);
 		if (!tradeCalService.isOpen(tradeDate)) {
 			tradeDate = tradeCalService.getPretradeDate(tradeDate);
@@ -121,7 +121,7 @@ public class CodeModelService {
 				getSorce(s, tradeDate, oneYearAgo, nextYear, updatedate, listLast, listHist, true,
 						histMap.get(s.getCode()), list, map);
 			} catch (Exception e) {
-				ErrorLogFileUitl.writeError(e, "", "", "");
+				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
 		}
 		if (listLast.size() > 0) {
@@ -137,7 +137,7 @@ public class CodeModelService {
 
 	}
 
-	public synchronized String run(String code) {
+	public synchronized String runByCode(String code) {
 		int updatedate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		List<CodeBaseModel> listm = new LinkedList<CodeBaseModel>();
 		List<CodeBaseModelHist> listh = new LinkedList<CodeBaseModelHist>();
@@ -151,7 +151,7 @@ public class CodeModelService {
 			StockBaseInfo s = JSON.parseObject(redisUtil.get(code), StockBaseInfo.class);
 			getSorce(s, updatedate, oneYearAgo, nextYear, updatedate, listm, listh, false, lastOne, list, map);
 		} catch (Exception e) {
-			ErrorLogFileUitl.writeError(e, "", "", "");
+			ErrorLogFileUitl.writeError(e, code, "", "");
 		}
 		return "OK";
 	}

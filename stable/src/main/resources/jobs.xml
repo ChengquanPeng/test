@@ -55,6 +55,13 @@
 		description="每日晚上23点05执行任务(回购公告、分红除权公告)" sharding-total-count="1"
 		overwrite="true" />
 	
+	<job:simple id="EveryDayMorningJob"
+		class="com.stable.job.EveryDayMorningJob"
+		registry-center-ref="regCenter" cron="0 05 1 ? * * *"
+		sharding-item-parameters="0=a"
+		description="每日凌晨01点05执行任务(股东人数)" sharding-total-count="1"
+		overwrite="true" />
+	
 	<job:simple id="EveryWorkingDayMorningJob"
 		class="com.stable.job.EveryWorkingDayMorningJob"
 		registry-center-ref="regCenter" cron="0 15 4 ? * 2,3,4,5,6 *"
