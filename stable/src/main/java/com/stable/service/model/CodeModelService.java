@@ -30,6 +30,7 @@ import com.stable.service.ConceptService;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
+import com.stable.service.PlateService;
 import com.stable.service.PledgeStatService;
 import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
@@ -37,7 +38,6 @@ import com.stable.service.TradeCalService;
 import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.trace.MiddleSortV1Service;
 import com.stable.utils.BeanCopy;
-import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
@@ -48,8 +48,6 @@ import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.CodePool;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.DividendHistory;
-import com.stable.vo.bus.FinYjkb;
-import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.PledgeStat;
 import com.stable.vo.bus.ShareFloat;
@@ -90,6 +88,8 @@ public class CodeModelService {
 	private ConceptService conceptService;
 	@Autowired
 	private MiddleSortV1Service middleSortV1Service;
+	@Autowired
+	private PlateService plateService;
 
 	public synchronized void runJob(boolean isJob, int date) {
 		try {
@@ -118,7 +118,7 @@ public class CodeModelService {
 		List<CodePool> list = new LinkedList<CodePool>();
 		for (StockBaseInfo s : codelist) {
 			try {
-				getSorce(s, tradeDate, oneYearAgo, nextYear, updatedate, listLast, listHist, true, null,
+				getSorce(s, tradeDate, oneYearAgo, nextYear, updatedate, listLast, listHist, true,
 						histMap.get(s.getCode()), list, map);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
@@ -143,23 +143,22 @@ public class CodeModelService {
 		List<CodeBaseModelHist> listh = new LinkedList<CodeBaseModelHist>();
 		int oneYearAgo = DateUtil.getPreYear(updatedate);
 		int nextYear = DateUtil.getNextYear(updatedate);
-		StringBuffer res = new StringBuffer();
 //		Map<String, CodeBaseModel> histMap = getALLForMap();
 		CodeBaseModel lastOne = getLastOneByCode(code);
 		Map<String, CodePool> map = new HashMap<String, CodePool>();
 		List<CodePool> list = new LinkedList<CodePool>();
 		try {
 			StockBaseInfo s = JSON.parseObject(redisUtil.get(code), StockBaseInfo.class);
-			getSorce(s, updatedate, oneYearAgo, nextYear, updatedate, listm, listh, false, res, lastOne, list, map);
+			getSorce(s, updatedate, oneYearAgo, nextYear, updatedate, listm, listh, false, lastOne, list, map);
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, "", "", "");
 		}
-		return res.toString();
+		return "OK";
 	}
 
 	private void getSorce(StockBaseInfo s, int treadeDate, int oneYearAgo, int nextYear, int updatedate,
-			List<CodeBaseModel> listLast, List<CodeBaseModelHist> listHist, boolean isJob, StringBuffer sb,
-			CodeBaseModel lastOne, List<CodePool> list, Map<String, CodePool> map) {
+			List<CodeBaseModel> listLast, List<CodeBaseModelHist> listHist, boolean isJob, CodeBaseModel lastOne,
+			List<CodePool> list, Map<String, CodePool> map) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
 		// 财务
@@ -220,55 +219,16 @@ public class CodeModelService {
 			newOne.setFloatDate(sf.getFloatDate());// 解禁日期
 			newOne.setFloatRatio(sf.getFloatRatio());// 流通股份占总股本比率
 		}
-		// 业绩快报(准确的)
-		FinYjkb yjkb = financeService.getLastFinaceKbByReportDate(code);
-		boolean hasKb = false;
-		boolean hasYg = false;
 
 		newOne.setForestallYear(0);
 		newOne.setForestallQuarter(0);
 		newOne.setForestallIncomeTbzz(0);
 		newOne.setForestallProfitTbzz(0);
 
-		double ystbzz = fbi.getYyzsrtbzz();
-		double jltbzz = fbi.getGsjlrtbzz();
+//		double ystbzz = fbi.getYyzsrtbzz();
+//		double jltbzz = fbi.getGsjlrtbzz();
 
-		// 业绩快报(准确的)
-		if (yjkb != null) {
-			if ((newOne.getCurrYear() == yjkb.getYear() && newOne.getCurrQuarter() < yjkb.getQuarter())// 同一年，季度大于
-					|| (yjkb.getYear() > newOne.getCurrYear())) {// 不同年
-				newOne.setForestallYear(yjkb.getYear());
-				newOne.setForestallQuarter(yjkb.getQuarter());
-				newOne.setForestallIncomeTbzz(yjkb.getYyzsrtbzz());
-				newOne.setForestallProfitTbzz(yjkb.getJlrtbzz());
-				hasKb = true;
-				if (yjkb.getYyzsrtbzz() != 0) {// 可能出现0的数据,则按财报进行计算
-					ystbzz = yjkb.getYyzsrtbzz();
-				}
-				if (yjkb.getJlrtbzz() != 0) {// 可能出现0的数据,则按财报进行计算
-					jltbzz = yjkb.getJlrtbzz();
-				}
-			}
-		}
-		// 业绩预告(类似天气预报,可能不准)
-		FinYjyg yjyg = null;
-		if (!hasKb) {
-			yjyg = financeService.getLastFinaceYgByReportDate(code);
-			if (yjyg != null) {
-				if ((newOne.getCurrYear() == yjyg.getYear() && newOne.getCurrQuarter() < yjyg.getQuarter())// 同一年,季度大于
-						|| (yjyg.getYear() > newOne.getCurrYear())) {// 不同年
-					hasYg = true;
-					newOne.setForestallYear(yjyg.getYear());
-					newOne.setForestallQuarter(yjyg.getQuarter());
-					newOne.setForestallProfitTbzz(yjyg.getJlrtbzz());
-					if (yjyg.getJlrtbzz() != 0) {// 可能出现0的数据,则按财报进行计算
-						jltbzz = yjyg.getJlrtbzz();
-					}
-				}
-			}
-		}
-
-		processingFinance(list, map, newOne, hasKb ? yjkb : null, hasYg ? yjyg : null, lastOne, fa, fbis);
+		processingFinance(list, map, newOne, lastOne, fa, fbis);
 		if (bb != null) {
 			// 股东大会通过/实施/完成
 		} else {
@@ -279,113 +239,77 @@ public class CodeModelService {
 		}
 
 		// 正向分数
-		// 营收(20)
-		int incomeupbase = newOne.getIncomeUpYear() + newOne.getIncomeUpQuarter() + newOne.getIncomeUp2Quarter();
-		// 利润(5)
-		int profitupbase = newOne.getProfitUpYear() + newOne.getProfitUpQuarter() + newOne.getProfitUp2Quarter();
+		int finals = 0;
+		// ======营收同比增长======
+		if (fbi.getYyzsrtbzz() > 0) {
+			finals += 20;// 营收同比增长
+		} else {
+			if (fbi.getYyzsrtbzz() > -10) {
+				finals += -5;
+			} else if (fbi.getYyzsrtbzz() > -20) {
+				finals += -10;
+			} else {
+				finals += -20;
+			}
+		}
+
+		// ======利润======
+		// 归属净利
+		if (fbi.getGsjlr() > 0) {
+			finals += 5;//
+		} else {// 亏损
+			finals += -5;
+		}
+		// 扣非净利
+		if (fbi.getKfjlr() > 0) {
+			finals += 5;// 营收同比增长
+		} else {// 亏损
+			finals += -5;
+		}
+		// 归属净利同比
+		if (fbi.getGsjlrtbzz() > 0) {
+			finals += 5;//
+		} else {// 亏损
+			finals += -5;
+		}
+		// 扣非净利同比
+		if (fbi.getKfjlrtbzz() > 0) {
+			finals += 5;// 营收同比增长
+		} else {// 亏损
+			finals += -5;
+		}
+
+		// ======资产收益率======
+		// 收益率类型:1:自身收益率增长,2: 年收益率超过5.0%*4=20%,4:同时包含12
+		if (newOne.getSylType() == 1) {
+			finals += 30;
+		} else if (newOne.getSylType() == 2) {
+			finals += 20;
+		} else if (newOne.getSylType() == 4) {
+			finals += 40;
+		}
 
 		// 分红(3)
-		int dividendbase = 0;
 		if (newOne.getLastDividendDate() != 0) {
-			dividendbase = 3;
+			finals += 3;
 		} else {
-			dividendbase = -2;
+			finals += -2;
 		}
 		// 回购(3)
-		int backbase = 0;
 		if (newOne.getLastBackDate() != 0) {
-			backbase = 3;
+			finals += 3;
 		} else {
-			backbase = -1;
+			finals += -1;
 		}
-
-		// 负向分数
-		// 营收(10)
-		int incomedownbase = newOne.getIncomeDownYear() + newOne.getIncomeDownQuarter()
-				+ newOne.getIncomeDown2Quarter();
-
-		// 利润(3)
-		int profitdownbase = newOne.getProfitDownYear() + newOne.getProfitDownQuarter() + newOne.getProfitDown2Quarter()
-				+ newOne.getProfitDown2Year();
-
 		// 质押
-		int pledgeRatio = 0;
 		if (newOne.getPledgeRatio() > 60) {
-			pledgeRatio = -5;
+			finals += -5;
 		}
 		// 解禁
-		int shareFloat = 0;
-		if (newOne.getFloatDate() > 0) {
-			shareFloat = -3;
-		}
-
-		// 权重
-		incomeupbase += incomeupbase * 20;
-		profitupbase += profitupbase * 5;
-
-		incomedownbase += incomedownbase * -10;
-		profitdownbase += profitdownbase * -3;
-
-		// 营收-业绩-按比例加减分
-		int yjsorce = 0;
-		if (ystbzz != 0) {
-			if (ystbzz > 0) {
-				if (ystbzz > 100) {
-					yjsorce += 10;
-				} else if (ystbzz > 40) {
-					yjsorce += 5;
-				}
-			} else {
-				if (ystbzz < -100) {
-					yjsorce += -10;
-				} else if (ystbzz < -30) {
-					yjsorce += -5;
-				}
-			}
-		}
-		if (jltbzz != 0) {
-			if (jltbzz > 0) {
-				if (jltbzz > 100) {
-					yjsorce += 6;
-				} else if (jltbzz > 40) {
-					yjsorce += 3;
-				}
-			} else {
-				if (jltbzz < -100) {
-					yjsorce += -5;
-				} else if (jltbzz < -30) {
-					yjsorce += -3;
-				}
-			}
-		}
-
-		int up = incomeupbase + profitupbase + dividendbase + backbase;
-		int down = incomedownbase + profitdownbase + pledgeRatio + shareFloat;
-		int finals = up + down + yjsorce;
-
-		if (sb != null) {
-			sb.append("报告期:incomeupbase[" + incomeupbase + "(x20)] = IncomeUpYear[" + newOne.getIncomeUpYear()
-					+ "] + IncomeUpQuarter[" + newOne.getIncomeUpQuarter() + "] + IncomeUp2Quarter:["
-					+ newOne.getIncomeUp2Quarter() + "]");
-			sb.append("报告期:profitupbase[" + profitupbase + "(x5)] = ProfitUpYear[" + newOne.getProfitUpYear()
-					+ "] + ProfitUpQuarter[" + newOne.getProfitUpQuarter() + "] + ProfitUp2Quarter["
-					+ newOne.getProfitUp2Quarter() + "]");
-			sb.append("dividendbase = " + dividendbase);
-			sb.append("backbase = " + backbase);
-			sb.append("报告期:incomedownbase[" + incomedownbase + "(x-10)] = IncomeDownYear[" + newOne.getIncomeDownYear()
-					+ "] + IncomeDownQuarter[" + newOne.getIncomeDownQuarter() + "] + IncomeDown2Quarter["
-					+ newOne.getIncomeDown2Quarter() + "]");
-			sb.append("profitdownbase[" + profitdownbase + "(x-3)] = ProfitDownYear[" + newOne.getProfitDownYear()
-					+ "] + ProfitDownQuarter[" + newOne.getProfitDownQuarter() + "] + ProfitDown2Quarter["
-					+ newOne.getProfitDown2Quarter() + "]");
-			sb.append("pledgeRatio = " + pledgeRatio);
-			sb.append("shareFloat = " + shareFloat);
-			sb.append("up = " + up);
-			sb.append("down = " + down);
-			sb.append("业绩比例:yjsorce = " + yjsorce);
-			sb.append("最后分finals  = " + finals);
-		}
-
+//		int shareFloat = 0;
+//		if (newOne.getFloatDate() > 0) {
+//			shareFloat = -3;
+//		}
 		newOne.setScore(finals);
 		newOne.setUdpateDate(updatedate);
 
@@ -408,8 +332,8 @@ public class CodeModelService {
 		}
 	}
 
-	private void processingFinance(List<CodePool> list, Map<String, CodePool> map, CodeBaseModel newOne, FinYjkb yjkb,
-			FinYjyg yjyg, CodeBaseModel lastOne, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
+	private void processingFinance(List<CodePool> list, Map<String, CodePool> map, CodeBaseModel newOne,
+			CodeBaseModel lastOne, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
 
 		// log.info(fa.printInfo());
 		// 营收(科技类,故事类主要指标)
@@ -434,20 +358,24 @@ public class CodeModelService {
 
 		// newOne
 		evaluateStep1(newOne, fa, fbis);
-		findBigBoss(newOne.getCode(), newOne.getDate(), list, map, fbis, fa, yjkb, yjyg, lastOne);
+		findBigBoss(newOne.getCode(), newOne.getDate(), list, map, fbis, fa, lastOne);
 	}
 
 	private void evaluateStep1(CodeBaseModel newOne, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
 		FinanceBaseInfo currJidu = fa.getCurrJidu();
-		newOne.setSyldjd(CurrencyUitl.roundHalfUp(currJidu.getJqjzcsyl() / (double) currJidu.getQuarter()));// 单季度？
-		double t = 0.0;
-		int fpyear = currJidu.getYear() - 1;
-		for (FinanceBaseInfo ft : fbis) {
-			if (ft.getYear() == fpyear && ft.getQuarter() == currJidu.getQuarter()) {
-				t = ft.getJqjzcsyl();
+		newOne.setSyl(currJidu.getJqjzcsyl());
+		newOne.setSylttm(plateService.getSylTtm(fbis));
+		newOne.setSyldjd(plateService.getSyldjd(currJidu));// 单季度？
+		if (newOne.getSyldjd() > newOne.getSylttm()) {
+			newOne.setSylType(1);// 自身收益率增长
+		}
+		if (newOne.getSylttm() >= 5.0) {
+			if (newOne.getSylType() == 1) {
+				newOne.setSylType(4);// 同时
+			} else {
+				newOne.setSylType(2);// 年收益率超过5.0%*4=20%
 			}
 		}
-		newOne.setSyltbzj(CurrencyUitl.roundHalfUp(currJidu.getJqjzcsyl() - t));// 同比增加？
 	}
 
 	public List<CodePool> findBigBoss(int treadeDate) {
@@ -464,7 +392,7 @@ public class CodeModelService {
 					for (FinanceBaseInfo fbi : fbis) {
 						fa.putJidu1(fbi);
 					}
-					findBigBoss(s.getCode(), treadeDate, list, map, fbis, fa, null, null, null);
+					findBigBoss(s.getCode(), treadeDate, list, map, fbis, fa, null);
 				}
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
@@ -474,7 +402,7 @@ public class CodeModelService {
 	}
 
 	private void findBigBoss(String code, int treadeDate, List<CodePool> list, Map<String, CodePool> map,
-			List<FinanceBaseInfo> fbis, FinanceAnalyzer fa, FinYjkb yjkb, FinYjyg yjyg, CodeBaseModel lastOne) {
+			List<FinanceBaseInfo> fbis, FinanceAnalyzer fa, CodeBaseModel lastOne) {
 		log.info("findBigBoss code:{}", code);
 		CodePool c = map.get(code);
 		if (c == null) {
@@ -494,12 +422,12 @@ public class CodeModelService {
 
 		c.setKbygjl(0);
 		c.setKbygys(0);
-		if (yjkb != null) {
-			c.setKbygys(yjkb.getYyzsrtbzz());
-			c.setKbygjl(yjkb.getJlrtbzz());
-		} else if (yjyg != null) {
-			c.setKbygjl(yjyg.getJlrtbzz());
-		}
+//		if (yjkb != null) {
+//			c.setKbygys(yjkb.getYyzsrtbzz());
+//			c.setKbygjl(yjkb.getJlrtbzz());
+//		} else if (yjyg != null) {
+//			c.setKbygjl(yjyg.getJlrtbzz());
+//		}
 
 		// 业绩连续
 		int continueJidu1 = 0;
@@ -651,7 +579,20 @@ public class CodeModelService {
 		String field = "score";
 		if (orderBy == 2) {
 			field = "upScore";
+		} else if (orderBy == 2) {
+			field = "upScore";
+		} else if (orderBy == 3) {
+			field = "sylttm";
+		} else if (orderBy == 4) {
+			field = "syl";
+		} else if (orderBy == 5) {
+			field = "sylType";
 		}
+//		<option value="1" selected="selected">综合评分</option>
+//		<option value="2">评分变化</option>
+//		<option value="3">资产收益率ttm</option>
+//		<option value="4">资产收益率报告期</option>
+//		<option value="5">资产收益评级</option>
 		SortOrder order = SortOrder.DESC;
 		if (asc == 2) {
 			order = SortOrder.ASC;

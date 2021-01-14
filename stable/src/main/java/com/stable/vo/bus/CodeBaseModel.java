@@ -109,9 +109,14 @@ public class CodeBaseModel extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int udpateDate;
 
+	// 加权净资产收益率
 	@Field(type = FieldType.Double)
-	private double syltbzj;// 加权净资产收益率+同比增加
+	private double syl;// 加权净资产收益率
 	@Field(type = FieldType.Double)
 	private double syldjd;// 加权净资产收益率+单季度百分比
+	@Field(type = FieldType.Double)
+	private double sylttm;// 加权净资产收益率+单季度百分比
+	@Field(type = FieldType.Integer)
+	private int sylType;// 收益率类型:1:自身收益率增长,2: 年收益率超过5.0%*4=20%,4:同时包含12
 
 }

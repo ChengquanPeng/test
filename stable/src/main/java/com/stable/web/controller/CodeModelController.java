@@ -20,7 +20,7 @@ import lombok.extern.log4j.Log4j2;
 @RequestMapping("/model")
 @RestController
 @Log4j2
-public class ModelController {
+public class CodeModelController {
 
 	@Autowired
 	private UpModelLineService upLevel1Service;

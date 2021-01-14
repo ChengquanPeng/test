@@ -23,19 +23,25 @@
 			<div id="menu"></div>
 			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
 			<div class="col-lg-7">
-					<div class="input-group">
-						股票代码：<input type="text" class="form-control" id="queryCode"> 
-						排序：<select id="gsort" class="form-control">
-							<option value="1" selected="selected">综合评分</option>
-							<option value="2">评分变化</option>
-						</select>
-						板块名称：<input type="text" class="form-control" id="conceptName"> 
-						概念id：<input type="text" class="form-control" id="conceptId"> 
-						倒序排序:<input type="checkbox" id="asc" name="asc" checked="checked" />
-					<span lass="input-group-btn"> <button class="btn btn-default" type="button" id="queryAction"> Go!</button> </span>
-					</div>
+				<div class="input-group">
+					股票代码：<input type="text" class="form-control" id="queryCode">
+					板块名称：<input type="text" class="form-control" id="conceptName">
+					概念id：<input type="text" class="form-control" id="conceptId">
+					排序：<select id="gsort" class="form-control">
+						<option value="1" selected="selected">综合评分</option>
+						<option value="2">评分变化</option>
+						<option value="3">资产收益率ttm</option>
+						<option value="4">资产收益率报告期</option>
+						<option value="5">资产收益评级</option>
+					</select> 
+					倒序排序:<input type="checkbox" id="asc" name="asc" checked="checked" />
+					<span lass="input-group-btn">
+						<button class="btn btn-default" type="button" id="queryAction">
+							Go!</button>
+					</span>
 				</div>
-				
+			</div>
+
 			<div id="rptList" style="width: 100%; hight: 100%; float: left；">
 				<table class="table table-hover" id="cusTable">
 				</table>
@@ -65,101 +71,143 @@
 		$('#cusTable').bootstrapTable('destroy');
 		function loadData() {
 			$('#cusTable').bootstrapTable('destroy');
-			$("#cusTable").bootstrapTable(
-					{
-						method : "get", //使用get请求到服务器获取数据  
-						url : "/web/codemodel/list", //获取数据的Servlet地址  
-						striped : true, //表格显示条纹  
-						pagination : true, //启动分页
-						cache : false,
-						pageSize : 20, //每页显示的记录数  
-						//pageNumber:1, //当前第几页  
-						pageList : [ 10, 15, 20, 50 ], //记录数可选列表  
-						search : false, //是否启用查询  
-						//showColumns: true,  //显示下拉框勾选要显示的列  
-						//showRefresh: true,  //显示刷新按钮  
-						sidePagination : "server", //表示服务端请求
-						//设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder  
-						//设置为limit可以获取limit, offset, search, sort, order  
-						queryParamsType : "undefined",
-						queryParams : function queryParams(params) { //设置查询参数  
-							var code = $('#queryCode').val();
-							var gsort = $('#gsort').val();
-							
-							
-							var param = {
-								pageNum : params.pageNumber,
-								pageSize : params.pageSize,
-							};
-							param.code = code;
-							param.orderBy = gsort;
-							param.asc = 1;
-							param.conceptId = $('#conceptId').val();
-							param.conceptName = $('#conceptName').val();
-							
-							if(!document.getElementById("asc").checked){
-								param.asc = 2;
-							}
-							return param;
-						},
-						columns : [ {
-							field : 'code',
-							title : '代码',
-							formatter : function(value, row,index) {
-								var actions = [];
-		                        actions.push('<a target="_blank" href="/web/code/' + value + '">' + value + '</a>');
-		                        return actions.join('');
-							}
-						}, {
-							field : 'codeName',
-							title : '名称'
-						}, {
-							field : 'udpateDate',
-							title : '更新日期'
-						}, {
-							field : 'currYear',
-							title : '年度'
-						}, {
-							field : 'currQuarter',
-							title : '季度'
-						}, {
-							field : 'score',
-							title : '综合分数'
-						}, {
-							field : 'upScore',
-							title : '增量分数'
-						}, {
-							field : 'incomeShow',
-							title : '营收同比<br/>(快预报)'
-						}, {
-							field : 'profitShow',
-							title : '净利同比<br/>(快预报)'
-						}, {
-							field : 'syltbzj',
-							title : '资产<br/>收益率'
-						}, {
-							field : 'syldjd',
-							title : '季度平均<br/>资产收益'
-						}],
-						responseHandler : function responseHandler(res) {
-							
-							var s1 = JSON.stringify(res.result);
-							var s2 = '{"total":9999,"rows":' + s1 + '}';
-							//alert(s2);
-							return eval('(' + s2 + ')')
-						},
-						onLoadSuccess : function() { //加载成功时执行
-							$("#rptList").show();
-						},
-						onLoadError : function() { //加载失败时执行  
-							alert("加载数据失败");
-						}
-					});
+			$("#cusTable")
+					.bootstrapTable(
+							{
+								method : "get", //使用get请求到服务器获取数据  
+								url : "/web/codemodel/list", //获取数据的Servlet地址  
+								striped : true, //表格显示条纹  
+								pagination : true, //启动分页
+								cache : false,
+								pageSize : 20, //每页显示的记录数  
+								//pageNumber:1, //当前第几页  
+								pageList : [ 10, 15, 20, 50 ], //记录数可选列表  
+								search : false, //是否启用查询  
+								//showColumns: true,  //显示下拉框勾选要显示的列  
+								//showRefresh: true,  //显示刷新按钮  
+								sidePagination : "server", //表示服务端请求
+								//设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder  
+								//设置为limit可以获取limit, offset, search, sort, order  
+								queryParamsType : "undefined",
+								queryParams : function queryParams(params) { //设置查询参数  
+									var code = $('#queryCode').val();
+									var gsort = $('#gsort').val();
+
+									var param = {
+										pageNum : params.pageNumber,
+										pageSize : params.pageSize,
+									};
+									param.code = code;
+									param.orderBy = gsort;
+									param.asc = 1;
+									param.conceptId = $('#conceptId').val();
+									param.conceptName = $('#conceptName').val();
+
+									if (!document.getElementById("asc").checked) {
+										param.asc = 2;
+									}
+									return param;
+								},
+								columns : [
+										{
+											field : 'code',
+											title : '代码',
+											formatter : function(value, row,
+													index) {
+												var actions = [];
+												actions.push('<a target="_blank" href="/web/code/' + value + '">'
+																+ value
+																+ '</a>');
+												return actions.join('');
+											}
+										},
+										{
+											field : 'codeName',
+											title : '名称'
+										},
+										{
+											field : 'udpateDate',
+											title : '更新日期'
+										},
+										{
+											field : 'currYear',
+											title : '报告期',
+											formatter : function(value, row, index) {
+												return row.currYear + "-" + row.currQuarter;
+											}
+										},
+										{
+											field : 'score',
+											title : '分数(变化)',
+											formatter : function(value, row, index) {
+												return row.score + "(" + (row.score - row.upScore) + ")";
+											}
+										},
+										{
+											field : 'incomeShow',
+											title : '营收同比<br/>(快预报)'
+										},
+										{
+											field : 'profitShow',
+											title : '净利同比<br/>(快预报)'
+										},
+										{
+											field : 'syl',
+											title : '资产收益<br/>报告期'
+										},
+										{
+											field : 'syldjd',
+											title : '资产收益<br/>季度平均'
+										},
+										{
+											field : 'sylttm',
+											title : '资产收益<br/>TTM'
+										},
+										{
+											field : 'sylType',
+											title : '收益评级',
+											formatter : function(value, row,
+													index) {
+												if (row.sylType == 0) {
+													return "0";
+												}
+												if (row.sylType == 1) {
+													return "1 增长";
+												}
+												if (row.sylType == 2) {
+													return "2 年超20%";
+												}
+												if (row.sylType == 4) {
+													return "4 增长+年超20%";
+												}
+												return row.sylType + " 未知";
+											}
+										}, {
+											field : 'pledgeRatio',
+											title : '质押%'
+										}, {
+											field : 'floatRatio',
+											title : '解禁%'
+										} ],
+								responseHandler : function responseHandler(res) {
+
+									var s1 = JSON.stringify(res.result);
+									var s2 = '{"total":9999,"rows":' + s1 + '}';
+									//alert(s2);
+									return eval('(' + s2 + ')')
+								},
+								onLoadSuccess : function() { //加载成功时执行
+									$("#rptList").show();
+								},
+								onLoadError : function() { //加载失败时执行  
+									alert("加载数据失败");
+								}
+							});
 		}
-		
+
 		$("#queryAction").click(function() {
-				//alert("abc");
-				loadData()
+			//alert("abc");
+			loadData()
 		});
 		loadData();
 	</script>

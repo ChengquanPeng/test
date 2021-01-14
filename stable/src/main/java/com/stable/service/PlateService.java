@@ -72,15 +72,8 @@ public class PlateService {
 				}
 				if (fbi != null) {
 //					log.info(fbi);
-
-					double t = 0.0;
-					int tc = 0;
-					for (FinanceBaseInfo f : l2) {
-						t += f.getJqjzcsyl();
-						tc += f.getQuarter();
-					}
-					r.setT2(CurrencyUitl.roundHalfUp(t / (double) tc));
-					r.setT2s(CurrencyUitl.roundHalfUp(fbi.getJqjzcsyl() / (double) fbi.getQuarter()));
+					r.setT2(getSylTtm(l2));
+					r.setT2s(getSyldjd(fbi));
 					t2 += r.getT2();
 					c2++;
 					if (fbi.getMll() > 0) {// 排除负数
@@ -136,6 +129,30 @@ public class PlateService {
 			}
 		}
 		return rl;
+	}
+
+	/**
+	 * 资产收益率TTM-季度平均
+	 */
+	public double getSylTtm(List<FinanceBaseInfo> fbis) {
+		int end = 4;
+		if (fbis.size() < 4) {
+			end = fbis.size();
+		}
+		double t = 0.0;
+		int tc = 0;
+		for (int i = 0; i < end; i++) {
+			FinanceBaseInfo f = fbis.get(i);
+			if (f.getJqjzcsyl() != 0.0) {
+				t += f.getJqjzcsyl();
+				tc += f.getQuarter();
+			}
+		}
+		return CurrencyUitl.roundHalfUp(t / (double) tc);
+	}
+
+	public double getSyldjd(FinanceBaseInfo fbi) {
+		return CurrencyUitl.roundHalfUp(fbi.getJqjzcsyl() / (double) fbi.getQuarter());
 	}
 
 	public static void main(String[] args) {

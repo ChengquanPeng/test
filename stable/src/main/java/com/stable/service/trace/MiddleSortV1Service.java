@@ -89,7 +89,9 @@ public class MiddleSortV1Service {
 					}
 					m.setRemark(OK);
 					m.setSuspectBigBoss(1);
-					m.setMonitor(1);// 监听:0不监听，1大牛，2中线，3人工
+					if (m.getMonitor() == 0) {
+						m.setMonitor(1);// 监听:0不监听，1大牛，2中线，3人工
+					}
 				} else {
 					if (m.getSuspectBigBoss() == 1) {
 						msg2.append(code).append(",");

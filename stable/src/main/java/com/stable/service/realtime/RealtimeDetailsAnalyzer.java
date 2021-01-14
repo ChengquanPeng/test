@@ -73,7 +73,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		rm.setCode(code);
 		rm.setCodeName(codeName);
 		rm.setBaseScore(cp.getScore());
-		rm.setModeName(CodeModeType.getCodeName(cp.getMonitor()));
+		rm.setModeName(CodeModeType.getCodeName(cp.getMonitor()) + cp.getRemark());
 		while (isRunning) {
 			try {
 				long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
