@@ -39,6 +39,7 @@ import com.stable.service.TradeCalService;
 import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.trace.MiddleSortV1Service;
 import com.stable.utils.BeanCopy;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
@@ -637,6 +638,9 @@ public class CodeModelService {
 				resp.setProfitShow(dh.getCurrProfitTbzz() + "%");
 				if (dh.getForestallIncomeTbzz() > 0) {
 					resp.setProfitShow(resp.getProfitShow() + "(" + dh.getForestallProfitTbzz() + "%)");
+				}
+				if (resp.getFloatRatio() > 0) {
+					resp.setFloatRatio(CurrencyUitl.roundHalfUp(resp.getFloatRatio()));
 				}
 				res.add(resp);
 			}

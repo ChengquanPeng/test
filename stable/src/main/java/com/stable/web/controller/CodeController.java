@@ -146,7 +146,6 @@ public class CodeController {
 			String conceptName, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
-
 			r.setResult(codeModelService.getListForWeb(code, orderBy, conceptId, conceptName, asc, page));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
