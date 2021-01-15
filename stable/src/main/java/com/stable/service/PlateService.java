@@ -151,7 +151,7 @@ public class PlateService {
 		if (tc > 0) {
 			return CurrencyUitl.roundHalfUp(t / (double) tc);
 		} else {
-			return -9999.0;
+			return 0.0;
 		}
 	}
 
