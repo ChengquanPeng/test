@@ -148,7 +148,11 @@ public class PlateService {
 				tc += f.getQuarter();
 			}
 		}
-		return CurrencyUitl.roundHalfUp(t / (double) tc);
+		if (tc > 0) {
+			return CurrencyUitl.roundHalfUp(t / (double) tc);
+		} else {
+			return -9999.0;
+		}
 	}
 
 	public double getSyldjd(FinanceBaseInfo fbi) {
