@@ -91,8 +91,9 @@ public class ChipsService {
 				}
 				if (c2 > 0) {
 					int start = list.get(0).getNum();
+					// lowNum/start
 					int reducePresent = Double
-							.valueOf(CurrencyUitl.cutProfit(Double.valueOf(start), Double.valueOf(lowNum))).intValue();
+							.valueOf(CurrencyUitl.cutProfit(Double.valueOf(lowNum), Double.valueOf(start))).intValue();
 					if (c2 < 10) {
 						return Double.valueOf(reducePresent + ".0" + c2);
 					} else {
@@ -112,12 +113,20 @@ public class ChipsService {
 				}
 				if (c1 > 0) {
 					int start = list.get(0).getNum();
+					// start/lowNum
 					int reducePresent = Double
-							.valueOf(CurrencyUitl.cutProfit(Double.valueOf(start), Double.valueOf(highNum))).intValue();
+							.valueOf(CurrencyUitl.cutProfit(Double.valueOf(highNum), Double.valueOf(start))).intValue();
+					double t = 0.0;
 					if (c1 < 10) {
-						return Double.valueOf(reducePresent + ".0" + c1);
+						t = Double.valueOf(reducePresent + ".0" + c1);
 					} else {
-						return Double.valueOf(reducePresent + "." + c1);
+						t = Double.valueOf(reducePresent + "." + c1);
+					}
+					// 变化太小导致reducePresent=0，没有-负数符号
+					if (reducePresent == 0) {
+						return (0 - t);
+					} else {
+						return t;
 					}
 				}
 			}
