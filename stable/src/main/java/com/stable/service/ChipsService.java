@@ -75,50 +75,56 @@ public class ChipsService {
 	 * 股东人数增长/减少分析（幅度+次数）
 	 */
 	public double holderNumAnalyse(String code) {
-		List<HolderNum> list = getHolderNumList45(code);
-		if (list != null && list.size() > 1) {
-			int c2 = 0;
-			int highNum = 0;
-			// 增加
-			for (int i = 0; i < list.size() - 1; i++) {
-				if (list.get(i).getNum() >= list.get(i - 1).getNum()) {
-					c2++;
-					highNum = list.get(i - 1).getNum();
-				} else {
-					break;
+		try {
+			List<HolderNum> list = getHolderNumList45(code);
+			if (list != null && list.size() > 1) {
+				int c2 = 0;
+				int lowNum = 0;
+				// 增加
+				for (int i = 0; i < list.size() - 1; i++) {
+					if (list.get(i).getNum() >= list.get(i + 1).getNum()) {
+						c2++;
+						lowNum = list.get(i + 1).getNum();
+					} else {
+						break;
+					}
+				}
+				if (c2 > 0) {
+					int start = list.get(0).getNum();
+					int reducePresent = Double
+							.valueOf(CurrencyUitl.cutProfit(Double.valueOf(start), Double.valueOf(lowNum))).intValue();
+					if (c2 < 10) {
+						return Double.valueOf(reducePresent + ".0" + c2);
+					} else {
+						return Double.valueOf(reducePresent + "." + c2);
+					}
+				}
+				// 减少
+				int c1 = 0;
+				int highNum = 0;
+				for (int i = 0; i < list.size() - 1; i++) {
+					if (list.get(i).getNum() <= list.get(i + 1).getNum()) {
+						c1++;
+						highNum = list.get(i + 1).getNum();
+					} else {
+						break;
+					}
+				}
+				if (c1 > 0) {
+					int start = list.get(0).getNum();
+					int reducePresent = Double
+							.valueOf(CurrencyUitl.cutProfit(Double.valueOf(start), Double.valueOf(highNum))).intValue();
+					if (c1 < 10) {
+						return Double.valueOf(reducePresent + ".0" + c1);
+					} else {
+						return Double.valueOf(reducePresent + "." + c1);
+					}
 				}
 			}
-			if (c2 > 0) {
-				int start = list.get(0).getNum();
-				int reducePresent = Double
-						.valueOf(CurrencyUitl.cutProfit(Double.valueOf(start), Double.valueOf(highNum))).intValue();
-				if (c2 < 10) {
-					return Double.valueOf(reducePresent + ".0" + c2);
-				} else {
-					return Double.valueOf(reducePresent + "." + c2);
-				}
-			}
-			// 减少
-			int c1 = 0;
-			for (int i = 0; i < list.size() - 1; i++) {
-				if (list.get(i).getNum() <= list.get(i - 1).getNum()) {
-					c1++;
-					highNum = list.get(i - 1).getNum();
-				} else {
-					break;
-				}
-			}
-			if (c1 > 0) {
-				int start = list.get(0).getNum();
-				int reducePresent = Double
-						.valueOf(CurrencyUitl.cutProfit(Double.valueOf(start), Double.valueOf(highNum))).intValue();
-				if (c1 < 10) {
-					return Double.valueOf(reducePresent + ".0" + c1);
-				} else {
-					return Double.valueOf(reducePresent + "." + c1);
-				}
-			}
+			return 0.0;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		return 0.0;
 	}
 }
