@@ -17,6 +17,7 @@ import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.realtime.MonitoringService;
+import com.stable.vo.bus.AddIssue;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.http.JsonResult;
@@ -48,11 +49,22 @@ public class CodeController {
 			model.addAttribute("codedetail", cbm);
 			model.addAttribute("code", code);
 			model.addAttribute("codeName", stockBasicService.getCodeName(code));
-			model.addAttribute("histList", codeModelService.getListByCode(code, EsQueryPageUtil.queryPage10));
+			model.addAttribute("histList", codeModelService.getListByCode(code, EsQueryPageUtil.queryPage5));
 			model.addAttribute("concepts", conceptService.getCodeConcept(code));
 			model.addAttribute("codeBasic", stockBasicService.getCode(code));
 			model.addAttribute("topThree", chipsService.getLastHolderPercent(code));
-			
+
+			AddIssue iss = chipsService.getLastAddIssue(code);
+			StringBuffer addIssue = new StringBuffer();
+			if (iss.getStartDate() > 0) {
+				addIssue.append("开始日期:").append(iss.getStartDate());
+				if (iss.getEndDate() > 0) {
+					addIssue.append(" 开始日期:").append(iss.getEndDate());
+				}
+				addIssue.append(" 状态:").append(getStatusDesc(iss.getStatus()));
+				addIssue.append(" 公告:").append(iss.getTitles());
+			}
+			model.addAttribute("addIssue", addIssue.toString());
 
 			String kb = "";
 			if (cbm.getForestallQuarter() > 0) {
@@ -69,6 +81,19 @@ public class CodeController {
 			e.printStackTrace();
 		}
 		return "code";
+	}
+
+	private String getStatusDesc(int s) {
+		if (s == 1) {
+			return "已开始";
+		}
+		if (s == 2) {
+			return "已完成";
+		}
+		if (s == 3) {
+			return "已终止";
+		}
+		return s + "";
 	}
 
 	/**

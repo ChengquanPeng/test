@@ -21,4 +21,5 @@ public class Constant {
 	public static final String FEN_HAO = ";";
 	public static final String NUM_ER = "2";
 	public static final String SYMBOL_ = "-";
+	public static final String HTML_LINE = "<br/>";
 }

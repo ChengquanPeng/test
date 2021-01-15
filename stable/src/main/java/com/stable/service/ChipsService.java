@@ -2,6 +2,7 @@ package com.stable.service;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -16,11 +17,16 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.es.dao.base.AddIssueDao;
 import com.stable.es.dao.base.EsHolderNumDao;
 import com.stable.es.dao.base.EsHolderPercentDao;
+import com.stable.es.dao.base.JiejinDao;
 import com.stable.utils.CurrencyUitl;
+import com.stable.vo.bus.AddIssue;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.HolderPercent;
+import com.stable.vo.bus.Jiejin;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
 /**
  * 筹码
@@ -32,9 +38,74 @@ public class ChipsService {
 	private EsHolderNumDao esHolderNumDao;
 	@Autowired
 	private EsHolderPercentDao esHolderPercentDao;
+	@Autowired
+	private AddIssueDao addIssueDao;
+	@Autowired
+	private JiejinDao jiejinDao;
 
 	/**
-	 * 最新的前2名大股东
+	 * 最后的增发记录
+	 */
+	public AddIssue getLastAddIssue(String code) {
+		int pageNum = EsQueryPageUtil.queryPage1.getPageNum();
+		int size = EsQueryPageUtil.queryPage1.getPageSize();
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		FieldSortBuilder sort = SortBuilders.fieldSort("startDate").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		Page<AddIssue> page = addIssueDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		return new AddIssue();
+	}
+
+	/**
+	 * -解禁记录
+	 */
+	public List<Jiejin> getAddJiejinList(String code, EsQueryPageReq querypage) {
+		int pageNum = querypage.getPageNum();
+		int size = querypage.getPageSize();
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		if (StringUtils.isNotBlank(code)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		}
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		Page<Jiejin> page = jiejinDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		return null;
+	}
+
+	/**
+	 * -增发记录
+	 */
+	public List<AddIssue> getAddIssueList(String code, EsQueryPageReq querypage) {
+		int pageNum = querypage.getPageNum();
+		int size = querypage.getPageSize();
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		if (StringUtils.isNotBlank(code)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		}
+		FieldSortBuilder sort = SortBuilders.fieldSort("startDate").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		Page<AddIssue> page = addIssueDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		return null;
+	}
+
+	/**
+	 * 最新的前3大股东占比
 	 */
 	public double getLastHolderPercent(String code) {
 		int pageNum = EsQueryPageUtil.queryPage1.getPageNum();

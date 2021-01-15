@@ -489,7 +489,7 @@ public class DaliyTradeHistroyService {
 		if (needFetch) {
 			log.info("code={},startDate={},endDate={},queryPage={},SortOrder={}", code, startDate, endDate,
 					queryPage.getPageSize(), s.toString());
-			new Exception().printStackTrace();
+//			new Exception().printStackTrace();
 			String today = DateUtil.getTodayYYYYMMDD();
 			String json = redisUtil.get(code);
 			if (StringUtils.isNotBlank(json)) {
