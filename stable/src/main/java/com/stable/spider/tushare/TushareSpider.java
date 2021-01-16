@@ -90,57 +90,6 @@ public class TushareSpider {
 		return items;
 	}
 
-	/**
-	 * 获取上海公司基础信息
-	 * 
-	 * @return
-	 */
-//	private final String stock_company_sh_fields = "ts_code,chairman,manager,secretary,reg_capital,setup_date,province,city,introduction,website,email,office,employees,main_business,business_scope";
-//
-//	public JSONArray getStockShCompany() {
-//		JSONObject json = new JSONObject();
-//		json.put("api_name", "stock_company");
-//		json.put("params", JSON.parse("{'exchange':'SSE'}"));
-//		json.put("fields", stock_company_sh_fields);
-//		String result = post(json);
-//		JSONObject data = JSON.parseObject(result);
-//		JSONArray items = data.getJSONObject("data").getJSONArray("items");
-//		return items;
-//	}
-	/**
-	 * 获取深圳公司基础信息
-	 */
-//	private final String stock_company_sz_fields = "ts_code,chairman,manager,secretary,reg_capital,setup_date,province,city,introduction,website,email,office,employees,main_business,business_scope";
-//
-//	public JSONArray getStockSZCompany() {
-//		JSONObject json = new JSONObject();
-//		json.put("api_name", "stock_company");
-//		json.put("params", JSON.parse("{'exchange':'SZSE'}"));
-//		json.put("fields", stock_company_sz_fields);
-//		String result = post(json);
-//		JSONObject data = JSON.parseObject(result);
-//		JSONArray items = data.getJSONObject("data").getJSONArray("items");
-//		return items;
-//	}
-
-	/**
-	 * 得到前10大持有人
-	 * 
-	 * @param code
-	 * @return
-	 */
-	private final String top10_holders_fields = "ts_code,ann_date,end_date,holder_name,hold_amount,hold_ratio";
-
-	public JSONArray getStockTopHolders(String code) {
-		JSONObject json = new JSONObject();
-		json.put("api_name", "top10_holders");
-		json.put("params", JSON.parse(String.format("{'ts_code':'%s'}", code)));
-		json.put("fields", top10_holders_fields);
-		String result = post(json);
-		JSONObject datas = JSON.parseObject(result);
-		JSONArray items = datas.getJSONObject("data").getJSONArray("items");
-		return items;
-	}
 
 	/**
 	 * 日线行情
