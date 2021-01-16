@@ -138,70 +138,82 @@ public class EastmoneySpider {
 	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=%s&code=%s";
 
 	public static List<FinanceBaseInfo> getNewFinanceAnalysis(String code, int type) {
-		List<FinanceBaseInfo> list = new ArrayList<>();
-		String url = String.format(financeUrl, type, formatCode2(code));
-		String result = HttpUtil.doGet2(url);
-		JSONArray objects = JSON.parseArray(result);
-		for (int i = 0; i < objects.size(); i++) {
-			JSONObject data = objects.getJSONObject(i);
-			String date = data.get("date").toString(); // 年报日期
-			FinanceBaseInfo newFinanceAnalysis = new FinanceBaseInfo(code, Integer.valueOf(date.replaceAll("-", "")));
+		int trytime = 0;
+		do {
+			trytime++;
 			try {
-				Double yyzsrtbzz = data.getDouble("yyzsrtbzz"); // 营业总收入同比增长(%)
-				newFinanceAnalysis.setYyzsrtbzz(yyzsrtbzz);
-			} catch (Exception e) {
-			}
-			try {
-				Double gsjlrtbzz = data.getDouble("gsjlrtbzz"); // 归属净利润同比增长(%)
-				newFinanceAnalysis.setGsjlrtbzz(gsjlrtbzz);
-			} catch (Exception e) {
-			}
-			try {
-				Double kfjlrtbzz = data.getDouble("kfjlrtbzz"); // 扣非净利润同比增长(%)
-				newFinanceAnalysis.setKfjlrtbzz(kfjlrtbzz);
-			} catch (Exception e) {
-			}
+				List<FinanceBaseInfo> list = new ArrayList<>();
+				String url = String.format(financeUrl, type, formatCode2(code));
+				String result = HttpUtil.doGet2(url);
+				JSONArray objects = JSON.parseArray(result);
+				for (int i = 0; i < objects.size(); i++) {
+					JSONObject data = objects.getJSONObject(i);
+					String date = data.get("date").toString(); // 年报日期
+					FinanceBaseInfo newFinanceAnalysis = new FinanceBaseInfo(code,
+							Integer.valueOf(date.replaceAll("-", "")));
+					try {
+						Double yyzsrtbzz = data.getDouble("yyzsrtbzz"); // 营业总收入同比增长(%)
+						newFinanceAnalysis.setYyzsrtbzz(yyzsrtbzz);
+					} catch (Exception e) {
+					}
+					try {
+						Double gsjlrtbzz = data.getDouble("gsjlrtbzz"); // 归属净利润同比增长(%)
+						newFinanceAnalysis.setGsjlrtbzz(gsjlrtbzz);
+					} catch (Exception e) {
+					}
+					try {
+						Double kfjlrtbzz = data.getDouble("kfjlrtbzz"); // 扣非净利润同比增长(%)
+						newFinanceAnalysis.setKfjlrtbzz(kfjlrtbzz);
+					} catch (Exception e) {
+					}
 
-			try {
-				Long yyzsr = CurrencyUitl.covertToLong(data.get("yyzsr").toString()); // 营业总收入
-				newFinanceAnalysis.setYyzsr(yyzsr);
+					try {
+						Long yyzsr = CurrencyUitl.covertToLong(data.get("yyzsr").toString()); // 营业总收入
+						newFinanceAnalysis.setYyzsr(yyzsr);
+					} catch (Exception e) {
+					}
+					try {
+						Long gsjlr = CurrencyUitl.covertToLong(data.get("gsjlr").toString()); // 归属净利润
+						newFinanceAnalysis.setGsjlr(gsjlr);
+					} catch (Exception e) {
+					}
+					try {
+						Long kfjlr = CurrencyUitl.covertToLong(data.get("kfjlr").toString()); // 扣非净利润同比增长(%)
+						newFinanceAnalysis.setKfjlr(kfjlr);
+					} catch (Exception e) {
+					}
+					try {
+						Double jqjzcsyl = data.getDouble("jqjzcsyl"); // 加权净资产收益率(%)
+						newFinanceAnalysis.setJqjzcsyl(CurrencyUitl.roundHalfUp(jqjzcsyl));
+						newFinanceAnalysis.setSyldjd(
+								CurrencyUitl.roundHalfUp(jqjzcsyl / (double) newFinanceAnalysis.getQuarter()));
+					} catch (Exception e) {
+					}
+					try {
+						Double tbjzcsyl = data.getDouble("tbjzcsyl"); // 摊薄净资产收益率(%)
+						newFinanceAnalysis.setTbjzcsyl(CurrencyUitl.roundHalfUp(tbjzcsyl));
+					} catch (Exception e) {
+					}
+					try {
+						Double mgjyxjl = data.getDouble("mgjyxjl");
+						newFinanceAnalysis.setMgjyxjl(CurrencyUitl.roundHalfUp(mgjyxjl));
+					} catch (Exception e) {
+					}
+					try {
+						Double mll = data.getDouble("mll");
+						newFinanceAnalysis.setMll(CurrencyUitl.roundHalfUp(mll));
+					} catch (Exception e) {
+					}
+					list.add(newFinanceAnalysis);
+				}
+				return list;
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			try {
-				Long gsjlr = CurrencyUitl.covertToLong(data.get("gsjlr").toString()); // 归属净利润
-				newFinanceAnalysis.setGsjlr(gsjlr);
-			} catch (Exception e) {
-			}
-			try {
-				Long kfjlr = CurrencyUitl.covertToLong(data.get("kfjlr").toString()); // 扣非净利润同比增长(%)
-				newFinanceAnalysis.setKfjlr(kfjlr);
-			} catch (Exception e) {
-			}
-			try {
-				Double jqjzcsyl = data.getDouble("jqjzcsyl"); // 加权净资产收益率(%)
-				newFinanceAnalysis.setJqjzcsyl(CurrencyUitl.roundHalfUp(jqjzcsyl));
-				newFinanceAnalysis
-						.setSyldjd(CurrencyUitl.roundHalfUp(jqjzcsyl / (double) newFinanceAnalysis.getQuarter()));
-			} catch (Exception e) {
-			}
-			try {
-				Double tbjzcsyl = data.getDouble("tbjzcsyl"); // 摊薄净资产收益率(%)
-				newFinanceAnalysis.setTbjzcsyl(CurrencyUitl.roundHalfUp(tbjzcsyl));
-			} catch (Exception e) {
-			}
-			try {
-				Double mgjyxjl = data.getDouble("mgjyxjl");
-				newFinanceAnalysis.setMgjyxjl(CurrencyUitl.roundHalfUp(mgjyxjl));
-			} catch (Exception e) {
-			}
-			try {
-				Double mll = data.getDouble("mll");
-				newFinanceAnalysis.setMll(CurrencyUitl.roundHalfUp(mll));
-			} catch (Exception e) {
-			}
-			list.add(newFinanceAnalysis);
-		}
-		return list;
+			ThreadsUtil.sleepRandomSecBetween1And5(trytime);
+		} while (trytime <= 10);
+		WxPushUtil.pushSystem1("同花顺关注度-抓包出错,code=" + code);
+		return null;
 	}
 
 	// http://data.eastmoney.com/bbsj/202003/yjyg.html

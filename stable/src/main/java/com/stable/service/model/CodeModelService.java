@@ -33,7 +33,6 @@ import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
 import com.stable.service.PlateService;
 import com.stable.service.PledgeStatService;
-import com.stable.service.ShareFloatService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.data.FinanceAnalyzer;
@@ -52,7 +51,6 @@ import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.DividendHistory;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.PledgeStat;
-import com.stable.vo.bus.ShareFloat;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.resp.CodeBaseModelResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -84,8 +82,6 @@ public class CodeModelService {
 	private EsCodeBaseModelHistDao codeBaseModelHistDao;
 	@Autowired
 	private FinanceService financeService;
-	@Autowired
-	private ShareFloatService shareFloatService;
 	@Autowired
 	private ConceptService conceptService;
 	@Autowired
@@ -218,11 +214,12 @@ public class CodeModelService {
 			newOne.setPledgeRatio(ps.getPledgeRatio());// 质押比例
 		}
 		// 限售股解禁
-		ShareFloat sf = shareFloatService.getLastRecordByLteDate(code, treadeDate, nextYear);
-		if (sf != null) {
-			newOne.setFloatDate(sf.getFloatDate());// 解禁日期
-			newOne.setFloatRatio(sf.getFloatRatio());// 流通股份占总股本比率
-		}
+//		ShareFloat sf = shareFloatService.getLastRecordByLteDate(code, treadeDate, nextYear);
+//		if (sf != null) {
+//			newOne.setFloatDate(sf.getFloatDate());// 解禁日期
+//			newOne.setFloatRatio(sf.getFloatRatio());// 流通股份占总股本比率
+//		}
+//		TODO
 
 		newOne.setForestallYear(0);
 		newOne.setForestallQuarter(0);
