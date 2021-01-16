@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.ChipsService;
 import com.stable.service.ConceptService;
@@ -20,6 +21,7 @@ import com.stable.service.realtime.MonitoringService;
 import com.stable.vo.bus.AddIssue;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
+import com.stable.vo.bus.Jiejin;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.http.resp.ReportVo;
 import com.stable.vo.http.resp.ViewVo;
@@ -54,6 +56,7 @@ public class CodeController {
 			model.addAttribute("codeBasic", stockBasicService.getCode(code));
 			model.addAttribute("topThree", chipsService.getLastHolderPercent(code));
 
+			// 是否有增发
 			AddIssue iss = chipsService.getLastAddIssue(code);
 			StringBuffer addIssue = new StringBuffer();
 			if (iss.getStartDate() > 0) {
@@ -65,7 +68,20 @@ public class CodeController {
 				addIssue.append(" 公告:").append(iss.getTitles());
 			}
 			model.addAttribute("addIssue", addIssue.toString());
-
+			// 前后1年解禁记录
+			List<Jiejin> jj = chipsService.getBf2yearJiejin(code);
+			StringBuffer jmsg = new StringBuffer();
+			if (jj != null) {
+				for (Jiejin j : jj) {
+					jmsg.append("解禁日期:").append(j.getDate());
+					jmsg.append(" 解禁类型:").append(j.getType());
+					jmsg.append(" 解禁占比:").append(j.getZzb());
+					jmsg.append(" 解禁成本:").append(j.getCost());
+					jmsg.append(Constant.HTML_LINE);
+				}
+			}
+			model.addAttribute("jmsg", jmsg.toString());
+			// 快预报
 			String kb = "";
 			if (cbm.getForestallQuarter() > 0) {
 				kb = cbm.getForestallYear() + "年" + cbm.getForestallQuarter() + "季度";

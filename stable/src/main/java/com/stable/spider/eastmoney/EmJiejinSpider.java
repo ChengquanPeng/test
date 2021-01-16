@@ -23,7 +23,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Component
 @Log4j2
-public class JiejinSpider {
+public class EmJiejinSpider {
 
 	// http://data.eastmoney.com/dxf/q/601989.html
 
@@ -43,6 +43,7 @@ public class JiejinSpider {
 					List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 					List<Jiejin> savelist = new ArrayList<Jiejin>();
 					for (StockBaseInfo b : list) {
+
 						dofetch(b.getCode(), savelist);
 						ThreadsUtil.sleepRandomSecBetween1And5();
 						if (savelist.size() > 100) {
@@ -62,38 +63,48 @@ public class JiejinSpider {
 	}
 
 	private void dofetch(String code, List<Jiejin> savelist) {
-		String url = URL_S + code + URL_E;
-		log.info(url);
-		String result = HttpUtil.doGet2(url);
-		result = result.substring(J_QUERY112306735504837667934_1610722345186.length(), result.length() - 1);
-		JSONObject object = JSON.parseObject(result);
-		JSONArray objects = object.getJSONArray("data");
-		for (int i = 0; i < objects.size(); i++) {
-			Jiejin jj = new Jiejin();
-			JSONObject data = objects.getJSONObject(i);
-			jj.setCode(data.getString("gpdm"));
-			String date = data.getString("ltsj").substring(0, 10);
-			// System.err.println(date);
-			jj.setDate(DateUtil.convertDate2(date));
-			jj.setType(data.getString("xsglx"));
+		int trytime = 0;
+		do {
+			trytime++;
 			try {
-				Double zb = data.getDouble("zb"); // 占比
-				jj.setZb(CurrencyUitl.roundHalfUp(zb * 100));
+				String url = URL_S + code + URL_E;
+				log.info(url);
+				String result = HttpUtil.doGet2(url);
+				result = result.substring(J_QUERY112306735504837667934_1610722345186.length(), result.length() - 1);
+				JSONObject object = JSON.parseObject(result);
+				JSONArray objects = object.getJSONArray("data");
+				for (int i = 0; i < objects.size(); i++) {
+					Jiejin jj = new Jiejin();
+					JSONObject data = objects.getJSONObject(i);
+					jj.setCode(data.getString("gpdm"));
+					String date = data.getString("ltsj").substring(0, 10);
+					// System.err.println(date);
+					jj.setDate(DateUtil.convertDate2(date));
+					jj.setType(data.getString("xsglx"));
+					try {
+						Double zb = data.getDouble("zb"); // 占比
+						jj.setZb(CurrencyUitl.roundHalfUp(zb * 100));
+					} catch (Exception e) {
+					}
+					try {
+						Double zzb = data.getDouble("zzb"); // 总占比
+						jj.setZzb(CurrencyUitl.roundHalfUp(zzb * 100));
+					} catch (Exception e) {
+					}
+					jj.setId(jj.getCode() + jj.getDate());
+					log.info(jj);
+					savelist.add(jj);
+				}
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			try {
-				Double zzb = data.getDouble("zzb"); // 总占比
-				jj.setZzb(CurrencyUitl.roundHalfUp(zzb * 100));
-			} catch (Exception e) {
-			}
-			jj.setId(jj.getCode() + jj.getDate());
-			log.info(jj);
-			savelist.add(jj);
-		}
+			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+		} while (trytime <= 10);
+		WxPushUtil.pushSystem1("东方财富-解禁-抓包出错,code=" + code);
 	}
 
 	public static void main(String[] args) {
-		JiejinSpider tp = new JiejinSpider();
+		EmJiejinSpider tp = new EmJiejinSpider();
 		String[] as = { "601989", "603385", "300676", "002405", "601369", "600789", "002612" };
 		for (int i = 0; i < as.length; i++) {
 			tp.dofetch(as[i], new ArrayList<Jiejin>());

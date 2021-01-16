@@ -210,9 +210,9 @@ public class EastmoneySpider {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			ThreadsUtil.sleepRandomSecBetween1And5(trytime);
+			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 		} while (trytime <= 10);
-		WxPushUtil.pushSystem1("同花顺关注度-抓包出错,code=" + code);
+		WxPushUtil.pushSystem1("东方财富-财务-抓包出错,code=" + code);
 		return null;
 	}
 

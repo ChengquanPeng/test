@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.ChipsService;
 import com.stable.spider.eastmoney.EmAddIssueSpider;
-import com.stable.spider.eastmoney.JiejinSpider;
+import com.stable.spider.eastmoney.EmJiejinSpider;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -21,7 +21,7 @@ public class ChipsController {
 	@Autowired
 	private EmAddIssueSpider emAddIssueSpider;
 	@Autowired
-	private JiejinSpider jiejinSpider;
+	private EmJiejinSpider jiejinSpider;
 
 	/**
 	 * 根据code查询股东人数

@@ -65,7 +65,7 @@ public class EmAddIssueSpider {
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					WxPushUtil.pushSystem1("东方财富-抓包公告出错-抓包出错");
+					WxPushUtil.pushSystem1("东方财富-抓包公告出错-抓包出错2");
 				}
 			}
 		}).start();
@@ -75,7 +75,6 @@ public class EmAddIssueSpider {
 		AddIssueUtil util = new AddIssueUtil();
 		util.setCode(code);
 		for (int i = 1; i < 5; i++) {
-
 			String url = String.format(BASE_URL, code, i);
 			int trytime = 0;
 			boolean fetched = false;
@@ -132,7 +131,7 @@ public class EmAddIssueSpider {
 					htmlunitSpider.close();
 				}
 				trytime++;
-				ThreadsUtil.sleepRandomSecBetween1And5(trytime);
+				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 				if (trytime >= 3) {
 					fetched = true;
 					WxPushUtil.pushSystem1("东方财富-抓包公告出错-抓包出错code=" + code + ",url=" + url);

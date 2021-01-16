@@ -1,5 +1,6 @@
 package com.stable.service;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +23,7 @@ import com.stable.es.dao.base.EsHolderNumDao;
 import com.stable.es.dao.base.EsHolderPercentDao;
 import com.stable.es.dao.base.JiejinDao;
 import com.stable.utils.CurrencyUitl;
+import com.stable.utils.DateUtil;
 import com.stable.vo.bus.AddIssue;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.HolderPercent;
@@ -60,6 +62,29 @@ public class ChipsService {
 			return page.getContent().get(0);
 		}
 		return new AddIssue();
+	}
+
+	/**
+	 * 前后1年的解禁记录（2年）
+	 */
+	public List<Jiejin> getBf2yearJiejin(String code) {
+		Date now = new Date();
+		int start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
+		int end = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 370));
+		int pageNum = EsQueryPageUtil.queryPage9999.getPageNum();
+		int size = EsQueryPageUtil.queryPage9999.getPageSize();
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("date").from(start).to(end));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		Page<Jiejin> page = jiejinDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		return null;
 	}
 
 	/**

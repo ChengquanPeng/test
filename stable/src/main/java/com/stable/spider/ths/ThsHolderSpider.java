@@ -48,13 +48,23 @@ public class ThsHolderSpider {
 	private StockBasicService stockBasicService;
 	private String urlbase = "http://basic.10jqka.com.cn/%s/holder.html?t=%s";
 	private String host = "http://basic.10jqka.com.cn/";
-	Map<String, String> header;
+	private Map<String, String> header;
 
 	public void dofetchHolder() {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
+//					Calendar cal = Calendar.getInstance();
+//					cal.setTime(new Date());
+//					if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+//						log.info("周六");
+//						int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
+//						dofetchHolderInner(date);
+//					} else {
+//						log.info(" 非周六");
+//					}
+//
 					int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
 					if (tradeCalService.isOpen(date)) {
 						dofetchHolderInner(date);
@@ -103,7 +113,7 @@ public class ThsHolderSpider {
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(urlbase, code, System.currentTimeMillis());
-		ThreadsUtil.sleepRandomSecBetween15And30();
+		ThreadsUtil.sleepRandomSecBetween1And5();
 		do {
 			try {
 				log.info(url);
@@ -164,7 +174,7 @@ public class ThsHolderSpider {
 				if (trytime >= 10) {
 					fetched = true;
 					e2.printStackTrace();
-					WxPushUtil.pushSystem1("同花顺概念-股东获取出错,url=" + url);
+					WxPushUtil.pushSystem1("同花顺-股东获取出错,url=" + url);
 				}
 			} finally {
 				htmlunitSpider.close();
