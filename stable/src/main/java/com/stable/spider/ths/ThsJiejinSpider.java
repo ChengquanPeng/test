@@ -134,7 +134,7 @@ public class ThsJiejinSpider {
 				e2.printStackTrace();
 				trytime++;
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
-				if (trytime >= 5) {
+				if (trytime >= 10) {
 					fetched = true;
 					e2.printStackTrace();
 					WxPushUtil.pushSystem1("同花顺-解禁获取出错,url=" + url);

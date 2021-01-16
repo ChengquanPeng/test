@@ -132,7 +132,7 @@ public class EmAddIssueSpider {
 				}
 				trytime++;
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
-				if (trytime >= 3) {
+				if (trytime >= 10) {
 					fetched = true;
 					WxPushUtil.pushSystem1("东方财富-抓包公告出错-抓包出错code=" + code + ",url=" + url);
 				}

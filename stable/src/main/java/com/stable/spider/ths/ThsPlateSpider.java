@@ -116,7 +116,7 @@ public class ThsPlateSpider {
 
 			trytime++;
 			ThreadsUtil.sleepRandomSecBetween1And5(trytime);
-			if (trytime >= 5) {
+			if (trytime >= 10) {
 				fetched = true;
 				WxPushUtil.pushSystem1("同花顺-亮点，主营出错出错code=" + code + ",url=" + url);
 			}
