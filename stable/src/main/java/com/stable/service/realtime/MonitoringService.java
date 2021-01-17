@@ -46,17 +46,8 @@ public class MonitoringService {
 	@Autowired
 	private BuyTraceService buyTraceService;
 	private Map<String, RealtimeDetailsAnalyzer> map = null;
-	@Autowired
-	private MonitoringSortV4Service monitoringSortV4Service;
 
 	public synchronized void startObservable() {
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				monitoringSortV4Service.startObservable();
-			}
-		}).start();
 //		if (System.currentTimeMillis() > 0) {
 //			return;
 //		}
