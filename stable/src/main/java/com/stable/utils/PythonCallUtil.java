@@ -9,9 +9,7 @@ import java.util.concurrent.Semaphore;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.alibaba.fastjson.JSONObject;
 import com.stable.config.SpringConfig;
-import com.stable.vo.MarketHistroyVo;
 
 public class PythonCallUtil {
 
@@ -114,33 +112,5 @@ public class PythonCallUtil {
 			sb.add(EXCEPT);
 		}
 		return sb;
-	}
-
-	public static void main(String[] args) {
-		test2();
-	}
-
-	public static void test2() {
-		for (int i = 0; i < 100; i++) {
-			callPythonScriptByServerTickData("600000", "2020-01-09");
-		}
-
-	}
-
-	public static void test1() {
-		String pythonScriptPathAndFileName = "E:\\pythonworkspace\\tushareTickData.py";
-		MarketHistroyVo mh = new MarketHistroyVo();
-		mh.setTs_code("000029.SZ");
-		mh.setAdj("qfq");
-		mh.setStart_date("20191220");
-		mh.setEnd_date("20191220");
-		mh.setFreq("D");
-
-		String params = JSONObject.toJSONString(mh);
-		params = params.replaceAll("\"", "\'");
-		PythonCallUtil.callPythonScript(pythonScriptPathAndFileName, params).forEach(str -> {
-			System.out.println(str);
-		});
-
 	}
 }

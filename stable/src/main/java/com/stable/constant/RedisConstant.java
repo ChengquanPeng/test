@@ -15,10 +15,6 @@ public class RedisConstant {
 	public static final String RDS_PRICE_LIFE_INDEX_ = "RDS_PRICE_LIFE_INDEX_";
 	// 最后除权日
 	public static final String RDS_DIVIDEND_LAST_DAY_ = "RDS_DIVIDEND_LAST_DAY_";
-	// 模型-交易
-	public static final String RDS_MODEL_V1_DATE = "RDS_MODEL_V1_DATE";
-	// 模型-基本面
-	public static final String RDS_MODEL_BASE_DATE = "RDS_MODEL_BASE_DATE_";
 	// 质押
 	public static final String RDS_PLEDGE_STAT_LAST_DAY = "RDS_PLEDGE_STAT_LAST_DAY_";
 	// 解禁
@@ -27,9 +23,4 @@ public class RedisConstant {
 	public static final String RDS_FIN_YUGAO_ = "RDS_FIN_YUGAO_";
 	// 快报
 	public static final String RDS_FIN_KUAIBAO_ = "RDS_FIN_KUAIBAO_";
-
-	// 关注度
-	public static final String RDS_ATTENTION_DATE = "RDS_ATTENTION_DATE";
-	public static final String RDS_ATTENTION_DATE_DONE_ = "RDS_ATTENTION_DATE_DONE_";
-	public static final String RDS_ATTENTION_DATE_CODE = "RDS_ATTENTION_DATE_CODE";
 }
