@@ -41,7 +41,6 @@ import com.stable.service.model.data.LinePrice;
 import com.stable.service.model.data.LineTickData;
 import com.stable.service.model.data.LineVol;
 import com.stable.service.model.data.StrongService;
-import com.stable.service.realtime.MonitoringSortV4Service;
 import com.stable.service.trace.SortV4Service;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
@@ -91,8 +90,6 @@ public class UpModelLineService {
 	private CodeModelService codeModelService;
 	@Autowired
 	private SortV4Service sortV4Service;
-	@Autowired
-	private MonitoringSortV4Service monitoringSortV4Service;
 
 	private final EsQueryPageReq queryPage250 = EsQueryPageUtil.queryPage250;
 	private final EsQueryPageReq deleteQueryPage9999 = EsQueryPageUtil.queryPage9999;
@@ -144,10 +141,6 @@ public class UpModelLineService {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "模型运行异常", "", "");
 			WxPushUtil.pushSystem1("模型运行异常..");
-		}
-		if (isJob) {
-			// sortV4Service.sortv4(today + "", today + "");
-			monitoringSortV4Service.autoSell(today);
 		}
 	}
 

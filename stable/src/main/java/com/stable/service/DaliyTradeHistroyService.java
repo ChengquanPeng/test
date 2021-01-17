@@ -33,7 +33,6 @@ import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.ImageStrategyListener;
-import com.stable.service.model.UpModelLineService;
 import com.stable.service.model.image.ImageService;
 import com.stable.service.trace.SortV6Service;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
@@ -85,8 +84,8 @@ public class DaliyTradeHistroyService {
 	private ImageService imageService;
 	@Autowired
 	private EsModelV1Dao esModelV1Dao;
-	@Autowired
-	private UpModelLineService upLevel1Service;
+//	@Autowired
+//	private UpModelLineService upLevel1Service;
 	@Autowired
 	private SortV6Service sortV6Service;
 
@@ -706,34 +705,34 @@ public class DaliyTradeHistroyService {
 							log.info("每日*定时任务-日交易[end]");
 						} finally {
 							log.info("等待模型执行");
-							nextModelJob(today);
+							nextSortMode6(today);
 						}
 						return null;
 					}
 				});
 	}
 
-	private void nextModelJob(String today) {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			@Override
-			public Object call() throws Exception {
-				try {
-					try {
-						TimeUnit.MINUTES.sleep(10);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					upLevel1Service.runJob(true, Integer.valueOf(today));
-				} finally {
-					// log.info("等待图片模型执行");
-					// nextImageJob(today);
-					log.info("等待 sort mode 执行");
-					nextSortMode6(today);
-				}
-				return null;
-			}
-		});
-	}
+//	private void nextModelJob(String today) {
+//		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
+//			@Override
+//			public Object call() throws Exception {
+//				try {
+//					try {
+//						TimeUnit.MINUTES.sleep(10);
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
+//					upLevel1Service.runJob(true, Integer.valueOf(today));
+//				} finally {
+//					// log.info("等待图片模型执行");
+//					// nextImageJob(today);
+//					log.info("等待 sort mode 执行");
+//					nextSortMode6(today);
+//				}
+//				return null;
+//			}
+//		});
+//	}
 
 	public void nextSortMode6(String today) {
 		TasksWorker.getInstance().getService().submit(new Callable<Object>() {

@@ -1,5 +1,6 @@
 package com.stable.web.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.ChipsService;
 import com.stable.service.ConceptService;
@@ -70,17 +70,10 @@ public class CodeController {
 			model.addAttribute("addIssue", addIssue.toString());
 			// 前后1年解禁记录
 			List<Jiejin> jj = chipsService.getBf2yearJiejin(code);
-			StringBuffer jmsg = new StringBuffer();
-			if (jj != null) {
-				for (Jiejin j : jj) {
-					jmsg.append("解禁日期:").append(j.getDate());
-					jmsg.append(" 解禁类型:").append(j.getType());
-					jmsg.append(" 解禁占比:").append(j.getZzb());
-					jmsg.append(" 解禁成本:").append(j.getCost());
-					jmsg.append(Constant.HTML_LINE);
-				}
+			if (jj == null) {
+				jj = Collections.emptyList();
 			}
-			model.addAttribute("jmsg", jmsg.toString());
+			model.addAttribute("jmsg", jj);
 			// 快预报
 			String kb = "";
 			if (cbm.getForestallQuarter() > 0) {

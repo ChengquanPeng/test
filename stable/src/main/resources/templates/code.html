@@ -66,7 +66,22 @@ trtd{
 	资金博弈:
 	<br/>
 	<div>最近增发记录:<span th:text="${addIssue}"></span></div>
-	<div>前后1年解禁记录:<span th:text="${jmsg}"></span></div>
+	<div>前后1年解禁记录:</span>
+		<table border='1' cellspacing='0' cellpadding='0'>
+		<tr>
+			<th>解禁日期</th>
+			<th>解禁类型</th>
+			<th>解禁占比</th>
+			<th>解禁成本</th>
+		</tr>
+		<tr th:each="jj : ${jmsg}">
+			<td th:text="${jj.date}"></td>
+			<td th:text="${jj.type}"></td>
+			<td th:text="${jj.zzb}"></td>
+			<td th:text="${jj.cost}"></td>
+		</tr>
+	</table>
+	</div>
 	<br/>------------------------------------------------------------<br/>
 	历史记录:
 	<br/>
