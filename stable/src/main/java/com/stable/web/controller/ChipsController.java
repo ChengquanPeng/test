@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.ChipsService;
-import com.stable.spider.eastmoney.EmAddIssueSpider;
 import com.stable.spider.eastmoney.EmJiejinSpider;
+import com.stable.spider.ths.ThsAddIssueSpider;
 import com.stable.spider.ths.ThsJiejinSpider;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -20,7 +20,7 @@ public class ChipsController {
 	@Autowired
 	private ChipsService chipsService;
 	@Autowired
-	private EmAddIssueSpider emAddIssueSpider;
+	private ThsAddIssueSpider thsAddIssueSpider;
 	@Autowired
 	private EmJiejinSpider emJiejinSpider;
 	@Autowired
@@ -78,13 +78,18 @@ public class ChipsController {
 	}
 
 	/**
-	 * 东方财富-公告-增发
+	 * 同花顺-公告-增发
 	 */
 	@RequestMapping(value = "/fetchAddIssue", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> fetchAddIssue() {
 		JsonResult r = new JsonResult();
 		try {
-			emAddIssueSpider.dofetch(20170101);
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					thsAddIssueSpider.dofetch(false, 20170101);
+				}
+			}).start();
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {

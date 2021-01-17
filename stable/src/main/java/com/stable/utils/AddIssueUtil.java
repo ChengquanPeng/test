@@ -32,7 +32,7 @@ public class AddIssueUtil {
 				}
 			} else {
 				if (startting > 0) {// 下一个轮回
-					return false;
+					return false;// 一定要获取到最新的一条开始
 				}
 			}
 		}

@@ -1,12 +1,15 @@
 package com.stable.job;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
-import com.stable.spider.eastmoney.EmAddIssueSpider;
+import com.stable.spider.ths.ThsAddIssueSpider;
 import com.stable.spider.ths.ThsHolderSpider;
 import com.stable.spider.ths.ThsJiejinSpider;
+import com.stable.utils.DateUtil;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -23,15 +26,20 @@ public class EveryDayMorningJob extends MySimpleJob {
 	@Autowired
 	private ThsHolderSpider thsHolderSpider;
 	@Autowired
-	private EmAddIssueSpider emAddIssueSpider;
+	private ThsAddIssueSpider thsAddIssueSpider;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
 		log.info("每日股东人数任务开始执行");
 		thsHolderSpider.dofetchHolder();
-		log.info("东方财富增发公告--- 一页有80条公告，一般正常抓一页就可以了。");
-		emAddIssueSpider.dofetch(Integer.MAX_VALUE);
+		log.info("同花顺增发公告--- ");
+		int two_year_start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -750));
+		thsAddIssueSpider.dofetch(true, two_year_start);
 		log.info("周六-同花顺解禁");
 		thsJiejinSpider.dofetch();
+	}
+
+	public static void main(String[] args) {
+		System.err.println(DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -750)));
 	}
 }

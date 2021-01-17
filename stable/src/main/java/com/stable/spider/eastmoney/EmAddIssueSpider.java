@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
@@ -22,8 +21,9 @@ import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
 
-@Component
+//@Component
 @Log4j2
+@Deprecated
 public class EmAddIssueSpider {
 
 //	1、先由董事会作出决议：方案
@@ -41,6 +41,7 @@ public class EmAddIssueSpider {
 	@Autowired
 	private AddIssueDao addIssueDao;
 
+	// 使用了同花顺
 	public void dofetch(int fromDate) {
 		new Thread(new Runnable() {
 			@Override
@@ -143,7 +144,7 @@ public class EmAddIssueSpider {
 		String[] as = { "603385", "300676", "002405", "601369", "600789", "002612" };
 		List<AddIssueUtil> res = new LinkedList<AddIssueUtil>();
 		for (int i = 0; i < as.length; i++) {
-			res.add(tp.dofetch(as[i], 20180101));
+			res.add(tp.dofetch(as[i], Integer.MAX_VALUE));
 		}
 		for (AddIssueUtil r : res) {
 			System.err.println(r.getAddIssue());
