@@ -5,8 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
-import com.stable.constant.EsQueryPageUtil;
-import com.stable.service.RunLogService;
+import com.stable.service.model.CodeModelService;
 import com.stable.utils.OSystemUtil;
 import com.stable.utils.WxPushUtil;
 
@@ -20,12 +19,12 @@ import com.stable.utils.WxPushUtil;
 public class SysStatusJob implements SimpleJob {
 
 	@Autowired
-	private RunLogService runLogService;
+	private CodeModelService codeModelService;
 
 	@Override
 	public void execute(ShardingContext sc) {
 		try {
-			runLogService.queryRunlogs(null, null, EsQueryPageUtil.queryPage1);
+			codeModelService.getLastOneByCode("000001");
 		} catch (Exception e) {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1("系统异常，正在重启...");
