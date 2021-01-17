@@ -24,21 +24,16 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
-import com.stable.es.dao.base.EsModelV1Dao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
 import com.stable.job.MyCallable;
-import com.stable.service.model.ImageStrategyListener;
-import com.stable.service.model.image.ImageService;
 import com.stable.service.trace.SortV6Service;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
-import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
@@ -46,8 +41,6 @@ import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.TasksWorker2ndRunnable;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.ModelContext;
-import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
@@ -80,10 +73,6 @@ public class DaliyTradeHistroyService {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private PriceLifeService priceLifeService;
-	@Autowired
-	private ImageService imageService;
-	@Autowired
-	private EsModelV1Dao esModelV1Dao;
 //	@Autowired
 //	private UpModelLineService upLevel1Service;
 	@Autowired
@@ -115,56 +104,6 @@ public class DaliyTradeHistroyService {
 	public void removeCacheByChuQuan(String code) {
 		redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
 		priceLifeService.removePriceLifeCache(code);
-	}
-
-	public void imageCheck(JSONArray array, String today) {
-		ListenableFuture<?> l = TasksWorker.getInstance().getService().submit(new Runnable() {
-			@Override
-			public void run() {
-				int oneYearChkDate = Integer.valueOf(today);
-				String startTime = DateUtil.getTodayYYYYMMDDHHMMSS();
-				try {
-					ImageStrategyListener sl = new ImageStrategyListener();
-					for (int i = 0; i < array.size(); i++) {
-						DaliyBasicInfo d = new DaliyBasicInfo(array.getJSONArray(i));
-						ModelContext mc = new ModelContext();
-						mc.setCode(d.getCode());
-						mc.setDate(d.getTrade_date());
-						if (stockBasicService.online1YearChk(mc.getCode(), oneYearChkDate)) {
-							String str = imageService.checkImg(mc.getCode(), mc.getDate());
-							if (StringUtils.isNotBlank(str)) {
-								if (str.contains(ImageService.MATCH_L2)) {
-//									mv.setImageIndex(2);
-								} else {
-//									mv.setImageIndex(1);
-								}
-								mc.setImgResult(str);
-								sl.processingModelResult(mc, null, null, null, null);
-							}
-						} else {
-							log.info("Online 不足1年，code={}", mc.getCode());
-						}
-
-					}
-					sl.fulshToFile();// 存盘
-					if (sl.getResultList().size() > 0) {
-						esModelV1Dao.saveAll(sl.getResultList());
-					}
-					log.info("Seq5=>图片模型执行完成。");
-					WxPushUtil.pushSystem1("Seq5=> " + today + " 图形模型执行完成！ 开始时间:" + startTime + " 结束时间："
-							+ DateUtil.getTodayYYYYMMDDHHMMSS() + ",succ=" + sl.getResultList().size());
-				} catch (Exception e) {
-					e.printStackTrace();
-					ErrorLogFileUitl.writeError(e, e.getMessage(), "", "");
-					WxPushUtil.pushSystem1("异常Seq5=> " + today + " 图形模型执行异常！ 开始时间:" + startTime);
-				}
-			}
-		});
-		try {
-			l.get();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	private synchronized int spiderTodayDaliyTrade(String today) {
@@ -749,29 +688,6 @@ public class DaliyTradeHistroyService {
 					// log.info("等待图片模型执行");
 					// nextImageJob(today);
 					// log.info("等待code pool 执行");
-				}
-				return null;
-			}
-		});
-	}
-
-	public void nextImageJob(String today) {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			@Override
-			public Object call() throws Exception {
-				JSONArray array;
-				try {
-					array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
-				} catch (Exception e) {
-					WxPushUtil.pushSystem1("图形指标：tushare获取记录StockDaliyBasic失败,date=" + today);
-					e.printStackTrace();
-					return null;
-				}
-				if (array == null || array.size() <= 0) {
-					WxPushUtil.pushSystem1("图形指标：tushare获取记录StockDaliyBasic失败,date=" + today);
-				} else {
-					log.info("{}获取到每日指标记录条数={}", today, array.size());
-					imageCheck(array, today);
 				}
 				return null;
 			}
