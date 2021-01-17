@@ -17,23 +17,6 @@ public class RealTimeController {
 	private MonitoringService monitoringService;
 
 	/**
-	 * 交易详情
-	 */
-	@RequestMapping(value = "/detail", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> detail(String code) {
-		JsonResult r = new JsonResult();
-		try {
-			r.setResult(monitoringService.todayBillingDetailReport(code));
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
-
-	/**
 	 * 终止线程
 	 */
 	@RequestMapping(value = "/stop", method = RequestMethod.GET)

@@ -3,7 +3,6 @@ package com.stable.service.realtime;
 import java.util.Date;
 
 import com.stable.enums.CodeModeType;
-import com.stable.es.dao.base.MonitoringDao;
 import com.stable.spider.sina.SinaRealTime;
 import com.stable.spider.sina.SinaRealtimeUitl;
 import com.stable.utils.CurrencyUitl;
@@ -24,7 +23,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean isRunning = true;
 	private String today = DateUtil.getTodayYYYYMMDD();
 	RealtimeDetailsResulter resulter;
-	MonitoringDao monitoringDao;
 	CodePool cp;
 	private boolean waitSend = true;
 	private boolean chkCodeClosed = false;

@@ -2,7 +2,6 @@ package com.stable.service;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -65,8 +64,6 @@ public class DaliyBasicHistroyService {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private StockBasicService stockBasicService;
-	@Autowired
-	private TickDataService tickDataService;
 	@Autowired
 	private XqDailyBaseSpider xqDailyBaseSpider;
 
@@ -247,25 +244,6 @@ public class DaliyBasicHistroyService {
 					nextTradeHistroyJob();
 				} else {
 					WxPushUtil.pushSystem1("异常执行Seq1=>daily_basic(每日指标),日期=" + today + ",数量:0,以后的链条不会被执行");
-				}
-				return null;
-			}
-		});
-	}
-
-	@Deprecated // tickdata 任务已停止
-	protected void nextTickDataJob() {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			@Override
-			public Object call() throws Exception {
-				log.info("resetTickDataStatus fetchTickData [0] -> [-1] ");
-				tickDataService.resetTickDataStatus();
-				log.info("Tick data 剩余fetch");
-				int succ = tickDataService.fetch("", "", "0", false, "", true);
-				if (succ == 0) {
-					WxPushUtil.pushSystem1("异常执行Seq2=>分笔任务TickDataJob,succ=" + succ);
-				} else {
-					WxPushUtil.pushSystem1("Seq2=>正常执行=>分笔任务TickDataJob,succ=" + succ);
 				}
 				return null;
 			}

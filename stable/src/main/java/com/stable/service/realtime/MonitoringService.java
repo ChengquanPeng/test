@@ -12,12 +12,9 @@ import org.springframework.stereotype.Service;
 import com.stable.service.CodePoolService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
-import com.stable.spider.eastmoney.EastmoneySpider;
-import com.stable.spider.sina.SinaRealtimeUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.CodePool;
-import com.stable.vo.bus.TickData;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -119,13 +116,5 @@ public class MonitoringService {
 				map.get(code).stop();
 			}
 		}
-	}
-
-	public String todayBillingDetailReport(String code) {
-		List<TickData> allTickData = EastmoneySpider.getRealtimeTick(code);
-		if (allTickData == null || allTickData.isEmpty()) {
-			return "没有找到今日数据";
-		}
-		return code + " " + stockBasicService.getCodeName(code) + "==> 当前信息(SINA):" + SinaRealtimeUitl.get(code);
 	}
 }

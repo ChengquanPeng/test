@@ -9,11 +9,8 @@ public enum RunLogBizTypeEnum {
 	DIVIDEND(6, "分红除权信息同步"),
 	DAILY_BASIC(7, "个股每日指标"),
 	DIVIDEND_TRADE_HISTROY(8, "前复权日期重置"),
-	TICK_DATA(9, "分笔数据"),
 	SHARE_FLOAT(10, "解禁"),
-	FINACE_FRIST(11, "预告-快报"), 
-	CODE_ATTENTION(12, "关注度"), 
-	RETRACE_SH_FIVEDAY(9100, "短线-5日反转");
+	FINACE_FRIST(11, "预告-快报");
 
 	public int bcode;
 	public String btypeName;
