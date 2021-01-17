@@ -36,7 +36,6 @@ import com.stable.service.PledgeStatService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.data.FinanceAnalyzer;
-import com.stable.service.trace.MiddleSortV1Service;
 import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.CodePoolService;
-import com.stable.service.trace.MiddleSortV1Service;
+import com.stable.service.model.MiddleSortV1Service;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
