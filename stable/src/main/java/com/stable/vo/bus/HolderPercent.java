@@ -38,6 +38,8 @@ public class HolderPercent extends EsBase {
 	private double numTwo;
 	@Field(type = FieldType.Double)
 	private double numThree;
+	@Field(type = FieldType.Integer)
+	private int sysdate;
 
 	public void addNum(double num) {
 		if (numOne <= 0) {

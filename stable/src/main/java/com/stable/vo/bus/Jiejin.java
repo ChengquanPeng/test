@@ -31,7 +31,8 @@ public class Jiejin extends EsBase {
 	private double zb;// 占比
 	@Field(type = FieldType.Double)
 	private double zzb;// 总占比
-
+	@Field(type = FieldType.Integer)
+	private int sysdate;
 	public Jiejin() {
 
 	}

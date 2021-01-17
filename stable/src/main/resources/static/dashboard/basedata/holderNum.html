@@ -62,64 +62,61 @@
 		$('#cusTable').bootstrapTable('destroy');
 		function loadData() {
 			$('#cusTable').bootstrapTable('destroy');
-			$("#cusTable")
-					.bootstrapTable(
-							{
-								method : "get", //使用get请求到服务器获取数据  
-								url : "/web/chips/holdernum/list", //获取数据的Servlet地址  
-								striped : true, //表格显示条纹  
-								pagination : true, //启动分页
-								cache : false,
-								pageSize : 20, //每页显示的记录数  
-								//pageNumber:1, //当前第几页  
-								pageList : [ 10, 15, 20, 50 ], //记录数可选列表  
-								search : false, //是否启用查询  
-								//showColumns: true,  //显示下拉框勾选要显示的列  
-								//showRefresh: true,  //显示刷新按钮  
-								sidePagination : "server", //表示服务端请求
-								//设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder  
-								//设置为limit可以获取limit, offset, search, sort, order  
-								queryParamsType : "undefined",
-								queryParams : function queryParams(params) { //设置查询参数  
-									var code = $('#queryCode').val();
-									var param = {
-											pageNum : params.pageNumber,
-											pageSize : params.pageSize,
-									};
-									param.code = code;
-									return param;
-								},
-								columns : [
-										{
-											field : 'code',
-											title : '代码'
-										},
-										{
-											field : 'date',
-											title : '更新日期'
-										},
-										{
-											field : 'num',
-											title : '数量'
-										},
-										{
-											field : 'avgPrice',
-											title : '均价'
-										} ],
-								responseHandler : function responseHandler(res) {
+			$("#cusTable").bootstrapTable({
+				method : "get", //使用get请求到服务器获取数据  
+				url : "/web/chips/holdernum/list", //获取数据的Servlet地址  
+				striped : true, //表格显示条纹  
+				pagination : true, //启动分页
+				cache : false,
+				pageSize : 20, //每页显示的记录数  
+				//pageNumber:1, //当前第几页  
+				pageList : [ 10, 15, 20, 50 ], //记录数可选列表  
+				search : false, //是否启用查询  
+				//showColumns: true,  //显示下拉框勾选要显示的列  
+				//showRefresh: true,  //显示刷新按钮  
+				sidePagination : "server", //表示服务端请求
+				//设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder  
+				//设置为limit可以获取limit, offset, search, sort, order  
+				queryParamsType : "undefined",
+				queryParams : function queryParams(params) { //设置查询参数  
+					var code = $('#queryCode').val();
+					var param = {
+						pageNum : params.pageNumber,
+						pageSize : params.pageSize,
+					};
+					param.code = code;
+					return param;
+				},
+				columns : [ {
+					field : 'code',
+					title : '代码'
+				}, {
+					field : 'date',
+					title : '更新日期'
+				}, {
+					field : 'num',
+					title : '数量'
+				}, {
+					field : 'avgPrice',
+					title : '均价'
+				}, {
+					field : 'sysdate',
+					title : '系统更新日期'
+				} ],
+				responseHandler : function responseHandler(res) {
 
-									var s1 = JSON.stringify(res.result);
-									var s2 = '{"total":9999,"rows":' + s1 + '}';
-									//alert(s2);
-									return eval('(' + s2 + ')')
-								},
-								onLoadSuccess : function() { //加载成功时执行
-									$("#rptList").show();
-								},
-								onLoadError : function() { //加载失败时执行  
-									alert("加载数据失败");
-								}
-							});
+					var s1 = JSON.stringify(res.result);
+					var s2 = '{"total":9999,"rows":' + s1 + '}';
+					//alert(s2);
+					return eval('(' + s2 + ')')
+				},
+				onLoadSuccess : function() { //加载成功时执行
+					$("#rptList").show();
+				},
+				onLoadError : function() { //加载失败时执行  
+					alert("加载数据失败");
+				}
+			});
 		}
 
 		$("#queryAction").click(function() {

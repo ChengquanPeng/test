@@ -60,10 +60,11 @@ public class ThsJiejinSpider {
 						header.put("Referer", host);
 						header.put("Upgrade-Insecure-Requests", "1");
 					}
+					int sysdate = DateUtil.getTodayIntYYYYMMDD();
 					List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 					List<Jiejin> savelist = new ArrayList<Jiejin>();
 					for (StockBaseInfo b : list) {
-						dofetch(b.getCode(), savelist);
+						dofetch(b.getCode(), savelist, sysdate);
 						if (savelist.size() > 100) {
 							jiejinDao.saveAll(savelist);
 							savelist = new ArrayList<Jiejin>();
@@ -80,7 +81,7 @@ public class ThsJiejinSpider {
 		}).start();
 	}
 
-	private void dofetch(String code, List<Jiejin> savelist) {
+	private void dofetch(String code, List<Jiejin> savelist, int sysdate) {
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(URL_S, code);
@@ -126,6 +127,7 @@ public class ThsJiejinSpider {
 					it2.next();// 是否公告值
 //					log.info(jj);
 					jj.setId(jj.getCode() + jj.getDate());
+					jj.setSysdate(sysdate);
 //					System.err.println(jj);
 					savelist.add(jj);
 				}
@@ -146,6 +148,7 @@ public class ThsJiejinSpider {
 	}
 
 	public static void main(String[] args) {
+		int sysdate = DateUtil.getTodayIntYYYYMMDD();
 		ThsJiejinSpider tp = new ThsJiejinSpider();
 		tp.header = new HashMap<String, String>();
 		tp.htmlunitSpider = new HtmlunitSpider();
@@ -153,7 +156,7 @@ public class ThsJiejinSpider {
 //		for (int i = 0; i < as.length; i++) {
 //			tp.dofetch(as[i], new ArrayList<Jiejin>());
 //		}
-		tp.dofetch(as[1], new ArrayList<Jiejin>());
+		tp.dofetch(as[1], new ArrayList<Jiejin>(), sysdate);
 	}
 
 }

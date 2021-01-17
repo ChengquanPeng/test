@@ -89,7 +89,7 @@ public class ThsHolderSpider {
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 		for (StockBaseInfo s : codelist) {
 			try {
-				dofetchHolderInner(s.getCode(), hns, hps);
+				dofetchHolderInner(date, s.getCode(), hns, hps);
 				if (hns.size() > 1000) {
 					esHolderNumDao.saveAll(hns);
 					esHolderPercentDao.saveAll(hps);
@@ -109,7 +109,7 @@ public class ThsHolderSpider {
 		WxPushUtil.pushSystem1(date + " 股东研究抓包同花顺已完成");
 	}
 
-	private void dofetchHolderInner(String code, List<HolderNum> hns, List<HolderPercent> hps) {
+	private void dofetchHolderInner(int sysdate, String code, List<HolderNum> hns, List<HolderPercent> hps) {
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(urlbase, code, System.currentTimeMillis());
@@ -134,6 +134,7 @@ public class ThsHolderSpider {
 						hn.setNum(Double.valueOf(jo.get(1).toString()).intValue());
 						hn.setAvgPrice(Double.valueOf(jo.get(2).toString()));
 						hn.setId(code + hn.getDate());
+						hn.setSysdate(sysdate);
 						hns.add(hn);
 						fetched = true;
 					} catch (Exception e) {
@@ -155,6 +156,7 @@ public class ThsHolderSpider {
 						ther_x = body.getElementsByAttribute("div", "id", key).get(0);
 						v1(body, ther_x, code, hp);
 						hp.setId(code + hp.getDate());
+						hp.setSysdate(sysdate);
 						hps.add(hp);
 						fetched = true;
 					} catch (Exception e) {
@@ -214,7 +216,7 @@ public class ThsHolderSpider {
 		ts.header = new HashMap<String, String>();
 		List<HolderPercent> hps = new LinkedList<HolderPercent>();
 		List<HolderNum> hns = new LinkedList<HolderNum>();
-		ts.dofetchHolderInner("002988", hns, hps);
+		ts.dofetchHolderInner(DateUtil.getTodayIntYYYYMMDD(), "002988", hns, hps);
 		for (HolderNum h : hns) {
 			System.err.println(h);
 		}

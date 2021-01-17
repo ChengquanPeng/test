@@ -63,6 +63,7 @@ public class EmAddIssueSpider {
 					if (res.size() > 0) {
 						addIssueDao.saveAll(res);
 					}
+					log.info("增发完成抓包");
 				} catch (Exception e) {
 					e.printStackTrace();
 					WxPushUtil.pushSystem1("东方财富-抓包公告出错-抓包出错2");
@@ -127,14 +128,14 @@ public class EmAddIssueSpider {
 					}
 				} catch (Exception e2) {
 					e2.printStackTrace();
+					trytime++;
+					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+					if (trytime >= 10) {
+						fetched = true;
+						WxPushUtil.pushSystem1("东方财富-抓包公告出错-抓包出错code=" + code + ",url=" + url);
+					}
 				} finally {
 					htmlunitSpider.close();
-				}
-				trytime++;
-				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
-				if (trytime >= 10) {
-					fetched = true;
-					WxPushUtil.pushSystem1("东方财富-抓包公告出错-抓包出错code=" + code + ",url=" + url);
 				}
 			} while (!fetched);
 		}

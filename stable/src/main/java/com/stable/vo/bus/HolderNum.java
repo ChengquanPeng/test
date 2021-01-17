@@ -32,4 +32,7 @@ public class HolderNum extends EsBase {
 	private int num;
 	@Field(type = FieldType.Double)
 	private double avgPrice;
+	@Field(type = FieldType.Integer)
+	private int sysdate;
+
 }
