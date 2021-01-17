@@ -92,9 +92,9 @@ public class CodeBaseModel extends EsBase {
 
 	// 增长
 	@Field(type = FieldType.Integer)
-	protected double forestallIncomeTbzz;// 营收增长
+	protected double forestallIncomeTbzz;// 快预告-营收增长
 	@Field(type = FieldType.Integer)
-	protected double forestallProfitTbzz;// 利润增长
+	protected double forestallProfitTbzz;// 快预告-利润增长
 	@Field(type = FieldType.Integer)
 	protected double currIncomeTbzz;// 营收增长
 	@Field(type = FieldType.Integer)
@@ -122,4 +122,7 @@ public class CodeBaseModel extends EsBase {
 	// 股东人数(变化：幅度+次数）
 	@Field(type = FieldType.Double)
 	private double holderChange;
+
+	@Field(type = FieldType.Integer)
+	private int zfStatus;// 增发状态（近2年）: 0无增发，1增发中，2增发完成，3，增发终止
 }

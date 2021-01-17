@@ -29,8 +29,8 @@ public class EveryDayMorningJob extends MySimpleJob {
 	public void myexecute(ShardingContext sc) {
 		log.info("每日股东人数任务开始执行");
 		thsHolderSpider.dofetchHolder();
-		log.info("东方财富增发公告");
-		emAddIssueSpider.dofetch(0);
+		log.info("东方财富增发公告--- 一页有80条公告，一般正常抓一页就可以了。");
+		emAddIssueSpider.dofetch(Integer.MAX_VALUE);
 		log.info("周六-同花顺解禁");
 		thsJiejinSpider.dofetch();
 	}

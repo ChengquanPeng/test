@@ -67,10 +67,7 @@ public class ChipsService {
 	/**
 	 * 前后1年的解禁记录（2年）
 	 */
-	public List<Jiejin> getBf2yearJiejin(String code) {
-		Date now = new Date();
-		int start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
-		int end = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 370));
+	public List<Jiejin> getBf2yearJiejin(String code, int start, int end) {
 		int pageNum = EsQueryPageUtil.queryPage9999.getPageNum();
 		int size = EsQueryPageUtil.queryPage9999.getPageSize();
 		Pageable pageable = PageRequest.of(pageNum, size);
@@ -85,6 +82,13 @@ public class ChipsService {
 			return page.getContent();
 		}
 		return null;
+	}
+
+	public List<Jiejin> getBf2yearJiejin(String code) {
+		Date now = new Date();
+		int start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
+		int end = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 370));
+		return getBf2yearJiejin(code, start, end);
 	}
 
 	/**

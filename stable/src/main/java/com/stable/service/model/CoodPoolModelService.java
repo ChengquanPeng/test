@@ -1,6 +1,5 @@
 package com.stable.service.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.elasticsearch.search.sort.SortOrder;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.CodePoolService;
-import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
@@ -20,9 +18,7 @@ import com.stable.service.model.data.LinePrice;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.CodePool;
-import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.StockAvgBase;
-import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -34,7 +30,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Service
 @Log4j2
-public class MiddleSortV1Service {
+public class CoodPoolModelService {
 	@Autowired
 	private PriceLifeService priceLifeService;
 	@Autowired
@@ -49,9 +45,6 @@ public class MiddleSortV1Service {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private StockBasicService stockBasicService;
-	@Autowired
-	private DaliyBasicHistroyService daliyBasicHistroyService;
-//
 	private String OK = "基本面OK,疑是建仓";
 
 //	private String NOT_OK = "系统默认NOT_OK";
@@ -99,7 +92,8 @@ public class MiddleSortV1Service {
 				}
 
 				// 是否中线(60日线)
-				if (priceLifeService.getLastIndex(code) >= 80 && avg.isWhiteHorseForMidV2(code, tradeDate)) {
+				if (m.getPe_ttm() > 0 && priceLifeService.getLastIndex(code) >= 80
+						&& avg.isWhiteHorseForMidV2(code, tradeDate)) {
 					if (m.getInmid() == 0) {
 						mid.append(code).append(",");
 					}
@@ -107,8 +101,9 @@ public class MiddleSortV1Service {
 				} else {
 					m.setInmid(0);
 				}
+				zfmoni(m, lp, tradeDate);
 				// 1大牛，2中线，3人工，4短线 // 箱体新高（3个月新高，短期有8%的涨幅）
-				chk(m, code, tradeDate, msg);
+				chk(m, code, tradeDate, msg3);
 			}
 			codePoolService.saveAll(list);
 			if (msg.length() > 0 || mid.length() > 0) {
@@ -125,67 +120,43 @@ public class MiddleSortV1Service {
 				WxPushUtil.pushSystem1("踢出主力建仓票:" + msg2.toString());
 			}
 			if (msg3.length() > 0) {
-				WxPushUtil.pushSystem1("股票池监听启动股票:" + msg3.toString());
+				WxPushUtil.pushSystem1("股票池-疑似-启动股票:" + msg3.toString());
 			}
 		}
 	}
 
-	public void sortv5(int tradeDate) {
-		StringBuffer msg = new StringBuffer();
-		List<Integer> pa = new ArrayList<Integer>();// 1大牛，2中线，3人工，4短线
-		pa.add(1);
-		pa.add(3);
-		List<CodePool> list = codePoolService.queryForSortV5(pa);
-		if (list != null && list.size() > 0) {
-			for (CodePool cp : list) {
-				String code = cp.getCode();
-				log.info(cp);
-				chk(cp, code, tradeDate, msg);
+	private void zfmoni(CodePool m, LinePrice lp, int tradeDate) {
+		if (m.getZfStatus() == 2 && lp.priceCheckForMid(m.getCode(), tradeDate, chkdouble)) {
+			m.setInzf(1);
+			if (m.getMonitor() == 0) {
+				m.setMonitor(5);
 			}
-		}
-		if (msg.length() > 0) {
-			WxPushUtil.pushSystem1("股票池监听启动股票:" + msg.toString());
+		} else {
+			m.setInzf(0);
 		}
 	}
 
 	private void chk(CodePool m, String code, int treadeDate, StringBuffer msg3) {
-		if ((m.getMonitor() == 1 || m.getMonitor() == 3) && isTodayPriceOk(code, treadeDate)
+		// 1大牛，2中线，3人工，4短线,5增发
+		if ((m.getMonitor() == 1 || m.getMonitor() == 3 || m.getMonitor() == 5) && isTodayPriceOk(code, treadeDate)
 				&& isWhiteHorseForSortV5(code, treadeDate)) {
 			msg3.append(code).append(",");
 		}
 	}
 
 	/**
-	 * 1.3个月新高，短期有9.5%的涨幅
+	 * 1.短期有9.5%的涨幅
 	 */
 	private boolean isTodayPriceOk(String code, int date) {
-		EsQueryPageReq page = EsQueryPageUtil.queryPage60;
 		// 3个月新高，22*3=60
-		DaliyBasicInfo daliy = daliyBasicHistroyService.getDaliyBasicInfoByDate(code, date);
-		List<TradeHistInfoDaliy> listD60 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0,
-				daliy.getTrade_date(), page, SortOrder.DESC);
-		if (listD60 == null || listD60.size() < page.getPageSize()) {
-			log.info("{} 未获取到3个月的前复权交易记录", code);
-			return false;
-		}
-		boolean isTopOK = true;
-		for (TradeHistInfoDaliy td : listD60) {
-			if (td.getHigh() > daliy.getHigh()) {
-				isTopOK = false;
+		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
+				EsQueryPageUtil.queryPage30, SortOrder.DESC);
+		for (TradeHistInfoDaliyNofq r : l2) {
+			if (r.getTodayChangeRate() >= 9.5) {
+				return true;
 			}
 		}
-		if (isTopOK) {
-			List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0,
-					daliy.getTrade_date(), EsQueryPageUtil.queryPage5, SortOrder.DESC);
-			for (TradeHistInfoDaliyNofq r : l2) {
-				if (r.getTodayChangeRate() >= 9.5) {
-					return true;
-				}
-			}
-			log.info("{} 最近5个工作日无大涨交易", code);
-		} else {
-			log.info("{} 非3个月新高", code);
-		}
+		log.info("{} 最近5个工作日无大涨交易", code);
 		return false;
 	}
 
@@ -193,15 +164,18 @@ public class MiddleSortV1Service {
 	 * 2.均线
 	 */
 	private boolean isWhiteHorseForSortV5(String code, int date) {
-		EsQueryPageReq req = EsQueryPageUtil.queryPage30;
-		// 最近30条-倒序
+		EsQueryPageReq req = EsQueryPageUtil.queryPage10;
 		List<StockAvgBase> clist30 = avgService.queryListByCodeForModelWithLast60(code, date, req, true);
-		StockAvgBase sa = clist30.get(0);
-		if (sa.getAvgPriceIndex30() >= sa.getAvgPriceIndex60() && sa.getAvgPriceIndex20() >= sa.getAvgPriceIndex30()
-				&& sa.getAvgPriceIndex20() >= sa.getAvgPriceIndex5()) {
+		int c = 0;
+		for (StockAvgBase sa : clist30) {
+			if (sa.getAvgPriceIndex30() >= sa.getAvgPriceIndex60()
+					&& sa.getAvgPriceIndex20() >= sa.getAvgPriceIndex30()) {
+				c++;
+			}
+		}
+		if (c >= 8) {
 			return true;
 		}
-		log.info("{} 均线不满足", code);
 		return false;
 	}
 

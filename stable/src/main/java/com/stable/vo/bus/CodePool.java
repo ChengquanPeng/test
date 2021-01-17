@@ -41,18 +41,20 @@ public class CodePool {
 	@Field(type = FieldType.Integer)
 	private int continYj2;// 允许间段1个季度业绩
 	// ---------------------------
-	// 监听:0不监听，1大牛，2中线，3人工，4短线
+	// 监听:0不监听，1大牛，2中线，3人工，4短线，5.增发监听
 	@Field(type = FieldType.Integer)
 	private int monitor = 0;
 	@Field(type = FieldType.Text)
 	private String remark;
 	@Field(type = FieldType.Integer)
 	private int inmid = 0;// 符合中线
-	
+	@Field(type = FieldType.Integer)
+	private int inzf = 0;// 增发
+
 	@Field(type = FieldType.Integer)
 	private int sortMode6 = 0;// 符合短线 //短线模型6(前期3-50%吸筹，深度回踩突然涨停后再2-5个交易日回踩拉起,涨停日不放量，超过涨停价格后买入，买入2内未大幅拉升放弃
 	@Field(type = FieldType.Integer)
-	private int sortMode7 = 0;// 突破箱体震荡  --//0未知，1待确认，2确认，3，不符合
+	private int sortMode7 = 0;// 突破箱体震荡 --//0未知，1待确认，2确认，3，不符合
 	@Field(type = FieldType.Text)
 	private String sortMode6Remark;
 	@Field(type = FieldType.Text)
@@ -60,6 +62,9 @@ public class CodePool {
 
 	@Field(type = FieldType.Integer)
 	private int score = 0;// 分数
+
+	@Field(type = FieldType.Integer)
+	private int zfStatus;// 增发状态（近2年）: 0无增发，1增发中，2增发完成，3，增发终止
 
 	@Transient
 	public boolean isIsok() {

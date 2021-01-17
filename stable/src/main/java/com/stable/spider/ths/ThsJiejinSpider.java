@@ -43,18 +43,22 @@ public class ThsJiejinSpider {
 	private String host = "http://basic.10jqka.com.cn";
 	private Map<String, String> header;
 
+	public void byJob() {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Date());
+		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
+			log.info("非周六");
+			return;
+		}
+		log.info("周六");
+		dofetch();
+	}
+
 	public void dofetch() {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(new Date());
-					if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
-						log.info("非周六");
-						return;
-					}
-					log.info("周六");
 					if (header == null) {
 						header = new HashMap<String, String>();
 						header.put("Referer", host);

@@ -1,6 +1,5 @@
 package com.stable.spider.eastmoney;
 
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,20 +47,13 @@ public class EmAddIssueSpider {
 			public void run() {
 				try {
 					int endDate = fromDate;
-					if (fromDate == 0) {
-						endDate = Integer.valueOf(DateUtil.formatYYYYMMDD(DateUtil.addDate(new Date(), -500)));
-					}
 					log.info("fromDate:{},endDate:{}", fromDate, endDate);
 					List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
-					List<AddIssue> res = new LinkedList<AddIssue>();
 					for (StockBaseInfo b : list) {
 						AddIssue iss = dofetch(b.getCode(), endDate).getAddIssue();
 						if (iss.getStartDate() > 0) {
-							res.add(iss);
+							addIssueDao.save(iss);
 						}
-					}
-					if (res.size() > 0) {
-						addIssueDao.saveAll(res);
 					}
 					log.info("增发完成抓包");
 				} catch (Exception e) {
@@ -87,8 +79,9 @@ public class EmAddIssueSpider {
 					log.info(url);
 					page = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url);
 					body = page.getBody();
+					// 一页有80条公告，一般正常抓一页就可以了。
 					List<HtmlElement> list = body.getElementsByAttribute("div", "class", "articleh normal_post");// list
-					String pageEndDateStr = "";
+					int pageEndDate = 0;
 					for (HtmlElement item : list) {
 						// 阅读,评论,标题,公告类型,公告日期
 						Iterator<DomElement> it = item.getChildElements().iterator();
@@ -119,10 +112,12 @@ public class EmAddIssueSpider {
 								return util;
 							}
 						}
-						pageEndDateStr = date;
+						try {
+							pageEndDate = DateUtil.convertDate2(date);
+						} catch (Exception e) {
+							log.error(item.asXml());
+						}
 					}
-					fetched = true;
-					int pageEndDate = DateUtil.convertDate2(pageEndDateStr);
 					if (pageEndDate < endDate) {
 						return util;
 					}

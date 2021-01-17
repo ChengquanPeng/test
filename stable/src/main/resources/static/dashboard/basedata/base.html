@@ -126,10 +126,6 @@
 											title : '名称'
 										},
 										{
-											field : 'udpateDate',
-											title : '更新日期'
-										},
-										{
 											field : 'currYear',
 											title : '报告期',
 											formatter : function(value, row, index) {
@@ -182,6 +178,25 @@
 												}
 												return row.sylType + " 未知";
 											}
+										},{
+											field : 'zfStatus',
+											title : '增发情况', 
+											formatter : function(value, row,
+														index) {
+													if (row.zfStatus == 0) {
+														return "无增发";
+													}
+													if (row.zfStatus == 1) {
+														return "增发中";
+													}
+													if (row.zfStatus == 2) {
+														return "增发完成";
+													}
+													if (row.zfStatus == 3) {
+														return "增发终止";
+													}
+													return row.zfStatus + " 未知";
+												}
 										}, {
 											field : 'holderChange',
 											title : '股东人数<br/>增减'

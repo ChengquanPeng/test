@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.CodePoolService;
-import com.stable.service.model.MiddleSortV1Service;
+import com.stable.service.model.CoodPoolModelService;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -19,7 +19,7 @@ public class CodePoolController {
 	@Autowired
 	private CodePoolService codePoolService;
 	@Autowired
-	private MiddleSortV1Service middleSortV1Service;
+	private CoodPoolModelService middleSortV1Service;
 
 	/**
 	 * 根据code

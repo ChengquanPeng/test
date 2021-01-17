@@ -1,5 +1,6 @@
 package com.stable.service.model;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,12 +43,15 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.AddIssue;
 import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.CodePool;
 import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.DividendHistory;
+import com.stable.vo.bus.FinYjkb;
+import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.PledgeStat;
 import com.stable.vo.bus.StockBaseInfo;
@@ -84,7 +88,7 @@ public class CodeModelService {
 	@Autowired
 	private ConceptService conceptService;
 	@Autowired
-	private MiddleSortV1Service middleSortV1Service;
+	private CoodPoolModelService middleSortV1Service;
 	@Autowired
 	private PlateService plateService;
 	@Autowired
@@ -100,7 +104,12 @@ public class CodeModelService {
 		}
 	}
 
+	private int start = 0;
+
 	private synchronized void runByJob(int tradeDate) {
+		Date now = new Date();
+		start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
+//		end = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 370));
 		log.info("CodeModel processing request date={}", tradeDate);
 		if (!tradeCalService.isOpen(tradeDate)) {
 			tradeDate = tradeCalService.getPretradeDate(tradeDate);
@@ -225,9 +234,34 @@ public class CodeModelService {
 		newOne.setForestallIncomeTbzz(0);
 		newOne.setForestallProfitTbzz(0);
 
-//		double ystbzz = fbi.getYyzsrtbzz();
-//		double jltbzz = fbi.getGsjlrtbzz();
+		// 业绩快报(准确的)
+		FinYjkb yjkb = financeService.getLastFinaceKbByReportDate(code);
+		boolean hasKb = false;
 
+		// 业绩快报(准确的)
+		if (yjkb != null) {
+			if ((newOne.getCurrYear() == yjkb.getYear() && newOne.getCurrQuarter() < yjkb.getQuarter())// 同一年，季度大于
+					|| (yjkb.getYear() > newOne.getCurrYear())) {// 不同年
+				newOne.setForestallYear(yjkb.getYear());
+				newOne.setForestallQuarter(yjkb.getQuarter());
+				newOne.setForestallIncomeTbzz(yjkb.getYyzsrtbzz());
+				newOne.setForestallProfitTbzz(yjkb.getJlrtbzz());
+				hasKb = true;
+			}
+		}
+		// 业绩预告(类似天气预报,可能不准)
+		FinYjyg yjyg = null;
+		if (!hasKb) {
+			yjyg = financeService.getLastFinaceYgByReportDate(code);
+			if (yjyg != null) {
+				if ((newOne.getCurrYear() == yjyg.getYear() && newOne.getCurrQuarter() < yjyg.getQuarter())// 同一年,季度大于
+						|| (yjyg.getYear() > newOne.getCurrYear())) {// 不同年
+					newOne.setForestallYear(yjyg.getYear());
+					newOne.setForestallQuarter(yjyg.getQuarter());
+					newOne.setForestallProfitTbzz(yjyg.getJlrtbzz());
+				}
+			}
+		}
 		processingFinance(list, map, newOne, lastOne, fa, fbis);
 		if (bb != null) {
 			// 股东大会通过/实施/完成
@@ -361,7 +395,24 @@ public class CodeModelService {
 
 		// newOne
 		evaluateStep1(newOne, fa, fbis);
-		findBigBoss(newOne.getCode(), newOne.getDate(), list, map, fbis, fa, lastOne);
+		CodePool c = findBigBoss(newOne.getCode(), newOne.getDate(), list, map, fbis, fa, lastOne);
+		chkZf(c, newOne);// 增发
+	}
+
+	// 增发
+	private void chkZf(CodePool c, CodeBaseModel newOne) {
+		AddIssue addIssue = chipsService.getLastAddIssue(newOne.getCode());
+		// start 一年以前
+		if (addIssue != null) {
+			if (addIssue.getStartDate() > start || addIssue.getEndDate() > start) {// 完成
+				newOne.setZfStatus(addIssue.getStatus());
+			} else {
+				newOne.setZfStatus(0);
+			}
+		} else {
+			newOne.setZfStatus(0);
+		}
+		c.setZfStatus(newOne.getZfStatus());
 	}
 
 	private void evaluateStep1(CodeBaseModel newOne, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
@@ -404,7 +455,7 @@ public class CodeModelService {
 		return list;
 	}
 
-	private void findBigBoss(String code, int treadeDate, List<CodePool> list, Map<String, CodePool> map,
+	private CodePool findBigBoss(String code, int treadeDate, List<CodePool> list, Map<String, CodePool> map,
 			List<FinanceBaseInfo> fbis, FinanceAnalyzer fa, CodeBaseModel lastOne) {
 		log.info("findBigBoss code:{}", code);
 		CodePool c = map.get(code);
@@ -422,7 +473,6 @@ public class CodeModelService {
 		c.setPb(basic.getPb());
 		c.setPe(basic.getPe());
 		c.setPe_ttm(basic.getPe_ttm());
-
 		c.setKbygjl(0);
 		c.setKbygys(0);
 //		if (yjkb != null) {
@@ -480,6 +530,7 @@ public class CodeModelService {
 		c.setIsok(isok);
 		c.setContinYj1(continueJidu1);
 		c.setContinYj2(continueJidu2);
+		return c;
 	}
 
 	public CodeBaseModel getLastOneByCode(String code) {
