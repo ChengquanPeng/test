@@ -2,6 +2,8 @@ package com.stable.spider.ths;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,23 +43,42 @@ public class ThsAddIssueSpider {
 	private AddIssueDao addIssueDao;
 	@Autowired
 	private ChipsService chipsService;
+	private ReentrantLock lock = new ReentrantLock();
 
 	public void dofetch(boolean isJob, int fromDate) {
-		try {
-			int endDate = fromDate;
-			log.info("fromDate:{},endDate:{}", fromDate, endDate);
-			List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
-			for (StockBaseInfo b : list) {
-				AddIssue iss = dofetch(b.getCode(), endDate, isJob).getAddIssue();
-				if (iss.getStartDate() > 0) {
-					addIssueDao.save(iss);
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					if (lock.tryLock(12, TimeUnit.HOURS)) {
+						log.info("getLock");
+						try {
+							int endDate = fromDate;
+							log.info("fromDate:{},endDate:{}", fromDate, endDate);
+							List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+							for (StockBaseInfo b : list) {
+								AddIssue iss = dofetch(b.getCode(), endDate, isJob).getAddIssue();
+								if (iss.getStartDate() > 0) {
+									addIssueDao.save(iss);
+								}
+							}
+							log.info("增发完成抓包");
+						} catch (Exception e) {
+							e.printStackTrace();
+							WxPushUtil.pushSystem1("同花顺-抓包公告出错-抓包出错2");
+						} finally {
+							lock.unlock();
+						}
+					} else {
+						log.info("No Lock");
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
+
 			}
-			log.info("增发完成抓包");
-		} catch (Exception e) {
-			e.printStackTrace();
-			WxPushUtil.pushSystem1("同花顺-抓包公告出错-抓包出错2");
-		}
+		}).start();
+
 	}
 
 	private AddIssueUtil dofetch(String code, int endDate, boolean isJob) {

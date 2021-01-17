@@ -84,12 +84,7 @@ public class ChipsController {
 	public ResponseEntity<JsonResult> fetchAddIssue() {
 		JsonResult r = new JsonResult();
 		try {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					thsAddIssueSpider.dofetch(false, 20170101);
-				}
-			}).start();
+			thsAddIssueSpider.dofetch(false, 20170101);
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
