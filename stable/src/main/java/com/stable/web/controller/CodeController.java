@@ -17,21 +17,16 @@ import com.stable.service.ChipsService;
 import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
-import com.stable.service.realtime.MonitoringService;
 import com.stable.vo.bus.AddIssue;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.http.JsonResult;
-import com.stable.vo.http.resp.ReportVo;
-import com.stable.vo.http.resp.ViewVo;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 @Controller
 public class CodeController {
 
-	@Autowired
-	private MonitoringService monitoringService;
 	@Autowired
 	private CodeModelService codeModelService;
 	@Autowired
@@ -131,22 +126,6 @@ public class CodeController {
 			e.printStackTrace();
 		}
 		return "code";
-	}
-
-	/**
-	 * 测试页面列表
-	 */
-	@RequestMapping(value = "/realtime/view", method = RequestMethod.GET)
-	public String view(String all, String type, String buyDate, Model model) {
-		try {
-			ReportVo pv = monitoringService.getVeiw(all, type, buyDate);
-			List<ViewVo> l = pv.getList();
-			model.addAttribute("vvs", l);
-			model.addAttribute("stat", pv);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return "realtimelist";
 	}
 
 	@RequestMapping(value = "/codemodel/list", method = RequestMethod.GET)

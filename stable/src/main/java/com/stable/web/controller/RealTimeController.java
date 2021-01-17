@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.realtime.MonitoringService;
-import com.stable.service.realtime.MonitoringSortV4Service;
 import com.stable.vo.http.JsonResult;
 
 @RequestMapping("/realtime")
@@ -52,58 +51,4 @@ public class RealTimeController {
 		return ResponseEntity.ok(r);
 	}
 
-	/**
-	 * 实时买入-人工
-	 */
-	@RequestMapping(value = "/buy", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> buy(String code) {
-		JsonResult r = new JsonResult();
-		try {
-			r.setResult(monitoringService.buy(code));
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
-
-	/**
-	 * 实时买出-人工
-	 */
-	@RequestMapping(value = "/sell", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> sell(String code) {
-		JsonResult r = new JsonResult();
-		try {
-			r.setResult(monitoringService.sell(code));
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
-
-	@Autowired
-	private MonitoringSortV4Service monitoringSortV4Service;
-
-	/**
-	 * sortV4标记是否符合
-	 */
-	@RequestMapping(value = "/sortv4sign", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> sortsign(String code, Integer sg) {
-		JsonResult r = new JsonResult();
-		try {
-			monitoringSortV4Service.signCodeOk(code, sg);
-			r.setResult(JsonResult.OK);
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
 }
