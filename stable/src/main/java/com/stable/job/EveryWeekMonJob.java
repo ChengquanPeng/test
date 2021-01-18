@@ -21,7 +21,6 @@ public class EveryWeekMonJob extends MySimpleJob {
 	private static final int TEN_MIN = 10 * 60 * 1000;
 	@Autowired
 	private FinanceService financeService;
-
 	@Autowired
 	private BuyBackService buyBackService;
 	@Autowired

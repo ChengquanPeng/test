@@ -65,14 +65,21 @@ body {
 			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
 			<div class="col-lg-9">
 				<div class="input-group">
-					股票代码：<input type="text" class="form-control" id="queryCode">
+					股票代码：<input type="text" class="form-control" id="queryCode">&nbsp;
+					增发状态：<select id="zfStatus" class="form-control">
+						<option value="" selected="selected">不限制</option>
+						<option value="1">增发中</option>
+						<option value="2">增发完成</option>
+						<option value="3">增发终止</option>
+						<option value="0">无增发</option>
+					</select>&nbsp;
 				</div>
 				<div class="input-group">
-					PE(市盈率):<input type="text" class="form-control" id="pe">
-					PE(市盈率TTM):<input type="text" class="form-control" id="pettm">
-					PB(市净率):<input type="text" class="form-control" id="pb">
+					PE(市盈率):<input type="text" class="form-control" id="pe">&nbsp;
+					PE(市盈率TTM):<input type="text" class="form-control" id="pettm">&nbsp;
+					PB(市净率):<input type="text" class="form-control" id="pb">&nbsp;
 					板块/概念(aliasCode)：<input type="text" class="form-control"
-						id="conceptId">
+						id="conceptId">&nbsp;
 				</div>
 				<div class="input-group">
 					疑似大牛:<input type="checkbox" id="suspectBigBoss"
@@ -177,7 +184,8 @@ body {
 									param.pettm = $('#pettm').val();
 									param.pb = $('#pb').val();
 									param.jiduc = $('#jiduc').val();
-
+									param.zfStatus = $('#zfStatus').val();
+									
 									return param;
 								},
 								columns : [

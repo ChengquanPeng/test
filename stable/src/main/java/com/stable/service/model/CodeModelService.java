@@ -615,7 +615,7 @@ public class CodeModelService {
 	}
 
 	public List<CodeBaseModel> getList(String code, int orderBy, String aliasCode, String conceptName, int asc,
-			EsQueryPageReq querypage) {
+			EsQueryPageReq querypage, String zfStatus) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -629,6 +629,9 @@ public class CodeModelService {
 			if (list.size() > 0) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			}
+		}
+		if (StringUtils.isNotBlank(zfStatus)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("zfStatus", Integer.valueOf(zfStatus)));
 		}
 		String field = "score";
 		if (orderBy == 2) {
@@ -667,11 +670,12 @@ public class CodeModelService {
 	}
 
 	public List<CodeBaseModelResp> getListForWeb(String code, int orderBy, String conceptId, String conceptName,
-			int asc, EsQueryPageReq querypage) {
-		log.info("CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={},conceptId={},conceptName={}",
-				code, orderBy, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName);
+			int asc, EsQueryPageReq querypage, String zfStatus) {
+		log.info(
+				"CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={},conceptId={},conceptName={},zfStatus={}",
+				code, orderBy, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName, zfStatus);
 
-		List<CodeBaseModel> list = getList(code, orderBy, conceptId, conceptName, asc, querypage);
+		List<CodeBaseModel> list = getList(code, orderBy, conceptId, conceptName, asc, querypage, zfStatus);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {
 			for (CodeBaseModel dh : list) {

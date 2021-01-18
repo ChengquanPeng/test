@@ -178,14 +178,14 @@ public class CodePoolService {
 
 	public List<CodePoolResp> getListForWeb(String code, String aliasCode, int asc, int monitor, int monitoreq,
 			int suspectBigBoss, int inmid, double pe, double pettm, double pb, EsQueryPageReq querypage, int jiduc,
-			int sortv6, int sortv7) {
+			int sortv6, int sortv7, String zfStatus) {
 		log.info(
-				"CodeBaseModel getListForWeb code={},asc={},num={},size={},aliasCode={},monitor={},monitoreq={},pe={},pettm={},pb={}",
+				"CodeBaseModel getListForWeb code={},asc={},num={},size={},aliasCode={},monitor={},monitoreq={},pe={},pettm={},pb={},zfStatus={}",
 				code, asc, querypage.getPageNum(), querypage.getPageSize(), aliasCode, monitor, monitoreq, pe, pettm,
-				pb);
+				pb, zfStatus);
 
 		List<CodePool> list = getList(code, aliasCode, asc, monitor, monitoreq, suspectBigBoss, inmid, pe, pettm, pb,
-				querypage, jiduc, sortv6, sortv7);
+				querypage, jiduc, sortv6, sortv7, zfStatus);
 		List<CodePoolResp> res = new LinkedList<CodePoolResp>();
 		if (list != null) {
 			for (CodePool dh : list) {
@@ -217,7 +217,7 @@ public class CodePoolService {
 
 	public List<CodePool> getList(String code, String aliasCode, int asc, int monitor, int monitoreq,
 			int suspectBigBoss, int inmid, double pe, double pettm, double pb, EsQueryPageReq querypage, int jiduc,
-			int sortv6, int sortv7) {
+			int sortv6, int sortv7, String zfStatus) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -242,6 +242,9 @@ public class CodePoolService {
 		}
 		if (monitoreq > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("monitor", monitoreq));
+		}
+		if (StringUtils.isNotBlank(zfStatus)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("zfStatus", Integer.valueOf(zfStatus)));
 		}
 		if (suspectBigBoss > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("suspectBigBoss", 1));

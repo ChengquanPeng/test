@@ -58,6 +58,7 @@ public class CoodPoolModelService {
 		StringBuffer mid = new StringBuffer();
 		StringBuffer msg2 = new StringBuffer();
 		StringBuffer msg3 = new StringBuffer();
+		// StringBuffer msg4 = new StringBuffer();
 		if (list.size() > 0) {
 			LinePrice lp = new LinePrice(daliyTradeHistroyService);
 			for (CodePool m : list) {
@@ -156,7 +157,7 @@ public class CoodPoolModelService {
 				return true;
 			}
 		}
-		log.info("{} 最近5个工作日无大涨交易", code);
+		log.info("{} 最近30个工作日无大涨交易", code);
 		return false;
 	}
 

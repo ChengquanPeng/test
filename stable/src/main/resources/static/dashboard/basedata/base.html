@@ -27,6 +27,13 @@
 					股票代码：<input type="text" class="form-control" id="queryCode">
 					板块名称：<input type="text" class="form-control" id="conceptName">
 					概念id：<input type="text" class="form-control" id="conceptId">
+					增发状态：<select id="zfStatus" class="form-control">
+						<option value="" selected="selected">不限制</option>
+						<option value="1">增发中</option>
+						<option value="2">增发完成</option>
+						<option value="3">增发终止</option>
+						<option value="0">无增发</option>
+					</select> 
 					排序：<select id="gsort" class="form-control">
 						<option value="1" selected="selected">综合评分</option>
 						<option value="2">评分变化</option>
@@ -102,7 +109,8 @@
 									param.asc = 1;
 									param.conceptId = $('#conceptId').val();
 									param.conceptName = $('#conceptName').val();
-
+									
+									param.zfStatus = $('#zfStatus').val();
 									if (!document.getElementById("asc").checked) {
 										param.asc = 2;
 									}

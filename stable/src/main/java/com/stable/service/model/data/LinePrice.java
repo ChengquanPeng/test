@@ -347,7 +347,7 @@ public class LinePrice {
 		return true;
 	}
 
-	// 半年整幅未超过50%
+	// 整幅未超过chkdouble%
 	public boolean priceCheckForMid(String code, int date, double chkdouble) {
 		List<TradeHistInfoDaliy> listD180 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
 				EsQueryPageUtil.queryPage250, SortOrder.DESC);
