@@ -95,7 +95,7 @@ public class ThsAddIssueSpider {
 		AddIssueUtil util = new AddIssueUtil();
 		util.setCode(code);
 		String org = "";
-		String UnicodeToCN = "";
+//		String UnicodeToCN = "";
 		for (int i = 1; i < 30; i++) {// 30页
 			String url = String.format(BASE_URL, code, i);
 			int trytime = 0;
@@ -105,12 +105,12 @@ public class ThsAddIssueSpider {
 					log.info(url);
 					ThreadsUtil.sleepRandomSecBetween1And2();
 					org = HttpUtil.doGet2(url);
-					UnicodeToCN = UnicodeUtil.UnicodeToCN(org);
-					JSONArray objects = JSON.parseArray(UnicodeToCN);
+//					UnicodeToCN = UnicodeUtil.UnicodeToCN(org); 整个json有双引号的情况，所以要下面title分开。
+					JSONArray objects = JSON.parseArray(org);
 					String s_date = "";
 					for (int j = 0; j < objects.size(); j++) {
 						JSONObject data = objects.getJSONObject(j);
-						String title = data.getString("title");
+						String title = UnicodeUtil.UnicodeToCN(data.getString("title"));
 						String date = data.getString("date");
 						// 成功
 						if (title.contains("上市公告书") || title.contains("发行情况报告书")) {
@@ -150,7 +150,7 @@ public class ThsAddIssueSpider {
 					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 					if (trytime >= 10) {
 						log.info("org:" + org);
-						log.info("UnicodeToCN:" + UnicodeToCN);
+						// log.info("UnicodeToCN:" + UnicodeToCN);
 						fetched = true;
 						WxPushUtil.pushSystem1("同花顺-抓包公告出错-抓包出错code=" + code + ",url=" + url);
 					}

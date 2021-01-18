@@ -29,11 +29,11 @@ public class FinanceBaseInfo extends EsBase {
 	private int quarter;// 季度
 
 	@Field(type = FieldType.Long)
-	private Long yyzsr; // 营业总收入
+	private long yyzsr; // 营业总收入
 	@Field(type = FieldType.Long)
-	private Long gsjlr; // 归属净利润
+	private long gsjlr; // 归属净利润
 	@Field(type = FieldType.Long)
-	private Long kfjlr; // 扣非净利润
+	private long kfjlr; // 扣非净利润
 
 	@Field(type = FieldType.Double)
 	private double yyzsrtbzz; // 营业总收入同比增长(%)
