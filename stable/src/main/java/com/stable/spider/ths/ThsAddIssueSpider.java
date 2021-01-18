@@ -53,14 +53,18 @@ public class ThsAddIssueSpider {
 					if (lock.tryLock(12, TimeUnit.HOURS)) {
 						log.info("getLock");
 						try {
+							StringBuffer done = new StringBuffer();
 							int endDate = fromDate;
 							log.info("fromDate:{},endDate:{}", fromDate, endDate);
 							List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 							for (StockBaseInfo b : list) {
-								AddIssue iss = dofetch(b.getCode(), endDate, isJob).getAddIssue();
+								AddIssue iss = dofetch(b.getCode(), endDate, isJob, done).getAddIssue();
 								if (iss.getStartDate() > 0) {
 									addIssueDao.save(iss);
 								}
+							}
+							if (done.length() > 0) {
+								WxPushUtil.pushSystem1("有新的股票已经完成增发，关注发行价格和对象，以及走势，行业情况，列表：" + done.toString());
 							}
 							log.info("增发完成抓包");
 						} catch (Exception e) {
@@ -81,7 +85,7 @@ public class ThsAddIssueSpider {
 
 	}
 
-	private AddIssueUtil dofetch(String code, int endDate, boolean isJob) {
+	private AddIssueUtil dofetch(String code, int endDate, boolean isJob, StringBuffer done) {
 		ThreadsUtil.sleepRandomSecBetween1And5();
 		boolean fatchOnePage = true;
 		// 1.定时任务+（null空或者已完成的）就只抓一页。
@@ -112,6 +116,7 @@ public class ThsAddIssueSpider {
 						JSONObject data = objects.getJSONObject(j);
 						String title = UnicodeUtil.UnicodeToCN(data.getString("title"));
 						String date = data.getString("date");
+//						System.err.println(date + " " + title);
 						// 成功
 						if (title.contains("上市公告书") || title.contains("发行情况报告书")) {
 							// System.err.println("999999-endingggg:" + date + " " + type + " " + title);
@@ -142,6 +147,9 @@ public class ThsAddIssueSpider {
 						return util;
 					}
 					if (pageEndDate < endDate) {
+						if (!fatchOnePage && util.getEndding() > 0) {
+							done.append(code).append(",");
+						}
 						return util;
 					}
 				} catch (Exception e2) {
@@ -165,10 +173,10 @@ public class ThsAddIssueSpider {
 	public static void main(String[] args) {
 		ThsAddIssueSpider tp = new ThsAddIssueSpider();
 //		String[] as = { "603385", "300676", "002405", "601369", "600789", "002612" };
-		String[] as = { "600789" };
+		String[] as = { "300027" };
 		List<AddIssueUtil> res = new LinkedList<AddIssueUtil>();
 		for (int i = 0; i < as.length; i++) {
-			res.add(tp.dofetch(as[i], 20160101, false));
+			res.add(tp.dofetch(as[i], 20160101, false, new StringBuffer()));
 		}
 		for (AddIssueUtil r : res) {
 			System.err.println(r.getAddIssue());
