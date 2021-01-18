@@ -77,6 +77,7 @@ public class ThsJiejinSpider {
 					if (savelist.size() > 0) {
 						jiejinDao.saveAll(savelist);
 					}
+					log.info("同花顺-抓包解禁-完成");
 				} catch (Exception e) {
 					e.printStackTrace();
 					WxPushUtil.pushSystem1("同花顺-抓包解禁出错-抓包出错");

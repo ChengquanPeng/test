@@ -94,6 +94,8 @@ public class ThsAddIssueSpider {
 		}
 		AddIssueUtil util = new AddIssueUtil();
 		util.setCode(code);
+		String org = "";
+		String UnicodeToCN = "";
 		for (int i = 1; i < 30; i++) {// 30页
 			String url = String.format(BASE_URL, code, i);
 			int trytime = 0;
@@ -102,9 +104,9 @@ public class ThsAddIssueSpider {
 				try {
 					log.info(url);
 					ThreadsUtil.sleepRandomSecBetween1And2();
-					String result = HttpUtil.doGet2(url);
-					result = UnicodeUtil.UnicodeToCN(result);
-					JSONArray objects = JSON.parseArray(result);
+					org = HttpUtil.doGet2(url);
+					UnicodeToCN = UnicodeUtil.UnicodeToCN(org);
+					JSONArray objects = JSON.parseArray(UnicodeToCN);
 					String s_date = "";
 					for (int j = 0; j < objects.size(); j++) {
 						JSONObject data = objects.getJSONObject(j);
@@ -147,6 +149,8 @@ public class ThsAddIssueSpider {
 					trytime++;
 					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 					if (trytime >= 10) {
+						log.info("org:" + org);
+						log.info("UnicodeToCN:" + UnicodeToCN);
 						fetched = true;
 						WxPushUtil.pushSystem1("同花顺-抓包公告出错-抓包出错code=" + code + ",url=" + url);
 					}
