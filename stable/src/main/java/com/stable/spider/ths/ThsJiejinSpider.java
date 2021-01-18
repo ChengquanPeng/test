@@ -39,6 +39,8 @@ public class ThsJiejinSpider {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private JiejinDao jiejinDao;
+	@Autowired
+	private ThsBonusSpider thsBonusSpider;
 
 	private String host = "http://basic.10jqka.com.cn";
 	private Map<String, String> header;
@@ -52,6 +54,7 @@ public class ThsJiejinSpider {
 		}
 		log.info("周六");
 		dofetch();
+
 	}
 
 	public void dofetch() {
@@ -81,6 +84,8 @@ public class ThsJiejinSpider {
 				} catch (Exception e) {
 					e.printStackTrace();
 					WxPushUtil.pushSystem1("同花顺-抓包解禁出错-抓包出错");
+				} finally {
+					thsBonusSpider.dofetchBonus();
 				}
 			}
 		}).start();

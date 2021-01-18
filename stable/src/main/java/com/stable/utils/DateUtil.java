@@ -31,7 +31,7 @@ public class DateUtil {
 			SimpleDateFormat format1 = new SimpleDateFormat(YYYY_MM_DD);
 			return Integer.valueOf(format1.format(d));
 		} catch (ParseException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			throw new RuntimeException("ParseException:yyyyMMdd:" + yyyyMMdd);
 		}
 	}

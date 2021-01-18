@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.ChipsService;
 import com.stable.spider.eastmoney.EmJiejinSpider;
-import com.stable.spider.ths.ThsAddIssueSpider;
+import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.spider.ths.ThsJiejinSpider;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -16,11 +16,10 @@ import com.stable.vo.spi.req.EsQueryPageReq;
 @RequestMapping("/chips")
 @RestController
 public class ChipsController {
-
+	@Autowired
+	private ThsBonusSpider thsBonusSpider;
 	@Autowired
 	private ChipsService chipsService;
-	@Autowired
-	private ThsAddIssueSpider thsAddIssueSpider;
 	@Autowired
 	private EmJiejinSpider emJiejinSpider;
 	@Autowired
@@ -84,7 +83,7 @@ public class ChipsController {
 	public ResponseEntity<JsonResult> fetchAddIssue() {
 		JsonResult r = new JsonResult();
 		try {
-			thsAddIssueSpider.dofetch(false, 20170101);
+			thsBonusSpider.dofetchBonus();
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {

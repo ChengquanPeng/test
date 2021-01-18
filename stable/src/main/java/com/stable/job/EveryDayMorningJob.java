@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
-import com.stable.spider.ths.ThsAddIssueSpider;
 import com.stable.spider.ths.ThsHolderSpider;
 import com.stable.spider.ths.ThsJiejinSpider;
 import com.stable.utils.DateUtil;
@@ -25,18 +24,13 @@ public class EveryDayMorningJob extends MySimpleJob {
 	private ThsJiejinSpider thsJiejinSpider;
 	@Autowired
 	private ThsHolderSpider thsHolderSpider;
-	@Autowired
-	private ThsAddIssueSpider thsAddIssueSpider;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
 		log.info("每日股东人数任务开始执行");
 		thsHolderSpider.dofetchHolder();
-		log.info("同花顺增发公告--- ");
-		int two_year_start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -750));
-		thsAddIssueSpider.dofetch(true, two_year_start);
-		log.info("周六-同花顺解禁");
-		thsJiejinSpider.dofetch();
+		log.info("周六-同花顺解禁&分紅");
+		thsJiejinSpider.byJob();
 	}
 
 	public static void main(String[] args) {
