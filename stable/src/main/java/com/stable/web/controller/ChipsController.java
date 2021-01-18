@@ -114,7 +114,7 @@ public class ChipsController {
 	}
 
 	/**
-	 * 东方财富-历史解禁
+	 * 同花顺-解禁
 	 */
 	@RequestMapping(value = "/fetchJiejinThs", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> fetchJiejinThs() {
