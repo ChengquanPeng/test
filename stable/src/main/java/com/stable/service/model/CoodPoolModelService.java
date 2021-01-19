@@ -1,5 +1,6 @@
 package com.stable.service.model;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.elasticsearch.search.sort.SortOrder;
@@ -23,6 +24,7 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.CodePool;
 import com.stable.vo.bus.StockAvgBase;
+import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -141,36 +143,53 @@ public class CoodPoolModelService {
 
 	private void zfmoni(CodePool m, LinePrice lp, int tradeDate, StringBuffer msg4) {
 		if (m.getZfStatus() == 2) {
-			if (m.getInzf() == 0) {
-				ZengFa zf = chipsService.getLastZengFa(m.getCode());
-				boolean preCondi = false;
-				if (zf.getPrice() > 0) {
-					// 价格对比,增发价没超60%
-					double chkline = CurrencyUitl.topPriceN(zf.getPrice(), 1.6);
-					double close = daliyBasicHistroyService.queryLastest(m.getCode()).getClose();
-					if (close <= chkline) {
-						preCondi = true;
-					}
-				} else {
-					// 没有价格对比就看一年涨幅
-					if (lp.priceCheckForMid(m.getCode(), tradeDate, chkdouble)) {
-						preCondi = true;
-					}
+			m.setInzf(1);
+			m.setZfself(0);
+
+			String code = m.getCode();
+			ZengFa zf = chipsService.getLastZengFa(code);
+			// 20个交易日股价
+			List<TradeHistInfoDaliy> befor45 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0,
+					zf.getEndDate(), EsQueryPageUtil.queryPage60, SortOrder.DESC);
+			double end = befor45.get(0).getClosed();
+			double max = befor45.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed)).get()
+					.getClosed();
+			if (max > end) {
+				if (CurrencyUitl.cutProfit(end, max) >= 15.0) {
+					m.setZfself(1);// 增发前跌幅在20%以上
 				}
-				if (preCondi) {
+			}
+			boolean preCondi = false;
+			if (zf.getPrice() > 0) {
+				// 价格对比,增发价没超60%
+				double chkline = CurrencyUitl.topPriceN(zf.getPrice(), 1.5);
+				double close = daliyBasicHistroyService.queryLastest(code).getClose();
+				if (close <= chkline) {
+					preCondi = true;
+				}
+			} else {
+				// 没有价格对比就看一年涨幅
+				if (lp.priceCheckForMid(code, tradeDate, chkdouble)) {
+					preCondi = true;
+				}
+			}
+			if (preCondi && m.getZfself() == 1) {
+				if (m.getZfmoni() == 0) {
 					if (m.getInzf() == 0) {
-						msg4.append(m.getCode() + ",增发价格:" + zf.getPrice()).append(Constant.HTML_LINE);
+						msg4.append(code + ",增发价格:" + zf.getPrice()).append(Constant.HTML_LINE);
 					}
-					m.setInzf(1);
-					if (m.getMonitor() == 0) {
-						m.setMonitor(5);
-					}
-				} else {
-					m.setInzf(0);
 				}
+				m.setZfmoni(1);
+				if (m.getMonitor() == 0) {
+					m.setMonitor(5);
+				}
+			} else {
+				m.setZfmoni(0);
 			}
 		} else {
 			m.setInzf(0);
+			m.setZfself(0);
+			m.setZfmoni(0);
 		}
 	}
 

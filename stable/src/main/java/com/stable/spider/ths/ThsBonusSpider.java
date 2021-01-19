@@ -140,6 +140,7 @@ public class ThsBonusSpider {
 				if (times > 0) {
 					List<HtmlElement> hists = body.getElementsByAttribute("table", "class", "m_table pggk mt10");
 					boolean getDetail = false;
+					ZengFa last = null;
 					for (HtmlElement h : hists) {
 						try {
 							ZengFa zf = new ZengFa();
@@ -203,7 +204,31 @@ public class ThsBonusSpider {
 							zf.setUpdate(sysdate);
 //						System.err.println("==================");
 							log.info(zf.toString());
-							zengFaDao.save(zf);
+							boolean currOk = true;
+							if (last != null) {
+								if (last.getStartDate() == zf.getStartDate()) {
+									if (zf.getStatus() < last.getStatus()) {
+										currOk = false;// 上一條已完成
+									} else {
+										// 兩條狀態一致
+										try {
+											double dl = Double
+													.valueOf(last.getAmt().replaceAll("亿元", "").replaceAll(" ", ""));
+											double dc = Double
+													.valueOf(zf.getAmt().replaceAll("亿元", "").replaceAll(" ", ""));
+											if (dc < dl) {
+												currOk = false;// 金额最大的准: 上一條金额较大
+											}
+										} catch (Exception e) {
+										}
+									}
+								}
+							}
+							if (currOk) {
+								last = zf;
+								zengFaDao.save(zf);
+							}
+
 						} catch (Exception e) {
 //							log.error(h.asXml());
 //							e.fillInStackTrace();

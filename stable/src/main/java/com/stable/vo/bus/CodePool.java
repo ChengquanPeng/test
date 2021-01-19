@@ -48,8 +48,6 @@ public class CodePool {
 	private String remark;
 	@Field(type = FieldType.Integer)
 	private int inmid = 0;// 符合中线
-	@Field(type = FieldType.Integer)
-	private int inzf = 0;// 增发
 
 	@Field(type = FieldType.Integer)
 	private int sortMode6 = 0;// 符合短线 //短线模型6(前期3-50%吸筹，深度回踩突然涨停后再2-5个交易日回踩拉起,涨停日不放量，超过涨停价格后买入，买入2内未大幅拉升放弃
@@ -65,6 +63,13 @@ public class CodePool {
 
 	@Field(type = FieldType.Integer)
 	private int zfStatus;// 增发状态（近2年）: 0无增发，1增发中，2增发完成，3，增发终止
+	@Field(type = FieldType.Integer)
+	private int inzf = 0;// 增发完成
+	@Field(type = FieldType.Integer)
+	private int zfself = 0;// 自己人在增发
+	@Field(type = FieldType.Integer)
+	private int zfmoni = 0;// 增发监视
+	
 
 	@Transient
 	public boolean isIsok() {
