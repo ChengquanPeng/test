@@ -49,7 +49,7 @@ public class ChipsController {
 	public ResponseEntity<JsonResult> zengfalist(String code, String status, EsQueryPageReq querypage) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(chipsService.getAddIssueList(code, status, querypage));
+			r.setResult(chipsService.getZengFaListForWeb(code, status, querypage));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -94,10 +94,10 @@ public class ChipsController {
 	}
 
 	/**
-	 * 同花顺-公告-增发
+	 * 同花顺-增发
 	 */
-	@RequestMapping(value = "/fetchAddIssue", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> fetchAddIssue() {
+	@RequestMapping(value = "/fetchZengfa", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> fetchZengfa() {
 		JsonResult r = new JsonResult();
 		try {
 			thsBonusSpider.dofetchBonus();

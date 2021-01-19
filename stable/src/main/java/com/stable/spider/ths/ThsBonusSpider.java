@@ -153,7 +153,7 @@ public class ThsBonusSpider {
 							zf.setStatusDesc(ts[1]);
 							zf.setIssueClz(ts[2]);
 							zf.setIssueType(ts[3]);
-							if (zf.getStatusDesc().contains("实施")) {
+							if (zf.getStatusDesc().contains("已实施")) {
 								zf.setStatus(2);
 								getDetail = true;
 							}

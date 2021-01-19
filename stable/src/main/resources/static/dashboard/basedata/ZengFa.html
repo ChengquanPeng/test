@@ -63,7 +63,7 @@
 	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
 		$("#header").load("/web/header.html")
-		addActive("m_addIssue");
+		addActive("m_zengfa");
 		$('#cusTable').bootstrapTable('destroy');
 		function loadData() {
 			$('#cusTable').bootstrapTable('destroy');
@@ -98,6 +98,10 @@
 										{
 											field : 'code',
 											title : '代码'
+										},
+										{
+											field : 'codeName',
+											title : '名称'
 										},
 										{
 											field : 'startDate',

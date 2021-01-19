@@ -1,6 +1,7 @@
 package com.stable.service;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -9,6 +10,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +36,7 @@ import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
 import com.stable.vo.bus.ZengFaSummary;
+import com.stable.vo.http.resp.ZengFaResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 /**
@@ -56,6 +59,8 @@ public class ChipsService {
 	private ZengFaSummaryDao zengFaSummaryDao;
 	@Autowired
 	private JiejinDao jiejinDao;
+	@Autowired
+	private StockBasicService stockBasicService;
 
 	/**
 	 * 最后的增发记录
@@ -182,7 +187,25 @@ public class ChipsService {
 	/**
 	 * -增发记录
 	 */
-	public List<ZengFa> getAddIssueList(String code, String status, EsQueryPageReq querypage) {
+	public List<ZengFaResp> getZengFaListForWeb(String code, String status, EsQueryPageReq querypage) {
+		List<ZengFa> list = getZengFaList(code, status, querypage);
+		if (list != null) {
+			List<ZengFaResp> l = new LinkedList<ZengFaResp>();
+			for (ZengFa zf : list) {
+				ZengFaResp r = new ZengFaResp();
+				BeanUtils.copyProperties(zf, r);
+				r.setCodeName(stockBasicService.getCodeName(zf.getCode()));
+				l.add(r);
+			}
+			return l;
+		}
+		return null;
+	}
+
+	/**
+	 * -增发记录
+	 */
+	public List<ZengFa> getZengFaList(String code, String status, EsQueryPageReq querypage) {
 		int pageNum = querypage.getPageNum();
 		int size = querypage.getPageSize();
 		Pageable pageable = PageRequest.of(pageNum, size);
@@ -190,10 +213,11 @@ public class ChipsService {
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		}
+		FieldSortBuilder sort = SortBuilders.fieldSort("startDate").unmappedType("integer").order(SortOrder.DESC);
 		if (StringUtils.isNotBlank(status)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("status", Integer.valueOf(status)));
+			sort = SortBuilders.fieldSort("endDate").unmappedType("integer").order(SortOrder.DESC);
 		}
-		FieldSortBuilder sort = SortBuilders.fieldSort("startDate").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 		Page<ZengFa> page = zengFaDao.search(sq);
