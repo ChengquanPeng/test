@@ -124,13 +124,10 @@ public class CurrencyUitl {
 	 */
 	public final static double topPrice(double preClosedPrice, boolean isST) {
 		if (isST) {
-			preClosedPrice = preClosedPrice * 1.05;
+			return topPriceN(preClosedPrice, 1.05);
 		} else {
-			preClosedPrice = preClosedPrice * 1.1;
+			return topPriceN(preClosedPrice, 1.105);
 		}
-		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
-				.doubleValue();
-		return result;
 	}
 
 	/**
@@ -148,21 +145,19 @@ public class CurrencyUitl {
 	}
 
 	public final static double topPrice20(double preClosedPrice) {
-		preClosedPrice = preClosedPrice * 1.2;
-		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
-				.doubleValue();
-		return result;
+		return topPriceN(preClosedPrice, 1.2);
 	}
 
 	public final static double topPrice30(double preClosedPrice) {
-		preClosedPrice = preClosedPrice * 1.3;
-		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
-				.doubleValue();
-		return result;
+		return topPriceN(preClosedPrice, 1.3);
 	}
 
 	public final static double topPrice50(double preClosedPrice) {
-		preClosedPrice = preClosedPrice * 1.5;
+		return topPriceN(preClosedPrice, 1.5);
+	}
+
+	public final static double topPriceN(double preClosedPrice, double rate) {
+		preClosedPrice = preClosedPrice * rate;
 		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
 				.doubleValue();
 		return result;

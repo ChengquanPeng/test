@@ -1,5 +1,6 @@
 package com.stable.service.model;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -103,7 +104,11 @@ public class CodeModelService {
 		}
 	}
 
+	private int start = 0;
+
 	private synchronized void runByJob(int tradeDate) {
+		Date now = new Date();
+		start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
 //		end = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 370));
 		log.info("CodeModel processing request date={}", tradeDate);
 		if (!tradeCalService.isOpen(tradeDate)) {
@@ -396,10 +401,10 @@ public class CodeModelService {
 
 	// 增发
 	private void chkZf(CodePool c, CodeBaseModel newOne) {
-		ZengFa addIssue = chipsService.getLastZengFa(newOne.getCode());
+		ZengFa zengfa = chipsService.getLastZengFa(newOne.getCode());
 		// start 一年以前
-		if (addIssue != null) {
-			newOne.setZfStatus(addIssue.getStatus());
+		if (zengfa != null && zengfa.getStartDate() > start || zengfa.getEndDate() > start) {
+			newOne.setZfStatus(zengfa.getStatus());
 		} else {
 			newOne.setZfStatus(0);
 		}

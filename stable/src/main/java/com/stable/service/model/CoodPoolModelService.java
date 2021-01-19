@@ -6,8 +6,11 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.service.ChipsService;
 import com.stable.service.CodePoolService;
+import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
@@ -15,11 +18,13 @@ import com.stable.service.TradeCalService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.data.LinePrice;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.CodePool;
 import com.stable.vo.bus.StockAvgBase;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
+import com.stable.vo.bus.ZengFa;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
@@ -45,6 +50,11 @@ public class CoodPoolModelService {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private StockBasicService stockBasicService;
+	@Autowired
+	private ChipsService chipsService;
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
+
 	private String OK = "基本面OK,疑是建仓";
 
 //	private String NOT_OK = "系统默认NOT_OK";
@@ -58,7 +68,7 @@ public class CoodPoolModelService {
 		StringBuffer mid = new StringBuffer();
 		StringBuffer msg2 = new StringBuffer();
 		StringBuffer msg3 = new StringBuffer();
-		// StringBuffer msg4 = new StringBuffer();
+		StringBuffer msg4 = new StringBuffer();
 		if (list.size() > 0) {
 			LinePrice lp = new LinePrice(daliyTradeHistroyService);
 			for (CodePool m : list) {
@@ -102,7 +112,7 @@ public class CoodPoolModelService {
 				} else {
 					m.setInmid(0);
 				}
-				zfmoni(m, lp, tradeDate);
+				zfmoni(m, lp, tradeDate, msg4);
 				// 1大牛，2中线，3人工，4短线 // 箱体新高（3个月新高，短期有8%的涨幅）
 				chk(m, code, tradeDate, msg3);
 			}
@@ -123,14 +133,41 @@ public class CoodPoolModelService {
 			if (msg3.length() > 0) {
 				WxPushUtil.pushSystem1("股票池-疑似-启动股票:" + msg3.toString());
 			}
+			if (msg4.length() > 0) {
+				WxPushUtil.pushSystem1("增发完成-未启动股票:" + msg4.toString());
+			}
 		}
 	}
 
-	private void zfmoni(CodePool m, LinePrice lp, int tradeDate) {
-		if (m.getZfStatus() == 2 && lp.priceCheckForMid(m.getCode(), tradeDate, chkdouble)) {
-			m.setInzf(1);
-			if (m.getMonitor() == 0) {
-				m.setMonitor(5);
+	private void zfmoni(CodePool m, LinePrice lp, int tradeDate, StringBuffer msg4) {
+		if (m.getZfStatus() == 2) {
+			if (m.getInzf() == 0) {
+				ZengFa zf = chipsService.getLastZengFa(m.getCode());
+				boolean preCondi = false;
+				if (zf.getPrice() > 0) {
+					// 价格对比,增发价没超60%
+					double chkline = CurrencyUitl.topPriceN(zf.getPrice(), 1.6);
+					double close = daliyBasicHistroyService.queryLastest(m.getCode()).getClose();
+					if (close <= chkline) {
+						preCondi = true;
+					}
+				} else {
+					// 没有价格对比就看一年涨幅
+					if (lp.priceCheckForMid(m.getCode(), tradeDate, chkdouble)) {
+						preCondi = true;
+					}
+				}
+				if (preCondi) {
+					if (m.getInzf() == 0) {
+						msg4.append(m.getCode() + ",增发价格:" + zf.getPrice()).append(Constant.HTML_LINE);
+					}
+					m.setInzf(1);
+					if (m.getMonitor() == 0) {
+						m.setMonitor(5);
+					}
+				} else {
+					m.setInzf(0);
+				}
 			}
 		} else {
 			m.setInzf(0);
