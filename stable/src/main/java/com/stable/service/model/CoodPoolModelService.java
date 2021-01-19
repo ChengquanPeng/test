@@ -74,6 +74,9 @@ public class CoodPoolModelService {
 		if (list.size() > 0) {
 			LinePrice lp = new LinePrice(daliyTradeHistroyService);
 			for (CodePool m : list) {
+				if (m.getMonitor() == 1) {
+					m.setMonitor(0);// TODO
+				}
 				String code = m.getCode();
 				boolean onlineYear = stockBasicService.online1YearChk(code, tradeDate);
 				if (!onlineYear) {
@@ -94,9 +97,6 @@ public class CoodPoolModelService {
 					}
 					m.setRemark(OK);
 					m.setSuspectBigBoss(1);
-					if (m.getMonitor() == 0) {
-						m.setMonitor(1);// 监听:0不监听，1大牛，2中线，3人工
-					}
 				} else {
 					if (m.getSuspectBigBoss() == 1) {
 						msg2.append(code).append(",");
@@ -116,7 +116,9 @@ public class CoodPoolModelService {
 				}
 				zfmoni(m, lp, tradeDate, msg4);
 				// 1大牛，2中线，3人工，4短线 // 箱体新高（3个月新高，短期有8%的涨幅）
-				chk(m, code, tradeDate, msg3);
+				//chk(m, code, tradeDate, msg3);TODO
+				//大牛需要涨停
+
 			}
 			codePoolService.saveAll(list);
 			if (msg.length() > 0 || mid.length() > 0) {
@@ -180,9 +182,6 @@ public class CoodPoolModelService {
 					}
 				}
 				m.setZfmoni(1);
-				if (m.getMonitor() == 0) {
-					m.setMonitor(5);
-				}
 			} else {
 				m.setZfmoni(0);
 			}
