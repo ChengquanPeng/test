@@ -25,16 +25,16 @@ trtd{
 	代码：<span th:text="${code}"></span>-<span th:text="${codeName}"></span>-分数：<b><span th:text="${codedetail.score}"></span></b>
 	-评分变化：<b><span th:text="${codedetail.upScore}"></span></b>-最后更新日期:<span th:text="${codedetail.udpateDate}"></span>
 	<br/>------------------------------------------------------------<br/>
-	<div>同花顺板块：<span th:text="${codeBasic.thsIndustry}"></span></div>
-	<div>同花顺概念：<span th:each="cp: ${concepts}"><span th:text="${cp.conceptName}"></span>&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+	<div>曾用名(金字招牌):<span th:text="${codeBasic.oldName}"></span></div>
 	<div>同花顺-主营:<span th:text="${codeBasic.thsMainBiz}"></span></div>
 	<div>同花顺-亮点:<span th:text="${codeBasic.thsLightspot}"></span></div>
-	<div>曾用名(金字招牌):<span th:text="${codeBasic.oldName}"></span></div>
 	<div>公司网站:<span th:text="${codeBasic.webSite}"></span></div>
-	<div>前3大股东占比:<span th:text="${topThree}"></span></div>
-	<div>股东人数变化（幅度+次数):<span th:text="${codedetail.holderChange}"></span></div>
+	<div>同花顺板块：<span th:text="${codeBasic.thsIndustry}"></span></div>
+	<div>同花顺概念：<span th:each="cp: ${concepts}"><span th:text="${cp.conceptName}"></span>&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
 	<div>分红概况:<span th:text="${fhgk}"></span></div>
 	<div>增发概况:<span th:text="${zfgk}"></span></div>
+	<div>前3大股东占比:<span th:text="${topThree}"></span></div>
+	<div>股东人数变化（幅度+次数):<span th:text="${codedetail.holderChange}"></span></div>
 	<br/>------------------------------------------------------------<br/>
 	财务报告年份：
 	<span th:text="${codedetail.currYear}"></span>-报告：<span th:text="${codedetail.currQuarter}"></span>季度,
