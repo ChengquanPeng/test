@@ -72,7 +72,6 @@ public class DaliyBasicHistroyService {
 
 	// 直接全量获取历史记录，不需要根据缓存来判断
 	private synchronized int spiderDaliyDailyBasic(String today) {
-		String preDate = tradeCalService.getPretradeDate(today);
 		JSONArray array = tushareSpider.getStockDaliyBasic(null, today, null, null).getJSONArray("items");
 		if (array == null || array.size() <= 0) {
 			log.warn("未获取到日交易daily_basic（每日指标）记录,tushare,日期={}", today);
@@ -81,6 +80,7 @@ public class DaliyBasicHistroyService {
 			}
 			return 0;
 		}
+		String preDate = tradeCalService.getPretradeDate(today);
 		List<DaliyBasicInfo> list = new LinkedList<DaliyBasicInfo>();
 		int size = array.size();
 		log.info("{}获取到每日指标记录条数={}", today, size);

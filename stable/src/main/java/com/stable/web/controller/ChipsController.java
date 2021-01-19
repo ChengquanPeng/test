@@ -45,11 +45,28 @@ public class ChipsController {
 	/**
 	 * 根据code查询增发
 	 */
-	@RequestMapping(value = "/addIssue/list", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> AddIssuelist(String code, EsQueryPageReq querypage) {
+	@RequestMapping(value = "/zengfa/list", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> zengfalist(String code, String status, EsQueryPageReq querypage) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(chipsService.getAddIssueList(code, querypage));
+			r.setResult(chipsService.getAddIssueList(code, status, querypage));
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * 最新的增发详情
+	 */
+	@RequestMapping(value = "/last/zengfadtl", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> lastZengfaDetail(String code) {
+		JsonResult r = new JsonResult();
+		try {
+			r.setResult(chipsService.getLastZengFaDetail(code));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

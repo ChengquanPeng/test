@@ -33,6 +33,8 @@ trtd{
 	<div>公司网站:<span th:text="${codeBasic.webSite}"></span></div>
 	<div>前3大股东占比:<span th:text="${topThree}"></span></div>
 	<div>股东人数变化（幅度+次数):<span th:text="${codedetail.holderChange}"></span></div>
+	<div>分红概况:<span th:text="${fhgk}"></span></div>
+	<div>增发概况:<span th:text="${zfgk}"></span></div>
 	<br/>------------------------------------------------------------<br/>
 	财务报告年份：
 	<span th:text="${codedetail.currYear}"></span>-报告：<span th:text="${codedetail.currQuarter}"></span>季度,
@@ -65,7 +67,7 @@ trtd{
 	<br/>------------------------------------------------------------<br/>
 	资金博弈:
 	<br/>
-	<div>最近增发记录:<span th:text="${addIssue}"></span></div>
+	<div>最近增发记录:<span th:text="${lastZf}"></span></div>
 	<div>前后1年解禁记录:</span>
 		<table border='1' cellspacing='0' cellpadding='0'>
 		<tr>

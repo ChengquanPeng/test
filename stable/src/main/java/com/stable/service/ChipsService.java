@@ -18,16 +18,22 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
-import com.stable.es.dao.base.AddIssueDao;
 import com.stable.es.dao.base.EsHolderNumDao;
 import com.stable.es.dao.base.EsHolderPercentDao;
+import com.stable.es.dao.base.FenHongDao;
 import com.stable.es.dao.base.JiejinDao;
+import com.stable.es.dao.base.ZengFaDao;
+import com.stable.es.dao.base.ZengFaDetailDao;
+import com.stable.es.dao.base.ZengFaSummaryDao;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
-import com.stable.vo.bus.AddIssue;
+import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.HolderPercent;
 import com.stable.vo.bus.Jiejin;
+import com.stable.vo.bus.ZengFa;
+import com.stable.vo.bus.ZengFaDetail;
+import com.stable.vo.bus.ZengFaSummary;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 /**
@@ -41,14 +47,56 @@ public class ChipsService {
 	@Autowired
 	private EsHolderPercentDao esHolderPercentDao;
 	@Autowired
-	private AddIssueDao addIssueDao;
+	private FenHongDao fenHongDao;
+	@Autowired
+	private ZengFaDao zengFaDao;
+	@Autowired
+	private ZengFaDetailDao zengFaDetailDao;
+	@Autowired
+	private ZengFaSummaryDao zengFaSummaryDao;
 	@Autowired
 	private JiejinDao jiejinDao;
 
 	/**
 	 * 最后的增发记录
 	 */
-	public AddIssue getLastAddIssue(String code) {
+	public FenHong getFenHong(String code) {
+		int pageNum = EsQueryPageUtil.queryPage1.getPageNum();
+		int size = EsQueryPageUtil.queryPage1.getPageSize();
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+		Page<FenHong> page = fenHongDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		return new FenHong();
+	}
+
+	/**
+	 * 增发-概况
+	 */
+	public ZengFaSummary getZengFaSummary(String code) {
+		int pageNum = EsQueryPageUtil.queryPage1.getPageNum();
+		int size = EsQueryPageUtil.queryPage1.getPageSize();
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+		Page<ZengFaSummary> page = zengFaSummaryDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		return new ZengFaSummary();
+	}
+
+	/**
+	 * 最后的增发记录
+	 */
+	public ZengFa getLastZengFa(String code) {
 		int pageNum = EsQueryPageUtil.queryPage1.getPageNum();
 		int size = EsQueryPageUtil.queryPage1.getPageSize();
 		Pageable pageable = PageRequest.of(pageNum, size);
@@ -57,11 +105,30 @@ public class ChipsService {
 		FieldSortBuilder sort = SortBuilders.fieldSort("startDate").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
-		Page<AddIssue> page = addIssueDao.search(sq);
+		Page<ZengFa> page = zengFaDao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			return page.getContent().get(0);
 		}
-		return new AddIssue();
+		return new ZengFa();
+	}
+
+	/**
+	 * 最后的增发详情记录
+	 */
+	public ZengFaDetail getLastZengFaDetail(String code) {
+		int pageNum = EsQueryPageUtil.queryPage1.getPageNum();
+		int size = EsQueryPageUtil.queryPage1.getPageSize();
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		Page<ZengFaDetail> page = zengFaDetailDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		return new ZengFaDetail();
 	}
 
 	/**
@@ -115,7 +182,7 @@ public class ChipsService {
 	/**
 	 * -增发记录
 	 */
-	public List<AddIssue> getAddIssueList(String code, EsQueryPageReq querypage) {
+	public List<ZengFa> getAddIssueList(String code, String status, EsQueryPageReq querypage) {
 		int pageNum = querypage.getPageNum();
 		int size = querypage.getPageSize();
 		Pageable pageable = PageRequest.of(pageNum, size);
@@ -123,10 +190,13 @@ public class ChipsService {
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		}
+		if (StringUtils.isNotBlank(status)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("status", Integer.valueOf(status)));
+		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("startDate").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
-		Page<AddIssue> page = addIssueDao.search(sq);
+		Page<ZengFa> page = zengFaDao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			return page.getContent();
 		}

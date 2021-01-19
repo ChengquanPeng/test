@@ -62,6 +62,8 @@ public class ThsJiejinSpider {
 			@Override
 			public void run() {
 				try {
+					new Exception().printStackTrace();
+					WxPushUtil.pushSystem1("同花顺-抓包解禁 周六调用？");
 					if (header == null) {
 						header = new HashMap<String, String>();
 						header.put("Referer", host);

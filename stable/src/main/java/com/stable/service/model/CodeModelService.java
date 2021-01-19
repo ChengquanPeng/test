@@ -1,6 +1,5 @@
 package com.stable.service.model;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,7 +42,6 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.bus.AddIssue;
 import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
@@ -55,6 +53,7 @@ import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.PledgeStat;
 import com.stable.vo.bus.StockBaseInfo;
+import com.stable.vo.bus.ZengFa;
 import com.stable.vo.http.resp.CodeBaseModelResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -104,11 +103,7 @@ public class CodeModelService {
 		}
 	}
 
-	private int start = 0;
-
 	private synchronized void runByJob(int tradeDate) {
-		Date now = new Date();
-		start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
 //		end = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 370));
 		log.info("CodeModel processing request date={}", tradeDate);
 		if (!tradeCalService.isOpen(tradeDate)) {
@@ -401,14 +396,10 @@ public class CodeModelService {
 
 	// 增发
 	private void chkZf(CodePool c, CodeBaseModel newOne) {
-		AddIssue addIssue = chipsService.getLastAddIssue(newOne.getCode());
+		ZengFa addIssue = chipsService.getLastZengFa(newOne.getCode());
 		// start 一年以前
 		if (addIssue != null) {
-			if (addIssue.getStartDate() > start || addIssue.getEndDate() > start) {// 完成
-				newOne.setZfStatus(addIssue.getStatus());
-			} else {
-				newOne.setZfStatus(0);
-			}
+			newOne.setZfStatus(addIssue.getStatus());
 		} else {
 			newOne.setZfStatus(0);
 		}

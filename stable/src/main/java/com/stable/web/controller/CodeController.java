@@ -17,10 +17,10 @@ import com.stable.service.ChipsService;
 import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
-import com.stable.vo.bus.AddIssue;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.Jiejin;
+import com.stable.vo.bus.ZengFa;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -52,23 +52,27 @@ public class CodeController {
 			model.addAttribute("topThree", chipsService.getLastHolderPercent(code));
 
 			// 是否有增发
-			AddIssue iss = chipsService.getLastAddIssue(code);
-			StringBuffer addIssue = new StringBuffer();
+			ZengFa iss = chipsService.getLastZengFa(code);
+			StringBuffer lastZf = new StringBuffer();
 			if (iss.getStartDate() > 0) {
-				addIssue.append("开始日期:").append(iss.getStartDate());
+				lastZf.append("开始日期:").append(iss.getStartDate());
 				if (iss.getEndDate() > 0) {
-					addIssue.append(" 开始日期:").append(iss.getEndDate());
+					lastZf.append(" 开始日期:").append(iss.getEndDate());
 				}
-				addIssue.append(" 状态:").append(getStatusDesc(iss.getStatus()));
-				addIssue.append(" 公告:").append(iss.getTitles());
+				lastZf.append(" 状态:").append(iss.getStatusDesc());
+				lastZf.append(" 类别:").append(iss.getIssueClz() + iss.getIssueType());
+				lastZf.append(" 金额:").append(iss.getPrice() + "/" + iss.getAmt());
 			}
-			model.addAttribute("addIssue", addIssue.toString());
+			model.addAttribute("lastZf", lastZf.toString());
 			// 前后1年解禁记录
 			List<Jiejin> jj = chipsService.getBf2yearJiejin(code);
 			if (jj == null) {
 				jj = Collections.emptyList();
 			}
 			model.addAttribute("jmsg", jj);
+
+			model.addAttribute("zfgk", chipsService.getZengFaSummary(code).getDesc());
+			model.addAttribute("fhgk", chipsService.getFenHong(code).getDetails());
 			// 快预报
 			String kb = "";
 			if (cbm.getForestallQuarter() > 0) {
@@ -85,19 +89,6 @@ public class CodeController {
 			e.printStackTrace();
 		}
 		return "code";
-	}
-
-	private String getStatusDesc(int s) {
-		if (s == 1) {
-			return "已开始";
-		}
-		if (s == 2) {
-			return "已完成";
-		}
-		if (s == 3) {
-			return "已终止";
-		}
-		return s + "";
 	}
 
 	/**

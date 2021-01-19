@@ -141,105 +141,116 @@ public class ThsBonusSpider {
 					List<HtmlElement> hists = body.getElementsByAttribute("table", "class", "m_table pggk mt10");
 					boolean getDetail = false;
 					for (HtmlElement h : hists) {
-						ZengFa zf = new ZengFa();
-						zf.setCode(code);
-						zf.setStatus(1);
-						Iterator<DomElement> it0 = h.getChildElements().iterator();
-						String title = it0.next().asText();
-						title = title.replaceAll("方案进度：", ",").replaceAll("发行类型：", ",").replaceAll("发行方式：", ",")
-								.replace(" ", "");
-						String[] ts = title.split(",");
-						zf.setStatusDesc(ts[1]);
-						zf.setIssueClz(ts[2]);
-						zf.setIssueType(ts[3]);
-						if (zf.getStatusDesc().contains("实施")) {
-							zf.setStatus(2);
-							getDetail = true;
-						}
+						try {
+							ZengFa zf = new ZengFa();
+							zf.setCode(code);
+							zf.setStatus(1);
+							Iterator<DomElement> it0 = h.getChildElements().iterator();
+							String title = it0.next().asText();
+							title = title.replaceAll("方案进度：", ",").replaceAll("发行类型：", ",").replaceAll("发行方式：", ",")
+									.replace(" ", "");
+							String[] ts = title.split(",");
+							zf.setStatusDesc(ts[1]);
+							zf.setIssueClz(ts[2]);
+							zf.setIssueType(ts[3]);
+							if (zf.getStatusDesc().contains("实施")) {
+								zf.setStatus(2);
+								getDetail = true;
+							}
 //						实际发行价格：17.0200元 新股上市公告日：2017-03-22
 //						实际发行数量：1.97亿股 发行新股日：2017-03-22
 //						实际募资净额：33.27亿元 证监会核准公告日：2017-01-18
 //						预案发行价格： 17.0200 元 发审委公告日：2016-10-24
 //						预案发行数量：不超过2.23亿股 股东大会公告日： 2016-06-08
 //						预案募资金额： 38 亿元 董事会公告日：2016-05-17
-						DomElement tbody = it0.next();
-						Iterator<DomElement> tr = tbody.getChildElements().iterator();
-						DomElement tr1 = tr.next();
-						try {
-							String s1 = tr1.getFirstElementChild().asText().replaceAll("元", "").replaceAll(" ", "")
-									.split("：")[1];
-							zf.setPrice(Double.valueOf(s1));
-						} catch (Exception e) {
-						}
-						try {
-							String s2 = tr1.getLastElementChild().asText().replaceAll(" ", "").split("：")[1];
-							zf.setEndDate(DateUtil.convertDate2(s2));
-						} catch (Exception e) {
-						}
-						DomElement tr2 = tr.next();
+							DomElement tbody = it0.next();
+							Iterator<DomElement> tr = tbody.getChildElements().iterator();
+							DomElement tr1 = tr.next();
+							try {
+								String s1 = tr1.getFirstElementChild().asText().replaceAll("元", "").replaceAll(" ", "")
+										.split("：")[1];
+								zf.setPrice(Double.valueOf(s1));
+							} catch (Exception e) {
+							}
+							try {
+								String s2 = tr1.getLastElementChild().asText().replaceAll(" ", "").split("：")[1];
+								zf.setEndDate(DateUtil.convertDate2(s2));
+							} catch (Exception e) {
+							}
+							DomElement tr2 = tr.next();
 
-						try {
-							zf.setNum(tr2.getFirstElementChild().asText().replaceAll(" ", "").split("：")[1]);
-						} catch (Exception e) {
-						}
-						DomElement tr3 = tr.next();
-						try {
-							zf.setAmt(tr3.getFirstElementChild().asText().replaceAll(" ", "").split("：")[1]);
-						} catch (Exception e) {
-						}
-						try {
-							String s4 = tr3.getLastElementChild().asText().replaceAll(" ", "").split("：")[1];
-							zf.setZjhDate(DateUtil.convertDate2(s4));
-						} catch (Exception e) {
-							// e.printStackTrace();
-						}
-						tr.next();
-						tr.next();
-						DomElement tr6 = tr.next();
-						String s5 = tr6.getLastElementChild().asText().replaceAll(" ", "").split("：")[1];
-						zf.setStartDate(DateUtil.convertDate2(s5));
-						zf.setId(zf.getCode() + zf.getStartDate());
-						zf.setUpdate(sysdate);
+							try {
+								zf.setNum(tr2.getFirstElementChild().asText().replaceAll(" ", "").split("：")[1]);
+							} catch (Exception e) {
+							}
+							DomElement tr3 = tr.next();
+							try {
+								zf.setAmt(tr3.getFirstElementChild().asText().replaceAll(" ", "").split("：")[1]);
+							} catch (Exception e) {
+							}
+							try {
+								String s4 = tr3.getLastElementChild().asText().replaceAll(" ", "").split("：")[1];
+								zf.setZjhDate(DateUtil.convertDate2(s4));
+							} catch (Exception e) {
+								// e.printStackTrace();
+							}
+							tr.next();
+							tr.next();
+							DomElement tr6 = tr.next();
+							String s5 = tr6.getLastElementChild().asText().replaceAll(" ", "").split("：")[1];
+							zf.setStartDate(DateUtil.convertDate2(s5));
+							zf.setId(zf.getCode() + zf.getStartDate());
+							zf.setUpdate(sysdate);
 //						System.err.println("==================");
-//						System.err.println(zf.toString());
-						zengFaDao.save(zf);
+							log.info(zf.toString());
+							zengFaDao.save(zf);
+						} catch (Exception e) {
+//							log.error(h.asXml());
+//							e.fillInStackTrace();
+						}
 					}
 					if (getDetail) {
-						HtmlElement detail = body.getElementsByAttribute("table", "class", "m_table m_hl").get(0);// 最近一次明细
-						ZengFaDetail zfd = new ZengFaDetail();
-						zfd.setCode(code);
-						zfd.setDetails(detail.asText());
-						String d1 = detail.getFirstElementChild().getFirstElementChild().asText().replaceAll(" ", "")
-								.split("：")[1];
-						zfd.setDate(DateUtil.convertDate2(d1));
-						zfd.setId(zfd.getCode() + zfd.getDate());
-						zfd.setUpdate(sysdate);
+						try {
+							HtmlElement detail = body.getElementsByAttribute("table", "class", "m_table m_hl").get(0);// 最近一次明细
+							ZengFaDetail zfd = new ZengFaDetail();
+							zfd.setCode(code);
+							zfd.setDetails(detail.asText());
+							String d1 = detail.getFirstElementChild().getFirstElementChild().asText()
+									.replaceAll(" ", "").split("：")[1];
+							zfd.setDate(DateUtil.convertDate2(d1));
+							zfd.setId(zfd.getCode() + zfd.getDate());
+							zfd.setUpdate(sysdate);
 //						System.err.println("==================");
 //						System.err.println(zfd.toString());
-						zfdl.add(zfd);
+							zfdl.add(zfd);
+						} catch (Exception e) {
+						}
 					}
 
 				}
-
-				HtmlElement bonuslist = body.getElementsByAttribute("div", "id", "bonuslist").get(0);
-				Iterator<DomElement> it0 = bonuslist.getChildElements().iterator();
-				it0.next();// <h2>分红情况</h2>
-				DomElement de0 = it0.next().getFirstElementChild();
-				String fhstr = de0.asText().replaceAll(" ", "");
+				try {
+					HtmlElement bonuslist = body.getElementsByAttribute("div", "id", "bonuslist").get(0);
+					Iterator<DomElement> it0 = bonuslist.getChildElements().iterator();
+					it0.next();// <h2>分红情况</h2>
+					DomElement de0 = it0.next().getFirstElementChild();
+					String fhstr = de0.asText().replaceAll(" ", "");
 //				System.err.println("==================");
-				FenHong fh = new FenHong();
-				fh.setCode(code);
-				fh.setDetails(fhstr);
+					FenHong fh = new FenHong();
+					fh.setCode(code);
+					fh.setDetails(fhstr);
 //				System.err.println(fhstr);
-				Iterator<DomElement> it1 = de0.getChildElements().iterator();
-				fh.setTimes(Integer.valueOf(it1.next().asText()));
-				fh.setPrice(Double.valueOf(it1.next().asText()));
-				fh.setUpdate(sysdate);
+					Iterator<DomElement> it1 = de0.getChildElements().iterator();
+					fh.setTimes(Integer.valueOf(it1.next().asText()));
+					fh.setPrice(Double.valueOf(it1.next().asText()));
+					fh.setUpdate(sysdate);
 //				System.err.println(fh.toString());
-				fhl.add(fh);
+					fhl.add(fh);
 //				if(times2>0) {
 //					HtmlElement bonuslist = body.getElementsByAttribute("div", "id", "bonus_table").get(0);
 //				}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				return;
 
 			} catch (Exception e2) {
@@ -264,6 +275,6 @@ public class ThsBonusSpider {
 		List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
 		List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
 		List<FenHong> fhl = new LinkedList<FenHong>();
-		ts.dofetchBonusInner(DateUtil.getTodayIntYYYYMMDD(), "002405", zfdl, zfsl, fhl);
+		ts.dofetchBonusInner(DateUtil.getTodayIntYYYYMMDD(), "000001", zfdl, zfsl, fhl);
 	}
 }
