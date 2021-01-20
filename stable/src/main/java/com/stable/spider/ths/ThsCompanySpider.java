@@ -64,6 +64,7 @@ public class ThsCompanySpider {
 	private String f1 = "国有资产";
 	private String f2 = "教育部";
 	private String f3 = "财政局";
+	private String f4 = "财政部";
 
 	private void dofetchHolderInner() {
 		if (header == null) {
@@ -76,7 +77,7 @@ public class ThsCompanySpider {
 				String r = dofetchHolderInner(s.getCode());
 				if (r != null) {
 					s.setFinalControl(r.trim());
-					if (r.contains(f1) || r.contains(f2) || r.contains(f3)) {
+					if (r.contains(f1) || r.contains(f2) || r.contains(f3) || r.contains(f4)) {
 						s.setCompnayType(1);
 					} else {
 						s.setCompnayType(0);
