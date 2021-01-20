@@ -29,7 +29,6 @@ import com.stable.service.BuyBackService;
 import com.stable.service.ChipsService;
 import com.stable.service.CodePoolService;
 import com.stable.service.ConceptService;
-import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
 import com.stable.service.PlateService;
@@ -47,7 +46,6 @@ import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.CodePool;
-import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.DividendHistory;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
@@ -67,8 +65,6 @@ public class CodeModelService {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private CodePoolService codePoolService;
-	@Autowired
-	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private DividendService dividendService;
 	@Autowired
@@ -465,10 +461,6 @@ public class CodeModelService {
 		list.add(c);
 		c.setUpdateDate(treadeDate);
 		// 是否符合中线、1.市盈率和ttm在50以内
-		DaliyBasicInfo basic = daliyBasicHistroyService.getDaliyBasicInfoByDate(code, treadeDate);
-		c.setPb(basic.getPb());
-		c.setPe(basic.getPe());
-		c.setPe_ttm(basic.getPe_ttm());
 		c.setKbygjl(0);
 		c.setKbygys(0);
 //		if (yjkb != null) {

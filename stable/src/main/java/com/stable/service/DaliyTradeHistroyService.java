@@ -2,7 +2,6 @@ package com.stable.service;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -27,12 +26,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
+import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
 import com.stable.job.MyCallable;
-import com.stable.service.model.SortV6Service;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.spider.xq.XqDailyBaseSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
@@ -41,6 +41,7 @@ import com.stable.utils.TasksWorker2nd;
 import com.stable.utils.TasksWorker2ndRunnable;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
@@ -66,17 +67,16 @@ public class DaliyTradeHistroyService {
 	private EsTradeHistInfoDaliyDao esTradeHistInfoDaliyDao;
 	@Autowired
 	private EsTradeHistInfoDaliyNofqDao esTradeHistInfoDaliyNofqDao;
-
+	@Autowired
+	private EsDaliyBasicInfoDao esDaliyBasicInfoDao;
 	@Value("${python.file.market.hist.daily}")
 	private String pythonFileName;
 	@Autowired
 	private TradeCalService tradeCalService;
 	@Autowired
 	private PriceLifeService priceLifeService;
-//	@Autowired
-//	private UpModelLineService upLevel1Service;
 	@Autowired
-	private SortV6Service sortV6Service;
+	private XqDailyBaseSpider xqDailyBaseSpider;
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -106,18 +106,23 @@ public class DaliyTradeHistroyService {
 		priceLifeService.removePriceLifeCache(code);
 	}
 
-	private synchronized int spiderTodayDaliyTrade(String today) {
-		String preDate = tradeCalService.getPretradeDate(today);
+	public synchronized int spiderTodayDaliyTrade(boolean isJob, String today) {
+
 		try {
 			JSONArray array = tushareSpider.getStockDaliyTrade(null, today, null, null);
 			if (array == null || array.size() <= 0) {
 				log.warn("未获取到日交易记录,tushare,code={}");
+				if (tradeCalService.isOpen(Integer.valueOf(today))) {
+					WxPushUtil.pushSystem1("未获取到日交易记录,tushare,日期=" + today);
+				}
 				return 0;
 			}
 			log.info("获取到日交易记录条数={}", array.size());
+			String preDate = tradeCalService.getPretradeDate(today);
 			CountDownLatch cnt = new CountDownLatch(array.size());
 			List<TradeHistInfoDaliy> list = new LinkedList<TradeHistInfoDaliy>();
 			List<TradeHistInfoDaliyNofq> listNofq = new LinkedList<TradeHistInfoDaliyNofq>();
+			List<DaliyBasicInfo2> daliybasicList = new LinkedList<DaliyBasicInfo2>();
 			for (int i = 0; i < array.size(); i++) {
 				// 1.保存记录
 				TradeHistInfoDaliy d = new TradeHistInfoDaliy(array.getJSONArray(i));
@@ -127,6 +132,8 @@ public class DaliyTradeHistroyService {
 				list.add(d);
 				TradeHistInfoDaliyNofq nofq = new TradeHistInfoDaliyNofq(array.getJSONArray(i));
 				listNofq.add(nofq);
+				DaliyBasicInfo2 dalyb = new DaliyBasicInfo2(array.getJSONArray(i));
+				daliybasicList.add(dalyb);
 
 				// 2.是否需要更新缺失记录
 
@@ -168,9 +175,18 @@ public class DaliyTradeHistroyService {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			if (daliybasicList.size() > 0) {
+				esDaliyBasicInfoDao.saveAll(daliybasicList);
+				if (isJob) {
+					xqDailyBaseSpider.fetchAll(daliybasicList);
+				}
+			}
+			if (listNofq.size() > 0) {
+				esTradeHistInfoDaliyNofqDao.saveAll(listNofq);
+				return list.size();
+			}
 			if (list.size() > 0) {
 				esTradeHistInfoDaliyDao.saveAll(list);
-				esTradeHistInfoDaliyNofqDao.saveAll(listNofq);
 				return list.size();
 			}
 		} catch (Exception e) {
@@ -613,100 +629,7 @@ public class DaliyTradeHistroyService {
 			// ErrorLogFileUitl.writeError(e, "日K数据错误", "原始数据", line);
 			log.info("日K数据错误,原始数据:" + line);
 			return null;
-//			throw new RuntimeException(e);
 		}
-//		return null;
-	}
-
-	/**
-	 * 每日*定时任务-日交易
-	 */
-	public void jobSpiderAll() {
-		TasksWorker.getInstance().getService()
-				.submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.DAY) {
-					public Object mycall() {
-						String today = DateUtil.getTodayYYYYMMDD();
-						try {
-							log.info("每日*定时任务-日交易[started]");
-							// 全量获取历史记录（定时任务）-根据缓存是否需要重新获取，（除权得时候会重新获取）
-							// 每日更新-job
-							int date = Integer.valueOf(today);
-							if (tradeCalService.isOpen(date)) {
-								int succ = spiderTodayDaliyTrade(today);
-								if (succ > 0) {
-									WxPushUtil.pushSystem1("Seq2=>正常执行=>日K复权任务,succ=" + succ);
-								} else {
-									WxPushUtil.pushSystem1("异常执行Seq2=>日K复权任务,succ=0");
-								}
-							} else {
-								log.info("非工作日。");
-							}
-							log.info("每日*定时任务-日交易[end]");
-						} finally {
-							log.info("等待模型执行");
-							nextSortMode6(today);
-						}
-						return null;
-					}
-				});
-	}
-
-//	private void nextModelJob(String today) {
-//		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-//			@Override
-//			public Object call() throws Exception {
-//				try {
-//					try {
-//						TimeUnit.MINUTES.sleep(10);
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
-//					upLevel1Service.runJob(true, Integer.valueOf(today));
-//				} finally {
-//					// log.info("等待图片模型执行");
-//					// nextImageJob(today);
-//					log.info("等待 sort mode 执行");
-//					nextSortMode6(today);
-//				}
-//				return null;
-//			}
-//		});
-//	}
-
-	public void nextSortMode6(String today) {
-		TasksWorker.getInstance().getService().submit(new Callable<Object>() {
-			@Override
-			public Object call() throws Exception {
-				try {
-					TimeUnit.MINUTES.sleep(10);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				try {
-					sortV6Service.sortv6(Integer.valueOf(today));
-				} finally {
-					// log.info("等待图片模型执行");
-					// nextImageJob(today);
-					// log.info("等待code pool 执行");
-				}
-				return null;
-			}
-		});
-	}
-
-	/**
-	 * 每日*定时任务-日交易
-	 */
-	public void jobSpiderAll(String date) {
-		TasksWorker.getInstance().getService()
-				.submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.MANUAL) {
-					public Object mycall() {
-						log.info("每日*定时任务-日交易[started]");
-						spiderTodayDaliyTrade(date);
-						log.info("每日*定时任务-日交易[end]");
-						return null;
-					}
-				});
 	}
 
 	/**
@@ -721,11 +644,31 @@ public class DaliyTradeHistroyService {
 						for (StockBaseInfo s : list) {
 							redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + s.getCode());
 						}
-						spiderTodayDaliyTrade(date);
+						spiderTodayDaliyTrade(false, date);
 						log.info("手动*全部历史,日交易[end]");
 						return null;
 					}
 				});
+	}
+
+	public TradeHistInfoDaliyNofq queryLastNofq(String code, int date) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		if (date > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("date", date));
+		}
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+		try {
+			return esTradeHistInfoDaliyNofqDao.search(sq).getContent().get(0);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public TradeHistInfoDaliyNofq queryLastNofq(String code) {
+		return queryLastNofq(code, 0);
 	}
 
 }

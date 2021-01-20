@@ -17,6 +17,7 @@ import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo;
+import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.FinanceBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -49,14 +50,14 @@ public class XqDailyBaseSpider {
 		}
 	}
 
-	public void fetchAll(List<DaliyBasicInfo> list) {
+	public void fetchAll(List<DaliyBasicInfo2> list) {
 		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					List<DaliyBasicInfo> upd = new LinkedList<DaliyBasicInfo>();
-					for (DaliyBasicInfo b : list) {
+					List<DaliyBasicInfo2> upd = new LinkedList<DaliyBasicInfo2>();
+					for (DaliyBasicInfo2 b : list) {
 						if (dofetch(b)) {
 							upd.add(b);
 						}
@@ -87,11 +88,12 @@ public class XqDailyBaseSpider {
 		}).start();
 	}
 
-	private boolean dofetch(DaliyBasicInfo b) {
-		b.setXq_pe(-1);
-		b.setXq_pe_d(-1);
-		b.setXq_pe_ttm(-1);
-		b.setXq_pb(-1);
+	private boolean dofetch(DaliyBasicInfo2 b) {
+		b.setPe(-1);
+		b.setPed(-1);
+		b.setPeTtm(-1);
+		b.setPb(-1);
+		// TODO
 
 		String code = b.getCode();
 		int trytime = 0;

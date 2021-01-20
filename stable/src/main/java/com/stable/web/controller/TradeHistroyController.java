@@ -12,11 +12,8 @@ import com.stable.service.DaliyTradeHistroyService;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
-import lombok.extern.log4j.Log4j2;
-
 @RequestMapping("/trade/hist")
 @RestController
-@Log4j2
 public class TradeHistroyController {
 
 	@Autowired
@@ -33,41 +30,6 @@ public class TradeHistroyController {
 		try {
 			r.setStatus(JsonResult.OK);
 			r.setResult(daliyBasicHistroyService.queryListByCodeByWebPage(code, page));
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
-
-	/**
-	 * 根据code重新获取历史记录-每日指标
-	 */
-	@RequestMapping(value = "/dailybasic/fetch/{date}", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> dailybasicfetch(@PathVariable(value = "date") String tradeDate) {
-		JsonResult r = new JsonResult();
-		try {
-			daliyBasicHistroyService.jobSpiderAllDailyBasic(tradeDate);
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
-
-	/**
-	 * 根据code重新获取历史记录-每日指标
-	 */
-	@RequestMapping(value = "/dailybasic/fetchByCode", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> fetchByCode(String code, String startDate, String endDate) {
-		JsonResult r = new JsonResult();
-		try {
-			log.info("getStockDaliyBasic code:{},startDate:{},endDate:{}", code, startDate, endDate);
-			daliyBasicHistroyService.spiderStockDaliyBasic(code, startDate, endDate);
-			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -117,7 +79,7 @@ public class TradeHistroyController {
 	public ResponseEntity<JsonResult> fetchall(String date) {
 		JsonResult r = new JsonResult();
 		try {
-			tradeHistroyService.jobSpiderAll(date);
+			tradeHistroyService.spiderTodayDaliyTrade(false, date);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

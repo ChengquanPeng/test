@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.Concept;
-import com.stable.vo.bus.DaliyBasicInfo;
+import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.http.resp.PlateResp;
 
@@ -63,7 +63,7 @@ public class PlateService {
 				PlateResp r = new PlateResp();
 				List<FinanceBaseInfo> l2 = financeService.getLastFinaceReport4Quarter(code);
 				FinanceBaseInfo fbi = l2.get(0);
-				DaliyBasicInfo d = daliyBasicHistroyService.queryLastest(code);
+				DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code);
 				if (d != null && d.getSzl() > 0) {// 排除负数
 					log.info("{},szl:{}", d.getCode(), d.getSzl());
 					r.setT1(d.getSzl());

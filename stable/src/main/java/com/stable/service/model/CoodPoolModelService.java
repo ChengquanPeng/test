@@ -11,7 +11,6 @@ import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.ChipsService;
 import com.stable.service.CodePoolService;
-import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
@@ -54,8 +53,6 @@ public class CoodPoolModelService {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private ChipsService chipsService;
-	@Autowired
-	private DaliyBasicHistroyService daliyBasicHistroyService;
 
 	private String OK = "基本面OK,疑是建仓";
 
@@ -72,7 +69,6 @@ public class CoodPoolModelService {
 		StringBuffer msg3 = new StringBuffer();
 		StringBuffer msg4 = new StringBuffer();
 		if (list.size() > 0) {
-			LinePrice lp = new LinePrice(daliyTradeHistroyService);
 			for (CodePool m : list) {
 				if (m.getMonitor() == 1) {
 					m.setMonitor(0);// TODO
@@ -86,7 +82,7 @@ public class CoodPoolModelService {
 				boolean isBigBoss = false;
 				if (m.isIsok()) {
 					// 1年整幅未超过80%
-					if (lp.priceCheckForMid(code, m.getUpdateDate(), chkdouble)) {
+					if (LinePrice.priceCheckForMid(daliyTradeHistroyService, code, m.getUpdateDate(), chkdouble)) {
 						isBigBoss = true;
 					}
 				}
@@ -114,10 +110,10 @@ public class CoodPoolModelService {
 				} else {
 					m.setInmid(0);
 				}
-				zfmoni(m, lp, tradeDate, msg4);
+				zfmoni(m, tradeDate, msg4);
 				// 1大牛，2中线，3人工，4短线 // 箱体新高（3个月新高，短期有8%的涨幅）
-				//chk(m, code, tradeDate, msg3);TODO
-				//大牛需要涨停
+				// chk(m, code, tradeDate, msg3);TODO
+				// 大牛需要涨停
 
 			}
 			codePoolService.saveAll(list);
@@ -143,7 +139,7 @@ public class CoodPoolModelService {
 		}
 	}
 
-	private void zfmoni(CodePool m, LinePrice lp, int tradeDate, StringBuffer msg4) {
+	private void zfmoni(CodePool m, int tradeDate, StringBuffer msg4) {
 		if (m.getZfStatus() == 2) {
 			m.setInzf(1);
 			m.setZfself(0);
@@ -165,13 +161,13 @@ public class CoodPoolModelService {
 			if (zf.getPrice() > 0) {
 				// 价格对比,增发价没超60%
 				double chkline = CurrencyUitl.topPriceN(zf.getPrice(), 1.5);
-				double close = daliyBasicHistroyService.queryLastest(code).getClose();
+				double close = daliyTradeHistroyService.queryLastNofq(code).getClosed();
 				if (close <= chkline) {
 					preCondi = true;
 				}
 			} else {
 				// 没有价格对比就看一年涨幅
-				if (lp.priceCheckForMid(code, tradeDate, chkdouble)) {
+				if (LinePrice.priceCheckForMid(daliyTradeHistroyService, code, tradeDate, chkdouble)) {
 					preCondi = true;
 				}
 			}

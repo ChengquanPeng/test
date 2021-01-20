@@ -343,7 +343,7 @@ public class FinanceService {
 		return null;
 	}
 
-	public void jobSpiderFirstFinaceHistoryInfo() {
+	public void jobSpiderKuaiYuBao() {
 		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.FINACE_FRIST, RunCycleEnum.DAY) {
 			public Object mycall() {
 				log.info("同步业绩预报和快报[started]");
