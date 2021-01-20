@@ -2,6 +2,8 @@ package com.stable.job;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +30,16 @@ public class DaliyJobLine {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private TradeCalService tradeCalService;
+	
+	@PostConstruct
+	private void test() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				start();
+			}
+		}).start();
+	}
 
 	public void start() {
 		log.info("DaliyJobLine start");
