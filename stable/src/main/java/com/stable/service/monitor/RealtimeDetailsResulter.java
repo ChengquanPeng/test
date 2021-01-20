@@ -1,8 +1,6 @@
 package com.stable.service.monitor;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -41,12 +39,6 @@ public class RealtimeDetailsResulter implements Runnable {
 				for (String key : msgs.keySet()) {
 					list.add(msgs.get(key));
 				}
-				Collections.sort(list, new Comparator<RealtimeMsg>() {
-					public int compare(RealtimeMsg o1, RealtimeMsg o2) {
-						return o2.getBaseScore() - o1.getBaseScore();
-					}
-				});
-
 				StringBuffer sb = new StringBuffer("风险第一！！！>>");
 				sb.append(BR);
 				int index = 1;

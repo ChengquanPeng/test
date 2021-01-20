@@ -5,10 +5,10 @@ import java.util.Date;
 import com.stable.enums.CodeModeType;
 import com.stable.spider.sina.SinaRealTime;
 import com.stable.spider.sina.SinaRealtimeUitl;
-import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
+import com.stable.utils.MonitoringUitl;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.bus.CodePool;
+import com.stable.vo.bus.MonitorPool;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -22,8 +22,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private String codeName;
 	private boolean isRunning = true;
 	private String today = DateUtil.getTodayYYYYMMDD();
-	RealtimeDetailsResulter resulter;
-	CodePool cp;
+	private RealtimeDetailsResulter resulter;
+	private MonitorPool cp;
 	private boolean waitSend = true;
 	private boolean chkCodeClosed = false;
 
@@ -31,12 +31,11 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		isRunning = false;
 	}
 
-	public int init(String code, CodePool cp, RealtimeDetailsResulter resulter, String codeName) {
+	public int init(String code, MonitorPool cp, RealtimeDetailsResulter resulter, String codeName) {
 		this.code = code;
 		this.codeName = codeName;
 		this.resulter = resulter;
 		this.cp = cp;
-
 		SinaRealTime srt = SinaRealtimeUitl.get(code);
 		if (srt.getOpen() == 0.0) {
 			log.info("{} {} SINA 今日疑似停牌或者可能没有集合竞价", code, codeName);
@@ -47,6 +46,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	}
 
 	public void run() {
+		String msg = CodeModeType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
 		if (chkCodeClosed) {
 			try {
 				Thread.sleep(TEN_MIN);
@@ -55,8 +55,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			}
 			SinaRealTime srt = SinaRealtimeUitl.get(code);
 			if (srt.getOpen() == 0.0) {
-				log.info("{} {} SINA 今日停牌", code, codeName);
-				WxPushUtil.pushSystem1(code + " " + codeName + "今日停牌");
+				log.info("{} {} SINA 今日停牌,{}", code, codeName, msg);
+				WxPushUtil.pushSystem1(code + " " + codeName + "今日停牌:" + msg);
 				return;
 			}
 		}
@@ -70,8 +70,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		RealtimeMsg rm = new RealtimeMsg();
 		rm.setCode(code);
 		rm.setCodeName(codeName);
-		rm.setBaseScore(cp.getScore());
-		rm.setModeName(CodeModeType.getCodeName(cp.getMonitor()) + cp.getRemark());
+		rm.setModeName(msg);
 		while (isRunning) {
 			try {
 				long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
@@ -85,16 +84,15 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				}
 
 				SinaRealTime srt = SinaRealtimeUitl.get(code);
-				double per = CurrencyUitl.cutProfit(srt.getYesterday(), srt.getNow());
-				if (per >= 3.5) {
+				boolean isOk = MonitoringUitl.isOkForRt(cp, srt);
+				if (isOk) {
 					rm.tiggerMessage();
 					resulter.addBuyMessage(code, rm);
 					if (waitSend) {
-						WxPushUtil.pushSystem1(code + " " + codeName + " " + rm.getModeName() + " 涨幅超过3.5%");
+						WxPushUtil.pushSystem1(code + " " + codeName + " " + rm.getModeName());
 						waitSend = false;
 					}
 				}
-
 				if (now > d1450) {
 					WAIT_MIN = ONE_MIN;
 				}

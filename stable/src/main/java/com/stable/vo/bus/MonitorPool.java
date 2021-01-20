@@ -37,4 +37,27 @@ public class MonitorPool {
 	private double upTodayChange = 0;// 高于某涨幅
 	@Field(type = FieldType.Integer)
 	private double downTodayChange = 0;// 低于某涨幅
+
+	public String getMsg() {
+		StringBuffer sb = new StringBuffer();
+		if (realtime == 1) {
+			sb.append("在线监听,");
+		}
+		if (offline == 1) {
+			sb.append("离线监听,");
+		}
+		if (upPrice > 0) {
+			sb.append("股价上涨到" + upPrice + ",");
+		}
+		if (upTodayChange > 0) {
+			sb.append("涨幅" + upTodayChange + ",");
+		}
+		if (downPrice > 0) {
+			sb.append("股价下跌到" + downPrice + ",");
+		}
+		if (downTodayChange > 0) {
+			sb.append("跌幅" + downTodayChange + ",");
+		}
+		return sb.toString();
+	}
 }

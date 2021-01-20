@@ -9,12 +9,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.stable.service.CodePoolService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.bus.CodePool;
+import com.stable.vo.bus.MonitorPool;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -23,7 +22,7 @@ import lombok.extern.log4j.Log4j2;
 public class RealtimeMonitoringService {
 
 	@Autowired
-	private CodePoolService codePoolService;
+	private MonitorPoolService monitorPoolService;
 	@Autowired
 	private TradeCalService tradeCalService;
 	@Autowired
@@ -48,9 +47,8 @@ public class RealtimeMonitoringService {
 		}
 
 		try {
-			// 所有买卖Code List
-			// 获取买入监听列表
-			List<CodePool> allCode = codePoolService.getPoolListForMonitor();
+			// 获取监听列表
+			List<MonitorPool> allCode = monitorPoolService.getPoolListForMonitor(1, 0);
 
 			List<RealtimeDetailsAnalyzer> list = new LinkedList<RealtimeDetailsAnalyzer>();
 			RealtimeDetailsResulter resulter = new RealtimeDetailsResulter();
@@ -59,7 +57,7 @@ public class RealtimeMonitoringService {
 			if (allCode.size() > 0) {
 				// 启动监听线程
 				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
-				for (CodePool cp : allCode) {
+				for (MonitorPool cp : allCode) {
 					String code = cp.getCode();
 					log.info(code);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();

@@ -158,7 +158,7 @@ public class MonitorPoolService {
 	/**
 	 * 监听列表-实时
 	 */
-	public List<MonitorPool> getPoolListForMonitor(int realtime) {
+	public List<MonitorPool> getPoolListForMonitor(int realtime, int offline) {
 		int pageNum = EsQueryPageUtil.queryPage9999.getPageNum();
 		int size = EsQueryPageUtil.queryPage9999.getPageSize();
 		log.info("queryPage pageNum={},size={}", pageNum, size);
@@ -166,8 +166,12 @@ public class MonitorPoolService {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		// 监听列表 should OR 或 查询
 		bqb.must(QueryBuilders.rangeQuery("monitor").gt(0));
-		bqb.must(QueryBuilders.matchPhraseQuery("realtime", 1));
-
+		if (realtime > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("realtime", 1));
+		}
+		if (offline > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("offline", 1));
+		}
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
 
