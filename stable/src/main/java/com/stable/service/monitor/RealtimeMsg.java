@@ -1,4 +1,4 @@
-package com.stable.service.realtime;
+package com.stable.service.monitor;
 
 import org.apache.commons.lang3.StringUtils;
 

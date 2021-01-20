@@ -125,4 +125,7 @@ public class CodeBaseModel extends EsBase {
 
 	@Field(type = FieldType.Integer)
 	private int zfStatus;// 增发状态（近2年）: 0无增发，1增发中，2增发完成，3，增发终止
+
+	@Field(type = FieldType.Integer)
+	private int monitor;// 监听
 }

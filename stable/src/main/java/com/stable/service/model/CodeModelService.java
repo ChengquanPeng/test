@@ -188,7 +188,7 @@ public class CodeModelService {
 			fa.putJidu1(fbi);
 		}
 		FinanceBaseInfo fbi = fa.getCurrJidu();
-		CodeBaseModel newOne = new CodeBaseModel();
+		CodeBaseModel newOne = getLastOneByCode(code);
 		newOne.setCode(code);
 		newOne.setDate(treadeDate);
 		newOne.setCurrYear(fbi.getYear());
@@ -540,7 +540,9 @@ public class CodeModelService {
 		if (page != null && !page.isEmpty()) {
 			return page.getContent().get(0);
 		}
-		return null;
+		CodeBaseModel cbm = new CodeBaseModel();
+		cbm.setCode(code);
+		return cbm;
 	}
 
 	public Map<String, CodeBaseModel> getALLForMap() {

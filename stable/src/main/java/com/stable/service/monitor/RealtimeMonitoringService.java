@@ -1,4 +1,4 @@
-package com.stable.service.realtime;
+package com.stable.service.monitor;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -20,7 +20,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
-public class MonitoringService {
+public class RealtimeMonitoringService {
 
 	@Autowired
 	private CodePoolService codePoolService;
