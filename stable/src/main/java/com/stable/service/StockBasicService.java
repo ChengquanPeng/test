@@ -20,7 +20,6 @@ import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.job.MyCallable;
-import com.stable.spider.ths.ThsPlateSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
@@ -43,8 +42,7 @@ public class StockBasicService {
 	private EsStockBaseInfoDao esStockBaseInfoDao;
 	@Autowired
 	private RedisUtil redisUtil;
-	@Autowired
-	private ThsPlateSpider thsPlateSpider;
+	
 	// @Autowired
 	// private DbStockBaseInfoDao dbStockBaseInfoDao;
 
@@ -130,8 +128,6 @@ public class StockBasicService {
 								if (removelist.size() > 0) {
 									esStockBaseInfoDao.saveAll(removelist);
 								}
-								// 更新同花顺
-								thsPlateSpider.fetchAll(false);
 							}
 							log.info("同步股票列表[end]");
 							LOCAL_ALL_ONLINE_LIST.clear();// 清空缓存
@@ -160,13 +156,15 @@ public class StockBasicService {
 				base.setThsMainBiz(old.getThsMainBiz());
 				base.setOldName(old.getOldName());
 				base.setWebSite(old.getWebSite());
+				base.setFinalControl(old.getFinalControl());
+				base.setCompnayType(old.getCompnayType());
 			}
 		}
 
 		redisUtil.set(base.getCode(), base);
 		// dbStockBaseInfoDao.saveOrUpdate(base);
 		CODE_NAME_MAP_LOCAL_HASH.put(base.getCode(), base.getName());
-		log.info("syn stock code list:{}", base);
+		log.info("syn stock code:{}", base);
 	}
 
 	public void loadAllLocalHash() {

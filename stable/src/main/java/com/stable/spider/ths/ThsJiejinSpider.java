@@ -1,8 +1,6 @@
 package com.stable.spider.ths;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +24,10 @@ import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * 同花顺解禁
+ *
+ */
 @Component
 @Log4j2
 public class ThsJiejinSpider {
@@ -39,58 +41,50 @@ public class ThsJiejinSpider {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private JiejinDao jiejinDao;
-	@Autowired
-	private ThsBonusSpider thsBonusSpider;
 
 	private String host = "http://basic.10jqka.com.cn";
 	private Map<String, String> header;
 
 	public void byJob() {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Date());
-		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
-			log.info("非周六");
-			return;
-		}
-		log.info("周六");
 		dofetch();
-
 	}
 
-	public void dofetch() {
+	public void byWeb() {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				try {
-					new Exception().printStackTrace();
-					WxPushUtil.pushSystem1("同花顺-抓包解禁 周六调用？");
-					if (header == null) {
-						header = new HashMap<String, String>();
-						header.put("Referer", host);
-						header.put("Upgrade-Insecure-Requests", "1");
-					}
-					int sysdate = DateUtil.getTodayIntYYYYMMDD();
-					List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
-					List<Jiejin> savelist = new ArrayList<Jiejin>();
-					for (StockBaseInfo b : list) {
-						dofetch(b.getCode(), savelist, sysdate);
-						if (savelist.size() > 100) {
-							jiejinDao.saveAll(savelist);
-							savelist = new ArrayList<Jiejin>();
-						}
-					}
-					if (savelist.size() > 0) {
-						jiejinDao.saveAll(savelist);
-					}
-					log.info("同花顺-抓包解禁-完成");
-				} catch (Exception e) {
-					e.printStackTrace();
-					WxPushUtil.pushSystem1("同花顺-抓包解禁出错-抓包出错");
-				} finally {
-					thsBonusSpider.dofetchBonus();
-				}
+				dofetch();
 			}
 		}).start();
+	}
+
+	private void dofetch() {
+		try {
+			new Exception().printStackTrace();
+			WxPushUtil.pushSystem1("同花顺-抓包解禁 周六调用？");
+			if (header == null) {
+				header = new HashMap<String, String>();
+				header.put("Referer", host);
+				header.put("Upgrade-Insecure-Requests", "1");
+			}
+			int sysdate = DateUtil.getTodayIntYYYYMMDD();
+			List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+			List<Jiejin> savelist = new ArrayList<Jiejin>();
+			for (StockBaseInfo b : list) {
+				dofetch(b.getCode(), savelist, sysdate);
+				if (savelist.size() > 100) {
+					jiejinDao.saveAll(savelist);
+					savelist = new ArrayList<Jiejin>();
+				}
+			}
+			if (savelist.size() > 0) {
+				jiejinDao.saveAll(savelist);
+			}
+			log.info("同花顺-抓包解禁-完成");
+		} catch (Exception e) {
+			e.printStackTrace();
+			WxPushUtil.pushSystem1("同花顺-抓包解禁出错-抓包出错");
+		}
 	}
 
 	private void dofetch(String code, List<Jiejin> savelist, int sysdate) {

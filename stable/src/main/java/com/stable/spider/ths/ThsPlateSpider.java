@@ -65,10 +65,10 @@ public class ThsPlateSpider {
 						}
 					}
 					if (upd.size() > 0) {
-						esStockBaseInfoDao.saveAll(list);
+						esStockBaseInfoDao.saveAll(upd);
 					}
 					if (needUpd > 0 && needUpd != upd.size()) {
-						WxPushUtil.pushSystem1("同花顺-行业，亮点，主营-抓包不完整，需要更新数={" + needUpd + "},实际更新数={" + upd.size() + "}");
+						WxPushUtil.pushSystem1("同花顺-亮点，主营-抓包不完整，需要更新数={" + needUpd + "},实际更新数={" + upd.size() + "}");
 					}
 					log.info("同花顺-亮点，主营,东方财富曾用名，网站完成");
 				} catch (Exception e) {

@@ -100,7 +100,7 @@ public class ChipsController {
 	public ResponseEntity<JsonResult> fetchZengfa() {
 		JsonResult r = new JsonResult();
 		try {
-			thsBonusSpider.dofetchBonus();
+			thsBonusSpider.byWeb();
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
@@ -136,7 +136,7 @@ public class ChipsController {
 	public ResponseEntity<JsonResult> fetchJiejinThs() {
 		JsonResult r = new JsonResult();
 		try {
-			thsJiejinSpider.dofetch();
+			thsJiejinSpider.byWeb();
 			r.setResult(JsonResult.OK);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {

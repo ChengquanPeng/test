@@ -68,47 +68,51 @@ public class ThsBonusSpider {
 //	<tr><td>4、由发行审核委员会审核，报证监会审核；</td></tr>
 //	<tr><td>5、上市公司自证监会审核之日起6个月内发行股票。</td></tr>
 
-	public void dofetchBonus() {
+	public void byJob() {
+		dofetchInner();
+	}
+
+	public void byWeb() {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				try {
-					dofetchInner();
-				} catch (Exception e) {
-					e.printStackTrace();
-					ErrorLogFileUitl.writeError(e, "同花顺分红&增发异常运行异常..", "", "");
-					WxPushUtil.pushSystem1("同花顺分红&增发异常运行异常");
-				}
+				dofetchInner();
 			}
 		}).start();
 	}
 
 	private void dofetchInner() {
-		if (header == null) {
-			header = new HashMap<String, String>();
-		}
-		int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
-		List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
-		List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
-		List<FenHong> fhl = new LinkedList<FenHong>();
-		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
-		for (StockBaseInfo s : codelist) {
-			try {
-				dofetchBonusInner(date, s.getCode(), zfdl, zfsl, fhl);
-			} catch (Exception e) {
-				ErrorLogFileUitl.writeError(e, "", "", "");
+		try {
+			if (header == null) {
+				header = new HashMap<String, String>();
 			}
+			int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
+			List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
+			List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
+			List<FenHong> fhl = new LinkedList<FenHong>();
+			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
+			for (StockBaseInfo s : codelist) {
+				try {
+					dofetchBonusInner(date, s.getCode(), zfdl, zfsl, fhl);
+				} catch (Exception e) {
+					ErrorLogFileUitl.writeError(e, "", "", "");
+				}
+			}
+			if (zfdl.size() > 0) {
+				zengFaDetailDao.saveAll(zfdl);
+			}
+			if (zfsl.size() > 0) {
+				zengFaSummaryDao.saveAll(zfsl);
+			}
+			if (fhl.size() > 0) {
+				fenHongDao.saveAll(fhl);
+			}
+			WxPushUtil.pushSystem1(date + " 分红&增发抓包同花顺已完成");
+		} catch (Exception e) {
+			e.printStackTrace();
+			ErrorLogFileUitl.writeError(e, "同花顺分红&增发异常运行异常..", "", "");
+			WxPushUtil.pushSystem1("同花顺分红&增发异常运行异常");
 		}
-		if (zfdl.size() > 0) {
-			zengFaDetailDao.saveAll(zfdl);
-		}
-		if (zfsl.size() > 0) {
-			zengFaSummaryDao.saveAll(zfsl);
-		}
-		if (fhl.size() > 0) {
-			fenHongDao.saveAll(fhl);
-		}
-		WxPushUtil.pushSystem1(date + " 分红&增发抓包同花顺已完成");
 	}
 
 	private void dofetchBonusInner(int sysdate, String code, List<ZengFaDetail> zfdl, List<ZengFaSummary> zfsl,

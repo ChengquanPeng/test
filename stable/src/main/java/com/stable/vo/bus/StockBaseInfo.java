@@ -77,7 +77,10 @@ public class StockBaseInfo extends EsBase {
 	private String oldName;// 曾用名
 	@Field(type = FieldType.Text)
 	private String webSite;// 网站
-	
+	@Field(type = FieldType.Text)
+	private String finalControl;// 最终控制人
+	@Field(type = FieldType.Text)
+	private int compnayType;// 公司性质：0普通，1国企
 
 	public StockBaseInfo() {
 

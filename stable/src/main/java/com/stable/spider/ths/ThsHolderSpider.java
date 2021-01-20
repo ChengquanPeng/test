@@ -51,10 +51,7 @@ public class ThsHolderSpider {
 	private Map<String, String> header;
 
 	public void dofetchHolder() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
+		try {
 //					Calendar cal = Calendar.getInstance();
 //					cal.setTime(new Date());
 //					if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
@@ -65,19 +62,17 @@ public class ThsHolderSpider {
 //						log.info(" 非周六");
 //					}
 //
-					int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
-					if (tradeCalService.isOpen(date)) {
-						dofetchHolderInner(date);
-					} else {
-						log.info("{} 非交易日", date);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					ErrorLogFileUitl.writeError(e, "同花顺股东人数异常运行异常..", "", "");
-					WxPushUtil.pushSystem1("同花顺股东人数异常运行异常");
-				}
+			int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
+			if (tradeCalService.isOpen(date)) {
+				dofetchHolderInner(date);
+			} else {
+				log.info("{} 非交易日", date);
 			}
-		}).start();
+		} catch (Exception e) {
+			e.printStackTrace();
+			ErrorLogFileUitl.writeError(e, "同花顺股东人数异常运行异常..", "", "");
+			WxPushUtil.pushSystem1("同花顺股东人数异常运行异常");
+		}
 	}
 
 	private void dofetchHolderInner(int date) {
