@@ -16,7 +16,6 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.bus.DaliyBasicInfo;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.FinanceBaseInfo;
 
@@ -37,6 +36,10 @@ public class XqDailyBaseSpider {
 	private String F2 = "市盈率(动)";
 	private String F3 = "市盈率(TTM)";
 	private String F4 = "市净率";
+	private String F5 = "流通值";
+	private String F6 = "总市值";
+	private String F7 = "总股本";
+	private String F8 = "流通股";
 	// https://xueqiu.com/S/SH600109
 	// https://xueqiu.com/S/SZ000001
 	private String BASE_URL = "https://xueqiu.com/S/%s";
@@ -64,12 +67,12 @@ public class XqDailyBaseSpider {
 						// 市赚率
 						// 市盈率/净资产收益率（PE/ROE）
 						FinanceBaseInfo fbi = financeService.getLastFinaceReport(b.getCode());
-						if (fbi != null && fbi.getJqjzcsyl() != 0.0 && b.getXq_pe_ttm() > 0) {
+						if (fbi != null && fbi.getJqjzcsyl() != 0.0 && b.getPeTtm() > 0) {
 							if (fbi.getSyldjd() != 0) {
-								b.setSzl(CurrencyUitl.roundHalfUp(b.getXq_pe_ttm() / fbi.getSyldjd()));
+								b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / fbi.getSyldjd()));
 							} else {
 								double syldjd = CurrencyUitl.roundHalfUp(fbi.getJqjzcsyl() / (double) fbi.getQuarter());
-								b.setSzl(CurrencyUitl.roundHalfUp(b.getXq_pe_ttm() / syldjd));
+								b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / syldjd));
 							}
 						}
 					}
@@ -117,29 +120,52 @@ public class XqDailyBaseSpider {
 						if (s.contains(F1)) {// "市盈率(静)";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
-								b.setXq_pe(Double.valueOf(s.split(SPLIT)[1]));
+								b.setPe(Double.valueOf(s.split(SPLIT)[1]));
 							} catch (Exception e) {
 							}
 						} else if (s.contains(F2)) {// "市盈率(动)";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
-								b.setXq_pe_d(Double.valueOf(s.split(SPLIT)[1]));
+								b.setPed(Double.valueOf(s.split(SPLIT)[1]));
 							} catch (Exception e) {
 							}
 						} else if (s.contains(F3)) {// "市盈率(TTM)";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
-								b.setXq_pe_ttm(Double.valueOf(s.split(SPLIT)[1]));
+								b.setPeTtm(Double.valueOf(s.split(SPLIT)[1]));
 							} catch (Exception e) {
 							}
 						} else if (s.contains(F4)) {// "市净率";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
-								b.setXq_pb(Double.valueOf(s.split(SPLIT)[1]));
+								b.setPb(Double.valueOf(s.split(SPLIT)[1]));
+							} catch (Exception e) {
+							}
+						} else if (s.contains(F5)) {// "流通值";
+							// System.err.println(s.split(SPLIT)[1]);
+							try {
+								b.setCircMarketVal(Double.valueOf(s.split(SPLIT)[1].replace("亿", "")));
+							} catch (Exception e) {
+							}
+						} else if (s.contains(F6)) {// "总市值";
+							// System.err.println(s.split(SPLIT)[1]);
+							try {
+								b.setTotalMarketVal(Double.valueOf(s.split(SPLIT)[1].replace("亿", "")));
+							} catch (Exception e) {
+							}
+						} else if (s.contains(F7)) {// "总股本";
+							// System.err.println(s.split(SPLIT)[1]);
+							try {
+								b.setTotalShare(Double.valueOf(s.split(SPLIT)[1].replace("亿", "")));
+							} catch (Exception e) {
+							}
+						} else if (s.contains(F8)) {// "floatShare";
+							// System.err.println(s.split(SPLIT)[1]);
+							try {
+								b.setFloatShare(Double.valueOf(s.split(SPLIT)[1].replace("亿", "")));
 							} catch (Exception e) {
 							}
 						} else {
-
 						}
 					}
 				}
@@ -164,9 +190,11 @@ public class XqDailyBaseSpider {
 	}
 
 	public static void main(String[] args) {
-		// XqDailyBaseSpider x = new XqDailyBaseSpider();
-		// DaliyBasicInfo b = new DaliyBasicInfo();
-		// System.err.println(b.getPb());
-		System.err.println(100.0 / (-1));
+		 XqDailyBaseSpider x = new XqDailyBaseSpider();
+		 x.htmlunitSpider = new HtmlunitSpider();
+		 DaliyBasicInfo2 b = new DaliyBasicInfo2();
+		 b.setCode("300519");
+		 System.err.println(x.dofetch(b));
+		 System.err.println(b);
 	}
 }
