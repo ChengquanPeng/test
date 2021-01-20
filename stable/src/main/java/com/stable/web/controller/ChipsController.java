@@ -1,5 +1,6 @@
 package com.stable.web.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +11,7 @@ import com.stable.service.ChipsService;
 import com.stable.spider.eastmoney.EmJiejinSpider;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.spider.ths.ThsJiejinSpider;
+import com.stable.vo.bus.ZengFaDetail;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -63,17 +65,13 @@ public class ChipsController {
 	 * 最新的增发详情
 	 */
 	@RequestMapping(value = "/last/zengfadtl", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> lastZengfaDetail(String code) {
-		JsonResult r = new JsonResult();
-		try {
-			r.setResult(chipsService.getLastZengFaDetail(code));
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
+	public Object lastZengfaDetail(String code) {
+		String s = "未找到记录";
+		ZengFaDetail zf = chipsService.getLastZengFaDetail(code);
+		if (zf != null && StringUtils.isNotBlank(zf.getDetails())) {
+			s = zf.getDetails().replaceAll("\\n", "</br>");
 		}
-		return ResponseEntity.ok(r);
+		return s;
 	}
 
 	/**
