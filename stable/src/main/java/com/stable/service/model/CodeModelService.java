@@ -42,11 +42,11 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.BonusHist;
 import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.CodePool;
-import com.stable.vo.bus.DividendHistory;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
@@ -193,17 +193,10 @@ public class CodeModelService {
 		newOne.setCurrProfitTbzz(fbi.getGsjlrtbzz());
 
 		// 分红
-		DividendHistory dh = dividendService.getLastRecordByLteDate(code, oneYearAgo, treadeDate);
+		BonusHist dh = dividendService.getLastRecordByLteDate(code, oneYearAgo, treadeDate);
 		if (dh != null) {
-			if (dividendService.SS.equals(dh.getDiv_proc())) {
-				newOne.setLastDividendDate(dh.getEnd_date());// 分红年度
-			} else {
-				// 股东大会通过:不分配。。。
-				if (dh.getCash_div() > 0) {
-					newOne.setLastDividendDate(dh.getEnd_date());
-				} else {
-					dh = null;
-				}
+			if (dividendService.SS.equals(dh.getStatus())) {
+				newOne.setLastDividendDate(dh.getDividendDate());// 分红年度
 			}
 		}
 		// 回购

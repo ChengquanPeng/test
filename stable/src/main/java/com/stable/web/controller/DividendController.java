@@ -18,39 +18,6 @@ public class DividendController {
 	@Autowired
 	private DividendService dividendService;
 
-	/**
-	 * 根据code抓取分红信息
-	 */
-	@RequestMapping(value = "/fetchall", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> fetchall() {
-		JsonResult r = new JsonResult();
-		try {
-			dividendService.spiderDividendAll();
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
-
-	/**
-	 * 根据code抓取分红信息
-	 */
-	@RequestMapping(value = "/fetch/{code}", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> fetch(@PathVariable(value = "code") String code) {
-		JsonResult r = new JsonResult();
-		try {
-			dividendService.spiderDividendByCode(code);
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
 
 	/**
 	 * 获取分红信息

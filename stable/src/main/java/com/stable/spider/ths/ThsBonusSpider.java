@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.stable.es.dao.base.BonusHistDao;
 import com.stable.es.dao.base.FenHongDao;
 import com.stable.es.dao.base.ZengFaDao;
 import com.stable.es.dao.base.ZengFaDetailDao;
@@ -23,6 +24,7 @@ import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.BonusHist;
 import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.ZengFa;
@@ -53,6 +55,8 @@ public class ThsBonusSpider {
 	private ZengFaDetailDao zengFaDetailDao;
 	@Autowired
 	private ZengFaSummaryDao zengFaSummaryDao;
+	@Autowired
+	private BonusHistDao bonusHistDao;
 
 //1、先由董事会作出决议：方案
 //2、提请股东大会批准
@@ -90,10 +94,11 @@ public class ThsBonusSpider {
 			List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
 			List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
 			List<FenHong> fhl = new LinkedList<FenHong>();
+			List<BonusHist> bhl = new LinkedList<BonusHist>();
 			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 			for (StockBaseInfo s : codelist) {
 				try {
-					dofetchBonusInner(date, s.getCode(), zfdl, zfsl, fhl);
+					dofetchBonusInner(date, s.getCode(), zfdl, zfsl, fhl, bhl);
 				} catch (Exception e) {
 					ErrorLogFileUitl.writeError(e, "", "", "");
 				}
@@ -107,6 +112,9 @@ public class ThsBonusSpider {
 			if (fhl.size() > 0) {
 				fenHongDao.saveAll(fhl);
 			}
+			if (bhl.size() > 0) {
+				bonusHistDao.saveAll(bhl);
+			}
 			WxPushUtil.pushSystem1(date + " 分红&增发抓包同花顺已完成");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -116,7 +124,7 @@ public class ThsBonusSpider {
 	}
 
 	private void dofetchBonusInner(int sysdate, String code, List<ZengFaDetail> zfdl, List<ZengFaSummary> zfsl,
-			List<FenHong> fhl) {
+			List<FenHong> fhl, List<BonusHist> bhl) {
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(urlbase, code, System.currentTimeMillis());
@@ -127,6 +135,55 @@ public class ThsBonusSpider {
 				header.put("Referer", host + code + "/");
 				HtmlPage page = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url, header);
 				HtmlElement body = page.getBody();
+				// 分红历史
+				try {
+					HtmlElement bonuslist = body.getElementsByAttribute("table", "id", "bonus_table").get(0);
+					DomElement tbody = bonuslist.getLastElementChild();
+					Iterator<DomElement> trs = tbody.getChildElements().iterator();
+					while (trs.hasNext()) {
+						try {
+							Iterator<DomElement> tds = trs.next().getChildElements().iterator();
+							String rptYear = tds.next().asText();// 报告期
+							String rptDate = tds.next().asText();// 董事会日期
+							tds.next();// 股东大会预案公告日期
+							tds.next();// 实施公告日
+							String detail = tds.next().asText();// 分红方案说明
+							String bookDate = tds.next().asText();// A股股权登记日
+							String dividendDate = tds.next().asText();// A股除权除息日
+							String totalAmt = tds.next().asText();// 分红总额
+							String status = tds.next().asText();// 方案进度
+							if (!detail.contains("不分配不转增")) {
+								BonusHist bh = new BonusHist();
+								bh.setCode(code);
+								bh.setRptYear(rptYear.trim());
+								bh.setRptDate(DateUtil.convertDate2(rptDate.trim()));
+								bh.setDetail(detail.trim());
+								bh.setId(code + bh.getRptDate());
+								try {
+									bh.setBookDate(DateUtil.convertDate2(bookDate.trim()));
+								} catch (Exception e) {
+								}
+								try {
+									bh.setDividendDate(DateUtil.convertDate2(dividendDate.trim()));
+								} catch (Exception e) {
+								}
+								bh.setAmt(totalAmt);
+								bh.setStatus(status);
+								if (detail.contains("转") && detail.contains("股")) {
+									bh.setHasZhuanGu(1);
+								}
+								bh.setUpdate(sysdate);
+								//System.err.println(bh.toString());
+								bhl.add(bh);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				// System.err.println(body.asText());
 				HtmlElement additionprofile_bd = body.getElementsByAttribute("div", "id", "additionprofile_bd").get(0);
 				DomElement sum = additionprofile_bd.getFirstElementChild();
@@ -274,9 +331,6 @@ public class ThsBonusSpider {
 					fh.setUpdate(sysdate);
 //				System.err.println(fh.toString());
 					fhl.add(fh);
-//				if(times2>0) {
-//					HtmlElement bonuslist = body.getElementsByAttribute("div", "id", "bonus_table").get(0);
-//				}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -304,6 +358,7 @@ public class ThsBonusSpider {
 		List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
 		List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
 		List<FenHong> fhl = new LinkedList<FenHong>();
-		ts.dofetchBonusInner(DateUtil.getTodayIntYYYYMMDD(), "000001", zfdl, zfsl, fhl);
+		List<BonusHist> bhl = new LinkedList<BonusHist>();
+		ts.dofetchBonusInner(DateUtil.getTodayIntYYYYMMDD(), "002405", zfdl, zfsl, fhl, bhl);
 	}
 }
