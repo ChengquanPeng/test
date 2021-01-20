@@ -1,9 +1,7 @@
 package com.stable.service;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -19,7 +17,6 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsFinYjkbDao;
@@ -27,13 +24,11 @@ import com.stable.es.dao.base.EsFinYjygDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.eastmoney.EastmoneySpider;
-import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.FinanceBaseInfoTuhsare;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
@@ -61,8 +56,6 @@ public class FinanceService {
 	private EsFinYjkbDao esFinYjkbDao;
 	@Autowired
 	private EastmoneySpider eastmoneySpider;
-	@Autowired
-	private TushareSpider tushareSpider;
 
 	/**
 	 * 删除redis，从头开始获取
@@ -85,28 +78,6 @@ public class FinanceService {
 			if (datas == null || datas.size() <= 0) {
 				log.warn("未从东方财富抓取到Finane记录,code={}", code);
 				return false;
-			}
-
-			JSONArray array = tushareSpider.getIncome(TushareSpider.formatCode(code));
-			// System.err.println(array.toJSONString());
-			if (array != null && array.size() > 0) {
-				Map<Integer, Integer> tushareMap = new HashMap<Integer, Integer>();
-				for (int i = 0; i < array.size(); i++) {
-					JSONArray arr = array.getJSONArray(i);
-					FinanceBaseInfoTuhsare ft = new FinanceBaseInfoTuhsare();
-					ft.setValue(code, arr);
-					tushareMap.put(ft.getEnd_date(), ft.getAnn_date());
-				}
-
-				for (FinanceBaseInfo fi : datas) {
-					try {
-						fi.setAnnDate(tushareMap.get(fi.getDate()));
-					} catch (Exception e) {
-						log.warn("code={} date={} 未获取到公告日期", code, fi.getDate());
-					}
-				}
-			} else {
-				log.warn("从tushareSpider 未抓到Finane记录code={}", code);
 			}
 			log.warn("从东方财富抓取到Finane记录{}条,code={}", datas.size(), code);
 			list.addAll(datas);

@@ -7,12 +7,15 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONArray;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.service.FinanceService;
+import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
+import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
@@ -31,6 +34,8 @@ public class XqDailyBaseSpider {
 	private EsDaliyBasicInfoDao esDaliyBasicInfoDao;
 	@Autowired
 	private FinanceService financeService;
+	@Autowired
+	private TushareSpider tushareSpider;
 
 	private String F1 = "市盈率(静)";
 	private String F2 = "市盈率(动)";
@@ -59,9 +64,10 @@ public class XqDailyBaseSpider {
 			@Override
 			public void run() {
 				try {
+					String today = DateUtil.getTodayYYYYMMDD();
 					List<DaliyBasicInfo2> upd = new LinkedList<DaliyBasicInfo2>();
 					for (DaliyBasicInfo2 b : list) {
-						if (dofetch(b)) {
+						if (dofetch(b, today)) {
 							upd.add(b);
 						}
 						// 市赚率
@@ -91,7 +97,7 @@ public class XqDailyBaseSpider {
 		}).start();
 	}
 
-	private boolean dofetch(DaliyBasicInfo2 b) {
+	private boolean dofetch(DaliyBasicInfo2 b, String today) {
 		b.setPe(-1);
 		b.setPed(-1);
 		b.setPeTtm(-1);
@@ -183,18 +189,67 @@ public class XqDailyBaseSpider {
 			ThreadsUtil.sleepRandomSecBetween1And5(trytime);
 			if (trytime >= 10) {
 				fetched = true;
-				WxPushUtil.pushSystem1("雪球每日信息出错(pe,pe-ttm),code={}" + code + ",url=" + url);
+				WxPushUtil.pushSystem1("雪球每日信息出错(pe,pe-ttm),用tushare进行补充,code={}" + code + ",url=" + url);
+				try {
+					JSONArray array = tushareSpider
+							.getStockDaliyBasic(TushareSpider.formatCode(code), today, null, null)
+							.getJSONArray("items");
+					JSONArray arr = array.getJSONArray(0);
+
+					int i = 0;
+					arr.getString(i++);// ts_code
+					arr.getString(i++);
+					arr.getString(i++);
+					arr.getString(i++);
+					arr.getString(i++);
+					arr.getString(i++);
+
+					try {
+						b.setPe(Double.valueOf(arr.getString(i++)));
+					} catch (Exception e) {
+					}
+					try {
+						b.setPeTtm(Double.valueOf(arr.getString(i++)));
+					} catch (Exception e) {
+					}
+					try {
+						b.setPb(Double.valueOf(arr.getString(i++)));
+					} catch (Exception e) {
+					}
+					arr.getString(i++);
+					arr.getString(i++);
+					arr.getString(i++);
+					arr.getString(i++);
+					try {
+						b.setTotalShare(Double.valueOf(arr.getString(i++)));
+					} catch (Exception e) {
+					}
+					try {
+						b.setFloatShare(Double.valueOf(arr.getString(i++)));
+					} catch (Exception e) {
+					}
+					try {
+						b.setTotalMarketVal(Double.valueOf(arr.getString(i++)));
+					} catch (Exception e) {
+					}
+					try {
+						b.setCircMarketVal(Double.valueOf(arr.getString(i++)));
+					} catch (Exception e) {
+					}
+				} catch (Exception e) {
+				}
 			}
 		} while (!fetched);
 		return false;
+
 	}
 
 	public static void main(String[] args) {
-		 XqDailyBaseSpider x = new XqDailyBaseSpider();
-		 x.htmlunitSpider = new HtmlunitSpider();
-		 DaliyBasicInfo2 b = new DaliyBasicInfo2();
-		 b.setCode("300519");
-		 System.err.println(x.dofetch(b));
-		 System.err.println(b);
+		XqDailyBaseSpider x = new XqDailyBaseSpider();
+		x.htmlunitSpider = new HtmlunitSpider();
+		DaliyBasicInfo2 b = new DaliyBasicInfo2();
+		b.setCode("300519");
+		System.err.println(x.dofetch(b, DateUtil.getTodayYYYYMMDD()));
+		System.err.println(b);
 	}
 }

@@ -13,7 +13,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.utils.ThreadsUtil;
-import com.stable.vo.spi.req.DividendReq;
 import com.stable.vo.spi.req.StockDaliyReq;
 
 /**
@@ -90,7 +89,6 @@ public class TushareSpider {
 		return items;
 	}
 
-
 	/**
 	 * 日线行情
 	 * 
@@ -144,13 +142,10 @@ public class TushareSpider {
 	public JSONObject getStockDaliyBasic(String ts_code, String trade_date, String start_date, String end_date) {
 		try {
 			StockDaliyReq req = new StockDaliyReq();
-			if (StringUtils.isNotBlank(trade_date)) {
-				req.setTrade_date(trade_date);
-			} else {
-				req.setTs_code(ts_code);
-				req.setStart_date(start_date);
-				req.setEnd_date(end_date);
-			}
+			req.setTrade_date(trade_date);
+			req.setTs_code(ts_code);
+			req.setStart_date(start_date);
+			req.setEnd_date(end_date);
 
 			JSONObject json = new JSONObject();
 			json.put("api_name", "daily_basic");
@@ -193,32 +188,6 @@ public class TushareSpider {
 	}
 
 	/**
-	 * 分红
-	 * 
-	 * @param ts_code    ts代码
-	 * @param start_date 开始日期 (格式：YYYYMMDD)
-	 * @param end_date   结束日期 (格式：YYYYMMDD)
-	 * @return
-	 */
-	private final String dividend_fields = "ts_code,end_date,ann_date,div_proc,stk_div,stk_bo_rate,stk_co_rate,cash_div,cash_div_tax,record_date,ex_date,pay_date,div_listdate,imp_ann_date,base_date,base_share";
-
-	public JSONArray getDividend(DividendReq req) {
-		try {
-			JSONObject json = new JSONObject();
-			json.put("api_name", "dividend");
-			json.put("params", JSON.parse(JSON.toJSONString(req)));
-			json.put("fields", dividend_fields);
-
-			String result = post(json);
-			JSONObject datas = JSON.parseObject(result);
-			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
-			return items;
-		} finally {
-			ThreadsUtil.tuShareSleepRandom();
-		}
-	}
-
-	/**
 	 * 回购
 	 * 
 	 * @param ts_code    ts代码
@@ -243,55 +212,6 @@ public class TushareSpider {
 			JSONObject datas = JSON.parseObject(result);
 			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
 			return items;
-		} finally {
-			ThreadsUtil.tuShareSleepRandom();
-		}
-	}
-
-	/**
-	 * 利润表
-	 * 
-	 * @param ts_code    ts代码
-	 * @param start_date 开始日期 (格式：YYYYMMDD)
-	 * @param end_date   结束日期 (格式：YYYYMMDD)
-	 * @return 如果都不填，单次默认返回2000条
-	 */
-	private final String income_fields = "ts_code,ann_date,f_ann_date,end_date,report_type,comp_type,basic_eps,diluted_eps,total_revenue,revenue,int_income,oth_b_income,total_cogs,oper_cost,int_exp,comm_exp,biz_tax_surchg,sell_exp,admin_exp,fin_exp,assets_impair_loss,other_bus_cost,operate_profit,non_oper_income,non_oper_exp,nca_disploss,total_profit,income_tax,n_income,n_income_attr_p,minority_gain,oth_compr_income,t_compr_income,compr_inc_attr_p,compr_inc_attr_m_s,undist_profit,distable_profit";
-
-	public JSONArray getIncome(String ts_code) {
-		try {
-			JSONObject json = new JSONObject();
-			json.put("api_name", "income");
-			json.put("params", JSON.parse("{'ts_code':'" + ts_code + "'}"));
-			json.put("fields", income_fields);
-			String result = post(json);
-			JSONObject datas = JSON.parseObject(result);
-			return datas.getJSONObject("data").getJSONArray("items");
-		} finally {
-			ThreadsUtil.tuShareSleepRandom();
-		}
-	}
-
-	/**
-	 * 利润表
-	 * 
-	 * @param ts_code    ts代码
-	 * @param start_date 开始日期 (格式：YYYYMMDD)
-	 * @param end_date   结束日期 (格式：YYYYMMDD)
-	 * @return 如果都不填，单次默认返回2000条 //pct_chg 涨幅
-	 */
-	private final String index_daily_fields = "trade_date,pct_chg,vol,amount";
-
-	public synchronized JSONArray getIndexDaily(String ts_code, int startedDate) {
-		try {
-			JSONObject json = new JSONObject();
-			json.put("api_name", "index_daily");
-			json.put("params", JSON.parse("{'ts_code':'" + ts_code + "','start_date':'" + startedDate + "'}"));
-			// started 20150101
-			json.put("fields", index_daily_fields);
-			String result = post(json);
-			JSONObject datas = JSON.parseObject(result);
-			return datas.getJSONObject("data").getJSONArray("items");
 		} finally {
 			ThreadsUtil.tuShareSleepRandom();
 		}
