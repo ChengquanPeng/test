@@ -3,6 +3,7 @@ package com.stable.spider.eastmoney;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -24,6 +25,7 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.FinanceZcfzb;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
@@ -140,69 +142,90 @@ public class EastmoneySpider {
 		do {
 			trytime++;
 			try {
-				List<FinanceBaseInfo> list = new ArrayList<>();
+				List<FinanceBaseInfo> list = new ArrayList<FinanceBaseInfo>();
 				String url = String.format(financeUrl, type, formatCode2(code));
 				String result = HttpUtil.doGet2(url);
 				JSONArray objects = JSON.parseArray(result);
 				for (int i = 0; i < objects.size(); i++) {
 					JSONObject data = objects.getJSONObject(i);
 					String date = data.get("date").toString(); // 年报日期
-					FinanceBaseInfo newFinanceAnalysis = new FinanceBaseInfo(code,
-							Integer.valueOf(date.replaceAll("-", "")));
+					FinanceBaseInfo fbi = new FinanceBaseInfo(code, Integer.valueOf(date.replaceAll("-", "")));
 					try {
 						Double yyzsrtbzz = data.getDouble("yyzsrtbzz"); // 营业总收入同比增长(%)
-						newFinanceAnalysis.setYyzsrtbzz(yyzsrtbzz);
+						fbi.setYyzsrtbzz(yyzsrtbzz);
 					} catch (Exception e) {
 					}
 					try {
 						Double gsjlrtbzz = data.getDouble("gsjlrtbzz"); // 归属净利润同比增长(%)
-						newFinanceAnalysis.setGsjlrtbzz(gsjlrtbzz);
+						fbi.setGsjlrtbzz(gsjlrtbzz);
 					} catch (Exception e) {
 					}
 					try {
 						Double kfjlrtbzz = data.getDouble("kfjlrtbzz"); // 扣非净利润同比增长(%)
-						newFinanceAnalysis.setKfjlrtbzz(kfjlrtbzz);
+						fbi.setKfjlrtbzz(kfjlrtbzz);
 					} catch (Exception e) {
 					}
 
 					try {
 						Long yyzsr = CurrencyUitl.covertToLong(data.get("yyzsr").toString()); // 营业总收入
-						newFinanceAnalysis.setYyzsr(yyzsr);
+						fbi.setYyzsr(yyzsr);
 					} catch (Exception e) {
 					}
 					try {
 						Long gsjlr = CurrencyUitl.covertToLong(data.get("gsjlr").toString()); // 归属净利润
-						newFinanceAnalysis.setGsjlr(gsjlr);
+						fbi.setGsjlr(gsjlr);
 					} catch (Exception e) {
 					}
 					try {
 						Long kfjlr = CurrencyUitl.covertToLong(data.get("kfjlr").toString()); // 扣非净利润同比增长(%)
-						newFinanceAnalysis.setKfjlr(kfjlr);
+						fbi.setKfjlr(kfjlr);
 					} catch (Exception e) {
 					}
 					try {
 						Double jqjzcsyl = data.getDouble("jqjzcsyl"); // 加权净资产收益率(%)
-						newFinanceAnalysis.setJqjzcsyl(CurrencyUitl.roundHalfUp(jqjzcsyl));
-						newFinanceAnalysis.setSyldjd(
-								CurrencyUitl.roundHalfUp(jqjzcsyl / (double) newFinanceAnalysis.getQuarter()));
+						fbi.setJqjzcsyl(CurrencyUitl.roundHalfUp(jqjzcsyl));
+						fbi.setSyldjd(CurrencyUitl.roundHalfUp(jqjzcsyl / (double) fbi.getQuarter()));
 					} catch (Exception e) {
 					}
 					try {
 						Double tbjzcsyl = data.getDouble("tbjzcsyl"); // 摊薄净资产收益率(%)
-						newFinanceAnalysis.setTbjzcsyl(CurrencyUitl.roundHalfUp(tbjzcsyl));
+						fbi.setTbjzcsyl(CurrencyUitl.roundHalfUp(tbjzcsyl));
 					} catch (Exception e) {
 					}
 					try {
 						Double mgjyxjl = data.getDouble("mgjyxjl");
-						newFinanceAnalysis.setMgjyxjl(CurrencyUitl.roundHalfUp(mgjyxjl));
+						fbi.setMgjyxjl(CurrencyUitl.roundHalfUp(mgjyxjl));
 					} catch (Exception e) {
 					}
 					try {
 						Double mll = data.getDouble("mll");
-						newFinanceAnalysis.setMll(CurrencyUitl.roundHalfUp(mll));
+						fbi.setMll(CurrencyUitl.roundHalfUp(mll));
 					} catch (Exception e) {
 					}
-					list.add(newFinanceAnalysis);
+					list.add(fbi);
+				}
+				if (list.size() > 0) {
+					Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getZcfzb(code);
+					for (FinanceBaseInfo fbi : list) {
+						FinanceZcfzb fzb = m.get(fbi.getId());
+						if (fzb != null) {
+							fbi.setGoodWill(fzb.getGoodWill());
+							fbi.setSumAsset(fzb.getSumAsset());
+							fbi.setSumDebt(fzb.getSumDebt());
+							fbi.setNetAsset(fzb.getNetAsset());
+							fbi.setInventory(fzb.getInventory());
+							if (fbi.getNetAsset() > 0) {
+								if (fbi.getGoodWill() > 0) {
+									fbi.setGoodWillPercent(
+											CurrencyUitl.roundHalfUp(fbi.getGoodWill() / fbi.getNetAsset()));
+								}
+								if (fbi.getInventory() > 0) {
+									fbi.setInventoryPercent(
+											CurrencyUitl.roundHalfUp(fbi.getInventory() / fbi.getNetAsset()));
+								}
+							}
+						}
+					}
 				}
 				return list;
 			} catch (Exception e) {

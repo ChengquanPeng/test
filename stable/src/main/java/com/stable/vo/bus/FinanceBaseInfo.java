@@ -52,6 +52,21 @@ public class FinanceBaseInfo extends EsBase {
 	private double mgjyxjl; // 每股经营现金流
 	@Field(type = FieldType.Double)
 	private double mll; // 毛利率
+	//资产负债表
+	@Field(type = FieldType.Double)
+	private double goodWill; // 商誉
+	@Field(type = FieldType.Double)
+	private double sumAsset; // 总资产
+	@Field(type = FieldType.Double)
+	private double inventory; // 存货资产
+	@Field(type = FieldType.Double)
+	private double sumDebt; // 负债
+	@Field(type = FieldType.Double)
+	private double netAsset; // 净资产
+	@Field(type = FieldType.Double)
+	private double goodWillPercent; // 商誉净资产占比
+	@Field(type = FieldType.Double)
+	private double inventoryPercent; // 存货净资产占比
 
 	public FinanceBaseInfo() {
 

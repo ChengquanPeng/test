@@ -11,6 +11,7 @@ public class DateUtil {
 	public static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
 	public static final String YYYY_MM_DD = "yyyyMMdd";
 	public static final String YYYY_MM_DD2 = "yyyy-MM-dd";
+	public static final String YYYY_MM_DD3 = "yyyy/MM/dd HH:mm:ss";
 	public static final String YYYY_MM_DD3_HHMMSS = "yyyyMMdd HH:mm:ss";
 
 	public static String convertDate(String yyyyMMdd) {
@@ -35,7 +36,26 @@ public class DateUtil {
 			throw new RuntimeException("ParseException:yyyyMMdd:" + yyyyMMdd);
 		}
 	}
-
+	public static int convertDate3(String yyyyMMdd) {
+		try {
+			SimpleDateFormat format2 = new SimpleDateFormat(YYYY_MM_DD3);
+			Date d = format2.parse(yyyyMMdd);
+			SimpleDateFormat format1 = new SimpleDateFormat(YYYY_MM_DD);
+			return Integer.valueOf(format1.format(d));
+		} catch (ParseException e) {
+			//e.printStackTrace();
+			throw new RuntimeException("ParseException:yyyyMMdd:" + yyyyMMdd);
+		}
+	}
+	public static Date parseDate3(String yyyyMMdd3) {
+		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD3);
+		try {
+			return format.parse(yyyyMMdd3);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new RuntimeException("ParseException:yyyyMMdd:" + yyyyMMdd3);
+		}
+	}
 	public static String formatYYYYMMDD(Date date) {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
 		return format.format(date);
