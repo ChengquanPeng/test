@@ -30,6 +30,7 @@ import com.stable.service.model.CodeModelService;
 import com.stable.utils.DateUtil;
 import com.stable.vo.bus.CodeBaseModel;
 import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.http.resp.MonitorPoolResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -145,10 +146,23 @@ public class MonitorPoolService {
 	}
 
 	public Map<String, MonitorPool> getMonitorPoolMap() {
+		return getPoolMap(this.getMonitorPool());
+	}
+
+	public Map<String, MonitorPool> getPoolMap(List<MonitorPool> list) {
 		Map<String, MonitorPool> map = new HashMap<String, MonitorPool>();
-		List<MonitorPool> list = this.getMonitorPool();
 		if (list != null) {
 			for (MonitorPool c : list) {
+				map.put(c.getCode(), c);
+			}
+		}
+		return map;
+	}
+
+	public Map<String, TradeHistInfoDaliyNofq> getPoolMap2(List<TradeHistInfoDaliyNofq> list) {
+		Map<String, TradeHistInfoDaliyNofq> map = new HashMap<String, TradeHistInfoDaliyNofq>();
+		if (list != null) {
+			for (TradeHistInfoDaliyNofq c : list) {
 				map.put(c.getCode(), c);
 			}
 		}

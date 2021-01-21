@@ -2,6 +2,7 @@ package com.stable.service;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -24,16 +25,19 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.RedisConstant;
+import com.stable.enums.CodeModeType;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
 import com.stable.job.MyCallable;
+import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.spider.xq.XqDailyBaseSpider;
 import com.stable.utils.DateUtil;
+import com.stable.utils.MonitoringUitl;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
@@ -42,6 +46,7 @@ import com.stable.utils.TasksWorker2ndRunnable;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
+import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
@@ -77,6 +82,8 @@ public class DaliyTradeHistroyService {
 	private PriceLifeService priceLifeService;
 	@Autowired
 	private XqDailyBaseSpider xqDailyBaseSpider;
+	@Autowired
+	private MonitorPoolService monitorPoolService;
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -183,18 +190,38 @@ public class DaliyTradeHistroyService {
 			}
 			if (listNofq.size() > 0) {
 				esTradeHistInfoDaliyNofqDao.saveAll(listNofq);
-				return list.size();
 			}
 			if (list.size() > 0) {
 				esTradeHistInfoDaliyDao.saveAll(list);
-				return list.size();
 			}
+			// 离线价格监听
+			priceChk(listNofq);
+			return list.size();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			WxPushUtil.pushSystem1("前复权qfq获取异常，获取日期:" + today);
 		}
 		return 0;
 
+	}
+
+	// 离线价格监听
+	private void priceChk(List<TradeHistInfoDaliyNofq> listNofq) {
+		if (listNofq != null && listNofq.size() > 0) {
+			List<MonitorPool> list = monitorPoolService.getPoolListForMonitor(0, 1);
+			if (list != null) {
+				Map<String, TradeHistInfoDaliyNofq> map = monitorPoolService.getPoolMap2(listNofq);
+				for (MonitorPool mp : list) {
+					TradeHistInfoDaliyNofq d = map.get(mp.getCode());
+					if (d != null) {
+						if (MonitoringUitl.isOk(mp, d.getTodayChangeRate(), d.getHigh(), d.getLow())) {
+							String s = CodeModeType.getCodeName(mp.getMonitor()) + mp.getRemark() + " " + mp.getMsg();
+							WxPushUtil.pushSystem1(mp.getCode() + " " + s);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	// 路由，优先eastmoney

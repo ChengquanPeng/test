@@ -10,7 +10,7 @@ public class MonitoringUitl {
 		return isOk(cp, CurrencyUitl.cutProfit(srt.getYesterday(), srt.getNow()), srt.getHigh(), srt.getLow());
 	}
 
-	private static final boolean isOk(MonitorPool cp, double todayChange, double high, double low) {
+	public static final boolean isOk(MonitorPool cp, double todayChange, double high, double low) {
 		if (cp.getUpTodayChange() > 0 || cp.getDownTodayChange() > 0) {
 			if (cp.getUpTodayChange() > 0) {// 涨幅
 				if (todayChange >= cp.getUpTodayChange()) {
