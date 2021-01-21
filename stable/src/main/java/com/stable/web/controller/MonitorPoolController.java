@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.service.StockBasicService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.http.resp.MonitorPoolResp;
@@ -18,7 +19,8 @@ import com.stable.vo.spi.req.EsQueryPageReq;
 @RequestMapping("/monitorPool")
 @RestController
 public class MonitorPoolController {
-
+	@Autowired
+	private StockBasicService stockBasicService;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
 
@@ -52,10 +54,8 @@ public class MonitorPoolController {
 			} else {
 				MonitorPoolResp rk = new MonitorPoolResp();
 				rk.setCode(code);
-				rk.setCodeName("codeName");
-				rk.setRemark("code没找到噢");
-				rk.setOffline(1);
-				rk.setMonitor(2);
+				rk.setCodeName(stockBasicService.getCodeName(code));
+				rk.setRemark("");
 				r.setResult(rk);
 			}
 			r.setStatus(JsonResult.OK);

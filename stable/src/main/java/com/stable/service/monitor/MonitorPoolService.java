@@ -103,7 +103,7 @@ public class MonitorPoolService {
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
 		} else {
-			c.setRemark(remark + c.getUpdateDate());
+			c.setRemark(remark + " " + c.getUpdateDate());
 		}
 		monitorPoolDao.save(c);
 		updateBaseMoniStatus(code, c.getMonitor());

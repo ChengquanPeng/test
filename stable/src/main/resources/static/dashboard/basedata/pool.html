@@ -243,22 +243,15 @@ body {
 											title : '操作',
 											formatter : function(value, row,
 													index) {
-													return "<a href='#' onclick='dianwo1(\""
-															+ row.code
-															+ "\",\""
-															+ row.remark
-															+ "\")'>中线</a>"
-															+ "&nbsp;<a href='#' onclick='dianwo2(\""
-															+ row.code
-															+ "\",\""
-															+ row.remark
-															+ "\")'>人工</a>"
-															+ "&nbsp;<a href='#' onclick='dianwo3(\""
-															+ row.code
-															+ "\",\""
-															+ row.remark
-															+ "\")'>移除</a>";
-												}
+												return "<a target='_blank' href='/web/dashboard/basedata/addMonitor.html?code="
+												+ row.code
+												+ "'>更改监听</a>"
+												+ "&nbsp;&nbsp;<a href='#' onclick='dianwo3(\""
+												+ row.code
+												+ "\",\""
+												+ row.remark
+												+ "\")'>移除</a>";
+									}
 											}
 										],
 								responseHandler : function responseHandler(res) {
