@@ -60,41 +60,44 @@ public class XqDailyBaseSpider {
 
 	public void fetchAll(List<DaliyBasicInfo2> list) {
 		new Thread(new Runnable() {
-
-			@Override
 			public void run() {
-				try {
-					String today = DateUtil.getTodayYYYYMMDD();
-					List<DaliyBasicInfo2> upd = new LinkedList<DaliyBasicInfo2>();
-					for (DaliyBasicInfo2 b : list) {
-						if (dofetch(b, today)) {
-							upd.add(b);
-						}
-						// 市赚率
-						// 市盈率/净资产收益率（PE/ROE）
-						FinanceBaseInfo fbi = financeService.getLastFinaceReport(b.getCode());
-						if (fbi != null && fbi.getJqjzcsyl() != 0.0 && b.getPeTtm() > 0) {
-							if (fbi.getSyldjd() != 0) {
-								b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / fbi.getSyldjd()));
-							} else {
-								double syldjd = CurrencyUitl.roundHalfUp(fbi.getJqjzcsyl() / (double) fbi.getQuarter());
-								b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / syldjd));
-							}
-						}
-					}
-					if (upd.size() > 0) {
-						esDaliyBasicInfoDao.saveAll(list);
-					}
-					log.info("雪球=>每日指标-市盈率完成,期望数:{" + list.size() + "},实际成功数:" + upd.size());
-					if (upd.size() != list.size()) {
-						WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + list.size() + "},实际成功数:" + upd.size());
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包出错");
-				}
+				dofetchEntry(list);
 			}
 		}).start();
+	}
+
+	private synchronized void dofetchEntry(List<DaliyBasicInfo2> list) {
+		try {
+			String today = DateUtil.getTodayYYYYMMDD();
+			List<DaliyBasicInfo2> upd = new LinkedList<DaliyBasicInfo2>();
+			for (DaliyBasicInfo2 b : list) {
+				if (dofetch(b, today)) {
+					upd.add(b);
+				}
+				// 市赚率
+				// 市盈率/净资产收益率（PE/ROE）
+				FinanceBaseInfo fbi = financeService.getLastFinaceReport(b.getCode());
+				if (fbi != null && fbi.getJqjzcsyl() != 0.0 && b.getPeTtm() > 0) {
+					if (fbi.getSyldjd() != 0) {
+						b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / fbi.getSyldjd()));
+					} else {
+						double syldjd = CurrencyUitl.roundHalfUp(fbi.getJqjzcsyl() / (double) fbi.getQuarter());
+						b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / syldjd));
+					}
+				}
+			}
+			if (upd.size() > 0) {
+				esDaliyBasicInfoDao.saveAll(list);
+			}
+			log.info("雪球=>每日指标-市盈率完成,期望数:{" + list.size() + "},实际成功数:" + upd.size());
+			if (upd.size() != list.size()) {
+				WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + list.size() + "},实际成功数:" + upd.size());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包出错");
+		}
+
 	}
 
 	private boolean dofetch(DaliyBasicInfo2 b, String today) {

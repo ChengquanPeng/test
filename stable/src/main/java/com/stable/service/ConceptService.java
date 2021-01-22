@@ -71,17 +71,24 @@ public class ConceptService {
 		return "";
 	}
 
-	/**
-	 * code 获取相关概率，板块
-	 */
-	public List<CodeConcept> getCodeConcept(String code) {
+	public List<CodeConcept> getCodeConcept(String code, int type) {
 		EsQueryPageReq queryPage = EsQueryPageUtil.queryPage9999;
 		Pageable pageable = PageRequest.of(queryPage.getPageNum(), queryPage.getPageSize());
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		if (type > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("type", type));
+		}
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
 		return esCodeConceptDao.search(sq).getContent();
+	}
+
+	/**
+	 * code 获取相关概率，板块
+	 */
+	public List<CodeConcept> getCodeConcept(String code) {
+		return getCodeConcept(code, 0);
 	}
 
 	private List<ConceptDaily> getTopConcepts(int date) {
@@ -129,7 +136,7 @@ public class ConceptService {
 		return m;
 	}
 
-	private List<CodeConcept> getCodes(String conceptId) {
+	public List<CodeConcept> getCodes(String conceptId) {
 		EsQueryPageReq queryPage = EsQueryPageUtil.queryPage9999;
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();

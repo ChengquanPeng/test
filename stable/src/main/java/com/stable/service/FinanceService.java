@@ -1,5 +1,7 @@
 package com.stable.service;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,11 +34,13 @@ import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.CodeConcept;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.resp.FinanceBaseInfoResp;
+import com.stable.vo.http.resp.PlateResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
@@ -65,6 +69,8 @@ public class FinanceService {
 	private ZhiYaService zhiYaService;
 	@Autowired
 	private ThsHolderSpider thsHolderSpider;
+	@Autowired
+	private ConceptService conceptService;
 
 	/**
 	 * 删除redis，从头开始获取
@@ -184,7 +190,23 @@ public class FinanceService {
 		return null;
 	}
 
-	Pageable pageable = PageRequest.of(0, 1);
+	public FinanceBaseInfo getLastFinaceReport(String code, int year, int quarter) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.matchPhraseQuery("year", year));
+		bqb.must(QueryBuilders.matchPhraseQuery("quarter", quarter));
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+
+		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		log.info("no last report fince code={},year={},quarter={}", code, year, quarter);
+		return null;
+
+	}
 
 	public FinanceBaseInfo getLastFinaceReport(String code, int annDate) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
@@ -193,13 +215,11 @@ public class FinanceService {
 		FieldSortBuilder sort = SortBuilders.fieldSort("annDate").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
 
 		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
 		if (page != null && !page.isEmpty()) {
-			FinanceBaseInfo f = page.getContent().get(0);
-			log.info("page size={},last report fince code={},date={}", page.getContent().size(), code, f.getDate());
-			return f;
+			return page.getContent().get(0);
 		}
 		log.info("no last report fince code={},annDate={}", code, annDate);
 		return null;
@@ -215,14 +235,11 @@ public class FinanceService {
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
 
 		Page<FinYjyg> page = esFinYjygDao.search(sq);
 		if (page != null && !page.isEmpty()) {
-			FinYjyg f = page.getContent().get(0);
-			// log.info("page size={},getLastFinYjkbReport code={},date={}",
-			// page.getContent().size(), code, f.getDate());
-			return f;
+			return page.getContent().get(0);
 		}
 		log.info("no FinYjyg report fince code={},annDate={}", code, annDate);
 		return null;
@@ -238,14 +255,11 @@ public class FinanceService {
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
 
 		Page<FinYjkb> page = esFinYjkbDao.search(sq);
 		if (page != null && !page.isEmpty()) {
-			FinYjkb f = page.getContent().get(0);
-			// log.info("page size={},getLastFinYjkbReport code={},date={}",
-			// page.getContent().size(), code, f.getDate());
-			return f;
+			return page.getContent().get(0);
 		}
 		log.info("no FinYjkb report fince code={},annDate={}", code, annDate);
 		return null;
@@ -278,14 +292,11 @@ public class FinanceService {
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
 
 		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
 		if (page != null && !page.isEmpty()) {
-			FinanceBaseInfo f = page.getContent().get(0);
-			// log.info("page size={},last report fince code={},date={}",
-			// page.getContent().size(), code, f.getDate());
-			return f;
+			return page.getContent().get(0);
 		}
 		log.info("no last report fince code={},now!", code);
 		return null;
@@ -298,7 +309,7 @@ public class FinanceService {
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
 
 		Page<FinYjkb> page = esFinYjkbDao.search(sq);
 		if (page != null && !page.isEmpty()) {
@@ -314,7 +325,7 @@ public class FinanceService {
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
 
 		Page<FinYjyg> page = esFinYjygDao.search(sq);
 		if (page != null && !page.isEmpty()) {
@@ -391,12 +402,55 @@ public class FinanceService {
 		for (StockBaseInfo s : list) {
 			String code = s.getCode();
 			try {
+				List<CodeConcept> cc = conceptService.getCodeConcept(code, 2);// 同花顺行业
+				if (cc != null && cc.size() > 0) {
+					for (CodeConcept c : cc) {
+						// TOOD get From Cache
+						List<CodeConcept> allcode = conceptService.getCodes(c.getConceptId());
+						FinanceBaseInfo fbi = this.getLastFinaceReport(code);
+						if (fbi != null) {
 
+						}
+					}
+				}
 			} catch (Exception e) {
 				WxPushUtil.pushSystem1("质押抓包异常:" + code);
 				ErrorLogFileUitl.writeError(e, "质押", "", "");
 			}
 		}
+	}
+
+//	private Map<String,R>
+	private void executeHangyeExt1(FinanceBaseInfo fbi, List<CodeConcept> allcode) {
+		int year = fbi.getYear();
+		int quarter = fbi.getQuarter();
+		List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
+		double mll = 0.0;
+		int mllc = 0;
+		for (CodeConcept c : allcode) {
+			FinanceBaseInfo f = this.getLastFinaceReport(c.getCode(), year, quarter);
+			if (f != null) {
+				rl.add(f);
+			}
+		}
+		mllSort(rl);
+		for (int i = 0; i < rl.size(); i++) {
+			FinanceBaseInfo r = rl.get(i);
+//			r.setRanking1(i + 1);
+		}
+	}
+
+	// 毛利率倒序排序
+	public static void mllSort(List<FinanceBaseInfo> rl) {
+		Collections.sort(rl, new Comparator<FinanceBaseInfo>() {
+			@Override
+			public int compare(FinanceBaseInfo o1, FinanceBaseInfo o2) {
+				if (o1.getMll() == o2.getMll()) {
+					return 0;
+				}
+				return o2.getMll() - o1.getMll() > 0 ? 1 : -1;
+			}
+		});
 	}
 
 	private void fetchFinances() {

@@ -49,11 +49,11 @@ public class PlateService {
 			list = conceptService.listCodesByAliasCode(aliasCode);
 		}
 		if (list != null) {
-			double t1 = 0.0;
+			double t1 = 0.0;// 市赚率
 			int c1 = 1;
-			double t2 = 0.0;
+			double t2 = 0.0;// 收益率ttm
 			int c2 = 1;
-			double t3 = 0.0;
+			double t3 = 0.0;// 毛利率
 			int c3 = 1;
 
 			for (String code : list) {
