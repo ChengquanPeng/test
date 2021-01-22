@@ -32,9 +32,9 @@ import com.stable.service.ConceptService;
 import com.stable.service.DividendService;
 import com.stable.service.FinanceService;
 import com.stable.service.PlateService;
-import com.stable.service.PledgeStatService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
+import com.stable.service.ZhiYaService;
 import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
@@ -50,9 +50,9 @@ import com.stable.vo.bus.CodePool;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
-import com.stable.vo.bus.PledgeStat;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.ZengFa;
+import com.stable.vo.bus.ZhiYa;
 import com.stable.vo.http.resp.CodeBaseModelResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -72,7 +72,7 @@ public class CodeModelService {
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
-	private PledgeStatService pledgeStatService;
+	private ZhiYaService zhiYaService;
 	@Autowired
 	private RedisUtil redisUtil;
 	@Autowired
@@ -205,11 +205,8 @@ public class CodeModelService {
 			newOne.setLastBackDate(Integer.valueOf(bb.getAnn_date()));// 股东大会通过/完成/停止/实施
 		}
 		// 质押比例
-		PledgeStat ps = pledgeStatService.getLastRecords(code, treadeDate);
-		if (ps != null) {
-			newOne.setEndDate(ps.getEndDate());// 截止日期
-			newOne.setPledgeRatio(ps.getPledgeRatio());// 质押比例
-		}
+		ZhiYa zy = zhiYaService.getZhiYa(code);
+		newOne.setZyRask(zy.getHasRisk());
 		// 限售股解禁
 //		ShareFloat sf = shareFloatService.getLastRecordByLteDate(code, treadeDate, nextYear);
 //		if (sf != null) {
@@ -325,7 +322,7 @@ public class CodeModelService {
 			finals += -1;
 		}
 		// 质押
-		if (newOne.getPledgeRatio() > 60) {
+		if (newOne.getZyRask() == 1) {
 			finals += -5;
 		}
 		// 解禁

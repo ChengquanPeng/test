@@ -1,9 +1,9 @@
-package com.stable.spider.eastmoney;
+package com.stable.vo;
 
 import lombok.Data;
 
 @Data
-public class Zyi {
+public class Zya {
 	int c = 0;
 	double bi = 0.0;
 }

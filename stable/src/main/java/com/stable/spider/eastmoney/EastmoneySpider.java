@@ -216,11 +216,11 @@ public class EastmoneySpider {
 							fbi.setInventory(fzb.getInventory());
 							if (fbi.getNetAsset() > 0) {
 								if (fbi.getGoodWill() > 0) {
-									fbi.setGoodWillPercent(
+									fbi.setGoodWillRatio(
 											CurrencyUitl.roundHalfUp(fbi.getGoodWill() / fbi.getNetAsset()));
 								}
 								if (fbi.getInventory() > 0) {
-									fbi.setInventoryPercent(
+									fbi.setInventoryRatio(
 											CurrencyUitl.roundHalfUp(fbi.getInventory() / fbi.getNetAsset()));
 								}
 							}
@@ -590,7 +590,7 @@ public class EastmoneySpider {
 //		String result = HttpUtil.doGet2(yjygBase);
 //		EastmoneySpider es = new EastmoneySpider();
 //		es.getFinYjkb();
-		List<FinanceBaseInfo> l = EastmoneySpider.getNewFinanceAnalysis("603707", 0);
+		List<FinanceBaseInfo> l = EastmoneySpider.getNewFinanceAnalysis("300027", 0);
 		for (FinanceBaseInfo r : l) {
 			System.err.println(r);
 		}

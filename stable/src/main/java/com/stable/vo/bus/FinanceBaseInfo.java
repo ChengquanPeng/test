@@ -64,9 +64,9 @@ public class FinanceBaseInfo extends EsBase {
 	@Field(type = FieldType.Double)
 	private double netAsset; // 净资产
 	@Field(type = FieldType.Double)
-	private double goodWillPercent; // 商誉净资产占比
+	private double goodWillRatio; // 商誉净资产占比
 	@Field(type = FieldType.Double)
-	private double inventoryPercent; // 存货净资产占比
+	private double inventoryRatio; // 存货净资产占比
 
 	public FinanceBaseInfo() {
 

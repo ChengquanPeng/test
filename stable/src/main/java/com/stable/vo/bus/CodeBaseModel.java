@@ -75,9 +75,7 @@ public class CodeBaseModel extends EsBase {
 	protected int noBackyear;// 最近1年无回购
 	// 质押比例
 	@Field(type = FieldType.Integer)
-	protected int endDate;// 截止日期
-	@Field(type = FieldType.Double)
-	protected double pledgeRatio;// 质押比例
+	protected int zyRask;// 质押风险
 	// 限售股解禁
 	@Field(type = FieldType.Integer)
 	protected int floatDate;// 解禁日期

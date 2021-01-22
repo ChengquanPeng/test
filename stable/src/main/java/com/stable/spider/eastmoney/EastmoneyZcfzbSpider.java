@@ -49,6 +49,7 @@ public class EastmoneyZcfzbSpider {
 		do {
 			trytime++;
 			try {
+				ThreadsUtil.sleepRandomSecBetween1And2();
 				Map<String, FinanceZcfzb> m = new HashMap<String, FinanceZcfzb>();
 				String url = String.format(financeUrl, formatCode2(code), System.currentTimeMillis());
 				String result = HttpUtil.doGet2(url);
