@@ -136,6 +136,7 @@ public class EastmoneySpider {
 	 * @return http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=1&code=SZ300750
 	 */
 	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=%s&code=%s";
+	static final double chkLine = CurrencyUitl.YI_N.doubleValue() * 10;// 10亿
 
 	public static List<FinanceBaseInfo> getNewFinanceAnalysis(String code, int type) {
 		int trytime = 0;
@@ -207,22 +208,60 @@ public class EastmoneySpider {
 				if (list.size() > 0) {
 					Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getZcfzb(code);
 					for (FinanceBaseInfo fbi : list) {
-						FinanceZcfzb fzb = m.get(fbi.getId());
-						if (fzb != null) {
-							fbi.setGoodWill(fzb.getGoodWill());
-							fbi.setSumAsset(fzb.getSumAsset());
-							fbi.setSumDebt(fzb.getSumDebt());
-							fbi.setNetAsset(fzb.getNetAsset());
-							fbi.setInventory(fzb.getInventory());
+						FinanceZcfzb zcfzb = m.get(fbi.getId());
+						if (zcfzb != null) {
+							// 基础数
+							fbi.setGoodWill(zcfzb.getGoodWill());
+							fbi.setSumAsset(zcfzb.getSumAsset());
+							fbi.setSumDebt(zcfzb.getSumDebt());
+							fbi.setNetAsset(zcfzb.getNetAsset());
+							fbi.setInventory(zcfzb.getInventory());
+							fbi.setSumDebtLd(zcfzb.getSumDebtLd());
+							fbi.setNetAsset(zcfzb.getNetAsset());
+							fbi.setMonetaryFund(zcfzb.getMonetaryFund());
+							fbi.setAccountrec(zcfzb.getAccountrec());
+							fbi.setAccountPay(zcfzb.getAccountPay());
+							fbi.setRetaineDearning(zcfzb.getRetaineDearning());
+							fbi.setInterestPay(zcfzb.getInterestPay());
+							fbi.setSumLasset(zcfzb.getSumLasset());
+
+							// 分析数据
 							if (fbi.getNetAsset() > 0) {
+								// 商誉-净资产
 								if (fbi.getGoodWill() > 0) {
-									fbi.setGoodWillRatio(
+									fbi.setGoodWillRatioNetAsset(
 											CurrencyUitl.roundHalfUp(fbi.getGoodWill() / fbi.getNetAsset()));
 								}
+								// 库存对应的净资产的占比
 								if (fbi.getInventory() > 0) {
 									fbi.setInventoryRatio(
 											CurrencyUitl.roundHalfUp(fbi.getInventory() / fbi.getNetAsset()));
 								}
+							}
+							// 资金紧张: 货币资金-流动负债, <=0
+							fbi.setFundNotOk(fbi.getMonetaryFund() - fbi.getSumDebtLd() > 0 ? 0 : 1);
+							if (fbi.getInterestPay() > 0) {// 应付利息:如果较高
+								double jieqian = fbi.getInterestPay() * 10;// 大概借的钱=利息*10倍（10%的利息）
+								if (jieqian > chkLine) {// 借钱超过10亿
+									if (fbi.getMonetaryFund() > chkLine || fbi.getRetaineDearning() > chkLine) {
+										// 如果货币资金和未分配利润较高，明明有钱为什么借钱，
+										fbi.setFundNotOk2(1);
+									}
+								}
+							}
+							// 是否有破产风险：应付账款:欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算
+							fbi.setBustUpRisks(fbi.getNetAsset() - fbi.getAccountPay() > 0 ? 0 : 1);
+//							货币资金：在会计科目上，主要指库存现金、银行存款和其他货币资金三者。
+//							库存现金：指存放于企业财会部门、由出纳人员经管的货币。
+//							银行存款：指企业存入银行或其他金融机构的各种款项。
+//							其他货币资金：指企业的银行汇票存款、银行本票存款、信用卡存款、信用证保证金存款、存出投资款、外埠存款等其他货币资金。
+//						实务中主要核算各项保证金和存入支付宝等第三方支付平台的款项。
+							//
+//						现金及现金等价物对流动性要求更高，需是3个月内可以使用的，所以，需要在在货币资金的基础上剔除一些受限资产。
+							// 应收账款-占比 同行业//TODO
+							if (fbi.getSumLasset() > 0) {
+								fbi.setAccountrecRatio(
+										CurrencyUitl.roundHalfUp(fbi.getAccountrec() / fbi.getSumLasset()));
 							}
 						}
 					}

@@ -12,7 +12,7 @@ import lombok.extern.log4j.Log4j2;
 public class CurrencyUitl {
 
 	private static final String YI = "亿";
-	private static final BigDecimal YI_N = new BigDecimal(100000000L);
+	public static final BigDecimal YI_N = new BigDecimal(100000000L);
 	private static final String WAN = "万";
 	private static final BigDecimal WAN_N = new BigDecimal(10000L);
 	private static final String YUAN = "元";

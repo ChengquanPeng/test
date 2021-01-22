@@ -52,9 +52,11 @@ public class FinanceBaseInfo extends EsBase {
 	private double mgjyxjl; // 每股经营现金流
 	@Field(type = FieldType.Double)
 	private double mll; // 毛利率
-	//资产负债表
+	// 资产负债表
 	@Field(type = FieldType.Double)
 	private double goodWill; // 商誉
+	@Field(type = FieldType.Double)
+	private double sumLasset; // 流动资产合计
 	@Field(type = FieldType.Double)
 	private double sumAsset; // 总资产
 	@Field(type = FieldType.Double)
@@ -62,11 +64,44 @@ public class FinanceBaseInfo extends EsBase {
 	@Field(type = FieldType.Double)
 	private double sumDebt; // 负债
 	@Field(type = FieldType.Double)
+	private double sumDebtLd; // 流动负债
+	@Field(type = FieldType.Double)
 	private double netAsset; // 净资产
 	@Field(type = FieldType.Double)
-	private double goodWillRatio; // 商誉净资产占比
+	private double monetaryFund;// 货币资金
 	@Field(type = FieldType.Double)
-	private double inventoryRatio; // 存货净资产占比
+	private double accountrec;// 应收账款（是否自己贴钱在干活，同行业比较）
+	@Field(type = FieldType.Double)
+	private double accountPay;// 应付账款:欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算
+	@Field(type = FieldType.Double)
+	private double retaineDearning;// 未分配利润
+	@Field(type = FieldType.Double)
+	private double interestPay;// 应付利息:如果较高，公司在大量有息借钱，关联到货币资金和未分配利润。如果货币资金和未分配利润较高，明明有钱为什么借钱，
+
+	// 计算字段
+//	@Field(type = FieldType.Double)
+//	private double goodWillRatioGsjlr; // 商誉净资产占比（净利润）
+	@Field(type = FieldType.Double)
+	private double goodWillRatioNetAsset; // 商誉净利润占比（净资产）
+	@Field(type = FieldType.Double)
+	private double inventoryRatio; // 存货净资产占比 // 存货资产占比（净资产）
+	@Field(type = FieldType.Double)
+	private int fundNotOk = 1;// 是否资金紧张:资金紧张: 货币资金-流动负债, <=0
+	@Field(type = FieldType.Double)
+	private int fundNotOk2 = 0;// interestPay
+	@Field(type = FieldType.Double)
+	private int bustUpRisks = 1;// 是否有破产风险：应付账款:欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算
+
+//	货币资金：在会计科目上，主要指库存现金、银行存款和其他货币资金三者。
+//		库存现金：指存放于企业财会部门、由出纳人员经管的货币。
+//		银行存款：指企业存入银行或其他金融机构的各种款项。
+//		其他货币资金：指企业的银行汇票存款、银行本票存款、信用卡存款、信用证保证金存款、存出投资款、外埠存款等其他货币资金。
+//	实务中主要核算各项保证金和存入支付宝等第三方支付平台的款项。
+//	
+//	现金及现金等价物对流动性要求更高，需是3个月内可以使用的，所以，需要在在货币资金的基础上剔除一些受限资产。
+
+	@Field(type = FieldType.Double)
+	private double accountrecRatio;// 应收款占比：
 
 	public FinanceBaseInfo() {
 

@@ -65,23 +65,51 @@ public class EastmoneyZcfzbSpider {
 					fzb.setId(code + "_" + fzb.getDate());
 
 					try {
-						fzb.setGoodWill(Double.valueOf(data.getString("GOODWILL")));
+						fzb.setGoodWill(Double.valueOf(data.getString("GOODWILL")));// 商誉
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setSumAsset(Double.valueOf(data.getString("SUMASSET")));
+						fzb.setSumAsset(Double.valueOf(data.getString("SUMASSET")));// 总资产
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setSumDebt(Double.valueOf(data.getString("SUMLIAB")));
+						fzb.setSumDebt(Double.valueOf(data.getString("SUMLIAB")));// 负债总计
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setNetAsset(Double.valueOf(data.getString("SUMSHEQUITY")));
+						fzb.setSumDebtLd(Double.valueOf(data.getString("SUMLLIAB")));// 流动负债总计
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setInventory(Double.valueOf(data.getString("INVENTORY")));
+						fzb.setNetAsset(Double.valueOf(data.getString("SUMSHEQUITY")));// 净资产
+					} catch (Exception e) {
+					}
+					try {
+						fzb.setInventory(Double.valueOf(data.getString("INVENTORY")));// 存货资产
+					} catch (Exception e) {
+					}
+					try {
+						fzb.setMonetaryFund(Double.valueOf(data.getString("MONETARYFUND")));// 货币资金
+					} catch (Exception e) {
+					}
+					try {
+						fzb.setAccountrec(Double.valueOf(data.getString("ACCOUNTREC")));// 应收账款（是否自己贴钱在干活，同行业比较）
+					} catch (Exception e) {
+					}
+					try {
+						fzb.setInterestPay(Double.valueOf(data.getString("INTERESTPAY")));// 应付利息:如果较高，公司在大量有息借钱，关联到货币资金和未分配利润。如果货币资金和未分配利润较高，明明有钱为什么借钱，
+					} catch (Exception e) {
+					}
+					try {
+						fzb.setAccountPay(Double.valueOf(data.getString("ACCOUNTPAY")));// 应付账款:欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算
+					} catch (Exception e) {
+					}
+					try {
+						fzb.setRetaineDearning(Double.valueOf(data.getString("RETAINEDEARNING")));// 未分配利润
+					} catch (Exception e) {
+					}
+					try {
+						fzb.setSumLasset(Double.valueOf(data.getString("SUMLASSET")));// 流动资产合计
 					} catch (Exception e) {
 					}
 //					System.err.println(fzb + " " + CurrencyUitl.covertToString(fzb.getSumAsset()) + " "
@@ -105,7 +133,10 @@ public class EastmoneyZcfzbSpider {
 	// "http://data.eastmoney.com/bbsj/yjyg/%s.html";
 
 	public static void main(String[] args) {
-		EastmoneyZcfzbSpider.getZcfzb("300027");
+		Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getZcfzb("300027");
+		for (String key : m.keySet()) {
+			System.err.println(m.get(key));
+		}
 //		System.err.println(CurrencyUitl.roundHalfUp( 5.9548019532E8/4.56697178601E9));
 	}
 }
