@@ -25,8 +25,10 @@ import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.CodeModelService;
 import com.stable.spider.eastmoney.EastmoneySpider;
+import com.stable.spider.ths.ThsHolderSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
+import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
@@ -59,6 +61,10 @@ public class FinanceService {
 	private EastmoneySpider eastmoneySpider;
 	@Autowired
 	private CodeModelService codeModelService;
+	@Autowired
+	private ZhiYaService zhiYaService;
+	@Autowired
+	private ThsHolderSpider thsHolderSpider;
 
 	/**
 	 * 删除redis，从头开始获取
@@ -363,24 +369,37 @@ public class FinanceService {
 		TasksWorker.getInstance().getService()
 				.submit(new MyCallable(RunLogBizTypeEnum.FINACE_HISTORY, RunCycleEnum.WEEK) {
 					public Object mycall() {
-						fetch();
+						fetchFinances();
 						return null;
 					}
 				});
 	}
 
 	public void byJob() {
-		fetch();
+		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+		log.info("模型开始之前运行执行：1.质押，2.股东人数");
+		zhiYaService.fetchBySun();
+		thsHolderSpider.dofetchHolder();
+		fetchFinances();
 		executeHangye();
 		// 运行完财务和行业对比后,重新运行
-		codeModelService.runJob(true, Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
+		codeModelService.runJob(true, date);
 	}
 
 	private void executeHangye() {
-		// TODO
+		List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+		for (StockBaseInfo s : list) {
+			String code = s.getCode();
+			try {
+
+			} catch (Exception e) {
+				WxPushUtil.pushSystem1("质押抓包异常:" + code);
+				ErrorLogFileUitl.writeError(e, "质押", "", "");
+			}
+		}
 	}
 
-	private void fetch() {
+	private void fetchFinances() {
 		log.info("同步财务报告报告[started]");
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 		int total = list.size();

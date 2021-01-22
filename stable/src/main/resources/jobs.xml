@@ -63,8 +63,8 @@
 
 	<job:simple id="EveryWeekMonJob"
 		class="com.stable.job.EveryWeekMonJob" registry-center-ref="regCenter"
-		cron="0 15 0 ? * MON" sharding-item-parameters="0=a"
-		description="每周一早上0点15执行任务（股票列表，回购，分红除权，业绩）" sharding-total-count="1"
+		cron="0 15 13 ? * SUN" sharding-item-parameters="0=a"
+		description="每周天下午13点15执行任务（质押-回购-业绩-模型）" sharding-total-count="1"
 		overwrite="true" />
 
 	<job:simple id="EveryMonthJob"

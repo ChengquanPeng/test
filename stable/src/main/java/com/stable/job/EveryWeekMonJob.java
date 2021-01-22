@@ -24,10 +24,9 @@ public class EveryWeekMonJob extends MySimpleJob {
 
 	@Override
 	public void myexecute(ShardingContext sc) {
-		log.info("每周1任务开始执行：");
-		log.info("2.同步股票报告");
-		financeService.byJob();
-		log.info("3.同步回购报告");
+		log.info("同步回购报告");
 		buyBackService.jobFetchHist();
+		log.info("同步股票报告 及模型相关");
+		financeService.byJob();
 	}
 }

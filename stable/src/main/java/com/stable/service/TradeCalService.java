@@ -20,6 +20,7 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.TradeCal;
 
 import lombok.extern.log4j.Log4j2;
@@ -96,6 +97,7 @@ public class TradeCalService {
 			}
 		} else {
 			log.warn("未获取到交易日历");
+			WxPushUtil.pushSystem1("未获取到交易日历");
 		}
 		String msg = start_date + " " + end_date + "获取交易日历条数=" + cnt;
 		log.info(msg);

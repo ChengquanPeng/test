@@ -48,8 +48,9 @@ public class EveryDayJob extends MySimpleJob {
 		// codeAttentionService.fetchAll();
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
-		// 周一周五执行，每一抓完财报后运行
-		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
+		// 周一周4执行，每周末抓完财报后运行
+		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY
+				&& cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
 			codeModelService.runJob(true, Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
 		}
 	}

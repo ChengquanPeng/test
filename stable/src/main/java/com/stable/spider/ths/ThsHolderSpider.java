@@ -1,6 +1,5 @@
 package com.stable.spider.ths;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -18,7 +17,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsHolderNumDao;
 import com.stable.es.dao.base.EsHolderPercentDao;
 import com.stable.service.StockBasicService;
-import com.stable.service.TradeCalService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HtmlunitSpider;
@@ -37,8 +35,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ThsHolderSpider {
 	@Autowired
-	private TradeCalService tradeCalService;
-	@Autowired
 	private EsHolderNumDao esHolderNumDao;
 	@Autowired
 	private EsHolderPercentDao esHolderPercentDao;
@@ -52,22 +48,8 @@ public class ThsHolderSpider {
 
 	public void dofetchHolder() {
 		try {
-//					Calendar cal = Calendar.getInstance();
-//					cal.setTime(new Date());
-//					if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-//						log.info("周六");
-//						int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
-//						dofetchHolderInner(date);
-//					} else {
-//						log.info(" 非周六");
-//					}
-//
-			int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
-			if (tradeCalService.isOpen(date)) {
-				dofetchHolderInner(date);
-			} else {
-				log.info("{} 非交易日", date);
-			}
+			int sysdate = DateUtil.getTodayIntYYYYMMDD();
+			dofetchHolderInner(sysdate);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "同花顺股东人数异常运行异常..", "", "");
@@ -75,7 +57,7 @@ public class ThsHolderSpider {
 		}
 	}
 
-	private void dofetchHolderInner(int date) {
+	private void dofetchHolderInner(int sysdate) {
 		if (header == null) {
 			header = new HashMap<String, String>();
 		}
@@ -84,7 +66,7 @@ public class ThsHolderSpider {
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 		for (StockBaseInfo s : codelist) {
 			try {
-				dofetchHolderInner(date, s.getCode(), hns, hps);
+				dofetchHolderInner(sysdate, s.getCode(), hns, hps);
 				if (hns.size() > 1000) {
 					esHolderNumDao.saveAll(hns);
 					esHolderPercentDao.saveAll(hps);
@@ -101,7 +83,7 @@ public class ThsHolderSpider {
 		if (hps.size() > 0) {
 			esHolderPercentDao.saveAll(hps);
 		}
-		WxPushUtil.pushSystem1(date + " 股东研究抓包同花顺已完成");
+		WxPushUtil.pushSystem1(sysdate + " 股东研究抓包同花顺已完成");
 	}
 
 	private void dofetchHolderInner(int sysdate, String code, List<HolderNum> hns, List<HolderPercent> hps) {

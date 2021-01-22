@@ -108,9 +108,9 @@ public class ThsSpider {
 		}
 	}
 
-	private void deleteAllCodeConcept() {
-		esCodeConceptDao.deleteAll();
-	}
+//	private void deleteAllCodeConcept() {
+//		esCodeConceptDao.deleteAll();
+//	}
 
 	private Map<String, Concept> getAllAliasCode() {
 		Map<String, Concept> m = new HashMap<String, Concept>();
@@ -143,9 +143,9 @@ public class ThsSpider {
 	}
 
 	private void startinner(int date, boolean isFirday) {
-		if (isFirday) {
-			deleteAllCodeConcept();
-		}
+//		if (isFirday) {
+//			deleteAllCodeConcept();
+//		}
 
 		Map<String, Concept> m = synchGnAndCode(isFirday);
 		if (m == null) {

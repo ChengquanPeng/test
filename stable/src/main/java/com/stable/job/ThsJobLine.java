@@ -28,23 +28,28 @@ public class ThsJobLine {
 	@Autowired
 	private ThsCompanySpider thsCompanySpider;
 
+	// 每日凌晨
 	public void start() {
-		log.info("每日股东人数任务开始执行");
-		// 交易日(周一到周五)
-		thsHolderSpider.dofetchHolder();
-
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
+		int week = cal.get(Calendar.DAY_OF_WEEK);
+		// 周二到周五凌晨（实际是抓取周1到周4的情况）
+		if (week == Calendar.TUESDAY || week == Calendar.WEDNESDAY || week == Calendar.THURSDAY
+				|| week == Calendar.FRIDAY) {
+			log.info("每日股东人数任务开始执行");
+			// 交易日(周一到周五)
+			thsHolderSpider.dofetchHolder();
+		}
 
-		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+		if (week == Calendar.SUNDAY) {
 			log.info("周日，同花顺-公司资料");
 			thsCompanySpider.byJob();// 周日，同花顺-公司资料
 		}
 
-		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+		if (week == Calendar.SATURDAY) {
 			log.info("周六");
-			thsBonusSpider.byJob();// 同花顺, 增发
-			thsJiejinSpider.byJob();// 同花顺, 解禁&分紅
+			thsBonusSpider.byJob();// 同花顺, 增发&分紅
+			thsJiejinSpider.byJob();// 同花顺, 解禁
 			log.info("同花顺-亮点，主营 fetchAll=true");
 			thsPlateSpider.fetchAll(true);// 同花顺-亮点，主营 多线程
 		} else {
