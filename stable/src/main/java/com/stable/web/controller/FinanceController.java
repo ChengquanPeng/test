@@ -42,7 +42,7 @@ public class FinanceController {
 	public ResponseEntity<JsonResult> daliyall() {
 		JsonResult r = new JsonResult();
 		try {
-			financeService.jobSpiderFinaceHistoryInfo();
+			financeService.byWeb();
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

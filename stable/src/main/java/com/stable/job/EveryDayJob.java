@@ -1,6 +1,8 @@
 package com.stable.job;
 
 import java.time.Duration;
+import java.util.Calendar;
+import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,6 +46,11 @@ public class EveryDayJob extends MySimpleJob {
 			e.printStackTrace();
 		}
 		// codeAttentionService.fetchAll();
-		codeModelService.runJob(true, Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Date());
+		// 周一周五执行，每一抓完财报后运行
+		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
+			codeModelService.runJob(true, Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
+		}
 	}
 }

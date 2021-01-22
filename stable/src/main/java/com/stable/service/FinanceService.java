@@ -23,6 +23,7 @@ import com.stable.es.dao.base.EsFinYjkbDao;
 import com.stable.es.dao.base.EsFinYjygDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.job.MyCallable;
+import com.stable.service.model.CodeModelService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -56,6 +57,8 @@ public class FinanceService {
 	private EsFinYjkbDao esFinYjkbDao;
 	@Autowired
 	private EastmoneySpider eastmoneySpider;
+	@Autowired
+	private CodeModelService codeModelService;
 
 	/**
 	 * 删除redis，从头开始获取
@@ -356,33 +359,47 @@ public class FinanceService {
 
 	}
 
-	public void jobSpiderFinaceHistoryInfo() {
+	public void byWeb() {
 		TasksWorker.getInstance().getService()
 				.submit(new MyCallable(RunLogBizTypeEnum.FINACE_HISTORY, RunCycleEnum.WEEK) {
 					public Object mycall() {
-						log.info("同步财务报告报告[started]");
-						List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
-						int total = list.size();
-						log.info("股票总数：" + total);
-						List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
-						int cnt = 0;
-						for (StockBaseInfo s : list) {
-							if (spiderFinaceHistoryInfo(s.getCode(), rl)) {
-								cnt++;
-							}
-							if (rl.size() > 1000) {
-								esFinanceBaseInfoDao.saveAll(rl);
-								rl = new LinkedList<FinanceBaseInfo>();
-							}
-						}
-						if (rl.size() > 0) {
-							esFinanceBaseInfoDao.saveAll(rl);
-						}
-						log.info("同步财务报告报告[end]");
-						WxPushUtil.pushSystem1(
-								"同步股票财务报告完成！股票总数：[" + total + "],成功股票数[" + cnt + "],失败股票数=" + (total - cnt));
+						fetch();
 						return null;
 					}
 				});
+	}
+
+	public void byJob() {
+		fetch();
+		executeHangye();
+		// 运行完财务和行业对比后,重新运行
+		codeModelService.runJob(true, Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
+	}
+
+	private void executeHangye() {
+		// TODO
+	}
+
+	private void fetch() {
+		log.info("同步财务报告报告[started]");
+		List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+		int total = list.size();
+		log.info("股票总数：" + total);
+		List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
+		int cnt = 0;
+		for (StockBaseInfo s : list) {
+			if (spiderFinaceHistoryInfo(s.getCode(), rl)) {
+				cnt++;
+			}
+			if (rl.size() > 1000) {
+				esFinanceBaseInfoDao.saveAll(rl);
+				rl = new LinkedList<FinanceBaseInfo>();
+			}
+		}
+		if (rl.size() > 0) {
+			esFinanceBaseInfoDao.saveAll(rl);
+		}
+		log.info("同步财务报告报告[end]");
+		WxPushUtil.pushSystem1("同步股票财务报告完成！股票总数：[" + total + "],成功股票数[" + cnt + "],失败股票数=" + (total - cnt));
 	}
 }
