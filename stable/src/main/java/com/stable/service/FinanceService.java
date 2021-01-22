@@ -2,8 +2,10 @@ package com.stable.service;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -24,6 +26,7 @@ import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsFinYjkbDao;
 import com.stable.es.dao.base.EsFinYjygDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoDao;
+import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.CodeModelService;
 import com.stable.spider.eastmoney.EastmoneySpider;
@@ -38,9 +41,9 @@ import com.stable.vo.bus.CodeConcept;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
+import com.stable.vo.bus.FinanceBaseInfoHangye;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.resp.FinanceBaseInfoResp;
-import com.stable.vo.http.resp.PlateResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
@@ -55,6 +58,8 @@ public class FinanceService {
 
 	@Autowired
 	private EsFinanceBaseInfoDao esFinanceBaseInfoDao;
+	@Autowired
+	private EsFinanceBaseInfoHyDao esFinanceBaseInfoHyDao;
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -392,24 +397,26 @@ public class FinanceService {
 		zhiYaService.fetchBySun();
 		thsHolderSpider.dofetchHolder();
 		fetchFinances();
-		executeHangye();
+		List<FinanceBaseInfoHangye> hys = executeHangye();// TODO
 		// 运行完财务和行业对比后,重新运行
 		codeModelService.runJob(true, date);
 	}
 
-	private void executeHangye() {
+	private List<FinanceBaseInfoHangye> executeHangye() {
+		cache = new HashMap<String, FinanceBaseInfoHangye>();
+		List<FinanceBaseInfoHangye> hys = new LinkedList<FinanceBaseInfoHangye>();
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 		for (StockBaseInfo s : list) {
 			String code = s.getCode();
 			try {
 				List<CodeConcept> cc = conceptService.getCodeConcept(code, 2);// 同花顺行业
 				if (cc != null && cc.size() > 0) {
-					for (CodeConcept c : cc) {
-						// TOOD get From Cache
-						List<CodeConcept> allcode = conceptService.getCodes(c.getConceptId());
-						FinanceBaseInfo fbi = this.getLastFinaceReport(code);
-						if (fbi != null) {
-
+					CodeConcept c = cc.get(0);
+					List<CodeConcept> allcode = conceptService.getCodes(c.getConceptId());
+					FinanceBaseInfo fbi = this.getLastFinaceReport(code);
+					if (fbi != null) {
+						if (!getFromCache(code, fbi.getYear(), fbi.getQuarter())) {// from chace
+							executeHangyeExt1(fbi.getYear(), fbi.getQuarter(), allcode, hys);
 						}
 					}
 				}
@@ -418,30 +425,101 @@ public class FinanceService {
 				ErrorLogFileUitl.writeError(e, "质押", "", "");
 			}
 		}
+		if (hys.size() > 0) {
+			esFinanceBaseInfoHyDao.saveAll(hys);
+		}
+		return hys;
 	}
 
-//	private Map<String,R>
-	private void executeHangyeExt1(FinanceBaseInfo fbi, List<CodeConcept> allcode) {
-		int year = fbi.getYear();
-		int quarter = fbi.getQuarter();
+	private boolean getFromCache(String code, int year, int quarter) {
+		String key = code + year + "" + quarter;
+		if (cache.containsKey(key)) {
+			return true;
+		}
+		return false;
+	}
+
+	private Map<String, FinanceBaseInfoHangye> cache = new HashMap<String, FinanceBaseInfoHangye>();
+
+	private void executeHangyeExt1(int year, int quarter, List<CodeConcept> allcode, List<FinanceBaseInfoHangye> hys) {
 		List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
 		double mll = 0.0;
 		int mllc = 0;
+
+		List<FinanceBaseInfo> yszkl = new LinkedList<FinanceBaseInfo>();
+		double yszk = 0.0;
+		int yszkc = 0;
 		for (CodeConcept c : allcode) {
 			FinanceBaseInfo f = this.getLastFinaceReport(c.getCode(), year, quarter);
 			if (f != null) {
-				rl.add(f);
+				if (f.getMll() != 0) {
+					rl.add(f);
+					mll += f.getMll();
+					mllc++;
+				}
+				if (f.getAccountrecRatio() != 0) {
+					yszkl.add(f);
+					yszk += f.getAccountrecRatio();
+					yszkc++;
+				}
 			}
 		}
+		// ====毛利率====start====
+		double avgtMll = CurrencyUitl.roundHalfUp(mll / (double) mllc);
 		mllSort(rl);
-		for (int i = 0; i < rl.size(); i++) {
+		for (int i = 0; i < rl.size(); i++) {// 有数据的
 			FinanceBaseInfo r = rl.get(i);
-//			r.setRanking1(i + 1);
+			FinanceBaseInfoHangye hy = new FinanceBaseInfoHangye();
+			hy.setCode(r.getCode());
+			hy.setMll(r.getMll());
+			hy.setMllAvg(avgtMll);
+			hy.setMllRank((i + 1));
+			hy.setYear(year);
+			hy.setQuarter(quarter);
+			hy.setId(hy.getCode() + year + "" + quarter);
+			cache.put(hy.getId(), hy);
+			hys.add(hy);
 		}
+		for (CodeConcept c : allcode) {// 无数据的：补全
+			String key = c.getCode() + year + "" + quarter;
+			if (!cache.containsKey(key)) {
+				FinanceBaseInfoHangye hy = new FinanceBaseInfoHangye();
+				hy.setCode(c.getCode());
+				hy.setMll(0);
+				hy.setMllAvg(avgtMll);
+				hy.setMllRank(9999);
+				hy.setYear(year);
+				hy.setQuarter(quarter);
+				hy.setId(key);
+				cache.put(hy.getId(), hy);
+				hys.add(hy);
+			}
+		}
+		// ====毛利率====end====
+
+		// ====应收占款比率====start====
+		double avgtAr = CurrencyUitl.roundHalfUp(yszk / (double) yszkc);
+		arSort(yszkl);
+		for (int i = 0; i < yszkl.size(); i++) {
+			FinanceBaseInfo r = rl.get(i);
+			String key = r.getCode() + year + "" + quarter;
+			FinanceBaseInfoHangye hy = cache.get(key);
+			hy.setYszk(r.getAccountrecRatio());
+			hy.setYszkRank((i + 1));
+			hy.setYszkAvg(avgtAr);
+		}
+		for (CodeConcept c : allcode) {
+			String key = c.getCode() + year + "" + quarter;
+			FinanceBaseInfoHangye hy = cache.get(key);
+			hy.setYszk(0);
+			hy.setYszkRank(9999);
+			hy.setYszkAvg(avgtAr);
+		}
+		// ====应收占款比率====end====
 	}
 
 	// 毛利率倒序排序
-	public static void mllSort(List<FinanceBaseInfo> rl) {
+	private void mllSort(List<FinanceBaseInfo> rl) {
 		Collections.sort(rl, new Comparator<FinanceBaseInfo>() {
 			@Override
 			public int compare(FinanceBaseInfo o1, FinanceBaseInfo o2) {
@@ -449,6 +527,19 @@ public class FinanceService {
 					return 0;
 				}
 				return o2.getMll() - o1.getMll() > 0 ? 1 : -1;
+			}
+		});
+	}
+
+	// 应收占款比率倒序排序
+	private void arSort(List<FinanceBaseInfo> rl) {
+		Collections.sort(rl, new Comparator<FinanceBaseInfo>() {
+			@Override
+			public int compare(FinanceBaseInfo o1, FinanceBaseInfo o2) {
+				if (o1.getAccountrecRatio() == o2.getAccountrecRatio()) {
+					return 0;
+				}
+				return o2.getAccountrecRatio() - o1.getAccountrecRatio() > 0 ? 1 : -1;
 			}
 		});
 	}

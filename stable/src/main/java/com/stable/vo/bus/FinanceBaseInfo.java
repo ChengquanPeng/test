@@ -101,7 +101,7 @@ public class FinanceBaseInfo extends EsBase {
 //	现金及现金等价物对流动性要求更高，需是3个月内可以使用的，所以，需要在在货币资金的基础上剔除一些受限资产。
 
 	@Field(type = FieldType.Double)
-	private double accountrecRatio;// 应收款占比：
+	private double accountrecRatio;// 应收款占比：accountrec应收账款/sumLasset流动资产合计
 
 	public FinanceBaseInfo() {
 

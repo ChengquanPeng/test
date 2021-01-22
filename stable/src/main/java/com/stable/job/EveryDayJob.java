@@ -14,6 +14,7 @@ import com.stable.service.model.CodeModelService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.FileDeleteUitl;
 import com.stable.utils.SpringUtil;
+import com.stable.utils.WxPushUtil;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -52,6 +53,8 @@ public class EveryDayJob extends MySimpleJob {
 		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY
 				&& cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
 			codeModelService.runJob(true, Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
+		} else {
+			WxPushUtil.pushSystem1("周五，周六，周日每晚23点不在运行定时运行 code model,周日下午在继续运行！");
 		}
 	}
 }
