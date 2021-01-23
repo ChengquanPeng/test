@@ -403,6 +403,7 @@ public class FinanceService {
 	}
 
 	private List<FinanceBaseInfoHangye> executeHangye() {
+		log.info("行业对比开始");
 		cache = new HashMap<String, FinanceBaseInfoHangye>();
 		List<FinanceBaseInfoHangye> hys = new LinkedList<FinanceBaseInfoHangye>();
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
@@ -428,6 +429,7 @@ public class FinanceService {
 		if (hys.size() > 0) {
 			esFinanceBaseInfoHyDao.saveAll(hys);
 		}
+		log.info("行业对比结束");
 		return hys;
 	}
 
