@@ -23,6 +23,11 @@ public class FinanceBaseInfoHangye extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int quarter;// 季度
 
+	@Field(type = FieldType.Text)
+	private String hangyeId;
+	@Field(type = FieldType.Text)
+	private String hangyeName;
+
 	@Field(type = FieldType.Integer)
 	private int mllRank;// 毛利排名
 	@Field(type = FieldType.Double)
@@ -36,4 +41,7 @@ public class FinanceBaseInfoHangye extends EsBase {
 	private double yszkAvg;// 应收账款占比平均
 	@Field(type = FieldType.Double)
 	private double yszk;// 应收账款占比
+
+	@Field(type = FieldType.Integer)
+	private int updateDate;
 }

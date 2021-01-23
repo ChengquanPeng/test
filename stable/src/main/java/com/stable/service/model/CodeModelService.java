@@ -22,9 +22,12 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.EsCodeBaseModelDao;
 import com.stable.es.dao.base.EsCodeBaseModelHistDao;
+import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.service.BuyBackService;
 import com.stable.service.ChipsService;
 import com.stable.service.CodePoolService;
@@ -45,11 +48,14 @@ import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BonusHist;
 import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.bus.CodeBaseModel;
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.CodePool;
+import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
+import com.stable.vo.bus.FinanceBaseInfoHangye;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZhiYa;
@@ -72,11 +78,13 @@ public class CodeModelService {
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
-	private ZhiYaService zhiYaService;
-	@Autowired
 	private RedisUtil redisUtil;
 	@Autowired
 	private EsCodeBaseModelDao codeBaseModelDao;
+	@Autowired
+	private EsCodeBaseModel2Dao codeBaseModel2Dao;
+	@Autowired
+	private EsFinanceBaseInfoHyDao esFinanceBaseInfoHyDao;
 	@Autowired
 	private EsCodeBaseModelHistDao codeBaseModelHistDao;
 	@Autowired
@@ -89,6 +97,164 @@ public class CodeModelService {
 	private PlateService plateService;
 	@Autowired
 	private ChipsService chipsService;
+	@Autowired
+	private ZhiYaService zhiYaService;
+
+	public synchronized void runJobv2(boolean isJob, int date) {
+		try {
+			runByJobv2(date);
+		} catch (Exception e) {
+			e.printStackTrace();
+			ErrorLogFileUitl.writeError(e, "CodeModel模型运行异常", "", "");
+			WxPushUtil.pushSystem1("CodeModel模型运行异常..");
+		}
+	}
+
+	private synchronized void runByJobv2(int tradeDate) {
+		log.info("CodeModel processing request date={}", tradeDate);
+		if (!tradeCalService.isOpen(tradeDate)) {
+			tradeDate = tradeCalService.getPretradeDate(tradeDate);
+		}
+		log.info("Actually processing request date={}", tradeDate);
+		int updatedate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
+		List<CodeBaseModelHist> listHist = new LinkedList<CodeBaseModelHist>();// TODO
+		int oneYearAgo = DateUtil.getPreYear(tradeDate);
+		int nextYear = DateUtil.getNextYear(tradeDate);
+		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
+		Map<String, CodeBaseModel> histMap = getALLForMap();
+		Map<String, CodePool> map = codePoolService.getCodePoolMap();
+		List<CodePool> list = new LinkedList<CodePool>();
+		for (StockBaseInfo s : codelist) {
+			try {
+				getBaseAnalyse(s, tradeDate, oneYearAgo, nextYear, updatedate, listLast, listHist, true,
+						histMap.get(s.getCode()), list, map);
+			} catch (Exception e) {
+				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
+			}
+		}
+		if (listLast.size() > 0) {
+			codeBaseModel2Dao.saveAll(listLast);
+		}
+//		if (listHist.size() > 0) {
+//			codeBaseModelHistDao.saveAll(listHist);
+//		}
+//		middleSortV1Service.start(tradeDate, list);
+		log.info("CodeModel v2 模型执行完成");
+		WxPushUtil.pushSystem1(
+				"Seq5=> CODE-MODEL " + tradeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listHist.size());
+	}
+
+	private void getBaseAnalyse(StockBaseInfo s, int treadeDate, int oneYearAgo, int nextYear, int updatedate,
+			List<CodeBaseModel2> listLast, List<CodeBaseModelHist> listHist, boolean isJob, CodeBaseModel lastOne,
+			List<CodePool> list, Map<String, CodePool> map) {
+		String code = s.getCode();
+		log.info("Code Model  processing for code:{}", code);
+		// 财务
+		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(code, treadeDate,
+				EsQueryPageUtil.queryPage9999);
+		// FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code,
+		// treadeDate);
+		if (fbis == null) {
+			boolean onlineYear = stockBasicService.online1YearChk(code, treadeDate);
+			if (onlineYear) {
+				ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, treadeDate + "", "Code Model错误");
+			} else {
+				log.info("{},Online 上市不足1年", code);
+			}
+			return;
+		}
+		FinanceAnalyzer fa = new FinanceAnalyzer();
+		for (FinanceBaseInfo fbi : fbis) {
+			fa.putJidu1(fbi);
+		}
+		FinanceBaseInfo fbi = fa.getCurrJidu();
+		CodeBaseModel2 newOne = getLastOneByCode2(code);
+		newOne.setCode(code);
+		newOne.setDate(treadeDate);
+		newOne.setCurrYear(fbi.getYear());
+		newOne.setCurrQuarter(fbi.getQuarter());
+
+		// ======== 红色警告 ========
+		StringBuffer sb1 = new StringBuffer();
+		// 退市风险
+		if (fa.profitDown2Year() == 1) {
+			newOne.setBaseRed(1);
+			sb1.append("退市风险:2年利润亏损").append(Constant.HTML_LINE);
+		}
+		if (fbi.getBustUpRisks() == 1) {
+			newOne.setBaseRed(1);
+			sb1.append("破产风险:净资产低于应付账款").append(Constant.HTML_LINE);
+		}
+		if (fbi.getFundNotOk() == 1) {
+			newOne.setBaseRed(1);
+			sb1.append("资金紧张:流动负债高于货币资金").append(Constant.HTML_LINE);
+		}
+		// ======== 黄色警告 ========
+		StringBuffer sb2 = new StringBuffer();
+		if (fa.getCurrYear().getGsjlr() < 0) {
+			newOne.setBaseYellow(1);
+			sb2.append("年报亏损").append(Constant.HTML_LINE);
+		}
+		if (fbi.getFundNotOk2() == 1) {
+			newOne.setBaseYellow(1);
+			sb2.append("资金紧张:应付利息较高").append(Constant.HTML_LINE);
+		}
+		// 毛利，应收账款
+		FinanceBaseInfoHangye hy = this.getFinanceBaseInfoHangye(code, fbi.getYear(), fbi.getQuarter());
+		if (hy != null) {
+			if (hy.getMll() > 60.0 && hy.getMllRank() <= 5) {
+				newOne.setBaseYellow(1);
+				sb2.append("(需人工复核)毛利率:" + hy.getMll() + " 行业平均:" + hy.getMllAvg() + ", 行业排名:" + hy.getMllRank())
+						.append(Constant.HTML_LINE);
+			}
+			// TODO
+//			if (hy.getYszk() > 60.0 && hy.getYszkRank() <= 5) {
+//				newOne.setBaseYellow(1);
+//				sb2.append("(需人工复核)毛利率:" + hy.getYszk() + " 行业平均:" + hy.getYszkAvg() + ", 行业排名:" + hy.getYszkRank())
+//						.append(Constant.HTML_LINE);
+//			}
+		}
+		// 商誉占比
+		if (fbi.getGoodWillRatioNetAsset() > 0.15) {// 超过15%
+			newOne.setBaseYellow(1);
+			sb2.append("商誉占比超15%:" + (fbi.getGoodWillRatioNetAsset() * 100) + "%").append(Constant.HTML_LINE);
+		}
+		// 库存占比
+		if (fbi.getInventoryRatio() > 0.45) {// 超过50%
+			newOne.setBaseYellow(1);
+			sb2.append("库存占比超45%:" + (fbi.getInventoryRatio() * 100) + "%").append(Constant.HTML_LINE);
+		}
+		// TODO 股东增持
+		// 高质押
+		ZhiYa zy = zhiYaService.getZhiYa(code);
+		if (zy.getHasRisk() == 1) {//
+			newOne.setBaseYellow(1);
+			sb2.append("高质押风险:" + zy.getDetail()).append(Constant.HTML_LINE);
+		}
+		// 分红
+		FenHong fh = chipsService.getFenHong(code);
+		if (fh.getTimes() <= 0) {
+			newOne.setBaseYellow(1);
+			sb2.append("无分红记录").append(Constant.HTML_LINE);
+		}
+		// ======== 蓝色警告 ========
+//		StringBuffer sb3 = new StringBuffer();
+//		if (fa.getCurrYear().getGsjlr() < 0) {
+//			newOne.setBaseYellow(1);
+//			sb3.append("年报亏损").append(Constant.HTML_LINE);
+//		}
+		// ======== 绿色警告 ========
+		newOne.setId(code);
+		listLast.add(newOne);
+//		if (saveHist) {
+//			// copy history
+//			CodeBaseModelHist hist = new CodeBaseModelHist();
+//			BeanCopy.copy(newOne, hist);
+//			hist.setId(code + treadeDate);
+//			listHist.add(hist);
+//		}
+	}
 
 	public synchronized void runJob(boolean isJob, int date) {
 		try {
@@ -511,6 +677,22 @@ public class CodeModelService {
 		return c;
 	}
 
+	public CodeBaseModel2 getLastOneByCode2(String code) {
+		log.info("getLastOneByCode:{}", code);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("id", code));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+
+		Page<CodeBaseModel2> page = codeBaseModel2Dao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		CodeBaseModel2 cbm = new CodeBaseModel2();
+		cbm.setCode(code);
+		return cbm;
+	}
+
 	public CodeBaseModel getLastOneByCode(String code) {
 		log.info("getLastOneByCode:{}", code);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
@@ -590,6 +772,32 @@ public class CodeModelService {
 		Page<CodeBaseModelHist> page = codeBaseModelHistDao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			return page.getContent().get(0);
+		}
+		return null;
+	}
+
+	private FinanceBaseInfoHangye getFinanceBaseInfoHangye(String code, int year, int quarter) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.matchPhraseQuery("year", year));
+		bqb.must(QueryBuilders.matchPhraseQuery("quarter", quarter));
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+
+		Page<FinanceBaseInfoHangye> page = esFinanceBaseInfoHyDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		} else {
+//			bqb = QueryBuilders.boolQuery();
+//			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+//			queryBuilder = new NativeSearchQueryBuilder();
+//			FieldSortBuilder sort = SortBuilders.fieldSort("updateDate").unmappedType("integer").order(SortOrder.DESC);
+//			sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+//			page = esFinanceBaseInfoHyDao.search(sq);
+//			if (page != null && !page.isEmpty()) {
+//				return page.getContent().get(0);
+//			}
 		}
 		return null;
 	}

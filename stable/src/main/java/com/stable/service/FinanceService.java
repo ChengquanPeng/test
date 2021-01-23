@@ -97,6 +97,7 @@ public class FinanceService {
 			List<FinanceBaseInfo> datas = EastmoneySpider.getNewFinanceAnalysis(code, 0);// 0按报告期、1=年报
 			if (datas == null || datas.size() <= 0) {
 				log.warn("未从东方财富抓取到Finane记录,code={}", code);
+				WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录,code=" + code);
 				return false;
 			}
 			log.warn("从东方财富抓取到Finane记录{}条,code={}", datas.size(), code);
@@ -397,12 +398,12 @@ public class FinanceService {
 		zhiYaService.fetchBySun();
 		thsHolderSpider.dofetchHolder();
 		fetchFinances();
-		executeHangye();
+		executeHangye(date);
 		// 运行完财务和行业对比后,重新运行
-		codeModelService.runJob(true, date);
+		codeModelService.runJobv2(true, date);
 	}
 
-	private List<FinanceBaseInfoHangye> executeHangye() {
+	private List<FinanceBaseInfoHangye> executeHangye(int date) {
 		log.info("行业对比开始");
 		cache = new HashMap<String, FinanceBaseInfoHangye>();
 		List<FinanceBaseInfoHangye> hys = new LinkedList<FinanceBaseInfoHangye>();
@@ -413,11 +414,13 @@ public class FinanceService {
 				List<CodeConcept> cc = conceptService.getCodeConcept(code, 2);// 同花顺行业
 				if (cc != null && cc.size() > 0) {
 					CodeConcept c = cc.get(0);
+					log.info("code={},ConceptId={},ConceptName={}", code, c.getConceptId(), c.getConceptName());
 					List<CodeConcept> allcode = conceptService.getCodes(c.getConceptId());
 					FinanceBaseInfo fbi = this.getLastFinaceReport(code);
 					if (fbi != null) {
 						if (!getFromCache(code, fbi.getYear(), fbi.getQuarter())) {// from chace
-							executeHangyeExt1(fbi.getYear(), fbi.getQuarter(), allcode, hys);
+							executeHangyeExt1(date, fbi.getYear(), fbi.getQuarter(), allcode, hys, c.getConceptId(),
+									c.getConceptName());
 						}
 					}
 				}
@@ -443,7 +446,8 @@ public class FinanceService {
 
 	private Map<String, FinanceBaseInfoHangye> cache = new HashMap<String, FinanceBaseInfoHangye>();
 
-	private void executeHangyeExt1(int year, int quarter, List<CodeConcept> allcode, List<FinanceBaseInfoHangye> hys) {
+	private void executeHangyeExt1(int updateDate, int year, int quarter, List<CodeConcept> allcode,
+			List<FinanceBaseInfoHangye> hys, String hyid, String hyName) {
 		List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
 		double mll = 0.0;
 		int mllc = 0;
@@ -452,6 +456,7 @@ public class FinanceService {
 		double yszk = 0.0;
 		int yszkc = 0;
 		for (CodeConcept c : allcode) {
+			log.info("板块：{},code={}", c.getConceptName(), c.getCode());
 			FinanceBaseInfo f = this.getLastFinaceReport(c.getCode(), year, quarter);
 			if (f != null) {
 				if (f.getMll() != 0) {
@@ -467,7 +472,10 @@ public class FinanceService {
 			}
 		}
 		// ====毛利率====start====
-		double avgtMll = CurrencyUitl.roundHalfUp(mll / (double) mllc);
+		double avgtMll = 0.0;
+		if (mllc > 0) {
+			avgtMll = CurrencyUitl.roundHalfUp(mll / (double) mllc);
+		}
 		mllSort(rl);
 		for (int i = 0; i < rl.size(); i++) {// 有数据的
 			FinanceBaseInfo r = rl.get(i);
@@ -479,6 +487,9 @@ public class FinanceService {
 			hy.setYear(year);
 			hy.setQuarter(quarter);
 			hy.setId(hy.getCode() + year + "" + quarter);
+			hy.setHangyeId(hyid);
+			hy.setHangyeName(hyName);
+			hy.setUpdateDate(updateDate);
 			cache.put(hy.getId(), hy);
 			hys.add(hy);
 		}
@@ -493,6 +504,9 @@ public class FinanceService {
 				hy.setYear(year);
 				hy.setQuarter(quarter);
 				hy.setId(key);
+				hy.setHangyeId(hyid);
+				hy.setHangyeName(hyName);
+				hy.setUpdateDate(updateDate);
 				cache.put(hy.getId(), hy);
 				hys.add(hy);
 			}
@@ -500,7 +514,10 @@ public class FinanceService {
 		// ====毛利率====end====
 
 		// ====应收占款比率====start====
-		double avgtAr = CurrencyUitl.roundHalfUp(yszk / (double) yszkc);
+		double avgtAr = 0.0;
+		if (yszkc > 0) {
+			avgtAr = CurrencyUitl.roundHalfUp(yszk / (double) yszkc);
+		}
 		arSort(yszkl);
 		for (int i = 0; i < yszkl.size(); i++) {
 			FinanceBaseInfo r = rl.get(i);

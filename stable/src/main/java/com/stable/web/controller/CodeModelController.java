@@ -30,7 +30,7 @@ public class CodeModelController {
 			int date = DateUtil.getTodayIntYYYYMMDD();
 			date = tradeCalService.getPretradeDate(date);
 			// codeModelService.reset();
-			codeModelService.runJob(false, date);
+			codeModelService.runJobv2(false, date);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

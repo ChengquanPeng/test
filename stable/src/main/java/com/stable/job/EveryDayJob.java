@@ -52,7 +52,7 @@ public class EveryDayJob extends MySimpleJob {
 		// 周一周4执行，每周末抓完财报后运行
 		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY
 				&& cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
-			codeModelService.runJob(true, Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
+			codeModelService.runJobv2(true, Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
 		} else {
 			WxPushUtil.pushSystem1("周五，周六，周日每晚23点不在运行定时运行 code model,周日下午在继续运行！");
 		}
