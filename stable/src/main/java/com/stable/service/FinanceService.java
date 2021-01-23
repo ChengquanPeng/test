@@ -397,7 +397,7 @@ public class FinanceService {
 		zhiYaService.fetchBySun();
 		thsHolderSpider.dofetchHolder();
 		fetchFinances();
-		List<FinanceBaseInfoHangye> hys = executeHangye();// TODO
+		executeHangye();
 		// 运行完财务和行业对比后,重新运行
 		codeModelService.runJob(true, date);
 	}
