@@ -421,8 +421,8 @@ public class FinanceService {
 					}
 				}
 			} catch (Exception e) {
-				WxPushUtil.pushSystem1("质押抓包异常:" + code);
-				ErrorLogFileUitl.writeError(e, "质押", "", "");
+				WxPushUtil.pushSystem1("行业分析（毛利率，应收占款）计算异常:" + code);
+				ErrorLogFileUitl.writeError(e, "行业分析（毛利率，应收占款）计算异常:", "", "");
 			}
 		}
 		if (hys.size() > 0) {
