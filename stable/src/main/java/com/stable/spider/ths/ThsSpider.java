@@ -367,6 +367,10 @@ public class ThsSpider {
 		int cntCodelist = 0;
 		int limit = 1;
 
+		if (isFirday) {
+			limit = 10;
+		}
+
 		StringBuffer newGn = new StringBuffer();
 
 		int index = 1;
@@ -434,10 +438,8 @@ public class ThsSpider {
 				}
 				trytime = 0;
 
-				if (!isFirday) {
-					if (index > limit) {
-						break;
-					}
+				if (index > limit) {
+					break;
 				}
 			} catch (Exception e) {
 				trytime++;
