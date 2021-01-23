@@ -18,16 +18,16 @@ public class DividendController {
 	@Autowired
 	private DividendService dividendService;
 
-
 	/**
 	 * 获取分红信息
 	 */
 	@RequestMapping(value = "/query", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> query(String code, String proc, EsQueryPageReq page) {
+	public ResponseEntity<JsonResult> query(String code, String zsg, String proc, String queryYear,
+			EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
 			r.setStatus(JsonResult.OK);
-			r.setResult(dividendService.getListByCodeForWebPage(code, proc, page));
+			r.setResult(dividendService.getListByCodeForWebPage(code, zsg, proc, queryYear, page));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -44,7 +44,7 @@ public class DividendController {
 		JsonResult r = new JsonResult();
 		try {
 			r.setStatus(JsonResult.OK);
-			r.setResult(dividendService.getListByCodeForWebPage(code, null, page));
+			r.setResult(dividendService.getListByCodeForWebPage(code, null, null, null, page));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);
@@ -61,7 +61,7 @@ public class DividendController {
 		JsonResult r = new JsonResult();
 		try {
 			r.setStatus(JsonResult.OK);
-			r.setResult(dividendService.getListByCodeForWebPage(null, null, page));
+			r.setResult(dividendService.getListByCodeForWebPage(null, null, null, null, page));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

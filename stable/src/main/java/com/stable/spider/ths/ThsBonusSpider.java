@@ -169,11 +169,11 @@ public class ThsBonusSpider {
 								}
 								bh.setAmt(totalAmt);
 								bh.setStatus(status);
-								if (detail.contains("转") && detail.contains("股")) {
-									bh.setHasZhuanGu(1);
+								if (detail.contains("股") && (detail.contains("转") || detail.contains("送"))) {
+									bh.setHasZhuanGu(1);// 转送股
 								}
 								bh.setUpdate(sysdate);
-								//System.err.println(bh.toString());
+								// System.err.println(bh.toString());
 								bhl.add(bh);
 							}
 						} catch (Exception e) {

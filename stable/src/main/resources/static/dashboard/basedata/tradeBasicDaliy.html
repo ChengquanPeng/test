@@ -91,32 +91,32 @@
 							field : 'codeName',
 							title : '名称'
 						}, {
-							field : 'trade_date',
+							field : 'date',
 							title : '交易日期'
 						}, {
-							field : 'close',
+							field : 'yesterdayPrice',
+							title : '昨收'
+						}, {
+							field : 'closed',
 							title : '收盘价'
 						}, {
-							field : 'turnover_rate',
-							title : '换手率'
+							field : 'todayChangeRate',
+							title : '涨幅'
 						}, {
-							field : 'turnover_rate_f',
-							title : '换手率(流通)'
-						}, {
-							field : 'volume_ratio',
-							title : '量比'
-						}, {
-							field : 'pe',
-							title : '市盈率'
+							field : 'peTtm',
+							title : '市盈率ttm'
 						}, {
 							field : 'pb',
 							title : '市净率'
 						}, {
-							field : 'total_mv',
-							title : '总市值[万]'
+							field : 'totalMarketVal',
+							title : '总市值'
 						}, {
-							field : 'circ_mv',
-							title : '流通市值[万]'
+							field : 'circMarketVal',
+							title : '流通值'
+						}, {
+							field : 'szl',
+							title : '市赚率'
 						}],
 						responseHandler : function responseHandler(res) {
 							

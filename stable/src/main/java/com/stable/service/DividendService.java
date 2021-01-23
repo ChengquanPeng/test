@@ -54,13 +54,20 @@ public class DividendService {
 	@Autowired
 	private RedisUtil redisUtil;
 
-	public List<BonusHist> getListByCode(String code, String proc, EsQueryPageReq querypage) {
+	public List<BonusHist> getListByCode(String code, String zsg, String proc, String queryYear,
+			EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		}
 		if (StringUtils.isNotBlank(proc)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("status", proc));
+		}
+		if (StringUtils.isNotBlank(proc)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("hasZhuanGu", 1));
+		}
+		if (StringUtils.isNotBlank(queryYear)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("rptYear", queryYear.trim() + "年报"));
 		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("rptDate").unmappedType("integer").order(SortOrder.DESC);
 
@@ -72,13 +79,14 @@ public class DividendService {
 		if (page != null && !page.isEmpty()) {
 			return page.getContent();
 		}
-		log.info("no DividendHistory for code={}", code);
+		log.info("no DividendHistory for code={},proc={}", code, proc);
 		return null;
 	}
 
-	public List<DividendHistoryResp> getListByCodeForWebPage(String code, String proc, EsQueryPageReq querypage) {
+	public List<DividendHistoryResp> getListByCodeForWebPage(String code, String zsg, String proc, String queryYear,
+			EsQueryPageReq querypage) {
 		List<DividendHistoryResp> res = new LinkedList<DividendHistoryResp>();
-		List<BonusHist> list = this.getListByCode(code, proc, querypage);
+		List<BonusHist> list = this.getListByCode(code, zsg, proc, queryYear, querypage);
 		if (list != null) {
 			for (BonusHist dh : list) {
 				DividendHistoryResp resp = new DividendHistoryResp();
