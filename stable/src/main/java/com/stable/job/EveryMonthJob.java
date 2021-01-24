@@ -8,10 +8,6 @@ import com.stable.service.TradeCalService;
 
 import lombok.extern.log4j.Log4j2;
 
-/**
- * 周一到周五执行的任务 18:00
- * 
- */
 @Component
 @Log4j2
 public class EveryMonthJob extends MySimpleJob {

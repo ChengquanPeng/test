@@ -32,7 +32,7 @@
 	<job:simple id="EveryWorkingDayJobThsGn"
 		class="com.stable.job.EveryWorkingDayJobThsGn"
 		registry-center-ref="regCenter" cron="0 05 16 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上16点05执行任务(同花顺概念)"
+		sharding-item-parameters="0=a" description="每日16点05执行任务(同花顺概念)"
 		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryWorkingDayJob"
@@ -55,12 +55,6 @@
 		description="每日凌晨01点05执行任务(股东人数)" sharding-total-count="1"
 		overwrite="true" />
 	
-	<job:simple id="EveryWorkingDayMorningJob"
-		class="com.stable.job.EveryWorkingDayMorningJob"
-		registry-center-ref="regCenter" cron="0 15 4 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日早上4点15执行任务(当日分红除权)"
-		sharding-total-count="1" overwrite="true" />
-
 	<job:simple id="EveryWeekMonJob"
 		class="com.stable.job.EveryWeekMonJob" registry-center-ref="regCenter"
 		cron="0 15 13 ? * SUN" sharding-item-parameters="0=a"

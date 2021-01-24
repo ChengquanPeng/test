@@ -39,6 +39,10 @@ import lombok.extern.log4j.Log4j2;
 @Component
 @Log4j2
 public class ThsBonusSpider {
+	private static final String DONE = "已实施";
+	private static final String NO_PASS = "未通过";
+	private static final String STOP = "停止实施";
+	private static final String TIME_OUT = "到期失效";
 	@Autowired
 	private HtmlunitSpider htmlunitSpider;
 	@Autowired
@@ -215,9 +219,13 @@ public class ThsBonusSpider {
 							zf.setStatusDesc(ts[1]);
 							zf.setIssueClz(ts[2]);
 							zf.setIssueType(ts[3]);
-							if (zf.getStatusDesc().contains("已实施")) {
+							if (zf.getStatusDesc().contains(DONE)) {// 已完成
 								zf.setStatus(2);
 								getDetail = true;
+							} else if (zf.getStatusDesc().contains(NO_PASS) || zf.getStatusDesc().contains(STOP)
+									|| zf.getStatusDesc().contains(TIME_OUT)) {
+								// 停止
+								zf.setStatus(3);
 							}
 //						实际发行价格：17.0200元 新股上市公告日：2017-03-22
 //						实际发行数量：1.97亿股 发行新股日：2017-03-22

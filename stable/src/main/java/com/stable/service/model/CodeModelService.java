@@ -28,6 +28,7 @@ import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.EsCodeBaseModelDao;
 import com.stable.es.dao.base.EsCodeBaseModelHistDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
+import com.stable.service.AnnouncementService;
 import com.stable.service.BuyBackService;
 import com.stable.service.ChipsService;
 import com.stable.service.CodePoolService;
@@ -45,6 +46,8 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.AnnMentParamUtil;
+import com.stable.vo.bus.AnnouncementHist;
 import com.stable.vo.bus.BonusHist;
 import com.stable.vo.bus.BuyBackInfo;
 import com.stable.vo.bus.CodeBaseModel;
@@ -56,6 +59,7 @@ import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
+import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZhiYa;
@@ -67,6 +71,8 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class CodeModelService {
+	@Autowired
+	private AnnouncementService announcementService;
 	@Autowired
 	private TradeCalService tradeCalService;
 	@Autowired
@@ -111,6 +117,9 @@ public class CodeModelService {
 	}
 
 	private synchronized void runByJobv2(int tradeDate) {
+		Date now = new Date();
+		oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
+		halfYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -180));
 		log.info("CodeModel processing request date={}", tradeDate);
 		if (!tradeCalService.isOpen(tradeDate)) {
 			tradeDate = tradeCalService.getPretradeDate(tradeDate);
@@ -127,8 +136,7 @@ public class CodeModelService {
 		List<CodePool> list = new LinkedList<CodePool>();
 		for (StockBaseInfo s : codelist) {
 			try {
-				getBaseAnalyse(s, tradeDate, oneYearAgo, nextYear, updatedate, listLast, listHist, true,
-						histMap.get(s.getCode()), list, map);
+				getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listLast, listHist);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -145,20 +153,19 @@ public class CodeModelService {
 				"Seq5=> CODE-MODEL " + tradeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listHist.size());
 	}
 
-	private void getBaseAnalyse(StockBaseInfo s, int treadeDate, int oneYearAgo, int nextYear, int updatedate,
-			List<CodeBaseModel2> listLast, List<CodeBaseModelHist> listHist, boolean isJob, CodeBaseModel lastOne,
-			List<CodePool> list, Map<String, CodePool> map) {
+	private void getBaseAnalyse(StockBaseInfo s, int tradeDate, CodeBaseModel lastOne, List<CodeBaseModel2> listLast,
+			List<CodeBaseModelHist> listHist) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
 		// 财务
-		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(code, treadeDate,
+		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(code, tradeDate,
 				EsQueryPageUtil.queryPage9999);
 		// FinanceBaseInfo fbi = financeService.getFinaceReportByLteDate(code,
 		// treadeDate);
 		if (fbis == null) {
-			boolean onlineYear = stockBasicService.online1YearChk(code, treadeDate);
+			boolean onlineYear = stockBasicService.online1YearChk(code, tradeDate);
 			if (onlineYear) {
-				ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, treadeDate + "", "Code Model错误");
+				ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, tradeDate + "", "Code Model错误");
 			} else {
 				log.info("{},Online 上市不足1年", code);
 			}
@@ -171,7 +178,7 @@ public class CodeModelService {
 		FinanceBaseInfo fbi = fa.getCurrJidu();
 		CodeBaseModel2 newOne = getLastOneByCode2(code);
 		newOne.setCode(code);
-		newOne.setDate(treadeDate);
+		newOne.setDate(tradeDate);
 		newOne.setCurrYear(fbi.getYear());
 		newOne.setCurrQuarter(fbi.getQuarter());
 
@@ -184,7 +191,7 @@ public class CodeModelService {
 		}
 		if (fbi.getBustUpRisks() == 1) {
 			newOne.setBaseRed(1);
-			sb1.append("破产风险:净资产低于应付账款").append(Constant.HTML_LINE);
+			sb1.append("破产风险:负债超高-净资产低于应付账款").append(Constant.HTML_LINE);
 		}
 		if (fbi.getFundNotOk() == 1) {
 			newOne.setBaseRed(1);
@@ -202,22 +209,21 @@ public class CodeModelService {
 		}
 		if (fbi.getFundNotOk2() == 1) {
 			newOne.setBaseYellow(1);
-			sb2.append("资金紧张:应付利息较高").append(Constant.HTML_LINE);
+			sb2.append("资金紧张:应付利息较高()").append(Constant.HTML_LINE);
 		}
 		// 毛利，应收账款
 		FinanceBaseInfoHangye hy = this.getFinanceBaseInfoHangye(code, fbi.getYear(), fbi.getQuarter());
 		if (hy != null) {
-			if (hy.getMll() > 60.0 && hy.getMllRank() <= 5) {
+			if (hy.getMll() > 0 && hy.getMll() > hy.getMllAvg() && hy.getMllRank() <= 5) {
 				newOne.setBaseYellow(1);
 				sb2.append("(需人工复核)毛利率:" + hy.getMll() + " 行业平均:" + hy.getMllAvg() + ", 行业排名:" + hy.getMllRank())
 						.append(Constant.HTML_LINE);
 			}
-			// TODO
-//			if (hy.getYszk() > 60.0 && hy.getYszkRank() <= 5) {
-//				newOne.setBaseYellow(1);
-//				sb2.append("(需人工复核)毛利率:" + hy.getYszk() + " 行业平均:" + hy.getYszkAvg() + ", 行业排名:" + hy.getYszkRank())
-//						.append(Constant.HTML_LINE);
-//			}
+			if (hy.getYszk() > 0 && hy.getYszk() > hy.getYszkAvg() && hy.getYszkRank() <= 5) {
+				newOne.setBaseYellow(1);
+				sb2.append("(需人工复核)应收账款:" + hy.getYszk() + " 行业平均:" + hy.getYszkAvg() + ", 行业排名:" + hy.getYszkRank())
+						.append(Constant.HTML_LINE);
+			}
 		}
 		// 商誉占比
 		if (fbi.getGoodWillRatioNetAsset() > 0.15) {// 超过15%
@@ -229,7 +235,14 @@ public class CodeModelService {
 			newOne.setBaseYellow(1);
 			sb2.append("库存占比超45%:" + (fbi.getInventoryRatio() * 100) + "%").append(Constant.HTML_LINE);
 		}
-		// TODO 股东增持
+		// 股东增持（一年）
+		AnnouncementHist zengchi = announcementService.getLastRecordType(code, AnnMentParamUtil.zhengchi.getType(),
+				oneYearAgo);
+		if (zengchi != null) {
+			newOne.setBaseYellow(1);
+			sb2.append("股东/高管增持:" + (zengchi.getRptDate()) + "%").append(Constant.HTML_LINE);
+
+		}
 		// 高质押
 		ZhiYa zy = zhiYaService.getZhiYa(code);
 		if (zy.getHasRisk() == 1) {//
@@ -242,15 +255,63 @@ public class CodeModelService {
 			newOne.setBaseYellow(1);
 			sb2.append("无分红记录").append(Constant.HTML_LINE);
 		}
+		// 限售股解禁（2年：前后1年）
+		List<Jiejin> jj = chipsService.getBf2yearJiejin(code);
+		if (jj != null) {
+			newOne.setBaseYellow(1);
+			sb2.append("前后1年解禁记录数:" + jj.size()).append(Constant.HTML_LINE);
+		}
 
-		// ======== 蓝色警告 ========
-//		StringBuffer sb3 = new StringBuffer();
-//		if (fa.getCurrYear().getGsjlr() < 0) {
-//			newOne.setBaseYellow(1);
-//			sb3.append("年报亏损").append(Constant.HTML_LINE);
-//		}
-		// ======== 绿色警告 ========
-		//
+		// ======== 蓝色警告 && 绿色 ========
+		StringBuffer sb3 = new StringBuffer();
+		StringBuffer sb4 = new StringBuffer();
+		if (fa.getCurrJidu().getYyzsrtbzz() <= 0) {
+			newOne.setBaseBlue(1);
+			sb3.append("营收同比下降").append(Constant.HTML_LINE);
+		} else {
+			newOne.setBaseGreen(1);
+			sb4.append("营收同比上涨").append(Constant.HTML_LINE);
+		}
+		if (fa.getCurrJidu().getGsjlrtbzz() <= 0) {
+			newOne.setBaseBlue(1);
+			sb3.append("净利同比下降").append(Constant.HTML_LINE);
+		} else {
+			newOne.setBaseGreen(1);
+			sb4.append("净利同比上涨").append(Constant.HTML_LINE);
+		}
+		evaluateStep1(newOne, fa, fbis);
+		if (newOne.getSylType() == 4 || newOne.getSylType() == 1) {
+			newOne.setBaseGreen(1);
+			sb4.append("资产收益率上涨").append(Constant.HTML_LINE);
+		} else {
+			newOne.setBaseBlue(1);
+			sb3.append("资产收益率下降").append(Constant.HTML_LINE);
+		}
+		if (newOne.getSylType() == 4 || newOne.getSylType() == 2) {
+			newOne.setBaseGreen(1);
+			sb4.append("资产收益率年超20%").append(Constant.HTML_LINE);
+		}
+		// 正在增发中
+		chkZf(newOne);
+		if (newOne.getZfStatus() == 1 || newOne.getZfStatus() == 2) {
+			newOne.setBaseBlue(1);
+			sb3.append("增发进度" + (s.getCompnayType() == 1 ? "(国资)" : "") + ":" + newOne.getZfStatusDesc())
+					.append(Constant.HTML_LINE);
+		}
+		// 股东减持（一年）
+		AnnouncementHist jianchi = announcementService.getLastRecordType(code, AnnMentParamUtil.jianchi.getType(),
+				oneYearAgo);
+		if (jianchi != null) {
+			newOne.setBaseBlue(1);
+			sb2.append("股东/高管减持:" + (jianchi.getRptDate()) + "%").append(Constant.HTML_LINE);
+		}
+		// 回购（半年内）
+		AnnouncementHist huigou = announcementService.getLastRecordType(code, AnnMentParamUtil.huigou.getType(),
+				halfYearAgo);
+		if (huigou != null) {
+			newOne.setBaseBlue(1);
+			sb2.append("回购:" + (huigou.getRptDate()) + "%").append(Constant.HTML_LINE);
+		}
 
 		if (newOne.getBaseRed() > 0) {
 			newOne.setBaseRedDesc(sb1.toString());
@@ -262,8 +323,16 @@ public class CodeModelService {
 		} else {
 			newOne.setBaseYellowDesc("");
 		}
-		// TODO
-
+		if (newOne.getBaseBlue() > 0) {
+			newOne.setBaseBlueDesc(sb3.toString());
+		} else {
+			newOne.setBaseBlueDesc("");
+		}
+		if (newOne.getBaseGreen() > 0) {
+			newOne.setBaseGreenDesc(sb4.toString());
+		} else {
+			newOne.setBaseGreenDesc("");
+		}
 		newOne.setId(code);
 		listLast.add(newOne);
 //		if (saveHist) {
@@ -285,11 +354,13 @@ public class CodeModelService {
 		}
 	}
 
-	private int start = 0;
+	private int oneYearAgo = 0;// 一年以前
+	private int halfYearAgo = 0;// 半年以前
 
 	private synchronized void runByJob(int tradeDate) {
 		Date now = new Date();
-		start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
+		oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
+		halfYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -180));
 //		end = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 370));
 		log.info("CodeModel processing request date={}", tradeDate);
 		if (!tradeCalService.isOpen(tradeDate)) {
@@ -566,20 +637,39 @@ public class CodeModelService {
 
 		// newOne
 		evaluateStep1(newOne, fa, fbis);
-		CodePool c = findBigBoss(newOne.getCode(), newOne.getDate(), list, map, fbis, fa, lastOne);
-		chkZf(c, newOne);// 增发
+		findBigBoss(newOne.getCode(), newOne.getDate(), list, map, fbis, fa, lastOne);
+//		chkZf(c, newOne);// 增发
 	}
 
 	// 增发
-	private void chkZf(CodePool c, CodeBaseModel newOne) {
+	private void chkZf(CodeBaseModel2 newOne) {
 		ZengFa zengfa = chipsService.getLastZengFa(newOne.getCode());
 		// start 一年以前
-		if (zengfa != null && zengfa.getStartDate() > start || zengfa.getEndDate() > start) {
+		if (zengfa != null && (zengfa.getStartDate() > oneYearAgo || zengfa.getEndDate() > oneYearAgo
+				|| zengfa.getZjhDate() > oneYearAgo)) {
 			newOne.setZfStatus(zengfa.getStatus());
+			newOne.setZfStatusDesc(zengfa.getStatusDesc());
 		} else {
 			newOne.setZfStatus(0);
+			newOne.setZfStatusDesc("");
 		}
-		c.setZfStatus(newOne.getZfStatus());
+	}
+
+	private void evaluateStep1(CodeBaseModel2 newOne, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
+		FinanceBaseInfo currJidu = fa.getCurrJidu();
+		newOne.setSyl(currJidu.getJqjzcsyl());
+		newOne.setSylttm(plateService.getSylTtm(fbis));
+		newOne.setSyldjd(plateService.getSyldjd(currJidu));// 单季度？
+		if (newOne.getSyldjd() > newOne.getSylttm()) {
+			newOne.setSylType(1);// 自身收益率增长
+		}
+		if (newOne.getSylttm() >= 5.0) {// 单季度5%，全年20%
+			if (newOne.getSylType() == 1) {
+				newOne.setSylType(4);// 同时
+			} else {
+				newOne.setSylType(2);// 年收益率超过5.0%*4=20%
+			}
+		}
 	}
 
 	private void evaluateStep1(CodeBaseModel newOne, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
@@ -590,7 +680,7 @@ public class CodeModelService {
 		if (newOne.getSyldjd() > newOne.getSylttm()) {
 			newOne.setSylType(1);// 自身收益率增长
 		}
-		if (newOne.getSylttm() >= 5.0) {
+		if (newOne.getSylttm() >= 5.0) {// 单季度5%，全年20%
 			if (newOne.getSylType() == 1) {
 				newOne.setSylType(4);// 同时
 			} else {

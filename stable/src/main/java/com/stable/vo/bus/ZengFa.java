@@ -22,7 +22,7 @@ public class ZengFa extends EsBase {
 	private String code;
 
 	@Field(type = FieldType.Integer)
-	private int status;// 1开始，2完成
+	private int status;// 1开始，2完成，3作废
 	@Field(type = FieldType.Keyword)
 	private String statusDesc;// 进度
 	@Field(type = FieldType.Text)
@@ -48,7 +48,7 @@ public class ZengFa extends EsBase {
 
 	@Field(type = FieldType.Integer)
 	private int update;
-	
+
 	public ZengFa() {
 
 	}

@@ -32,10 +32,11 @@ public class DateUtil {
 			SimpleDateFormat format1 = new SimpleDateFormat(YYYY_MM_DD);
 			return Integer.valueOf(format1.format(d));
 		} catch (ParseException e) {
-			//e.printStackTrace();
+			// e.printStackTrace();
 			throw new RuntimeException("ParseException:yyyyMMdd:" + yyyyMMdd);
 		}
 	}
+
 	public static int convertDate3(String yyyyMMdd) {
 		try {
 			SimpleDateFormat format2 = new SimpleDateFormat(YYYY_MM_DD3);
@@ -43,10 +44,11 @@ public class DateUtil {
 			SimpleDateFormat format1 = new SimpleDateFormat(YYYY_MM_DD);
 			return Integer.valueOf(format1.format(d));
 		} catch (ParseException e) {
-			//e.printStackTrace();
+			// e.printStackTrace();
 			throw new RuntimeException("ParseException:yyyyMMdd:" + yyyyMMdd);
 		}
 	}
+
 	public static Date parseDate3(String yyyyMMdd3) {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD3);
 		try {
@@ -56,8 +58,14 @@ public class DateUtil {
 			throw new RuntimeException("ParseException:yyyyMMdd:" + yyyyMMdd3);
 		}
 	}
+
 	public static String formatYYYYMMDD(Date date) {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
+		return format.format(date);
+	}
+
+	public static String formatYYYYMMDD2(Date date) {
+		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD2);
 		return format.format(date);
 	}
 
@@ -98,6 +106,18 @@ public class DateUtil {
 	public static String getTodayYYYYMMDDHHMMSS() {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
 		return format.format(new Date());
+	}
+
+	public static int getTodayYYYYMMDDHHMMSS(String time) {
+		try {
+			SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
+			Date d = format.parse(time);
+
+			return formatYYYYMMDDReturnInt(d);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 
 	public static Date parseTodayYYYYMMDDHHMMSS(String time) {

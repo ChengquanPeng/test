@@ -1,6 +1,5 @@
 package com.stable.job;
 
-import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -11,6 +10,7 @@ import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.config.SpringConfig;
 import com.stable.service.BuyBackService;
 import com.stable.service.model.CodeModelService;
+import com.stable.spider.jys.JysSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.FileDeleteUitl;
 import com.stable.utils.SpringUtil;
@@ -30,6 +30,8 @@ public class EveryDayJob extends MySimpleJob {
 	private BuyBackService buyBackService;
 	@Autowired
 	private CodeModelService codeModelService;
+	@Autowired
+	private JysSpider jysSpider;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
@@ -41,11 +43,10 @@ public class EveryDayJob extends MySimpleJob {
 		FileDeleteUitl.deletePastDateFile(efc.getModelImageFloder());
 		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloder());
 		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloderDesc());
-		try {
-			Thread.sleep(Duration.ofMinutes(5).toMillis());
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+
+		log.info("交易所公告");
+		jysSpider.byJob();
+
 		// codeAttentionService.fetchAll();
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());

@@ -132,6 +132,27 @@ public class HttpUtil {
 		return jsonObj;
 	}
 
+	public static String doGet3_1(String url, Map<String, String> header) {
+		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+		HttpGet httpget = new HttpGet(url);
+		try {
+			if (header != null) {
+				header.keySet().forEach(key -> {
+					httpget.setHeader(key, header.get(key));
+				});
+			}
+
+			HttpResponse response = httpclient.execute(httpget);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				return EntityUtils.toString(entity, UTF_8);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+
 	public static JSONObject doPost(String url) {
 		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
 		HttpPost httpPost = new HttpPost(url);
@@ -169,6 +190,23 @@ public class HttpUtil {
 			e.printStackTrace();
 		}
 		return jsonObj;
+	}
+
+	public static String doPost2(String url, String json) {
+		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+		HttpPost httpPost = new HttpPost(url);
+		try {
+			httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
+			httpPost.setEntity(new StringEntity(json, UTF_8));
+			HttpResponse response = httpclient.execute(httpPost);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				return EntityUtils.toString(entity, UTF_8);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return "";
 	}
 
 }

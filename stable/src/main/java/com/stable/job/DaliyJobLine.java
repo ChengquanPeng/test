@@ -33,7 +33,7 @@ public class DaliyJobLine {
 		log.info("DaliyJobLine start");
 		log.info("1.同步股票列表");
 		stockBasicService.jobSynStockList(true);
-		log.info("2.同步股票列表");
+		log.info("2.快预报");
 		financeService.jobSpiderKuaiYuBao();
 		line1();
 		log.info("EveryWorkingDayJob end");

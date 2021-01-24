@@ -243,7 +243,8 @@ public class EastmoneySpider {
 							if (fbi.getInterestPay() > 0) {// 应付利息:如果较高
 								double jieqian = fbi.getInterestPay() * 10;// 大概借的钱=利息*10倍（10%的利息）
 								if (jieqian > chkLine) {// 借钱超过10亿
-									if (fbi.getMonetaryFund() > chkLine || fbi.getRetaineDearning() > chkLine) {
+									if (fbi.getMonetaryFund() > chkLine || fbi.getRetaineDearning() > chkLine
+											|| (fbi.getMonetaryFund() + fbi.getRetaineDearning()) > chkLine) {
 										// 如果货币资金和未分配利润较高，明明有钱为什么借钱，
 										fbi.setFundNotOk2(1);
 									}
@@ -258,7 +259,7 @@ public class EastmoneySpider {
 //						实务中主要核算各项保证金和存入支付宝等第三方支付平台的款项。
 							//
 //						现金及现金等价物对流动性要求更高，需是3个月内可以使用的，所以，需要在在货币资金的基础上剔除一些受限资产。
-							// 应收账款-占比 同行业//TODO
+							// 应收账款-占比 同行业
 							if (fbi.getSumLasset() > 0) {
 								fbi.setAccountrecRatio(
 										CurrencyUitl.roundHalfUp(fbi.getAccountrec() / fbi.getSumLasset()));
