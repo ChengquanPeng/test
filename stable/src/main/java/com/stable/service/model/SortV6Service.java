@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 
-import javax.annotation.PostConstruct;
-
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -300,11 +298,11 @@ public class SortV6Service {
 
 	}
 
-	@PostConstruct
-	public void test6() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
+//	@PostConstruct
+//	public void test6() {
+//		new Thread(new Runnable() {
+//			@Override
+//			public void run() {
 //				String code = "600789";
 //				int date = 20200117;
 //				String code = "603477";
@@ -354,8 +352,8 @@ public class SortV6Service {
 //				} else {
 //					log.info("{} 不满足条件", code);
 //				}
-			}
-		}).start();
-	}
+//			}
+//		}).start();
+//	}
 
 }

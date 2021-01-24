@@ -190,6 +190,10 @@ public class CodeModelService {
 			newOne.setBaseRed(1);
 			sb1.append("资金紧张:流动负债高于货币资金").append(Constant.HTML_LINE);
 		}
+		if (fbi.getNetAsset() < 0) {
+			newOne.setBaseRed(1);
+			sb1.append("净资产小于0").append(Constant.HTML_LINE);
+		}
 		// ======== 黄色警告 ========
 		StringBuffer sb2 = new StringBuffer();
 		if (fa.getCurrYear().getGsjlr() < 0) {
@@ -238,6 +242,7 @@ public class CodeModelService {
 			newOne.setBaseYellow(1);
 			sb2.append("无分红记录").append(Constant.HTML_LINE);
 		}
+
 		// ======== 蓝色警告 ========
 //		StringBuffer sb3 = new StringBuffer();
 //		if (fa.getCurrYear().getGsjlr() < 0) {
@@ -245,6 +250,20 @@ public class CodeModelService {
 //			sb3.append("年报亏损").append(Constant.HTML_LINE);
 //		}
 		// ======== 绿色警告 ========
+		//
+
+		if (newOne.getBaseRed() > 0) {
+			newOne.setBaseRedDesc(sb1.toString());
+		} else {
+			newOne.setBaseRedDesc("");
+		}
+		if (newOne.getBaseYellow() > 0) {
+			newOne.setBaseYellowDesc(sb2.toString());
+		} else {
+			newOne.setBaseYellowDesc("");
+		}
+		// TODO
+
 		newOne.setId(code);
 		listLast.add(newOne);
 //		if (saveHist) {

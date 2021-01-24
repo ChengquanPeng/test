@@ -519,14 +519,6 @@ public class FinanceService {
 			avgtAr = CurrencyUitl.roundHalfUp(yszk / (double) yszkc);
 		}
 		arSort(yszkl);
-		for (int i = 0; i < yszkl.size(); i++) {
-			FinanceBaseInfo r = rl.get(i);
-			String key = r.getCode() + year + "" + quarter;
-			FinanceBaseInfoHangye hy = cache.get(key);
-			hy.setYszk(r.getAccountrecRatio());
-			hy.setYszkRank((i + 1));
-			hy.setYszkAvg(avgtAr);
-		}
 		for (CodeConcept c : allcode) {
 			String key = c.getCode() + year + "" + quarter;
 			FinanceBaseInfoHangye hy = cache.get(key);
@@ -534,6 +526,14 @@ public class FinanceService {
 			hy.setYszkRank(9999);
 			hy.setYszkAvg(avgtAr);
 		}
+		for (int i = 0; i < yszkl.size(); i++) {
+			FinanceBaseInfo r = rl.get(i);
+			String key = r.getCode() + year + "" + quarter;
+			FinanceBaseInfoHangye hy = cache.get(key);
+			hy.setYszk(r.getAccountrecRatio());
+			hy.setYszkRank((i + 1));
+		}
+
 		// ====应收占款比率====end====
 	}
 

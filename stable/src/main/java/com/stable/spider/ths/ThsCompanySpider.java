@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,10 +52,10 @@ public class ThsCompanySpider {
 			}
 		}).start();
 	}
-
+	
 	public void dofetchInner() {
 		try {
-			dofetchHolderInner();
+			dofetchInner2();
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "同花顺公司资料异常运行异常..", "", "");
@@ -64,9 +66,10 @@ public class ThsCompanySpider {
 	private String f1 = "国有资产";
 	private String f2 = "教育部";
 	private String f3 = "财政局";
-	private String f4 = "财政部";
+	private String f4 = "财政厅";
+	private String f5 = "财政部";
 
-	private void dofetchHolderInner() {
+	private synchronized void dofetchInner2() {
 		if (header == null) {
 			header = new HashMap<String, String>();
 		}
@@ -74,10 +77,10 @@ public class ThsCompanySpider {
 		List<StockBaseInfo> upd = new LinkedList<StockBaseInfo>();
 		for (StockBaseInfo s : codelist) {
 			try {
-				String r = dofetchHolderInner(s.getCode());
+				String r = dofetchInner3(s.getCode());
 				if (r != null) {
 					s.setFinalControl(r.trim());
-					if (r.contains(f1) || r.contains(f2) || r.contains(f3) || r.contains(f4)) {
+					if (r.contains(f1) || r.contains(f2) || r.contains(f3) || r.contains(f4) || r.contains(f5)) {
 						s.setCompnayType(1);
 					} else {
 						s.setCompnayType(0);
@@ -94,7 +97,7 @@ public class ThsCompanySpider {
 		}
 	}
 
-	private String dofetchHolderInner(String code) {
+	private String dofetchInner3(String code) {
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(urlbase, code, System.currentTimeMillis());
@@ -109,21 +112,38 @@ public class ThsCompanySpider {
 				HtmlElement table = body.getElementsByAttribute("table", "class", "m_table ggintro managelist").get(0);
 				DomElement tbody = table.getFirstElementChild();
 				Iterator<DomElement> it0 = tbody.getChildElements().iterator();
-				it0.next();
-				it0.next();
-				it0.next();
-				it0.next();
-				DomElement finaletr = it0.next();
-				DomElement td = finaletr.getFirstElementChild();
-				DomElement div = td.getFirstElementChild();
-				Iterator<DomElement> it1 = div.getChildElements().iterator();
-				it1.next();
-				it1.next();
-				it1.next();
-				DomElement finale = it1.next();
-				String res = finale.asText();
+				it0.next();// 主营业务
+				it0.next();// 产品名称
+				DomElement holder = it0.next();// 控股股东
+				DomElement finalHolder = it0.next();// 实际控制人
+
+				try {
+					DomElement finaletr = it0.next();// 最终控制人
+					DomElement td = finaletr.getFirstElementChild();
+					DomElement div = td.getFirstElementChild();
+					Iterator<DomElement> it1 = div.getChildElements().iterator();
+					it1.next();
+					it1.next();
+					it1.next();
+					DomElement finale = it1.next();
+					String res = finale.asText();
 //				System.err.println(res);
-				return res;
+					return res;
+				} catch (Exception e) {
+					try {
+						DomElement td = finalHolder.getFirstElementChild();
+						DomElement div = td.getFirstElementChild();
+						Iterator<DomElement> it1 = div.getChildElements().iterator();
+						it1.next();
+						return it1.next().asText();
+					} catch (Exception e2) {
+						DomElement td = holder.getFirstElementChild();
+						DomElement div = td.getFirstElementChild();
+						Iterator<DomElement> it1 = div.getChildElements().iterator();
+						it1.next();
+						return it1.next().asText();
+					}
+				}
 			} catch (Exception e2) {
 				e2.printStackTrace();
 				trytime++;
@@ -144,6 +164,6 @@ public class ThsCompanySpider {
 		ThsCompanySpider ts = new ThsCompanySpider();
 		ts.htmlunitSpider = new HtmlunitSpider();
 		ts.header = new HashMap<String, String>();
-		System.err.println(ts.dofetchHolderInner("601989"));
+		System.err.println(ts.dofetchInner3("002464"));
 	}
 }
