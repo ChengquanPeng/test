@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -37,6 +38,7 @@ import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.WeekendFinFetchRtl;
 import com.stable.vo.bus.CodeConcept;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
@@ -395,14 +397,34 @@ public class FinanceService {
 	public synchronized void byJob() {
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		log.info("模型开始之前运行执行：1.质押，2.股东人数");
+		WeekendFinFetchRtl rtl = new WeekendFinFetchRtl();
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				thsHolderSpider.dofetchHolder();
+				rtl.setThsHolderOk(true);
 			}
 		}).start();
-		zhiYaService.fetchBySun();
-		fetchFinances();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				zhiYaService.fetchBySun();
+				rtl.setDfZfOk(true);
+			}
+		}).start();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				fetchFinances();
+				rtl.setDfFinOk(true);
+			}
+		}).start();
+
+		while (!rtl.isAllOk()) {
+			log.info("没有完成所有事项，继续等待");
+			ThreadsUtil.sleep(15, TimeUnit.MINUTES);
+		}
+		log.info("已完成所有事项");
 		executeHangye(date);
 		// 运行完财务和行业对比后,重新运行
 		codeModelService.runJobv2(true, date);
