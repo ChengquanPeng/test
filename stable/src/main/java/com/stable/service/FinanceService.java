@@ -392,11 +392,16 @@ public class FinanceService {
 				});
 	}
 
-	public void byJob() {
+	public synchronized void byJob() {
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		log.info("模型开始之前运行执行：1.质押，2.股东人数");
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				thsHolderSpider.dofetchHolder();
+			}
+		}).start();
 		zhiYaService.fetchBySun();
-		thsHolderSpider.dofetchHolder();
 		fetchFinances();
 		executeHangye(date);
 		// 运行完财务和行业对比后,重新运行

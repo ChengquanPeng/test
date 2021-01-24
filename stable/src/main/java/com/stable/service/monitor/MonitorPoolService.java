@@ -22,13 +22,13 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.CodeModeType;
-import com.stable.es.dao.base.EsCodeBaseModelDao;
+import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
 import com.stable.utils.DateUtil;
-import com.stable.vo.bus.CodeBaseModel;
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.http.resp.MonitorPoolResp;
@@ -45,7 +45,7 @@ public class MonitorPoolService {
 	@Autowired
 	private MonitorPoolDao monitorPoolDao;
 	@Autowired
-	private EsCodeBaseModelDao codeBaseModelDao;
+	private EsCodeBaseModel2Dao codeBaseModel2Dao;
 	@Autowired
 	private CodeModelService codeModelService;
 	@Autowired
@@ -74,9 +74,9 @@ public class MonitorPoolService {
 	}
 
 	private void updateBaseMoniStatus(String code, int monitor) {
-		CodeBaseModel cbm = codeModelService.getLastOneByCode(code);
+		CodeBaseModel2 cbm = codeModelService.getLastOneByCode2(code);
 		cbm.setMonitor(monitor);
-		codeBaseModelDao.save(cbm);
+		codeBaseModel2Dao.save(cbm);
 	}
 
 	// 加入监听

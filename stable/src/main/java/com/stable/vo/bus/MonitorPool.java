@@ -37,6 +37,12 @@ public class MonitorPool {
 	private double upTodayChange = 0;// 高于某涨幅
 	@Field(type = FieldType.Integer)
 	private double downTodayChange = 0;// 低于某涨幅
+	
+	//增发
+	
+	//短线
+	
+	//
 
 	public String getMsg() {
 		StringBuffer sb = new StringBuffer();

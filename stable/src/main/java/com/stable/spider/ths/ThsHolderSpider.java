@@ -83,7 +83,7 @@ public class ThsHolderSpider {
 		if (hps.size() > 0) {
 			esHolderPercentDao.saveAll(hps);
 		}
-		WxPushUtil.pushSystem1(sysdate + " 股东研究抓包同花顺已完成");
+		WxPushUtil.pushSystem1(sysdate + " 股东人数/股东研究抓包同花顺已完成");
 	}
 
 	private void dofetchHolderInner(int sysdate, String code, List<HolderNum> hns, List<HolderPercent> hps) {

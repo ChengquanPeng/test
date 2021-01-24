@@ -17,7 +17,7 @@ import com.stable.service.ChipsService;
 import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
-import com.stable.vo.bus.CodeBaseModel;
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.ZengFa;
@@ -42,7 +42,7 @@ public class CodeController {
 	@RequestMapping(value = "/code/{code}", method = RequestMethod.GET)
 	public String detail(@PathVariable(value = "code") String code, Model model) {
 		try {
-			CodeBaseModel cbm = codeModelService.getLastOneByCode(code);
+			CodeBaseModel2 cbm = codeModelService.getLastOneByCode2(code);
 			model.addAttribute("codedetail", cbm);
 			model.addAttribute("code", code);
 			model.addAttribute("codeName", stockBasicService.getCodeName(code));
@@ -74,16 +74,16 @@ public class CodeController {
 			model.addAttribute("zfgk", chipsService.getZengFaSummary(code).getDesc());
 			model.addAttribute("fhgk", chipsService.getFenHong(code).getDetails());
 			// 快预报
-			String kb = "";
-			if (cbm.getForestallQuarter() > 0) {
-				kb = cbm.getForestallYear() + "年" + cbm.getForestallQuarter() + "季度";
-				if (cbm.getForestallIncomeTbzz() > 0) {
-					kb += ",营收同比:" + cbm.getForestallIncomeTbzz();
-				}
-				if (cbm.getForestallProfitTbzz() > 0) {
-					kb += ",净利同比:" + cbm.getForestallProfitTbzz();
-				}
-			}
+			String kb = "未实现";
+//			if (cbm.getForestallQuarter() > 0) {
+//				kb = cbm.getForestallYear() + "年" + cbm.getForestallQuarter() + "季度";
+//				if (cbm.getForestallIncomeTbzz() > 0) {
+//					kb += ",营收同比:" + cbm.getForestallIncomeTbzz();
+//				}
+//				if (cbm.getForestallProfitTbzz() > 0) {
+//					kb += ",净利同比:" + cbm.getForestallProfitTbzz();
+//				}
+//			}
 			model.addAttribute("kb", kb);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -103,15 +103,15 @@ public class CodeController {
 			model.addAttribute("codeName", stockBasicService.getCodeName(code));
 			model.addAttribute("codedetail", cbm);
 			String kb = "";
-			if (cbm.getForestallQuarter() > 0) {
-				kb = cbm.getForestallYear() + "年" + cbm.getForestallQuarter() + "季度";
-				if (cbm.getForestallIncomeTbzz() > 0) {
-					kb += ",营收同比:" + cbm.getForestallIncomeTbzz();
-				}
-				if (cbm.getForestallProfitTbzz() > 0) {
-					kb += ",净利同比:" + cbm.getForestallProfitTbzz();
-				}
-			}
+//			if (cbm.getForestallQuarter() > 0) {
+//				kb = cbm.getForestallYear() + "年" + cbm.getForestallQuarter() + "季度";
+//				if (cbm.getForestallIncomeTbzz() > 0) {
+//					kb += ",营收同比:" + cbm.getForestallIncomeTbzz();
+//				}
+//				if (cbm.getForestallProfitTbzz() > 0) {
+//					kb += ",净利同比:" + cbm.getForestallProfitTbzz();
+//				}
+//			}
 			model.addAttribute("kb", kb);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -126,21 +126,6 @@ public class CodeController {
 		JsonResult r = new JsonResult();
 		try {
 			r.setResult(codeModelService.getListForWeb(code, orderBy, conceptId, conceptName, asc, page, zfStatus));
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
-
-	@RequestMapping(value = "/showsorce/{code}", method = RequestMethod.GET)
-	@ResponseBody
-	public ResponseEntity<JsonResult> showsorce(@PathVariable(value = "code") String code) {
-		JsonResult r = new JsonResult();
-		try {
-			r.setResult(codeModelService.runByCode(code));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

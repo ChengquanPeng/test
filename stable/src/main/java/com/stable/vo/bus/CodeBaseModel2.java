@@ -1,5 +1,7 @@
 package com.stable.vo.bus;
 
+import java.beans.Transient;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -20,6 +22,10 @@ public class CodeBaseModel2 extends EsBase {
 	private String code;
 	@Field(type = FieldType.Integer)
 	protected int date;
+
+	@Field(type = FieldType.Integer)
+	private int monitor;// 是否监听
+
 	@Field(type = FieldType.Integer)
 	protected int currYear;
 	@Field(type = FieldType.Integer)
@@ -57,7 +63,18 @@ public class CodeBaseModel2 extends EsBase {
 	private int zfStatus;// 增发状态（近1年）: 0无增发，1增发中，2增发完成，3，增发终止
 	@Field(type = FieldType.Text)
 	private String zfStatusDesc;// 增发进度
-	
-	
-	//
+
+	// TODO
+
+	@Transient
+	public String getKeyString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(baseRedDesc).append("|");
+		sb.append(baseYellowDesc).append("|");
+		sb.append(baseBlueDesc).append("|");
+		sb.append(baseGreenDesc).append("|");
+		sb.append(sylType).append("|");
+		sb.append(zfStatus).append("|");
+		return sb.toString();
+	}
 }

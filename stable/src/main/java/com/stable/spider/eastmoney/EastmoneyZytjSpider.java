@@ -103,7 +103,7 @@ public class EastmoneyZytjSpider {
 				} catch (Exception e) {
 					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 					if (trytime >= 10) {
-						WxPushUtil.pushSystem1("东方财富-财务(资产负债表)-抓包出错,code=" + code);
+						WxPushUtil.pushSystem1("东方财富-质押统计-抓包出错,code=" + code);
 						fetch = true;
 						return m;
 					} else {

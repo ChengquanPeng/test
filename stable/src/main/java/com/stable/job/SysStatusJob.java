@@ -24,7 +24,7 @@ public class SysStatusJob implements SimpleJob {
 	@Override
 	public void execute(ShardingContext sc) {
 		try {
-			codeModelService.getLastOneByCode("000001");
+			codeModelService.getLastOneByCode2("000001");
 		} catch (Exception e) {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1("系统异常，正在重启...");
