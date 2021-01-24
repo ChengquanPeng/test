@@ -1,5 +1,6 @@
 package com.stable.service.model;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,13 +31,20 @@ import com.stable.service.AnnouncementService;
 import com.stable.service.ChipsService;
 import com.stable.service.CodePoolService;
 import com.stable.service.ConceptService;
+import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.FinanceService;
 import com.stable.service.PlateService;
+import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.ZhiYaService;
+import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.FinanceAnalyzer;
+import com.stable.service.model.data.LineAvgPrice;
+import com.stable.service.model.data.LinePrice;
+import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.BeanCopy;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.WxPushUtil;
@@ -49,7 +57,9 @@ import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
 import com.stable.vo.bus.Jiejin;
+import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockBaseInfo;
+import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZhiYa;
 import com.stable.vo.http.resp.CodeBaseModelResp;
@@ -84,6 +94,14 @@ public class CodeModelService {
 	private ChipsService chipsService;
 	@Autowired
 	private ZhiYaService zhiYaService;
+	@Autowired
+	private MonitorPoolService monitorPoolService;
+	@Autowired
+	private DaliyTradeHistroyService daliyTradeHistroyService;
+	@Autowired
+	private PriceLifeService priceLifeService;
+	@Autowired
+	private AvgService avgService;
 
 	public synchronized void runJobv2(boolean isJob, int date) {
 		try {
@@ -104,13 +122,18 @@ public class CodeModelService {
 			tradeDate = tradeCalService.getPretradeDate(tradeDate);
 		}
 		log.info("Actually processing request date={}", tradeDate);
+		// 基本面
 		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
 		List<CodeBaseModelHist> listHist = new LinkedList<CodeBaseModelHist>();
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
+		// 大牛
+		Map<String, MonitorPool> poolMap = monitorPoolService.getMonitorPoolMap();
+		List<MonitorPool> poolList = new LinkedList<MonitorPool>();
+
 		Map<String, CodeBaseModel2> histMap = getALLForMap();
 		for (StockBaseInfo s : codelist) {
 			try {
-				getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listLast, listHist);
+				getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listLast, listHist, poolList, poolMap);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -128,13 +151,22 @@ public class CodeModelService {
 	}
 
 	private void getBaseAnalyse(StockBaseInfo s, int tradeDate, CodeBaseModel2 oldOne, List<CodeBaseModel2> listLast,
-			List<CodeBaseModelHist> listHist) {
+			List<CodeBaseModelHist> listHist, List<MonitorPool> poolList, Map<String, MonitorPool> poolMap) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
+		// 基本面池
 		CodeBaseModel2 newOne = new CodeBaseModel2();
+		newOne.setId(code);
 		newOne.setCode(code);
 		newOne.setDate(tradeDate);
 		listLast.add(newOne);
+		// 监听池
+		MonitorPool pool = poolMap.get(code);
+		if (pool == null) {
+			pool = new MonitorPool();
+			pool.setCode(code);
+		}
+		poolList.add(pool);
 		// 财务
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(code, tradeDate,
 				EsQueryPageUtil.queryPage9999);
@@ -147,6 +179,66 @@ public class CodeModelService {
 			}
 			return;
 		}
+		ZengFa zf = chipsService.getLastZengFa(code);
+		baseAnalyseColor(s, newOne, fbis, zf);// 基本面-红蓝绿
+		findBigBoss2(code, newOne, fbis);// 基本面-疑似大牛
+		susWhiteHorses(code, newOne);// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
+		zfBoss(newOne, zf);// TODO 增发更多细节
+//		限售解禁TODO
+//		股东人数TODO
+//		短线TODO
+		copyAndHist(newOne, oldOne, listHist);// 复制和历史
+	}
+
+	private void zfBoss(CodeBaseModel2 newOne, ZengFa zf) {
+		if (newOne.getZfStatus() == 2) {
+			String code = newOne.getCode();
+			// 20个交易日股价
+			List<TradeHistInfoDaliy> befor45 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0,
+					zf.getEndDate(), EsQueryPageUtil.queryPage60, SortOrder.DESC);
+			double end = befor45.get(0).getClosed();
+			double max = befor45.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed)).get()
+					.getClosed();
+			if (max > end) {
+				if (CurrencyUitl.cutProfit(end, max) >= 15.0) {
+					newOne.setZfself(1);// 增发前跌幅在20%以上
+				}
+			}
+			boolean preCondi = false;
+			if (zf.getPrice() > 0) {
+				// 价格对比,增发价没超60%
+				double chkline = CurrencyUitl.topPriceN(zf.getPrice(), 1.5);
+				double close = daliyTradeHistroyService.queryLastNofq(code).getClosed();
+				if (close <= chkline) {
+					preCondi = true;
+				}
+			} else {
+				// 没有价格对比就看一年涨幅
+				if (LinePrice.priceCheckForMid(daliyTradeHistroyService, code, newOne.getDate(), chkdouble)) {
+					preCondi = true;
+				}
+			}
+			if (preCondi && newOne.getZfself() == 1) {
+				newOne.setSusZfBoss(1);
+			}
+		} else {
+			newOne.setSusZfBoss(0);
+			newOne.setZfself(0);
+		}
+	}
+
+	private void susWhiteHorses(String code, CodeBaseModel2 newOne) {
+		// 是否中线(60日线),TODO,加上市值
+		if (priceLifeService.getLastIndex(code) >= 80
+				&& LineAvgPrice.isWhiteHorseForMidV2(avgService, code, newOne.getDate())) {
+			newOne.setSusWhiteHors(1);
+		} else {
+			newOne.setSusWhiteHors(0);
+		}
+	}
+
+	private void baseAnalyseColor(StockBaseInfo s, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis, ZengFa zf) {
+		String code = newOne.getCode();
 		FinanceAnalyzer fa = new FinanceAnalyzer();
 		for (FinanceBaseInfo fbi : fbis) {
 			fa.putJidu1(fbi);
@@ -265,7 +357,7 @@ public class CodeModelService {
 			sb4.append("资产收益率年超20%").append(Constant.HTML_LINE);
 		}
 		// 正在增发中
-		chkZf(newOne);
+		chkZf(newOne, zf);
 		if (newOne.getZfStatus() == 1 || newOne.getZfStatus() == 2) {
 			newOne.setBaseBlue(1);
 			sb3.append("增发进度" + (s.getCompnayType() == 1 ? "(国资)" : "") + ":" + newOne.getZfStatusDesc())
@@ -306,8 +398,9 @@ public class CodeModelService {
 		} else {
 			newOne.setBaseGreenDesc("");
 		}
-		newOne.setId(code);
+	}
 
+	private void copyAndHist(CodeBaseModel2 newOne, CodeBaseModel2 oldOne, List<CodeBaseModelHist> listHist) {
 		boolean saveHist = true;
 		if (oldOne != null) {
 			// 复制一些属性
@@ -322,8 +415,77 @@ public class CodeModelService {
 			// copy history
 			CodeBaseModelHist hist = new CodeBaseModelHist();
 			BeanCopy.copy(newOne, hist);
-			hist.setId(code + tradeDate);
+			hist.setId(hist.getCode() + hist.getDate());
 			listHist.add(hist);
+		}
+	}
+
+	private double chkdouble = 80.0;// 10跌倒5.x
+
+	private void findBigBoss2(String code, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis) {
+		log.info("findBigBoss code:{}", code);
+		// 是否符合中线、1.市盈率和ttm在50以内
+//		c.setKbygjl(0);
+//		c.setKbygys(0);
+//		if (yjkb != null) {
+//			c.setKbygys(yjkb.getYyzsrtbzz());
+//			c.setKbygjl(yjkb.getJlrtbzz());
+//		} else if (yjyg != null) {
+//			c.setKbygjl(yjyg.getJlrtbzz());
+//		}
+
+		// 业绩连续
+		int continueJidu1 = 0;
+		int continueJidu2 = 0;
+		boolean cj1 = true;
+		int cj2 = 0;
+		List<Double> high = new LinkedList<Double>();
+		List<Double> high2 = new LinkedList<Double>();
+		for (FinanceBaseInfo fbi : fbis) {
+			if (cj1 && fbi.getYyzsrtbzz() >= 1.0 && fbi.getGsjlrtbzz() >= 1.0) {// 连续季度增长
+				continueJidu1++;
+				high.add(fbi.getYyzsrtbzz());
+			} else {
+				cj1 = false;
+			}
+			if (cj2 <= 1 && fbi.getYyzsrtbzz() >= 1.0 && fbi.getGsjlrtbzz() >= 1.0) {// 允许一次断连续
+				continueJidu2++;
+				high2.add(fbi.getYyzsrtbzz());
+			} else {
+				cj2++;
+			}
+		}
+		boolean isok = false;
+		if (continueJidu1 > 3 || continueJidu2 > 5) {
+			if (continueJidu1 > 3) {
+				int cn = 0;
+				for (Double h : high) {// 连续超过25%的次数超过一半
+					if (h > 25.0) {
+						cn++;
+					}
+				}
+				if (cn * 2 > continueJidu1) {
+					isok = true;
+				}
+			} else if (continueJidu2 > 5) {
+				int cn = 0;
+				for (Double h : high2) {
+					if (h > 25.0) {
+						cn++;
+					}
+				}
+				if (cn * 2 > continueJidu2) {
+					isok = true;
+				}
+			}
+		}
+		if (isok) {
+			// 1年整幅未超过80% -- //chkdouble = 80.0;// 10跌倒5.x
+			if (LinePrice.priceCheckForMid(daliyTradeHistroyService, code, newOne.getDate(), chkdouble)) {
+				newOne.setSusBigBoss(1);
+			}
+		} else {
+			newOne.setSusBigBoss(0);
 		}
 	}
 
@@ -510,8 +672,7 @@ public class CodeModelService {
 //	}
 
 	// 增发
-	private void chkZf(CodeBaseModel2 newOne) {
-		ZengFa zengfa = chipsService.getLastZengFa(newOne.getCode());
+	private void chkZf(CodeBaseModel2 newOne, ZengFa zengfa) {
 		// start 一年以前
 		if (zengfa != null && (zengfa.getStartDate() > oneYearAgo || zengfa.getEndDate() > oneYearAgo
 				|| zengfa.getZjhDate() > oneYearAgo)) {

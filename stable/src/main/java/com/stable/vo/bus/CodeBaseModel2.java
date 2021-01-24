@@ -63,8 +63,16 @@ public class CodeBaseModel2 extends EsBase {
 	private int zfStatus;// 增发状态（近1年）: 0无增发，1增发中，2增发完成，3，增发终止
 	@Field(type = FieldType.Text)
 	private String zfStatusDesc;// 增发进度
+	@Field(type = FieldType.Integer)
+	private int zfself = 0;// 自己人在增发
+	@Field(type = FieldType.Integer)
+	private int susZfBoss; // 增发博弈
 
-	// TODO
+	// 交易面
+	@Field(type = FieldType.Integer)
+	private int susBigBoss; // 疑似大牛
+	@Field(type = FieldType.Integer)
+	private int susWhiteHors; // 疑似白马
 
 	@Transient
 	public String getKeyString() {

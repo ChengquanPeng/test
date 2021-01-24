@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
@@ -34,7 +33,7 @@ import lombok.extern.log4j.Log4j2;
  * 基本面趋势票
  *
  */
-@Service
+//@Service
 @Log4j2
 public class CoodPoolModelService {
 	@Autowired
@@ -61,7 +60,6 @@ public class CoodPoolModelService {
 	private double chkdouble = 80.0;// 10跌倒5.x
 
 	public synchronized void start(int tradeDate, List<CodePool> list) {
-		LineAvgPrice avg = new LineAvgPrice(avgService);
 		log.info("code coop list:" + list.size());
 		StringBuffer msg = new StringBuffer();
 		StringBuffer mid = new StringBuffer();
@@ -102,7 +100,7 @@ public class CoodPoolModelService {
 
 				// 是否中线(60日线)
 				if (m.getPe_ttm() > 0 && priceLifeService.getLastIndex(code) >= 80
-						&& avg.isWhiteHorseForMidV2(code, tradeDate)) {
+						&& LineAvgPrice.isWhiteHorseForMidV2(avgService, code, tradeDate)) {
 					if (m.getInmid() == 0) {
 						mid.append(code).append(",");
 					}

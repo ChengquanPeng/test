@@ -25,11 +25,14 @@ import com.stable.enums.CodeModeType;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.service.ConceptService;
+import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
+import com.stable.service.model.data.AvgService;
 import com.stable.utils.DateUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.StockAvgBase;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.http.resp.MonitorPoolResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -52,6 +55,10 @@ public class MonitorPoolService {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private ConceptService conceptService;
+	@Autowired
+	private DaliyTradeHistroyService daliyTradeHistroyService;
+	@Autowired
+	private AvgService avgService;
 
 	// 移除监听
 	public void delMonit(String code, String remark) {
@@ -245,5 +252,40 @@ public class MonitorPoolService {
 		}
 		log.info("no records CodeBaseModels");
 		return null;
+	}
+
+	/**
+	 * 1.短期有9.5%的涨幅
+	 */
+	private boolean isTodayPriceOk(String code, int date) {
+		// 3个月新高，22*3=60
+		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
+				EsQueryPageUtil.queryPage30, SortOrder.DESC);
+		for (TradeHistInfoDaliyNofq r : l2) {
+			if (r.getTodayChangeRate() >= 9.5) {
+				return true;
+			}
+		}
+		log.info("{} 最近30个工作日无大涨交易", code);
+		return false;
+	}
+
+	/**
+	 * 2.均线
+	 */
+	private boolean isWhiteHorseForSortV5(String code, int date) {
+		EsQueryPageReq req = EsQueryPageUtil.queryPage10;
+		List<StockAvgBase> clist30 = avgService.queryListByCodeForModelWithLast60(code, date, req, true);
+		int c = 0;
+		for (StockAvgBase sa : clist30) {
+			if (sa.getAvgPriceIndex30() >= sa.getAvgPriceIndex60()
+					&& sa.getAvgPriceIndex20() >= sa.getAvgPriceIndex30()) {
+				c++;
+			}
+		}
+		if (c >= 8) {
+			return true;
+		}
+		return false;
 	}
 }
