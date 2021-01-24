@@ -6,8 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +50,7 @@ public class ThsCompanySpider {
 			}
 		}).start();
 	}
-	
+
 	public void dofetchInner() {
 		try {
 			dofetchInner2();
@@ -137,11 +135,16 @@ public class ThsCompanySpider {
 						it1.next();
 						return it1.next().asText();
 					} catch (Exception e2) {
-						DomElement td = holder.getFirstElementChild();
-						DomElement div = td.getFirstElementChild();
-						Iterator<DomElement> it1 = div.getChildElements().iterator();
-						it1.next();
-						return it1.next().asText();
+
+						try {
+							DomElement td = holder.getFirstElementChild();
+							DomElement div = td.getFirstElementChild();
+							Iterator<DomElement> it1 = div.getChildElements().iterator();
+							it1.next();
+							return it1.next().asText();
+						} catch (Exception e3) {
+							return "无控制人";
+						}
 					}
 				}
 			} catch (Exception e2) {
@@ -164,6 +167,6 @@ public class ThsCompanySpider {
 		ThsCompanySpider ts = new ThsCompanySpider();
 		ts.htmlunitSpider = new HtmlunitSpider();
 		ts.header = new HashMap<String, String>();
-		System.err.println(ts.dofetchInner3("002464"));
+		System.err.println(ts.dofetchInner3("000002"));
 	}
 }
