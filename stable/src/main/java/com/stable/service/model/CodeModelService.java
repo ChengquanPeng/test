@@ -187,6 +187,7 @@ public class CodeModelService {
 //		限售解禁TODO
 //		股东人数TODO
 //		短线TODO
+//		买点: 监听//TODO
 		copyAndHist(newOne, oldOne, listHist);// 复制和历史
 	}
 
