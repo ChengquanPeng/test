@@ -324,7 +324,7 @@ public class CodeModelService {
 				oneYearAgo);
 		if (zengchi != null) {
 			newOne.setBaseYellow(1);
-			sb2.append("股东/高管增持:" + (zengchi.getRptDate()) + "%").append(Constant.HTML_LINE);
+			sb2.append("股东/高管增持:" + (zengchi.getRptDate())).append(Constant.HTML_LINE);
 
 		}
 		// 高质押
@@ -918,7 +918,7 @@ public class CodeModelService {
 				resp.setMonitorDesc(CodeModeType.getCodeName(dh.getMonitor()));
 				// 收益率
 				StringBuffer sb2 = new StringBuffer(SylType.getCodeName(dh.getSylType()));
-				sb2.append(Constant.HTML_LINE).append("ttm/jd:").append(dh.getSylttm()).append(dh.getSyldjd());
+				sb2.append(Constant.HTML_LINE).append("ttm/jd:").append(dh.getSylttm()).append("/").append(dh.getSyldjd());
 				resp.setSylDesc(sb2.toString());
 				if (dh.getZfself() == 1) {
 					resp.setZfInfo("打压增发价");

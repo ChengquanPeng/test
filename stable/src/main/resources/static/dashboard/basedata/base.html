@@ -35,7 +35,7 @@
 						<option value="0">无增发</option>
 					</select> 
 					排序：<select id="gsort" class="form-control">
-						<option value="" selected="selected">默认</option>
+						<option value="0" selected="selected">默认</option>
 						<option value="3">资产收益率ttm</option>
 						<option value="4">资产收益率报告期</option>
 						<option value="5">资产收益评级</option>
@@ -127,10 +127,6 @@
 																+ '</a><br/>'+row.codeName);
 												return actions.join('');
 											}
-										},
-										{
-											field : 'codeName',
-											title : '名称'
 										},
 										{
 											field : 'currYear',

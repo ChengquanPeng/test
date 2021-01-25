@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -83,7 +81,7 @@ public class FinanceService {
 	private ConceptService conceptService;
 	@Autowired
 	private JysSpider jysSpider;
-	
+
 	/**
 	 * 删除redis，从头开始获取
 	 */
@@ -435,22 +433,6 @@ public class FinanceService {
 		executeHangye(date);
 		// 运行完财务和行业对比后,重新运行
 		codeModelService.runJobv2(true, date);
-	}
-	@PostConstruct
-	private void a() {
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-				log.info("交易所公告");
-				jysSpider.byJob();
-				executeHangye(date);
-				// 运行完财务和行业对比后,重新运行
-				codeModelService.runJobv2(true, date);
-				
-			}
-		}).start();
 	}
 
 	private List<FinanceBaseInfoHangye> executeHangye(int date) {
