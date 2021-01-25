@@ -62,7 +62,7 @@ public class FinanceBaseInfo extends EsBase {
 	@Field(type = FieldType.Double)
 	private double inventory; // 存货资产
 	@Field(type = FieldType.Double)
-	private double sumDebt; // 负债
+	private double sumDebt; // 负债合计
 	@Field(type = FieldType.Double)
 	private double sumDebtLd; // 流动负债
 	@Field(type = FieldType.Double)

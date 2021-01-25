@@ -595,7 +595,7 @@ public class FinanceService {
 		});
 	}
 
-	private void fetchFinances() {
+	public void fetchFinances() {
 		log.info("同步财务报告报告[started]");
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 		int total = list.size();

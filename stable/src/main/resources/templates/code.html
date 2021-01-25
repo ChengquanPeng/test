@@ -22,7 +22,7 @@ trtd{
 </head>
 <body>
 	<br/>------------------------------------------------------------<br/>
-	代码：<span th:text="${code}"></span>-<span th:text="${codeName}"></span>-最后更新日期:<span th:text="${codedetail.date}"></span>
+	代码：<span th:text="${code}"></span>-<span th:text="${codedetail.codeName}"></span>-最后更新日期:<span th:text="${codedetail.date}"></span>
 	<br/>------------------------------------------------------------<br/>
 	<div>曾用名(金字招牌):<span th:text="${codeBasic.oldName}"></span></div>
 	<div>同花顺-主营:<span th:text="${codeBasic.thsMainBiz}"></span></div>
@@ -32,38 +32,41 @@ trtd{
 	<div>同花顺概念：<span th:each="cp: ${concepts}"><span th:text="${cp.conceptName}"></span>&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
 	<div>分红概况:<span th:text="${fhgk}"></span></div>
 	<div>增发概况:<span th:text="${zfgk}"></span></div>
-	<div>前3大股东占比:<span th:text="${topThree}"></span></div>
-	<div>股东人数变化（幅度+次数):未实现</div>
+	<div>违规处理:<a href='http://basic.10jqka.com.cn/${code}/event.html'>--></a></div>
+	<div>财务亏损: 是否主营业务亏损？</div>
 	<br/>------------------------------------------------------------<br/>
 	财务报告年份：
 	<span th:text="${codedetail.currYear}"></span>-报告：<span th:text="${codedetail.currQuarter}"></span>季度
-	-日期:<span th:text="${codedetail.date}"></span>
 	<br/>------------------------------------------------------------<br/>
-	<table border='1' cellspacing='0' cellpadding='0'>
-	<tr><td>项目</td><td>条目</td><td>增长</td><td>下降/地雷</td></tr>
-	<tr><td rowspan='3'>营收<br/>(科技类,故事类主要指标)</td>
-		<td>1.年报同比</td><td>--</td></tr>
-	<tr><td>2.最近季度同比</td><td>--</td></tr>
-	<tr><td>3.最近2个季度同比持续</td><td>--</td></tr>
+	<div>营业总收入:<span th:text="${yyzsr}"></span> &nbsp;同比:<span th:text="${finance.yyzsrtbzz}"></span></div>
+	<div>归属净利润:<span th:text="${gsjlr}"></span> &nbsp;同比:<span th:text="${finance.gsjlrtbzz}"></span></div>
+	<div>扣非净利润:<span th:text="${kfjlr}"></span> &nbsp;同比:<span th:text="${finance.kfjlrtbzz}"></span></div>
+	<div>业绩快报/预告:<span th:text="${kb}"></span></div>
+	<div>加权净资产收益率:<span th:text="${finance.jqjzcsyl}"></span></div>
+	<div>平均单季度净资产收益率:<span th:text="${finance.syldjd}"></span></div>
+	<div>每股经营现金流:<span th:text="${finance.mgjyxjl}"></span></div>
+	<div>毛利率:<span th:text="${finance.mll}"></span></div>
 	
-	<tr><td rowspan='4'>利润<br/>(传统,销售类主要指标)</td>
-		<td>1.年报同比</td><td>--</td><td>--</td></tr>
-	<tr><td>2.最近季度同比</td><td>--</td><td>--</td></tr>
-	<tr><td>3.最近2个季度同比持续</td><td>--</td><td>--</td></tr>
-	<tr><td>4.退市风险(亏损年数)</td><td>--</td><td>--</span></td></tr>
+	<div>总资产:<span th:text="${finance.sumAsset}"></span></div>
+	<div>存货资产:<span th:text="${finance.inventory}"></span> &nbsp;(库存变现能力弱)</div>
+	<div>商誉:<span th:text="${goodWill}"></span> &nbsp;净资产占比:<span th:text="${finance.goodWillRatioNetAsset}"></span></div>
+	<div>流动资产合计:<span th:text="${finance.sumLasset}"></span></div>
+	<div>货币资金:<span th:text="${finance.monetaryFund}"></span> &nbsp;(相当于可用现金)</div>
+	<div>交易性金融资产:<span th:text="${finance.tradeFinassetNotfvtpl}"></span> &nbsp;(相当于可用现金)</div>
+	<div>流动负债:<span th:text="${finance.sumDebtLd}"></span> &nbsp;(短期负债)</div>
+	<div>负债合计:<span th:text="${finance.sumDebt}"></span></div>
+	<div>净资产:<span th:text="${finance.netAsset}"></span></div>
 	
-	<tr><td rowspan='2'>现金能力</td>
-		<td>1.最近分红年份</td><td>--</td><td>--</td></tr>
-	<tr><td>2.最后回购日期</td><td>--</span></td><td>--</td></tr>
-	
-	<tr><td rowspan='3'>其他情况</td>
-		<td colspan='3'>1.股票质押情况:--</td></tr>
-	<tr><td colspan='3'>2.限售股解禁:--</td></tr>
-	<tr><td colspan='3'>3.业绩快报/预告:<span th:text="${kb}"></span></td></tr>
-	</table>
+	<div>应付账款:<span th:text="${finance.accountPay}"></span>&nbsp;&nbsp;(欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算)</div>
+	<div>未分配利润:<span th:text="${finance.retaineDearning}"></span></div>
+	<div>应付利息:<span th:text="${finance.interestPay}"></span>&nbsp;&nbsp;(如果较高，公司在大量有息借钱，关联到货币资金和未分配利润。如果货币资金和未分配利润较高，明明有钱为什么借钱？)</div>
+	<div>应收账款:<span th:text="${finance.accountrec}"></span>&nbsp;&nbsp;（是否自己贴钱在干活，同行业比较）</div>
+	<div>应收款占比:<span th:text="${finance.accountrecRatio}"></span>&nbsp;&nbsp;（应收款占比：accountrec应收账款/sumLasset流动资产合计）</div>
 	<br/>------------------------------------------------------------<br/>
 	资金博弈:
-	<br/>
+	<br/>------------------------------------------------------------<br/>
+	<div>前3大股东占比:<span th:text="${topThree}"></span></div>
+	<div>股东人数变化（幅度+次数):${codedetail.holderNum}</div>
 	<div>最近增发记录:<span th:text="${lastZf}"></span></div>
 	<div>前后1年解禁记录:</span>
 		<table border='1' cellspacing='0' cellpadding='0'>
@@ -83,7 +86,7 @@ trtd{
 	</div>
 	<br/>------------------------------------------------------------<br/>
 	历史记录:
-	<br/>
+	<br/>------------------------------------------------------------<br/>
 	<div th:each="d: ${histList}">
 		<div>日期:<a target="_blank" th:href="@{'/codehist/'+${d.id}}"><span th:text="${d.date}"></span></a></div>
 	</div>

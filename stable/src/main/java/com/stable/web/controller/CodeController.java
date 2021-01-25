@@ -13,10 +13,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.ChipsService;
 import com.stable.service.ConceptService;
+import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
+import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.CodeBaseModelHist;
+import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.ZengFa;
 
@@ -31,6 +34,8 @@ public class CodeController {
 	private ConceptService conceptService;
 	@Autowired
 	private ChipsService chipsService;
+	@Autowired
+	private FinanceService financeService;
 
 	/**
 	 * 个股当前状态
@@ -38,15 +43,36 @@ public class CodeController {
 	@RequestMapping(value = "/code/{code}", method = RequestMethod.GET)
 	public String detail(@PathVariable(value = "code") String code, Model model) {
 		try {
-			CodeBaseModel2 cbm = codeModelService.getLastOneByCode2(code);
+			CodeBaseModel2 cbm = codeModelService.getLastOneByCodeResp(code);
 			model.addAttribute("codedetail", cbm);
 			model.addAttribute("code", code);
-			model.addAttribute("codeName", stockBasicService.getCodeName(code));
 			model.addAttribute("histList", codeModelService.getListByCode(code, EsQueryPageUtil.queryPage5));
 			model.addAttribute("concepts", conceptService.getCodeConcept(code));
 			model.addAttribute("codeBasic", stockBasicService.getCode(code));
 			model.addAttribute("topThree", chipsService.getLastHolderPercent(code));
-
+			FinanceBaseInfo fbi = financeService.getLastFinaceReport(code);
+			try {
+				model.addAttribute("yyzsr", CurrencyUitl.covertToString(fbi.getYyzsr()));
+			} catch (Exception e) {
+				model.addAttribute("yyzsr", "--");
+			}
+			try {
+				model.addAttribute("gsjlr", CurrencyUitl.covertToString(fbi.getGsjlr()));
+			} catch (Exception e) {
+				model.addAttribute("gsjlr", "--");
+			}
+			try {
+				model.addAttribute("kfjlr", CurrencyUitl.covertToString(fbi.getKfjlr()));
+			} catch (Exception e) {
+				model.addAttribute("kfjlr", "--");
+			}
+			try {
+				model.addAttribute("goodWill", CurrencyUitl.covertToString(fbi.getGoodWill()));
+			} catch (Exception e) {
+				model.addAttribute("goodWill", "--");
+			}
+			model.addAttribute("finance", fbi);
+			
 			// 是否有增发
 			ZengFa iss = chipsService.getLastZengFa(code);
 			StringBuffer lastZf = new StringBuffer();

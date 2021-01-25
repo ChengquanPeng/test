@@ -186,6 +186,7 @@ public class CodeModelService {
 		susWhiteHorses(code, newOne);// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
 		zfBoss(newOne, zf);// TODO 增发更多细节
 		sortModel(newOne);// 短线模型
+		newOne.setHolderNum(chipsService.holderNumAnalyse(code));
 //		限售解禁TODO
 //		股东人数TODO
 //		短线TODO
@@ -935,6 +936,78 @@ public class CodeModelService {
 		log.info("no records CodeBaseModels");
 		return null;
 	}
+	
+	public CodeBaseModel2 getLastOneByCodeResp(String code) {
+		return getModelResp(getLastOneByCode2(code));
+	}
+	
+	private CodeBaseModelResp getModelResp(CodeBaseModel2 dh) {
+		CodeBaseModelResp resp = new CodeBaseModelResp();
+		BeanUtils.copyProperties(dh, resp);
+		resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
+		StringBuffer sb1 = new StringBuffer("");
+		if (dh.getBaseRed() == 1) {
+			sb1.append("<font color='red'>红:</font>" + dh.getBaseRedDesc());
+		}
+		if (dh.getBaseYellow() == 1) {
+			sb1.append("<font color='#FF00FF'>黄:</font>" + dh.getBaseYellowDesc());
+		}
+		if (dh.getBaseBlue() == 1) {
+			sb1.append("<font color='blue'>蓝:</font>" + dh.getBaseBlueDesc());
+		}
+		if (dh.getBaseGreen() == 1) {
+			sb1.append("<font color='green'>绿:</font>" + dh.getBaseGreenDesc());
+		}
+		resp.setBaseInfo(sb1.toString());
+		resp.setMonitorDesc(CodeModeType.getCodeName(dh.getMonitor()));
+		// 收益率
+		StringBuffer sb2 = new StringBuffer(SylType.getCodeName(dh.getSylType()));
+		sb2.append(Constant.HTML_LINE).append("ttm/jd").append(Constant.HTML_LINE).append(dh.getSylttm())
+				.append("/").append(dh.getSyldjd());
+		resp.setSylDesc(sb2.toString());
+
+		StringBuffer sb3 = new StringBuffer("");
+		if (dh.getSortMode6() == 1) {
+			sb3.append("短线6").append(Constant.HTML_LINE);
+		}
+		if (dh.getSortMode7() == 1) {
+			sb3.append("箱体突破").append(Constant.HTML_LINE);
+		}
+		resp.setSortInfo(sb3.toString());
+		StringBuffer sb4 = new StringBuffer("");
+		if (dh.getSusBigBoss() == 1) {
+			sb4.append("疑似大牛").append(Constant.HTML_LINE);
+		}
+		if (dh.getSusWhiteHors() == 1) {
+			sb4.append("疑似白马").append(Constant.HTML_LINE);
+		}
+		if (dh.getSusZfBoss() == 1) {
+			sb4.append("增发筹码博弈");
+		}
+		resp.setCodeType(sb4.toString());
+
+		StringBuffer sb5 = new StringBuffer(ZfStatus.getCodeName(dh.getZfStatus()));
+		if (dh.getZfStatus() == 1) {
+			sb5.append(":").append(dh.getZfStatusDesc()).append(Constant.HTML_LINE);
+		}
+		if (dh.getZfStatus() == 2) {
+			if (dh.getZfself() == 1) {
+				sb5.append(":打压增发价").append(Constant.HTML_LINE);
+			} else {
+				sb5.append(":增发价正常").append(Constant.HTML_LINE);
+			}
+		}
+		resp.setZfInfo(sb5.toString());
+//		resp.setIncomeShow(dh.getCurrIncomeTbzz() + "%");
+//		if (dh.getForestallIncomeTbzz() > 0) {
+//			resp.setIncomeShow(resp.getIncomeShow() + "(" + dh.getForestallIncomeTbzz() + "%)");
+//		}
+//		resp.setProfitShow(dh.getCurrProfitTbzz() + "%");
+//		if (dh.getForestallIncomeTbzz() > 0) {
+//			resp.setProfitShow(resp.getProfitShow() + "(" + dh.getForestallProfitTbzz() + "%)");
+//		}
+		return resp;
+	}
 
 	public List<CodeBaseModelResp> getListForWeb(String code, int orderBy, String conceptId, String conceptName,
 			int asc, EsQueryPageReq querypage, String zfStatus, String monitor, String bred, String byellow,
@@ -949,71 +1022,7 @@ public class CodeModelService {
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {
 			for (CodeBaseModel2 dh : list) {
-				CodeBaseModelResp resp = new CodeBaseModelResp();
-				BeanUtils.copyProperties(dh, resp);
-				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
-				StringBuffer sb1 = new StringBuffer("");
-				if (dh.getBaseRed() == 1) {
-					sb1.append("<font color='red'>红:</font>" + dh.getBaseRedDesc());
-				}
-				if (dh.getBaseYellow() == 1) {
-					sb1.append("<font color='#FF00FF'>黄:</font>" + dh.getBaseYellowDesc());
-				}
-				if (dh.getBaseBlue() == 1) {
-					sb1.append("<font color='blue'>蓝:</font>" + dh.getBaseBlueDesc());
-				}
-				if (dh.getBaseGreen() == 1) {
-					sb1.append("<font color='green'>绿:</font>" + dh.getBaseGreenDesc());
-				}
-				resp.setBaseInfo(sb1.toString());
-				resp.setMonitorDesc(CodeModeType.getCodeName(dh.getMonitor()));
-				// 收益率
-				StringBuffer sb2 = new StringBuffer(SylType.getCodeName(dh.getSylType()));
-				sb2.append(Constant.HTML_LINE).append("ttm/jd").append(Constant.HTML_LINE).append(dh.getSylttm())
-						.append("/").append(dh.getSyldjd());
-				resp.setSylDesc(sb2.toString());
-
-				StringBuffer sb3 = new StringBuffer("");
-				if (dh.getSortMode6() == 1) {
-					sb3.append("短线6").append(Constant.HTML_LINE);
-				}
-				if (dh.getSortMode7() == 1) {
-					sb3.append("箱体突破").append(Constant.HTML_LINE);
-				}
-				resp.setSortInfo(sb3.toString());
-				StringBuffer sb4 = new StringBuffer("");
-				if (dh.getSusBigBoss() == 1) {
-					sb4.append("疑似大牛").append(Constant.HTML_LINE);
-				}
-				if (dh.getSusWhiteHors() == 1) {
-					sb4.append("疑似白马").append(Constant.HTML_LINE);
-				}
-				if (dh.getSusZfBoss() == 1) {
-					sb4.append("增发筹码博弈");
-				}
-				resp.setCodeType(sb4.toString());
-
-				StringBuffer sb5 = new StringBuffer(ZfStatus.getCodeName(dh.getZfStatus()));
-				if (dh.getZfStatus() == 1) {
-					sb5.append(":").append(dh.getZfStatusDesc()).append(Constant.HTML_LINE);
-				}
-				if (dh.getZfStatus() == 2) {
-					if (dh.getZfself() == 1) {
-						sb5.append(":打压增发价").append(Constant.HTML_LINE);
-					} else {
-						sb5.append(":增发价正常").append(Constant.HTML_LINE);
-					}
-				}
-				resp.setZfInfo(sb5.toString());
-//				resp.setIncomeShow(dh.getCurrIncomeTbzz() + "%");
-//				if (dh.getForestallIncomeTbzz() > 0) {
-//					resp.setIncomeShow(resp.getIncomeShow() + "(" + dh.getForestallIncomeTbzz() + "%)");
-//				}
-//				resp.setProfitShow(dh.getCurrProfitTbzz() + "%");
-//				if (dh.getForestallIncomeTbzz() > 0) {
-//					resp.setProfitShow(resp.getProfitShow() + "(" + dh.getForestallProfitTbzz() + "%)");
-//				}
-				res.add(resp);
+				res.add(getModelResp(dh));
 			}
 		}
 		return res;
