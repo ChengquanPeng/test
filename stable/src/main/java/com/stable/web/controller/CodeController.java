@@ -92,7 +92,8 @@ public class CodeController {
 				model.addAttribute("monetaryFund", "--");
 			}
 			try {
-				model.addAttribute("tradeFinassetNotfvtpl", CurrencyUitl.covertToString(fbi.getTradeFinassetNotfvtpl()));
+				model.addAttribute("tradeFinassetNotfvtpl",
+						CurrencyUitl.covertToString(fbi.getTradeFinassetNotfvtpl()));
 			} catch (Exception e) {
 				model.addAttribute("tradeFinassetNotfvtpl", "--");
 			}
@@ -100,6 +101,11 @@ public class CodeController {
 				model.addAttribute("sumDebtLd", CurrencyUitl.covertToString(fbi.getSumDebtLd()));
 			} catch (Exception e) {
 				model.addAttribute("sumDebtLd", "--");
+			}
+			try {
+				model.addAttribute("sumDebt", CurrencyUitl.covertToString(fbi.getSumDebt()));
+			} catch (Exception e) {
+				model.addAttribute("sumDebt", "--");
 			}
 			try {
 				model.addAttribute("netAsset", CurrencyUitl.covertToString(fbi.getNetAsset()));
@@ -127,7 +133,7 @@ public class CodeController {
 				model.addAttribute("accountrec", "--");
 			}
 			model.addAttribute("finance", fbi);
-			
+
 			// 是否有增发
 			ZengFa iss = chipsService.getLastZengFa(code);
 			StringBuffer lastZf = new StringBuffer();
