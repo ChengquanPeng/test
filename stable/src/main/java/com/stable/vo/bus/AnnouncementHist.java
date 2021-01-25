@@ -12,7 +12,7 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-@Document(indexName = "bonus_hist")
+@Document(indexName = "annment_hist")
 public class AnnouncementHist extends EsBase {
 
 	private static final long serialVersionUID = 1L;

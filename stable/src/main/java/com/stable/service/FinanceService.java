@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -31,6 +33,7 @@ import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.CodeModelService;
 import com.stable.spider.eastmoney.EastmoneySpider;
+import com.stable.spider.jys.JysSpider;
 import com.stable.spider.ths.ThsHolderSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -78,7 +81,9 @@ public class FinanceService {
 	private ThsHolderSpider thsHolderSpider;
 	@Autowired
 	private ConceptService conceptService;
-
+	@Autowired
+	private JysSpider jysSpider;
+	
 	/**
 	 * 删除redis，从头开始获取
 	 */
@@ -396,6 +401,8 @@ public class FinanceService {
 
 	public synchronized void byJob() {
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+		log.info("交易所公告");
+		jysSpider.byJob();
 		log.info("模型开始之前运行执行：1.质押，2.股东人数");
 		WeekendFinFetchRtl rtl = new WeekendFinFetchRtl();
 		new Thread(new Runnable() {
@@ -428,6 +435,22 @@ public class FinanceService {
 		executeHangye(date);
 		// 运行完财务和行业对比后,重新运行
 		codeModelService.runJobv2(true, date);
+	}
+	@PostConstruct
+	private void a() {
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+				log.info("交易所公告");
+				jysSpider.byJob();
+				executeHangye(date);
+				// 运行完财务和行业对比后,重新运行
+				codeModelService.runJobv2(true, date);
+				
+			}
+		}).start();
 	}
 
 	private List<FinanceBaseInfoHangye> executeHangye(int date) {

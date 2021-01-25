@@ -4,13 +4,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.ChipsService;
@@ -21,8 +19,6 @@ import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.ZengFa;
-import com.stable.vo.http.JsonResult;
-import com.stable.vo.spi.req.EsQueryPageReq;
 
 @Controller
 public class CodeController {
@@ -119,19 +115,4 @@ public class CodeController {
 		return "code";
 	}
 
-	@RequestMapping(value = "/codemodel/list", method = RequestMethod.GET)
-	@ResponseBody
-	public ResponseEntity<JsonResult> codemodellist(String code, int orderBy, int asc, String conceptId,
-			String conceptName, String zfStatus, EsQueryPageReq page) {
-		JsonResult r = new JsonResult();
-		try {
-			r.setResult(codeModelService.getListForWeb(code, orderBy, conceptId, conceptName, asc, page, zfStatus));
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
 }

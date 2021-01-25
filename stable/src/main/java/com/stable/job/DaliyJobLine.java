@@ -1,7 +1,5 @@
 package com.stable.job;
 
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +7,6 @@ import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
-import com.stable.service.model.SortV6Service;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 
@@ -19,8 +16,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class DaliyJobLine {
 	@Autowired
-	private SortV6Service sortV6Service;
-	@Autowired
 	private DaliyTradeHistroyService tradeHistroyService;
 	@Autowired
 	private FinanceService financeService;
@@ -28,7 +23,7 @@ public class DaliyJobLine {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private TradeCalService tradeCalService;
-	
+
 	public void start() {
 		log.info("DaliyJobLine start");
 		log.info("1.同步股票列表");
@@ -54,7 +49,7 @@ public class DaliyJobLine {
 			e.printStackTrace();
 		} finally {
 			// 短线模型
-			next2SortMode6(today);
+			// next2SortMode6(today);
 		}
 		log.info("流水任务 [end]");
 	}
@@ -69,14 +64,5 @@ public class DaliyJobLine {
 			WxPushUtil.pushSystem1("异常执行Seq1=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:0,以后的链条不会被执行");
 			return false;
 		}
-	}
-
-	private void next2SortMode6(String today) {
-		try {
-			TimeUnit.MINUTES.sleep(10);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		sortV6Service.sortv6(Integer.valueOf(today));
 	}
 }

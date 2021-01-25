@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 import org.elasticsearch.search.sort.SortOrder;
@@ -12,15 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
-import com.stable.service.CodePoolService;
 import com.stable.service.DaliyTradeHistroyService;
-import com.stable.service.StockBasicService;
 import com.stable.service.model.data.AvgService;
 import com.stable.utils.CurrencyUitl;
-import com.stable.utils.WxPushUtil;
-import com.stable.vo.bus.CodePool;
 import com.stable.vo.bus.StockAvgBase;
-import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -31,64 +25,14 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class SortV6Service {
 	@Autowired
-	private CodePoolService codePoolService;
-	@Autowired
-	private StockBasicService stockBasicService;
-	@Autowired
 	private AvgService avgService;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 
-	public void sortv6(int tradeDate) {
-		StringBuffer msg = new StringBuffer();
-		StringBuffer msg2 = new StringBuffer();
-		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
-		Map<String, CodePool> map = codePoolService.getCodePoolMap();
-		List<CodePool> list = new LinkedList<CodePool>();
-		for (StockBaseInfo s : codelist) {
-			String code = s.getCode();
-			boolean onlineYear = stockBasicService.online1YearChk(code, tradeDate);
-			if (!onlineYear) {
-				log.info("{},Online 上市不足1年", code);
-				continue;
-			}
-			CodePool cp = map.get(code);
-
-			// 短线模型6
-			if (isWhiteHorseForSortV6(is15DayTodayPriceOk(code, tradeDate))) {
-				if (cp.getSortMode6() == 0) {
-					msg.append(code).append(",");
-					cp.setSortMode6(1);
-				}
-
-			} else {
-				cp.setSortMode6(0);
-			}
-			// 短线模型7（箱体震荡新高，是否有波浪走势）
-			if (isWhiteHorseForSortV7(code, tradeDate)) {
-				if (cp.getSortMode7() == 0) {
-					msg2.append(code).append(",");
-					cp.setSortMode7(1);
-				}
-			} else {
-				cp.setSortMode7(0);
-			}
-			list.add(cp);
-		}
-		codePoolService.saveAll(list);
-		if (msg.length() > 0) {
-			WxPushUtil.pushSystem1(
-					"短线模型6(前期3-50%吸筹，深度回踩突然涨停后再2-5个交易日回踩拉起,涨停日不放量，超过涨停价格后买入，买入2内未大幅拉升放弃):" + msg.toString());
-		}
-		if (msg2.length() > 0) {
-			WxPushUtil.pushSystem1("短线模型7(箱体震荡新高,是否有波浪走势):" + msg2.toString());
-		}
-	}
-
 	/**
 	 * 1.15个交易日内有9.5%的涨幅,且涨停日有回调
 	 */
-	private TradeHistInfoDaliyNofq is15DayTodayPriceOk(String code, int date) {
+	public TradeHistInfoDaliyNofq is15DayTodayPriceOk(String code, int date) {
 		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
 				EsQueryPageUtil.queryPage16, SortOrder.DESC);
 
@@ -202,7 +146,7 @@ public class SortV6Service {
 	/**
 	 * 2.均线
 	 */
-	private boolean isWhiteHorseForSortV6(TradeHistInfoDaliyNofq topDate) {
+	public boolean isWhiteHorseForSortV6(TradeHistInfoDaliyNofq topDate) {
 		if (topDate != null) {
 			String code = topDate.getCode();
 			EsQueryPageReq req = EsQueryPageUtil.queryPage30;
@@ -221,7 +165,7 @@ public class SortV6Service {
 	/**
 	 * 箱体新高
 	 */
-	private boolean isWhiteHorseForSortV7(String code, int date) {
+	public boolean isWhiteHorseForSortV7(String code, int date) {
 		List<TradeHistInfoDaliy> l1 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
 				EsQueryPageUtil.queryPage5, SortOrder.DESC);
 		TradeHistInfoDaliy maxDate = l1.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed)).get();

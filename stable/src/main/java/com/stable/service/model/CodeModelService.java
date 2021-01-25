@@ -24,12 +24,13 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.enums.CodeModeType;
+import com.stable.enums.SylType;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.EsCodeBaseModelHistDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.service.AnnouncementService;
 import com.stable.service.ChipsService;
-import com.stable.service.CodePoolService;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.FinanceService;
@@ -52,7 +53,6 @@ import com.stable.vo.AnnMentParamUtil;
 import com.stable.vo.bus.AnnouncementHist;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.CodeBaseModelHist;
-import com.stable.vo.bus.CodePool;
 import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
@@ -74,8 +74,6 @@ public class CodeModelService {
 	private AnnouncementService announcementService;
 	@Autowired
 	private TradeCalService tradeCalService;
-	@Autowired
-	private CodePoolService codePoolService;
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -102,6 +100,8 @@ public class CodeModelService {
 	private PriceLifeService priceLifeService;
 	@Autowired
 	private AvgService avgService;
+	@Autowired
+	private SortV6Service sortV6Service;
 
 	public synchronized void runJobv2(boolean isJob, int date) {
 		try {
@@ -184,11 +184,29 @@ public class CodeModelService {
 		findBigBoss2(code, newOne, fbis);// 基本面-疑似大牛
 		susWhiteHorses(code, newOne);// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
 		zfBoss(newOne, zf);// TODO 增发更多细节
+		sortModel(newOne);// 短线模型
 //		限售解禁TODO
 //		股东人数TODO
 //		短线TODO
 //		买点: 监听//TODO
 		copyAndHist(newOne, oldOne, listHist);// 复制和历史
+	}
+
+	private void sortModel(CodeBaseModel2 newOne) {
+		String code = newOne.getCode();
+		int tradeDate = newOne.getDate();
+		// 短线模型6
+		if (sortV6Service.isWhiteHorseForSortV6(sortV6Service.is15DayTodayPriceOk(code, tradeDate))) {
+			newOne.setSortMode6(1);
+		} else {
+			newOne.setSortMode6(0);
+		}
+		// 短线模型7（箱体震荡新高，是否有波浪走势）
+		if (sortV6Service.isWhiteHorseForSortV7(code, tradeDate)) {
+			newOne.setSortMode7(1);
+		} else {
+			newOne.setSortMode7(0);
+		}
 	}
 
 	private void zfBoss(CodeBaseModel2 newOne, ZengFa zf) {
@@ -363,6 +381,9 @@ public class CodeModelService {
 			newOne.setBaseBlue(1);
 			sb3.append("增发进度" + (s.getCompnayType() == 1 ? "(国资)" : "") + ":" + newOne.getZfStatusDesc())
 					.append(Constant.HTML_LINE);
+			if (newOne.getZfStatus() == 2) {
+				sb3.append("成本：").append(zf.getPrice()).append(Constant.HTML_LINE);
+			}
 		}
 		// 股东减持（一年）
 		AnnouncementHist jianchi = announcementService.getLastRecordType(code, AnnMentParamUtil.jianchi.getType(),
@@ -702,100 +723,6 @@ public class CodeModelService {
 		}
 	}
 
-	public List<CodePool> findBigBoss(int treadeDate) {
-		log.info("treadeDate={}", treadeDate);
-		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
-		Map<String, CodePool> map = codePoolService.getCodePoolMap();
-		List<CodePool> list = new LinkedList<CodePool>();
-		for (StockBaseInfo s : codelist) {
-			try {
-				List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(s.getCode(), treadeDate,
-						EsQueryPageUtil.queryPage9999);
-				if (fbis != null && fbis.size() > 0) {
-					FinanceAnalyzer fa = new FinanceAnalyzer();
-					for (FinanceBaseInfo fbi : fbis) {
-						fa.putJidu1(fbi);
-					}
-					findBigBoss(s.getCode(), treadeDate, list, map, fbis, fa);
-				}
-			} catch (Exception e) {
-				ErrorLogFileUitl.writeError(e, "", "", "");
-			}
-		}
-		return list;
-	}
-
-	private CodePool findBigBoss(String code, int treadeDate, List<CodePool> list, Map<String, CodePool> map,
-			List<FinanceBaseInfo> fbis, FinanceAnalyzer fa) {
-		log.info("findBigBoss code:{}", code);
-		CodePool c = map.get(code);
-		if (c == null) {
-			c = new CodePool();
-			c.setCode(code);
-		}
-		list.add(c);
-		c.setUpdateDate(treadeDate);
-		// 是否符合中线、1.市盈率和ttm在50以内
-		c.setKbygjl(0);
-		c.setKbygys(0);
-//		if (yjkb != null) {
-//			c.setKbygys(yjkb.getYyzsrtbzz());
-//			c.setKbygjl(yjkb.getJlrtbzz());
-//		} else if (yjyg != null) {
-//			c.setKbygjl(yjyg.getJlrtbzz());
-//		}
-
-		// 业绩连续
-		int continueJidu1 = 0;
-		int continueJidu2 = 0;
-		boolean cj1 = true;
-		int cj2 = 0;
-		List<Double> high = new LinkedList<Double>();
-		List<Double> high2 = new LinkedList<Double>();
-		for (FinanceBaseInfo fbi : fbis) {
-			if (cj1 && fbi.getYyzsrtbzz() >= 1.0 && fbi.getGsjlrtbzz() >= 1.0) {// 连续季度增长
-				continueJidu1++;
-				high.add(fbi.getYyzsrtbzz());
-			} else {
-				cj1 = false;
-			}
-			if (cj2 <= 1 && fbi.getYyzsrtbzz() >= 1.0 && fbi.getGsjlrtbzz() >= 1.0) {// 允许一次断连续
-				continueJidu2++;
-				high2.add(fbi.getYyzsrtbzz());
-			} else {
-				cj2++;
-			}
-		}
-		boolean isok = false;
-		if (continueJidu1 > 3 || continueJidu2 > 5) {
-			if (continueJidu1 > 3) {
-				int cn = 0;
-				for (Double h : high) {// 连续超过25%的次数超过一半
-					if (h > 25.0) {
-						cn++;
-					}
-				}
-				if (cn * 2 > continueJidu1) {
-					isok = true;
-				}
-			} else if (continueJidu2 > 5) {
-				int cn = 0;
-				for (Double h : high2) {
-					if (h > 25.0) {
-						cn++;
-					}
-				}
-				if (cn * 2 > continueJidu2) {
-					isok = true;
-				}
-			}
-		}
-		c.setIsok(isok);
-		c.setContinYj1(continueJidu1);
-		c.setContinYj2(continueJidu2);
-		return c;
-	}
-
 	public CodeBaseModel2 getLastOneByCode2(String code) {
 		log.info("getLastOneByCode:{}", code);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
@@ -974,6 +901,47 @@ public class CodeModelService {
 				CodeBaseModelResp resp = new CodeBaseModelResp();
 				BeanUtils.copyProperties(dh, resp);
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
+				StringBuffer sb1 = new StringBuffer("");
+				if (dh.getBaseRed() == 1) {
+					sb1.append("红:" + dh.getBaseRedDesc());
+				}
+				if (dh.getBaseYellow() == 1) {
+					sb1.append("黄:" + dh.getBaseYellowDesc());
+				}
+				if (dh.getBaseBlue() == 1) {
+					sb1.append("蓝:" + dh.getBaseBlueDesc());
+				}
+				if (dh.getBaseGreen() == 1) {
+					sb1.append("绿:" + dh.getBaseGreenDesc());
+				}
+				resp.setBaseInfo(sb1.toString());
+				resp.setMonitorDesc(CodeModeType.getCodeName(dh.getMonitor()));
+				// 收益率
+				StringBuffer sb2 = new StringBuffer(SylType.getCodeName(dh.getSylType()));
+				sb2.append(Constant.HTML_LINE).append("ttm/jd:").append(dh.getSylttm()).append(dh.getSyldjd());
+				resp.setSylDesc(sb2.toString());
+				if (dh.getZfself() == 1) {
+					resp.setZfInfo("打压增发价");
+				}
+				StringBuffer sb3 = new StringBuffer("");
+				if (dh.getSortMode6() == 1) {
+					sb3.append("短线6").append(Constant.HTML_LINE);
+				}
+				if (dh.getSortMode7() == 1) {
+					sb3.append("箱体突破").append(Constant.HTML_LINE);
+				}
+				resp.setSortInfo(sb3.toString());
+				StringBuffer sb4 = new StringBuffer("");
+				if (dh.getSusBigBoss() == 1) {
+					sb4.append("疑似大牛").append(Constant.HTML_LINE);
+				}
+				if (dh.getSusWhiteHors() == 1) {
+					sb4.append("疑似白马").append(Constant.HTML_LINE);
+				}
+				if (dh.getSusZfBoss() == 1) {
+					sb4.append("增发筹码博弈");
+				}
+				resp.setCodeType(sb4.toString());
 //				resp.setIncomeShow(dh.getCurrIncomeTbzz() + "%");
 //				if (dh.getForestallIncomeTbzz() > 0) {
 //					resp.setIncomeShow(resp.getIncomeShow() + "(" + dh.getForestallIncomeTbzz() + "%)");
