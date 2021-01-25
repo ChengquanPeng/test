@@ -13,6 +13,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.Constant;
 import com.stable.es.dao.base.ZhiYaDao;
 import com.stable.spider.eastmoney.EastmoneyZytjSpider;
 import com.stable.utils.DateUtil;
@@ -55,7 +56,8 @@ public class ZhiYaService {
 				for (String key : m.keySet()) {
 					Zya z = m.get(key);
 //					System.err.println(key + "-> 次数:" + z.getC() + " 比例:" + z.getBi() + "%");
-					sb.append(key + "-> 次数:" + z.getC() + " 比例:" + z.getBi() + "% \n");
+					sb.append(key).append(Constant.HTML_LINE);
+					sb.append("-> 次数:" + z.getC() + " 比例:" + z.getBi() + "%").append(Constant.HTML_LINE);
 					if (z.getBi() > 50.0) {
 						r1 = true;
 					}

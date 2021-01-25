@@ -950,23 +950,23 @@ public class CodeModelService {
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
 				StringBuffer sb1 = new StringBuffer("");
 				if (dh.getBaseRed() == 1) {
-					sb1.append("红:" + dh.getBaseRedDesc());
+					sb1.append("<font color='red'>红:</font>" + dh.getBaseRedDesc());
 				}
 				if (dh.getBaseYellow() == 1) {
-					sb1.append("黄:" + dh.getBaseYellowDesc());
+					sb1.append("<font color='#FF00FF'>黄:</font>" + dh.getBaseYellowDesc());
 				}
 				if (dh.getBaseBlue() == 1) {
-					sb1.append("蓝:" + dh.getBaseBlueDesc());
+					sb1.append("<font color='blue'>蓝:</font>" + dh.getBaseBlueDesc());
 				}
 				if (dh.getBaseGreen() == 1) {
-					sb1.append("绿:" + dh.getBaseGreenDesc());
+					sb1.append("<font color='green'>绿:</font>" + dh.getBaseGreenDesc());
 				}
 				resp.setBaseInfo(sb1.toString());
 				resp.setMonitorDesc(CodeModeType.getCodeName(dh.getMonitor()));
 				// 收益率
 				StringBuffer sb2 = new StringBuffer(SylType.getCodeName(dh.getSylType()));
-				sb2.append(Constant.HTML_LINE).append("ttm/jd:").append(dh.getSylttm()).append("/")
-						.append(dh.getSyldjd());
+				sb2.append(Constant.HTML_LINE).append("ttm/jd").append(Constant.HTML_LINE).append(dh.getSylttm())
+						.append("/").append(dh.getSyldjd());
 				resp.setSylDesc(sb2.toString());
 
 				StringBuffer sb3 = new StringBuffer("");
