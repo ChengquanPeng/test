@@ -286,6 +286,10 @@ public class CodeModelService {
 			newOne.setBaseRed(1);
 			sb1.append("净资产小于0").append(Constant.HTML_LINE);
 		}
+		if (fbi.getSumLasset() < fbi.getSumDebtLd()) {
+			newOne.setBaseRed(1);
+			sb1.append("流动资产小于流动负债").append(Constant.HTML_LINE);
+		}
 		// ======== 黄色警告 ========
 		StringBuffer sb2 = new StringBuffer();
 		if (fa.getCurrYear().getGsjlr() < 0) {
