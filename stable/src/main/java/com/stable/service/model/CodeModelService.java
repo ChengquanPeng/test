@@ -804,20 +804,6 @@ public class CodeModelService {
 		return null;
 	}
 
-	public CodeBaseModelHist getHistOneById(String id) {
-		log.info("getHistOneById:{}", id);
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("id", id));
-
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).build();
-
-		Page<CodeBaseModelHist> page = codeBaseModelHistDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent().get(0);
-		}
-		return null;
-	}
 
 	private FinanceBaseInfoHangye getFinanceBaseInfoHangye(String code, int year, int quarter) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
@@ -939,6 +925,43 @@ public class CodeModelService {
 	
 	public CodeBaseModel2 getLastOneByCodeResp(String code) {
 		return getModelResp(getLastOneByCode2(code));
+	}
+	public CodeBaseModelResp getHistOneByCodeYearQuarter(String code,int year,int quarter) {
+		if(quarter==1) {
+			quarter = 4;
+			year--;
+		}else {
+			quarter--;
+		}
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.matchPhraseQuery("currYear", year));
+		bqb.must(QueryBuilders.matchPhraseQuery("currQuarter", quarter));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+		Page<CodeBaseModelHist> page = codeBaseModelHistDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			CodeBaseModelHist dh = page.getContent().get(0);
+			return getModelResp(dh);
+		}
+		return null;
+	
+	}
+	public CodeBaseModelResp getHistOneById(String id) {
+		log.info("getHistOneById:{}", id);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("id", id));
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+
+		Page<CodeBaseModelHist> page = codeBaseModelHistDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			CodeBaseModelHist dh = page.getContent().get(0);
+			return getModelResp(dh);
+		}
+		return null;
 	}
 	
 	private CodeBaseModelResp getModelResp(CodeBaseModel2 dh) {
