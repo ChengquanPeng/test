@@ -15,6 +15,19 @@
 
 <!-- Custom styles for this template -->
 <link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
+<script type="text/javascript">
+	function getQueryVariable(variable) {
+		var query = window.location.search.substring(1);
+		var vars = query.split("&");
+		for (var i = 0; i < vars.length; i++) {
+			var pair = vars[i].split("=");
+			if (pair[0] == variable) {
+				return pair[1];
+			}
+		}
+		return (false);
+	}
+</script>
 </head>
 
 <body>
@@ -23,23 +36,38 @@
 		<div class="row">
 			<div id="menu"></div>
 			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
-			<div class="col-lg-9">
+			<div>
+				股票代码：<input type="text"  id="queryCode"
+					width="30">
+			</div>
+			<div>
+				板块名称：<input type="text"  id="conceptName"
+					width="30">
+			</div>
+			<div>
+				概念id：<input type="text" id="conceptId"
+					width="30">
+			</div>
+			<div>
 				<div class="input-group">
-					股票代码：<input type="text" class="form-control" id="queryCode">
-					板块名称：<input type="text" class="form-control" id="conceptName">
-					概念id：<input type="text" class="form-control" id="conceptId">
-					增发状态：<select id="zfStatus" class="form-control">
+					增发状态：<select id="zfStatus">
 						<option value="" selected="selected">不限制</option>
 						<option value="1">增发中</option>
 						<option value="2">增发完成</option>
 						<option value="3">增发终止</option>
 						<option value="0">无增发</option>
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 收益率:<select id="bsyl"
+						class="form-control">
+						<option value="" selected="selected">无限制</option>
+						<option value="1">增长</option>
+						<option value="2">年超20%</option>
+						<option value="4">增长&超20%</option>
 					</select>
 				</div>
 			</div>
-			<div class="col-lg-9">
+			<div>
 				<div class="input-group">
-					红色:<select id="bred" class="form-control">
+					红色:<select id="bred">
 						<option value="" selected="selected">无限制</option>
 						<option value="1">有红色</option>
 						<option value="0">无红色</option>
@@ -58,18 +86,12 @@
 						<option value="" selected="selected">无限制</option>
 						<option value="1">有绿色</option>
 						<option value="0">无绿色</option>
-					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 收益率:<select id="bsyl"
-						class="form-control">
-						<option value="" selected="selected">无限制</option>
-						<option value="1">增长</option>
-						<option value="2">年超20%</option>
-						<option value="4">增长&超20%</option>
-					</select>
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				</div>
 			</div>
-			<div class="col-lg-9">
+			<div>
 				<div class="input-group">
-					监听类型:<select id="monitor" class="form-control">
+					监听类型:<select id="monitor">
 						<option value="" selected="selected">无限制</option>
 						<option value="1">疑似大牛</option>
 						<option value="2">中线</option>
@@ -78,17 +100,17 @@
 						<option value="5">增发</option>
 						<option value="0">无监听</option>
 						<option value="9999">有监听</option>
-					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-					疑似大牛:<input type="checkbox" id="susBigBoss" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-					疑似白马:<input type="checkbox" id="susWhiteHors" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 疑似大牛:<input type="checkbox"
+						id="susBigBoss" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 疑似白马:<input
+						type="checkbox" id="susWhiteHors" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					增发博弈:<input type="checkbox" id="susZfBoss" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					箱体突破:<input type="checkbox" id="sort7" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					短线模型:<input type="checkbox" id="sort6" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				</div>
 			</div>
-			<div class="col-lg-4">
+			<div>
 				<div class="input-group">
-					排序：<select id="gsort" class="form-control">
+					排序：<select id="gsort">
 						<option value="0" selected="selected">默认</option>
 						<option value="3">资产收益率ttm</option>
 						<option value="4">资产收益率报告期</option>
@@ -264,6 +286,11 @@
 			//alert("abc");
 			loadData()
 		});
+		var c = getQueryVariable("code");
+		if (c) {
+			$("#queryCode").val(c);
+		}
+
 		loadData();
 	</script>
 </body>
