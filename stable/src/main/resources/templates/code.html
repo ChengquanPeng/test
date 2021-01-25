@@ -35,10 +35,7 @@ trtd{
 	<div><font color='red'>违规处理</font>:<a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/event.html'}">--></a></div>
 	<div><font color='red'>财务亏损: 是否主营业务亏损？</font></div>
 	<br/>------------------------------------------------------------<br/>
-	财务报告年份：
-	<div><span th:text="${codedetail.currYear}"></span>-报告：<span th:text="${codedetail.currQuarter}"></span>季度
-	&nbsp;&nbsp;&nbsp;&nbsp; <a target="_blank" th:href="@{'/codehist/pre/'+${code}+'/'+${codedetail.currYear}+'/'+${codedetail.currQuarter}}">上一季度</span></a>
-	</div>
+	财务报告年份：<span th:text="${codedetail.currYear}"></span>-年：<span th:text="${codedetail.currQuarter}"></span>季度&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'/codehist/pre/'+${code}+'/'+${codedetail.currYear}+'/'+${codedetail.currQuarter}}">上一季度</a></span>
 	<br/>------------------------------------------------------------<br/>
 	<div>流动资产合计(<span th:text="${sumLasset}"></span>) = 货币资金 (<span th:text="${monetaryFund}"></span>)
 		+ 交易性金融资产<span th:text="${tradeFinassetNotfvtpl}"></span> + 存货<span th:text="${inventory}"></span>
