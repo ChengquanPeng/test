@@ -36,7 +36,9 @@ trtd{
 	<div><font color='red'>财务亏损: 是否主营业务亏损？</font></div>
 	<br/>------------------------------------------------------------<br/>
 	财务报告年份：
-	<span th:text="${codedetail.currYear}"></span>-报告：<span th:text="${codedetail.currQuarter}"></span>季度
+	<div><span th:text="${codedetail.currYear}"></span>-报告：<span th:text="${codedetail.currQuarter}"></span>季度
+	&nbsp;&nbsp;&nbsp;&nbsp; <a target="_blank" th:href="@{'/codehist/pre/'+${code}+'/'+${codedetail.currYear}+'/'+${codedetail.currQuarter}}">上一季度</span></a>
+	</div>
 	<br/>------------------------------------------------------------<br/>
 	<div>营业总收入:<span th:text="${yyzsr}"></span> &nbsp;同比:<span th:text="${finance.yyzsrtbzz}"></span></div>
 	<div>归属净利润:<span th:text="${gsjlr}"></span> &nbsp;同比:<span th:text="${finance.gsjlrtbzz}"></span></div>
