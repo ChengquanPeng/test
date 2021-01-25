@@ -196,16 +196,6 @@ public class SortV6Service {
 		return false;
 	}
 
-//	@PostConstruct
-//	private void test() {
-//		String code = "600798";
-//		if (isWhiteHorseForSortV6(is15DayTodayPriceOk(code, 20201217))) {
-//			log.info("{} 满足条件", code);
-//		} else {
-//			log.info("{} 不满足条件", code);
-//		}
-//	}
-
 	public static final Semaphore sempAll = new Semaphore(1);
 
 	EsQueryPageReq req00 = EsQueryPageUtil.queryPage6;
@@ -241,63 +231,4 @@ public class SortV6Service {
 		return true;
 
 	}
-
-//	@PostConstruct
-//	public void test6() {
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				String code = "600789";
-//				int date = 20200117;
-//				String code = "603477";
-//				int date = 20201030;
-//				String code = "300750";
-//				int date = 20200929;
-
-//				String code = "000625";
-//				int date = 20201113;
-//
-//				double rate = 3.5;
-//				int day = 3;
-//				List<TradeHistInfoDaliyNofq> dailyList0 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code,
-//						date, date, EsQueryPageUtil.queryPage9999, SortOrder.ASC);
-//				if (dailyList0 != null && dailyList0.size() > 0) {
-//					TradeHistInfoDaliyNofq td = dailyList0.get(0);
-//					TraceSortv2Vo tv = middleRunningsortv4(code, date, td, rate, 7.5, day);
-//					log.info(tv);
-//				} else {
-//					log.info("dailyList0 is null");
-//				}
-//
-//				String code = "600798";
-//				int date = 20201218;
-//				String code = "002765";
-//				int date = 20201231;
-//				if (isWhiteHorseForSortV6(is15DayTodayPriceOk(code, date))) {
-//					log.info("{} 满足条件", code);
-//				} else {
-//					log.info("{} 不满足条件", code);
-//				}
-
-//				sortv6(20201231);
-//				sortv6("20200101", "20201225");
-//				sortv6("20190101", "20191231");
-//				sortv6("20180101", "20181231");
-//				sortv6("20170101", "20171231");
-//				sortv6("20160101", "20161231");
-//				sortv4("20110101", "20111231");
-//				sortv4("20120101", "20121231");
-//				sortv4("20130101", "20131231");
-
-//				String code = "600789";
-//				int date = 20191231;
-//				if (isWhiteHorseForSortV7(code, date)) {
-//					log.info("{} 满足条件", code);
-//				} else {
-//					log.info("{} 不满足条件", code);
-//				}
-//			}
-//		}).start();
-//	}
-
 }

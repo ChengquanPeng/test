@@ -174,18 +174,6 @@ public class ThsSpider {
 		dofetchThs884xxx(isFirday);
 	}
 
-//	@PostConstruct
-//	private void test() {
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				// startinner(Integer.valueOf(DateUtil.getTodayYYYYMMDD()), true);
-//				dofetchHye(false);
-//				dofetchThs884xxx(false);
-//			}
-//		}).start();
-//	}
-
 	private void synchConceptDaliy(int date, Map<String, Concept> m) {
 		try {
 			int c = 0;
