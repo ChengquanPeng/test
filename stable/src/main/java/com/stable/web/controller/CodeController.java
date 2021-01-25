@@ -71,6 +71,61 @@ public class CodeController {
 			} catch (Exception e) {
 				model.addAttribute("goodWill", "--");
 			}
+			try {
+				model.addAttribute("sumAsset", CurrencyUitl.covertToString(fbi.getSumAsset()));
+			} catch (Exception e) {
+				model.addAttribute("sumAsset", "--");
+			}
+			try {
+				model.addAttribute("inventory", CurrencyUitl.covertToString(fbi.getInventory()));
+			} catch (Exception e) {
+				model.addAttribute("inventory", "--");
+			}
+			try {
+				model.addAttribute("sumLasset", CurrencyUitl.covertToString(fbi.getSumLasset()));
+			} catch (Exception e) {
+				model.addAttribute("sumLasset", "--");
+			}
+			try {
+				model.addAttribute("monetaryFund", CurrencyUitl.covertToString(fbi.getMonetaryFund()));
+			} catch (Exception e) {
+				model.addAttribute("monetaryFund", "--");
+			}
+			try {
+				model.addAttribute("tradeFinassetNotfvtpl", CurrencyUitl.covertToString(fbi.getTradeFinassetNotfvtpl()));
+			} catch (Exception e) {
+				model.addAttribute("tradeFinassetNotfvtpl", "--");
+			}
+			try {
+				model.addAttribute("sumDebtLd", CurrencyUitl.covertToString(fbi.getSumDebtLd()));
+			} catch (Exception e) {
+				model.addAttribute("sumDebtLd", "--");
+			}
+			try {
+				model.addAttribute("netAsset", CurrencyUitl.covertToString(fbi.getNetAsset()));
+			} catch (Exception e) {
+				model.addAttribute("netAsset", "--");
+			}
+			try {
+				model.addAttribute("accountPay", CurrencyUitl.covertToString(fbi.getAccountPay()));
+			} catch (Exception e) {
+				model.addAttribute("accountPay", "--");
+			}
+			try {
+				model.addAttribute("retaineDearning", CurrencyUitl.covertToString(fbi.getRetaineDearning()));
+			} catch (Exception e) {
+				model.addAttribute("retaineDearning", "--");
+			}
+			try {
+				model.addAttribute("interestPay", CurrencyUitl.covertToString(fbi.getInterestPay()));
+			} catch (Exception e) {
+				model.addAttribute("interestPay", "--");
+			}
+			try {
+				model.addAttribute("accountrec", CurrencyUitl.covertToString(fbi.getAccountrec()));
+			} catch (Exception e) {
+				model.addAttribute("accountrec", "--");
+			}
 			model.addAttribute("finance", fbi);
 			
 			// 是否有增发
