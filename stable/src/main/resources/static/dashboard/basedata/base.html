@@ -10,7 +10,8 @@
 <title>Dashboard Template for Bootstrap</title>
 
 <!-- Bootstrap core CSS -->
-<link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
+	rel="stylesheet">
 
 <!-- Custom styles for this template -->
 <link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
@@ -33,20 +34,74 @@
 						<option value="2">增发完成</option>
 						<option value="3">增发终止</option>
 						<option value="0">无增发</option>
-					</select> 
+					</select>
+				</div>
+			</div>
+			<div class="col-lg-9">
+				<div class="input-group">
+					红色:<select id="bred" class="form-control">
+						<option value="" selected="selected">无限制</option>
+						<option value="1">有红色</option>
+						<option value="0">无红色</option>
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 黄色:<select id="byellow"
+						class="form-control">
+						<option value="" selected="selected">无限制</option>
+						<option value="1">有黄色</option>
+						<option value="0">无黄色</option>
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 蓝色:<select id="bblue"
+						class="form-control">
+						<option value="" selected="selected">无限制</option>
+						<option value="1">有蓝色</option>
+						<option value="0">无蓝色</option>
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 绿色:<select id="bgreen"
+						class="form-control">
+						<option value="" selected="selected">无限制</option>
+						<option value="1">有绿色</option>
+						<option value="0">无绿色</option>
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 收益率:<select id="bsyl"
+						class="form-control">
+						<option value="" selected="selected">无限制</option>
+						<option value="1">增长</option>
+						<option value="2">年超20%</option>
+						<option value="4">增长&超20%</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-lg-9">
+				<div class="input-group">
+					监听类型:<select id="monitor" class="form-control">
+						<option value="" selected="selected">无限制</option>
+						<option value="1">疑似大牛</option>
+						<option value="2">中线</option>
+						<option value="3">人工</option>
+						<option value="4">短线</option>
+						<option value="5">增发</option>
+						<option value="0">无监听</option>
+						<option value="9999">有监听</option>
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					疑似大牛:<input type="checkbox" id="susBigBoss" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					疑似白马:<input type="checkbox" id="susWhiteHors" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					增发博弈:<input type="checkbox" id="susZfBoss" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					箱体突破:<input type="checkbox" id="sort7" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					短线模型:<input type="checkbox" id="sort6" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				</div>
+			</div>
+			<div class="col-lg-4">
+				<div class="input-group">
 					排序：<select id="gsort" class="form-control">
 						<option value="0" selected="selected">默认</option>
 						<option value="3">资产收益率ttm</option>
 						<option value="4">资产收益率报告期</option>
 						<option value="5">资产收益评级</option>
-					</select> 
-					倒序排序:<input type="checkbox" id="asc" name="asc" checked="checked" />
-					<span class="input-group-btn">
+					</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 倒序排序:<input type="checkbox"
+						id="asc" name="asc" checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
 						<button class="btn btn-default" type="button" id="queryAction">
 							Go!</button>
 					</span>
 				</div>
 			</div>
+
 
 			<div id="rptList" style="width: 100%; hight: 100%; float: left；">
 				<table class="table table-hover" id="cusTable">
@@ -108,8 +163,37 @@
 									param.asc = 1;
 									param.conceptId = $('#conceptId').val();
 									param.conceptName = $('#conceptName').val();
-									
 									param.zfStatus = $('#zfStatus').val();
+
+									param.bred = $('#bred').val();
+									param.byellow = $('#byellow').val();
+									param.bblue = $('#bblue').val();
+									param.bgreen = $('#bgreen').val();
+									param.bsyl = $('#bsyl').val();
+
+									param.monitor = $('#monitor').val();
+
+									param.susBigBoss = 0;
+									param.susWhiteHors = 0;
+									param.susZfBoss = 0;
+									param.sort7 = 0;
+									param.sort6 = 0;
+									if (!document.getElementById("susBigBoss").checked) {
+										param.susBigBoss = 1;
+									}
+									if (!document.getElementById("susWhiteHors").checked) {
+										param.susWhiteHors = 1;
+									}
+									if (!document.getElementById("susZfBoss").checked) {
+										param.susZfBoss = 1;
+									}
+									if (!document.getElementById("sort7").checked) {
+										param.sort7 = 1;
+									}
+									if (!document.getElementById("sort6").checked) {
+										param.sort6 = 1;
+									}
+
 									if (!document.getElementById("asc").checked) {
 										param.asc = 2;
 									}
@@ -122,47 +206,44 @@
 											formatter : function(value, row,
 													index) {
 												var actions = [];
-												actions.push('<a target="_blank" href="/web/code/' + value + '">'
+												actions
+														.push('<a target="_blank" href="/web/code/' + value + '">'
 																+ value
-																+ '</a><br/>'+row.codeName);
+																+ '</a><br/>'
+																+ row.codeName);
 												return actions.join('');
 											}
 										},
 										{
 											field : 'currYear',
 											title : '报告期',
-											formatter : function(value, row, index) {
-												return row.currYear + "-" + row.currQuarter;
+											formatter : function(value, row,
+													index) {
+												return row.currYear + "-"
+														+ row.currQuarter;
 											}
-										},
-										{
+										}, {
 											field : 'baseInfo',
 											title : '避雷区'
-										},
-										{
+										}, {
 											field : 'sylDesc',
 											title : '收益率'
-										},
-										{
+										}, {
 											field : 'codeType',
 											title : '类型'
-										},
-										{
+										}, {
 											field : 'zfInfo',
 											title : '增发'
-										},
-										{
+										}, {
 											field : 'sortInfo',
 											title : '短线'
-										},
-										{
+										}, {
 											field : 'monitorDesc',
 											title : '监听'
-										},
-										{
+										}, {
 											field : 'a',
 											title : '其他'
-										}],
+										} ],
 								responseHandler : function responseHandler(res) {
 
 									var s1 = JSON.stringify(res.result);

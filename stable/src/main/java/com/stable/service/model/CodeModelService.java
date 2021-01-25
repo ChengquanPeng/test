@@ -26,6 +26,7 @@ import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.CodeModeType;
 import com.stable.enums.SylType;
+import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.EsCodeBaseModelHistDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
@@ -840,7 +841,8 @@ public class CodeModelService {
 	}
 
 	public List<CodeBaseModel2> getList(String code, int orderBy, String aliasCode, String conceptName, int asc,
-			EsQueryPageReq querypage, String zfStatus) {
+			EsQueryPageReq querypage, String zfStatus, String monitor, String bred, String byellow, String bblue,
+			String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6, int sort7) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -866,6 +868,48 @@ public class CodeModelService {
 		} else if (orderBy == 5) {
 			field = "sylType";
 		}
+
+		if (StringUtils.isNotBlank(monitor)) {
+			int m = Integer.valueOf(monitor);
+			if (m == 9999) {
+				bqb.must(QueryBuilders.rangeQuery("monitor").gte(1));
+			} else {
+				bqb.must(QueryBuilders.matchPhraseQuery("monitor", m));
+			}
+		}
+
+		if (StringUtils.isNotBlank(bred)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("baseRed", Integer.valueOf(bred)));
+		}
+		if (StringUtils.isNotBlank(byellow)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("baseYellow", Integer.valueOf(byellow)));
+		}
+		if (StringUtils.isNotBlank(bblue)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("baseBlue", Integer.valueOf(bblue)));
+		}
+		if (StringUtils.isNotBlank(bgreen)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("baseGreen", Integer.valueOf(bgreen)));
+		}
+		if (StringUtils.isNotBlank(bsyl)) {
+			bqb.must(QueryBuilders.matchPhraseQuery("sylType", Integer.valueOf(bsyl)));
+		}
+
+		if (susBigBoss == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("susBigBoss", 1));
+		}
+		if (susWhiteHors == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));
+		}
+		if (susZfBoss == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("susZfBoss", 1));
+		}
+		if (sort6 == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("sort6", 1));
+		}
+		if (sort7 == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("sort7", 1));
+		}
+
 //		<option value="3">资产收益率ttm</option>
 //		<option value="4">资产收益率报告期</option>
 //		<option value="5">资产收益评级</option>
@@ -889,12 +933,15 @@ public class CodeModelService {
 	}
 
 	public List<CodeBaseModelResp> getListForWeb(String code, int orderBy, String conceptId, String conceptName,
-			int asc, EsQueryPageReq querypage, String zfStatus) {
+			int asc, EsQueryPageReq querypage, String zfStatus, String monitor, String bred, String byellow,
+			String bblue, String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6,
+			int sort7) {
 		log.info(
 				"CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={},conceptId={},conceptName={},zfStatus={}",
 				code, orderBy, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName, zfStatus);
 
-		List<CodeBaseModel2> list = getList(code, orderBy, conceptId, conceptName, asc, querypage, zfStatus);
+		List<CodeBaseModel2> list = getList(code, orderBy, conceptId, conceptName, asc, querypage, zfStatus, monitor,
+				bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {
 			for (CodeBaseModel2 dh : list) {
@@ -918,11 +965,10 @@ public class CodeModelService {
 				resp.setMonitorDesc(CodeModeType.getCodeName(dh.getMonitor()));
 				// 收益率
 				StringBuffer sb2 = new StringBuffer(SylType.getCodeName(dh.getSylType()));
-				sb2.append(Constant.HTML_LINE).append("ttm/jd:").append(dh.getSylttm()).append("/").append(dh.getSyldjd());
+				sb2.append(Constant.HTML_LINE).append("ttm/jd:").append(dh.getSylttm()).append("/")
+						.append(dh.getSyldjd());
 				resp.setSylDesc(sb2.toString());
-				if (dh.getZfself() == 1) {
-					resp.setZfInfo("打压增发价");
-				}
+
 				StringBuffer sb3 = new StringBuffer("");
 				if (dh.getSortMode6() == 1) {
 					sb3.append("短线6").append(Constant.HTML_LINE);
@@ -942,6 +988,19 @@ public class CodeModelService {
 					sb4.append("增发筹码博弈");
 				}
 				resp.setCodeType(sb4.toString());
+
+				StringBuffer sb5 = new StringBuffer(ZfStatus.getCodeName(dh.getZfStatus()));
+				if (dh.getZfStatus() == 1) {
+					sb5.append(":").append(dh.getZfStatusDesc()).append(Constant.HTML_LINE);
+				}
+				if (dh.getZfStatus() == 2) {
+					if (dh.getZfself() == 1) {
+						sb5.append(":打压增发价").append(Constant.HTML_LINE);
+					} else {
+						sb5.append(":增发价正常").append(Constant.HTML_LINE);
+					}
+				}
+				resp.setZfInfo(sb5.toString());
 //				resp.setIncomeShow(dh.getCurrIncomeTbzz() + "%");
 //				if (dh.getForestallIncomeTbzz() > 0) {
 //					resp.setIncomeShow(resp.getIncomeShow() + "(" + dh.getForestallIncomeTbzz() + "%)");

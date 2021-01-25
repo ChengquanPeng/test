@@ -23,10 +23,13 @@ public class CodeModelController {
 
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> codemodellist(String code, int orderBy, int asc, String conceptId,
-			String conceptName, String zfStatus, EsQueryPageReq page) {
+			String conceptName, String zfStatus, EsQueryPageReq querypage, String monitor, String bred, String byellow,
+			String bblue, String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6,
+			int sort7) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(codeModelService.getListForWeb(code, orderBy, conceptId, conceptName, asc, page, zfStatus));
+			r.setResult(codeModelService.getListForWeb(code, orderBy, conceptId, conceptName, asc, querypage, zfStatus,
+					monitor, bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

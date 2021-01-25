@@ -6,7 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum ZfStatus {
-	NO(0, "无"), UP(1, "增长"), C20(2, "年超20%"), BOTH(4, "增长&超20%");
+	NO(0, "无"), ING(1, "正在增发"), DONE(2, "完成增发"), ZUOFEI(3, "增发作废");
 
 	private int code;
 	private String desc;
