@@ -112,6 +112,10 @@ public class EastmoneyZcfzbSpider {
 						fzb.setSumLasset(Double.valueOf(data.getString("SUMLASSET")));// 流动资产合计
 					} catch (Exception e) {
 					}
+					try {
+						fzb.setTradeFinassetNotfvtpl(Double.valueOf(data.getString("TRADE_FINASSET_NOTFVTPL")));
+					} catch (Exception e) {
+					}
 //					System.err.println(fzb + " " + CurrencyUitl.covertToString(fzb.getSumAsset()) + " "
 //							+ CurrencyUitl.covertToString(fzb.getSumDebt()) + " "
 //							+ CurrencyUitl.covertToString(fzb.getNetAsset()));

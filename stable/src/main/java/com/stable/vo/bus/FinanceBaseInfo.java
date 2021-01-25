@@ -70,6 +70,8 @@ public class FinanceBaseInfo extends EsBase {
 	@Field(type = FieldType.Double)
 	private double monetaryFund;// 货币资金
 	@Field(type = FieldType.Double)
+	private double tradeFinassetNotfvtpl; // 交易性金融资产
+	@Field(type = FieldType.Double)
 	private double accountrec;// 应收账款（是否自己贴钱在干活，同行业比较）
 	@Field(type = FieldType.Double)
 	private double accountPay;// 应付账款:欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算

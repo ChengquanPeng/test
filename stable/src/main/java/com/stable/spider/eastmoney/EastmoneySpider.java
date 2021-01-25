@@ -224,6 +224,7 @@ public class EastmoneySpider {
 							fbi.setRetaineDearning(zcfzb.getRetaineDearning());
 							fbi.setInterestPay(zcfzb.getInterestPay());
 							fbi.setSumLasset(zcfzb.getSumLasset());
+							fbi.setTradeFinassetNotfvtpl(zcfzb.getTradeFinassetNotfvtpl());
 
 							// 分析数据
 							if (fbi.getNetAsset() > 0) {
@@ -239,7 +240,10 @@ public class EastmoneySpider {
 								}
 							}
 							// 资金紧张: 货币资金-流动负债, <=0
-							fbi.setFundNotOk(fbi.getMonetaryFund() - fbi.getSumDebtLd() > 0 ? 0 : 1);
+							fbi.setFundNotOk(
+									(fbi.getMonetaryFund() + fbi.getTradeFinassetNotfvtpl() - fbi.getSumDebtLd()) > 0
+											? 0
+											: 1);
 							if (fbi.getInterestPay() > 0) {// 应付利息:如果较高
 								double jieqian = fbi.getInterestPay() * 10;// 大概借的钱=利息*10倍（10%的利息）
 								if (jieqian > chkLine) {// 借钱超过10亿
