@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.Constant;
 import com.stable.es.dao.base.ZhiYaDao;
 import com.stable.spider.eastmoney.EastmoneyZytjSpider;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.WxPushUtil;
@@ -57,7 +58,7 @@ public class ZhiYaService {
 					Zya z = m.get(key);
 //					System.err.println(key + "-> 次数:" + z.getC() + " 比例:" + z.getBi() + "%");
 					sb.append(key).append(Constant.HTML_LINE);
-					sb.append("-> 次数:" + z.getC() + " 比例:" + z.getBi() + "%").append(Constant.HTML_LINE);
+					sb.append("-> 次数:" + z.getC() + " 比例:" + CurrencyUitl.roundHalfUp(z.getBi()) + "%").append(Constant.HTML_LINE);
 					if (z.getBi() > 50.0) {
 						r1 = true;
 					}
@@ -66,8 +67,8 @@ public class ZhiYaService {
 					}
 				}
 				zy.setDetail(sb.toString());
-				zy.setHighRatio(highRatio);
-				zy.setTotalRatio(tzy.getBi());
+				zy.setHighRatio(CurrencyUitl.roundHalfUp(highRatio));
+				zy.setTotalRatio(CurrencyUitl.roundHalfUp(tzy.getBi()));
 				zy.setUpdate(update);
 				zy.setHasRisk(0);
 				if (r1 && tzy.getBi() > 7.0) {// 股东超过50%的质押，总股本超过10%
