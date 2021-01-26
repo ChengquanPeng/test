@@ -17,6 +17,9 @@ public class ThsAnnSpider {
 	private static String BASE_URL = "http://basic.10jqka.com.cn/api/stock/getsnlist/%s_%s.json";
 
 	public static String dofetch(String code, int endDate) {
+		if (endDate < 20160101) {
+			endDate = 20160101;
+		}
 		String org = "";
 //		String UnicodeToCN = "";
 		int i = 1;
@@ -40,7 +43,7 @@ public class ThsAnnSpider {
 						// 成功
 						if (title.contains("上市公告书") || title.contains("发行情况报告书")) {
 							// System.err.println("999999-endingggg:" + date + " " + type + " " + title);
-							if(title.contains("资产") && title.contains("买")) {
+							if (title.contains("资产") && title.contains("买")) {
 								return title;
 							}
 						}

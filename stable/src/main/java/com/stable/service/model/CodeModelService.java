@@ -63,6 +63,7 @@ import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.ZengFa;
+import com.stable.vo.bus.ZengFaExt;
 import com.stable.vo.bus.ZhiYa;
 import com.stable.vo.http.resp.CodeBaseModelResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -255,6 +256,11 @@ public class CodeModelService {
 			}
 			if (preCondi && newOne.getZfself() == 1) {
 				newOne.setSusZfBoss(1);
+			}
+			
+			ZengFaExt zfe = chipsService.getZengFaExtById(zf.getId());
+			if(zfe!=null) {
+				newOne.setZfbuy(zfe.getBuy());
 			}
 		} else {
 			newOne.setSusZfBoss(0);

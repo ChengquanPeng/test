@@ -66,6 +66,8 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int zfself = 0;// 自己人在增发
 	@Field(type = FieldType.Integer)
+	private int zfbuy = 0;// 是否购买资产
+	@Field(type = FieldType.Integer)
 	private int susZfBoss; // 增发博弈
 	// 交易面
 	@Field(type = FieldType.Integer)
