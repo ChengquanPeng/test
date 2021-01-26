@@ -3,6 +3,7 @@ package com.stable.job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.stable.service.ChipsService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
@@ -23,14 +24,18 @@ public class DaliyJobLine {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private TradeCalService tradeCalService;
-
-	public void start() {
+	@Autowired
+	private ChipsService chipsService;
+	
+	
+	public synchronized void start() {
 		log.info("DaliyJobLine start");
 		log.info("1.同步股票列表");
 		stockBasicService.jobSynStockList(true);
 		log.info("2.快预报");
 		financeService.jobSpiderKuaiYuBao();
 		line1();
+		chipsService.jobZengFaExt(true);
 		log.info("EveryWorkingDayJob end");
 	}
 

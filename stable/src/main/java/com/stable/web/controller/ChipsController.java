@@ -108,6 +108,29 @@ public class ChipsController {
 		}
 		return ResponseEntity.ok(r);
 	}
+	
+	/**
+	 * 同花顺-增发-ext
+	 */
+	@RequestMapping(value = "/fetchZengfaExt", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> fetchZengfaExt() {
+		JsonResult r = new JsonResult();
+		try {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					chipsService.jobZengFaExt(false);
+				}
+			}).start();
+			r.setResult(JsonResult.OK);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
 
 	/**
 	 * 东方财富-历史解禁

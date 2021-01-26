@@ -20,21 +20,26 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsHolderNumDao;
 import com.stable.es.dao.base.EsHolderPercentDao;
 import com.stable.es.dao.base.FenHongDao;
 import com.stable.es.dao.base.JiejinDao;
 import com.stable.es.dao.base.ZengFaDao;
 import com.stable.es.dao.base.ZengFaDetailDao;
+import com.stable.es.dao.base.ZengFaExtDao;
 import com.stable.es.dao.base.ZengFaSummaryDao;
+import com.stable.spider.ths.ThsAnnSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.HolderPercent;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
+import com.stable.vo.bus.ZengFaExt;
 import com.stable.vo.bus.ZengFaSummary;
 import com.stable.vo.http.resp.ZengFaResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -59,6 +64,8 @@ public class ChipsService {
 	private ZengFaSummaryDao zengFaSummaryDao;
 	@Autowired
 	private JiejinDao jiejinDao;
+	@Autowired
+	private ZengFaExtDao zengFaExtDao;
 	@Autowired
 	private StockBasicService stockBasicService;
 
@@ -206,12 +213,59 @@ public class ChipsService {
 	 * -增发记录
 	 */
 	public List<ZengFa> getZengFaList(String code, String status, EsQueryPageReq querypage) {
+		return getZengFaList(code, status, 0, querypage);
+	}
+
+	public void jobZengFaExt(boolean isJob) {
+		int endDate = 0; // 全部
+		if (isJob) {
+			endDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -90));
+		}
+		StringBuffer sb = new StringBuffer();
+		List<ZengFa> l = getZengFaList("", ZfStatus.DONE.getCode() + "", endDate, EsQueryPageUtil.queryPage9999);
+		for (ZengFa zf : l) {
+			ZengFaExt zfe = getZengFaExtById(zf.getId());
+			if (zfe == null) {
+				zfe = new ZengFaExt();
+				zfe.setId(zf.getId());
+				zfe.setCode(zf.getCode());
+				zfe.setDate(zf.getEndDate());
+				String s = ThsAnnSpider.dofetch(zf.getCode(), zf.getStartDate());
+				if (StringUtils.isNotBlank(s)) {
+					zfe.setBuy(1);
+					zfe.setTitle(s);
+					sb.append(zfe.getCode()).append(",");
+				}
+				zengFaExtDao.save(zfe);
+			}
+		}
+		if (sb.length() > 0) {
+			WxPushUtil.pushSystem1("增发完成且是购买资产：" + sb.toString());
+		}
+	}
+
+	public ZengFaExt getZengFaExtById(String id) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("id", id));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+		Page<ZengFaExt> page = zengFaExtDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		return null;
+	}
+
+	public List<ZengFa> getZengFaList(String code, String status, int endDate, EsQueryPageReq querypage) {
 		int pageNum = querypage.getPageNum();
 		int size = querypage.getPageSize();
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		}
+		if (endDate > 0) {
+			bqb.must(QueryBuilders.rangeQuery("endDate").from(endDate));
 		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("startDate").unmappedType("integer").order(SortOrder.DESC);
 		if (StringUtils.isNotBlank(status)) {
