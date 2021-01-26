@@ -40,6 +40,7 @@ public class EveryDayJob extends MySimpleJob {
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		log.info("回购公告");
 		buyBackService.jobFetchHistEveryDay();
+		codeModelService.resetSureField();
 
 		log.info("过期文件的删除");
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);

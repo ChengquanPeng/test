@@ -267,7 +267,15 @@
 											title : '监听'
 										}, {
 											field : 'a',
-											title : '其他'
+											title : '人工',
+											formatter : function(value, row,
+													index) {
+												return "<a target='_blank' href='/web/dashboard/basedata/manual.html?code="
+												+ row.code
+												+ "'>人工</a>";
+											}
+											
+												
 										} ],
 								responseHandler : function responseHandler(res) {
 

@@ -79,11 +79,22 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int sortMode7 = 0;// 突破箱体震荡 --//0未知，1待确认，2确认，3，不符合
 
-	//股东人数
+	// 人工确定
+	@Field(type = FieldType.Integer)
+	private int susZfBossSure;
+	@Field(type = FieldType.Integer)
+	private int susBigBossSure;
+	@Field(type = FieldType.Integer)
+	private int susWhiteHorsSure;
+	@Field(type = FieldType.Integer)
+	private int sortMode6Sure;
+	@Field(type = FieldType.Integer)
+	private int sortMode7Sure;
+
+	// 股东人数
 	@Field(type = FieldType.Double)
 	private double holderNum;
-	
-	
+
 	@Transient
 	public String getKeyString() {
 		StringBuffer sb = new StringBuffer();

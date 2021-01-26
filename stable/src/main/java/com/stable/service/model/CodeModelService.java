@@ -30,6 +30,7 @@ import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.EsCodeBaseModelHistDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
+import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.service.AnnouncementService;
 import com.stable.service.ChipsService;
 import com.stable.service.ConceptService;
@@ -103,6 +104,8 @@ public class CodeModelService {
 	private AvgService avgService;
 	@Autowired
 	private SortV6Service sortV6Service;
+	@Autowired
+	private MonitorPoolDao monitorPoolDao;
 
 	public synchronized void runJobv2(boolean isJob, int date) {
 		try {
@@ -134,7 +137,15 @@ public class CodeModelService {
 		Map<String, CodeBaseModel2> histMap = getALLForMap();
 		for (StockBaseInfo s : codelist) {
 			try {
-				getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listLast, listHist, poolList, poolMap);
+				String code = s.getCode();
+				// 监听池
+				MonitorPool pool = poolMap.get(code);
+				if (pool == null) {
+					pool = new MonitorPool();
+					pool.setCode(code);
+					poolList.add(pool);
+				}
+				getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listLast, listHist);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -145,6 +156,9 @@ public class CodeModelService {
 		if (listHist.size() > 0) {
 			codeBaseModelHistDao.saveAll(listHist);
 		}
+		if (poolList.size() > 0) {
+			monitorPoolDao.saveAll(poolList);
+		}
 //		middleSortV1Service.start(tradeDate, list);
 		log.info("CodeModel v2 模型执行完成");
 		WxPushUtil.pushSystem1(
@@ -152,7 +166,7 @@ public class CodeModelService {
 	}
 
 	private void getBaseAnalyse(StockBaseInfo s, int tradeDate, CodeBaseModel2 oldOne, List<CodeBaseModel2> listLast,
-			List<CodeBaseModelHist> listHist, List<MonitorPool> poolList, Map<String, MonitorPool> poolMap) {
+			List<CodeBaseModelHist> listHist) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
 		// 基本面池
@@ -161,13 +175,6 @@ public class CodeModelService {
 		newOne.setCode(code);
 		newOne.setDate(tradeDate);
 		listLast.add(newOne);
-		// 监听池
-		MonitorPool pool = poolMap.get(code);
-		if (pool == null) {
-			pool = new MonitorPool();
-			pool.setCode(code);
-		}
-		poolList.add(pool);
 		// 财务
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(code, tradeDate,
 				EsQueryPageUtil.queryPage9999);
@@ -180,6 +187,7 @@ public class CodeModelService {
 			}
 			return;
 		}
+		copyProperty(newOne, oldOne);// copy原有属性
 		ZengFa zf = chipsService.getLastZengFa(code);
 		baseAnalyseColor(s, newOne, fbis, zf);// 基本面-红蓝绿
 		findBigBoss2(code, newOne, fbis);// 基本面-疑似大牛
@@ -188,30 +196,36 @@ public class CodeModelService {
 		sortModel(newOne);// 短线模型
 		newOne.setHolderNum(chipsService.holderNumAnalyse(code));
 //		限售解禁TODO
-//		股东人数TODO
-//		短线TODO
 //		买点: 监听//TODO
-		copyAndHist(newOne, oldOne, listHist);// 复制和历史
+		saveHist(newOne, oldOne, listHist);// 历史
 	}
 
 	private void sortModel(CodeBaseModel2 newOne) {
 		String code = newOne.getCode();
 		int tradeDate = newOne.getDate();
-		// 短线模型6
-		if (sortV6Service.isWhiteHorseForSortV6(sortV6Service.is15DayTodayPriceOk(code, tradeDate))) {
-			newOne.setSortMode6(1);
-		} else {
-			newOne.setSortMode6(0);
+
+		if (newOne.getSortMode6Sure() < 2) {
+			// 短线模型6
+			if (sortV6Service.isWhiteHorseForSortV6(sortV6Service.is15DayTodayPriceOk(code, tradeDate))) {
+				newOne.setSortMode6(1);
+			} else {
+				newOne.setSortMode6(0);
+			}
 		}
-		// 短线模型7（箱体震荡新高，是否有波浪走势）
-		if (sortV6Service.isWhiteHorseForSortV7(code, tradeDate)) {
-			newOne.setSortMode7(1);
-		} else {
-			newOne.setSortMode7(0);
+		if (newOne.getSortMode7Sure() < 2) {
+			// 短线模型7（箱体震荡新高，是否有波浪走势）
+			if (sortV6Service.isWhiteHorseForSortV7(code, tradeDate)) {
+				newOne.setSortMode7(1);
+			} else {
+				newOne.setSortMode7(0);
+			}
 		}
 	}
 
 	private void zfBoss(CodeBaseModel2 newOne, ZengFa zf) {
+		if (newOne.getSusZfBossSure() > 1) {
+			return;
+		}
 		if (newOne.getZfStatus() == 2) {
 			String code = newOne.getCode();
 			// 20个交易日股价
@@ -249,6 +263,9 @@ public class CodeModelService {
 	}
 
 	private void susWhiteHorses(String code, CodeBaseModel2 newOne) {
+		if (newOne.getSusWhiteHorsSure() > 1) {
+			return;
+		}
 		// 是否中线(60日线),TODO,加上市值
 		if (priceLifeService.getLastIndex(code) >= 80
 				&& LineAvgPrice.isWhiteHorseForMidV2(avgService, code, newOne.getDate())) {
@@ -428,12 +445,21 @@ public class CodeModelService {
 		}
 	}
 
-	private void copyAndHist(CodeBaseModel2 newOne, CodeBaseModel2 oldOne, List<CodeBaseModelHist> listHist) {
-		boolean saveHist = true;
+	private void copyProperty(CodeBaseModel2 newOne, CodeBaseModel2 oldOne) {
 		if (oldOne != null) {
 			// 复制一些属性
 			newOne.setMonitor(oldOne.getMonitor());
+			newOne.setSusZfBossSure(oldOne.getSusZfBossSure());
+			newOne.setSusBigBossSure(oldOne.getSusBigBossSure());
+			newOne.setSusWhiteHorsSure(oldOne.getSusWhiteHorsSure());
+			newOne.setSortMode6Sure(oldOne.getSortMode6Sure());
+			newOne.setSortMode7Sure(oldOne.getSortMode7Sure());
+		}
+	}
 
+	private void saveHist(CodeBaseModel2 newOne, CodeBaseModel2 oldOne, List<CodeBaseModelHist> listHist) {
+		boolean saveHist = true;
+		if (oldOne != null) {
 			// 是否更新历史
 			if (oldOne.getKeyString().equals(newOne.getKeyString())) {// 主要指标是否有变化，则记录
 				saveHist = false;
@@ -452,6 +478,9 @@ public class CodeModelService {
 
 	private void findBigBoss2(String code, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis) {
 		log.info("findBigBoss code:{}", code);
+		if (newOne.getSusBigBossSure() > 1) {
+			return;
+		}
 		// 是否符合中线、1.市盈率和ttm在50以内
 //		c.setKbygjl(0);
 //		c.setKbygys(0);
@@ -804,7 +833,6 @@ public class CodeModelService {
 		return null;
 	}
 
-
 	private FinanceBaseInfoHangye getFinanceBaseInfoHangye(String code, int year, int quarter) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -922,15 +950,16 @@ public class CodeModelService {
 		log.info("no records CodeBaseModels");
 		return null;
 	}
-	
+
 	public CodeBaseModel2 getLastOneByCodeResp(String code) {
 		return getModelResp(getLastOneByCode2(code));
 	}
-	public CodeBaseModelResp getHistOneByCodeYearQuarter(String code,int year,int quarter) {
-		if(quarter==1) {
+
+	public CodeBaseModelResp getHistOneByCodeYearQuarter(String code, int year, int quarter) {
+		if (quarter == 1) {
 			quarter = 4;
 			year--;
-		}else {
+		} else {
 			quarter--;
 		}
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
@@ -946,8 +975,9 @@ public class CodeModelService {
 			return getModelResp(dh);
 		}
 		return null;
-	
+
 	}
+
 	public CodeBaseModelResp getHistOneById(String id) {
 		log.info("getHistOneById:{}", id);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
@@ -963,7 +993,7 @@ public class CodeModelService {
 		}
 		return null;
 	}
-	
+
 	private CodeBaseModelResp getModelResp(CodeBaseModel2 dh) {
 		CodeBaseModelResp resp = new CodeBaseModelResp();
 		BeanUtils.copyProperties(dh, resp);
@@ -985,8 +1015,8 @@ public class CodeModelService {
 		resp.setMonitorDesc(CodeModeType.getCodeName(dh.getMonitor()));
 		// 收益率
 		StringBuffer sb2 = new StringBuffer(SylType.getCodeName(dh.getSylType()));
-		sb2.append(Constant.HTML_LINE).append("ttm/jd").append(Constant.HTML_LINE).append(dh.getSylttm())
-				.append("/").append(dh.getSyldjd());
+		sb2.append(Constant.HTML_LINE).append("ttm/jd").append(Constant.HTML_LINE).append(dh.getSylttm()).append("/")
+				.append(dh.getSyldjd());
 		resp.setSylDesc(sb2.toString());
 
 		StringBuffer sb3 = new StringBuffer("");
@@ -1061,6 +1091,91 @@ public class CodeModelService {
 			}
 		}
 		return codes;
+	}
+
+	private String fields[] = { "susZfBossSure", "susBigBossSure", "susWhiteHorsSure", "sortMode6Sure",
+			"sortMode7Sure" };
+
+	public void addManual(String code, int i, int timemonth) {
+		if (i < 0 || i > 4) {
+			throw new RuntimeException("i < 0 || i > 4 ? ");
+		}
+//		monitor 和上面的对应
+		int date = -1;
+		if (timemonth == 9) {
+			date = 0;
+		} else {
+			int days = 0;
+			if (timemonth == 1) {
+				days = 30;
+			} else if (timemonth == 2) {
+				days = 60;
+			} else if (timemonth == 3) {
+				days = 90;
+			} else if (timemonth == 4) {
+				days = 180;
+			} else if (timemonth == 5) {
+				days = 365;
+			}
+			if (days > 0) {
+				Date now = new Date();
+				date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, days));
+			}
+		}
+		if (date != 1) {
+			CodeBaseModel2 c = getLastOneByCode2(code);
+			if (i == 0) {
+				c.setSusZfBossSure(date);
+			} else if (i == 1) {
+				c.setSusBigBossSure(date);
+			} else if (i == 2) {
+				c.setSusWhiteHorsSure(date);
+			} else if (i == 3) {
+				c.setSortMode6Sure(date);
+			} else if (i == 4) {
+				c.setSortMode7Sure(date);
+			}
+			codeBaseModel2Dao.save(c);
+		}
+	}
+
+	public void resetSureField() {
+		int date = DateUtil.getTodayIntYYYYMMDD();
+		for (int i = 0; i < fields.length; i++) {
+			List<CodeBaseModel2> l = getList(fields[i], date);
+			if (l != null) {
+				for (CodeBaseModel2 c : l) {
+					if (i == 0) {
+						c.setSusZfBoss(0);
+					} else if (i == 1) {
+						c.setSusBigBoss(0);
+					} else if (i == 2) {
+						c.setSusWhiteHorsSure(0);
+					} else if (i == 3) {
+						c.setSortMode6Sure(0);
+					} else if (i == 4) {
+						c.setSortMode7Sure(0);
+					}
+				}
+				codeBaseModel2Dao.saveAll(l);
+			}
+		}
+	}
+
+	private List<CodeBaseModel2> getList(String filed, int date) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.rangeQuery(filed).gt(1).lte(date));// 大于1，小于date
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		Pageable pageable = PageRequest.of(EsQueryPageUtil.queryPage9999.getPageNum(),
+				EsQueryPageUtil.queryPage9999.getPageSize());
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+
+		Page<CodeBaseModel2> page = codeBaseModel2Dao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		log.info("no records CodeBaseModels");
+		return null;
 	}
 
 }

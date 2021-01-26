@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>Dashboard Template for Bootstrap</title>
+
+<!-- Bootstrap core CSS -->
+<link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
+<style type="text/css">
+body {
+	margin: 0px;
+}
+
+.zhezhao {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	background: #000;
+	width: 100%;
+	height: 100%;
+	opacity: 0.5;
+}
+
+.tankuang {
+	position: relative;
+	background: #fff;
+	width: 30%;
+	height: 30%;
+	border-radius: 5px;
+	margin: 5% auto;
+}
+
+#header {
+	height: 40px;
+}
+
+#header-right {
+	position: absolute;
+	width: 25px;
+	height: 25px;
+	border-radius: 5px;
+	background: red;
+	color: #fff;
+	right: 5px;
+	top: 5px;
+	text-align: center;
+}
+
+.input-group {
+	margin-left: 120px;
+}
+</style>
+</head>
+<script type="text/javascript">
+	function getQueryVariable(variable) {
+		var query = window.location.search.substring(1);
+		var vars = query.split("&");
+		for (var i = 0; i < vars.length; i++) {
+			var pair = vars[i].split("=");
+			if (pair[0] == variable) {
+				return pair[1];
+			}
+		}
+		return (false);
+	}
+</script>
+<body>
+	<div id="header"></div>
+	<div class="container-fluid">
+		<div class="row">
+			<div id="menu"></div>
+			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
+			<div class="col-lg-9">
+				<div class="input-group">
+					代码：<input type="text" class="form-control" id="code">&nbsp;
+				</div>
+				<div class="input-group">
+					代码名称：<input type="text" class="form-control" id="codeName">&nbsp;
+				</div>
+				<div class="input-group">
+					监听类型：<select id="monitor">
+						<option value="0">增发</option>
+						<option value="1">疑似大牛</option>
+						<option value="2">白马</option>
+						<option value="3">短线6</option>
+						<option value="4">箱体突破</option>
+					</select>
+					时间：<select id="timemonth">
+						<option value="1">1个月</option>
+						<option value="2">2个月</option>
+						<option value="3">3个月</option>
+						<option value="4">半年</option>
+						<option value="5">1年</option>
+						<option value="9">恢复</option>
+					</select>
+				</div>
+				
+				<br />
+				<div class="input-group">
+					<span class="input-group-btn">
+						<button class="btn btn-default" type="button" id="queryAction"
+							onclick="dianwo()">Go!</button>
+					</span>
+				</div>
+			</div>
+
+			<div id="rptList" style="width: 100%; hight: 100%; float: left；">
+				<table class="table table-hover" id="cusTable">
+				</table>
+			</div>
+			</main>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="/web/libs/js/jquery-3.1.1.slim.min.js"
+		integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/js/tether.min.js"
+		integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap.min.js"></script>
+	<script src="/web/libs/js/common.js"></script>
+	<script src="/web/libs/js/jquery.js"></script>
+	<script src="/web/libs/js/dashboard/index.js"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
+	<script src="/web/libs/js/dashboard/basedata.js"></script>
+	<script type="text/javascript">
+		$("#header").load("/web/header.html")
+		addActive("m_monitor_pool");
+		$('#cusTable').bootstrapTable('destroy');
+	</script>
+	<script type="text/javascript">
+		function dianwo() {
+			var realtime = 0
+			if (document.getElementById("realtime").checked) {
+				realtime = 1;
+			}
+			var offline = 0
+			if (document.getElementById("offline").checked) {
+				offline = 1;
+			}
+			$.ajax({
+				url : "/web/model/addManual", //访问地址--action地址
+				//url : "http://127.0.0.1:8081/web/monitorPool/addMonitor", //访问地址--action地址
+				type : "get", //提交方式
+				data : {
+					code : $('#code').val(),
+					monitor : $('#monitor').val(),
+					timemonth : $('#timemonth').val()
+				}, //提交给服务器的数据
+				success : function(reData) { //回调函数的处理方式
+					if ("OK" == reData.status) {
+						alert("成功");
+						window.close();
+					} else {
+						alert("失败:" + reData.result);
+					}
+				}
+			});
+		}
+		var qc = getQueryVariable("code");
+		$.ajax({
+			url : "/web/monitorPool/byCode", //访问地址--action地址
+			//url : "http://127.0.0.1:8081/web/monitorPool/byCode", //访问地址--action地址
+			type : "get", //提交方式
+			data : {
+				code : qc
+			}, //提交给服务器的数据
+			success : function(reData) { //回调函数的处理方式
+				$('#code').val(reData.result.code);
+				$('#codeName').val(reData.result.codeName);
+			}
+		});
+	</script>
+</body>
+</html>

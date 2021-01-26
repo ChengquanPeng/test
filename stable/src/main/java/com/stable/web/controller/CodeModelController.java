@@ -58,4 +58,17 @@ public class CodeModelController {
 		}
 		return ResponseEntity.ok(r);
 	}
+	
+	@RequestMapping(value = "/addManual")
+	public ResponseEntity<JsonResult> addManual(String code, int monitor, int timemonth) {
+		JsonResult r = new JsonResult();
+		try {
+			codeModelService.addManual(code, monitor, timemonth);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setStatus(JsonResult.FAIL);
+			r.setResult(e.getMessage());
+		}
+		return ResponseEntity.ok(r);
+	}
 }
