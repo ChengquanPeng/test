@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.config.SpringConfig;
 import com.stable.service.BuyBackService;
-import com.stable.service.FinanceService;
 import com.stable.service.model.CodeModelService;
 import com.stable.spider.jys.JysSpider;
 import com.stable.utils.DateUtil;
@@ -36,6 +35,9 @@ public class EveryDayJob extends MySimpleJob {
 
 	@Override
 	public void myexecute(ShardingContext sc) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Date());
+		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		log.info("回购公告");
 		buyBackService.jobFetchHistEveryDay();
 
@@ -48,19 +50,16 @@ public class EveryDayJob extends MySimpleJob {
 		log.info("交易所公告");
 		jysSpider.byJob();
 
-		// codeAttentionService.fetchAll();
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Date());
 		// 周一周4执行，每周末抓完财报后运行
 		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY
 				&& cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
-			financeService.fetchFinances();
-			codeModelService.runJobv2(true, Integer.valueOf(DateUtil.getTodayYYYYMMDD()));
+//			financeService.fetchFinances();
+			codeModelService.runJobv2(true, date);
 		} else {
 			WxPushUtil.pushSystem1("周五，周六，周日每晚23点不在运行定时运行 code model,周日下午在继续运行！");
 		}
 	}
-	
-	@Autowired
-	private FinanceService financeService;
+//
+//	@Autowired
+//	private FinanceService financeService;
 }
