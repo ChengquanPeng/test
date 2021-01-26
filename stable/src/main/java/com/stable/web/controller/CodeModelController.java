@@ -25,11 +25,12 @@ public class CodeModelController {
 	public ResponseEntity<JsonResult> codemodellist(String code, int orderBy, int asc, String conceptId,
 			String conceptName, String zfStatus, EsQueryPageReq querypage, String monitor, String bred, String byellow,
 			String bblue, String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6,
-			int sort7) {
+			int sort7, int zfbuy) {
 		JsonResult r = new JsonResult();
 		try {
 			r.setResult(codeModelService.getListForWeb(code, orderBy, conceptId, conceptName, asc, querypage, zfStatus,
-					monitor, bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7));
+					monitor, bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7,
+					zfbuy));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -58,7 +59,7 @@ public class CodeModelController {
 		}
 		return ResponseEntity.ok(r);
 	}
-	
+
 	@RequestMapping(value = "/addManual")
 	public ResponseEntity<JsonResult> addManual(String code, int monitor, int timemonth) {
 		JsonResult r = new JsonResult();

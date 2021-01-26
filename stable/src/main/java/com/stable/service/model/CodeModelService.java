@@ -257,14 +257,15 @@ public class CodeModelService {
 			if (preCondi && newOne.getZfself() == 1) {
 				newOne.setSusZfBoss(1);
 			}
-			
+
 			ZengFaExt zfe = chipsService.getZengFaExtById(zf.getId());
-			if(zfe!=null) {
+			if (zfe != null) {
 				newOne.setZfbuy(zfe.getBuy());
 			}
 		} else {
 			newOne.setSusZfBoss(0);
 			newOne.setZfself(0);
+			newOne.setZfbuy(0);
 		}
 	}
 
@@ -867,7 +868,7 @@ public class CodeModelService {
 
 	public List<CodeBaseModel2> getList(String code, int orderBy, String aliasCode, String conceptName, int asc,
 			EsQueryPageReq querypage, String zfStatus, String monitor, String bred, String byellow, String bblue,
-			String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6, int sort7) {
+			String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6, int sort7, int zfbuy) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -921,6 +922,9 @@ public class CodeModelService {
 
 		if (susBigBoss == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("susBigBoss", 1));
+		}
+		if (zfbuy == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("zfbuy", 1));
 		}
 		if (susWhiteHors == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));
@@ -1051,9 +1055,12 @@ public class CodeModelService {
 		}
 		if (dh.getZfStatus() == 2) {
 			if (dh.getZfself() == 1) {
-				sb5.append(":打压增发价").append(Constant.HTML_LINE);
+				sb5.append(",打压增发价").append(Constant.HTML_LINE);
 			} else {
-				sb5.append(":增发价正常").append(Constant.HTML_LINE);
+				sb5.append(",增发价正常").append(Constant.HTML_LINE);
+			}
+			if (dh.getZfbuy() == 1) {
+				sb5.append(",购买资产").append(Constant.HTML_LINE);
 			}
 		}
 		resp.setZfInfo(sb5.toString());
@@ -1071,13 +1078,13 @@ public class CodeModelService {
 	public List<CodeBaseModelResp> getListForWeb(String code, int orderBy, String conceptId, String conceptName,
 			int asc, EsQueryPageReq querypage, String zfStatus, String monitor, String bred, String byellow,
 			String bblue, String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6,
-			int sort7) {
+			int sort7, int zfbuy) {
 		log.info(
 				"CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={},conceptId={},conceptName={},zfStatus={}",
 				code, orderBy, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName, zfStatus);
 
 		List<CodeBaseModel2> list = getList(code, orderBy, conceptId, conceptName, asc, querypage, zfStatus, monitor,
-				bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7);
+				bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7,zfbuy);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {
 			for (CodeBaseModel2 dh : list) {
