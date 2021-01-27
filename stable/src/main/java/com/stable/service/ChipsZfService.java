@@ -143,9 +143,9 @@ public class ChipsZfService {
 						}
 						if (ext.getCompType() == 1) {
 							r.setCompType("国企");
-						} else if (ext.getCompType() == 2){
+						} else if (ext.getCompType() == 2) {
 							r.setCompType("民企");
-						}else {
+						} else {
 							r.setCompType("-");
 						}
 						r.setMarketVal(ext.getCircMarketVal() + "<br/>" + ext.getTotalMarketVal());// 总市值
@@ -175,6 +175,9 @@ public class ChipsZfService {
 		List<ZengFa> l = getZengFaList("", ZfStatus.DONE.getCode() + "", endDate, EsQueryPageUtil.queryPage9999);
 		for (ZengFa zf : l) {
 			try {
+				if (zf.getEndDate() <= 20180101) {
+					continue;
+				}
 				ZengFaExt zfe = getZengFaExtById(zf.getId());
 				if (zfe == null) {
 					zfe = new ZengFaExt();
