@@ -179,8 +179,8 @@ public class CodeModelService {
 		// 财务
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(code, tradeDate,
 				EsQueryPageUtil.queryPage9999);
+		boolean onlineYear = stockBasicService.online1YearChk(code, tradeDate);
 		if (fbis == null) {
-			boolean onlineYear = stockBasicService.online1YearChk(code, tradeDate);
 			if (onlineYear) {
 				ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, tradeDate + "", "Code Model错误");
 			} else {
@@ -194,7 +194,9 @@ public class CodeModelService {
 		findBigBoss2(code, newOne, fbis);// 基本面-疑似大牛
 		susWhiteHorses(code, newOne);// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
 		zfBoss(newOne, zf);// TODO 增发更多细节
-		sortModel(newOne);// 短线模型
+		if (onlineYear) {
+			sortModel(newOne);// 短线模型
+		}
 		newOne.setHolderNum(chipsService.holderNumAnalyse(code));
 //		限售解禁TODO
 //		买点: 监听//TODO
@@ -868,7 +870,8 @@ public class CodeModelService {
 
 	public List<CodeBaseModel2> getList(String code, int orderBy, String aliasCode, String conceptName, int asc,
 			EsQueryPageReq querypage, String zfStatus, String monitor, String bred, String byellow, String bblue,
-			String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6, int sort7, int zfbuy) {
+			String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6, int sort7,
+			int zfbuy) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -1084,7 +1087,7 @@ public class CodeModelService {
 				code, orderBy, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName, zfStatus);
 
 		List<CodeBaseModel2> list = getList(code, orderBy, conceptId, conceptName, asc, querypage, zfStatus, monitor,
-				bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7,zfbuy);
+				bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7, zfbuy);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {
 			for (CodeBaseModel2 dh : list) {
