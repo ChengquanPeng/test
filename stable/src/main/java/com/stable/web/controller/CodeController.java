@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.ChipsService;
+import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
@@ -34,6 +35,8 @@ public class CodeController {
 	private ConceptService conceptService;
 	@Autowired
 	private ChipsService chipsService;
+	@Autowired
+	private ChipsZfService chipsZfService;
 	@Autowired
 	private FinanceService financeService;
 
@@ -142,7 +145,7 @@ public class CodeController {
 		model.addAttribute("finance", fbi);
 
 		// 是否有增发
-		ZengFa iss = chipsService.getLastZengFa(code);
+		ZengFa iss = chipsZfService.getLastZengFa(code);
 		StringBuffer lastZf = new StringBuffer();
 		if (iss.getStartDate() > 0) {
 			lastZf.append("开始日期:").append(iss.getStartDate());
@@ -161,7 +164,7 @@ public class CodeController {
 		}
 		model.addAttribute("jmsg", jj);
 
-		model.addAttribute("zfgk", chipsService.getZengFaSummary(code).getDesc());
+		model.addAttribute("zfgk", chipsZfService.getZengFaSummary(code).getDesc());
 		model.addAttribute("fhgk", chipsService.getFenHong(code).getDetails());
 		// 快预报
 		String kb = financeService.getyjkb(code, fbi.getYear(), fbi.getQuarter());

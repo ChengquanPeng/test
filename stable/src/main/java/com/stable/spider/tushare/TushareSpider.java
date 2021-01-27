@@ -139,13 +139,13 @@ public class TushareSpider {
 	 */
 	private final String stockdaliybasic_fields = "ts_code,trade_date,close,turnover_rate,turnover_rate_f,volume_ratio,pe,pe_ttm,pb,ps,ps_ttm,dv_ratio,dv_ttm,total_share,float_share,free_share,total_mv,circ_mv";
 
-	public JSONObject getStockDaliyBasic(String ts_code, String trade_date, String start_date, String end_date) {
+	public JSONObject getStockDaliyBasic(String ts_code, String trade_date) {
 		try {
 			StockDaliyReq req = new StockDaliyReq();
 			req.setTrade_date(trade_date);
 			req.setTs_code(ts_code);
-			req.setStart_date(start_date);
-			req.setEnd_date(end_date);
+//			req.setStart_date(start_date);  , String start_date, String end_date
+//			req.setEnd_date(end_date);
 
 			JSONObject json = new JSONObject();
 			json.put("api_name", "daily_basic");

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.ChipsService;
+import com.stable.service.ChipsZfService;
 import com.stable.spider.eastmoney.EmJiejinSpider;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.spider.ths.ThsJiejinSpider;
@@ -22,6 +23,8 @@ public class ChipsController {
 	private ThsBonusSpider thsBonusSpider;
 	@Autowired
 	private ChipsService chipsService;
+	@Autowired
+	private ChipsZfService chipsZfService;
 	@Autowired
 	private EmJiejinSpider emJiejinSpider;
 	@Autowired
@@ -51,7 +54,7 @@ public class ChipsController {
 	public ResponseEntity<JsonResult> zengfalist(String code, String status, EsQueryPageReq querypage) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(chipsService.getZengFaListForWeb(code, status, querypage));
+			r.setResult(chipsZfService.getZengFaListForWeb(code, status, querypage));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -67,7 +70,7 @@ public class ChipsController {
 	@RequestMapping(value = "/last/zengfadtl", method = RequestMethod.GET)
 	public Object lastZengfaDetail(String code) {
 		String s = "未找到记录";
-		ZengFaDetail zf = chipsService.getLastZengFaDetail(code);
+		ZengFaDetail zf = chipsZfService.getLastZengFaDetail(code);
 		if (zf != null && StringUtils.isNotBlank(zf.getDetails())) {
 			s = zf.getDetails().replaceAll("\\n", "</br>");
 		}
@@ -119,7 +122,7 @@ public class ChipsController {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					chipsService.jobZengFaExt(false);
+					chipsZfService.jobZengFaExt(false);
 				}
 			}).start();
 			r.setResult(JsonResult.OK);

@@ -33,6 +33,7 @@ import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.service.AnnouncementService;
 import com.stable.service.ChipsService;
+import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.FinanceService;
@@ -107,6 +108,8 @@ public class CodeModelService {
 	private SortV6Service sortV6Service;
 	@Autowired
 	private MonitorPoolDao monitorPoolDao;
+	@Autowired
+	private ChipsZfService chipsZfService;
 
 	public synchronized void runJobv2(boolean isJob, int date) {
 		try {
@@ -189,7 +192,7 @@ public class CodeModelService {
 			return;
 		}
 		copyProperty(newOne, oldOne);// copy原有属性
-		ZengFa zf = chipsService.getLastZengFa(code);
+		ZengFa zf = chipsZfService.getLastZengFa(code);
 		baseAnalyseColor(s, newOne, fbis, zf);// 基本面-红蓝绿
 		findBigBoss2(code, newOne, fbis);// 基本面-疑似大牛
 		susWhiteHorses(code, newOne);// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
@@ -260,7 +263,7 @@ public class CodeModelService {
 				newOne.setSusZfBoss(1);
 			}
 
-			ZengFaExt zfe = chipsService.getZengFaExtById(zf.getId());
+			ZengFaExt zfe = chipsZfService.getZengFaExtById(zf.getId());
 			if (zfe != null) {
 				newOne.setZfbuy(zfe.getBuy());
 			}

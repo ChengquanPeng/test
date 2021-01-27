@@ -195,7 +195,7 @@ public class XqDailyBaseSpider {
 				WxPushUtil.pushSystem1("雪球每日信息出错(pe,pe-ttm),用tushare进行补充,code={}" + code + ",url=" + url);
 				try {
 					JSONArray array = tushareSpider
-							.getStockDaliyBasic(TushareSpider.formatCode(code), today, null, null)
+							.getStockDaliyBasic(TushareSpider.formatCode(code), today)
 							.getJSONArray("items");
 					JSONArray arr = array.getJSONArray(0);
 

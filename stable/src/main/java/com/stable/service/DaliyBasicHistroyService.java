@@ -27,7 +27,7 @@ import com.stable.vo.spi.req.EsQueryPageReq;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * 日交易历史
+ * 日交易历史(每日指biao)
  *
  */
 @Service

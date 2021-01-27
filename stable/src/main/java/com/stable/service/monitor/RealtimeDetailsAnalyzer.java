@@ -37,7 +37,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		this.resulter = resulter;
 		this.cp = cp;
 		SinaRealTime srt = SinaRealtimeUitl.get(code);
-		if (srt.getOpen() == 0.0) {
+		if (srt.getOpen() == 0.0 && srt.getBuy1() == 0.0 && srt.getSell1() == 0.0) {
 			log.info("{} {} SINA 今日疑似停牌或者可能没有集合竞价", code, codeName);
 			// WxPushUtil.pushSystem1(code + " " + codeName + "今日疑似停牌或者可能没有集合竞价");
 			chkCodeClosed = true;
