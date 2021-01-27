@@ -88,7 +88,7 @@ public class MonitorPoolService {
 
 	// 加入监听
 	public void addMonitor(String code, int monitor, int realtime, int offline, double upPrice, double downPrice,
-			double upTodayChange, double downTodayChange, String remark) {
+			double upTodayChange, double downTodayChange, String remark, int ykb) {
 		if (monitor <= 0) {
 			throw new RuntimeException("monitor<=0 ?");
 		}
@@ -108,6 +108,7 @@ public class MonitorPoolService {
 		c.setDownTodayChange(downTodayChange);
 		c.setUpPrice(upPrice);
 		c.setUpTodayChange(upTodayChange);
+		c.setYkb(ykb);
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
 		} else {

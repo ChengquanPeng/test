@@ -33,6 +33,9 @@ public class ThsAnnSpider {
 					ThreadsUtil.sleepRandomSecBetween1And5();
 					org = HttpUtil.doGet2(url);
 //					UnicodeToCN = UnicodeUtil.UnicodeToCN(org); 整个json有双引号的情况，所以要下面title分开。
+					if (i > 10 && org.contains("parameter error")) {
+						return "";
+					}
 					JSONArray objects = JSON.parseArray(org);
 					String s_date = "";
 					for (int j = 0; j < objects.size(); j++) {
