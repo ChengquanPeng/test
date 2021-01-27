@@ -2,6 +2,7 @@ package com.stable.service;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -93,6 +94,7 @@ public class FinanceService {
 	private void kybMonitor() {
 		List<MonitorPool> list = monitorPoolService.getList("", 0, 0, 1, EsQueryPageUtil.queryPage9999, "");
 		if (list != null) {
+			int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -15));
 			for (MonitorPool mp : list) {
 				if (mp.getYkb() > 0) {
 					try {
@@ -102,40 +104,37 @@ public class FinanceService {
 						boolean find = false;
 						StringBuffer sb = new StringBuffer();
 						// 业绩快报(准确的)
-						if (yjkb != null) {
-							find = true;
+						if (yjkb != null && yjkb.getAnnDate() >= startDate) {
 							sb.append(code);
-							if (yjkb.getJlr() > 0 || yjkb.getJlrtbzz() > 0) {
+							if (yjkb.getJlr() > 0) {
 								sb.append(",业绩快报不亏:");
-							} else {
+								find = true;
+							} else if (yjkb.getJlr() < 0) {
 								sb.append(",业绩快报亏损:");
-							}
-							if (mp.getYkb() == 1) {
-								sb.append("期望不亏");
-							} else {
-								sb.append("期望亏损");
+								find = true;
 							}
 						} else {
 							// 业绩预告(类似天气预报,可能不准)
 							FinYjyg yjyg = getLastFinaceYgByReportDate(code, fbi.getYear(), fbi.getQuarter());
-							if (yjyg != null) {
-								find = true;
+							if (yjyg != null && yjyg.getAnnDate() >= startDate) {
 								sb.append(code);
-								if (yjyg.getJlr() > 0 || yjyg.getJlrtbzz() > 0) {
-									sb.append(",业绩快报不亏:");
-								} else {
-									sb.append(",业绩快报亏损:");
-								}
-								if (mp.getYkb() == 1) {
-									sb.append("期望不亏");
-								} else {
-									sb.append("期望亏损");
+								if (yjyg.getJlr() > 0) {
+									sb.append(",业绩预告不亏:");
+									find = true;
+								} else if (yjyg.getJlr() < 0) {
+									sb.append(",业绩预告亏损:");
+									find = true;
 								}
 							}
 						}
 						if (find) {
 							mp.setYkb(0);
 							monitorPoolDao.save(mp);
+							if (mp.getYkb() == 1) {
+								sb.append("期望不亏");
+							} else {
+								sb.append("期望亏损");
+							}
 							WxPushUtil.pushSystem1(sb.toString());
 						}
 					} catch (Exception e) {
@@ -144,6 +143,7 @@ public class FinanceService {
 				}
 			}
 		}
+
 	}
 
 	/**
