@@ -37,11 +37,13 @@ public class MonitorPool {
 	private double upTodayChange = 0;// 高于某涨幅
 	@Field(type = FieldType.Integer)
 	private double downTodayChange = 0;// 低于某涨幅
-	
-	//增发
-	
-	//短线
-	
+	@Field(type = FieldType.Integer)
+	private int ykb = 0;// 快预报(0不预警，1不亏，2亏损）
+
+	// 增发
+
+	// 短线
+
 	//
 
 	public String getMsg() {

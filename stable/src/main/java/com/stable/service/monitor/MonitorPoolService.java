@@ -208,7 +208,7 @@ public class MonitorPoolService {
 		log.info("CodeBaseModel getListForWeb code={},num={},size={},aliasCode={},monitor={},monitoreq={}", code,
 				querypage.getPageNum(), querypage.getPageSize(), aliasCode, monitor, monitoreq);
 
-		List<MonitorPool> list = getList(code, monitor, monitoreq, querypage, aliasCode);
+		List<MonitorPool> list = getList(code, monitor, monitoreq, 0, querypage, aliasCode);
 		List<MonitorPoolResp> res = new LinkedList<MonitorPoolResp>();
 		if (list != null) {
 			for (MonitorPool dh : list) {
@@ -216,13 +216,20 @@ public class MonitorPoolService {
 				BeanUtils.copyProperties(dh, resp);
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
 				resp.setMonitorDesc(CodeModeType.getCodeName(dh.getMonitor()));
+				if (dh.getYkb() == 0) {
+					resp.setYkbDesc("不预警");
+				} else if (dh.getYkb() == 1) {
+					resp.setYkbDesc("期望不亏");
+				} else if (dh.getYkb() == 2) {
+					resp.setYkbDesc("期望亏损");
+				}
 				res.add(resp);
 			}
 		}
 		return res;
 	}
 
-	public List<MonitorPool> getList(String code, int monitor, int monitoreq, EsQueryPageReq querypage,
+	public List<MonitorPool> getList(String code, int monitor, int monitoreq, int ykb, EsQueryPageReq querypage,
 			String aliasCode) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
@@ -235,6 +242,9 @@ public class MonitorPoolService {
 		}
 		if (monitor > 0) {
 			bqb.must(QueryBuilders.rangeQuery("monitor").gt(0));
+		}
+		if (ykb > 0) {
+			bqb.must(QueryBuilders.rangeQuery("ykb").gt(0));
 		}
 		if (monitoreq > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("monitor", monitoreq));

@@ -119,6 +119,13 @@ body {
 				<div class="input-group">
 					低于某涨幅：<input type="text" class="form-control" id="downTodayChange">&nbsp;
 				</div>
+				<div class="input-group">
+					快预报：<select id="ykb">
+						<option value="0">不预警</option>
+						<option value="1">期望不亏</option>
+						<option value="2">期望亏损</option>
+					</select>
+				</div>
 				<br />
 				<div class="input-group">
 					<span class="input-group-btn">
@@ -179,6 +186,7 @@ body {
 					upPrice : $('#upPrice').val(),
 					downPrice : $('#downPrice').val(),
 					upTodayChange : $('#upTodayChange').val(),
+					ykb : $('#ykb').val(),
 					downTodayChange : $('#downTodayChange').val()
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
@@ -214,6 +222,7 @@ body {
 				$('#upTodayChange').val(reData.result.upTodayChange);
 				$('#downTodayChange').val(reData.result.downTodayChange);
 				$('#monitor').val(reData.result.monitor);
+				$('#ykb').val(reData.result.ykb);
 			}
 		});
 	</script>

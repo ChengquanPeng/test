@@ -22,14 +22,17 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsFinYjkbDao;
 import com.stable.es.dao.base.EsFinYjygDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
+import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.CodeModelService;
+import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.jys.JysSpider;
 import com.stable.spider.ths.ThsHolderSpider;
@@ -45,6 +48,7 @@ import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
+import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.resp.FinanceBaseInfoResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -81,6 +85,66 @@ public class FinanceService {
 	private ConceptService conceptService;
 	@Autowired
 	private JysSpider jysSpider;
+	@Autowired
+	private MonitorPoolDao monitorPoolDao;
+	@Autowired
+	private MonitorPoolService monitorPoolService;
+
+	private void kybMonitor() {
+		List<MonitorPool> list = monitorPoolService.getList("", 0, 0, 1, EsQueryPageUtil.queryPage9999, "");
+		if (list != null) {
+			for (MonitorPool mp : list) {
+				if (mp.getYkb() > 0) {
+					try {
+						String code = mp.getCode();
+						FinanceBaseInfo fbi = this.getLastFinaceReport(code);
+						FinYjkb yjkb = getLastFinaceKbByReportDate(code, fbi.getYear(), fbi.getQuarter());
+						boolean find = false;
+						StringBuffer sb = new StringBuffer();
+						// 业绩快报(准确的)
+						if (yjkb != null) {
+							find = true;
+							sb.append(code);
+							if (yjkb.getJlr() > 0 || yjkb.getJlrtbzz() > 0) {
+								sb.append(",业绩快报不亏:");
+							} else {
+								sb.append(",业绩快报亏损:");
+							}
+							if (mp.getYkb() == 1) {
+								sb.append("期望不亏");
+							} else {
+								sb.append("期望亏损");
+							}
+						} else {
+							// 业绩预告(类似天气预报,可能不准)
+							FinYjyg yjyg = getLastFinaceYgByReportDate(code, fbi.getYear(), fbi.getQuarter());
+							if (yjyg != null) {
+								find = true;
+								sb.append(code);
+								if (yjyg.getJlr() > 0 || yjyg.getJlrtbzz() > 0) {
+									sb.append(",业绩快报不亏:");
+								} else {
+									sb.append(",业绩快报亏损:");
+								}
+								if (mp.getYkb() == 1) {
+									sb.append("期望不亏");
+								} else {
+									sb.append("期望亏损");
+								}
+							}
+						}
+						if (find) {
+							mp.setYkb(0);
+							monitorPoolDao.save(mp);
+							WxPushUtil.pushSystem1(sb.toString());
+						}
+					} catch (Exception e) {
+						ErrorLogFileUitl.writeError(e, "快预报预警", "", "");
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * 删除redis，从头开始获取
@@ -313,6 +377,53 @@ public class FinanceService {
 		return null;
 	}
 
+	private FinYjkb getLastFinaceKbByReportDate(String code, int currYear, int currQuarter) {
+		FinYjkb yjkb = getLastFinaceKbByReportDate(code);
+		if (yjkb != null) {
+			if ((currYear == yjkb.getYear() && currQuarter < yjkb.getQuarter())// 同一年，季度大于
+					|| (yjkb.getYear() > currYear)) {// 不同年
+//				newOne.setForestallIncomeTbzz(yjkb.getYyzsrtbzz());
+//				newOne.setForestallProfitTbzz(yjkb.getJlrtbzz());
+//				hasKb = true;
+				return yjkb;
+			}
+		}
+		return null;
+	}
+
+	private FinYjyg getLastFinaceYgByReportDate(String code, int currYear, int currQuarter) {
+		FinYjyg yjyg = getLastFinaceYgByReportDate(code);
+		if (yjyg != null) {
+			if ((currYear == yjyg.getYear() && currQuarter < yjyg.getQuarter())// 同一年,季度大于
+					|| (yjyg.getYear() > currYear)) {// 不同年
+				return yjyg;
+			}
+		}
+		return null;
+	}
+
+	public String getyjkb(String code, int currYear, int currQuarter) {
+		FinYjkb yjkb = getLastFinaceKbByReportDate(code, currYear, currQuarter);
+//		boolean hasKb = false;
+		// 业绩快报(准确的)
+		if (yjkb != null) {
+			StringBuffer sb = new StringBuffer("快报-->");
+			sb.append(yjkb.getYear() + "-" + yjkb.getQuarter()).append(" ");
+			sb.append("营收同比:").append(yjkb.getYyzsrtbzz()).append("% ");
+			sb.append("净利同比:").append(yjkb.getJlrtbzz()).append("% ");
+			return sb.toString();
+		}
+		// 业绩预告(类似天气预报,可能不准)
+		FinYjyg yjyg = getLastFinaceYgByReportDate(code, currYear, currQuarter);
+		if (yjyg != null) {
+			StringBuffer sb = new StringBuffer("预告-->");
+			sb.append(yjyg.getYear() + "-" + yjyg.getQuarter()).append(" ");
+			sb.append("净利同比:").append(yjyg.getJlrtbzz()).append("% ").append(yjyg.getType());
+			return sb.toString();
+		}
+		return "";
+	}
+
 	public FinYjkb getLastFinaceKbByReportDate(String code) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -381,10 +492,10 @@ public class FinanceService {
 
 				WxPushUtil.pushSystem1(
 						"同步业绩预报和快报完成！" + (sb.length() > 0 ? ("今日快报或者预告:" + sb.toString()) : "今日无业绩快报或者预告"));
+				kybMonitor();
 				return null;
 			}
 		});
-
 	}
 
 	public void byWeb() {

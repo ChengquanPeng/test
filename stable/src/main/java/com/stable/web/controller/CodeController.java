@@ -51,8 +51,8 @@ public class CodeController {
 		}
 		return "code";
 	}
-	
-	private void prepare(Model model,String code) {
+
+	private void prepare(Model model, String code) {
 		model.addAttribute("code", code);
 		model.addAttribute("histList", codeModelService.getListByCode(code, EsQueryPageUtil.queryPage5));
 		model.addAttribute("concepts", conceptService.getCodeConcept(code));
@@ -100,8 +100,7 @@ public class CodeController {
 			model.addAttribute("monetaryFund", "--");
 		}
 		try {
-			model.addAttribute("tradeFinassetNotfvtpl",
-					CurrencyUitl.covertToString(fbi.getTradeFinassetNotfvtpl()));
+			model.addAttribute("tradeFinassetNotfvtpl", CurrencyUitl.covertToString(fbi.getTradeFinassetNotfvtpl()));
 		} catch (Exception e) {
 			model.addAttribute("tradeFinassetNotfvtpl", "--");
 		}
@@ -148,7 +147,7 @@ public class CodeController {
 		if (iss.getStartDate() > 0) {
 			lastZf.append("开始日期:").append(iss.getStartDate());
 			if (iss.getEndDate() > 0) {
-				lastZf.append(" 开始日期:").append(iss.getEndDate());
+				lastZf.append(" 结束日期:").append(iss.getEndDate());
 			}
 			lastZf.append(" 状态:").append(iss.getStatusDesc());
 			lastZf.append(" 类别:").append(iss.getIssueClz() + iss.getIssueType());
@@ -165,16 +164,7 @@ public class CodeController {
 		model.addAttribute("zfgk", chipsService.getZengFaSummary(code).getDesc());
 		model.addAttribute("fhgk", chipsService.getFenHong(code).getDetails());
 		// 快预报
-		String kb = "未实现";
-//		if (cbm.getForestallQuarter() > 0) {
-//			kb = cbm.getForestallYear() + "年" + cbm.getForestallQuarter() + "季度";
-//			if (cbm.getForestallIncomeTbzz() > 0) {
-//				kb += ",营收同比:" + cbm.getForestallIncomeTbzz();
-//			}
-//			if (cbm.getForestallProfitTbzz() > 0) {
-//				kb += ",净利同比:" + cbm.getForestallProfitTbzz();
-//			}
-//		}
+		String kb = financeService.getyjkb(code, fbi.getYear(), fbi.getQuarter());
 		model.addAttribute("kb", kb);
 	}
 
@@ -182,7 +172,7 @@ public class CodeController {
 	 * 历史状态
 	 */
 	@RequestMapping(value = "/codehist/pre/{code}/{year}/{quarter}", method = RequestMethod.GET)
-	public String pre(@PathVariable(value = "code") String code,int year,int quarter, Model model) {
+	public String pre(@PathVariable(value = "code") String code, int year, int quarter, Model model) {
 		try {
 			CodeBaseModelResp cbm = codeModelService.getHistOneByCodeYearQuarter(code, year, quarter);
 			model.addAttribute("codedetail", cbm);
@@ -192,6 +182,7 @@ public class CodeController {
 		}
 		return "code";
 	}
+
 	/**
 	 * 历史状态
 	 */

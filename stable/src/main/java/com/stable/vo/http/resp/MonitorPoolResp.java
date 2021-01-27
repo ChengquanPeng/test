@@ -11,4 +11,5 @@ public class MonitorPoolResp extends MonitorPool {
 
 	private String codeName;
 	private String monitorDesc;
+	private String ykbDesc;
 }
