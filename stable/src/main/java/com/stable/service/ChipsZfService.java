@@ -45,11 +45,13 @@ import com.stable.vo.bus.ZengFaSummary;
 import com.stable.vo.http.resp.ZengFaResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
+import lombok.extern.log4j.Log4j2;
+
 /**
  * 筹码-增发
  */
 @Service
-//@Log4j2
+@Log4j2
 public class ChipsZfService {
 	@Autowired
 	private ZengFaDao zengFaDao;
@@ -170,33 +172,40 @@ public class ChipsZfService {
 		int endDate = 0; // 全部
 		if (isJob) {
 			endDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -90));
+		} else {
+			endDate = 20180101;
 		}
 		StringBuffer sb = new StringBuffer();
 		List<ZengFa> l = getZengFaList("", ZfStatus.DONE.getCode() + "", endDate, EsQueryPageUtil.queryPage9999);
-		for (ZengFa zf : l) {
-			try {
-				if (zf.getEndDate() <= 20180101) {
-					continue;
-				}
-				ZengFaExt zfe = getZengFaExtById(zf.getId());
-				if (zfe == null) {
-					zfe = new ZengFaExt();
-					zfe.setId(zf.getId());
-					zfe.setCode(zf.getCode());
-					zfe.setDate(zf.getEndDate());
-					String s = ThsAnnSpider.dofetch(zf.getCode(), zf.getStartDate());
-					if (StringUtils.isNotBlank(s)) {
-						zfe.setBuy(1);
-						zfe.setTitle(s);
-						sb.append(zfe.getCode()).append(",");
+		if (l != null) {
+			log.info("List<ZengFa> size:{}", l.size());
+			for (ZengFa zf : l) {
+				try {
+					log.info("zf code:{}", zf.getCode());
+					ZengFaExt zfe = getZengFaExtById(zf.getId());
+					if (zfe == null) {
+						zfe = new ZengFaExt();
+						zfe.setId(zf.getId());
+						zfe.setCode(zf.getCode());
+						zfe.setDate(zf.getEndDate());
+						String s = ThsAnnSpider.dofetch(zf.getCode(), zf.getStartDate());
+						if (StringUtils.isNotBlank(s)) {
+							zfe.setBuy(1);
+							zfe.setTitle(s);
+							sb.append(zfe.getCode()).append(",");
+						}
+						ws(zfe, zf.getEndDate());
+						zengFaExtDao.save(zfe);
+						log.info("done:{}", zf.getCode());
 					}
-					ws(zfe, zf.getEndDate());
-					zengFaExtDao.save(zfe);
+				} catch (Exception e) {
+					ErrorLogFileUitl.writeError(e, "ZengFaExt 增发是否购买资产出错", "", "");
 				}
-			} catch (Exception e) {
-				ErrorLogFileUitl.writeError(e, "ZengFaExt 增发是否购买资产出错", "", "");
 			}
+		} else {
+			log.info("List<ZengFa> size:ooo");
 		}
+		log.info("List<ZengFa> done");
 		if (sb.length() > 0) {
 			WxPushUtil.pushSystem1("增发完成且是购买资产：" + sb.toString());
 		}

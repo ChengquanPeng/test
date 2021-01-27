@@ -40,8 +40,9 @@ public class RealtimeMonitoringService {
 			return;
 		}
 		long now = new Date().getTime();
-		long isAlivingMillis = DateUtil.parseTodayYYYYMMDDHHMMSS(date + " 15:03:00").getTime();
-		if (now > isAlivingMillis) {// 已经超时
+		long starttime = DateUtil.parseTodayYYYYMMDDHHMMSS(date + " 09:15:00").getTime();
+		long endtime = DateUtil.parseTodayYYYYMMDDHHMMSS(date + " 15:03:00").getTime();
+		if (starttime < now || now > endtime) {// 已经超时
 			log.info("now > isAlivingMillis,已超时");
 			return;
 		}
@@ -83,7 +84,7 @@ public class RealtimeMonitoringService {
 					"交易日监听实时交易，监听总数:[" + allCode.size() + "],实际总数[" + list.size() + "],监听失败[" + failtt + "]");
 
 			long from3 = new Date().getTime();
-			int millis = (int) ((isAlivingMillis - from3));
+			int millis = (int) ((endtime - from3));
 			if (millis > 0) {
 				Thread.sleep(millis);
 			}
