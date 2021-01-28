@@ -210,12 +210,14 @@ public class ChipsZfService {
 			WxPushUtil.pushSystem1("增发完成且是购买资产：" + sb.toString());
 		}
 
-		ThreadsUtil.sleep(10, TimeUnit.MINUTES);
+		ThreadsUtil.sleep(3, TimeUnit.MINUTES);
 
 		List<ZengFaExt> exts = getZengFaExtListWithChk();
 		if (exts != null) {
+			log.info("List<ZengFaExt> exts:{}", exts.size());
 			for (ZengFaExt z : exts) {
 				try {
+					log.info("ZengFaExt code:{}", z.getCode());
 					ZengFa orig = this.getZengFaById(z.getId());
 					ws(z, orig.getEndDate());
 				} catch (Exception e) {
@@ -224,6 +226,7 @@ public class ChipsZfService {
 			}
 			zengFaExtDao.saveAll(exts);
 		}
+		log.info("List<ZengFaExt> done");
 	}
 
 	private void ws(ZengFaExt z, int zfEndDate) {

@@ -3,9 +3,7 @@ package com.stable.utils;
 import com.stable.spider.sina.SinaRealTime;
 import com.stable.vo.bus.MonitorPool;
 
-import lombok.extern.log4j.Log4j2;
-
-@Log4j2
+//@Log4j2
 public class MonitoringUitl {
 
 	// 实时
@@ -14,7 +12,7 @@ public class MonitoringUitl {
 	}
 
 	public static final boolean isOk(MonitorPool cp, double todayChange, double high, double low) {
-		log.info("cp={},todayChange={},high={},low={}", cp, todayChange, high, low);
+//		log.info("cp={},todayChange={},high={},low={}", cp, todayChange, high, low);
 		if (cp.getUpTodayChange() > 0 || cp.getDownTodayChange() > 0) {
 			if (cp.getUpTodayChange() > 0) {// 涨幅
 				if (todayChange >= cp.getUpTodayChange()) {
@@ -26,11 +24,13 @@ public class MonitoringUitl {
 					return true;
 				}
 			}
-		} else if (cp.getUpPrice() > 0) {// 上涨到价格
+		}
+		if (cp.getUpPrice() > 0) {// 上涨到价格
 			if (high >= cp.getUpPrice()) {
 				return true;
 			}
-		} else if (cp.getDownPrice() > 0) {// 下跌到价格
+		}
+		if (cp.getDownPrice() > 0) {// 下跌到价格
 			if (low <= cp.getDownPrice()) {
 				return true;
 			}
