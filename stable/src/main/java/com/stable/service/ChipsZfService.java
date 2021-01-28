@@ -194,6 +194,7 @@ public class ChipsZfService {
 							zfe.setTitle(s);
 							sb.append(zfe.getCode()).append(",");
 						}
+						zfe.setSelfzf(0);
 						ws(zfe, zf.getEndDate());
 						zengFaExtDao.save(zfe);
 						log.info("done:{}", zf.getCode());
@@ -211,7 +212,7 @@ public class ChipsZfService {
 		}
 
 		ThreadsUtil.sleep(3, TimeUnit.MINUTES);
-
+		// 以下代码一个月后去掉，2020-01-28
 		List<ZengFaExt> exts = getZengFaExtListWithChk();
 		if (exts != null) {
 			log.info("List<ZengFaExt> exts:{}", exts.size());
@@ -250,7 +251,7 @@ public class ChipsZfService {
 		} else {
 			try {
 				JSONObject js = tushareSpider.getStockDaliyBasic(TushareSpider.formatCode(code), zfEndDate + "");
-				JSONArray arr = js.getJSONObject("data").getJSONArray("items");
+				JSONArray arr = js.getJSONArray("items").getJSONArray(0);
 				int length = arr.size();
 				double c = arr.getDoubleValue(length - 1);// 流通市值
 				double t = arr.getDoubleValue(length - 2);// 总市值
@@ -271,7 +272,7 @@ public class ChipsZfService {
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("selfzf", 0));
-		FieldSortBuilder sort = SortBuilders.fieldSort("startDate").unmappedType("integer").order(SortOrder.DESC);
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 		Page<ZengFaExt> page = zengFaExtDao.search(sq);
