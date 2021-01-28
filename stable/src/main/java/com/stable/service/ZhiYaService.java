@@ -57,8 +57,9 @@ public class ZhiYaService {
 				for (String key : m.keySet()) {
 					Zya z = m.get(key);
 //					System.err.println(key + "-> 次数:" + z.getC() + " 比例:" + z.getBi() + "%");
-					sb.append(key).append(Constant.HTML_LINE);
-					sb.append("-> 次数:" + z.getC() + " 比例:" + CurrencyUitl.roundHalfUp(z.getBi()) + "%").append(Constant.HTML_LINE);
+					sb.append(key).append("->").append(Constant.HTML_LINE);
+					sb.append(" 次数:" + z.getC() + " 比例:" + CurrencyUitl.roundHalfUp(z.getBi()) + "%")
+							.append(Constant.HTML_LINE);
 					if (z.getBi() > 50.0) {
 						r1 = true;
 					}
