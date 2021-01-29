@@ -1,6 +1,5 @@
 package com.stable.service.model;
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -62,7 +61,6 @@ import com.stable.vo.bus.FinanceBaseInfoHangye;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockBaseInfo;
-import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaExt;
 import com.stable.vo.bus.ZhiYa;
@@ -336,12 +334,14 @@ public class CodeModelService {
 		// 商誉占比
 		if (fbi.getGoodWillRatioNetAsset() > 0.15) {// 超过15%
 			newOne.setBaseYellow(1);
-			sb2.append("商誉占比超15%:" + (fbi.getGoodWillRatioNetAsset() * 100) + "%").append(Constant.HTML_LINE);
+			sb2.append("商誉占比超15%:" + CurrencyUitl.roundHalfUp((fbi.getGoodWillRatioNetAsset() * 100)) + "%")
+					.append(Constant.HTML_LINE);
 		}
 		// 库存占比
 		if (fbi.getInventoryRatio() > 0.45) {// 超过50%
 			newOne.setBaseYellow(1);
-			sb2.append("库存占比超45%:" + (fbi.getInventoryRatio() * 100) + "%").append(Constant.HTML_LINE);
+			sb2.append("库存占比超45%:" + CurrencyUitl.roundHalfUp((fbi.getInventoryRatio() * 100)) + "%")
+					.append(Constant.HTML_LINE);
 		}
 		// 股东增持（一年）
 		AnnouncementHist zengchi = announcementService.getLastRecordType(code, AnnMentParamUtil.zhengchi.getType(),
@@ -414,14 +414,14 @@ public class CodeModelService {
 				oneYearAgo);
 		if (jianchi != null) {
 			newOne.setBaseBlue(1);
-			sb2.append("股东/高管减持:" + (jianchi.getRptDate()) + "%").append(Constant.HTML_LINE);
+			sb2.append("股东/高管减持:" + (jianchi.getRptDate())).append(Constant.HTML_LINE);
 		}
 		// 回购（半年内）
 		AnnouncementHist huigou = announcementService.getLastRecordType(code, AnnMentParamUtil.huigou.getType(),
 				halfYearAgo);
 		if (huigou != null) {
 			newOne.setBaseBlue(1);
-			sb2.append("回购:" + (huigou.getRptDate()) + "%").append(Constant.HTML_LINE);
+			sb2.append("回购:" + (huigou.getRptDate())).append(Constant.HTML_LINE);
 		}
 
 		if (newOne.getBaseRed() > 0) {
