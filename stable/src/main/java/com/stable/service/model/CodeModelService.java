@@ -229,22 +229,11 @@ public class CodeModelService {
 	}
 
 	private void zfBoss(CodeBaseModel2 newOne, ZengFa zf) {
-		if (newOne.getSusZfBossSure() > 1) {
+		if (newOne.getSusZfBoss() == 1 && newOne.getSusZfBossSure() > 1) {
 			return;
 		}
 		if (newOne.getZfStatus() == 2) {
 			String code = newOne.getCode();
-			// 20个交易日股价
-			List<TradeHistInfoDaliy> befor45 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0,
-					zf.getEndDate(), EsQueryPageUtil.queryPage60, SortOrder.DESC);
-			double end = befor45.get(0).getClosed();
-			double max = befor45.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed)).get()
-					.getClosed();
-			if (max > end) {
-				if (CurrencyUitl.cutProfit(end, max) >= 15.0) {
-					newOne.setZfself(1);// 增发前跌幅在20%以上
-				}
-			}
 			boolean preCondi = false;
 			if (zf.getPrice() > 0) {
 				// 价格对比,增发价没超60%
@@ -259,13 +248,13 @@ public class CodeModelService {
 					preCondi = true;
 				}
 			}
-			if (preCondi && newOne.getZfself() == 1) {
-				newOne.setSusZfBoss(1);
-			}
-
 			ZengFaExt zfe = chipsZfService.getZengFaExtById(zf.getId());
 			if (zfe != null) {
 				newOne.setZfbuy(zfe.getBuy());
+				newOne.setZfself(zfe.getSelfzf());
+			}
+			if (preCondi && newOne.getZfself() == 1) {
+				newOne.setSusZfBoss(1);
 			}
 		} else {
 			newOne.setSusZfBoss(0);
