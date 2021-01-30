@@ -24,7 +24,7 @@ trtd{
 	<br/>------------------------------------------------------------<br/>
 	代码：<span th:text="${code}"></span>-<span th:text="${codedetail.codeName}"></span>-最后更新日期:<span th:text="${codedetail.date}"></span>
 	<br/>------------------------------------------------------------<br/>
-	<div><font color='red'>曾用名(金字招牌)</font>:<span th:text="${codeBasic.oldName}"></span></div>
+	<div><font color='#FF00FF'>曾用名(金字招牌)</font>:<span th:text="${codeBasic.oldName}"></span></div>
 	<div>同花顺-主营:<span th:text="${codeBasic.thsMainBiz}"></span></div>
 	<div>同花顺-亮点:<span th:text="${codeBasic.thsLightspot}"></span></div>
 	<div>公司网站:<span th:text="${codeBasic.webSite}"></span></div>
@@ -32,8 +32,10 @@ trtd{
 	<div>同花顺概念：<span th:each="cp: ${concepts}"><span th:text="${cp.conceptName}"></span>&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
 	<div>分红概况:<span th:text="${fhgk}"></span></div>
 	<div>增发概况:<span th:text="${zfgk}"></span></div>
-	<div><font color='red'>违规处理</font>:<a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/event.html'}">--></a></div>
-	<div><font color='red'>财务亏损: 是否主营业务亏损？</font></div>
+	<div><font color='#FF00FF'>违规处理</font>:<a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/capital.html'}">--></a></div>
+	<div><font color='#FF00FF'>财务亏损:</font> 是否主营业务亏损？</div>
+	<div><font color='#FF00FF'>项目进度:</font><a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/event.html'}">-->同花顺</a>
+	<a target="_blank" th:href="@{'http://f10.eastmoney.com/f10_v2/CapitalOperation.aspx?code='+${dfcfcode}+'#xmjd-0'}">-->东方财富</a></div>
 	<br/>------------------------------------------------------------<br/>
 	财务报告年份：<span th:text="${codedetail.currYear}"></span>-年：<span th:text="${codedetail.currQuarter}"></span>季度&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'/codehist/pre/'+${code}+'/'+${codedetail.currYear}+'/'+${codedetail.currQuarter}}">上一季度</a></span>
 	<br/>------------------------------------------------------------<br/>

@@ -60,8 +60,6 @@ public class ThsJiejinSpider {
 
 	private void dofetch() {
 		try {
-			new Exception().printStackTrace();
-			WxPushUtil.pushSystem1("同花顺-抓包解禁 周六调用？");
 			if (header == null) {
 				header = new HashMap<String, String>();
 				header.put("Referer", host);
@@ -139,6 +137,10 @@ public class ThsJiejinSpider {
 				}
 				fetched = true;
 			} catch (Exception e2) {
+				// 特殊处理一下
+				if ("600182".equals(code) && sysdate <= 20211231) {
+					return;
+				}
 				e2.printStackTrace();
 				trytime++;
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);

@@ -17,6 +17,7 @@ import com.stable.service.ConceptService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
+import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.FinanceBaseInfo;
@@ -56,6 +57,8 @@ public class CodeController {
 	}
 
 	private void prepare(Model model, String code) {
+
+		model.addAttribute("dfcfcode", EastmoneySpider.formatCode2(code));
 		model.addAttribute("code", code);
 		model.addAttribute("histList", codeModelService.getListByCode(code, EsQueryPageUtil.queryPage5));
 		model.addAttribute("concepts", conceptService.getCodeConcept(code));
