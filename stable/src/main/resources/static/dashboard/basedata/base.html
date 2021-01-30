@@ -58,6 +58,8 @@
 						<option value="0">无增发</option>
 					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 					增发购买资产:<input type="checkbox" id="zfbuy" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					增发解禁:<input type="checkbox" id="zfjj" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					增发解禁未涨:<input type="checkbox" id="zfjjup" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					收益率:<select id="bsyl"
 						class="form-control">
 						<option value="" selected="selected">无限制</option>
@@ -206,6 +208,8 @@
 									param.sort7 = 0;
 									param.sort6 = 0;
 									param.zfbuy = 0;
+									param.zfjj = 0;
+									param.zfjjup = 0;
 									if (document.getElementById("zfbuy").checked) {
 										param.zfbuy = 1;
 									}if (document.getElementById("susBigBoss").checked) {
@@ -223,6 +227,14 @@
 									if (document.getElementById("sort6").checked) {
 										param.sort6 = 1;
 									}
+									if (document.getElementById("zfjj").checked) {
+										param.zfjj = 1;
+									}
+									if (document.getElementById("zfjjup").checked) {
+										param.zfjjup = 1;
+									}
+									
+									
 
 									if (!document.getElementById("asc").checked) {
 										param.asc = 2;
@@ -263,7 +275,7 @@
 											title : '类型'
 										}, {
 											field : 'zfInfo',
-											title : '增发'
+											title : '最后增发'
 										}, {
 											field : 'sortInfo',
 											title : '短线'

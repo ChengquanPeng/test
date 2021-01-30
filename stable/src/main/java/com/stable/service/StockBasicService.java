@@ -42,7 +42,7 @@ public class StockBasicService {
 	private EsStockBaseInfoDao esStockBaseInfoDao;
 	@Autowired
 	private RedisUtil redisUtil;
-	
+
 	// @Autowired
 	// private DbStockBaseInfoDao dbStockBaseInfoDao;
 
@@ -144,10 +144,10 @@ public class StockBasicService {
 		return jobSynStockList(false);
 	}
 
-	public void synBaseStockInfo(StockBaseInfo base, boolean updateTHSinfo) {
+	public void synBaseStockInfo(StockBaseInfo base, boolean fromNotTushare) {
 		// esStockBaseInfoDao.save(base);
 
-		if (!updateTHSinfo) {// 部门字段来自同花顺
+		if (!fromNotTushare) {// 部门字段来自同花顺
 			String json = redisUtil.get(base.getCode());
 			if (StringUtils.isNotBlank(json)) {
 				StockBaseInfo old = JSON.parseObject(json, StockBaseInfo.class);
@@ -158,6 +158,8 @@ public class StockBasicService {
 				base.setWebSite(old.getWebSite());
 				base.setFinalControl(old.getFinalControl());
 				base.setCompnayType(old.getCompnayType());
+				base.setFloatShare(old.getFloatShare());
+				base.setTotalShare(old.getTotalShare());
 			}
 		}
 

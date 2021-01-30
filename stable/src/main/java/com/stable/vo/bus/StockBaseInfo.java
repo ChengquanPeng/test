@@ -81,7 +81,11 @@ public class StockBaseInfo extends EsBase {
 	private String finalControl;// 最终控制人
 	@Field(type = FieldType.Text)
 	private int compnayType;// 公司性质：0普通，1国企
-
+	@Field(type = FieldType.Double)
+	private double totalShare;// float 总股本 （万股）
+	@Field(type = FieldType.Double)
+	private double floatShare;// float 流通股本 （万股）
+	
 	public StockBaseInfo() {
 
 	}

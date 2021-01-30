@@ -36,6 +36,8 @@ public class ZengFa extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int zjhDate;// 证监会核准公告日
 	@Field(type = FieldType.Integer)
+	private int numOnLineDate;// 发行新股日
+	@Field(type = FieldType.Integer)
 	private int endDate;// 新股上市公告日
 
 	// 价格&数量

@@ -21,6 +21,7 @@ import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.FinanceBaseInfo;
+import com.stable.vo.bus.ForeignCapitalSum;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.http.resp.CodeBaseModelResp;
@@ -57,7 +58,18 @@ public class CodeController {
 	}
 
 	private void prepare(Model model, String code) {
-
+		ForeignCapitalSum fc = chipsService.getForeignCapitalSum(code);
+		if (fc.getHoldVol() > 0) {
+			model.addAttribute("fcvol", CurrencyUitl.covertToString(fc.getHoldVol()) + "股");
+		} else {
+			model.addAttribute("fcvol", "0");
+		}
+		if (fc.getHoldAmount() > 0) {
+			model.addAttribute("fcamt", CurrencyUitl.covertToString(fc.getHoldAmount()));
+		} else {
+			model.addAttribute("fcamt", "0");
+		}
+		model.addAttribute("fcratio", fc.getHoldRatio());
 		model.addAttribute("dfcfcode", EastmoneySpider.formatCode2(code));
 		model.addAttribute("code", code);
 		model.addAttribute("histList", codeModelService.getListByCode(code, EsQueryPageUtil.queryPage5));
@@ -160,8 +172,8 @@ public class CodeController {
 			lastZf.append(" 金额:").append(iss.getPrice() + "/" + iss.getAmt());
 		}
 		model.addAttribute("lastZf", lastZf.toString());
-		// 前后1年解禁记录
-		List<Jiejin> jj = chipsService.getBf2yearJiejin(code);
+		// 1年前到未来解禁记录
+		List<Jiejin> jj = chipsService.getBf2yearJiejin(code, 0);
 		if (jj == null) {
 			jj = Collections.emptyList();
 		}

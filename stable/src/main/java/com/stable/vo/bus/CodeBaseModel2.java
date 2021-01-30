@@ -69,12 +69,17 @@ public class CodeBaseModel2 extends EsBase {
 	private int zfbuy = 0;// 是否购买资产
 	@Field(type = FieldType.Integer)
 	private int susZfBoss; // 增发博弈
+	// 增发解禁
+	@Field(type = FieldType.Integer)
+	private int zfjj; // 增发解禁
+	@Field(type = FieldType.Integer)
+	private int zfjjup; // 增发未大涨
+
 	// 交易面
 	@Field(type = FieldType.Integer)
 	private int susBigBoss; // 疑似大牛
 	@Field(type = FieldType.Integer)
 	private int susWhiteHors; // 疑似白马
-
 	// 短线
 	@Field(type = FieldType.Integer)
 	private int sortMode6 = 0;// 符合短线 //短线模型6(前期3-50%吸筹，深度回踩突然涨停后再2-5个交易日回踩拉起,涨停日不放量，超过涨停价格后买入，买入2内未大幅拉升放弃

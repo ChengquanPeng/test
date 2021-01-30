@@ -6,6 +6,7 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.stable.spider.igoodstock.IgoodstockSpider;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.spider.ths.ThsCompanySpider;
 import com.stable.spider.ths.ThsHolderSpider;
@@ -27,6 +28,8 @@ public class ThsJobLine {
 	private ThsBonusSpider thsBonusSpider;
 	@Autowired
 	private ThsCompanySpider thsCompanySpider;
+	@Autowired
+	private IgoodstockSpider igoodstockSpider;
 
 	// 每日凌晨
 	public void start() {
@@ -44,6 +47,7 @@ public class ThsJobLine {
 		if (week == Calendar.SUNDAY) {
 			log.info("周日，同花顺-公司资料");
 			thsCompanySpider.byJob();// 周日，同花顺-公司资料
+			igoodstockSpider.byWeb();// 外资持股
 		}
 
 		if (week == Calendar.SATURDAY) {

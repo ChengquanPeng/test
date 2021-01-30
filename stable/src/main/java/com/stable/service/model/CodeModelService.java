@@ -199,9 +199,28 @@ public class CodeModelService {
 			sortModel(newOne);// 短线模型
 		}
 		newOne.setHolderNum(chipsService.holderNumAnalyse(code));
-//		限售解禁TODO
+//		限售解禁T
+		zfjj(newOne);
 //		买点: 监听//TODO
 		saveHist(newOne, oldOne, listHist);// 历史
+	}
+
+	private double chkdouble_2 = 150.0;// 10跌倒5.x
+
+	private void zfjj(CodeBaseModel2 newOne) {
+		String code = newOne.getCode();
+		List<Jiejin> l = chipsService.getRecentlyZfJiejin(code);
+		if (l != null && l.size() > 0) {
+			newOne.setZfjj(1);
+		} else {
+			newOne.setZfjj(0);
+		}
+		// 至少2年未大涨
+		newOne.setZfjjup(0);
+		if (LinePrice.priceCheckForMid(daliyTradeHistroyService, code, newOne.getDate(), chkdouble_2,
+				EsQueryPageUtil.queryPage500)) {
+			newOne.setZfjjup(1);
+		}
 	}
 
 	private void sortModel(CodeBaseModel2 newOne) {
@@ -668,7 +687,7 @@ public class CodeModelService {
 	public List<CodeBaseModel2> getList(String code, int orderBy, String aliasCode, String conceptName, int asc,
 			EsQueryPageReq querypage, String zfStatus, String monitor, String bred, String byellow, String bblue,
 			String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6, int sort7,
-			int zfbuy) {
+			int zfbuy, int zfjj, int zfjjup) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -738,7 +757,12 @@ public class CodeModelService {
 		if (sort7 == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("sort7", 1));
 		}
-
+		if (zfjj == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("zfjj", 1));
+		}
+		if (zfjjup == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("zfjjup", 1));
+		}
 //		<option value="3">资产收益率ttm</option>
 //		<option value="4">资产收益率报告期</option>
 //		<option value="5">资产收益评级</option>
@@ -878,13 +902,14 @@ public class CodeModelService {
 	public List<CodeBaseModelResp> getListForWeb(String code, int orderBy, String conceptId, String conceptName,
 			int asc, EsQueryPageReq querypage, String zfStatus, String monitor, String bred, String byellow,
 			String bblue, String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6,
-			int sort7, int zfbuy) {
+			int sort7, int zfbuy, int zfjj, int zfjjup) {
 		log.info(
 				"CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={},conceptId={},conceptName={},zfStatus={}",
 				code, orderBy, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName, zfStatus);
 
 		List<CodeBaseModel2> list = getList(code, orderBy, conceptId, conceptName, asc, querypage, zfStatus, monitor,
-				bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7, zfbuy);
+				bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7, zfbuy, zfjj,
+				zfjjup);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {
 			for (CodeBaseModel2 dh : list) {

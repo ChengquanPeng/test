@@ -104,9 +104,12 @@ public class ChipsZfService {
 	/**
 	 * 最后的增发详情记录
 	 */
-	public ZengFaDetail getLastZengFaDetail(String code) {
+	public ZengFaDetail getLastZengFaDetail(String code, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		if (date > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("date", date));
+		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();

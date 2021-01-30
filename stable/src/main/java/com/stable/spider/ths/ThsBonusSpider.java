@@ -236,29 +236,34 @@ public class ThsBonusSpider {
 							DomElement tbody = it0.next();
 							Iterator<DomElement> tr = tbody.getChildElements().iterator();
 							DomElement tr1 = tr.next();
-							try {
+							try {// 实际发行价格
 								String s1 = tr1.getFirstElementChild().asText().replaceAll("元", "").replaceAll(" ", "")
 										.split("：")[1];
 								zf.setPrice(Double.valueOf(s1));
 							} catch (Exception e) {
 							}
-							try {
+							try {// 新股上市公告日
 								String s2 = tr1.getLastElementChild().asText().replaceAll(" ", "").split("：")[1];
 								zf.setEndDate(DateUtil.convertDate2(s2));
 							} catch (Exception e) {
 							}
 							DomElement tr2 = tr.next();
-
-							try {
+							try {// 发行数量
 								zf.setNum(tr2.getFirstElementChild().asText().replaceAll(" ", "").split("：")[1]);
 							} catch (Exception e) {
 							}
+							try {// 发行新股日
+								String s2 = tr2.getLastElementChild().asText().replaceAll(" ", "").split("：")[1];
+								zf.setNumOnLineDate(DateUtil.convertDate2(s2));
+							} catch (Exception e) {
+							}
+
 							DomElement tr3 = tr.next();
-							try {
+							try {// 实际募资净额
 								zf.setAmt(tr3.getFirstElementChild().asText().replaceAll(" ", "").split("：")[1]);
 							} catch (Exception e) {
 							}
-							try {
+							try {// 证监会核准公告日
 								String s4 = tr3.getLastElementChild().asText().replaceAll(" ", "").split("：")[1];
 								zf.setZjhDate(DateUtil.convertDate2(s4));
 							} catch (Exception e) {
@@ -267,9 +272,14 @@ public class ThsBonusSpider {
 							tr.next();
 							tr.next();
 							DomElement tr6 = tr.next();
+							// 董事会公告日
 							String s5 = tr6.getLastElementChild().asText().replaceAll(" ", "").split("：")[1];
 							zf.setStartDate(DateUtil.convertDate2(s5));
-							zf.setId(zf.getCode() + zf.getStartDate());
+							if (zf.getStatus() == 2) {// 可能用一天
+								zf.setId(zf.getCode() + zf.getStartDate() + "_" + zf.getNumOnLineDate());
+							} else {
+								zf.setId(zf.getCode() + zf.getStartDate());
+							}
 							zf.setUpdate(sysdate);
 //						System.err.println("==================");
 							log.info(zf.toString());

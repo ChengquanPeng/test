@@ -13,6 +13,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.service.FinanceService;
+import com.stable.service.StockBasicService;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -21,6 +22,7 @@ import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.FinanceBaseInfo;
+import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -36,6 +38,8 @@ public class XqDailyBaseSpider {
 	private FinanceService financeService;
 	@Autowired
 	private TushareSpider tushareSpider;
+	@Autowired
+	private StockBasicService stockBasicService;
 
 	private String F1 = "市盈率(静)";
 	private String F2 = "市盈率(动)";
@@ -85,6 +89,14 @@ public class XqDailyBaseSpider {
 						b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / syldjd));
 					}
 				}
+				// 流通股份
+				if (b.getFloatShare() > 0 && b.getTotalShare() > 0) {
+					StockBaseInfo base = stockBasicService.getCode(b.getCode());
+					base.setFloatShare(b.getFloatShare());
+					base.setTotalShare(b.getTotalShare());
+					stockBasicService.synBaseStockInfo(base, true);
+				}
+
 			}
 			if (upd.size() > 0) {
 				esDaliyBasicInfoDao.saveAll(list);
@@ -194,8 +206,7 @@ public class XqDailyBaseSpider {
 				fetched = true;
 				WxPushUtil.pushSystem1("雪球每日信息出错(pe,pe-ttm),用tushare进行补充,code={}" + code + ",url=" + url);
 				try {
-					JSONArray array = tushareSpider
-							.getStockDaliyBasic(TushareSpider.formatCode(code), today)
+					JSONArray array = tushareSpider.getStockDaliyBasic(TushareSpider.formatCode(code), today)
 							.getJSONArray("items");
 					JSONArray arr = array.getJSONArray(0);
 

@@ -30,8 +30,7 @@
 						<option value="">无限制</option>
 						<option value="1">未实施</option>
 						<option value="2">已实施</option>
-					</select>
-					<span class="input-group-btn">
+					</select> <span class="input-group-btn">
 						<button class="btn btn-default" type="button" id="queryAction">
 							Go!</button>
 					</span>
@@ -87,8 +86,8 @@
 								queryParamsType : "undefined",
 								queryParams : function queryParams(params) { //设置查询参数  
 									var param = {
-											pageNum : params.pageNumber,
-											pageSize : params.pageSize,
+										pageNum : params.pageNumber,
+										pageSize : params.pageSize,
 									};
 									param.code = $('#queryCode').val();
 									param.status = $('#status').val();
@@ -158,9 +157,15 @@
 										{
 											field : 'update',
 											title : '最后增发详情',
-											formatter : function(value, row, index) {
+											formatter : function(value, row,
+													index) {
 												var actions = [];
-												actions.push('<a target="_blank" href="/web/chips/last/zengfadtl?code=' + row.code + '"> ==> </a>');
+												actions
+														.push('<a target="_blank" href="/web/chips/last/zengfadtl?code='
+																+ row.code
+																+ '&date='
+																+ row.numOnLineDate
+																+ '"> ==> </a>');
 												return actions.join('');
 											}
 										} ],
