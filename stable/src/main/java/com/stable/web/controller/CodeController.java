@@ -187,7 +187,7 @@ public class CodeController {
 	}
 
 	/**
-	 * 历史状态
+	 * 历史状态（上一季度）
 	 */
 	@RequestMapping(value = "/codehist/pre/{code}/{year}/{quarter}", method = RequestMethod.GET)
 	public String pre(@PathVariable(value = "code") String code, int year, int quarter, Model model) {

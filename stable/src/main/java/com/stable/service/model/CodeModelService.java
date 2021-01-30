@@ -888,6 +888,17 @@ public class CodeModelService {
 			}
 		}
 		resp.setZfInfo(sb5.toString());
+
+		if (dh.getZfjj() == 1) {
+			resp.setZfjjInfo("有增发解禁");
+		}
+		if (dh.getZfjjup() == 1) {
+			if (dh.getZfjj() == 1) {
+				resp.setZfjjInfo(resp.getZfjjInfo() + "<br/>2年未大涨");
+			} else {
+				resp.setZfjjInfo("2年未大涨");
+			}
+		}
 //		resp.setIncomeShow(dh.getCurrIncomeTbzz() + "%");
 //		if (dh.getForestallIncomeTbzz() > 0) {
 //			resp.setIncomeShow(resp.getIncomeShow() + "(" + dh.getForestallIncomeTbzz() + "%)");

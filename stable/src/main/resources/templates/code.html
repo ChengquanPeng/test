@@ -32,10 +32,10 @@ trtd{
 	<div>同花顺概念：<span th:each="cp: ${concepts}"><span th:text="${cp.conceptName}"></span>&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
 	<div>分红概况:<span th:text="${fhgk}"></span></div>
 	<div>增发概况:<span th:text="${zfgk}"></span></div>
-	<div><font color='#FF00FF'>违规处理</font>:<a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/capital.html'}">--></a></div>
+	<div><font color='#FF00FF'>违规处理</font>:<a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/event.html'}">--></a></div>
 	<div><font color='#FF00FF'>财务亏损:</font> 是否主营业务亏损？</div>
-	<div><font color='#FF00FF'>项目进度:</font><a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/event.html'}">-->同花顺</a>
-	<a target="_blank" th:href="@{'http://f10.eastmoney.com/f10_v2/CapitalOperation.aspx?code='+${dfcfcode}+'#xmjd-0'}">-->东方财富</a></div>
+	<div><font color='#FF00FF'>项目进度:&nbsp;&nbsp;--></font><a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/capital.html'}">同花顺</a>
+	&nbsp;&nbsp;--><a target="_blank" th:href="@{'http://f10.eastmoney.com/f10_v2/CapitalOperation.aspx?code='+${dfcfcode}+'#xmjd-0'}">东方财富</a></div>
 	<br/>------------------------------------------------------------<br/>
 	财务报告年份：<span th:text="${codedetail.currYear}"></span>-年：<span th:text="${codedetail.currQuarter}"></span>季度&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'/codehist/pre/'+${code}+'/'+${codedetail.currYear}+'/'+${codedetail.currQuarter}}">上一季度</a></span>
 	<br/>------------------------------------------------------------<br/>
@@ -64,8 +64,8 @@ trtd{
 	<div>前3大股东占比:<span th:text="${topThree}"></span></div>
 	<div>股东人数变化（幅度+次数):<span th:text="${codedetail.holderNum}"></span></div>
 	<div>外资持股：比例：<span th:text="${fcratio}"></span>%,金额：<span th:text="${fcamt}"></span>元,数量：<span th:text="${fcvol}"></span>股
-		&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'http://www.igoodstock.com/goodstock/hsgt_hold?sc='+${code}}">持股明细（goodstock）</a>
-		&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'http://data.eastmoney.com/hsgtcg/StockHdStatistics.aspx?stock='+${code}}">持股明细（东方财富）</a>
+		&nbsp;&nbsp;&nbsp;&nbsp;持股明细&nbsp;&nbsp;<a target="_blank" th:href="@{'http://www.igoodstock.com/goodstock/hsgt_hold?sc='+${code}}">（goodstock）</a>
+		&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'http://data.eastmoney.com/hsgtcg/StockHdStatistics.aspx?stock='+${code}}">（东方财富）</a>
 	</div>
 	<div>最近增发记录:<span th:text="${lastZf}"></span></div>
 	<div>1年前到现在解禁记录:</span>

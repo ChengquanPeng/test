@@ -81,7 +81,7 @@ public class ChipsController {
 			}
 		}
 		ZengFaDetail zf = chipsZfService.getLastZengFaDetail(code, d);
-		if (zf == null && d > 0) {
+		if (zf.getDate() == 0 && d > 0) {
 			zf = chipsZfService.getLastZengFaDetail(code, 0);
 		}
 		if (zf != null && StringUtils.isNotBlank(zf.getDetails())) {
