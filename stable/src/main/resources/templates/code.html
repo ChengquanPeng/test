@@ -63,7 +63,10 @@ trtd{
 	<br/>------------------------------------------------------------<br/>
 	<div>前3大股东占比:<span th:text="${topThree}"></span></div>
 	<div>股东人数变化（幅度+次数):<span th:text="${codedetail.holderNum}"></span></div>
-	<div>外资持股：比例：<span th:text="${fcratio}"></span>%,金额：<span th:text="${fcamt}"></span>元,数量：<span th:text="${fcvol}"></span>股</div>
+	<div>外资持股：比例：<span th:text="${fcratio}"></span>%,金额：<span th:text="${fcamt}"></span>元,数量：<span th:text="${fcvol}"></span>股
+		&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'http://www.igoodstock.com/goodstock/hsgt_hold?sc='+${code}}">持股明细（goodstock）</a>
+		&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'http://data.eastmoney.com/hsgtcg/StockHdStatistics.aspx?stock='+${code}}">持股明细（东方财富）</a>
+	</div>
 	<div>最近增发记录:<span th:text="${lastZf}"></span></div>
 	<div>1年前到现在解禁记录:</span>
 		<table border='1' cellspacing='0' cellpadding='0'>
