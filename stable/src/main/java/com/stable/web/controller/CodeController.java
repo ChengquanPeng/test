@@ -60,7 +60,7 @@ public class CodeController {
 	private void prepare(Model model, String code) {
 		ForeignCapitalSum fc = chipsService.getForeignCapitalSum(code);
 		if (fc.getHoldVol() > 0) {
-			model.addAttribute("fcvol", CurrencyUitl.covertToString(fc.getHoldVol()) + "股");
+			model.addAttribute("fcvol", CurrencyUitl.covertToString(fc.getHoldVol()));
 		} else {
 			model.addAttribute("fcvol", "0");
 		}
