@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.stable.service.DividendService;
+import com.stable.service.BonusService;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -16,7 +16,7 @@ import com.stable.vo.spi.req.EsQueryPageReq;
 public class DividendController {
 
 	@Autowired
-	private DividendService dividendService;
+	private BonusService dividendService;
 
 	/**
 	 * 获取分红信息

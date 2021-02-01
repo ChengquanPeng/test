@@ -25,12 +25,12 @@ import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.CodeModeType;
 import com.stable.enums.SylType;
-import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.EsCodeBaseModelHistDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.service.AnnouncementService;
+import com.stable.service.BonusService;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
@@ -108,6 +108,8 @@ public class CodeModelService {
 	private MonitorPoolDao monitorPoolDao;
 	@Autowired
 	private ChipsZfService chipsZfService;
+	@Autowired
+	private BonusService bonusService;
 
 	public synchronized void runJobv2(boolean isJob, int date) {
 		try {
@@ -271,6 +273,8 @@ public class CodeModelService {
 		newOne.setSusZfBoss(0);
 		newOne.setZfself(0);
 		newOne.setZfbuy(0);
+		newOne.setGsz(0);
+		newOne.setZflastOkDate(0);
 
 		String code = newOne.getCode();
 		ZengFa zf = chipsZfService.getLastZengFa(code, 2);// 已完成的增发
@@ -301,8 +305,8 @@ public class CodeModelService {
 			if (preCondi && newOne.getZfself() == 1) {
 				newOne.setSusZfBoss(1);
 			}
-			if (zf.getEndDate() > 0) {
-				newOne.setZflastOkDate(zf.getEndDate());
+			if (bonusService.isGsz(code, threYearAgo)) {
+				newOne.setGsz(1);
 			}
 		}
 	}
@@ -498,7 +502,6 @@ public class CodeModelService {
 			newOne.setSusWhiteHorsSure(oldOne.getSusWhiteHorsSure());
 			newOne.setSortMode6Sure(oldOne.getSortMode6Sure());
 			newOne.setSortMode7Sure(oldOne.getSortMode7Sure());
-			newOne.setZflastOkDate(oldOne.getZflastOkDate());
 		}
 	}
 
@@ -887,23 +890,24 @@ public class CodeModelService {
 		if (dh.getSusWhiteHors() == 1) {
 			sb4.append("疑似白马").append(Constant.HTML_LINE);
 		}
-		if (dh.getSusZfBoss() == 1) {
-			sb4.append("增发筹码博弈");
-		}
 		resp.setCodeType(sb4.toString());
 
-		StringBuffer sb5 = new StringBuffer(ZfStatus.getCodeName(dh.getZfStatus()));
-		if (dh.getZfStatus() == 1) {
-			sb5.append(":").append(dh.getZfStatusDesc()).append(Constant.HTML_LINE);
-		}
-		if (dh.getZfStatus() == 2) {
+		StringBuffer sb5 = new StringBuffer();
+		if (dh.getZflastOkDate() > 0) {
+			sb5.append("日期:").append(dh.getZflastOkDate()).append(Constant.HTML_LINE);
+			if (dh.getZfbuy() == 1) {
+				sb5.append(",购买资产").append(Constant.HTML_LINE);
+			}
 			if (dh.getZfself() == 1) {
 				sb5.append(",打压增发价").append(Constant.HTML_LINE);
 			} else {
 				sb5.append(",增发价正常").append(Constant.HTML_LINE);
 			}
-			if (dh.getZfbuy() == 1) {
-				sb5.append(",购买资产").append(Constant.HTML_LINE);
+			if (dh.getSusZfBoss() == 1) {
+				sb5.append(",增发筹码博弈").append(Constant.HTML_LINE);
+			}
+			if (dh.getGsz() == 1) {
+				sb5.append(",3年内有高送转").append(Constant.HTML_LINE);
 			}
 		}
 		resp.setZfInfo(sb5.toString());

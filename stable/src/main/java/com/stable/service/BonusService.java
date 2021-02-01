@@ -41,7 +41,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @Service
 @Log4j2
-public class DividendService {
+public class BonusService {
 	public final String GDDH = "股东大会通过";
 	public final String SS = "实施方案";
 	@Autowired
@@ -81,6 +81,23 @@ public class DividendService {
 		}
 		log.info("no DividendHistory for code={},proc={}", code, proc);
 		return null;
+	}
+
+	public boolean isGsz(String code, int start) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.matchPhraseQuery("hasZhuanGu", 1));
+		if (start > 0) {
+			bqb.must(QueryBuilders.rangeQuery("dividendDate").gte(Integer.valueOf(start)));
+		}
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+
+		Page<BonusHist> page = bonusHistDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return true;
+		}
+		return false;
 	}
 
 	public List<DividendHistoryResp> getListByCodeForWebPage(String code, String zsg, String proc, String queryYear,

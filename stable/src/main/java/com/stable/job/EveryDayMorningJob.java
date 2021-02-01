@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
-import com.stable.service.DividendService;
+import com.stable.service.BonusService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -15,7 +15,7 @@ public class EveryDayMorningJob extends MySimpleJob {
 	@Autowired
 	private ThsJobLine thsJobLine;
 	@Autowired
-	private DividendService dividendService;
+	private BonusService dividendService;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
