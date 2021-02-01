@@ -89,8 +89,18 @@ public class ChipsZfService {
 	 * 最后的增发记录
 	 */
 	public ZengFa getLastZengFa(String code) {
+		return getLastZengFa(code, 0);
+	}
+
+	/**
+	 * 最后已实施的增发记录
+	 */
+	public ZengFa getLastZengFa(String code, int status) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		if (status > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("status", status));
+		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("startDate").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();

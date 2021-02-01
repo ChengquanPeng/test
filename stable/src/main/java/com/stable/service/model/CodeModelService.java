@@ -246,11 +246,18 @@ public class CodeModelService {
 	}
 
 	private void zfBoss(CodeBaseModel2 newOne, ZengFa zf) {
+		String code = newOne.getCode();
+		if (newOne.getZflastOkDate() == 0) {
+			ZengFa zfok = chipsZfService.getLastZengFa(code, 2);
+			if (zfok.getEndDate() > 0) {
+				newOne.setZflastOkDate(zfok.getEndDate());
+			}
+		}
+
 		if (newOne.getSusZfBoss() == 1 && newOne.getSusZfBossSure() > 1) {
 			return;
 		}
 		if (newOne.getZfStatus() == 2) {
-			String code = newOne.getCode();
 			boolean preCondi = false;
 			if (zf.getPrice() > 0) {
 				// 价格对比,增发价没超60%
@@ -272,6 +279,9 @@ public class CodeModelService {
 			}
 			if (preCondi && newOne.getZfself() == 1) {
 				newOne.setSusZfBoss(1);
+			}
+			if (zf.getEndDate() > 0) {
+				newOne.setZflastOkDate(zf.getEndDate());
 			}
 		} else {
 			newOne.setSusZfBoss(0);
@@ -474,6 +484,7 @@ public class CodeModelService {
 			newOne.setSusWhiteHorsSure(oldOne.getSusWhiteHorsSure());
 			newOne.setSortMode6Sure(oldOne.getSortMode6Sure());
 			newOne.setSortMode7Sure(oldOne.getSortMode7Sure());
+			newOne.setZflastOkDate(oldOne.getZflastOkDate());
 		}
 	}
 
@@ -706,7 +717,10 @@ public class CodeModelService {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfStatus", Integer.valueOf(zfStatus)));
 		}
 		String field = "baseGreen";
-		if (orderBy == 3) {
+
+		if (orderBy == 2) {
+			field = "zflastOkDate";
+		} else if (orderBy == 3) {
 			field = "sylttm";
 		} else if (orderBy == 4) {
 			field = "syl";

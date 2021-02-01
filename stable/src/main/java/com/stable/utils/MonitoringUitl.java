@@ -31,7 +31,7 @@ public class MonitoringUitl {
 			}
 		}
 		if (cp.getDownPrice() > 0) {// 下跌到价格
-			if (low <= cp.getDownPrice()) {
+			if (low > 0 && low <= cp.getDownPrice()) {
 				return true;
 			}
 		}

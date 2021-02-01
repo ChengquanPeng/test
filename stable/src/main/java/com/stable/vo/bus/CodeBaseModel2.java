@@ -69,6 +69,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int zfbuy = 0;// 是否购买资产
 	@Field(type = FieldType.Integer)
 	private int susZfBoss; // 增发博弈
+	@Field(type = FieldType.Integer)
+	private int zflastOkDate = 0;// 最后已实施时间
 	// 增发解禁
 	@Field(type = FieldType.Integer)
 	private int zfjj; // 增发解禁
