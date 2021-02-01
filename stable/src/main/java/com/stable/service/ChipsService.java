@@ -87,6 +87,7 @@ public class ChipsService {
 		return getBf2yearJiejin(code, start, end, null);
 	}
 
+	// 顺序排序
 	public List<Jiejin> getBf2yearJiejin(String code, int start, int end, String type) {
 		int pageNum = EsQueryPageUtil.queryPage9999.getPageNum();
 		int size = EsQueryPageUtil.queryPage9999.getPageSize();
@@ -101,7 +102,7 @@ public class ChipsService {
 		if (type != null) {
 			bqb.must(QueryBuilders.matchQuery("type", type));// 分词
 		}
-		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.ASC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 		Page<Jiejin> page = jiejinDao.search(sq);

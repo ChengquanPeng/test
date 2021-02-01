@@ -71,6 +71,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int susZfBoss; // 增发博弈
 	@Field(type = FieldType.Integer)
 	private int zflastOkDate = 0;// 最后已实施时间
+	@Field(type = FieldType.Integer)
+	private int zfjjDate = 0;// 最近的增发解禁时间
 	// 增发解禁
 	@Field(type = FieldType.Integer)
 	private int zfjj; // 增发解禁

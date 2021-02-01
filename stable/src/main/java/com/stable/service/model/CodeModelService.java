@@ -211,9 +211,11 @@ public class CodeModelService {
 		String code = newOne.getCode();
 		List<Jiejin> l = chipsService.getRecentlyZfJiejin(code);
 		if (l != null && l.size() > 0) {
+			newOne.setZfjjDate(l.get(0).getDate());
 			newOne.setZfjj(1);
 		} else {
 			newOne.setZfjj(0);
+			newOne.setZfjjDate(0);
 		}
 		// 至少2年未大涨
 		newOne.setZfjjup(0);
@@ -904,7 +906,7 @@ public class CodeModelService {
 		resp.setZfInfo(sb5.toString());
 
 		if (dh.getZfjj() == 1) {
-			resp.setZfjjInfo("有增发解禁");
+			resp.setZfjjInfo("有增发解禁(" + dh.getZfjjDate() + ")");
 		}
 		if (dh.getZfjjup() == 1) {
 			if (dh.getZfjj() == 1) {
