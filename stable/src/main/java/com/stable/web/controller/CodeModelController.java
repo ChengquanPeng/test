@@ -25,12 +25,12 @@ public class CodeModelController {
 	public ResponseEntity<JsonResult> codemodellist(String code, int orderBy, int asc, String conceptId,
 			String conceptName, String zfStatus, EsQueryPageReq querypage, String monitor, String bred, String byellow,
 			String bblue, String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6,
-			int sort7, int zfbuy, int zfjj, int zfjjup) {
+			int sort7, int zfbuy, int zfjj, int zfjjup, int zfself) {
 		JsonResult r = new JsonResult();
 		try {
 			r.setResult(codeModelService.getListForWeb(code, orderBy, conceptId, conceptName, asc, querypage, zfStatus,
 					monitor, bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7,
-					zfbuy, zfjj, zfjjup));
+					zfbuy, zfjj, zfjjup, zfself));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

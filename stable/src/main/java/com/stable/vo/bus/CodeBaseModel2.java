@@ -58,11 +58,13 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int sylType;// 收益率类型:1:自身收益率增长,2: 年收益率超过5.0%*4=20%,4:同时包含12
 
-	// 增发
+	// 增发(最近的增发，包含正在增发）
 	@Field(type = FieldType.Integer)
 	private int zfStatus;// 增发状态（近1年）: 0无增发，1增发中，2增发完成，3，增发终止
 	@Field(type = FieldType.Text)
 	private String zfStatusDesc;// 增发进度
+
+	// 已完成的增发
 	@Field(type = FieldType.Integer)
 	private int zfself = 0;// 自己人在增发
 	@Field(type = FieldType.Integer)
@@ -71,13 +73,13 @@ public class CodeBaseModel2 extends EsBase {
 	private int susZfBoss; // 增发博弈
 	@Field(type = FieldType.Integer)
 	private int zflastOkDate = 0;// 最后已实施时间
-	@Field(type = FieldType.Integer)
-	private int zfjjDate = 0;// 最近的增发解禁时间
 	// 增发解禁
 	@Field(type = FieldType.Integer)
 	private int zfjj; // 增发解禁
 	@Field(type = FieldType.Integer)
 	private int zfjjup; // 增发未大涨
+	@Field(type = FieldType.Integer)
+	private int zfjjDate = 0;// 最近的增发解禁时间
 
 	// 交易面
 	@Field(type = FieldType.Integer)
