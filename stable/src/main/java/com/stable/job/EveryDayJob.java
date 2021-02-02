@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.config.SpringConfig;
 import com.stable.service.BuyBackService;
+import com.stable.service.ChipsZfService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.jys.JysSpider;
@@ -35,6 +36,8 @@ public class EveryDayJob extends MySimpleJob {
 	private JysSpider jysSpider;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
+	@Autowired
+	private ChipsZfService chipsZfService;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
@@ -53,6 +56,8 @@ public class EveryDayJob extends MySimpleJob {
 
 		log.info("定增完成预警公告");
 		monitorPoolService.jobZfDoneWarning();
+		log.info("定增扩展属性");
+		chipsZfService.jobZengFaExt(true);
 
 		log.info("交易所公告");
 		jysSpider.byJob();
