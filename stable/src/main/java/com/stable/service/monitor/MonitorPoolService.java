@@ -1,5 +1,6 @@
 package com.stable.service.monitor;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,18 +23,27 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.CodeModeType;
+import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.MonitorPoolDao;
+import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.model.data.AvgService;
+import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.utils.DateUtil;
+import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.BonusHist;
 import com.stable.vo.bus.CodeBaseModel2;
+import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockAvgBase;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
+import com.stable.vo.bus.ZengFa;
+import com.stable.vo.bus.ZengFaDetail;
+import com.stable.vo.bus.ZengFaSummary;
 import com.stable.vo.http.resp.MonitorPoolResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -59,6 +69,10 @@ public class MonitorPoolService {
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private AvgService avgService;
+	@Autowired
+	private ThsBonusSpider thsBonusSpider;
+	@Autowired
+	private ChipsZfService chipsZfService;
 
 	// 移除监听
 	public void delMonit(String code, String remark) {
@@ -88,7 +102,7 @@ public class MonitorPoolService {
 
 	// 加入监听
 	public void addMonitor(String code, int monitor, int realtime, int offline, double upPrice, double downPrice,
-			double upTodayChange, double downTodayChange, String remark, int ykb) {
+			double upTodayChange, double downTodayChange, String remark, int ykb, int zfdone) {
 		if (monitor <= 0) {
 			throw new RuntimeException("monitor<=0 ?");
 		}
@@ -109,6 +123,7 @@ public class MonitorPoolService {
 		c.setUpPrice(upPrice);
 		c.setUpTodayChange(upTodayChange);
 		c.setYkb(ykb);
+		c.setZfdone(zfdone);
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
 		} else {
@@ -209,7 +224,7 @@ public class MonitorPoolService {
 		log.info("CodeBaseModel getListForWeb code={},num={},size={},aliasCode={},monitor={},monitoreq={}", code,
 				querypage.getPageNum(), querypage.getPageSize(), aliasCode, monitor, monitoreq);
 
-		List<MonitorPool> list = getList(code, monitor, monitoreq, 0, querypage, aliasCode);
+		List<MonitorPool> list = getList(code, monitor, monitoreq, 0, 0, querypage, aliasCode);
 		List<MonitorPoolResp> res = new LinkedList<MonitorPoolResp>();
 		if (list != null) {
 			for (MonitorPool dh : list) {
@@ -230,8 +245,8 @@ public class MonitorPoolService {
 		return res;
 	}
 
-	public List<MonitorPool> getList(String code, int monitor, int monitoreq, int ykb, EsQueryPageReq querypage,
-			String aliasCode) {
+	public List<MonitorPool> getList(String code, int monitor, int monitoreq, int ykb, int zfdone,
+			EsQueryPageReq querypage, String aliasCode) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -250,6 +265,9 @@ public class MonitorPoolService {
 		if (monitoreq > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("monitor", monitoreq));
 		}
+		if (zfdone > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("zfdone", zfdone));
+		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort("updateDate").unmappedType("integer").order(SortOrder.DESC);
 
@@ -263,6 +281,33 @@ public class MonitorPoolService {
 		}
 		log.info("no records CodeBaseModels");
 		return null;
+	}
+
+	// 完成定增预警
+	public void jobZfDoneWarning() {
+		List<MonitorPool> list = getList("", 0, 0, 0, 1, EsQueryPageUtil.queryPage9999, "");
+		if (list != null) {
+			int oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));
+			int sysdate = DateUtil.getTodayIntYYYYMMDD();
+			List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
+			List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
+			List<FenHong> fhl = new LinkedList<FenHong>();
+			List<BonusHist> bhl = new LinkedList<BonusHist>();
+			// 抓包
+			for (MonitorPool mp : list) {
+				thsBonusSpider.dofetchBonusInner(sysdate, mp.getCode(), zfdl, zfsl, fhl, bhl);
+			}
+			thsBonusSpider.saveAll(zfdl, zfsl, fhl, bhl);
+			// 预警
+			for (MonitorPool mp : list) {
+				ZengFa zf = chipsZfService.getLastZengFa(mp.getCode(), ZfStatus.ING.getCode());
+				if (!chipsZfService.isZfDateOk(zf, oneYearAgo)) {
+					mp.setZfdone(0);
+					monitorPoolDao.save(mp);
+					WxPushUtil.pushSystem1(mp.getCode() + " 已完成增发");
+				}
+			}
+		}
 	}
 
 	/**

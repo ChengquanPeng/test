@@ -70,6 +70,14 @@ public class ChipsZfService {
 	@Autowired
 	private TushareSpider tushareSpider;
 
+	public boolean isZfDateOk(ZengFa zengfa, int agoDate) {
+		if (zengfa != null && (zengfa.getStartDate() > agoDate || zengfa.getEndDate() > agoDate
+				|| zengfa.getZjhDate() > agoDate)) {
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * 增发-概况
 	 */

@@ -92,7 +92,7 @@ public class FinanceService {
 	private MonitorPoolService monitorPoolService;
 
 	private void kybMonitor() {
-		List<MonitorPool> list = monitorPoolService.getList("", 0, 0, 1, EsQueryPageUtil.queryPage9999, "");
+		List<MonitorPool> list = monitorPoolService.getList("", 0, 0, 1, 0, EsQueryPageUtil.queryPage9999, "");
 		if (list != null) {
 			int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -15));
 			for (MonitorPool mp : list) {

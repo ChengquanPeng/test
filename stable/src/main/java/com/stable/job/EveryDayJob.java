@@ -10,6 +10,7 @@ import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.config.SpringConfig;
 import com.stable.service.BuyBackService;
 import com.stable.service.model.CodeModelService;
+import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.jys.JysSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.FileDeleteUitl;
@@ -32,6 +33,8 @@ public class EveryDayJob extends MySimpleJob {
 	private CodeModelService codeModelService;
 	@Autowired
 	private JysSpider jysSpider;
+	@Autowired
+	private MonitorPoolService monitorPoolService;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
@@ -47,6 +50,9 @@ public class EveryDayJob extends MySimpleJob {
 		FileDeleteUitl.deletePastDateFile(efc.getModelImageFloder());
 		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloder());
 		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloderDesc());
+
+		log.info("定增完成预警公告");
+		monitorPoolService.jobZfDoneWarning();
 
 		log.info("交易所公告");
 		jysSpider.byJob();

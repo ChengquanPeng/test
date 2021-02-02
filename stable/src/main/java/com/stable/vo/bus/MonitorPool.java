@@ -39,6 +39,8 @@ public class MonitorPool {
 	private double downTodayChange = 0;// 低于某涨幅
 	@Field(type = FieldType.Integer)
 	private int ykb = 0;// 快预报(0不预警，1不亏，2亏损）
+	@Field(type = FieldType.Integer)
+	private int zfdone = 0;// 定增预警(0不预警，1预警）
 
 	// 增发
 

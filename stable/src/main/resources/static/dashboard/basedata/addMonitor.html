@@ -126,6 +126,12 @@ body {
 						<option value="2">期望亏损</option>
 					</select>
 				</div>
+				<div class="input-group">
+					定增完成：<select id="zfdone">
+						<option value="0">不预警</option>
+						<option value="1">预警</option>
+					</select>
+				</div>
 				<br />
 				<div class="input-group">
 					<span class="input-group-btn">
@@ -187,6 +193,7 @@ body {
 					downPrice : $('#downPrice').val(),
 					upTodayChange : $('#upTodayChange').val(),
 					ykb : $('#ykb').val(),
+					zfdone : $('#zfdone').val(),
 					downTodayChange : $('#downTodayChange').val()
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式

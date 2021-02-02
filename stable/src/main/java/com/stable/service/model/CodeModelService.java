@@ -197,12 +197,11 @@ public class CodeModelService {
 		findBigBoss2(code, newOne, fbis);// 基本面-疑似大牛
 		susWhiteHorses(code, newOne);// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
 		zfBoss(newOne);// 已完成的增发，更多细节
+		newOne.setHolderNum(chipsService.holderNumAnalyse(code));
 		if (onlineYear) {
 			sortModel(newOne);// 短线模型
+			zfjj(newOne);// 限售解禁T
 		}
-		newOne.setHolderNum(chipsService.holderNumAnalyse(code));
-//		限售解禁T
-		zfjj(newOne);
 //		买点: 监听//TODO
 		saveHist(newOne, oldOne, listHist);// 历史
 	}
@@ -237,25 +236,17 @@ public class CodeModelService {
 		newOne.setZfStatusDesc("");
 		ZengFa undone = chipsZfService.getLastZengFa(newOne.getCode(), ZfStatus.ING.getCode());// 是否有正在增发的
 		// start 一年以前
-		if (isZfDateOk(undone, oneYearAgo)) {
+		if (chipsZfService.isZfDateOk(undone, oneYearAgo)) {
 			newOne.setZfStatus(undone.getStatus());
 			newOne.setZfStatusDesc(undone.getStatusDesc());
 		} else {
 			ZengFa last = chipsZfService.getLastZengFa(newOne.getCode(), ZfStatus.NO.getCode());// 最新的增发
 			// start 一年以前
-			if (isZfDateOk(last, oneYearAgo)) {// 一年之类是否有增发
+			if (chipsZfService.isZfDateOk(last, oneYearAgo)) {// 一年之类是否有增发
 				newOne.setZfStatus(last.getStatus());
 				newOne.setZfStatusDesc(last.getStatusDesc());
 			}
 		}
-	}
-
-	private boolean isZfDateOk(ZengFa zengfa, int agoDate) {
-		if (zengfa != null && (zengfa.getStartDate() > agoDate || zengfa.getEndDate() > agoDate
-				|| zengfa.getZjhDate() > agoDate)) {
-			return true;
-		}
-		return false;
 	}
 
 	private void zfjj(CodeBaseModel2 newOne) {
@@ -285,7 +276,7 @@ public class CodeModelService {
 
 		String code = newOne.getCode();
 		ZengFa zf = chipsZfService.getLastZengFa(code, ZfStatus.DONE.getCode());// 已完成的增发
-		if (isZfDateOk(zf, threYearAgo)) {
+		if (chipsZfService.isZfDateOk(zf, threYearAgo)) {
 			newOne.setZflastOkDate(zf.getEndDate());
 //			if (newOne.getSusZfBoss() == 1 && newOne.getSusZfBossSure() > 1) {
 //				return;

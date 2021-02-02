@@ -87,69 +87,6 @@ public class ThsAnnSpider {
 		}
 	}
 
-	/**
-	 * 疑似
-	 */
-	public static String isStartZf(String code, int endDate) {
-		if (endDate < 20160101) {
-			endDate = 20160101;
-		}
-		String org = "";
-//		String UnicodeToCN = "";
-		int i = 1;
-		while (true) {// 30页
-			String url = String.format(BASE_URL, code, i);
-			int trytime = 0;
-			boolean fetched = false;
-			do {
-				try {
-					log.info(url);
-					ThreadsUtil.sleepRandomSecBetween1And5();
-					org = HttpUtil.doGet2(url);
-//					UnicodeToCN = UnicodeUtil.UnicodeToCN(org); 整个json有双引号的情况，所以要下面title分开。
-					if (i > 10 && org.contains("parameter error")) {
-						return "";
-					}
-					JSONArray objects = JSON.parseArray(org);
-					String s_date = "";
-					for (int j = 0; j < objects.size(); j++) {
-						JSONObject data = objects.getJSONObject(j);
-						String title = UnicodeUtil.UnicodeToCN(data.getString("title"));
-						String date = data.getString("date");
-//						System.err.println(date + " " + title);
-						// 发行
-						if (title.contains("发行") && title.contains("案") && title.contains("股")) {
-							return date + " " + title;
-						}
-						s_date = date;
-					}
-					fetched = true;
-					int pageEndDate = 0;
-					try {
-						pageEndDate = DateUtil.convertDate2(s_date);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					if (pageEndDate < endDate) {
-						return "";
-					}
-				} catch (Exception e2) {
-					e2.printStackTrace();
-					trytime++;
-					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
-					if (trytime >= 10) {
-						log.info("org:" + org);
-						// log.info("UnicodeToCN:" + UnicodeToCN);
-						fetched = true;
-						WxPushUtil.pushSystem1("同花顺-抓包公告出错-抓包出错code=" + code + ",url=" + url);
-					}
-				} finally {
-				}
-			} while (!fetched);
-			i++;
-		}
-	}
-
 	public static void main(String[] args) {
 //		String[] as = { "603385", "300676", "002405", "601369", "600789", "002612" };
 		String[] as = { "002612" };

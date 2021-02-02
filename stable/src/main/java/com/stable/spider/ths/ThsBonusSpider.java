@@ -108,18 +108,7 @@ public class ThsBonusSpider {
 					ErrorLogFileUitl.writeError(e, "", "", "");
 				}
 			}
-			if (zfdl.size() > 0) {
-				zengFaDetailDao.saveAll(zfdl);
-			}
-			if (zfsl.size() > 0) {
-				zengFaSummaryDao.saveAll(zfsl);
-			}
-			if (fhl.size() > 0) {
-				fenHongDao.saveAll(fhl);
-			}
-			if (bhl.size() > 0) {
-				bonusHistDao.saveAll(bhl);
-			}
+			saveAll(zfdl, zfsl, fhl, bhl);
 			WxPushUtil.pushSystem1(date + " 分红&增发抓包同花顺已完成");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -128,7 +117,22 @@ public class ThsBonusSpider {
 		}
 	}
 
-	private void dofetchBonusInner(int sysdate, String code, List<ZengFaDetail> zfdl, List<ZengFaSummary> zfsl,
+	public void saveAll(List<ZengFaDetail> zfdl, List<ZengFaSummary> zfsl, List<FenHong> fhl, List<BonusHist> bhl) {
+		if (zfdl.size() > 0) {
+			zengFaDetailDao.saveAll(zfdl);
+		}
+		if (zfsl.size() > 0) {
+			zengFaSummaryDao.saveAll(zfsl);
+		}
+		if (fhl.size() > 0) {
+			fenHongDao.saveAll(fhl);
+		}
+		if (bhl.size() > 0) {
+			bonusHistDao.saveAll(bhl);
+		}
+	}
+
+	public void dofetchBonusInner(int sysdate, String code, List<ZengFaDetail> zfdl, List<ZengFaSummary> zfsl,
 			List<FenHong> fhl, List<BonusHist> bhl) {
 		int trytime = 0;
 		boolean fetched = false;
