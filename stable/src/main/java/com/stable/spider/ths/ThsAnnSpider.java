@@ -33,7 +33,7 @@ public class ThsAnnSpider {
 			do {
 				try {
 					log.info(url);
-					ThreadsUtil.sleepRandomSecBetween1And5();
+					ThreadsUtil.sleepSleep1Seconds();
 					org = HttpUtil.doGet2(url);
 //					UnicodeToCN = UnicodeUtil.UnicodeToCN(org); 整个json有双引号的情况，所以要下面title分开。
 					if (i > 10 && org.contains("parameter error")) {
@@ -73,7 +73,7 @@ public class ThsAnnSpider {
 				} catch (Exception e2) {
 					e2.printStackTrace();
 					trytime++;
-					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+					ThreadsUtil.sleepRandomSecBetween1And5(trytime);
 					if (trytime >= 10) {
 						log.info("org:" + org);
 						// log.info("UnicodeToCN:" + UnicodeToCN);

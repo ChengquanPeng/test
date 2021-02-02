@@ -157,7 +157,7 @@ public class TushareSpider {
 			JSONObject items = datas.getJSONObject("data");
 			return items;
 		} finally {
-			ThreadsUtil.tuShareSleepRandom();
+			//ThreadsUtil.tuShareSleepRandom();
 		}
 	}
 
