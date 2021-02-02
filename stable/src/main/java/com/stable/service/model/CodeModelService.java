@@ -198,6 +198,13 @@ public class CodeModelService {
 		susWhiteHorses(code, newOne);// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
 		zfBoss(newOne);// 已完成的增发，更多细节
 		newOne.setHolderNum(chipsService.holderNumAnalyse(code));
+
+		newOne.setZfjjup(0);
+		newOne.setZfjj(0);
+		newOne.setZfjjDate(0);
+		newOne.setSortMode7(0);
+		newOne.setSortMode6(0);
+
 		if (onlineYear) {
 			sortModel(newOne);// 短线模型
 			zfjj(newOne);// 限售解禁T
@@ -216,16 +223,12 @@ public class CodeModelService {
 			// 短线模型6
 			if (sortV6Service.isWhiteHorseForSortV6(sortV6Service.is15DayTodayPriceOk(code, tradeDate))) {
 				newOne.setSortMode6(1);
-			} else {
-				newOne.setSortMode6(0);
 			}
 		}
 		if (newOne.getSortMode7Sure() < 2) {
 			// 短线模型7（箱体震荡新高，是否有波浪走势）
 			if (sortV6Service.isWhiteHorseForSortV7(code, tradeDate)) {
 				newOne.setSortMode7(1);
-			} else {
-				newOne.setSortMode7(0);
 			}
 		}
 	}
@@ -251,16 +254,12 @@ public class CodeModelService {
 
 	private void zfjj(CodeBaseModel2 newOne) {
 		String code = newOne.getCode();
-		List<Jiejin> l = chipsService.getRecentlyZfJiejin(code);
-		if (l != null && l.size() > 0) {
-			newOne.setZfjjDate(l.get(0).getDate());
+		int d = chipsService.getRecentlyZfJiejin(code);
+		if (d > 0) {
+			newOne.setZfjjDate(d);
 			newOne.setZfjj(1);
-		} else {
-			newOne.setZfjj(0);
-			newOne.setZfjjDate(0);
 		}
 		// 至少2年未大涨
-		newOne.setZfjjup(0);
 		if (LinePrice.priceCheckForMid(daliyTradeHistroyService, code, newOne.getDate(), chkdouble_2,
 				EsQueryPageUtil.queryPage500)) {
 			newOne.setZfjjup(1);

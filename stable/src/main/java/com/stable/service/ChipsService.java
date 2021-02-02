@@ -112,11 +112,19 @@ public class ChipsService {
 		return null;
 	}
 
-	public List<Jiejin> getRecentlyZfJiejin(String code) {
+	public int getRecentlyZfJiejin(String code) {
 		Date now = new Date();
 		int start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -540));
 		int end = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 180));
-		return getBf2yearJiejin(code, start, end, ZF);
+		List<Jiejin> list = getBf2yearJiejin(code, start, end, ZF);
+		if (list != null) {
+			for (Jiejin jj : list) {
+				if (jj.getType().contains(ZF)) {
+					return jj.getDate();
+				}
+			}
+		}
+		return 0;
 	}
 
 	public List<Jiejin> getBf2yearJiejin(String code) {
