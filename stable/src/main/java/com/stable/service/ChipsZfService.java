@@ -201,7 +201,7 @@ public class ChipsZfService {
 						zfe.setId(zf.getId());
 						zfe.setCode(zf.getCode());
 						zfe.setDate(zf.getEndDate());
-						String s = ThsAnnSpider.dofetch(zf.getCode(), zf.getStartDate());
+						String s = ThsAnnSpider.isBuyAsset(zf.getCode(), zf.getStartDate());
 						if (StringUtils.isNotBlank(s)) {
 							zfe.setBuy(1);
 							zfe.setTitle(s);

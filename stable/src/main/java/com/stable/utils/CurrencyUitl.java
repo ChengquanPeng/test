@@ -32,7 +32,7 @@ public class CurrencyUitl {
 			return 0l;
 		}
 		// System.err.println("STR:" + str);
-		str = str.trim().replace(YUAN, Constant.EMPTY_STRING);
+		str = str.trim().replaceAll(" ", "").replace(YUAN, Constant.EMPTY_STRING);
 		BigDecimal s = new BigDecimal(1);
 		if (str.contains(YI)) {
 			str = str.split(YI)[0];

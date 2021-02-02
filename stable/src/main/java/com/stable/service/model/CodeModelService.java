@@ -25,6 +25,7 @@ import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.CodeModeType;
 import com.stable.enums.SylType;
+import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.EsCodeBaseModelHistDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
@@ -232,14 +233,20 @@ public class CodeModelService {
 
 	// 增发
 	private void chkZf(CodeBaseModel2 newOne) {
-		ZengFa zengfa = chipsZfService.getLastZengFa(newOne.getCode());
+		newOne.setZfStatus(ZfStatus.NO.getCode());
+		newOne.setZfStatusDesc("");
+		ZengFa undone = chipsZfService.getLastZengFa(newOne.getCode(), ZfStatus.ING.getCode());// 是否有正在增发的
 		// start 一年以前
-		if (isZfDateOk(zengfa, oneYearAgo)) {// 一年之类是否有增发
-			newOne.setZfStatus(zengfa.getStatus());
-			newOne.setZfStatusDesc(zengfa.getStatusDesc());
+		if (isZfDateOk(undone, oneYearAgo)) {
+			newOne.setZfStatus(undone.getStatus());
+			newOne.setZfStatusDesc(undone.getStatusDesc());
 		} else {
-			newOne.setZfStatus(0);
-			newOne.setZfStatusDesc("");
+			ZengFa last = chipsZfService.getLastZengFa(newOne.getCode(), ZfStatus.NO.getCode());// 最新的增发
+			// start 一年以前
+			if (isZfDateOk(last, oneYearAgo)) {// 一年之类是否有增发
+				newOne.setZfStatus(last.getStatus());
+				newOne.setZfStatusDesc(last.getStatusDesc());
+			}
 		}
 	}
 
@@ -277,7 +284,7 @@ public class CodeModelService {
 		newOne.setZflastOkDate(0);
 
 		String code = newOne.getCode();
-		ZengFa zf = chipsZfService.getLastZengFa(code, 2);// 已完成的增发
+		ZengFa zf = chipsZfService.getLastZengFa(code, ZfStatus.DONE.getCode());// 已完成的增发
 		if (isZfDateOk(zf, threYearAgo)) {
 			newOne.setZflastOkDate(zf.getEndDate());
 //			if (newOne.getSusZfBoss() == 1 && newOne.getSusZfBossSure() > 1) {

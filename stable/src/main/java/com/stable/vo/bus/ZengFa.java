@@ -17,7 +17,7 @@ public class ZengFa extends EsBase {
 
 	private static final long serialVersionUID = 1L;
 	@Id
-	private String id;
+	private String id;// (code+startdate+yjamt)
 	@Field(type = FieldType.Keyword)
 	private String code;
 
@@ -47,6 +47,8 @@ public class ZengFa extends EsBase {
 	private String num;// 实际发行数量：1941.87万股
 	@Field(type = FieldType.Text)
 	private String amt;// 实际募资净额：3.31亿元
+	@Field(type = FieldType.Long)
+	private long yjamt = 0;// 预计募资净额
 
 	@Field(type = FieldType.Integer)
 	private int update;

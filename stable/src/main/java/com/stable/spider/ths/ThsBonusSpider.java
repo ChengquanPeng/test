@@ -19,6 +19,7 @@ import com.stable.es.dao.base.ZengFaDao;
 import com.stable.es.dao.base.ZengFaDetailDao;
 import com.stable.es.dao.base.ZengFaSummaryDao;
 import com.stable.service.StockBasicService;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HtmlunitSpider;
@@ -205,7 +206,6 @@ public class ThsBonusSpider {
 				if (times > 0) {
 					List<HtmlElement> hists = body.getElementsByAttribute("table", "class", "m_table pggk mt10");
 					boolean getDetail = false;
-					ZengFa last = null;
 					for (HtmlElement h : hists) {
 						try {
 							ZengFa zf = new ZengFa();
@@ -275,38 +275,17 @@ public class ThsBonusSpider {
 							// 董事会公告日
 							String s5 = tr6.getLastElementChild().asText().replaceAll(" ", "").split("：")[1];
 							zf.setStartDate(DateUtil.convertDate2(s5));
-							if (zf.getStatus() == 2) {// 可能用一天
-								zf.setId(zf.getCode() + zf.getStartDate() + "_" + zf.getNumOnLineDate());
-							} else {
-								zf.setId(zf.getCode() + zf.getStartDate());
-							}
 							zf.setUpdate(sysdate);
+							try {// 实际募资净额
+								String s = tr6.getFirstElementChild().asText().replaceAll(" ", "").split("：")[1];
+								zf.setYjamt(CurrencyUitl.covertToLong(s));
+							} catch (Exception e) {
+							}
+							zf.setId(zf.getCode() + zf.getStartDate() + "_" + zf.getYjamt());
 //						System.err.println("==================");
 							log.info(zf.toString());
-							boolean currOk = true;
-							if (last != null) {
-								if (last.getStartDate() == zf.getStartDate()) {
-									if (zf.getStatus() < last.getStatus()) {
-										currOk = false;// 上一條已完成
-									} else {
-										// 兩條狀態一致
-										try {
-											double dl = Double
-													.valueOf(last.getAmt().replaceAll("亿元", "").replaceAll(" ", ""));
-											double dc = Double
-													.valueOf(zf.getAmt().replaceAll("亿元", "").replaceAll(" ", ""));
-											if (dc < dl) {
-												currOk = false;// 金额最大的准: 上一條金额较大
-											}
-										} catch (Exception e) {
-										}
-									}
-								}
-							}
-							if (currOk) {
-								last = zf;
-								zengFaDao.save(zf);
-							}
+
+							zengFaDao.save(zf);
 
 						} catch (Exception e) {
 //							log.error(h.asXml());
@@ -377,6 +356,6 @@ public class ThsBonusSpider {
 		List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
 		List<FenHong> fhl = new LinkedList<FenHong>();
 		List<BonusHist> bhl = new LinkedList<BonusHist>();
-		ts.dofetchBonusInner(DateUtil.getTodayIntYYYYMMDD(), "002405", zfdl, zfsl, fhl, bhl);
+		ts.dofetchBonusInner(DateUtil.getTodayIntYYYYMMDD(), "002282", zfdl, zfsl, fhl, bhl);
 	}
 }

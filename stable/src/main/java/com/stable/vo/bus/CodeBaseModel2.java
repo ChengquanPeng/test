@@ -66,24 +66,23 @@ public class CodeBaseModel2 extends EsBase {
 
 	// 已完成的增发
 	@Field(type = FieldType.Integer)
+	private int zflastOkDate = 0;// 最后已实施时间
+	@Field(type = FieldType.Integer)
 	private int zfself = 0;// 自己人在增发
 	@Field(type = FieldType.Integer)
 	private int zfbuy = 0;// 是否购买资产
 	@Field(type = FieldType.Integer)
-	private int susZfBoss; // 增发博弈
+	private int susZfBoss = 0; // 增发博弈(自己人+未涨)
 	@Field(type = FieldType.Integer)
-	private int zflastOkDate = 0;// 最后已实施时间
-	
+	private int gsz = 0;// 三年高送转
+
 	// 增发解禁
-	@Field(type = FieldType.Integer)
-	private int zfjj; // 增发解禁
-	@Field(type = FieldType.Integer)
-	private int zfjjup; // 增发未大涨
 	@Field(type = FieldType.Integer)
 	private int zfjjDate = 0;// 最近的增发解禁时间
 	@Field(type = FieldType.Integer)
-	private int gsz = 0;// 三年高送转
-	
+	private int zfjj = 0; // 增发解禁
+	@Field(type = FieldType.Integer)
+	private int zfjjup = 0; // 增发未大涨
 
 	// 交易面
 	@Field(type = FieldType.Integer)
