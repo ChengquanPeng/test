@@ -32,6 +32,7 @@ trtd{
 	<div>同花顺概念：<span th:each="cp: ${concepts}"><span th:text="${cp.conceptName}"></span>&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
 	<div>分红概况:<span th:text="${fhgk}"></span></div>
 	<div>增发概况:<span th:text="${zfgk}"></span></div>
+	<div><font color='#FF00FF'>是否发布了定增？查询近一年公告。</font></div>
 	<div><font color='#FF00FF'>曾用名(金字招牌)</font>:<span th:text="${codeBasic.oldName}"></span></div>
 	<div><font color='#FF00FF'>违规处理</font>:<a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/event.html'}">--></a></div>
 	<div><font color='#FF00FF'>财务亏损:</font> 是否主营业务亏损？</div>
