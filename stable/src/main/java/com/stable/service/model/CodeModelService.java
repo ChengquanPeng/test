@@ -358,7 +358,7 @@ public class CodeModelService {
 		}
 		if (fbi.getFundNotOk() == 1) {
 			newOne.setBaseYellow(1);
-			sb1.append("资金紧张:流动负债高于货币资金").append(Constant.HTML_LINE);
+			sb2.append("资金紧张:流动负债高于货币资金").append(Constant.HTML_LINE);
 		}
 		if (fbi.getFundNotOk2() == 1) {
 			newOne.setBaseYellow(1);
