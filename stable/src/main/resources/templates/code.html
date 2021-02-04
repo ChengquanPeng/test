@@ -69,6 +69,8 @@ trtd{
 		&nbsp;&nbsp;&nbsp;&nbsp;持股明细&nbsp;&nbsp;<a target="_blank" th:href="@{'http://www.igoodstock.com/goodstock/hsgt_hold?sc='+${code}}">（goodstock）</a>
 		&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'http://data.eastmoney.com/hsgtcg/StockHdStatistics.aspx?stock='+${code}}">（东方财富）</a>
 	</div>
+	<div><a target="_blank" th:href="@{'http://data.eastmoney.com/dzjy/detail/'+${code}+'.html'}">大宗交易记录</a></div>
+	<br/>
 	<div>最近增发记录:<span th:text="${lastZf}"></span></div>
 	<div>1年前到现在解禁记录:</span>
 		<table border='1' cellspacing='0' cellpadding='0'>
