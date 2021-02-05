@@ -203,6 +203,12 @@ public class EastmoneySpider {
 						fbi.setMll(CurrencyUitl.roundHalfUp(mll));
 					} catch (Exception e) {
 					}
+					try {
+						Double zcfzl = data.getDouble("zcfzl");
+						fbi.setZcfzl(zcfzl);
+					} catch (Exception e) {
+					}
+
 					list.add(fbi);
 				}
 				if (list.size() > 0) {

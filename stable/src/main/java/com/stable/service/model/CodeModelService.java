@@ -364,6 +364,14 @@ public class CodeModelService {
 			newOne.setBaseYellow(1);
 			sb2.append("资金紧张:应付利息较高").append(Constant.HTML_LINE);
 		}
+		// 资产负债率
+		if (fbi.getZcfzl() >= 150) {
+			newOne.setBaseRed(1);
+			sb1.append("资产负债率超高:").append(fbi.getZcfzl()).append("%").append(Constant.HTML_LINE);
+		} else if (fbi.getZcfzl() >= 100) {
+			newOne.setBaseYellow(1);
+			sb2.append("资产负债率高:").append(fbi.getZcfzl()).append("%").append(Constant.HTML_LINE);
+		}
 		// 现金流
 		if (fbi.getMgjyxjl() <= 0) {
 			newOne.setBaseYellow(1);
