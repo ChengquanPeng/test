@@ -43,5 +43,12 @@ public class FinanceBaseInfoHangye extends EsBase {
 	private double yszk;// 应收账款占比
 
 	@Field(type = FieldType.Integer)
+	private int xjlRank;// 现金流排名
+	@Field(type = FieldType.Double)
+	private double xjlAvg;// 现金流平均
+	@Field(type = FieldType.Double)
+	private double xjl;// 现金流
+
+	@Field(type = FieldType.Integer)
 	private int updateDate;
 }

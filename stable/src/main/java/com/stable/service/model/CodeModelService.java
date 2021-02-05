@@ -366,15 +366,15 @@ public class CodeModelService {
 		}
 		// 现金流
 		if (fbi.getMgjyxjl() <= 0) {
+			newOne.setBaseYellow(1);
+			sb2.append("现金流负数").append(Constant.HTML_LINE);
 			if (fbi.getKfjlr() > 0 && fbi.getMgjyxjl() < 0) {
-				newOne.setBaseRed(1);
-				sb1.append("疑似暴雷风险:现金流负数,扣非净利为正,靠融资在运转").append(Constant.HTML_LINE);
-			} else {
 				newOne.setBaseYellow(1);
-				sb2.append("现金流负数").append(Constant.HTML_LINE);
+				sb2.append("疑似暴雷风险:现金流负数,扣非净利为正").append(Constant.HTML_LINE).append(",是否靠融资在运转?,多年财务现金流连续负数?")
+						.append(Constant.HTML_LINE);
 			}
 		}
-		// 毛利，应收账款
+		// 行业对比:毛利，应收账款，现金流
 		FinanceBaseInfoHangye hy = this.getFinanceBaseInfoHangye(code, fbi.getYear(), fbi.getQuarter());
 		if (hy != null) {
 			if (hy.getMll() > 0 && hy.getMll() > hy.getMllAvg() && hy.getMllRank() <= 5) {
@@ -385,6 +385,11 @@ public class CodeModelService {
 			if (hy.getYszk() > 0 && hy.getYszk() > hy.getYszkAvg() && hy.getYszkRank() <= 5) {
 				newOne.setBaseYellow(1);
 				sb2.append("(需人工复核)应收账款:" + hy.getYszk() + " 行业平均:" + hy.getYszkAvg() + ", 行业排名:" + hy.getYszkRank())
+						.append(Constant.HTML_LINE);
+			}
+			if (hy.getXjl() < 0 && hy.getXjl() < hy.getXjlAvg() && hy.getXjlRank() <= 5) {
+				newOne.setBaseYellow(1);
+				sb2.append("(需人工复核)现金流:" + hy.getXjl() + " 行业平均:" + hy.getXjlAvg() + ", 行业排名:" + hy.getXjlRank())
 						.append(Constant.HTML_LINE);
 			}
 		}

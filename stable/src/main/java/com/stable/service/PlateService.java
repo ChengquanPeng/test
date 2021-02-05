@@ -173,19 +173,6 @@ public class PlateService {
 		}
 	}
 
-	// 先正序排序
-	public static void sort11(List<PlateResp> rl) {
-		Collections.sort(rl, new Comparator<PlateResp>() {
-			@Override
-			public int compare(PlateResp o1, PlateResp o2) {
-				if (o1.getT1() == o2.getT1()) {
-					return 0;
-				}
-				return o1.getT1() - o2.getT1() > 0 ? -1 : 1;
-			}
-		});
-	}
-
 	// 在把负数放最后
 	public static void sort12(List<PlateResp> rl) {
 		Collections.sort(rl, new Comparator<PlateResp>() {
@@ -195,6 +182,19 @@ public class PlateService {
 					return 1;
 				}
 				return -1;
+			}
+		});
+	}
+
+	// 先正序排序
+	public static void sort11(List<PlateResp> rl) {
+		Collections.sort(rl, new Comparator<PlateResp>() {
+			@Override
+			public int compare(PlateResp o1, PlateResp o2) {
+				if (o1.getT1() == o2.getT1()) {
+					return 0;
+				}
+				return o1.getT1() - o2.getT1() > 0 ? -1 : 1;
 			}
 		});
 	}

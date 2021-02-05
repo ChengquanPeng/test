@@ -591,13 +591,16 @@ public class FinanceService {
 
 	private void executeHangyeExt1(int updateDate, int year, int quarter, List<CodeConcept> allcode,
 			List<FinanceBaseInfoHangye> hys, String hyid, String hyName) {
-		List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
 		double mll = 0.0;
 		int mllc = 0;
-
-		List<FinanceBaseInfo> yszkl = new LinkedList<FinanceBaseInfo>();
 		double yszk = 0.0;
 		int yszkc = 0;
+		double xjl = 0.0;
+		int xjlc = 0;
+		List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
+		List<FinanceBaseInfo> yszkl = new LinkedList<FinanceBaseInfo>();
+		List<FinanceBaseInfo> xjll = new LinkedList<FinanceBaseInfo>();
+
 		for (CodeConcept c : allcode) {
 			log.info("板块：{},code={}", c.getConceptName(), c.getCode());
 			FinanceBaseInfo f = this.getLastFinaceReport(c.getCode(), year, quarter);
@@ -612,6 +615,9 @@ public class FinanceService {
 					yszk += f.getAccountrecRatio();
 					yszkc++;
 				}
+				xjl += f.getMgjyxjl();
+				xjlc++;
+				xjll.add(f);
 			}
 		}
 		// ====毛利率====start====
@@ -662,22 +668,37 @@ public class FinanceService {
 			avgtAr = CurrencyUitl.roundHalfUp(yszk / (double) yszkc);
 		}
 		arSort(yszkl);
-		for (CodeConcept c : allcode) {
+		for (CodeConcept c : allcode) {// 初始化
 			String key = c.getCode() + year + "" + quarter;
 			FinanceBaseInfoHangye hy = cache.get(key);
 			hy.setYszk(0);
 			hy.setYszkRank(9999);
 			hy.setYszkAvg(avgtAr);
 		}
-		for (int i = 0; i < yszkl.size(); i++) {
-			FinanceBaseInfo r = rl.get(i);
+		for (int i = 0; i < yszkl.size(); i++) {// 填充有数据的
+			FinanceBaseInfo r = yszkl.get(i);
 			String key = r.getCode() + year + "" + quarter;
 			FinanceBaseInfoHangye hy = cache.get(key);
 			hy.setYszk(r.getAccountrecRatio());
 			hy.setYszkRank((i + 1));
 		}
-
 		// ====应收占款比率====end====
+
+		// ====现金流====start====
+		double avgxjl = 0.0;
+		if (xjlc > 0) {
+			avgxjl = CurrencyUitl.roundHalfUp(xjl / (double) xjlc);
+		}
+		xjlSort(xjll);
+		for (int i = 0; i < xjll.size(); i++) {
+			FinanceBaseInfo r = xjll.get(i);
+			String key = r.getCode() + year + "" + quarter;
+			FinanceBaseInfoHangye hy = cache.get(key);
+			hy.setXjl(r.getMgjyxjl());
+			hy.setXjlRank((i + 1));
+			hy.setXjlAvg(avgxjl);
+		}
+		// ====现金流====end====
 	}
 
 	// 毛利率倒序排序
@@ -702,6 +723,19 @@ public class FinanceService {
 					return 0;
 				}
 				return o2.getAccountrecRatio() - o1.getAccountrecRatio() > 0 ? 1 : -1;
+			}
+		});
+	}
+
+	// 现金流(低的排前）
+	private void xjlSort(List<FinanceBaseInfo> rl) {
+		Collections.sort(rl, new Comparator<FinanceBaseInfo>() {
+			@Override
+			public int compare(FinanceBaseInfo o1, FinanceBaseInfo o2) {
+				if (o1.getMgjyxjl() == o2.getMgjyxjl()) {
+					return 0;
+				}
+				return o2.getMgjyxjl() - o1.getMgjyxjl() > 0 ? -1 : 1;
 			}
 		});
 	}
