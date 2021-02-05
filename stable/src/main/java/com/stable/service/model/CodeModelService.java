@@ -364,6 +364,16 @@ public class CodeModelService {
 			newOne.setBaseYellow(1);
 			sb2.append("资金紧张:应付利息较高").append(Constant.HTML_LINE);
 		}
+		// 现金流
+		if (fbi.getMgjyxjl() <= 0) {
+			if (fbi.getKfjlr() > 0 && fbi.getMgjyxjl() < 0) {
+				newOne.setBaseRed(1);
+				sb1.append("疑似暴雷风险:现金流负数,扣非净利为正,靠融资在运转").append(Constant.HTML_LINE);
+			} else {
+				newOne.setBaseYellow(1);
+				sb2.append("现金流负数").append(Constant.HTML_LINE);
+			}
+		}
 		// 毛利，应收账款
 		FinanceBaseInfoHangye hy = this.getFinanceBaseInfoHangye(code, fbi.getYear(), fbi.getQuarter());
 		if (hy != null) {
@@ -386,9 +396,16 @@ public class CodeModelService {
 		}
 		// 库存占比
 		if (fbi.getInventoryRatio() > 0.45) {// 超过50%
-			newOne.setBaseYellow(1);
-			sb2.append("库存占比超45%:" + CurrencyUitl.roundHalfUp((fbi.getInventoryRatio() * 100)) + "%")
-					.append(Constant.HTML_LINE);
+			if (!s.getThsIndustry().contains("地产")) {// 房地产忽悠占比
+				double d = CurrencyUitl.roundHalfUp((fbi.getInventoryRatio() * 100));
+				if (d > 90.0) {
+					newOne.setBaseRed(1);
+					sb1.append("库存净资产占比超:" + d + "%").append(Constant.HTML_LINE);
+				} else {
+					newOne.setBaseYellow(1);
+					sb2.append("库存净资产占比超:" + d + "%").append(Constant.HTML_LINE);
+				}
+			}
 		}
 		// 股东增持（一年）
 		AnnouncementHist zengchi = announcementService.getLastRecordType(code, AnnMentParamUtil.zhengchi.getType(),

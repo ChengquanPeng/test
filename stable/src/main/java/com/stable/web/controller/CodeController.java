@@ -157,6 +157,13 @@ public class CodeController {
 		} catch (Exception e) {
 			model.addAttribute("accountrec", "--");
 		}
+		try {
+			double d = CurrencyUitl.roundHalfUp((fbi.getInventoryRatio() * 100));
+			model.addAttribute("inventoryRatio", d + "%");
+		} catch (Exception e) {
+			model.addAttribute("inventoryRatio", "--");
+		}
+
 		model.addAttribute("finance", fbi);
 
 		// 是否有增发
