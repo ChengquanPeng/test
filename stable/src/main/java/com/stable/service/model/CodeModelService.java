@@ -378,7 +378,7 @@ public class CodeModelService {
 			sb2.append("现金流负数").append(Constant.HTML_LINE);
 			if (fbi.getKfjlr() > 0 && fbi.getMgjyxjl() < 0) {
 				newOne.setBaseYellow(1);
-				sb2.append("疑似暴雷风险:现金流负数,扣非净利为正").append(Constant.HTML_LINE).append(",是否靠融资在运转?,多年财务现金流连续负数?")
+				sb2.append("疑似暴雷风险:现金流负数,扣非净利为正").append(Constant.HTML_LINE).append("靠融资在运转?多年现金流连续负数?")
 						.append(Constant.HTML_LINE);
 			}
 		}
