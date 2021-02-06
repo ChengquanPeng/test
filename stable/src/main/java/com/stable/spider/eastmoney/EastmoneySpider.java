@@ -212,7 +212,7 @@ public class EastmoneySpider {
 					list.add(fbi);
 				}
 				if (list.size() > 0) {
-					Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getZcfzb(code);
+					Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getZcfzb(code, type);
 					for (FinanceBaseInfo fbi : list) {
 						FinanceZcfzb zcfzb = m.get(fbi.getId());
 						if (zcfzb != null) {

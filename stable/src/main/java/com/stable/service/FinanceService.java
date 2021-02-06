@@ -151,7 +151,7 @@ public class FinanceService {
 	 */
 	public boolean spiderFinaceHistoryInfoFromStart(String code) {
 		List<FinanceBaseInfo> list = new LinkedList<FinanceBaseInfo>();
-		if (spiderFinaceHistoryInfo(code, list)) {
+		if (spiderFinaceHistoryInfo(code, list, 1)) {
 			if (list.size() > 0) {
 				esFinanceBaseInfoDao.saveAll(list);
 			}
@@ -160,9 +160,17 @@ public class FinanceService {
 		return false;
 	}
 
-	private boolean spiderFinaceHistoryInfo(String code, List<FinanceBaseInfo> list) {
+	private boolean spiderFinaceHistoryInfo(String code, List<FinanceBaseInfo> list, int type) {
 		try {
-
+			if (type == 1) {
+				List<FinanceBaseInfo> datas = EastmoneySpider.getNewFinanceAnalysis(code, 1);
+				if (datas == null || datas.size() <= 0) {
+					log.warn("未从东方财富抓取到Finane记录(年报),code={}", code);
+					WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录(年报),code=" + code);
+				} else {
+					list.addAll(datas);
+				}
+			}
 			List<FinanceBaseInfo> datas = EastmoneySpider.getNewFinanceAnalysis(code, 0);// 0按报告期、1=年报
 			if (datas == null || datas.size() <= 0) {
 				log.warn("未从东方财富抓取到Finane记录,code={}", code);
@@ -502,7 +510,7 @@ public class FinanceService {
 		TasksWorker.getInstance().getService()
 				.submit(new MyCallable(RunLogBizTypeEnum.FINACE_HISTORY, RunCycleEnum.WEEK) {
 					public Object mycall() {
-						fetchFinances();
+						fetchFinances(1);
 						return null;
 					}
 				});
@@ -531,7 +539,7 @@ public class FinanceService {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				fetchFinances();
+				fetchFinances(0);
 				rtl.setDfFinOk(true);
 			}
 		}).start();
@@ -740,7 +748,7 @@ public class FinanceService {
 		});
 	}
 
-	public void fetchFinances() {
+	public void fetchFinances(int type) {
 		log.info("同步财务报告报告[started]");
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
 		int total = list.size();
@@ -748,7 +756,7 @@ public class FinanceService {
 		List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
 		int cnt = 0;
 		for (StockBaseInfo s : list) {
-			if (spiderFinaceHistoryInfo(s.getCode(), rl)) {
+			if (spiderFinaceHistoryInfo(s.getCode(), rl, type)) {
 				cnt++;
 			}
 			if (rl.size() > 1000) {

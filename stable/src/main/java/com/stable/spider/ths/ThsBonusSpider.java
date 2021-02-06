@@ -50,7 +50,7 @@ public class ThsBonusSpider {
 	private StockBasicService stockBasicService;
 	private String urlbase = "http://basic.10jqka.com.cn/%s/bonus.html?t=%s";
 	private String host = "http://basic.10jqka.com.cn/";
-	private Map<String, String> header;
+	private Map<String, String> header = new HashMap<String, String>();
 
 	@Autowired
 	private FenHongDao fenHongDao;
@@ -92,9 +92,6 @@ public class ThsBonusSpider {
 
 	private void dofetchInner() {
 		try {
-			if (header == null) {
-				header = new HashMap<String, String>();
-			}
 			int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
 			List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
 			List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
@@ -355,7 +352,6 @@ public class ThsBonusSpider {
 	public static void main(String[] args) {
 		ThsBonusSpider ts = new ThsBonusSpider();
 		ts.htmlunitSpider = new HtmlunitSpider();
-		ts.header = new HashMap<String, String>();
 		List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
 		List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
 		List<FenHong> fhl = new LinkedList<FenHong>();

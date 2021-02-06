@@ -40,10 +40,10 @@ public class EastmoneyZcfzbSpider {
 	 * @param type 0按报告期、1=年报
 	 * @return http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=1&code=SZ300750
 	 */
-	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/zcfzbAjax?companyType=4&reportDateType=0&reportType=2&endDate=&code=%s&t=%s";
+	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/zcfzbAjax?companyType=4&reportDateType=%s&reportType=2&endDate=&code=%s&t=%s";
 
 	@SuppressWarnings("deprecation")
-	public static Map<String, FinanceZcfzb> getZcfzb(String code) {
+	public static Map<String, FinanceZcfzb> getZcfzb(String code, int type) {
 
 		int trytime = 0;
 		do {
@@ -51,7 +51,7 @@ public class EastmoneyZcfzbSpider {
 			try {
 				ThreadsUtil.sleepRandomSecBetween1And2();
 				Map<String, FinanceZcfzb> m = new HashMap<String, FinanceZcfzb>();
-				String url = String.format(financeUrl, formatCode2(code), System.currentTimeMillis());
+				String url = String.format(financeUrl, type, formatCode2(code), System.currentTimeMillis());
 				String result = HttpUtil.doGet2(url);
 				result = result.substring(1, result.length() - 1);
 				result = StringUtils.replaceAll(result, "\\\\", "");
@@ -137,7 +137,7 @@ public class EastmoneyZcfzbSpider {
 	// "http://data.eastmoney.com/bbsj/yjyg/%s.html";
 
 	public static void main(String[] args) {
-		Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getZcfzb("300027");
+		Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getZcfzb("300027", 1);
 		for (String key : m.keySet()) {
 			System.err.println(m.get(key));
 		}
