@@ -212,9 +212,14 @@ public class EastmoneySpider {
 					list.add(fbi);
 				}
 				if (list.size() > 0) {
-					Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getZcfzb(code, type);
+					Map<String, FinanceZcfzb> fzb = EastmoneyZcfzbSpider.getZcfzb(code, type);
+					Map<String, FinanceZcfzb> llb = EastmoneyZcfzbSpider.getXjllb(code, type);
 					for (FinanceBaseInfo fbi : list) {
-						FinanceZcfzb zcfzb = m.get(fbi.getId());
+						FinanceZcfzb llba = llb.get(fbi.getId());
+						if (llba != null) {
+							fbi.setJyxjlce(llba.getGoodWill());// yxjlce:经营现金流量差额， GoodWill:零时字段
+						}
+						FinanceZcfzb zcfzb = fzb.get(fbi.getId());
 						if (zcfzb != null) {
 							// 基础数
 							fbi.setGoodWill(zcfzb.getGoodWill());

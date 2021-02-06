@@ -44,7 +44,6 @@ public class EastmoneyZcfzbSpider {
 
 	@SuppressWarnings("deprecation")
 	public static Map<String, FinanceZcfzb> getZcfzb(String code, int type) {
-
 		int trytime = 0;
 		do {
 			trytime++;
@@ -137,10 +136,59 @@ public class EastmoneyZcfzbSpider {
 	// "http://data.eastmoney.com/bbsj/yjyg/%s.html";
 
 	public static void main(String[] args) {
-		Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getZcfzb("300027", 1);
+		Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getXjllb("002405", 1);
 		for (String key : m.keySet()) {
 			System.err.println(m.get(key));
 		}
 //		System.err.println(CurrencyUitl.roundHalfUp( 5.9548019532E8/4.56697178601E9));
+	}
+
+	/**
+	 * 财务信息
+	 * 
+	 * @param code 6位普通股票代码
+	 * @param type 0按报告期、1=年报
+	 * @return http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=1&code=SZ300750
+	 */
+	static final String financeUrlxjl = "http://f10.eastmoney.com/NewFinanceAnalysis/xjllbAjax?companyType=4&reportDateType=%s&reportType=1&endDate=&code=%s";
+
+	@SuppressWarnings("deprecation")
+	public static Map<String, FinanceZcfzb> getXjllb(String code, int type) {
+		int trytime = 0;
+		do {
+			trytime++;
+			try {
+				ThreadsUtil.sleepRandomSecBetween1And2();
+				Map<String, FinanceZcfzb> m = new HashMap<String, FinanceZcfzb>();
+				String url = String.format(financeUrlxjl, type, formatCode2(code), System.currentTimeMillis());
+				String result = HttpUtil.doGet2(url);
+				result = result.substring(1, result.length() - 1);
+				result = StringUtils.replaceAll(result, "\\\\", "");
+				JSONArray objects = JSON.parseArray(result);
+				for (int i = 0; i < objects.size(); i++) {
+					JSONObject data = objects.getJSONObject(i);
+					FinanceZcfzb fzb = new FinanceZcfzb();
+					fzb.setCode(code);
+					String date = data.get("REPORTDATE").toString(); // 年报日期
+					fzb.setDate(DateUtil.formatYYYYMMDDReturnInt(DateUtil.parseDate3(date)));
+					fzb.setId(code + "_" + fzb.getDate());
+
+					try {
+						fzb.setGoodWill(Double.valueOf(data.getString("NETOPERATECASHFLOW")));// 商誉
+					} catch (Exception e) {
+					}
+//					System.err.println(fzb + " " + CurrencyUitl.covertToString(fzb.getSumAsset()) + " "
+//							+ CurrencyUitl.covertToString(fzb.getSumDebt()) + " "
+//							+ CurrencyUitl.covertToString(fzb.getNetAsset()));
+					m.put(fzb.getId(), fzb);
+				}
+				return m;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+		} while (trytime <= 10);
+		WxPushUtil.pushSystem1("东方财富-财务(现金流量表)-抓包出错,code=" + code);
+		return new HashMap<String, FinanceZcfzb>();
 	}
 }

@@ -163,6 +163,18 @@ public class CodeController {
 		} catch (Exception e) {
 			model.addAttribute("inventoryRatio", "--");
 		}
+		try {
+			double d = CurrencyUitl.roundHalfUp((fbi.getAccountrecRatio() * 100));
+			model.addAttribute("accountrecRatio", d + "%");
+		} catch (Exception e) {
+			model.addAttribute("accountrecRatio", "--");
+		}
+		try {
+			double d = CurrencyUitl.roundHalfUp((fbi.getGoodWillRatioNetAsset() * 100));
+			model.addAttribute("goodWillRatioNetAsset", d + "%");
+		} catch (Exception e) {
+			model.addAttribute("goodWillRatioNetAsset", "--");
+		}
 
 		model.addAttribute("finance", fbi);
 

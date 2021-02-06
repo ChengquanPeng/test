@@ -168,6 +168,7 @@ public class FinanceService {
 					log.warn("未从东方财富抓取到Finane记录(年报),code={}", code);
 					WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录(年报),code=" + code);
 				} else {
+					log.warn("年度-从东方财富抓取到Finane记录{}条,code={}", datas.size(), code);
 					list.addAll(datas);
 				}
 			}
@@ -177,7 +178,7 @@ public class FinanceService {
 				WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录,code=" + code);
 				return false;
 			}
-			log.warn("从东方财富抓取到Finane记录{}条,code={}", datas.size(), code);
+			log.warn("季度-从东方财富抓取到Finane记录{}条,code={}", datas.size(), code);
 			list.addAll(datas);
 		} finally {
 			ThreadsUtil.sleepRandomSecBetween1And5();
