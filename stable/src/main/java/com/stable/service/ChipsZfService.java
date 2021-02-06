@@ -221,7 +221,7 @@ public class ChipsZfService {
 						log.info("done:{}", zf.getCode());
 					}
 				} catch (Exception e) {
-					ErrorLogFileUitl.writeError(e, "ZengFaExt 增发是否购买资产出错", "", "");
+					ErrorLogFileUitl.writeError(e, "ZengFaExt 增发是否购买资产出错", zf.getCode(), "");
 				}
 			}
 		} else {
@@ -267,6 +267,9 @@ public class ChipsZfService {
 		z.setCompType(stockBasicService.getCode(code).getCompnayType());
 		if (zfEndDate >= 20210125) {
 			DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code, zfEndDate);
+			if (d == null) {
+				d = daliyBasicHistroyService.queryLastest(code, 0);
+			}
 			z.setCircMarketVal(d.getCircMarketVal());
 			z.setTotalMarketVal(d.getTotalMarketVal());
 		} else {
