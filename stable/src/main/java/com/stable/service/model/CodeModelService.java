@@ -213,8 +213,6 @@ public class CodeModelService {
 		saveHist(newOne, oldOne, listHist);// 历史
 	}
 
-	private double chkdouble_2 = 150.0;// 10跌倒5.x
-
 	private void sortModel(CodeBaseModel2 newOne) {
 		String code = newOne.getCode();
 		int tradeDate = newOne.getDate();
@@ -258,12 +256,10 @@ public class CodeModelService {
 		if (d > 0) {
 			newOne.setZfjjDate(d);
 			newOne.setZfjj(1);
+			// 至少N年未大涨
+			newOne.setZfjjup(priceLifeService.noupYear(code));
 		}
-		// 至少2年未大涨
-		if (LinePrice.priceCheckForMid(daliyTradeHistroyService, code, newOne.getDate(), chkdouble_2,
-				EsQueryPageUtil.queryPage500)) {
-			newOne.setZfjjup(1);
-		}
+
 	}
 
 	private void zfBoss(CodeBaseModel2 newOne) {
@@ -838,7 +834,7 @@ public class CodeModelService {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfjj", 1));
 		}
 		if (zfjjup == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("zfjjup", 1));
+			bqb.must(QueryBuilders.rangeQuery("zfjjup").gte(1));
 		}
 //		<option value="3">资产收益率ttm</option>
 //		<option value="4">资产收益率报告期</option>
@@ -970,11 +966,11 @@ public class CodeModelService {
 		if (dh.getZfjj() == 1) {
 			resp.setZfjjInfo("有增发解禁(" + dh.getZfjjDate() + ")");
 		}
-		if (dh.getZfjjup() == 1) {
+		if (dh.getZfjjup() > 0) {
 			if (dh.getZfjj() == 1) {
-				resp.setZfjjInfo(resp.getZfjjInfo() + "<br/>2年未大涨");
+				resp.setZfjjInfo(resp.getZfjjInfo() + "<br/>" + dh.getZfjjup() + "年未大涨");
 			} else {
-				resp.setZfjjInfo("2年未大涨");
+				resp.setZfjjInfo(dh.getZfjjup() + "年未大涨");
 			}
 		}
 //		resp.setIncomeShow(dh.getCurrIncomeTbzz() + "%");

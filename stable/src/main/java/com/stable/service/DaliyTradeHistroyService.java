@@ -95,11 +95,7 @@ public class DaliyTradeHistroyService {
 						String today = DateUtil.getTodayYYYYMMDD();
 						redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
 						log.info("日期前复权：{}重新获取记录", code);
-						String json = redisUtil.get(code);
-						if (StringUtils.isNotBlank(json)) {
-							StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-							spiderDaliyTradeHistoryInfoFromIPOCenter(code, base.getList_date(), today, 0);
-						}
+						spiderDaliyTradeHistoryInfoFromIPOCenter(code, today, 0);
 						return null;
 					}
 				});
@@ -152,12 +148,10 @@ public class DaliyTradeHistroyService {
 					// 第一次上市或者除权
 					StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
 					if (base != null) {
-						yyyymmdd = base.getList_date();
-						String datep = yyyymmdd;
 						TasksWorker2nd.add(new TasksWorker2ndRunnable() {
 							public void running() {
 								try {
-									spiderDaliyTradeHistoryInfoFromIPOCenter(d.getCode(), datep, today, 0);
+									spiderDaliyTradeHistoryInfoFromIPOCenter(d.getCode(), today, 0);
 								} finally {
 									cnt.countDown();
 								}
@@ -225,14 +219,13 @@ public class DaliyTradeHistroyService {
 	}
 
 	// 路由，优先eastmoney
-	private boolean spiderDaliyTradeHistoryInfoFromIPOCenter(String code, String startDate, String today,
-			int fortimes) {
+	public boolean spiderDaliyTradeHistoryInfoFromIPOCenter(String code, String today, int fortimes) {
 		priceLifeService.removePriceLifeCache(code);
 		if (spiderDaliyTradeHistoryInfoFromIPOEastMoney(code, fortimes)) {
 			redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 			return true;
 		}
-		throw new RuntimeException(code + " " + startDate + " " + today + " 日交易获取前复权错误");
+		throw new RuntimeException(code + " " + today + " 日交易获取前复权错误");
 //		if (spiderDaliyTradeHistoryInfoFromIPOTushare(code, startDate, today, fortimes)) {
 //			redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 //			return true;
@@ -241,12 +234,11 @@ public class DaliyTradeHistroyService {
 	}
 
 	// 路由，优先eastmoney
-	private boolean spiderDaliyTradeHistoryInfoFromIPOCenterNofq(String code, String startDate, String today,
-			int fortimes) {
+	private boolean spiderDaliyTradeHistoryInfoFromIPOCenterNofq(String code, int fortimes) {
 		if (spiderDaliyTradeHistoryInfoFromIPOEastMoneyNofq(code, fortimes)) {
 			return true;
 		}
-		throw new RuntimeException(code + " " + startDate + " " + today + " 日交易获取No复权错误");
+		throw new RuntimeException(code + " 日交易获取No复权错误");
 //		if (spiderDaliyTradeHistoryInfoFromIPOTushareNofq(code, startDate, today, fortimes)) {
 //			return true;
 //		}
@@ -472,12 +464,8 @@ public class DaliyTradeHistroyService {
 					queryPage.getPageSize(), s.toString());
 //			new Exception().printStackTrace();
 			String today = DateUtil.getTodayYYYYMMDD();
-			String json = redisUtil.get(code);
-			if (StringUtils.isNotBlank(json)) {
-				StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-				if (spiderDaliyTradeHistoryInfoFromIPOCenter(code, base.getList_date(), today, 0)) {
-					return queryListByCode(code, startDate, endDate, queryPage, s);
-				}
+			if (spiderDaliyTradeHistoryInfoFromIPOCenter(code, today, 0)) {
+				return queryListByCode(code, startDate, endDate, queryPage, s);
 			}
 			return null;
 		}
@@ -553,13 +541,8 @@ public class DaliyTradeHistroyService {
 			log.info("Nofq code={},startDate={},endDate={},queryPage={},SortOrder={}", code, startDate, endDate,
 					queryPage.getPageSize(), s.toString());
 			new Exception().printStackTrace();
-			String today = DateUtil.getTodayYYYYMMDD();
-			String json = redisUtil.get(code);
-			if (StringUtils.isNotBlank(json)) {
-				StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-				if (spiderDaliyTradeHistoryInfoFromIPOCenterNofq(code, base.getList_date(), today, 0)) {
-					return queryListByCodeNofq(code, startDate, endDate, queryPage, s);
-				}
+			if (spiderDaliyTradeHistoryInfoFromIPOCenterNofq(code, 0)) {
+				return queryListByCodeNofq(code, startDate, endDate, queryPage, s);
 			}
 			return null;
 		}
@@ -698,4 +681,23 @@ public class DaliyTradeHistroyService {
 		return queryLastNofq(code, 0);
 	}
 
+	public TradeHistInfoDaliy queryLastfq(String code, int date) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		if (date > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("date", date));
+		}
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+		try {
+			return esTradeHistInfoDaliyDao.search(sq).getContent().get(0);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public TradeHistInfoDaliy queryLastfq(String code) {
+		return queryLastfq(code, 0);
+	}
 }

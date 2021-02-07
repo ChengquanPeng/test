@@ -1,5 +1,6 @@
 package com.stable.service;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
+import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.vo.bus.PriceLife;
 import com.stable.vo.bus.TradeHistInfoDaliy;
@@ -33,6 +35,8 @@ public class PriceLifeService {
 	private RedisUtil redisUtil;
 	@Autowired
 	private EsTradeHistInfoDaliyDao tradeHistDaliy;
+	@Autowired
+	private DaliyTradeHistroyService daliyTradeHistroyService;
 
 	/**
 	 * 实时更新价格
@@ -68,21 +72,21 @@ public class PriceLifeService {
 //			WxPushUtil.pushSystem1("PriceLifeService.checkAndSetPrice 601001 日志断点");
 //		}
 
-		int index = priceIndex(pl, code, hist.getClosed());
+		int index = priceIndex(pl, hist.getClosed());
 		redisUtil.set(RedisConstant.RDS_PRICE_LIFE_INDEX_ + code, index + "");
 	}
 
 	// 收盘价介于最高价和最低价的index
 	public int priceIndex(String code, double price) {
 		PriceLife pl = getPriceLife(code);
-		return priceIndex(pl, code, price);
+		return priceIndex(pl, price);
 	}
 
 	public int getLastIndex(String code) {
 		return Integer.valueOf(redisUtil.get(RedisConstant.RDS_PRICE_LIFE_INDEX_ + code, "100"));
 	}
 
-	private int priceIndex(PriceLife pl, String code, double price) {
+	private int priceIndex(PriceLife pl, double price) {
 		if (pl == null || price <= pl.getLowest()) {
 			return 0;
 		} else if (price >= pl.getHighest()) {
@@ -115,7 +119,7 @@ public class PriceLifeService {
 		}
 		pl.setHighest(ti.getHigh());
 		pl.setHighDate(ti.getDate());
-		TradeHistInfoDaliy t2 = getlowest(code);
+		TradeHistInfoDaliy t2 = getlowest(code, 0, 0);
 		pl.setLowDate(t2.getDate());
 		pl.setLowest(t2.getLow());
 
@@ -158,16 +162,50 @@ public class PriceLifeService {
 	/**
 	 * 获取历史最低价格
 	 */
-	private TradeHistInfoDaliy getlowest(String code) {
+	private TradeHistInfoDaliy getlowest(String code, int start, int end) {
 		Pageable pageable = PageRequest.of(0, 1);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		if (start > 0) {
+			bqb.must(QueryBuilders.rangeQuery("date").gte(start).lte(end));
+		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("low").order(SortOrder.ASC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 
 		Page<TradeHistInfoDaliy> page = tradeHistDaliy.search(sq);
-		return page.getContent().get(0);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		return null;
+	}
+
+	public int noupYear(String code) {
+		PriceLife pl = getPriceLife(code);
+		double lastPrice = daliyTradeHistroyService.queryLastfq(code).getClosed();
+		Date now = new Date();
+		int days = -365;
+		int year = 0;
+		int end = DateUtil.formatYYYYMMDDReturnInt(now);
+		for (int i = 1; i < 10; i++) {
+			int start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, i * days));
+			TradeHistInfoDaliy td = getlowest(code, start, end);
+			if (td != null) {// 停牌太久
+				if (td.getLow() <= lastPrice) {
+					pl.setLowest(td.getLow());
+					int index = priceIndex(pl, lastPrice);
+					if (index <= 25) {
+						year = i;
+					} else {
+						break;
+					}
+				} else {
+					break;
+				}
+			}
+			end = start;
+		}
+		return year;
 	}
 }
