@@ -394,8 +394,8 @@ public class CodeModelService {
 		// 应收账款
 		if (fbi.getAccountrecRatio() > 0) {
 			if (fbi.getAccountrecRatio() >= 50.0) {
-				newOne.setBaseRed(1);
-				sb1.append("应收账款超高:").append(fbi.getAccountrecRatio()).append("%").append(Constant.HTML_LINE);
+				newOne.setBaseYellow(1);
+				sb2.append("应收账款超高:").append(fbi.getAccountrecRatio()).append("%").append(Constant.HTML_LINE);
 			} else if (fbi.getAccountrecRatio() >= 25.0) {
 				newOne.setBaseYellow(1);
 				sb2.append("应收账款高:").append(fbi.getAccountrecRatio()).append("%").append(Constant.HTML_LINE);
