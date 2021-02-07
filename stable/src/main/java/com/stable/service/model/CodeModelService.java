@@ -381,26 +381,18 @@ public class CodeModelService {
 				newOne.setBaseYellow(1);
 				sb2.append("经营现金流入不敷出").append(Constant.HTML_LINE);
 			}
-
-			//
-			List<FinanceBaseInfo> yearRpts = financeService.getFinacesReportByYearRpt(code, EsQueryPageUtil.queryPage8);
-			if (yearRpts != null) {
-				int c = 0;
-				for (FinanceBaseInfo ft : yearRpts) {
-					if (fbi.getKfjlr() > 0 && (ft.getJyxjlce() < 0 || fbi.getMgjyxjl() <= 0)) {
-						c++;
-					} else {
-						break;
-					}
-				}
-				if (c > 0) {
-					newOne.setBaseRed(1);
-					sb1.append("暴雷风险:连续").append(c).append("年,现金流为负却有扣非净利").append(Constant.HTML_LINE).append("靠融资在运转?")
-							.append(Constant.HTML_LINE);
-				}
-			} else {
-				ErrorLogFileUitl.writeError(new RuntimeException("无年度财务数据"), code, "", "年报现金流计算错误");
+		}
+		// 连续季度
+		int c = 0;
+		for (FinanceBaseInfo ft : fbis) {
+			if (fbi.getKfjlr() > 0 && (ft.getJyxjlce() < 0 || fbi.getMgjyxjl() < 0)) {
+				c++;
 			}
+		}
+		if (c > (fbis.size() / 2)) {
+			newOne.setBaseRed(1);
+			sb1.append("暴雷风险:").append(c).append("季度经常现金流为负却有扣非净利").append(Constant.HTML_LINE).append("靠融资在运转?")
+					.append(Constant.HTML_LINE);
 		}
 
 		// 应收账款
