@@ -59,7 +59,7 @@ trtd{
 	<div>加权净资产收益率:<span th:text="${finance.jqjzcsyl}"></span></div>
 	<div>净资产收益率(单季度|ttm):<span th:text="${finance.syldjd}"></span>|<span th:text="${codedetail.sylttm}"></span></div>
 	<div>资产负债率:<span th:text="${finance.zcfzl}"></span>%</div>
-	<div>每股经营现金流:<span th:text="${finance.mgjyxjl}"></span></div>
+	<div>经营现金流差额|每股经营现金流:<span th:text="${jyxjlce}"></span>|<span th:text="${finance.mgjyxjl}"></span> -->现金流代表该是企业能不能活下来</div>
 	<div>毛利率:<span th:text="${finance.mll}"></span></div>
 	<br/>
 	<br/>------------------------------------------------------------<br/>
@@ -105,5 +105,15 @@ trtd{
 	<div>应付账款:欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算</div>
 	<div>应收账款:是否自己贴钱在干活，同行业比较</div>
 	<div>应收款占比:&应收款占比：应收账款/流动资产合计</div>
+	<div>
+		<pre>
+			现金流:
+			经济形势不好的时候，现金流特别值得特别关注；而经济形势好的时候，利润又会更加值得关注。
+			当企业遭遇巨大风险的时候，关注风险是第一位的，现金流更重要；当企业经营活动的风险在相对可控的范围内时，利润就显得更为重要
+			最关心的应该是企业能不能活下来，在这个时候现金流自然就显得格外重要。
+			有些公司在寡头垄断的行业里，经营风险在相对可控的范围内，在这种情况下，首先应该关注的当然是收益和利润。
+			分红率和分红历史很重要，可以检验净利润和现金流质量
+		</pre>
+	</div>
 </body>
 </html>

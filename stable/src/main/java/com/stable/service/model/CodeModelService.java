@@ -373,13 +373,44 @@ public class CodeModelService {
 			sb2.append("资产负债率高:").append(fbi.getZcfzl()).append("%").append(Constant.HTML_LINE);
 		}
 		// 现金流
-		if (fbi.getMgjyxjl() <= 0) {
-			newOne.setBaseYellow(1);
-			sb2.append("现金流负数").append(Constant.HTML_LINE);
-			if (fbi.getKfjlr() > 0 && fbi.getMgjyxjl() < 0) {
+		if (fbi.getJyxjlce() <= 0 && fbi.getMgjyxjl() <= 0) {
+			if (fbi.getKfjlr() > 0) {
 				newOne.setBaseYellow(1);
-				sb2.append("疑似暴雷风险:现金流负数,扣非净利为正").append(Constant.HTML_LINE).append("靠融资在运转?多年现金流连续负数?")
-						.append(Constant.HTML_LINE);
+				sb2.append("经营现金流入不敷出,净利存疑").append(Constant.HTML_LINE);
+			} else {
+				newOne.setBaseYellow(1);
+				sb2.append("经营现金流入不敷出").append(Constant.HTML_LINE);
+			}
+
+			//
+			List<FinanceBaseInfo> yearRpts = financeService.getFinacesReportByYearRpt(code, EsQueryPageUtil.queryPage8);
+			if (yearRpts != null) {
+				int c = 0;
+				for (FinanceBaseInfo ft : yearRpts) {
+					if (fbi.getKfjlr() > 0 && (ft.getJyxjlce() < 0 || fbi.getMgjyxjl() <= 0)) {
+						c++;
+					} else {
+						break;
+					}
+				}
+				if (c > 0) {
+					newOne.setBaseRed(1);
+					sb1.append("暴雷风险:连续").append(c).append("年,现金流为负却有扣非净利").append(Constant.HTML_LINE).append("靠融资在运转?")
+							.append(Constant.HTML_LINE);
+				}
+			} else {
+				ErrorLogFileUitl.writeError(new RuntimeException("无年度财务数据"), code, "", "年报现金流计算错误");
+			}
+		}
+
+		// 应收账款
+		if (fbi.getAccountrecRatio() > 0) {
+			if (fbi.getAccountrecRatio() >= 50.0) {
+				newOne.setBaseRed(1);
+				sb1.append("应收账款超高:").append(fbi.getAccountrecRatio()).append("%").append(Constant.HTML_LINE);
+			} else if (fbi.getAccountrecRatio() >= 25.0) {
+				newOne.setBaseYellow(1);
+				sb2.append("应收账款高:").append(fbi.getAccountrecRatio()).append("%").append(Constant.HTML_LINE);
 			}
 		}
 		// 行业对比:毛利，应收账款，现金流
@@ -479,8 +510,14 @@ public class CodeModelService {
 		chkZf(newOne);
 		if (newOne.getZfStatus() == 1 || newOne.getZfStatus() == 2) {
 			newOne.setBaseBlue(1);
-			sb3.append("增发进度" + (s.getCompnayType() == 1 ? "(国资)" : "") + ":" + newOne.getZfStatusDesc())
-					.append(Constant.HTML_LINE);
+			if (newOne.getZfStatus() == 1) {
+				sb3.append("<font color='red'>");
+			} else {
+				sb3.append("<font color='green'>");
+			}
+			sb3.append("增发进度" + (s.getCompnayType() == 1 ? "(国资)" : "") + ":" + newOne.getZfStatusDesc());
+			sb3.append("</font>");
+			sb3.append(Constant.HTML_LINE);
 		}
 		// 股东减持（一年）
 		AnnouncementHist jianchi = announcementService.getLastRecordType(code, AnnMentParamUtil.jianchi.getType(),

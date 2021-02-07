@@ -172,6 +172,11 @@ public class CodeController {
 		} catch (Exception e) {
 			model.addAttribute("goodWillRatioNetAsset", "--");
 		}
+		try {
+			model.addAttribute("jyxjlce", CurrencyUitl.covertToString(fbi.getJyxjlce()));
+		} catch (Exception e) {
+			model.addAttribute("jyxjlce", "--");
+		}
 
 		model.addAttribute("finance", fbi);
 

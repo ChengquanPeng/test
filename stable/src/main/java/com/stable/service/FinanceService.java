@@ -270,7 +270,25 @@ public class FinanceService {
 		if (page != null && !page.isEmpty()) {
 			return page.getContent();
 		}
-		log.info("no last report fince date={}", date);
+		log.info("no last report fince code={}", code);
+		return null;
+	}
+
+	public List<FinanceBaseInfo> getFinacesReportByYearRpt(String code, EsQueryPageReq queryPage8) {
+		Pageable pageable = PageRequest.of(queryPage8.getPageNum(), queryPage8.getPageSize());
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.matchPhraseQuery("quarter", 4));// 报告期
+		FieldSortBuilder sort = SortBuilders.fieldSort("year").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		log.info("no last report fince year code={}", code);
 		return null;
 	}
 
