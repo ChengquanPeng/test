@@ -217,28 +217,28 @@ public class TushareSpider {
 		}
 	}
 
-	/**
-	 * 质押统计
-	 * 
-	 * @param ts_code  ts代码
-	 * @param end_date 结束日期 (格式：YYYYMMDD)
-	 */
-	private final String pledge_stat_fields = "ts_code,end_date,pledge_count,unrest_pledge,rest_pledge,total_share,pledge_ratio";
-
-	public JSONArray getPledgeStatList(String ts_code, String end_date) {
-		try {
-			JSONObject json = new JSONObject();
-			json.put("api_name", "pledge_stat");
-			json.put("params", JSON.parse("{'ts_code':'" + ts_code + "','end_date':'" + end_date + "'}"));
-			json.put("fields", pledge_stat_fields);
-
-			String result = post(json);
-			JSONObject datas = JSON.parseObject(result);
-			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
-			return items;
-		} finally {
-			ThreadsUtil.tuShareSleepRandom();
-		}
-	}
+//	/**
+//	 * 质押统计
+//	 * 
+//	 * @param ts_code  ts代码
+//	 * @param end_date 结束日期 (格式：YYYYMMDD)
+//	 */
+//	private final String pledge_stat_fields = "ts_code,end_date,pledge_count,unrest_pledge,rest_pledge,total_share,pledge_ratio";
+//
+//	public JSONArray getPledgeStatList(String ts_code, String end_date) {
+//		try {
+//			JSONObject json = new JSONObject();
+//			json.put("api_name", "pledge_stat");
+//			json.put("params", JSON.parse("{'ts_code':'" + ts_code + "','end_date':'" + end_date + "'}"));
+//			json.put("fields", pledge_stat_fields);
+//
+//			String result = post(json);
+//			JSONObject datas = JSON.parseObject(result);
+//			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
+//			return items;
+//		} finally {
+//			ThreadsUtil.tuShareSleepRandom();
+//		}
+//	}
 
 }

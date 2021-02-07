@@ -22,4 +22,6 @@ public class Constant {
 	public static final String NUM_ER = "2";
 	public static final String SYMBOL_ = "-";
 	public static final String HTML_LINE = "<br/>";
+	
+	public static final int END_DATE = 20100101;
 }

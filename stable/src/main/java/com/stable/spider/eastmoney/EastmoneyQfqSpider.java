@@ -6,6 +6,7 @@ import java.util.List;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.stable.constant.Constant;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
@@ -60,7 +61,9 @@ public class EastmoneyQfqSpider {
 				TradeHistInfoDaliyNofq td = new TradeHistInfoDaliyNofq(code, data);
 				td.setYesterdayPrice(yesterdayprice);
 				yesterdayprice = td.getClosed();
-				list.add(td);
+				if (td.getDate() >= Constant.END_DATE) {
+					list.add(td);
+				}
 			}
 			log.info("{} ->从东方财富获取日交易数据(不复权)记录条数:{}", code, list.size());
 			return list;
@@ -91,8 +94,10 @@ public class EastmoneyQfqSpider {
 				TradeHistInfoDaliy td = new TradeHistInfoDaliy(code, data);
 				td.setYesterdayPrice(yesterdayprice);
 				yesterdayprice = td.getClosed();
-				td.setQfqDate(qfqDate);
-				list.add(td);
+				if (td.getDate() >= Constant.END_DATE) {
+					td.setQfqDate(qfqDate);
+					list.add(td);
+				}
 			}
 			log.info("{} ->从东方财富获取日交易数据(前复权)数据记录条数:{}", code, list.size());
 			return list;
