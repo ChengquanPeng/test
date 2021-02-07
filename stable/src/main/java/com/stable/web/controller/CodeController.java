@@ -158,20 +158,17 @@ public class CodeController {
 			model.addAttribute("accountrec", "--");
 		}
 		try {
-			double d = CurrencyUitl.roundHalfUp((fbi.getInventoryRatio() * 100));
-			model.addAttribute("inventoryRatio", d + "%");
+			model.addAttribute("inventoryRatio", fbi.getInventoryRatio() + "%");
 		} catch (Exception e) {
 			model.addAttribute("inventoryRatio", "--");
 		}
 		try {
-			double d = CurrencyUitl.roundHalfUp((fbi.getAccountrecRatio() * 100));
-			model.addAttribute("accountrecRatio", d + "%");
+			model.addAttribute("accountrecRatio", fbi.getAccountrecRatio() + "%");
 		} catch (Exception e) {
 			model.addAttribute("accountrecRatio", "--");
 		}
 		try {
-			double d = CurrencyUitl.roundHalfUp((fbi.getGoodWillRatioNetAsset() * 100));
-			model.addAttribute("goodWillRatioNetAsset", d + "%");
+			model.addAttribute("goodWillRatioNetAsset", fbi.getGoodWillRatioNetAsset() + "%");
 		} catch (Exception e) {
 			model.addAttribute("goodWillRatioNetAsset", "--");
 		}

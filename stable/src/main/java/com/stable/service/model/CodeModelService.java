@@ -402,15 +402,14 @@ public class CodeModelService {
 			}
 		}
 		// 商誉占比
-		if (fbi.getGoodWillRatioNetAsset() > 0.15) {// 超过15%
+		if (fbi.getGoodWillRatioNetAsset() > 15.0) {// 超过15%
 			newOne.setBaseYellow(1);
-			sb2.append("商誉占比超15%:" + CurrencyUitl.roundHalfUp((fbi.getGoodWillRatioNetAsset() * 100)) + "%")
-					.append(Constant.HTML_LINE);
+			sb2.append("商誉占比超:" + fbi.getGoodWillRatioNetAsset() + "%").append(Constant.HTML_LINE);
 		}
 		// 库存占比
-		if (fbi.getInventoryRatio() > 0.45) {// 超过50%
+		if (fbi.getInventoryRatio() > 45.0) {// 超过50%
 			if (!s.getThsIndustry().contains("地产")) {// 房地产忽悠占比
-				double d = CurrencyUitl.roundHalfUp((fbi.getInventoryRatio() * 100));
+				double d = fbi.getInventoryRatio();
 				if (d > 90.0) {
 					newOne.setBaseRed(1);
 					sb1.append("库存净资产占比超:" + d + "%").append(Constant.HTML_LINE);

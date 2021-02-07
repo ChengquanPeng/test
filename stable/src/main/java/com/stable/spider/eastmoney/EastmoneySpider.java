@@ -242,12 +242,12 @@ public class EastmoneySpider {
 								// 商誉-净资产
 								if (fbi.getGoodWill() > 0) {
 									fbi.setGoodWillRatioNetAsset(
-											CurrencyUitl.roundHalfUp(fbi.getGoodWill() / fbi.getNetAsset()));
+											CurrencyUitl.roundHalfUpWhithPercent(fbi.getGoodWill() / fbi.getNetAsset()));
 								}
 								// 库存对应的净资产的占比
 								if (fbi.getInventory() > 0) {
 									fbi.setInventoryRatio(
-											CurrencyUitl.roundHalfUp(fbi.getInventory() / fbi.getNetAsset()));
+											CurrencyUitl.roundHalfUpWhithPercent(fbi.getInventory() / fbi.getNetAsset()));
 								}
 							}
 							// 资金紧张: 货币资金-流动负债, <=0
@@ -277,7 +277,7 @@ public class EastmoneySpider {
 							// 应收账款-占比 同行业
 							if (fbi.getSumLasset() > 0) {
 								fbi.setAccountrecRatio(
-										CurrencyUitl.roundHalfUp(fbi.getAccountrec() / fbi.getSumLasset()));
+										CurrencyUitl.roundHalfUpWhithPercent(fbi.getAccountrec() / fbi.getSumLasset()));
 							}
 						}
 					}
