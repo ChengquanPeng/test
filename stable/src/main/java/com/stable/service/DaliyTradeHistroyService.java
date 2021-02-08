@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.stable.constant.Constant;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.CodeModeType;
 import com.stable.enums.RunCycleEnum;
@@ -110,7 +111,6 @@ public class DaliyTradeHistroyService {
 	}
 
 	public synchronized int spiderTodayDaliyTrade(boolean isJob, String today) {
-
 		try {
 			JSONArray array = tushareSpider.getStockDaliyTrade(null, today, null, null);
 			if (array == null || array.size() <= 0) {
@@ -699,5 +699,57 @@ public class DaliyTradeHistroyService {
 
 	public TradeHistInfoDaliy queryLastfq(String code) {
 		return queryLastfq(code, 0);
+	}
+
+	public void deleteData() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Pageable pageable = PageRequest.of(0, 2000);
+				log.info("删除过期数据");
+				// 复权
+				while (true) {
+					BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+					bqb.must(QueryBuilders.rangeQuery("date").lte(Constant.END_DATE));
+					NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+					SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+					try {
+						List<TradeHistInfoDaliy> list = esTradeHistInfoDaliyDao.search(sq).getContent();
+						if (list != null && list.size() > 0) {
+							esTradeHistInfoDaliyDao.deleteAll(list);
+							log.info("TradeHistInfoDaliy size:" + list.size());
+						} else {
+							log.info("TradeHistInfoDaliy null");
+							break;
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+						break;
+					}
+				}
+				log.info("复权 TradeHistInfoDaliy done");
+				// 不复权
+				while (true) {
+					BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+					bqb.must(QueryBuilders.rangeQuery("date").lte(Constant.END_DATE));
+					NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+					SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+					try {
+						List<TradeHistInfoDaliyNofq> list = esTradeHistInfoDaliyNofqDao.search(sq).getContent();
+						if (list != null && list.size() > 0) {
+							esTradeHistInfoDaliyNofqDao.deleteAll(list);
+							log.info("TradeHistInfoDaliyNofq size:" + list.size());
+						} else {
+							log.info("TradeHistInfoDaliyNofq null");
+							break;
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+						break;
+					}
+				}
+				log.info("不复权 TradeHistInfoDaliyNofq done");
+			}
+		}).start();
 	}
 }

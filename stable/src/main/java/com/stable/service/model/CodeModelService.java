@@ -168,6 +168,7 @@ public class CodeModelService {
 //		middleSortV1Service.start(tradeDate, list);
 		log.info("CodeModel v2 模型执行完成");
 		WxPushUtil.pushSystem1("CODE-MODEL V2-" + tradeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listHist.size());
+		daliyTradeHistroyService.deleteData();
 	}
 
 	private void getBaseAnalyse(StockBaseInfo s, int tradeDate, CodeBaseModel2 oldOne, List<CodeBaseModel2> listLast,
