@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.stable.constant.Constant;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.CodeModeType;
 import com.stable.enums.RunCycleEnum;
@@ -135,8 +134,10 @@ public class DaliyTradeHistroyService {
 				list.add(d);
 				TradeHistInfoDaliyNofq nofq = new TradeHistInfoDaliyNofq(array.getJSONArray(i));
 				listNofq.add(nofq);
-				DaliyBasicInfo2 dalyb = new DaliyBasicInfo2(array.getJSONArray(i));
-				daliybasicList.add(dalyb);
+				if (isJob) {
+					DaliyBasicInfo2 dalyb = new DaliyBasicInfo2(array.getJSONArray(i));
+					daliybasicList.add(dalyb);
+				}
 
 				// 2.是否需要更新缺失记录
 
@@ -151,7 +152,10 @@ public class DaliyTradeHistroyService {
 						TasksWorker2nd.add(new TasksWorker2ndRunnable() {
 							public void running() {
 								try {
-									spiderDaliyTradeHistoryInfoFromIPOCenter(d.getCode(), today, 0);
+									spiderDaliyTradeHistoryInfoFromIPOCenter(code, today, 0);
+									spiderDaliyTradeHistoryInfoFromIPOCenterNofq(code, 0);
+								} catch (Exception e) {
+									WxPushUtil.pushSystem1("重新获取前后复权出错：" + code);
 								} finally {
 									cnt.countDown();
 								}
@@ -701,55 +705,55 @@ public class DaliyTradeHistroyService {
 		return queryLastfq(code, 0);
 	}
 
-	public void deleteData() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				Pageable pageable = PageRequest.of(0, 2000);
-				log.info("删除过期数据");
-				// 复权
-				while (true) {
-					BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-					bqb.must(QueryBuilders.rangeQuery("date").lte(Constant.END_DATE));
-					NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-					SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
-					try {
-						List<TradeHistInfoDaliy> list = esTradeHistInfoDaliyDao.search(sq).getContent();
-						if (list != null && list.size() > 0) {
-							esTradeHistInfoDaliyDao.deleteAll(list);
-							log.info("TradeHistInfoDaliy size:" + list.size());
-						} else {
-							log.info("TradeHistInfoDaliy null");
-							break;
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-						break;
-					}
-				}
-				log.info("复权 TradeHistInfoDaliy done");
-				// 不复权
-				while (true) {
-					BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-					bqb.must(QueryBuilders.rangeQuery("date").lte(Constant.END_DATE));
-					NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-					SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
-					try {
-						List<TradeHistInfoDaliyNofq> list = esTradeHistInfoDaliyNofqDao.search(sq).getContent();
-						if (list != null && list.size() > 0) {
-							esTradeHistInfoDaliyNofqDao.deleteAll(list);
-							log.info("TradeHistInfoDaliyNofq size:" + list.size());
-						} else {
-							log.info("TradeHistInfoDaliyNofq null");
-							break;
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-						break;
-					}
-				}
-				log.info("不复权 TradeHistInfoDaliyNofq done");
-			}
-		}).start();
-	}
+//	public void deleteData() {
+//		new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				Pageable pageable = PageRequest.of(0, 2000);
+//				log.info("删除过期数据");
+//				// 复权
+//				while (true) {
+//					BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+//					bqb.must(QueryBuilders.rangeQuery("date").lte(Constant.END_DATE));
+//					NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+//					SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+//					try {
+//						List<TradeHistInfoDaliy> list = esTradeHistInfoDaliyDao.search(sq).getContent();
+//						if (list != null && list.size() > 0) {
+//							esTradeHistInfoDaliyDao.deleteAll(list);
+//							log.info("TradeHistInfoDaliy size:" + list.size());
+//						} else {
+//							log.info("TradeHistInfoDaliy null");
+//							break;
+//						}
+//					} catch (Exception e) {
+//						e.printStackTrace();
+//						break;
+//					}
+//				}
+//				log.info("复权 TradeHistInfoDaliy done");
+//				// 不复权
+//				while (true) {
+//					BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+//					bqb.must(QueryBuilders.rangeQuery("date").lte(Constant.END_DATE));
+//					NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+//					SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+//					try {
+//						List<TradeHistInfoDaliyNofq> list = esTradeHistInfoDaliyNofqDao.search(sq).getContent();
+//						if (list != null && list.size() > 0) {
+//							esTradeHistInfoDaliyNofqDao.deleteAll(list);
+//							log.info("TradeHistInfoDaliyNofq size:" + list.size());
+//						} else {
+//							log.info("TradeHistInfoDaliyNofq null");
+//							break;
+//						}
+//					} catch (Exception e) {
+//						e.printStackTrace();
+//						break;
+//					}
+//				}
+//				log.info("不复权 TradeHistInfoDaliyNofq done");
+//			}
+//		}).start();
+//	}
 }
