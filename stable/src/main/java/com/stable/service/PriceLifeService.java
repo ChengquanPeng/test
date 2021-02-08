@@ -208,7 +208,7 @@ public class PriceLifeService {
 			}
 			end = start;
 		}
-		if (year >= 1) {
+		if (year >= 2) {
 			return year;
 		}
 		// 第二种情况:横盘
@@ -228,7 +228,10 @@ public class PriceLifeService {
 				break;
 			}
 		}
-		return year;
+		if (year >= 2) {
+			return year;
+		}
+		return 0;
 	}
 
 //	@PostConstruct

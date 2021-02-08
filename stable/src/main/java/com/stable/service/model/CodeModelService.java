@@ -327,55 +327,57 @@ public class CodeModelService {
 		newOne.setCurrYear(fbi.getYear());
 		newOne.setCurrQuarter(fbi.getQuarter());
 
+		int red = 1;
 		// ======== 红色警告 ========
 		StringBuffer sb1 = new StringBuffer();
 		// 退市风险
 		if (fa.profitDown2Year() == 1) {
 			newOne.setBaseRed(1);
-			sb1.append("退市风险:2年利润亏损").append(Constant.HTML_LINE);
+			sb1.append(red++).append(".退市风险:2年利润亏损").append(Constant.HTML_LINE);
 		}
 		if (fbi.getBustUpRisks() == 1) {
 			newOne.setBaseRed(1);
-			sb1.append("破产风险:负债超高-净资产低于应付账款").append(Constant.HTML_LINE);
+			sb1.append(red++).append(".破产风险:负债超高-净资产低于应付账款").append(Constant.HTML_LINE);
 		}
 		if (fbi.getNetAsset() < 0) {
 			newOne.setBaseRed(1);
-			sb1.append("净资产小于0").append(Constant.HTML_LINE);
+			sb1.append(red++).append(".净资产小于0").append(Constant.HTML_LINE);
 		}
 		if (fbi.getSumLasset() < fbi.getSumDebtLd()) {
 			newOne.setBaseRed(1);
-			sb1.append("流动资产小于流动负债").append(Constant.HTML_LINE);
+			sb1.append(red++).append(".流动资产小于流动负债").append(Constant.HTML_LINE);
 		}
+		int yellow = 1;
 		// ======== 黄色警告 ========
 		StringBuffer sb2 = new StringBuffer();
 		if (fa.getCurrYear().getGsjlr() < 0) {
 			newOne.setBaseYellow(1);
-			sb2.append("年报亏损").append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".年报亏损").append(Constant.HTML_LINE);
 		}
 		if (fbi.getFundNotOk() == 1) {
 			newOne.setBaseYellow(1);
-			sb2.append("资金紧张:流动负债高于货币资金").append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".资金紧张:流动负债高于货币资金").append(Constant.HTML_LINE);
 		}
 		if (fbi.getFundNotOk2() == 1) {
 			newOne.setBaseYellow(1);
-			sb2.append("资金紧张:应付利息较高").append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".资金紧张:应付利息较高").append(Constant.HTML_LINE);
 		}
 		// 资产负债率
 		if (fbi.getZcfzl() >= 150) {
 			newOne.setBaseRed(1);
-			sb1.append("资产负债率超高:").append(fbi.getZcfzl()).append("%").append(Constant.HTML_LINE);
+			sb1.append(red++).append(".资产负债率超高:").append(fbi.getZcfzl()).append("%").append(Constant.HTML_LINE);
 		} else if (fbi.getZcfzl() >= 100) {
 			newOne.setBaseYellow(1);
-			sb2.append("资产负债率高:").append(fbi.getZcfzl()).append("%").append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".资产负债率高:").append(fbi.getZcfzl()).append("%").append(Constant.HTML_LINE);
 		}
 		// 现金流
 		if (fbi.getJyxjlce() <= 0 && fbi.getMgjyxjl() <= 0) {
 			if (fbi.getKfjlr() > 0) {
 				newOne.setBaseYellow(1);
-				sb2.append("经营现金流入不敷出,净利存疑").append(Constant.HTML_LINE);
+				sb2.append(yellow++).append(".经营现金流入不敷出,净利存疑").append(Constant.HTML_LINE);
 			} else {
 				newOne.setBaseYellow(1);
-				sb2.append("经营现金流入不敷出").append(Constant.HTML_LINE);
+				sb2.append(yellow++).append(".经营现金流入不敷出").append(Constant.HTML_LINE);
 			}
 		}
 		// 连续季度
@@ -387,18 +389,20 @@ public class CodeModelService {
 		}
 		if (c > (fbis.size() / 2)) {
 			newOne.setBaseRed(1);
-			sb1.append("暴雷风险:").append(c).append("季度经常现金流为负却有扣非净利").append(Constant.HTML_LINE).append("靠融资在运转?")
-					.append(Constant.HTML_LINE);
+			sb1.append(red++).append(".暴雷风险:").append(c).append("季度经常现金流为负却有扣非净利").append(Constant.HTML_LINE)
+					.append("靠融资在运转?").append(Constant.HTML_LINE);
 		}
 
 		// 应收账款
 		if (fbi.getAccountrecRatio() > 0) {
 			if (fbi.getAccountrecRatio() >= 50.0) {
 				newOne.setBaseYellow(1);
-				sb2.append("应收账款超高:").append(fbi.getAccountrecRatio()).append("%").append(Constant.HTML_LINE);
+				sb2.append(yellow++).append(".应收账款超高:").append(fbi.getAccountrecRatio()).append("%")
+						.append(Constant.HTML_LINE);
 			} else if (fbi.getAccountrecRatio() >= 25.0) {
 				newOne.setBaseYellow(1);
-				sb2.append("应收账款高:").append(fbi.getAccountrecRatio()).append("%").append(Constant.HTML_LINE);
+				sb2.append(yellow++).append(".应收账款高:").append(fbi.getAccountrecRatio()).append("%")
+						.append(Constant.HTML_LINE);
 			}
 		}
 		// 行业对比:毛利，应收账款，现金流
@@ -406,24 +410,27 @@ public class CodeModelService {
 		if (hy != null) {
 			if (hy.getMll() > 0 && hy.getMll() > hy.getMllAvg() && hy.getMllRank() <= 5) {
 				newOne.setBaseYellow(1);
-				sb2.append("(需人工复核)毛利率:" + hy.getMll() + " 行业平均:" + hy.getMllAvg() + ", 行业排名:" + hy.getMllRank())
+				sb2.append(yellow++)
+						.append(".(需人工复核)毛利率:" + hy.getMll() + " 行业平均:" + hy.getMllAvg() + ", 行业排名:" + hy.getMllRank())
 						.append(Constant.HTML_LINE);
 			}
 			if (hy.getYszk() > 0 && hy.getYszk() > hy.getYszkAvg() && hy.getYszkRank() <= 5) {
 				newOne.setBaseYellow(1);
-				sb2.append("(需人工复核)应收账款:" + hy.getYszk() + " 行业平均:" + hy.getYszkAvg() + ", 行业排名:" + hy.getYszkRank())
+				sb2.append(yellow++).append(
+						".(需人工复核)应收账款:" + hy.getYszk() + " 行业平均:" + hy.getYszkAvg() + ", 行业排名:" + hy.getYszkRank())
 						.append(Constant.HTML_LINE);
 			}
 			if (hy.getXjl() < 0 && hy.getXjl() < hy.getXjlAvg() && hy.getXjlRank() <= 5) {
 				newOne.setBaseYellow(1);
-				sb2.append("(需人工复核)现金流:" + hy.getXjl() + " 行业平均:" + hy.getXjlAvg() + ", 行业排名:" + hy.getXjlRank())
+				sb2.append(yellow++)
+						.append(".(需人工复核)现金流:" + hy.getXjl() + " 行业平均:" + hy.getXjlAvg() + ", 行业排名:" + hy.getXjlRank())
 						.append(Constant.HTML_LINE);
 			}
 		}
 		// 商誉占比
 		if (fbi.getGoodWillRatioNetAsset() > 15.0) {// 超过15%
 			newOne.setBaseYellow(1);
-			sb2.append("商誉占比超:" + fbi.getGoodWillRatioNetAsset() + "%").append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".商誉占比超:" + fbi.getGoodWillRatioNetAsset() + "%").append(Constant.HTML_LINE);
 		}
 		// 库存占比
 		if (fbi.getInventoryRatio() > 45.0) {// 超过50%
@@ -431,10 +438,10 @@ public class CodeModelService {
 				double d = fbi.getInventoryRatio();
 				if (d > 90.0) {
 					newOne.setBaseRed(1);
-					sb1.append("库存净资产占比超:" + d + "%").append(Constant.HTML_LINE);
+					sb1.append(red++).append(".库存净资产占比超:" + d + "%").append(Constant.HTML_LINE);
 				} else {
 					newOne.setBaseYellow(1);
-					sb2.append("库存净资产占比超:" + d + "%").append(Constant.HTML_LINE);
+					sb2.append(yellow++).append(".库存净资产占比超:" + d + "%").append(Constant.HTML_LINE);
 				}
 			}
 		}
@@ -443,26 +450,26 @@ public class CodeModelService {
 				oneYearAgo);
 		if (zengchi != null) {
 			newOne.setBaseYellow(1);
-			sb2.append("股东/高管增持:" + (zengchi.getRptDate())).append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".股东/高管增持:" + (zengchi.getRptDate())).append(Constant.HTML_LINE);
 
 		}
 		// 高质押
 		ZhiYa zy = zhiYaService.getZhiYa(code);
 		if (zy.getHasRisk() == 1) {//
 			newOne.setBaseYellow(1);
-			sb2.append("高质押风险:" + zy.getDetail()).append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".高质押风险:" + zy.getDetail()).append(Constant.HTML_LINE);
 		}
 		// 分红
 		FenHong fh = chipsService.getFenHong(code);
 		if (fh.getTimes() <= 0) {
 			newOne.setBaseYellow(1);
-			sb2.append("无分红记录").append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".无分红记录").append(Constant.HTML_LINE);
 		}
 		// 限售股解禁（2年：前后1年）
 		List<Jiejin> jj = chipsService.getBf2yearJiejin(code);
 		if (jj != null) {
 			newOne.setBaseYellow(1);
-			sb2.append("前后1年解禁记录数:" + jj.size()).append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".前后1年解禁记录数:" + jj.size()).append(Constant.HTML_LINE);
 		}
 
 		// ======== 蓝色警告 && 绿色 ========
@@ -512,14 +519,14 @@ public class CodeModelService {
 				oneYearAgo);
 		if (jianchi != null) {
 			newOne.setBaseBlue(1);
-			sb2.append("股东/高管减持:" + (jianchi.getRptDate())).append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".股东/高管减持:" + (jianchi.getRptDate())).append(Constant.HTML_LINE);
 		}
 		// 回购（半年内）
 		AnnouncementHist huigou = announcementService.getLastRecordType(code, AnnMentParamUtil.huigou.getType(),
 				halfYearAgo);
 		if (huigou != null) {
 			newOne.setBaseBlue(1);
-			sb2.append("回购:" + (huigou.getRptDate())).append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".回购:" + (huigou.getRptDate())).append(Constant.HTML_LINE);
 		}
 
 		if (newOne.getBaseRed() > 0) {
@@ -757,7 +764,12 @@ public class CodeModelService {
 			int zfbuy, int zfjj, int zfjjup, int zfself) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+			String[] cc = code.split(",");
+			if (cc.length == 1) {
+				bqb.must(QueryBuilders.matchPhraseQuery("code", cc[0]));
+			} else {
+				bqb.must(QueryBuilders.termsQuery("code", cc));
+			}
 		} else if (StringUtils.isNotBlank(aliasCode)) {
 			List<String> list = conceptService.listCodesByAliasCode(aliasCode);
 			if (list != null) {
