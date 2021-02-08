@@ -382,7 +382,12 @@ public class CodeModelService {
 		}
 		// 连续季度
 		int c = 0;
+		int fort = 0;// 最近2年
 		for (FinanceBaseInfo ft : fbis) {
+			fort++;
+			if (fort > 8) {
+				break;
+			}
 			if (fbi.getKfjlr() > 0 && (ft.getJyxjlce() < 0 || fbi.getMgjyxjl() < 0)) {
 				c++;
 			}
