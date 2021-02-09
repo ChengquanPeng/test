@@ -110,6 +110,8 @@ public class CodeBaseModel2 extends EsBase {
 	// 股东人数
 	@Field(type = FieldType.Double)
 	private double holderNum;
+	@Field(type = FieldType.Integer)
+	private int holderDate;
 
 	@Transient
 	public String getKeyString() {

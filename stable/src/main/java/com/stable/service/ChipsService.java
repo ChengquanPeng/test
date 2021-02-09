@@ -25,6 +25,7 @@ import com.stable.es.dao.base.ForeignCapitalSumDao;
 import com.stable.es.dao.base.JiejinDao;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
+import com.stable.vo.HolderAnalyse;
 import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.ForeignCapitalSum;
 import com.stable.vo.bus.HolderNum;
@@ -199,10 +200,17 @@ public class ChipsService {
 	/**
 	 * 股东人数增长/减少分析（幅度+次数）
 	 */
-	public double holderNumAnalyse(String code) {
+	public HolderAnalyse holderNumAnalyse(String code) {
+		HolderAnalyse r = new HolderAnalyse();
+		r.setAnaRes(holderNumAnalyse(code, r));
+		return r;
+	}
+
+	private double holderNumAnalyse(String code, HolderAnalyse r) {
 		try {
 			List<HolderNum> list = getHolderNumList45(code);
 			if (list != null && list.size() > 1) {
+				r.setDate(list.get(0).getDate());
 				int c2 = 0;
 				int lowNum = 0;
 				// 增加

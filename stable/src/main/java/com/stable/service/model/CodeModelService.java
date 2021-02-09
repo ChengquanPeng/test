@@ -53,6 +53,7 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.AnnMentParamUtil;
+import com.stable.vo.HolderAnalyse;
 import com.stable.vo.bus.AnnouncementHist;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.CodeBaseModelHist;
@@ -198,7 +199,9 @@ public class CodeModelService {
 		findBigBoss2(code, newOne, fbis);// 基本面-疑似大牛
 		susWhiteHorses(code, newOne);// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
 		zfBoss(newOne);// 已完成的增发，更多细节
-		newOne.setHolderNum(chipsService.holderNumAnalyse(code));
+		HolderAnalyse ha = chipsService.holderNumAnalyse(code);
+		newOne.setHolderNum(ha.getAnaRes());
+		newOne.setHolderDate(ha.getDate());
 
 		newOne.setZfjjup(0);
 		newOne.setZfjj(0);

@@ -39,7 +39,7 @@ trtd{
 	<div><font color='#FF00FF'>项目进度:&nbsp;&nbsp;--></font><a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/capital.html'}">同花顺</a>
 	&nbsp;&nbsp;--><a target="_blank" th:href="@{'http://f10.eastmoney.com/f10_v2/CapitalOperation.aspx?code='+${dfcfcode}+'#xmjd-0'}">东方财富</a></div>
 	<br/>------------------------------------------------------------<br/>
-	财务报告年份：<span th:text="${codedetail.currYear}"></span>-年：<span th:text="${codedetail.currQuarter}"></span>季度&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'/codehist/pre/'+${code}+'/'+${codedetail.currYear}+'/'+${codedetail.currQuarter}}">上一季度</a></span>
+	财务报告年份：<span th:text="${codedetail.currYear}"></span>-<span th:text="${codedetail.currQuarter}"></span>季度&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'/codehist/pre/'+${code}+'/'+${codedetail.currYear}+'/'+${codedetail.currQuarter}}">上一季度</a></span>
 	<br/>------------------------------------------------------------<br/>
 	<div>流动资产合计(<span th:text="${sumLasset}"></span>) = 货币资金 (<span th:text="${monetaryFund}"></span>)
 		+ 交易性金融资产<span th:text="${tradeFinassetNotfvtpl}"></span> 
@@ -66,7 +66,7 @@ trtd{
 	资金博弈:
 	<br/>------------------------------------------------------------<br/>
 	<div>前3大股东占比:<span th:text="${topThree}"></span></div>
-	<div>股东人数变化（幅度+次数):<span th:text="${codedetail.holderNum}"></span></div>
+	<div>股东人数变化（幅度+次数):<span th:text="${codedetail.holderDate}"></span>--><span th:text="${codedetail.holderNum}"></span></div>
 	<div>外资持股：比例：<span th:text="${fcratio}"></span>%,金额：<span th:text="${fcamt}"></span>元,数量：<span th:text="${fcvol}"></span>股
 		&nbsp;&nbsp;&nbsp;&nbsp;持股明细&nbsp;&nbsp;<a target="_blank" th:href="@{'http://www.igoodstock.com/goodstock/hsgt_hold?sc='+${code}}">（goodstock）</a>
 		&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'http://data.eastmoney.com/hsgtcg/StockHdStatistics.aspx?stock='+${code}}">（东方财富）</a>
