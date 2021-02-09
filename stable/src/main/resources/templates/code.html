@@ -94,7 +94,7 @@ trtd{
 	历史记录:
 	<br/>------------------------------------------------------------<br/>
 	<div th:each="d: ${histList}">
-		<div>日期:<a target="_blank" th:href="@{'/codehist/'+${d.id}}"><span th:text="${d.date}"></span></a></div>
+		<div>日期:<a target="_blank" th:href="@{'/codehist/'+${d.id}}"><span th:text="${d.id}"></span></a></div>
 	</div>
 	<br/>------------------------------------------------------------<br/>
 	<div>应付利息:如果较高，公司在大量有息借钱，关联到货币资金和未分配利润。如果货币资金和未分配利润较高，明明有钱为什么借钱？</div>

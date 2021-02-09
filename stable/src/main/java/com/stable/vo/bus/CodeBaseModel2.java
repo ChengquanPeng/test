@@ -116,12 +116,8 @@ public class CodeBaseModel2 extends EsBase {
 	@Transient
 	public String getKeyString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append(baseRedDesc).append("|");
-		sb.append(baseYellowDesc).append("|");
-		sb.append(baseBlueDesc).append("|");
-		sb.append(baseGreenDesc).append("|");
-		sb.append(sylType).append("|");
-		sb.append(zfStatus).append("|");
+		sb.append(currYear).append("|");
+		sb.append(currQuarter).append("|");
 		return sb.toString();
 	}
 }

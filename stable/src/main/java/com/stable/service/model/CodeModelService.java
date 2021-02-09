@@ -584,7 +584,7 @@ public class CodeModelService {
 			// copy history
 			CodeBaseModelHist hist = new CodeBaseModelHist();
 			BeanCopy.copy(newOne, hist);
-			hist.setId(hist.getCode() + hist.getDate());
+			hist.setId(hist.getCode() + "_" + hist.getCurrYear() + "_" + hist.getCurrQuarter());
 			listHist.add(hist);
 		}
 	}
