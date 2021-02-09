@@ -573,20 +573,11 @@ public class CodeModelService {
 	}
 
 	private void saveHist(CodeBaseModel2 newOne, CodeBaseModel2 oldOne, List<CodeBaseModelHist> listHist) {
-		boolean saveHist = true;
-		if (oldOne != null) {
-			// 是否更新历史
-			if (oldOne.getKeyString().equals(newOne.getKeyString())) {// 主要指标是否有变化，则记录
-				saveHist = false;
-			}
-		}
-		if (saveHist) {
-			// copy history
-			CodeBaseModelHist hist = new CodeBaseModelHist();
-			BeanCopy.copy(newOne, hist);
-			hist.setId(hist.getCode() + "_" + hist.getCurrYear() + "_" + hist.getCurrQuarter());
-			listHist.add(hist);
-		}
+		// copy history
+		CodeBaseModelHist hist = new CodeBaseModelHist();
+		BeanCopy.copy(newOne, hist);
+		hist.setId(hist.getCode() + "_" + hist.getCurrYear() + "_" + hist.getCurrQuarter());
+		listHist.add(hist);
 	}
 
 	private double chkdouble = 80.0;// 10跌倒5.x
