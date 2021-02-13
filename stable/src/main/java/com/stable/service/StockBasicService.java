@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Semaphore;
@@ -55,7 +56,7 @@ public class StockBasicService {
 	public String getCodeName(String code) {
 		String name = CODE_NAME_MAP_LOCAL_HASH.get(code);
 		if (name == null) {
-			loadAllLocalHash();
+			loadAllNameFromDbToLocalHash();
 			name = CODE_NAME_MAP_LOCAL_HASH.get(code);
 			if (name == null) {
 				try {
@@ -83,7 +84,11 @@ public class StockBasicService {
 			StockBaseInfo old = JSON.parseObject(json, StockBaseInfo.class);
 			return old;
 		}
-		return new StockBaseInfo();
+		Optional<StockBaseInfo> db = esStockBaseInfoDao.findById(code);
+		if (!db.isPresent()) {
+			return new StockBaseInfo();
+		}
+		return db.get();
 	}
 
 	private final Semaphore semap = new Semaphore(1);
@@ -148,19 +153,16 @@ public class StockBasicService {
 		// esStockBaseInfoDao.save(base);
 
 		if (!fromNotTushare) {// 部门字段来自同花顺
-			String json = redisUtil.get(base.getCode());
-			if (StringUtils.isNotBlank(json)) {
-				StockBaseInfo old = JSON.parseObject(json, StockBaseInfo.class);
-				base.setThsIndustry(old.getThsIndustry());
-				base.setThsLightspot(old.getThsLightspot());
-				base.setThsMainBiz(old.getThsMainBiz());
-				base.setOldName(old.getOldName());
-				base.setWebSite(old.getWebSite());
-				base.setFinalControl(old.getFinalControl());
-				base.setCompnayType(old.getCompnayType());
-				base.setFloatShare(old.getFloatShare());
-				base.setTotalShare(old.getTotalShare());
-			}
+			StockBaseInfo old = getCode(base.getCode());
+			base.setThsIndustry(old.getThsIndustry());
+			base.setThsLightspot(old.getThsLightspot());
+			base.setThsMainBiz(old.getThsMainBiz());
+			base.setOldName(old.getOldName());
+			base.setWebSite(old.getWebSite());
+			base.setFinalControl(old.getFinalControl());
+			base.setCompnayType(old.getCompnayType());
+			base.setFloatShare(old.getFloatShare());
+			base.setTotalShare(old.getTotalShare());
 		}
 
 		redisUtil.set(base.getCode(), base);
@@ -169,7 +171,7 @@ public class StockBasicService {
 		log.info("syn stock code:{}", base);
 	}
 
-	public void loadAllLocalHash() {
+	private void loadAllNameFromDbToLocalHash() {
 		Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
 		while (it.hasNext()) {
 			StockBaseInfo e = it.next();
