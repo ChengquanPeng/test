@@ -491,27 +491,25 @@ public class FinanceService {
 				List<FinYjkb> list1 = eastmoneySpider.getFinYjkb();
 				List<FinYjyg> list2 = eastmoneySpider.getFinYjyg();
 				StringBuffer sb = new StringBuffer();
-				int index = list1.size();
 				if (list1.size() > 0) {
-					for (FinYjkb fy : list1) {
-						if (index <= 5) {// 前面5条
+					for (int i = 0; i < list1.size(); i++) {
+						FinYjkb fy = list1.get(i);
+						if (i < 5) {// 前面5条
 							sb.append(stockBasicService.getCodeName(fy.getCode())).append(",");
 						}
 						fy.setUpdateDate(updateDate);
 						fy.setIsValid(1);
-						index--;
 					}
 					esFinYjkbDao.saveAll(list1);
 				}
-				index = list2.size();
 				if (list2.size() > 0) {
-					for (FinYjyg fy : list2) {// 前面5条
-						if (index <= 5) {
+					for (int i = 0; i < list2.size(); i++) {
+						FinYjyg fy = list2.get(i);
+						if (i <= 5) {
 							sb.append(stockBasicService.getCodeName(fy.getCode())).append(",");
 						}
 						fy.setUpdateDate(updateDate);
 						fy.setIsValid(1);
-						index--;
 					}
 					esFinYjygDao.saveAll(list2);
 				}

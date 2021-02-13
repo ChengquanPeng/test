@@ -26,7 +26,7 @@ public class EveryWeekMonJob extends MySimpleJob {
 	public void myexecute(ShardingContext sc) {
 		log.info("同步回购报告");
 		buyBackService.jobFetchHist();
-		log.info("同步股票报告 及模型相关");
+		log.info("同步股票报告及模型相关");
 		financeService.byJob();
 	}
 }
