@@ -34,15 +34,11 @@ public class FinanceAnalyzer {
 			this.prevJidu = fbi;
 		}
 		if (fbi.getQuarter() == 4) {
-			putYear(fbi);
-		}
-	}
-
-	public void putYear(FinanceBaseInfo year) {
-		if (currYear == null) {
-			currYear = year;
-		} else if (prevYear == null) {
-			prevYear = year;
+			if (currYear == null) {
+				currYear = fbi;
+			} else if (prevYear == null) {
+				prevYear = fbi;
+			}
 		}
 	}
 

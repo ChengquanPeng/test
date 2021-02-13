@@ -34,7 +34,7 @@ trtd{
 	<div>增发概况:<span th:text="${zfgk}"></span></div>
 	<div><font color='#FF00FF'>是否发布了定增？查询近一年公告。</font></div>
 	<div><font color='#FF00FF'>曾用名(金字招牌)</font>:<span th:text="${codeBasic.oldName}"></span></div>
-	<div><font color='#FF00FF'>违规处理</font>:<a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/event.html'}">--></a></div>
+	<div><font color='#FF00FF'>违规处理和重大违法退市</font>:<a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/event.html'}">--></a></div>
 	<div><font color='#FF00FF'>财务亏损:</font> 是否主营业务亏损？</div>
 	<div><font color='#FF00FF'>项目进度:&nbsp;&nbsp;--></font><a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/capital.html'}">同花顺</a>
 	&nbsp;&nbsp;--><a target="_blank" th:href="@{'http://f10.eastmoney.com/f10_v2/CapitalOperation.aspx?code='+${dfcfcode}+'#xmjd-0'}">东方财富</a></div>
@@ -54,7 +54,7 @@ trtd{
 	<br/>
 	<div>营业总收入:<span th:text="${yyzsr}"></span> &nbsp;同比:<span th:text="${finance.yyzsrtbzz}"></span></div>
 	<div>归属净利润:<span th:text="${gsjlr}"></span> &nbsp;同比:<span th:text="${finance.gsjlrtbzz}"></span></div>
-	<div>扣非净利润:<span th:text="${kfjlr}"></span> &nbsp;同比:<span th:text="${finance.kfjlrtbzz}"></span> --> 经营现金流差额:<span th:text="${jyxjlce}"></span>,应收账款:<span th:text="${accountrec}"></span></div>
+	<div>扣非净利润:<span th:text="${kfjlr}"></span> &nbsp;同比:<span th:text="${finance.kfjlrtbzz}"></span> --> 经营现金流净额:<span th:text="${jyxjlce}"></span>,应收账款:<span th:text="${accountrec}"></span></div>
 	<div>业绩快报/预告:<span th:text="${kb}"></span></div>
 	<div>加权净资产收益率:<span th:text="${finance.jqjzcsyl}"></span></div>
 	<div>净资产收益率(单季度|ttm):<span th:text="${finance.syldjd}"></span>|<span th:text="${codedetail.sylttm}"></span></div>
