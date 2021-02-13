@@ -353,11 +353,11 @@ public class ThsSpider {
 		List<Concept> list = new LinkedList<Concept>();
 		int cntList = 0;
 		int cntCodelist = 0;
-		int limit = 1;
-
-		if (isFirday) {
-			limit = 10;
-		}
+//		int limit = 1;
+//
+//		if (isFirday) {
+//			limit = 10;
+//		}
 
 		StringBuffer newGn = new StringBuffer();
 
@@ -426,9 +426,9 @@ public class ThsSpider {
 				}
 				trytime = 0;
 
-				if (index > limit) {
-					break;
-				}
+//				if (index > limit) {
+//					break;
+//				}
 			} catch (Exception e) {
 				trytime++;
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
