@@ -37,6 +37,7 @@ import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.jys.JysSpider;
 import com.stable.spider.ths.ThsHolderSpider;
+import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -49,6 +50,7 @@ import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
+import com.stable.vo.bus.FinanceBaseInfoPage;
 import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.resp.FinanceBaseInfoResp;
@@ -163,23 +165,37 @@ public class FinanceService {
 	private boolean spiderFinaceHistoryInfo(String code, List<FinanceBaseInfo> list, int type) {
 		try {
 			if (type == 1) {
-				List<FinanceBaseInfo> datas = EastmoneySpider.getNewFinanceAnalysis(code, 1);
+				List<FinanceBaseInfoPage> datas = EastmoneySpider.getNewFinanceAnalysis(code, 1);
 				if (datas == null || datas.size() <= 0) {
 					log.warn("未从东方财富抓取到Finane记录(年报),code={}", code);
 					WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录(年报),code=" + code);
 				} else {
 					log.warn("年度-从东方财富抓取到Finane记录{}条,code={}", datas.size(), code);
-					list.addAll(datas);
+					// 数据无误的则加入
+					for (FinanceBaseInfoPage p : datas) {
+						if (p.isDataOk()) {
+							FinanceBaseInfo f = new FinanceBaseInfo();
+							BeanCopy.copy(p, f);
+							list.add(f);
+						}
+					}
 				}
 			}
-			List<FinanceBaseInfo> datas = EastmoneySpider.getNewFinanceAnalysis(code, 0);// 0按报告期、1=年报
+			List<FinanceBaseInfoPage> datas = EastmoneySpider.getNewFinanceAnalysis(code, 0);// 0按报告期、1=年报
 			if (datas == null || datas.size() <= 0) {
 				log.warn("未从东方财富抓取到Finane记录,code={}", code);
 				WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录,code=" + code);
 				return false;
 			}
 			log.warn("季度-从东方财富抓取到Finane记录{}条,code={}", datas.size(), code);
-			list.addAll(datas);
+			// 数据无误的则加入
+			for (FinanceBaseInfoPage p : datas) {
+				if (p.isDataOk()) {
+					FinanceBaseInfo f = new FinanceBaseInfo();
+					BeanCopy.copy(p, f);
+					list.add(f);
+				}
+			}
 		} finally {
 			ThreadsUtil.sleepRandomSecBetween1And5();
 		}

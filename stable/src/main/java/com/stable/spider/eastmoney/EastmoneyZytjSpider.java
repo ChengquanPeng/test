@@ -33,11 +33,7 @@ public class EastmoneyZytjSpider {
 	}
 
 	/**
-	 * 财务信息
-	 * 
-	 * @param code 6位普通股票代码
-	 * @param type 0按报告期、1=年报
-	 * @return http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=1&code=SZ300750
+	 * 质押统计
 	 */
 	static final String financeUrl = "http://f10.eastmoney.com/CompanyBigNews/GetPledgeHolder?code=%s&pageIndex=%s&t=%s";
 

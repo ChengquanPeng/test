@@ -28,7 +28,7 @@ import com.stable.utils.WxPushUtil;
 import com.stable.vo.FinanceZcfzb;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
-import com.stable.vo.bus.FinanceBaseInfo;
+import com.stable.vo.bus.FinanceBaseInfoPage;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -138,19 +138,19 @@ public class EastmoneySpider {
 	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=%s&code=%s";
 	static final double chkLine = CurrencyUitl.YI_N.doubleValue() * 10;// 10亿
 
-	public static List<FinanceBaseInfo> getNewFinanceAnalysis(String code, int type) {
+	public static List<FinanceBaseInfoPage> getNewFinanceAnalysis(String code, int type) {
 		int trytime = 0;
 		do {
 			trytime++;
 			try {
-				List<FinanceBaseInfo> list = new ArrayList<FinanceBaseInfo>();
+				List<FinanceBaseInfoPage> list = new ArrayList<FinanceBaseInfoPage>();
 				String url = String.format(financeUrl, type, formatCode2(code));
 				String result = HttpUtil.doGet2(url);
 				JSONArray objects = JSON.parseArray(result);
 				for (int i = 0; i < objects.size(); i++) {
 					JSONObject data = objects.getJSONObject(i);
 					String date = data.get("date").toString(); // 年报日期
-					FinanceBaseInfo fbi = new FinanceBaseInfo(code, Integer.valueOf(date.replaceAll("-", "")));
+					FinanceBaseInfoPage fbi = new FinanceBaseInfoPage(code, Integer.valueOf(date.replaceAll("-", "")));
 					try {
 						Double yyzsrtbzz = data.getDouble("yyzsrtbzz"); // 营业总收入同比增长(%)
 						fbi.setYyzsrtbzz(yyzsrtbzz);
@@ -214,13 +214,14 @@ public class EastmoneySpider {
 				if (list.size() > 0) {
 					Map<String, FinanceZcfzb> fzb = EastmoneyZcfzbSpider.getZcfzb(code, type);
 					Map<String, FinanceZcfzb> llb = EastmoneyZcfzbSpider.getXjllb(code, type);
-					for (FinanceBaseInfo fbi : list) {
+					for (FinanceBaseInfoPage fbi : list) {
 						FinanceZcfzb llba = llb.get(fbi.getId());
 						if (llba != null) {
 							fbi.setJyxjlce(llba.getGoodWill());// yxjlce:经营现金流量差额， GoodWill:零时字段
 						}
 						FinanceZcfzb zcfzb = fzb.get(fbi.getId());
 						if (zcfzb != null) {
+							fbi.setDataOk(true);
 							// 基础数
 							fbi.setGoodWill(zcfzb.getGoodWill());
 							fbi.setSumAsset(zcfzb.getSumAsset());
@@ -241,13 +242,13 @@ public class EastmoneySpider {
 							if (fbi.getNetAsset() > 0) {
 								// 商誉-净资产
 								if (fbi.getGoodWill() > 0) {
-									fbi.setGoodWillRatioNetAsset(
-											CurrencyUitl.roundHalfUpWhithPercent(fbi.getGoodWill() / fbi.getNetAsset()));
+									fbi.setGoodWillRatioNetAsset(CurrencyUitl
+											.roundHalfUpWhithPercent(fbi.getGoodWill() / fbi.getNetAsset()));
 								}
 								// 库存对应的净资产的占比
 								if (fbi.getInventory() > 0) {
-									fbi.setInventoryRatio(
-											CurrencyUitl.roundHalfUpWhithPercent(fbi.getInventory() / fbi.getNetAsset()));
+									fbi.setInventoryRatio(CurrencyUitl
+											.roundHalfUpWhithPercent(fbi.getInventory() / fbi.getNetAsset()));
 								}
 							}
 							// 资金紧张: 货币资金-流动负债, <=0
@@ -279,6 +280,17 @@ public class EastmoneySpider {
 								fbi.setAccountrecRatio(
 										CurrencyUitl.roundHalfUpWhithPercent(fbi.getAccountrec() / fbi.getSumLasset()));
 							}
+						} else {
+							int t = cs(fbi);// ->2020*10=20200,+1=20201;
+							boolean isok = true;
+							for (FinanceBaseInfoPage p : list) {
+								if (cs(p) > t) {
+									isok = false;
+								}
+							}
+							if (isok) {
+								fbi.setDataOk(true);
+							}
 						}
 					}
 				}
@@ -290,6 +302,10 @@ public class EastmoneySpider {
 		} while (trytime <= 10);
 		WxPushUtil.pushSystem1("东方财富-财务-抓包出错,code=" + code);
 		return null;
+	}
+
+	private static int cs(FinanceBaseInfoPage p) {
+		return ((p.getYear() * 10) + p.getQuarter());
 	}
 
 	// http://data.eastmoney.com/bbsj/202003/yjyg.html
@@ -645,8 +661,8 @@ public class EastmoneySpider {
 //		String result = HttpUtil.doGet2(yjygBase);
 //		EastmoneySpider es = new EastmoneySpider();
 //		es.getFinYjkb();
-		List<FinanceBaseInfo> l = EastmoneySpider.getNewFinanceAnalysis("300027", 0);
-		for (FinanceBaseInfo r : l) {
+		List<FinanceBaseInfoPage> l = EastmoneySpider.getNewFinanceAnalysis("300027", 0);
+		for (FinanceBaseInfoPage r : l) {
 			System.err.println(r);
 		}
 	}

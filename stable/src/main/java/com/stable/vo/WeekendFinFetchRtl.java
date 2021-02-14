@@ -10,6 +10,6 @@ public class WeekendFinFetchRtl {
 	private boolean dfFinOk = false;
 
 	public boolean isAllOk() {
-		return (thsHolderOk && dfFinOk && dfFinOk);
+		return (thsHolderOk && dfZfOk && dfFinOk);
 	}
 }
