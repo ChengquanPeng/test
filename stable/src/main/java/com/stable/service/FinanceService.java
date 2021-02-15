@@ -257,6 +257,8 @@ public class FinanceService {
 				resp.setSumLasset(CurrencyUitl.covertToString(dh.getSumLasset()));
 				resp.setSumDebtLd(CurrencyUitl.covertToString(dh.getSumDebtLd()));
 				resp.setNetAsset(CurrencyUitl.covertToString(dh.getNetAsset()));
+				resp.setZcfzl(dh.getZcfzl());
+
 				res.add(resp);
 			}
 		}

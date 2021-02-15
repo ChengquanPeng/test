@@ -97,63 +97,58 @@
 				},
 				columns : [ {
 					field : 'code',
-					title : '代码'
+					title : '代码',
+					formatter : function(value, row, index) {
+						return row.code + "<br/>" + row.codeName;
+					}
 				}, {
-					field : 'codeName',
-					title : '名称'
-				}
-				//, {
-				//	field : 'endDate',
-				//	title : '报告期'
-				//}
-				, {
 					field : 'endType',
-					title : '报告期类型'
+					title : '报告期'
 				}, {
 					field : 'yyzsr',
-					title : '营收(TB%)',
+					title : '营收<br/>(TB%)',
 					formatter : function(value, row, index) {
-						return row.yyzsr + "(" + row.yyzsrtbzz + "%)";
+						return row.yyzsr + "<br/>(" + row.yyzsrtbzz + "%)";
 					}
 				}, {
 					field : 'gsjlr',
-					title : '归属净利(TB%)',
+					title : '归属净利<br/>(TB%)',
 					formatter : function(value, row, index) {
-						return row.gsjlr + "(" + row.gsjlrtbzz + "%)";
+						return row.gsjlr + "<br/>(" + row.gsjlrtbzz + "%)";
 					}
 				}, {
 					field : 'kfjlr',
-					title : '扣非净利(TB%)',
+					title : '扣非净利<br/>(TB%)',
 					formatter : function(value, row, index) {
-						return row.kfjlr + "(" + row.kfjlrtbzz + "%)";
+						return row.kfjlr + "<br/>(" + row.kfjlrtbzz + "%)";
 					}
 				}, {
 					field : 'mgjyxjl',
-					title : '现金流净额(每股)',
+					title : 'jy现金流<br/>(每股)',
 					formatter : function(value, row, index) {
-						return row.jyxjl + "(" + row.mgjyxjl + ")";
+						return row.jyxjl + "<br/>(" + row.mgjyxjl + ")";
 					}
 				}, {
 					field : 'accountrec',
 					title : '应收账款'
 				}, {
-					field : 'jqjzcsyl',
-					title : '资产收益%'
+					field : 'sumDebtLd',
+					title : '流动负债'
+				}, {
+					field : 'sumLasset',
+					title : '流动资产'
 				}, {
 					field : 'netAsset',
 					title : '净资产'
 				}, {
-					field : 'sumLasset',
-					title : '流动资产合计'
+					field : 'zcfzl',
+					title : '资产负债%'
 				}, {
-					field : 'sumDebtLd',
-					title : '流动负债合计'
-				}, {
-					field : 'mll',
-					title : '资产负债率'
+					field : 'jqjzcsyl',
+					title : '资产收益%'
 				}, {
 					field : 'mll',
-					title : '毛利(%)'
+					title : '毛利%'
 				} ],
 				responseHandler : function responseHandler(res) {
 

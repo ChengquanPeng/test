@@ -455,7 +455,7 @@ public class CodeModelService {
 		}
 		// 库存占比
 		if (fbi.getInventoryRatio() > 45.0) {// 超过50%
-			if (!s.getThsIndustry().contains("地产")) {// 房地产忽悠占比
+			if (s.getThsIndustry() != null && !s.getThsIndustry().contains("地产")) {// 房地产忽悠占比
 				double d = fbi.getInventoryRatio();
 				if (d > 90.0) {
 					newOne.setBaseRed(1);
