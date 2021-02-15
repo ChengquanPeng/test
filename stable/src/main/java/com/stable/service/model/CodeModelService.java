@@ -396,22 +396,44 @@ public class CodeModelService {
 				sb2.append(yellow++).append(".经营现金流入不敷出").append(Constant.HTML_LINE);
 			}
 		}
-		// 连续季度
-		int c = 0;
-		int fort = 0;// 最近2年
-		for (FinanceBaseInfo ft : fbis) {
-			fort++;
-			if (fort > 8) {
-				break;
+		if (fbi.getKfjlr() > 0 && (fbi.getJyxjlce() < 0 || fbi.getMgjyxjl() < 0)) {
+			int c = 0;
+			int fort = 0;// 最近2年
+			if (fbis.size() > 2) {
+				for (FinanceBaseInfo ft : fbis) {
+					if (ft.getKfjlr() > 0 && (ft.getJyxjlce() < 0 || ft.getMgjyxjl() < 0)) {
+						c++;
+					}
+					fort++;
+					if (fort >= 3) {
+						break;
+					}
+				}
 			}
-			if (fbi.getKfjlr() > 0 && (ft.getJyxjlce() < 0 || fbi.getMgjyxjl() < 0)) {
-				c++;
+			// 连续3季度
+			if (c >= 3) {
+				newOne.setBaseRed(1);
+				sb1.append(red++).append(".暴雷风险:").append(c).append("至少3季度经常现金流连续为负却有扣非净利").append(Constant.HTML_LINE)
+						.append("靠融资在运转?").append(Constant.HTML_LINE);
+			} else {// 最近2年
+				// 连续季度
+				c = 0;
+				fort = 0;// 最近2年
+				for (FinanceBaseInfo ft : fbis) {
+					fort++;
+					if (fort > 8) {
+						break;
+					}
+					if (ft.getKfjlr() > 0 && (ft.getJyxjlce() < 0 || ft.getMgjyxjl() < 0)) {
+						c++;
+					}
+				}
+				if (c > (fbis.size() / 2)) {
+					newOne.setBaseRed(1);
+					sb1.append(red++).append(".暴雷风险:").append(c).append("季度经常现金流为负却有扣非净利").append(Constant.HTML_LINE)
+							.append("靠融资在运转?").append(Constant.HTML_LINE);
+				}
 			}
-		}
-		if (c > (fbis.size() / 2)) {
-			newOne.setBaseRed(1);
-			sb1.append(red++).append(".暴雷风险:").append(c).append("季度经常现金流为负却有扣非净利").append(Constant.HTML_LINE)
-					.append("靠融资在运转?").append(Constant.HTML_LINE);
 		}
 
 		// 应收账款
