@@ -113,8 +113,13 @@ public class CodeModelService {
 	@Autowired
 	private BonusService bonusService;
 
-	public synchronized void runJobv2(boolean isJob, int date) {
+	public synchronized void runJobv2(int date) {
 		try {
+			log.info("param date:{}", date);
+			if (!tradeCalService.isOpen(date)) {
+				date = tradeCalService.getPretradeDate(date);
+			}
+			log.info("final date:{}", date);
 			runByJobv2(date);
 		} catch (Exception e) {
 			e.printStackTrace();
