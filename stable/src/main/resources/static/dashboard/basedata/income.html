@@ -10,7 +10,8 @@
 <title>Dashboard Template for Bootstrap</title>
 
 <!-- Bootstrap core CSS -->
-<link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
+	rel="stylesheet">
 
 <!-- Custom styles for this template -->
 <link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
@@ -23,19 +24,21 @@
 			<div id="menu"></div>
 			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
 			<div>
-					<div class="input-group">
-						股票代码：<input type="text" class="form-control" id="queryCode"> 
-						进度：<select id="quarter" class="form-control">
-							<option value="" selected="selected">全部</option>
-							<option value="1">一季度</option>
-							<option value="2">二季度</option>
-							<option value="3">三季度</option>
-							<option value="4">年报</option>
-						</select>
-					<span class="input-group-btn"> <button class="btn btn-default" type="button" id="queryAction"> Go!</button> </span>
-					</div>
+				<div class="input-group">
+					股票代码：<input type="text" class="form-control" id="queryCode">
+					报告期：<select id="quarter" class="form-control">
+						<option value="" selected="selected">全部</option>
+						<option value="1">一季度</option>
+						<option value="2">二季度</option>
+						<option value="3">三季度</option>
+						<option value="4">年报</option>
+					</select> <span class="input-group-btn">
+						<button class="btn btn-default" type="button" id="queryAction">
+							Go!</button>
+					</span>
 				</div>
-				
+			</div>
+
 			<div id="rptList" style="width: 100%; hight: 100%; float: left；">
 				<table class="table table-hover" id="cusTable">
 				</table>
@@ -65,95 +68,112 @@
 		$('#cusTable').bootstrapTable('destroy');
 		function loadData() {
 			$('#cusTable').bootstrapTable('destroy');
-			$("#cusTable").bootstrapTable(
-					{
-						method : "get", //使用get请求到服务器获取数据  
-						url : "/web/finance/hist/query", //获取数据的Servlet地址  
-						striped : true, //表格显示条纹  
-						pagination : true, //启动分页
-						cache : false,
-						pageSize : 20, //每页显示的记录数  
-						//pageNumber:1, //当前第几页  
-						pageList : [ 10, 15, 20, 50 ], //记录数可选列表  
-						search : false, //是否启用查询  
-						//showColumns: true,  //显示下拉框勾选要显示的列  
-						//showRefresh: true,  //显示刷新按钮  
-						sidePagination : "server", //表示服务端请求
-						//设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder  
-						//设置为limit可以获取limit, offset, search, sort, order  
-						queryParamsType : "undefined",
-						queryParams : function queryParams(params) { //设置查询参数  
-							var code = $('#queryCode').val();
-							var quarter = $('#quarter').val();
-							var param = {
-								pageNum : params.pageNumber,
-								pageSize : params.pageSize,
-							};
-							param.code = code;
-							param.quarter = quarter;
-							return param;
-						},
-						columns : [ {
-							field : 'code',
-							title : '代码'
-						}, {
-							field : 'codeName',
-							title : '名称'
-						}
-						//, {
-						//	field : 'endDate',
-						//	title : '报告期'
-						//}
-						,{
-							field : 'endType',
-							title : '报告期类型'
-						}, {
-							field : 'yyzsr',
-							title : '营收'
-						}, {
-							field : 'yyzsrtbzz',
-							title : '营收TB%'
-						}, {
-							field : 'gsjlr',
-							title : '归属净利'
-						}, {
-							field : 'gsjlrtbzz',
-							title : '净利TB%'
-						}, {
-							field : 'kfjlr',
-							title : '扣非净利'
-						}, {
-							field : 'kfjlrtbzz',
-							title : '净利TB%'
-						}, {
-							field : 'jqjzcsyl',
-							title : '资产收益%'
-						}, {
-							field : 'mgjyxjl',
-							title : '现金流'
-						}, {
-							field : 'mll',
-							title : '毛利(%)'
-						}],
-						responseHandler : function responseHandler(res) {
-							
-							var s1 = JSON.stringify(res.result);
-							var s2 = '{"total":9999,"rows":' + s1 + '}';
-							//alert(s2);
-							return eval('(' + s2 + ')')
-						},
-						onLoadSuccess : function() { //加载成功时执行
-							$("#rptList").show();
-						},
-						onLoadError : function() { //加载失败时执行  
-							alert("加载数据失败");
-						}
-					});
+			$("#cusTable").bootstrapTable({
+				method : "get", //使用get请求到服务器获取数据  
+				url : "/web/finance/hist/query", //获取数据的Servlet地址  
+				striped : true, //表格显示条纹  
+				pagination : true, //启动分页
+				cache : false,
+				pageSize : 20, //每页显示的记录数  
+				//pageNumber:1, //当前第几页  
+				pageList : [ 10, 15, 20, 50 ], //记录数可选列表  
+				search : false, //是否启用查询  
+				//showColumns: true,  //显示下拉框勾选要显示的列  
+				//showRefresh: true,  //显示刷新按钮  
+				sidePagination : "server", //表示服务端请求
+				//设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder  
+				//设置为limit可以获取limit, offset, search, sort, order  
+				queryParamsType : "undefined",
+				queryParams : function queryParams(params) { //设置查询参数  
+					var code = $('#queryCode').val();
+					var quarter = $('#quarter').val();
+					var param = {
+						pageNum : params.pageNumber,
+						pageSize : params.pageSize,
+					};
+					param.code = code;
+					param.quarter = quarter;
+					return param;
+				},
+				columns : [ {
+					field : 'code',
+					title : '代码'
+				}, {
+					field : 'codeName',
+					title : '名称'
+				}
+				//, {
+				//	field : 'endDate',
+				//	title : '报告期'
+				//}
+				, {
+					field : 'endType',
+					title : '报告期类型'
+				}, {
+					field : 'yyzsr',
+					title : '营收(TB%)',
+					formatter : function(value, row, index) {
+						return row.yyzsr + "(" + row.yyzsrtbzz + "%)";
+					}
+				}, {
+					field : 'gsjlr',
+					title : '归属净利(TB%)',
+					formatter : function(value, row, index) {
+						return row.gsjlr + "(" + row.gsjlrtbzz + "%)";
+					}
+				}, {
+					field : 'kfjlr',
+					title : '扣非净利(TB%)',
+					formatter : function(value, row, index) {
+						return row.kfjlr + "(" + row.kfjlrtbzz + "%)";
+					}
+				}, {
+					field : 'mgjyxjl',
+					title : '现金流净额(每股)',
+					formatter : function(value, row, index) {
+						return row.jyxjl + "(" + row.mgjyxjl + ")";
+					}
+				}, {
+					field : 'accountrec',
+					title : '应收账款'
+				}, {
+					field : 'jqjzcsyl',
+					title : '资产收益%'
+				}, {
+					field : 'netAsset',
+					title : '净资产'
+				}, {
+					field : 'sumLasset',
+					title : '流动资产合计'
+				}, {
+					field : 'sumDebtLd',
+					title : '流动负债合计'
+				}, {
+					field : 'mll',
+					title : '资产负债率'
+				}, {
+					field : 'mll',
+					title : '毛利(%)'
+				} ],
+				responseHandler : function responseHandler(res) {
+
+					var s1 = JSON.stringify(res.result);
+					var s2 = '{"total":9999,"rows":' + s1 + '}';
+					//alert(s2);
+					return eval('(' + s2 + ')')
+				},
+				onLoadSuccess : function() { //加载成功时执行
+					$("#rptList").show();
+				},
+				onLoadError : function() { //加载失败时执行  
+					alert("加载数据失败");
+				}
+			});
 		}
-		
+
 		$("#queryAction").click(function() {
-				//alert("abc");
-				loadData()
+			//alert("abc");
+			loadData()
 		});
 		loadData();
 	</script>

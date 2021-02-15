@@ -252,6 +252,11 @@ public class FinanceService {
 				resp.setJqjzcsyl(dh.getJqjzcsyl());
 				resp.setMgjyxjl(dh.getMgjyxjl());
 				resp.setMll(dh.getMll());
+				resp.setJyxjl(CurrencyUitl.covertToString(dh.getJyxjlce()));
+				resp.setAccountrec(CurrencyUitl.covertToString(dh.getAccountrec()));
+				resp.setSumLasset(CurrencyUitl.covertToString(dh.getSumLasset()));
+				resp.setSumDebtLd(CurrencyUitl.covertToString(dh.getSumDebtLd()));
+				resp.setNetAsset(CurrencyUitl.covertToString(dh.getNetAsset()));
 				res.add(resp);
 			}
 		}
