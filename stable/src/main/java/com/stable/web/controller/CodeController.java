@@ -19,7 +19,6 @@ import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
-import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.ForeignCapitalSum;
 import com.stable.vo.bus.Jiejin;
@@ -48,7 +47,7 @@ public class CodeController {
 	@RequestMapping(value = "/code/{code}", method = RequestMethod.GET)
 	public String detail(@PathVariable(value = "code") String code, Model model) {
 		try {
-			CodeBaseModel2 cbm = codeModelService.getLastOneByCodeResp(code);
+			CodeBaseModelResp cbm = codeModelService.getLastOneByCodeResp(code);
 			model.addAttribute("codedetail", cbm);
 			prepare(model, code);
 		} catch (Exception e) {

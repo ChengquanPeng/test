@@ -882,7 +882,7 @@ public class CodeModelService {
 		return null;
 	}
 
-	public CodeBaseModel2 getLastOneByCodeResp(String code) {
+	public CodeBaseModelResp getLastOneByCodeResp(String code) {
 		return getModelResp(getLastOneByCode2(code));
 	}
 

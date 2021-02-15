@@ -175,7 +175,7 @@ public class FinanceService {
 					for (FinanceBaseInfoPage p : datas) {
 						if (p.isDataOk()) {
 							FinanceBaseInfo f = new FinanceBaseInfo();
-							BeanCopy.copy(p, f);
+							BeanCopy.copy(p, f);// TODO copy
 							list.add(f);
 						}
 					}
@@ -193,9 +193,12 @@ public class FinanceService {
 				if (p.isDataOk()) {
 					FinanceBaseInfo f = new FinanceBaseInfo();
 					BeanCopy.copy(p, f);
+					FinanceBaseInfo db = this.getFinaceReportByDate(code, f.getYear(), f.getQuarter());
+					// TODO copy
 					list.add(f);
 				}
 			}
+
 		} finally {
 			ThreadsUtil.sleepRandomSecBetween1And5();
 		}
@@ -308,7 +311,7 @@ public class FinanceService {
 		return null;
 	}
 
-	public FinanceBaseInfo getLastFinaceReport(String code, int year, int quarter) {
+	public FinanceBaseInfo getFinaceReportByDate(String code, int year, int quarter) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.matchPhraseQuery("year", year));
@@ -644,7 +647,7 @@ public class FinanceService {
 
 		for (CodeConcept c : allcode) {
 			log.info("板块：{},code={}", c.getConceptName(), c.getCode());
-			FinanceBaseInfo f = this.getLastFinaceReport(c.getCode(), year, quarter);
+			FinanceBaseInfo f = this.getFinaceReportByDate(c.getCode(), year, quarter);
 			if (f != null) {
 				if (f.getMll() != 0) {
 					rl.add(f);

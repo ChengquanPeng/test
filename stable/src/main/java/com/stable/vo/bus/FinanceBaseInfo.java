@@ -111,6 +111,16 @@ public class FinanceBaseInfo extends EsBase {
 	@Field(type = FieldType.Double)
 	private double accountrecRatio;// 应收款占比：accountrec应收账款/sumLasset流动资产合计
 
+	// 第二计算字段
+//	1.净资产小于0
+//	2.流动负债高于流动资产
+//	3.资金紧张:流动负债高于货币资金
+//	4.资金紧张:应付利息较高
+//	5.资产负债率超高:
+//	6.经营现金流入不敷出
+//	7.季度经常现金流为负却有扣非净利
+//	8.应收账款超高:
+
 	public FinanceBaseInfo() {
 
 	}

@@ -281,10 +281,10 @@ public class EastmoneySpider {
 										CurrencyUitl.roundHalfUpWhithPercent(fbi.getAccountrec() / fbi.getSumLasset()));
 							}
 						} else {
-							int t = cs(fbi);// ->2020*10=20200,+1=20201;
+							int t = YearQuarter(fbi.getYear(), fbi.getQuarter());// ->2020*10=20200,+1=20201;
 							boolean isok = true;
 							for (FinanceBaseInfoPage p : list) {
-								if (cs(p) > t) {
+								if (YearQuarter(p.getYear(), p.getQuarter()) > t) {
 									isok = false;
 								}
 							}
@@ -304,8 +304,8 @@ public class EastmoneySpider {
 		return null;
 	}
 
-	private static int cs(FinanceBaseInfoPage p) {
-		return ((p.getYear() * 10) + p.getQuarter());
+	public static int YearQuarter(int year, int quarter) {
+		return ((year * 10) + quarter);
 	}
 
 	// http://data.eastmoney.com/bbsj/202003/yjyg.html
@@ -661,9 +661,10 @@ public class EastmoneySpider {
 //		String result = HttpUtil.doGet2(yjygBase);
 //		EastmoneySpider es = new EastmoneySpider();
 //		es.getFinYjkb();
-		List<FinanceBaseInfoPage> l = EastmoneySpider.getNewFinanceAnalysis("300027", 0);
-		for (FinanceBaseInfoPage r : l) {
-			System.err.println(r);
-		}
+//		List<FinanceBaseInfoPage> l = EastmoneySpider.getNewFinanceAnalysis("300027", 0);
+//		for (FinanceBaseInfoPage r : l) {
+//			System.err.println(r);
+//		}
+		System.err.println(YearQuarter(2021, 1));
 	}
 }
