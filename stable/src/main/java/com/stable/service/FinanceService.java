@@ -175,7 +175,7 @@ public class FinanceService {
 					for (FinanceBaseInfoPage p : datas) {
 						if (p.isDataOk()) {
 							FinanceBaseInfo f = new FinanceBaseInfo();
-							BeanCopy.copy(p, f);// TODO copy
+							BeanCopy.copy(p, f);
 							list.add(f);
 						}
 					}
@@ -193,8 +193,6 @@ public class FinanceService {
 				if (p.isDataOk()) {
 					FinanceBaseInfo f = new FinanceBaseInfo();
 					BeanCopy.copy(p, f);
-					FinanceBaseInfo db = this.getFinaceReportByDate(code, f.getYear(), f.getQuarter());
-					// TODO copy
 					list.add(f);
 				}
 			}
