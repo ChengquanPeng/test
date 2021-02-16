@@ -223,6 +223,8 @@ public class CodeController {
 			}
 			CodeBaseModelResp cbm = codeModelService.getHistOneByCodeYearQuarter(code, year, quarter);
 			if (cbm == null) {
+				response.setCharacterEncoding("UTF-8");
+				response.setHeader("Content-Type", "text/html; charset=UTF-8");
 				response.getWriter().write("未找到" + year + "年" + quarter + "季度数据");
 				response.getWriter().close();
 				return null;

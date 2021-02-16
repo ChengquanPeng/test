@@ -157,7 +157,27 @@ public class CodeModelService {
 					pool.setCode(code);
 					poolList.add(pool);
 				}
-				getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listLast, listHist);
+				CodeBaseModel2 model = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listLast, listHist);
+				if (pool.getMonitor() == CodeModeType.ZengFaAuto.getCode()) {// 自动监听归0
+					pool.setMonitor(CodeModeType.NO.getCode());
+					pool.setRealtime(0);
+					pool.setUpTodayChange(0);
+					if (!poolList.contains(pool)) {
+						poolList.add(pool);
+					}
+
+				}
+				if (model.getZfjjup() > 0 && model.getZfself() > 0) {
+					if (pool.getMonitor() == CodeModeType.NO.getCode()) {
+						pool.setMonitor(CodeModeType.ZengFaAuto.getCode());
+						pool.setRealtime(1);
+						pool.setUpTodayChange(9);
+						if (!poolList.contains(pool)) {
+							poolList.add(pool);
+						}
+					}
+				}
+
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -177,8 +197,8 @@ public class CodeModelService {
 //		daliyTradeHistroyService.deleteData();
 	}
 
-	private void getBaseAnalyse(StockBaseInfo s, int tradeDate, CodeBaseModel2 oldOne, List<CodeBaseModel2> listLast,
-			List<CodeBaseModelHist> listHist) {
+	private CodeBaseModel2 getBaseAnalyse(StockBaseInfo s, int tradeDate, CodeBaseModel2 oldOne,
+			List<CodeBaseModel2> listLast, List<CodeBaseModelHist> listHist) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
 		// 基本面池
@@ -197,7 +217,7 @@ public class CodeModelService {
 			} else {
 				log.info("{},Online 上市不足1年", code);
 			}
-			return;
+			return newOne;
 		}
 		copyProperty(newOne, oldOne);// copy原有属性
 		baseAnalyseColor(s, newOne, fbis);// 基本面-红蓝绿
@@ -220,6 +240,7 @@ public class CodeModelService {
 		}
 //		买点: 监听//TODO
 		saveHist(newOne, oldOne, listHist);// 历史
+		return newOne;
 	}
 
 	private void sortModel(CodeBaseModel2 newOne) {
@@ -1096,10 +1117,10 @@ public class CodeModelService {
 			bqb.must(QueryBuilders.matchPhraseQuery("susZfBoss", 1));
 		}
 		if (sort6 == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("sort6", 1));
+			bqb.must(QueryBuilders.matchPhraseQuery("sortMode6", 1));
 		}
 		if (sort7 == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("sort7", 1));
+			bqb.must(QueryBuilders.matchPhraseQuery("sortMode7", 1));
 		}
 		if (zfjj == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfjj", 1));
@@ -1254,8 +1275,9 @@ public class CodeModelService {
 			String bblue, String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6,
 			int sort7, int zfbuy, int zfjj, int zfjjup, int zfself) {
 		log.info(
-				"CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={},conceptId={},conceptName={},zfStatus={}",
-				code, orderBy, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName, zfStatus);
+				"CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={},conceptId={},conceptName={},zfStatus={},sort6={},sort7={},zfself={}",
+				code, orderBy, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName, zfStatus,
+				sort6, sort7, zfself);
 
 		List<CodeBaseModel2> list = getList(code, orderBy, conceptId, conceptName, asc, querypage, zfStatus, monitor,
 				bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7, zfbuy, zfjj,
