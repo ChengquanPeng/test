@@ -914,12 +914,6 @@ public class CodeModelService {
 	}
 
 	public CodeBaseModelResp getHistOneByCodeYearQuarter(String code, int year, int quarter) {
-		if (quarter == 1) {
-			quarter = 4;
-			year--;
-		} else {
-			quarter--;
-		}
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.matchPhraseQuery("currYear", year));

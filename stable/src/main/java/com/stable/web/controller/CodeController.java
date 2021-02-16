@@ -3,6 +3,8 @@ package com.stable.web.controller;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -211,9 +213,20 @@ public class CodeController {
 	 */
 	@RequestMapping(value = "/codehist/pre/{code}/{year}/{quarter}", method = RequestMethod.GET)
 	public String pre(@PathVariable(value = "code") String code, @PathVariable(value = "year") int year,
-			@PathVariable(value = "quarter") int quarter, Model model) {
+			@PathVariable(value = "quarter") int quarter, Model model, HttpServletResponse response) {
 		try {
+			if (quarter == 1) {
+				quarter = 4;
+				year--;
+			} else {
+				quarter--;
+			}
 			CodeBaseModelResp cbm = codeModelService.getHistOneByCodeYearQuarter(code, year, quarter);
+			if (cbm == null) {
+				response.getWriter().write("未找到" + year + "年" + quarter + "季度数据");
+				response.getWriter().close();
+				return null;
+			}
 			model.addAttribute("codedetail", cbm);
 			prepare(model, code);
 		} catch (Exception e) {

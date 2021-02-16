@@ -22,8 +22,8 @@ trtd{
 </head>
 <body>
 	<br/>------------------------------------------------------------<br/>
-	
-	<div>代码：<span th:text="${code}"></span>-<span th:text="${codedetail.codeName}"></div>
+	<div><b>代码：<span th:text="${code}"></span>-<span th:text="${codedetail.codeName}"></b></div>
+	------------------------------------------------------------<br/>
 	<div>最终控制人:<span th:text="${codeBasic.finalControl}"></span></div>
 	<div>同花顺-主营:<span th:text="${codeBasic.thsMainBiz}"></span></div>
 	<div>同花顺-亮点:<span th:text="${codeBasic.thsLightspot}"></span></div>
@@ -39,7 +39,7 @@ trtd{
 	<div><font color='#FF00FF'>项目进度:&nbsp;&nbsp;--></font><a target="_blank" th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/capital.html'}">同花顺</a>
 	&nbsp;&nbsp;--><a target="_blank" th:href="@{'http://f10.eastmoney.com/f10_v2/CapitalOperation.aspx?code='+${dfcfcode}+'#xmjd-0'}">东方财富</a></div>
 	<br/>------------------------------------------------------------<br/>
-	财务报告年份：<span th:text="${codedetail.currYear}"></span>-<span th:text="${codedetail.currQuarter}"></span>季度&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'/codehist/pre/'+${code}+'/'+${codedetail.currYear}+'/'+${codedetail.currQuarter}}">上一季度</a></span>
+	<b>财务报告年份：<span th:text="${codedetail.currYear}"></span>-<span th:text="${codedetail.currQuarter}"></span>季度&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" th:href="@{'/codehist/pre/'+${code}+'/'+${codedetail.currYear}+'/'+${codedetail.currQuarter}}">上一季度</a></span></b>
 	<br/>------------------------------------------------------------<br/>
 	<div>流动资产合计(<span th:text="${sumLasset}"></span>) = 货币资金 (<span th:text="${monetaryFund}"></span>)
 		+ 交易性金融资产<span th:text="${tradeFinassetNotfvtpl}"></span> 
@@ -63,7 +63,11 @@ trtd{
 	<div>毛利率:<span th:text="${finance.mll}"></span></div>
 	<br/>
 	<br/>------------------------------------------------------------<br/>
-	资金博弈:
+	<b>基本面分析:</b>
+	<br/>------------------------------------------------------------<br/>
+	<div th:utext="${codedetail.baseInfo}"></div>
+	<br/>------------------------------------------------------------<br/>
+	<b>资金博弈:</b>
 	<br/>------------------------------------------------------------<br/>
 	<div>前3大股东占比:<span th:text="${topThree}"></span></div>
 	<div>股东人数变化（幅度+次数):<span th:text="${codedetail.holderDate}"></span>--><span th:text="${codedetail.holderNum}"></span></div>
@@ -90,15 +94,19 @@ trtd{
 		</tr>
 	</table>
 	</div>
+	<br/>
+	<br/>
+	<br/>
 	<br/>------------------------------------------------------------<br/>
-	基本信息:<span th:text="${codedetail.baseInfo}"></span>
-	<br/>------------------------------------------------------------<br/>
-	<br/>------------------------------------------------------------<br/>
-	历史记录:
+	<b>历史记录:</b>
 	<br/>------------------------------------------------------------<br/>
 	<div th:each="d: ${histList}">
 		<div>日期:<a target="_blank" th:href="@{'/codehist/'+${d.id}}"><span th:text="${d.id}"></span></a></div>
 	</div>
+	<br/>
+	<br/>
+	<br/>------------------------------------------------------------<br/>
+	<b>其他说明:</b>
 	<br/>------------------------------------------------------------<br/>
 	<div>应付利息:如果较高，公司在大量有息借钱，关联到货币资金和未分配利润。如果货币资金和未分配利润较高，明明有钱为什么借钱？</div>
 	<div>存货资产:库存变现能力弱</div>
