@@ -45,7 +45,8 @@ public class MonitorPool {
 	private int holderNum = 0;// 股东人数(0不预警，date:截止日期）
 	@Field(type = FieldType.Integer)
 	private int buyLowVol = 0;// 地量(0不预警，1多少个交易日）
-
+	@Field(type = FieldType.Integer)
+	private int xjl = 0;// 现金流净额转正(0不预警，1预警）
 	// 增发
 
 	// 短线

@@ -63,7 +63,7 @@ body {
 		<div class="row">
 			<div id="menu"></div>
 			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
-			<div >
+			<div>
 				<div class="input-group">
 					股票代码：<input type="text" class="form-control" id="queryCode">&nbsp;
 				</div>
@@ -163,13 +163,10 @@ body {
 												actions
 														.push('<a target="_blank" href="/web/code/' + value + '">'
 																+ value
-																+ '</a>');
+																+ '</a><br/>'
+																+ row.codeName);
 												return actions.join('');
 											}
-										},
-										{
-											field : 'codeName',
-											title : '名称'
 										},
 										{
 											field : 'monitorDesc',
@@ -177,39 +174,55 @@ body {
 										},
 										{
 											field : 'remark',
-											title : '监听说明'
-										},
-										{
-											field : 'realtime',
-											title : '实时'
+											title : '监听说明',
+											width : 25
 										},
 										{
 											field : 'offline',
-											title : '离线'
+											title : '在/离线',
+											formatter : function(value, row,
+													index) {
+												return row.realtime + "/"
+														+ row.offline;
+											}
 										},
 										{
 											field : 'upPrice',
-											title : '高于某价格'
-										},
-										{
-											field : 'downPrice',
-											title : '低于某价格'
+											title : '价格H/L',
+											formatter : function(value, row,
+													index) {
+												return row.upPrice + "/"
+														+ row.downPrice;
+											}
 										},
 										{
 											field : 'upTodayChange',
-											title : '高于某涨幅'
-										},
-										{
-											field : 'downTodayChange',
-											title : '低于某涨幅'
+											title : '涨幅H/L',
+											formatter : function(value, row,
+													index) {
+												return row.upTodayChange + "/"
+														+ row.downTodayChange;
+											}
 										},
 										{
 											field : 'ykbDesc',
-											title : '快预报'
+											title : '业绩'
 										},
 										{
 											field : 'zfdone',
-											title : '定增完成'
+											title : '定增'
+										},
+										{
+											field : 'holderNum',
+											title : '股东'
+										},
+										{
+											field : 'buyLowVol',
+											title : '地量'
+										},
+										{
+											field : 'xjl',
+											title : '现金流'
 										},
 										{
 											field : 'monitor',

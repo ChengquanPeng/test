@@ -30,7 +30,6 @@ import com.stable.es.dao.base.EsFinYjkbDao;
 import com.stable.es.dao.base.EsFinYjygDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
-import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
@@ -88,13 +87,28 @@ public class FinanceService {
 	private ConceptService conceptService;
 	@Autowired
 	private JysSpider jysSpider;
-	@Autowired
-	private MonitorPoolDao monitorPoolDao;
+//	@Autowired
+//	private MonitorPoolDao monitorPoolDao;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
 
+	// 经营现金流转正监听
+	public void jobXjlWarning() {
+		List<MonitorPool> list = monitorPoolService.getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 1);
+		if (list != null) {
+			for (MonitorPool mp : list) {
+				FinanceBaseInfo fbi = this.getLastFinaceReport(mp.getCode());
+				if (fbi.getJyxjlce() > 0 || fbi.getMgjyxjl() > 0) {
+					WxPushUtil.pushSystem1(
+							mp.getCode() + " 经营现金流净额已转正(" + fbi.getYear() + "年" + fbi.getQuarter() + "季度)");
+				}
+			}
+		}
+	}
+
+	// 快预报监听
 	private void kybMonitor() {
-		List<MonitorPool> list = monitorPoolService.getList("", 0, 0, 1, 0, EsQueryPageUtil.queryPage9999, "", 0, 0);
+		List<MonitorPool> list = monitorPoolService.getList("", 0, 0, 1, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0);
 		if (list != null) {
 			int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -15));
 			for (MonitorPool mp : list) {
@@ -131,7 +145,7 @@ public class FinanceService {
 						}
 						if (find) {
 							mp.setYkb(0);
-							monitorPoolDao.save(mp);
+							// monitorPoolDao.save(mp);
 							if (mp.getYkb() == 1) {
 								sb.append("期望不亏");
 							} else {

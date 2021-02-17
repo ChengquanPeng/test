@@ -33,7 +33,6 @@ import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
-import com.stable.service.model.data.AvgService;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -43,7 +42,6 @@ import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.MonitorPool;
-import com.stable.vo.bus.StockAvgBase;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
@@ -71,8 +69,8 @@ public class MonitorPoolService {
 	private ConceptService conceptService;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
-	@Autowired
-	private AvgService avgService;
+//	@Autowired
+//	private AvgService avgService;
 	@Autowired
 	private ThsBonusSpider thsBonusSpider;
 	@Autowired
@@ -91,6 +89,9 @@ public class MonitorPoolService {
 		c.setDownTodayChange(0);
 		c.setRealtime(0);
 		c.setOffline(0);
+		c.setBuyLowVol(0);
+		c.setHolderNum(0);
+		c.setXjl(0);
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
 		} else {
@@ -109,17 +110,17 @@ public class MonitorPoolService {
 	// 加入监听
 	public void addMonitor(String code, int monitor, int realtime, int offline, double upPrice, double downPrice,
 			double upTodayChange, double downTodayChange, String remark, int ykb, int zfdone, int holderNum,
-			int buyLowVol) {
+			int buyLowVol, int xjl) {
 		if (monitor <= 0) {
 			throw new RuntimeException("monitor<=0 ?");
 		}
-		if (realtime == 0 && offline == 0) {
-			throw new RuntimeException("realtime == 0 && offline == 0 ?");
-		}
-		if (upPrice == 0 && upTodayChange == 0 && downPrice == 0 && downTodayChange == 0) {
-			throw new RuntimeException(
-					"upPrice == 0 && upTodayChange == 0 && downPrice == 0 && downTodayChange == 0 ?");
-		}
+//		if (realtime == 0 && offline == 0) {
+//			throw new RuntimeException("realtime == 0 && offline == 0 ?");
+//		}
+//		if (upPrice == 0 && upTodayChange == 0 && downPrice == 0 && downTodayChange == 0) {
+//			throw new RuntimeException(
+//					"upPrice == 0 && upTodayChange == 0 && downPrice == 0 && downTodayChange == 0 ?");
+//		}
 		MonitorPool c = getMonitorPool(code);
 		c.setUpdateDate(DateUtil.getTodayIntYYYYMMDD());
 		c.setMonitor(monitor);
@@ -133,6 +134,7 @@ public class MonitorPoolService {
 		c.setZfdone(zfdone);
 		c.setHolderNum(holderNum);
 		c.setBuyLowVol(buyLowVol);
+		c.setXjl(xjl);
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
 		} else {
@@ -233,7 +235,7 @@ public class MonitorPoolService {
 		log.info("CodeBaseModel getListForWeb code={},num={},size={},aliasCode={},monitor={},monitoreq={}", code,
 				querypage.getPageNum(), querypage.getPageSize(), aliasCode, monitor, monitoreq);
 
-		List<MonitorPool> list = getList(code, monitor, monitoreq, 0, 0, querypage, aliasCode, 0, 0);
+		List<MonitorPool> list = getList(code, monitor, monitoreq, 0, 0, querypage, aliasCode, 0, 0, 0);
 		List<MonitorPoolResp> res = new LinkedList<MonitorPoolResp>();
 		if (list != null) {
 			for (MonitorPool dh : list) {
@@ -242,11 +244,11 @@ public class MonitorPoolService {
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
 				resp.setMonitorDesc(MonitorType.getCodeName(dh.getMonitor()));
 				if (dh.getYkb() == 0) {
-					resp.setYkbDesc("不预警");
+					resp.setYkbDesc("-");
 				} else if (dh.getYkb() == 1) {
-					resp.setYkbDesc("期望不亏");
+					resp.setYkbDesc("扭亏");
 				} else if (dh.getYkb() == 2) {
-					resp.setYkbDesc("期望亏损");
+					resp.setYkbDesc("亏损");
 				}
 				res.add(resp);
 			}
@@ -255,7 +257,7 @@ public class MonitorPoolService {
 	}
 
 	public List<MonitorPool> getList(String code, int monitor, int monitoreq, int ykb, int zfdone,
-			EsQueryPageReq querypage, String aliasCode, int holderNum, int buyLowVol) {
+			EsQueryPageReq querypage, String aliasCode, int holderNum, int buyLowVol, int xjl) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -276,6 +278,9 @@ public class MonitorPoolService {
 		}
 		if (buyLowVol > 0) {
 			bqb.must(QueryBuilders.rangeQuery("buyLowVol").gt(0));
+		}
+		if (xjl > 0) {
+			bqb.must(QueryBuilders.rangeQuery("xjl").gt(0));
 		}
 		if (monitoreq > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("monitor", monitoreq));
@@ -300,7 +305,7 @@ public class MonitorPoolService {
 
 	// 完成定增预警
 	public void jobZfDoneWarning() {
-		List<MonitorPool> list = getList("", 0, 0, 0, 1, EsQueryPageUtil.queryPage9999, "", 0, 0);
+		List<MonitorPool> list = getList("", 0, 0, 0, 1, EsQueryPageUtil.queryPage9999, "", 0, 0, 0);
 		if (list != null) {
 			int oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));
 			int sysdate = DateUtil.getTodayIntYYYYMMDD();
@@ -328,7 +333,7 @@ public class MonitorPoolService {
 	// 股东人数预警
 	public void jobHolderWarning() {
 		log.info("股东人数预警");
-		List<MonitorPool> list = getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 1, 0);
+		List<MonitorPool> list = getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 1, 0, 0);
 		if (list != null) {
 			// 预警
 			for (MonitorPool mp : list) {
@@ -348,7 +353,7 @@ public class MonitorPoolService {
 
 	// 买点:地量
 	public void jobBuyLowVolWarning() {
-		List<MonitorPool> list = getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 1);
+		List<MonitorPool> list = getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 1, 0);
 		if (list != null) {
 			Integer today = DateUtil.getTodayIntYYYYMMDD();
 			for (MonitorPool mp : list) {
@@ -367,38 +372,38 @@ public class MonitorPoolService {
 		}
 	}
 
-	/**
-	 * 1.短期有9.5%的涨幅
-	 */
-	private boolean isTodayPriceOk(String code, int date) {
-		// 3个月新高，22*3=60
-		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
-				EsQueryPageUtil.queryPage30, SortOrder.DESC);
-		for (TradeHistInfoDaliyNofq r : l2) {
-			if (r.getTodayChangeRate() >= 9.5) {
-				return true;
-			}
-		}
-		log.info("{} 最近30个工作日无大涨交易", code);
-		return false;
-	}
-
-	/**
-	 * 2.均线
-	 */
-	private boolean isWhiteHorseForSortV5(String code, int date) {
-		EsQueryPageReq req = EsQueryPageUtil.queryPage10;
-		List<StockAvgBase> clist30 = avgService.queryListByCodeForModelWithLast60(code, date, req, true);
-		int c = 0;
-		for (StockAvgBase sa : clist30) {
-			if (sa.getAvgPriceIndex30() >= sa.getAvgPriceIndex60()
-					&& sa.getAvgPriceIndex20() >= sa.getAvgPriceIndex30()) {
-				c++;
-			}
-		}
-		if (c >= 8) {
-			return true;
-		}
-		return false;
-	}
+//	/**
+//	 * 1.短期有9.5%的涨幅
+//	 */
+//	private boolean isTodayPriceOk(String code, int date) {
+//		// 3个月新高，22*3=60
+//		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
+//				EsQueryPageUtil.queryPage30, SortOrder.DESC);
+//		for (TradeHistInfoDaliyNofq r : l2) {
+//			if (r.getTodayChangeRate() >= 9.5) {
+//				return true;
+//			}
+//		}
+//		log.info("{} 最近30个工作日无大涨交易", code);
+//		return false;
+//	}
+//
+//	/**
+//	 * 2.均线
+//	 */
+//	private boolean isWhiteHorseForSortV5(String code, int date) {
+//		EsQueryPageReq req = EsQueryPageUtil.queryPage10;
+//		List<StockAvgBase> clist30 = avgService.queryListByCodeForModelWithLast60(code, date, req, true);
+//		int c = 0;
+//		for (StockAvgBase sa : clist30) {
+//			if (sa.getAvgPriceIndex30() >= sa.getAvgPriceIndex60()
+//					&& sa.getAvgPriceIndex20() >= sa.getAvgPriceIndex30()) {
+//				c++;
+//			}
+//		}
+//		if (c >= 8) {
+//			return true;
+//		}
+//		return false;
+//	}
 }

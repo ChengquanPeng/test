@@ -133,8 +133,11 @@ body {
 					</select>
 				</div>
 				<div class="input-group">
-					股东人数：<input type="checkbox" id="holderNum" name="realtime" /><span
+					股东人数：<input type="checkbox" id="holderNum" name="holderNum" /><span
 						id="holderNumDate"></span>
+				</div>
+				<div class="input-group">
+					经营现金流净额转正：<input type="checkbox" id="xjl" name="xjl" />
 				</div>
 				<div class="input-group">
 					买点-地量：<input type="text" class="form-control" id="buyLowVol">&nbsp;(多少天交易日)
@@ -191,6 +194,11 @@ body {
 			if (document.getElementById("holderNum").checked) {
 				holderNum = 1;
 			}
+			var xjl = 0
+			if (document.getElementById("xjl").checked) {
+				xjl = 1;
+			}
+
 			$.ajax({
 				url : "/web/monitorPool/addMonitor", //访问地址--action地址
 				//url : "http://127.0.0.1:8081/web/monitorPool/addMonitor", //访问地址--action地址
@@ -205,6 +213,7 @@ body {
 					downPrice : $('#downPrice').val(),
 					upTodayChange : $('#upTodayChange').val(),
 					ykb : $('#ykb').val(),
+					xjl : xjl,
 					holderNum : holderNum,
 					buyLowVol : $('#buyLowVol').val(),
 					zfdone : $('#zfdone').val(),
@@ -238,7 +247,10 @@ body {
 				if (reData.result.offline == 1) {
 					$('#offline').attr("checked", 'checked');
 				}
-				if (reData.result.holderNum == 1) {
+				if (reData.result.xjl == 1) {
+					$('#xjl').attr("checked", 'checked');
+				}
+				if (reData.result.holderNum > 0) {
 					$('#holderNum').attr("checked", 'checked');
 					$('#holderNumDate').val(reData.result.holderNum);
 				}

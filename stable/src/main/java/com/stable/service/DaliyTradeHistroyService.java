@@ -212,12 +212,17 @@ public class DaliyTradeHistroyService {
 			List<MonitorPool> list = monitorPoolService.getPoolListForMonitor(0, 1);
 			if (list != null) {
 				Map<String, TradeHistInfoDaliyNofq> map = monitorPoolService.getPoolMap2(listNofq);
-				for (MonitorPool mp : list) {
-					TradeHistInfoDaliyNofq d = map.get(mp.getCode());
+				for (MonitorPool cp : list) {
+					if (cp.getDownPrice() <= 0 && cp.getDownTodayChange() <= 0 && cp.getUpPrice() <= 0
+							&& cp.getUpTodayChange() <= 0) {
+						log.info("{} 没有离线价格监听", cp.getCode());
+						continue;
+					}
+					TradeHistInfoDaliyNofq d = map.get(cp.getCode());
 					if (d != null) {
-						if (MonitoringUitl.isOk(mp, d.getTodayChangeRate(), d.getHigh(), d.getLow())) {
-							String s = MonitorType.getCodeName(mp.getMonitor()) + mp.getRemark() + " " + mp.getMsg();
-							WxPushUtil.pushSystem1(mp.getCode() + " " + s);
+						if (MonitoringUitl.isOk(cp, d.getTodayChangeRate(), d.getHigh(), d.getLow())) {
+							String s = MonitorType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
+							WxPushUtil.pushSystem1(cp.getCode() + " " + s);
 						}
 					}
 				}

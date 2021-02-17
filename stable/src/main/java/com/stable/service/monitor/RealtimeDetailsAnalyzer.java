@@ -36,6 +36,11 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		this.codeName = codeName;
 		this.resulter = resulter;
 		this.cp = cp;
+		if (cp.getDownPrice() <= 0 && cp.getDownTodayChange() <= 0 && cp.getUpPrice() <= 0
+				&& cp.getUpTodayChange() <= 0) {
+			log.info("{} {} 没有在线价格监听", code, codeName);
+			return 0;
+		}
 		SinaRealTime srt = SinaRealtimeUitl.get(code);
 		if (srt.getOpen() == 0.0 && srt.getBuy1() == 0.0 && srt.getSell1() == 0.0) {
 			log.info("{} {} SINA 今日疑似停牌或者可能没有集合竞价", code, codeName);
