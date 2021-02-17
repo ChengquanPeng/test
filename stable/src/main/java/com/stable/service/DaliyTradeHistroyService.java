@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.RedisConstant;
-import com.stable.enums.CodeModeType;
+import com.stable.enums.MonitorType;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
@@ -193,7 +193,10 @@ public class DaliyTradeHistroyService {
 				esTradeHistInfoDaliyDao.saveAll(list);
 			}
 			// 离线价格监听
-			priceChk(listNofq);
+			if (isJob) {
+				priceChk(listNofq);
+				monitorPoolService.jobBuyLowVolWarning();
+			}
 			return list.size();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -213,7 +216,7 @@ public class DaliyTradeHistroyService {
 					TradeHistInfoDaliyNofq d = map.get(mp.getCode());
 					if (d != null) {
 						if (MonitoringUitl.isOk(mp, d.getTodayChangeRate(), d.getHigh(), d.getLow())) {
-							String s = CodeModeType.getCodeName(mp.getMonitor()) + mp.getRemark() + " " + mp.getMsg();
+							String s = MonitorType.getCodeName(mp.getMonitor()) + mp.getRemark() + " " + mp.getMsg();
 							WxPushUtil.pushSystem1(mp.getCode() + " " + s);
 						}
 					}

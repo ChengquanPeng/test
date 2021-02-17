@@ -132,6 +132,14 @@ body {
 						<option value="1">预警</option>
 					</select>
 				</div>
+				<div class="input-group">
+					股东人数：<input type="checkbox" id="holderNum" name="realtime" /><span
+						id="holderNumDate"></span>
+				</div>
+				<div class="input-group">
+					买点-地量：<input type="text" class="form-control" id="buyLowVol">&nbsp;(多少天交易日)
+				</div>
+
 				<br />
 				<div class="input-group">
 					<span class="input-group-btn">
@@ -179,6 +187,10 @@ body {
 			if (document.getElementById("offline").checked) {
 				offline = 1;
 			}
+			var holderNum = 0
+			if (document.getElementById("holderNum").checked) {
+				holderNum = 1;
+			}
 			$.ajax({
 				url : "/web/monitorPool/addMonitor", //访问地址--action地址
 				//url : "http://127.0.0.1:8081/web/monitorPool/addMonitor", //访问地址--action地址
@@ -193,6 +205,8 @@ body {
 					downPrice : $('#downPrice').val(),
 					upTodayChange : $('#upTodayChange').val(),
 					ykb : $('#ykb').val(),
+					holderNum : holderNum,
+					buyLowVol : $('#buyLowVol').val(),
 					zfdone : $('#zfdone').val(),
 					downTodayChange : $('#downTodayChange').val()
 				}, //提交给服务器的数据
@@ -224,6 +238,10 @@ body {
 				if (reData.result.offline == 1) {
 					$('#offline').attr("checked", 'checked');
 				}
+				if (reData.result.holderNum == 1) {
+					$('#holderNum').attr("checked", 'checked');
+					$('#holderNumDate').val(reData.result.holderNum);
+				}
 				$('#upPrice').val(reData.result.upPrice);
 				$('#downPrice').val(reData.result.downPrice);
 				$('#upTodayChange').val(reData.result.upTodayChange);
@@ -231,6 +249,7 @@ body {
 				$('#monitor').val(reData.result.monitor);
 				$('#ykb').val(reData.result.ykb);
 				$('#zfdone').val(reData.result.zfdone);
+				$('#buyLowVol').val(reData.result.buyLowVol);
 			}
 		});
 	</script>

@@ -2,7 +2,7 @@ package com.stable.service.monitor;
 
 import java.util.Date;
 
-import com.stable.enums.CodeModeType;
+import com.stable.enums.MonitorType;
 import com.stable.spider.sina.SinaRealTime;
 import com.stable.spider.sina.SinaRealtimeUitl;
 import com.stable.utils.DateUtil;
@@ -46,7 +46,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	}
 
 	public void run() {
-		String msg = CodeModeType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
+		String msg = MonitorType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
 		if (chkCodeClosed) {
 			try {
 				Thread.sleep(TEN_MIN);

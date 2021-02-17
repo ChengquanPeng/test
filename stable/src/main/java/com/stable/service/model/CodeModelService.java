@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
-import com.stable.enums.CodeModeType;
+import com.stable.enums.MonitorType;
 import com.stable.enums.SylType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
@@ -158,8 +158,8 @@ public class CodeModelService {
 					poolList.add(pool);
 				}
 				CodeBaseModel2 model = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listLast, listHist);
-				if (pool.getMonitor() == CodeModeType.ZengFaAuto.getCode()) {// 自动监听归0
-					pool.setMonitor(CodeModeType.NO.getCode());
+				if (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()) {// 自动监听归0
+					pool.setMonitor(MonitorType.NO.getCode());
 					pool.setRealtime(0);
 					pool.setUpTodayChange(0);
 					if (!poolList.contains(pool)) {
@@ -168,8 +168,8 @@ public class CodeModelService {
 
 				}
 				if (model.getZfjjup() > 0 && model.getZfself() > 0) {
-					if (pool.getMonitor() == CodeModeType.NO.getCode()) {
-						pool.setMonitor(CodeModeType.ZengFaAuto.getCode());
+					if (pool.getMonitor() == MonitorType.NO.getCode()) {
+						pool.setMonitor(MonitorType.ZengFaAuto.getCode());
 						pool.setRealtime(1);
 						pool.setUpTodayChange(9);
 						if (!poolList.contains(pool)) {
@@ -1205,7 +1205,7 @@ public class CodeModelService {
 			sb1.append("<font color='green'>绿:</font>" + dh.getBaseGreenDesc());
 		}
 		resp.setBaseInfo(sb1.toString());
-		resp.setMonitorDesc(CodeModeType.getCodeName(dh.getMonitor()));
+		resp.setMonitorDesc(MonitorType.getCodeName(dh.getMonitor()));
 		// 收益率
 		StringBuffer sb2 = new StringBuffer(SylType.getCodeName(dh.getSylType()));
 		sb2.append(Constant.HTML_LINE).append("ttm/jd").append(Constant.HTML_LINE).append(dh.getSylttm()).append("/")

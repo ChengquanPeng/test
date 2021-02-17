@@ -1,5 +1,6 @@
 package com.stable.service.monitor;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,10 +23,11 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
-import com.stable.enums.CodeModeType;
+import com.stable.enums.MonitorType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.MonitorPoolDao;
+import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
@@ -33,11 +35,13 @@ import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.model.data.AvgService;
 import com.stable.spider.ths.ThsBonusSpider;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BonusHist;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.FenHong;
+import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockAvgBase;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
@@ -73,6 +77,8 @@ public class MonitorPoolService {
 	private ThsBonusSpider thsBonusSpider;
 	@Autowired
 	private ChipsZfService chipsZfService;
+	@Autowired
+	private ChipsService chipsService;
 
 	// 移除监听
 	public void delMonit(String code, String remark) {
@@ -102,7 +108,8 @@ public class MonitorPoolService {
 
 	// 加入监听
 	public void addMonitor(String code, int monitor, int realtime, int offline, double upPrice, double downPrice,
-			double upTodayChange, double downTodayChange, String remark, int ykb, int zfdone) {
+			double upTodayChange, double downTodayChange, String remark, int ykb, int zfdone, int holderNum,
+			int buyLowVol) {
 		if (monitor <= 0) {
 			throw new RuntimeException("monitor<=0 ?");
 		}
@@ -124,6 +131,8 @@ public class MonitorPoolService {
 		c.setUpTodayChange(upTodayChange);
 		c.setYkb(ykb);
 		c.setZfdone(zfdone);
+		c.setHolderNum(holderNum);
+		c.setBuyLowVol(buyLowVol);
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
 		} else {
@@ -224,14 +233,14 @@ public class MonitorPoolService {
 		log.info("CodeBaseModel getListForWeb code={},num={},size={},aliasCode={},monitor={},monitoreq={}", code,
 				querypage.getPageNum(), querypage.getPageSize(), aliasCode, monitor, monitoreq);
 
-		List<MonitorPool> list = getList(code, monitor, monitoreq, 0, 0, querypage, aliasCode);
+		List<MonitorPool> list = getList(code, monitor, monitoreq, 0, 0, querypage, aliasCode, 0, 0);
 		List<MonitorPoolResp> res = new LinkedList<MonitorPoolResp>();
 		if (list != null) {
 			for (MonitorPool dh : list) {
 				MonitorPoolResp resp = new MonitorPoolResp();
 				BeanUtils.copyProperties(dh, resp);
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
-				resp.setMonitorDesc(CodeModeType.getCodeName(dh.getMonitor()));
+				resp.setMonitorDesc(MonitorType.getCodeName(dh.getMonitor()));
 				if (dh.getYkb() == 0) {
 					resp.setYkbDesc("不预警");
 				} else if (dh.getYkb() == 1) {
@@ -246,7 +255,7 @@ public class MonitorPoolService {
 	}
 
 	public List<MonitorPool> getList(String code, int monitor, int monitoreq, int ykb, int zfdone,
-			EsQueryPageReq querypage, String aliasCode) {
+			EsQueryPageReq querypage, String aliasCode, int holderNum, int buyLowVol) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -261,6 +270,12 @@ public class MonitorPoolService {
 		}
 		if (ykb > 0) {
 			bqb.must(QueryBuilders.rangeQuery("ykb").gt(0));
+		}
+		if (holderNum > 0) {
+			bqb.must(QueryBuilders.rangeQuery("holderNum").gt(0));
+		}
+		if (buyLowVol > 0) {
+			bqb.must(QueryBuilders.rangeQuery("buyLowVol").gt(0));
 		}
 		if (monitoreq > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("monitor", monitoreq));
@@ -285,7 +300,7 @@ public class MonitorPoolService {
 
 	// 完成定增预警
 	public void jobZfDoneWarning() {
-		List<MonitorPool> list = getList("", 0, 0, 0, 1, EsQueryPageUtil.queryPage9999, "");
+		List<MonitorPool> list = getList("", 0, 0, 0, 1, EsQueryPageUtil.queryPage9999, "", 0, 0);
 		if (list != null) {
 			int oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));
 			int sysdate = DateUtil.getTodayIntYYYYMMDD();
@@ -305,6 +320,48 @@ public class MonitorPoolService {
 					mp.setZfdone(0);
 					monitorPoolDao.save(mp);
 					WxPushUtil.pushSystem1(mp.getCode() + " 已完成增发");
+				}
+			}
+		}
+	}
+
+	// 股东人数预警
+	public void jobHolderWarning() {
+		log.info("股东人数预警");
+		List<MonitorPool> list = getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 1, 0);
+		if (list != null) {
+			// 预警
+			for (MonitorPool mp : list) {
+				List<HolderNum> hml = chipsService.getHolderNumList45(mp.getCode());
+				if (hml != null && hml.size() > 1) {
+					HolderNum hn0 = hml.get(0);
+					if (hn0.getDate() >= mp.getHolderNum()) {
+						boolean islow = hml.get(1).getNum() > hn0.getNum();
+						WxPushUtil.pushSystem1(mp.getCode() + " 股东人数:" + (islow ? "下降" : "上涨"));
+						mp.setHolderNum(DateUtil.getTodayIntYYYYMMDD());
+						monitorPoolDao.save(mp);
+					}
+				}
+			}
+		}
+	}
+
+	// 买点:地量
+	public void jobBuyLowVolWarning() {
+		List<MonitorPool> list = getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 1);
+		if (list != null) {
+			Integer today = DateUtil.getTodayIntYYYYMMDD();
+			for (MonitorPool mp : list) {
+				EsQueryPageReq req = new EsQueryPageReq(mp.getBuyLowVol());
+				List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(mp.getCode(), 0,
+						today, req, SortOrder.DESC);
+				TradeHistInfoDaliyNofq tday = l2.get(0);
+				double l = l2.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getVolume)).get()
+						.getVolume();
+				double factor = CurrencyUitl.topPriceN(l, 1.03);
+				if (tday.getVolume() <= factor) {
+					WxPushUtil.pushSystem1(mp.getCode() + " 差不多已经地量(" + mp.getBuyLowVol() + "交易日),日期从"
+							+ l2.get(l2.size() - 1).getDate() + " " + tday.getDate());
 				}
 			}
 		}

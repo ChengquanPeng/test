@@ -41,6 +41,10 @@ public class MonitorPool {
 	private int ykb = 0;// 快预报(0不预警，1不亏，2亏损）
 	@Field(type = FieldType.Integer)
 	private int zfdone = 0;// 定增预警(0不预警，1预警）
+	@Field(type = FieldType.Integer)
+	private int holderNum = 0;// 股东人数(0不预警，date:截止日期）
+	@Field(type = FieldType.Integer)
+	private int buyLowVol = 0;// 地量(0不预警，1多少个交易日）
 
 	// 增发
 

@@ -17,6 +17,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsHolderNumDao;
 import com.stable.es.dao.base.EsHolderPercentDao;
 import com.stable.service.StockBasicService;
+import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HtmlunitSpider;
@@ -42,6 +43,9 @@ public class ThsHolderSpider {
 	private HtmlunitSpider htmlunitSpider;
 	@Autowired
 	private StockBasicService stockBasicService;
+	@Autowired
+	private MonitorPoolService monitorPoolService;
+
 	private String urlbase = "http://basic.10jqka.com.cn/%s/holder.html?t=%s";
 	private String host = "http://basic.10jqka.com.cn/";
 	private Map<String, String> header;
@@ -50,6 +54,7 @@ public class ThsHolderSpider {
 		try {
 			int sysdate = DateUtil.getTodayIntYYYYMMDD();
 			dofetchHolderInner(sysdate);
+			monitorPoolService.jobHolderWarning();
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "同花顺股东人数异常运行异常..", "", "");
