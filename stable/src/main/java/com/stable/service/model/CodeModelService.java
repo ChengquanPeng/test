@@ -66,6 +66,7 @@ import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaExt;
 import com.stable.vo.bus.ZhiYa;
+import com.stable.vo.http.req.ModelReq;
 import com.stable.vo.http.resp.CodeBaseModelResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -1038,34 +1039,32 @@ public class CodeModelService {
 		return null;
 	}
 
-	public List<CodeBaseModel2> getList(String code, int orderBy, String aliasCode, String conceptName, int asc,
-			EsQueryPageReq querypage, String zfStatus, String monitor, String bred, String byellow, String bblue,
-			String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6, int sort7,
-			int zfbuy, int zfjj, int zfjjup, int zfself) {
+	public List<CodeBaseModel2> getList(ModelReq mr, EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		if (StringUtils.isNotBlank(code)) {
-			String[] cc = code.split(",");
+		if (StringUtils.isNotBlank(mr.getCode())) {
+			String[] cc = mr.getCode().split(",");
 			if (cc.length == 1) {
 				bqb.must(QueryBuilders.matchPhraseQuery("code", cc[0]));
 			} else {
 				bqb.must(QueryBuilders.termsQuery("code", cc));
 			}
-		} else if (StringUtils.isNotBlank(aliasCode)) {
-			List<String> list = conceptService.listCodesByAliasCode(aliasCode);
+		} else if (StringUtils.isNotBlank(mr.getConceptId())) {
+			List<String> list = conceptService.listCodesByAliasCode(mr.getConceptId());
 			if (list != null) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			}
-		} else if (StringUtils.isNotBlank(conceptName)) {
-			List<String> list = listCodeByCodeConceptName(conceptName);
+		} else if (StringUtils.isNotBlank(mr.getConceptName())) {
+			List<String> list = listCodeByCodeConceptName(mr.getConceptName());
 			if (list.size() > 0) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			}
 		}
-		if (StringUtils.isNotBlank(zfStatus)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("zfStatus", Integer.valueOf(zfStatus)));
+		if (StringUtils.isNotBlank(mr.getZfStatus())) {
+			bqb.must(QueryBuilders.matchPhraseQuery("zfStatus", Integer.valueOf(mr.getZfStatus())));
 		}
 		String field = "baseGreen";
 
+		int orderBy = mr.getOrderBy();
 		if (orderBy == 2) {
 			field = "zflastOkDate";
 		} else if (orderBy == 3) {
@@ -1076,8 +1075,8 @@ public class CodeModelService {
 			field = "sylType";
 		}
 
-		if (StringUtils.isNotBlank(monitor)) {
-			int m = Integer.valueOf(monitor);
+		if (StringUtils.isNotBlank(mr.getMonitor())) {
+			int m = Integer.valueOf(mr.getMonitor());
 			if (m == 9999) {
 				bqb.must(QueryBuilders.rangeQuery("monitor").gte(1));
 			} else {
@@ -1085,54 +1084,54 @@ public class CodeModelService {
 			}
 		}
 
-		if (StringUtils.isNotBlank(bred)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("baseRed", Integer.valueOf(bred)));
+		if (StringUtils.isNotBlank(mr.getBred())) {
+			bqb.must(QueryBuilders.matchPhraseQuery("baseRed", Integer.valueOf(mr.getBred())));
 		}
-		if (StringUtils.isNotBlank(byellow)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("baseYellow", Integer.valueOf(byellow)));
+		if (StringUtils.isNotBlank(mr.getByellow())) {
+			bqb.must(QueryBuilders.matchPhraseQuery("baseYellow", Integer.valueOf(mr.getByellow())));
 		}
-		if (StringUtils.isNotBlank(bblue)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("baseBlue", Integer.valueOf(bblue)));
+		if (StringUtils.isNotBlank(mr.getBblue())) {
+			bqb.must(QueryBuilders.matchPhraseQuery("baseBlue", Integer.valueOf(mr.getBblue())));
 		}
-		if (StringUtils.isNotBlank(bgreen)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("baseGreen", Integer.valueOf(bgreen)));
+		if (StringUtils.isNotBlank(mr.getBgreen())) {
+			bqb.must(QueryBuilders.matchPhraseQuery("baseGreen", Integer.valueOf(mr.getBgreen())));
 		}
-		if (StringUtils.isNotBlank(bsyl)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("sylType", Integer.valueOf(bsyl)));
+		if (StringUtils.isNotBlank(mr.getBsyl())) {
+			bqb.must(QueryBuilders.matchPhraseQuery("sylType", Integer.valueOf(mr.getBsyl())));
 		}
 
-		if (zfself == 1) {
+		if (mr.getZfself() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfself", 1));
 		}
-		if (susBigBoss == 1) {
+		if (mr.getSusBigBoss() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("susBigBoss", 1));
 		}
-		if (zfbuy == 1) {
+		if (mr.getZfbuy() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfbuy", 1));
 		}
-		if (susWhiteHors == 1) {
+		if (mr.getSusWhiteHors() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));
 		}
-		if (susZfBoss == 1) {
+		if (mr.getSusZfBoss() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("susZfBoss", 1));
 		}
-		if (sort6 == 1) {
+		if (mr.getSort6() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("sortMode6", 1));
 		}
-		if (sort7 == 1) {
+		if (mr.getSort7() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("sortMode7", 1));
 		}
-		if (zfjj == 1) {
+		if (mr.getZfjj() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfjj", 1));
 		}
-		if (zfjjup == 1) {
+		if (mr.getZfjjup() == 1) {
 			bqb.must(QueryBuilders.rangeQuery("zfjjup").gte(1));
 		}
 //		<option value="3">资产收益率ttm</option>
 //		<option value="4">资产收益率报告期</option>
 //		<option value="5">资产收益评级</option>
 		SortOrder order = SortOrder.DESC;
-		if (asc == 2) {
+		if (mr.getAsc() == 2) {
 			order = SortOrder.ASC;
 		}
 
@@ -1270,18 +1269,10 @@ public class CodeModelService {
 		return resp;
 	}
 
-	public List<CodeBaseModelResp> getListForWeb(String code, int orderBy, String conceptId, String conceptName,
-			int asc, EsQueryPageReq querypage, String zfStatus, String monitor, String bred, String byellow,
-			String bblue, String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6,
-			int sort7, int zfbuy, int zfjj, int zfjjup, int zfself) {
-		log.info(
-				"CodeBaseModel getListForWeb code={},orderBy={},asc={},num={},size={},conceptId={},conceptName={},zfStatus={},sort6={},sort7={},zfself={}",
-				code, orderBy, asc, querypage.getPageNum(), querypage.getPageSize(), conceptId, conceptName, zfStatus,
-				sort6, sort7, zfself);
+	public List<CodeBaseModelResp> getListForWeb(ModelReq mr, EsQueryPageReq querypage) {
+		log.info("CodeBaseModel getListForWeb mr={}", mr);
 
-		List<CodeBaseModel2> list = getList(code, orderBy, conceptId, conceptName, asc, querypage, zfStatus, monitor,
-				bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7, zfbuy, zfjj,
-				zfjjup, zfself);
+		List<CodeBaseModel2> list = getList(mr, querypage);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {
 			for (CodeBaseModel2 dh : list) {

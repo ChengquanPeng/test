@@ -10,6 +10,7 @@ import com.stable.service.TradeCalService;
 import com.stable.service.model.CodeModelService;
 import com.stable.utils.DateUtil;
 import com.stable.vo.http.JsonResult;
+import com.stable.vo.http.req.ModelReq;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 @RequestMapping("/model")
@@ -22,15 +23,10 @@ public class CodeModelController {
 	private TradeCalService tradeCalService;
 
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> codemodellist(String code, int orderBy, int asc, String conceptId,
-			String conceptName, String zfStatus, EsQueryPageReq querypage, String monitor, String bred, String byellow,
-			String bblue, String bgreen, String bsyl, int susBigBoss, int susWhiteHors, int susZfBoss, int sort6,
-			int sort7, int zfbuy, int zfjj, int zfjjup, int zfself) {
+	public ResponseEntity<JsonResult> codemodellist(ModelReq mr, EsQueryPageReq querypage) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(codeModelService.getListForWeb(code, orderBy, conceptId, conceptName, asc, querypage, zfStatus,
-					monitor, bred, byellow, bblue, bgreen, bsyl, susBigBoss, susWhiteHors, susZfBoss, sort6, sort7,
-					zfbuy, zfjj, zfjjup, zfself));
+			r.setResult(codeModelService.getListForWeb(mr, querypage));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
