@@ -69,9 +69,8 @@ public class StockBasicService {
 				}
 				name = CODE_NAME_MAP_LOCAL_HASH.get(code);
 				if (StringUtils.isBlank(name)) {
-					log.warn("已下市股票,code：{}", code);
-					CODE_NAME_MAP_LOCAL_HASH.put(code, "已下市");
-					return "";
+					log.warn("未找到code={},新股或者已退市", code);
+					return code;
 				}
 			}
 		}
