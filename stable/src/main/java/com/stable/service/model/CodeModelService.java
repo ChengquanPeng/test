@@ -35,6 +35,7 @@ import com.stable.service.BonusService;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
+import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.FinanceService;
 import com.stable.service.PlateService;
@@ -57,6 +58,7 @@ import com.stable.vo.HolderAnalyse;
 import com.stable.vo.bus.AnnouncementHist;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.CodeBaseModelHist;
+import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
@@ -113,6 +115,8 @@ public class CodeModelService {
 	private ChipsZfService chipsZfService;
 	@Autowired
 	private BonusService bonusService;
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
 
 	public synchronized void runJobv2(int date) {
 		try {
@@ -158,7 +162,24 @@ public class CodeModelService {
 					pool.setCode(code);
 					poolList.add(pool);
 				}
-				CodeBaseModel2 model = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listLast, listHist);
+				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listHist);
+				listLast.add(newOne);
+
+				// 市值
+				DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code, 0, 1);
+				newOne.setMkv(d.getCircMarketVal());
+				if (d.getCircMarketVal() <= 100.0) {
+					newOne.setMkvType(1);// 小市值
+				} else if (d.getCircMarketVal() <= 350.0) {
+					newOne.setMkvType(2);// 中市值
+				} else if (d.getCircMarketVal() <= 1000.0) {
+					newOne.setMkvType(3);// 大市值
+				} else if (d.getCircMarketVal() <= 2000.0) {
+					newOne.setMkvType(4);// 大市值
+				} else {
+					newOne.setMkvType(5);// 超大市值
+				}
+				// 增发自动监听
 				if (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()) {// 自动监听归0
 					pool.setMonitor(MonitorType.NO.getCode());
 					pool.setRealtime(0);
@@ -168,7 +189,7 @@ public class CodeModelService {
 					}
 
 				}
-				if (model.getZfjjup() > 0 && model.getZfself() > 0) {
+				if (newOne.getZfjjup() > 0 && newOne.getZfself() > 0) {
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
 						pool.setMonitor(MonitorType.ZengFaAuto.getCode());
 						pool.setRealtime(1);
@@ -199,7 +220,7 @@ public class CodeModelService {
 	}
 
 	private CodeBaseModel2 getBaseAnalyse(StockBaseInfo s, int tradeDate, CodeBaseModel2 oldOne,
-			List<CodeBaseModel2> listLast, List<CodeBaseModelHist> listHist) {
+			List<CodeBaseModelHist> listHist) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
 		// 基本面池
@@ -207,7 +228,6 @@ public class CodeModelService {
 		newOne.setId(code);
 		newOne.setCode(code);
 		newOne.setDate(tradeDate);
-		listLast.add(newOne);
 		// 财务
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(code, tradeDate,
 				EsQueryPageUtil.queryPage9999);
@@ -1099,7 +1119,9 @@ public class CodeModelService {
 		if (StringUtils.isNotBlank(mr.getBsyl())) {
 			bqb.must(QueryBuilders.matchPhraseQuery("sylType", Integer.valueOf(mr.getBsyl())));
 		}
-
+		if (mr.getMkvType() > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("mkvType", mr.getMkvType()));
+		}
 		if (mr.getZfself() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfself", 1));
 		}

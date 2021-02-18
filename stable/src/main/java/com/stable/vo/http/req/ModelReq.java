@@ -25,4 +25,5 @@ public class ModelReq {
 	int zfjj;
 	int zfjjup;
 	int zfself;
+	int mkvType;
 }

@@ -37,16 +37,13 @@
 			<div id="menu"></div>
 			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
 			<div>
-				股票代码：<input type="text"  id="queryCode"
-					width="30">
+				股票代码：<input type="text" id="queryCode" width="30">
 			</div>
 			<div>
-				板块名称：<input type="text"  id="conceptName"
-					width="30">
+				板块名称：<input type="text" id="conceptName" width="30">
 			</div>
 			<div>
-				概念id：<input type="text" id="conceptId"
-					width="30">
+				概念id：<input type="text" id="conceptId" width="30">
 			</div>
 			<div>
 				<div class="input-group">
@@ -56,8 +53,7 @@
 						<option value="2">增发完成</option>
 						<option value="3">增发终止</option>
 						<option value="0">无增发</option>
-					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-					收益率:<select id="bsyl"
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 收益率:<select id="bsyl"
 						class="form-control">
 						<option value="" selected="selected">无限制</option>
 						<option value="1">增长</option>
@@ -72,20 +68,17 @@
 						<option value="" selected="selected">无限制</option>
 						<option value="1">有红色</option>
 						<option value="0">无红色</option>
-					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					黄色:<select id="byellow"
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 黄色:<select id="byellow"
 						class="form-control">
 						<option value="" selected="selected">无限制</option>
 						<option value="1">有黄色</option>
 						<option value="0">无黄色</option>
-					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					蓝色:<select id="bblue"
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 蓝色:<select id="bblue"
 						class="form-control">
 						<option value="" selected="selected">无限制</option>
 						<option value="1">有蓝色</option>
 						<option value="0">无蓝色</option>
-					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					绿色:<select id="bgreen"
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 绿色:<select id="bgreen"
 						class="form-control">
 						<option value="" selected="selected">无限制</option>
 						<option value="1">有绿色</option>
@@ -113,12 +106,20 @@
 			</div>
 			<div>
 				<div class="input-group">
-					已完成的增发-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-					自己人增发:<input type="checkbox" id="zfself" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					已完成的增发-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 自己人增发:<input
+						type="checkbox" id="zfself" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					增发购买资产:<input type="checkbox" id="zfbuy" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					增发博弈(自+未):<input type="checkbox" id="susZfBoss" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					增发解禁:<input type="checkbox" id="zfjj" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					增发解禁未涨:<input type="checkbox" id="zfjjup" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					市值类型:<select id="mkvType">
+						<option value="0" selected="selected">无限制</option>
+						<option value="1">小市值(-100亿)</option>
+						<option value="2">中市值(-350亿)</option>
+						<option value="3">中大市值(-1k亿)</option>
+						<option value="4">大市值(-2k亿)</option>
+						<option value="5">超大市值(2k+)</option>
+					</select>
 				</div>
 			</div>
 			<div>
@@ -208,6 +209,7 @@
 									param.bsyl = $('#bsyl').val();
 
 									param.monitor = $('#monitor').val();
+									param.monitor = $('#mkvType').val();
 
 									param.susBigBoss = 0;
 									param.susWhiteHors = 0;
@@ -218,7 +220,7 @@
 									param.zfjj = 0;
 									param.zfjjup = 0;
 									param.zfself = 0;
-									
+
 									if (document.getElementById("zfself").checked) {
 										param.zfself = 1;
 									}
@@ -262,7 +264,9 @@
 														.push('<a target="_blank" href="/web/code/' + value + '">'
 																+ value
 																+ '</a><br/>'
-																+ row.codeName);
+																+ row.codeName
+																+ '<br/>'
+																+ row.mkv + '亿');
 												return actions.join('');
 											}
 										},
@@ -274,38 +278,44 @@
 												return row.currYear + "-"
 														+ row.currQuarter;
 											}
-										}, {
+										},
+										{
 											field : 'baseInfo',
 											title : '避雷区'
-										}, {
+										},
+										{
 											field : 'sylDesc',
 											title : '收益率'
-										}, {
+										},
+										{
 											field : 'codeType',
 											title : '类型'
-										}, {
+										},
+										{
 											field : 'zfInfo',
 											title : '已完成增发'
-										}, {
+										},
+										{
 											field : 'zfjjInfo',
 											title : '增发解禁'
-										}, {
+										},
+										{
 											field : 'sortInfo',
 											title : '短线'
-										}, {
+										},
+										{
 											field : 'monitorDesc',
 											title : '监听'
-										}, {
+										},
+										{
 											field : 'a',
 											title : '人工',
 											formatter : function(value, row,
 													index) {
 												return "<a target='_blank' href='/web/dashboard/basedata/manual.html?code="
-												+ row.code
-												+ "'>人工</a>";
+														+ row.code + "'>人工</a>";
 											}
-											
-												
+
 										} ],
 								responseHandler : function responseHandler(res) {
 

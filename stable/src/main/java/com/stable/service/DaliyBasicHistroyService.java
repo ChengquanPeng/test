@@ -80,10 +80,17 @@ public class DaliyBasicHistroyService {
 	}
 
 	public DaliyBasicInfo2 queryLastest(String code, int date) {
+		return queryLastest(code, date, 0);
+	}
+
+	public DaliyBasicInfo2 queryLastest(String code, int date, int mkv) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		if (date > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("date", date));
+		}
+		if (mkv > 0) {
+			bqb.must(QueryBuilders.rangeQuery("circMarketVal").gt(0));
 		}
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
