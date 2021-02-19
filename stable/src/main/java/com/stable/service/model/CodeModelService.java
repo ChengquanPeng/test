@@ -189,7 +189,7 @@ public class CodeModelService {
 					}
 
 				}
-				if (newOne.getZfjjup() > 0 && newOne.getZfself() > 0) {
+				if (newOne.getZfjjup() > 0 && newOne.getZfself() > 0 && d.getCircMarketVal() <= 200.0) {// 200亿以内的
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
 						pool.setMonitor(MonitorType.ZengFaAuto.getCode());
 						pool.setRealtime(1);
@@ -406,7 +406,7 @@ public class CodeModelService {
 		// 负债超高-净资产低于应付账款
 		if (fbi.getBustUpRisks() == 1) {
 			newOne.setBaseYellow(1);
-			sb2.append(red++).append(".破产风险:负债超高-净资产低于应付账款").append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".破产风险:负债超高-净资产低于应付账款").append(Constant.HTML_LINE);
 
 			int c = 0;
 			int fort = 0;// 最近2年
@@ -829,14 +829,14 @@ public class CodeModelService {
 				oneYearAgo);
 		if (jianchi != null) {
 			newOne.setBaseBlue(1);
-			sb2.append(yellow++).append(".股东/高管减持:" + (jianchi.getRptDate())).append(Constant.HTML_LINE);
+			sb3.append(yellow++).append(".股东/高管减持:" + (jianchi.getRptDate())).append(Constant.HTML_LINE);
 		}
 		// 回购（半年内）
 		AnnouncementHist huigou = announcementService.getLastRecordType(code, AnnMentParamUtil.huigou.getType(),
 				halfYearAgo);
 		if (huigou != null) {
 			newOne.setBaseBlue(1);
-			sb2.append(yellow++).append(".回购:" + (huigou.getRptDate())).append(Constant.HTML_LINE);
+			sb3.append(yellow++).append(".回购:" + (huigou.getRptDate())).append(Constant.HTML_LINE);
 		}
 
 		if (newOne.getBaseRed() > 0) {

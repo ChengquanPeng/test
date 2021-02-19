@@ -246,7 +246,7 @@ public class MonitorPoolService {
 				if (dh.getYkb() == 0) {
 					resp.setYkbDesc("-");
 				} else if (dh.getYkb() == 1) {
-					resp.setYkbDesc("扭亏");
+					resp.setYkbDesc("不亏");
 				} else if (dh.getYkb() == 2) {
 					resp.setYkbDesc("亏损");
 				}
