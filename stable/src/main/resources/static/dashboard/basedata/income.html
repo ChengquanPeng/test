@@ -129,14 +129,23 @@
 						return row.jyxjl + "<br/>(" + row.mgjyxjl + ")";
 					}
 				}, {
-					field : 'accountrec',
-					title : '应收账款'
-				}, {
 					field : 'sumDebtLd',
-					title : '流动负债'
+					title : '流动负债<br/>(应付款)',
+					formatter : function(value, row, index) {
+						return row.sumDebtLd + "<br/>(" + row.accountPay + ")";
+					}
 				}, {
 					field : 'sumLasset',
-					title : '流动资产'
+					title : '流动资产<br/>(应收款)',
+					formatter : function(value, row, index) {
+						return row.sumLasset + "<br/>(" + row.accountrec + ")";
+					}
+				}, {
+					field : 'a',
+					title : '货币资金<br/>(借款)',
+					formatter : function(value, row, index) {
+						return row.totalAmt + "<br/>(" + row.borrow + ")";
+					}
 				}, {
 					field : 'netAsset',
 					title : '净资产'

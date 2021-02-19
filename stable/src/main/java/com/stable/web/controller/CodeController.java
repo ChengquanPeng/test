@@ -178,6 +178,16 @@ public class CodeController {
 		} catch (Exception e) {
 			model.addAttribute("jyxjlce", "--");
 		}
+		try {
+			model.addAttribute("stborrow", CurrencyUitl.covertToString(fbi.getStborrow()));
+		} catch (Exception e) {
+			model.addAttribute("stborrow", "--");
+		}
+		try {
+			model.addAttribute("ltborrow", CurrencyUitl.covertToString(fbi.getLtborrow()));
+		} catch (Exception e) {
+			model.addAttribute("ltborrow", "--");
+		}
 
 		model.addAttribute("finance", fbi);
 
