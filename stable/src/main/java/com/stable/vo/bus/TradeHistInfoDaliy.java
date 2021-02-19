@@ -54,7 +54,7 @@ public class TradeHistInfoDaliy extends EsBase {
 	// 今日涨跌幅
 	@Field(type = FieldType.Double)
 	private double todayChangeRate;
-	
+
 	@Field(type = FieldType.Integer)
 	private int qfqDate;
 
@@ -86,7 +86,7 @@ public class TradeHistInfoDaliy extends EsBase {
 		this.code = code;
 		String[] vals = lineFromEastMoeny.split(",");
 		int i = 0;
-		this.date = Integer.valueOf(vals[i++].replaceAll("-", ""));// TODO
+		this.date = Integer.valueOf(vals[i++].replaceAll("-", ""));
 		this.open = Double.valueOf(vals[i++]);
 		this.closed = Double.valueOf(vals[i++]);
 		this.high = Double.valueOf(vals[i++]);

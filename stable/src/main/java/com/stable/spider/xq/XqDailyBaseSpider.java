@@ -117,7 +117,6 @@ public class XqDailyBaseSpider {
 		b.setPed(-1);
 		b.setPeTtm(-1);
 		b.setPb(-1);
-		// TODO
 
 		String code = b.getCode();
 		int trytime = 0;

@@ -25,7 +25,7 @@ public class PythonCallUtil {
 			CALL_FORMAT = "/usr/local/bin/python3.8 %s %s";
 		}
 	}
-	// TODO 调用python脚本会CPU会瞬时100%，从而导致python吃CPU导致ES异常退出， 控制python的调用数量：
+	// 调用python脚本会CPU会瞬时100%，从而导致python吃CPU导致ES异常退出， 控制python的调用数量：
 
 	public static List<String> callPythonScript(String pythonScriptPathAndFileName, String params) {
 		try {

@@ -83,7 +83,7 @@ public class TradeHistInfoDaliyNofq extends EsBase {
 		this.code = code;
 		String[] vals = lineFromEastMoeny.split(",");
 		int i = 0;
-		this.date = Integer.valueOf(vals[i++].replaceAll("-", ""));// TODO
+		this.date = Integer.valueOf(vals[i++].replaceAll("-", ""));
 		this.open = Double.valueOf(vals[i++]);
 		this.closed = Double.valueOf(vals[i++]);
 		this.high = Double.valueOf(vals[i++]);

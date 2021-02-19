@@ -194,7 +194,7 @@ public class JysSpider {
 								ah.setUpdate(sysupdate);
 								ah.setType(type);
 								ah.setUrl(d.getString("URL"));
-								ah.setId(ah.getCode() + ah.getRptDate() + ah.getTitle().hashCode());// TODO
+								ah.setId(ah.getCode() + ah.getRptDate() + ah.getTitle().hashCode());//
 								log.info(ah);
 								list.add(ah);
 							}

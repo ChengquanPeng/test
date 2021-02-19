@@ -49,7 +49,6 @@ public class HtmlunitSpider {
 
 			@Override
 			public void warn(String message, String sourceName, int line, String lineSource, int lineOffset) {
-				// TODO Auto-generated method stub
 
 			}
 		});
@@ -156,7 +155,6 @@ public class HtmlunitSpider {
 
 			@Override
 			public void warn(String message, String sourceName, int line, String lineSource, int lineOffset) {
-				// TODO Auto-generated method stub
 
 			}
 		});

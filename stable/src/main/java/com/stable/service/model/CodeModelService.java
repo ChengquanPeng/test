@@ -118,14 +118,14 @@ public class CodeModelService {
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 
-	public synchronized void runJobv2(int date) {
+	public synchronized void runJobv2(int date, boolean isweekend) {
 		try {
 			log.info("param date:{}", date);
 			if (!tradeCalService.isOpen(date)) {
 				date = tradeCalService.getPretradeDate(date);
 			}
 			log.info("final date:{}", date);
-			runByJobv2(date);
+			runByJobv2(date, isweekend);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "CodeModel模型运行异常", "", "");
@@ -133,7 +133,7 @@ public class CodeModelService {
 		}
 	}
 
-	private synchronized void runByJobv2(int tradeDate) {
+	private synchronized void runByJobv2(int tradeDate, boolean isweekend) {
 		Date now = new Date();
 		threYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -1000));
 		oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
@@ -189,6 +189,9 @@ public class CodeModelService {
 					}
 
 				}
+				if (isweekend) {
+					newOne.setZfjjup(priceLifeService.noupYear(code));// 至少N年未大涨?
+				}
 				if (newOne.getZfjjup() > 0 && newOne.getZfself() > 0 && d.getCircMarketVal() <= 200.0) {// 200亿以内的
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
 						pool.setMonitor(MonitorType.ZengFaAuto.getCode());
@@ -199,7 +202,6 @@ public class CodeModelService {
 						}
 					}
 				}
-
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -249,7 +251,6 @@ public class CodeModelService {
 		newOne.setHolderNum(ha.getAnaRes());
 		newOne.setHolderDate(ha.getDate());
 
-		newOne.setZfjjup(0);
 		newOne.setZfjj(0);
 		newOne.setZfjjDate(0);
 		newOne.setSortMode7(0);
@@ -259,7 +260,6 @@ public class CodeModelService {
 			sortModel(newOne);// 短线模型
 			zfjj(newOne);// 限售解禁T
 		}
-//		买点: 监听//TODO
 		saveHist(newOne, oldOne, listHist);// 历史
 		return newOne;
 	}
@@ -307,10 +307,7 @@ public class CodeModelService {
 		if (d > 0) {
 			newOne.setZfjjDate(d);
 			newOne.setZfjj(1);
-			// 至少N年未大涨
-			newOne.setZfjjup(priceLifeService.noupYear(code));
 		}
-
 	}
 
 	private void zfBoss(CodeBaseModel2 newOne) {
@@ -870,6 +867,7 @@ public class CodeModelService {
 			newOne.setSusWhiteHorsSure(oldOne.getSusWhiteHorsSure());
 			newOne.setSortMode6Sure(oldOne.getSortMode6Sure());
 			newOne.setSortMode7Sure(oldOne.getSortMode7Sure());
+			newOne.setZfjjup(oldOne.getZfjjup());
 		}
 	}
 
