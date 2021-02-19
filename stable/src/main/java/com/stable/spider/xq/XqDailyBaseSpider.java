@@ -165,25 +165,43 @@ public class XqDailyBaseSpider {
 						} else if (s.contains(F5)) {// "流通值";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
-								b.setCircMarketVal(Double.valueOf(s.split(SPLIT)[1].replace("亿", "")));
+								b.setCircMarketVal(Double.valueOf(s.split(SPLIT)[1].replace(CurrencyUitl.YI, "")));
 							} catch (Exception e) {
+								try {
+									String wy = s.split(SPLIT)[1].replace(CurrencyUitl.YI, "");
+									if (wy.contains(CurrencyUitl.WAN)) {
+										b.setCircMarketVal(
+												Double.valueOf(s.split(SPLIT)[1].replace(CurrencyUitl.YI, "")) * 10000);
+									}
+								} catch (Exception e2) {
+
+								}
 							}
 						} else if (s.contains(F6)) {// "总市值";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
-								b.setTotalMarketVal(Double.valueOf(s.split(SPLIT)[1].replace("亿", "")));
+								b.setTotalMarketVal(Double.valueOf(s.split(SPLIT)[1].replace(CurrencyUitl.YI, "")));
 							} catch (Exception e) {
+								try {
+									String wy = s.split(SPLIT)[1].replace(CurrencyUitl.YI, "");
+									if (wy.contains(CurrencyUitl.WAN)) {
+										b.setTotalMarketVal(
+												Double.valueOf(s.split(SPLIT)[1].replace(CurrencyUitl.YI, "")) * 10000);
+									}
+								} catch (Exception e2) {
+
+								}
 							}
 						} else if (s.contains(F7)) {// "总股本";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
-								b.setTotalShare(Double.valueOf(s.split(SPLIT)[1].replace("亿", "")));
+								b.setTotalShare(Double.valueOf(s.split(SPLIT)[1].replace(CurrencyUitl.YI, "")));
 							} catch (Exception e) {
 							}
 						} else if (s.contains(F8)) {// "floatShare";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
-								b.setFloatShare(Double.valueOf(s.split(SPLIT)[1].replace("亿", "")));
+								b.setFloatShare(Double.valueOf(s.split(SPLIT)[1].replace(CurrencyUitl.YI, "")));
 							} catch (Exception e) {
 							}
 						} else {
