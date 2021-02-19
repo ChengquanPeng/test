@@ -224,6 +224,6 @@ public class CurrencyUitl {
 //		System.err.println(CurrencyUitl.covertToString(997));
 //		System.err.println(CurrencyUitl.covertToString(-9978890000.0f));
 //		System.err.println(CurrencyUitl.covertToString(-9970000.0f));
-		System.err.println(CurrencyUitl.topPriceN(100, 1.03));
+		System.err.println(CurrencyUitl.cutProfit(100, 210));
 	}
 }

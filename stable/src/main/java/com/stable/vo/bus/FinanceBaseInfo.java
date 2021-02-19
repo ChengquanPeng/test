@@ -78,6 +78,10 @@ public class FinanceBaseInfo extends EsBase {
 	@Field(type = FieldType.Double)
 	private double tradeFinassetNotfvtpl; // 交易性金融资产
 	@Field(type = FieldType.Double)
+	private double stborrow;// 短期借款
+	@Field(type = FieldType.Double)
+	private double ltborrow;// 长期借款
+	@Field(type = FieldType.Double)
 	private double accountrec;// 应收账款（是否自己贴钱在干活，同行业比较）
 	@Field(type = FieldType.Double)
 	private double accountPay;// 应付账款:欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算
@@ -97,6 +101,8 @@ public class FinanceBaseInfo extends EsBase {
 	private int fundNotOk = 1;// 是否资金紧张:资金紧张: 货币资金-流动负债, <=0
 	@Field(type = FieldType.Double)
 	private int fundNotOk2 = 0;// interestPay
+	@Field(type = FieldType.Double)
+	private int fundNotOk3 = 0;// 疑似财务三高
 	@Field(type = FieldType.Double)
 	private int bustUpRisks = 1;// 是否有破产风险：应付账款:欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算
 

@@ -523,20 +523,23 @@ public class CodeModelService {
 				}
 			}
 		}
-
-		if (fbi.getFundNotOk() == 1 || fbi.getFundNotOk2() == 1) {
+		if (fbi.getFundNotOk3() == 1) {
 			newOne.setBaseYellow(1);
-			if (fbi.getFundNotOk() == 1) {
-				sb2.append(yellow++).append(".资金紧张:流动负债高于货币资金").append(Constant.HTML_LINE);
-			} else {
-				sb2.append(yellow++).append(".资金紧张:应付利息较高").append(Constant.HTML_LINE);
-			}
+			sb2.append(yellow++).append(".财务疑似三高,核查各报告期短长期借款和货币资金").append(Constant.HTML_LINE);
+		}
+		if (fbi.getFundNotOk() == 1) {
+			newOne.setBaseYellow(1);
+			sb2.append(yellow++).append(".资金紧张:流动负债高于流动/货币资金30%以上").append(Constant.HTML_LINE);
+		}
+		if (fbi.getFundNotOk2() == 1) {
+			newOne.setBaseYellow(1);
+			sb2.append(yellow++).append(".资金紧张:应付利息较高").append(Constant.HTML_LINE);
 
 			int c = 0;
 			int fort = 0;// 最近2年
 			if (fbis.size() > 2) {
 				for (FinanceBaseInfo ft : fbis) {
-					if (ft.getFundNotOk() == 1 || ft.getFundNotOk2() == 1) {
+					if (ft.getFundNotOk2() == 1) {
 						c++;
 					}
 					fort++;
@@ -548,7 +551,7 @@ public class CodeModelService {
 			// 连续3季度
 			if (c >= 3) {
 				newOne.setBaseRed(1);
-				sb1.append(red++).append(".暴雷风险:连续3季度资金紧张").append(Constant.HTML_LINE);
+				sb1.append(red++).append(".暴雷风险:连续3季度资金紧张-应付利息高").append(Constant.HTML_LINE);
 			} else {// 最近2年
 				// 连续季度
 				c = 0;
@@ -558,13 +561,13 @@ public class CodeModelService {
 					if (fort > 8) {
 						break;
 					}
-					if (ft.getFundNotOk() == 1 || ft.getFundNotOk2() == 1) {
+					if (ft.getFundNotOk2() == 1) {
 						c++;
 					}
 				}
 				if (c >= (fbis.size() / 2)) {
 					newOne.setBaseRed(1);
-					sb1.append(red++).append(".暴雷风险:最近" + c + "季度资金紧张").append(Constant.HTML_LINE);
+					sb1.append(red++).append(".暴雷风险:最近" + c + "季度资金紧张-应付利息高").append(Constant.HTML_LINE);
 				}
 			}
 		}
@@ -718,19 +721,19 @@ public class CodeModelService {
 			if (hy.getMll() > 0 && hy.getMll() > hy.getMllAvg() && hy.getMllRank() <= 5) {
 				newOne.setBaseYellow(1);
 				sb2.append(yellow++)
-						.append(".(需人工)毛利率:" + hy.getMll() + " 行业平均:" + hy.getMllAvg() + ", 行业排名:" + hy.getMllRank())
+						.append(".毛利率:" + hy.getMll() + " 行业平均:" + hy.getMllAvg() + ", 行业排名:" + hy.getMllRank())
 						.append(Constant.HTML_LINE);
 			}
 			if (hy.getYszk() > 0 && hy.getYszk() > hy.getYszkAvg() && hy.getYszkRank() <= 5) {
 				newOne.setBaseYellow(1);
-				sb2.append(yellow++).append(
-						".(需人工)应收账款:" + hy.getYszk() + " 行业平均:" + hy.getYszkAvg() + ", 行业排名:" + hy.getYszkRank())
+				sb2.append(yellow++)
+						.append(".应收账款:" + hy.getYszk() + " 行业平均:" + hy.getYszkAvg() + ", 行业排名:" + hy.getYszkRank())
 						.append(Constant.HTML_LINE);
 			}
 			if (hy.getXjl() < 0 && hy.getXjl() < hy.getXjlAvg() && hy.getXjlRank() <= 5) {
 				newOne.setBaseYellow(1);
 				sb2.append(yellow++)
-						.append(".(需人工)现金流:" + hy.getXjl() + " 行业平均:" + hy.getXjlAvg() + ", 行业排名:" + hy.getXjlRank())
+						.append(".现金流:" + hy.getXjl() + " 行业平均:" + hy.getXjlAvg() + ", 行业排名:" + hy.getXjlRank())
 						.append(Constant.HTML_LINE);
 			}
 		}

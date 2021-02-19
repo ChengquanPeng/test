@@ -38,7 +38,7 @@ public class EastmoneyZcfzbSpider {
 	 * 
 	 * @param code 6位普通股票代码
 	 * @param type 0按报告期、1=年报
-	 * @return http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=1&code=SZ300750
+	 *             http://f10.eastmoney.com/NewFinanceAnalysis/zcfzbAjax?companyType=4&reportDateType=0&reportType=2&endDate=&code=SZ002752
 	 */
 	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/zcfzbAjax?companyType=4&reportDateType=%s&reportType=2&endDate=&code=%s&t=%s";
 
@@ -87,10 +87,7 @@ public class EastmoneyZcfzbSpider {
 						fzb.setInventory(Double.valueOf(data.getString("INVENTORY")));// 存货资产
 					} catch (Exception e) {
 					}
-					try {
-						fzb.setMonetaryFund(Double.valueOf(data.getString("MONETARYFUND")));// 货币资金
-					} catch (Exception e) {
-					}
+
 					try {
 						fzb.setAccountrec(Double.valueOf(data.getString("ACCOUNTREC")));// 应收账款（是否自己贴钱在干活，同行业比较）
 					} catch (Exception e) {
@@ -112,7 +109,20 @@ public class EastmoneyZcfzbSpider {
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setTradeFinassetNotfvtpl(Double.valueOf(data.getString("TRADE_FINASSET_NOTFVTPL")));
+						fzb.setMonetaryFund(Double.valueOf(data.getString("MONETARYFUND")));// 货币资金
+					} catch (Exception e) {
+					}
+					try {
+						fzb.setTradeFinassetNotfvtpl(Double.valueOf(data.getString("TRADE_FINASSET_NOTFVTPL")));// 可交易金融资产
+					} catch (Exception e) {
+					}
+
+					try {
+						fzb.setStborrow(Double.valueOf(data.getString("STBORROW")));// 短期借款-STBORROW
+					} catch (Exception e) {
+					}
+					try {
+						fzb.setLtborrow(Double.valueOf(data.getString("LTBORROW")));// 长期借款-LTBORROW
 					} catch (Exception e) {
 					}
 //					System.err.println(fzb + " " + CurrencyUitl.covertToString(fzb.getSumAsset()) + " "

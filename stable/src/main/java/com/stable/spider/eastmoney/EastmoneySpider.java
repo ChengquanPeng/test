@@ -136,7 +136,7 @@ public class EastmoneySpider {
 	 * @return http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=1&code=SZ300750
 	 */
 	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=%s&code=%s";
-	static final double chkLine = CurrencyUitl.YI_N.doubleValue() * 10;// 10亿
+	static final double Yi10 = CurrencyUitl.YI_N.doubleValue() * 10;// 10亿
 
 	public static List<FinanceBaseInfoPage> getNewFinanceAnalysis(String code, int type) {
 		int trytime = 0;
@@ -150,124 +150,135 @@ public class EastmoneySpider {
 				for (int i = 0; i < objects.size(); i++) {
 					JSONObject data = objects.getJSONObject(i);
 					String date = data.get("date").toString(); // 年报日期
-					FinanceBaseInfoPage fbi = new FinanceBaseInfoPage(code, Integer.valueOf(date.replaceAll("-", "")));
+					FinanceBaseInfoPage page = new FinanceBaseInfoPage(code, Integer.valueOf(date.replaceAll("-", "")));
 					try {
 						Double yyzsrtbzz = data.getDouble("yyzsrtbzz"); // 营业总收入同比增长(%)
-						fbi.setYyzsrtbzz(yyzsrtbzz);
+						page.setYyzsrtbzz(yyzsrtbzz);
 					} catch (Exception e) {
 					}
 					try {
 						Double gsjlrtbzz = data.getDouble("gsjlrtbzz"); // 归属净利润同比增长(%)
-						fbi.setGsjlrtbzz(gsjlrtbzz);
+						page.setGsjlrtbzz(gsjlrtbzz);
 					} catch (Exception e) {
 					}
 					try {
 						Double kfjlrtbzz = data.getDouble("kfjlrtbzz"); // 扣非净利润同比增长(%)
-						fbi.setKfjlrtbzz(kfjlrtbzz);
+						page.setKfjlrtbzz(kfjlrtbzz);
 					} catch (Exception e) {
 					}
 
 					try {
 						Long yyzsr = CurrencyUitl.covertToLong(data.get("yyzsr").toString()); // 营业总收入
-						fbi.setYyzsr(yyzsr);
+						page.setYyzsr(yyzsr);
 					} catch (Exception e) {
 					}
 					try {
 						Long gsjlr = CurrencyUitl.covertToLong(data.get("gsjlr").toString()); // 归属净利润
-						fbi.setGsjlr(gsjlr);
+						page.setGsjlr(gsjlr);
 					} catch (Exception e) {
 					}
 					try {
 						Long kfjlr = CurrencyUitl.covertToLong(data.get("kfjlr").toString()); // 扣非净利润同比增长(%)
-						fbi.setKfjlr(kfjlr);
+						page.setKfjlr(kfjlr);
 					} catch (Exception e) {
 					}
 					try {
 						Double jqjzcsyl = data.getDouble("jqjzcsyl"); // 加权净资产收益率(%)
-						fbi.setJqjzcsyl(CurrencyUitl.roundHalfUp(jqjzcsyl));
-						fbi.setSyldjd(CurrencyUitl.roundHalfUp(jqjzcsyl / (double) fbi.getQuarter()));
+						page.setJqjzcsyl(CurrencyUitl.roundHalfUp(jqjzcsyl));
+						page.setSyldjd(CurrencyUitl.roundHalfUp(jqjzcsyl / (double) page.getQuarter()));
 					} catch (Exception e) {
 					}
 					try {
 						Double tbjzcsyl = data.getDouble("tbjzcsyl"); // 摊薄净资产收益率(%)
-						fbi.setTbjzcsyl(CurrencyUitl.roundHalfUp(tbjzcsyl));
+						page.setTbjzcsyl(CurrencyUitl.roundHalfUp(tbjzcsyl));
 					} catch (Exception e) {
 					}
 					try {
 						Double mgjyxjl = data.getDouble("mgjyxjl");
-						fbi.setMgjyxjl(CurrencyUitl.roundHalfUp(mgjyxjl));
+						page.setMgjyxjl(CurrencyUitl.roundHalfUp(mgjyxjl));
 					} catch (Exception e) {
 					}
 					try {
 						Double mll = data.getDouble("mll");
-						fbi.setMll(CurrencyUitl.roundHalfUp(mll));
+						page.setMll(CurrencyUitl.roundHalfUp(mll));
 					} catch (Exception e) {
 					}
 					try {
 						Double zcfzl = data.getDouble("zcfzl");
-						fbi.setZcfzl(zcfzl);
+						page.setZcfzl(zcfzl);
 					} catch (Exception e) {
 					}
 
-					list.add(fbi);
+					list.add(page);
 				}
 				if (list.size() > 0) {
 					Map<String, FinanceZcfzb> fzb = EastmoneyZcfzbSpider.getZcfzb(code, type);
 					Map<String, FinanceZcfzb> llb = EastmoneyZcfzbSpider.getXjllb(code, type);
-					for (FinanceBaseInfoPage fbi : list) {
-						FinanceZcfzb llba = llb.get(fbi.getId());
+					for (FinanceBaseInfoPage page : list) {
+						FinanceZcfzb llba = llb.get(page.getId());
 						if (llba != null) {
-							fbi.setJyxjlce(llba.getGoodWill());// yxjlce:经营现金流量差额， GoodWill:零时字段
+							page.setJyxjlce(llba.getGoodWill());// yxjlce:经营现金流量差额， GoodWill:零时字段
 						}
-						FinanceZcfzb zcfzb = fzb.get(fbi.getId());
+						FinanceZcfzb zcfzb = fzb.get(page.getId());
 						if (zcfzb != null) {
-							fbi.setDataOk(true);
+							page.setDataOk(true);
 							// 基础数
-							fbi.setGoodWill(zcfzb.getGoodWill());
-							fbi.setSumAsset(zcfzb.getSumAsset());
-							fbi.setSumDebt(zcfzb.getSumDebt());
-							fbi.setNetAsset(zcfzb.getNetAsset());
-							fbi.setInventory(zcfzb.getInventory());
-							fbi.setSumDebtLd(zcfzb.getSumDebtLd());
-							fbi.setNetAsset(zcfzb.getNetAsset());
-							fbi.setMonetaryFund(zcfzb.getMonetaryFund());
-							fbi.setAccountrec(zcfzb.getAccountrec());
-							fbi.setAccountPay(zcfzb.getAccountPay());
-							fbi.setRetaineDearning(zcfzb.getRetaineDearning());
-							fbi.setInterestPay(zcfzb.getInterestPay());
-							fbi.setSumLasset(zcfzb.getSumLasset());
-							fbi.setTradeFinassetNotfvtpl(zcfzb.getTradeFinassetNotfvtpl());
+							page.setGoodWill(zcfzb.getGoodWill());
+							page.setSumAsset(zcfzb.getSumAsset());
+							page.setSumDebt(zcfzb.getSumDebt());
+							page.setNetAsset(zcfzb.getNetAsset());
+							page.setInventory(zcfzb.getInventory());
+							page.setSumDebtLd(zcfzb.getSumDebtLd());
+							page.setNetAsset(zcfzb.getNetAsset());
+							page.setMonetaryFund(zcfzb.getMonetaryFund());
+							page.setAccountrec(zcfzb.getAccountrec());
+							page.setAccountPay(zcfzb.getAccountPay());
+							page.setRetaineDearning(zcfzb.getRetaineDearning());
+							page.setInterestPay(zcfzb.getInterestPay());
+							page.setSumLasset(zcfzb.getSumLasset());
+							page.setTradeFinassetNotfvtpl(zcfzb.getTradeFinassetNotfvtpl());
+							page.setStborrow(zcfzb.getStborrow());
+							page.setLtborrow(zcfzb.getLtborrow());
 
 							// 分析数据
-							if (fbi.getNetAsset() > 0) {
+							if (page.getNetAsset() > 0) {
 								// 商誉-净资产
-								if (fbi.getGoodWill() > 0) {
-									fbi.setGoodWillRatioNetAsset(CurrencyUitl
-											.roundHalfUpWhithPercent(fbi.getGoodWill() / fbi.getNetAsset()));
+								if (page.getGoodWill() > 0) {
+									page.setGoodWillRatioNetAsset(CurrencyUitl
+											.roundHalfUpWhithPercent(page.getGoodWill() / page.getNetAsset()));
 								}
 								// 库存对应的净资产的占比
-								if (fbi.getInventory() > 0) {
-									fbi.setInventoryRatio(CurrencyUitl
-											.roundHalfUpWhithPercent(fbi.getInventory() / fbi.getNetAsset()));
+								if (page.getInventory() > 0) {
+									page.setInventoryRatio(CurrencyUitl
+											.roundHalfUpWhithPercent(page.getInventory() / page.getNetAsset()));
 								}
 							}
-							// 资金紧张: 货币资金-流动负债, <=0
-							fbi.setFundNotOk(
-									(fbi.getMonetaryFund() + fbi.getTradeFinassetNotfvtpl() - fbi.getSumDebtLd()) > 0
-											? 0
-											: 1);
-							if (fbi.getInterestPay() > 0) {// 应付利息:如果较高
-								double jieqian = fbi.getInterestPay() * 10;// 大概借的钱=利息*10倍（10%的利息）
-								if (jieqian > chkLine) {// 借钱超过10亿
-									if (fbi.getMonetaryFund() > chkLine || fbi.getRetaineDearning() > chkLine
-											|| (fbi.getMonetaryFund() + fbi.getRetaineDearning()) > chkLine) {
+							// 资金紧张: 货币资金不能覆盖流动负债,则看比例
+							if ((page.getMonetaryFund() + page.getTradeFinassetNotfvtpl() - page.getSumDebtLd()) < 0) {
+								if (CurrencyUitl.cutProfit((page.getMonetaryFund() + page.getTradeFinassetNotfvtpl()),
+										page.getSumDebtLd()) > 30) {
+									page.setFundNotOk(1);
+								}
+							}
+							// 应付利息较高
+							if (page.getInterestPay() > 0) {// 应付利息:如果较高
+								double jieqian = page.getInterestPay() * 10;// 大概借的钱=利息*10倍（10%的利息）
+								if (jieqian > Yi10) {// 借钱超过10亿
+									if (page.getMonetaryFund() > Yi10 || page.getRetaineDearning() > Yi10
+											|| (page.getMonetaryFund() + page.getRetaineDearning()) > Yi10) {
 										// 如果货币资金和未分配利润较高，明明有钱为什么借钱，
-										fbi.setFundNotOk2(1);
+										page.setFundNotOk2(1);
 									}
 								}
 							}
+							// 财务“三高”
+							double totalAmt = page.getMonetaryFund() + page.getTradeFinassetNotfvtpl();
+							double totalBorrow = page.getStborrow() + page.getLtborrow();
+							if ((totalAmt > Yi10) && (totalBorrow > Yi10)) {
+								page.setFundNotOk3(1);
+							}
 							// 是否有破产风险：应付账款:欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算
-							fbi.setBustUpRisks(fbi.getNetAsset() - fbi.getAccountPay() > 0 ? 0 : 1);
+							page.setBustUpRisks(page.getNetAsset() - page.getAccountPay() > 0 ? 0 : 1);
 //							货币资金：在会计科目上，主要指库存现金、银行存款和其他货币资金三者。
 //							库存现金：指存放于企业财会部门、由出纳人员经管的货币。
 //							银行存款：指企业存入银行或其他金融机构的各种款项。
@@ -276,12 +287,12 @@ public class EastmoneySpider {
 							//
 //						现金及现金等价物对流动性要求更高，需是3个月内可以使用的，所以，需要在在货币资金的基础上剔除一些受限资产。
 							// 应收账款-占比 同行业
-							if (fbi.getSumLasset() > 0) {
-								fbi.setAccountrecRatio(
-										CurrencyUitl.roundHalfUpWhithPercent(fbi.getAccountrec() / fbi.getSumLasset()));
+							if (page.getSumLasset() > 0) {
+								page.setAccountrecRatio(CurrencyUitl
+										.roundHalfUpWhithPercent(page.getAccountrec() / page.getSumLasset()));
 							}
 						} else {
-							int t = YearQuarter(fbi.getYear(), fbi.getQuarter());// ->2020*10=20200,+1=20201;
+							int t = YearQuarter(page.getYear(), page.getQuarter());// ->2020*10=20200,+1=20201;
 							boolean isok = true;
 							for (FinanceBaseInfoPage p : list) {
 								if (YearQuarter(p.getYear(), p.getQuarter()) > t) {
@@ -289,7 +300,7 @@ public class EastmoneySpider {
 								}
 							}
 							if (isok) {
-								fbi.setDataOk(true);
+								page.setDataOk(true);
 							}
 						}
 					}
