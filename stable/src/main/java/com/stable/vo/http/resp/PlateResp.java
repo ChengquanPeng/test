@@ -12,13 +12,17 @@ public class PlateResp {
 	double avgt1 = 0.0;
 	double avgt2 = 0.0;
 	double avgt3 = 0.0;
+	double avgt4 = 0.0;
 
 	double t1 = 0.0;
 	double t2 = 0.0;
 	double t2s = 0.0;
 	double t3 = 0.0;
+	double t4 = 0.0;
+	String t4e = "0";
 
 	int ranking1 = 0;
 	int ranking2 = 0;
 	int ranking3 = 0;
+	int ranking4 = 0;
 }

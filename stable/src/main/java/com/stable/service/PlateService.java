@@ -55,6 +55,8 @@ public class PlateService {
 			int c2 = 1;
 			double t3 = 0.0;// 毛利率
 			int c3 = 1;
+			double t4 = 0.0;// 应收账款
+			int c4 = 1;
 
 			for (String code : list) {
 //				<option value="1">市赚率(股价)</option>
@@ -81,6 +83,11 @@ public class PlateService {
 						t3 += r.getT3();
 						c3++;
 					}
+					if (fbi.getAccountrecRatio() != 0) {
+						t4 += fbi.getAccountrecRatio();
+						c4++;
+						r.setT4e(CurrencyUitl.covertToString(Double.valueOf(fbi.getAccountrec()).longValue()));
+					}
 				}
 				r.setCode(code);
 				r.setCodeName(stockBasicService.getCodeName(code));
@@ -95,16 +102,26 @@ public class PlateService {
 			if (c3 > 1) {
 				c3--;
 			}
+			if (c4 > 1) {
+				c4--;
+			}
 			double avgt1 = CurrencyUitl.roundHalfUp(t1 / (double) c1);
 			double avgt2 = CurrencyUitl.roundHalfUp(t2 / (double) c2);
 			double avgt3 = CurrencyUitl.roundHalfUp(t3 / (double) c3);
+			double avgt4 = CurrencyUitl.roundHalfUp(t4 / (double) c4);
 			for (PlateResp r : rl) {
 				r.setAvgt1(avgt1);
 				r.setAvgt2(avgt2);
 				r.setAvgt3(avgt3);
+				r.setAvgt4(avgt4);
+			}
+			// 排序
+			arSort(rl);
+			for (int i = 0; i < rl.size(); i++) {
+				PlateResp r = rl.get(i);
+				r.setRanking4(i + 1);
 			}
 
-			// 排序
 			sort3(rl);
 			for (int i = 0; i < rl.size(); i++) {
 				PlateResp r = rl.get(i);
@@ -126,6 +143,8 @@ public class PlateService {
 				sort2(rl);
 			} else if (sort == 3) {
 				sort3(rl);
+			} else if (sort == 4) {
+				arSort(rl);
 			}
 		}
 		return rl;
@@ -207,6 +226,18 @@ public class PlateService {
 					return 0;
 				}
 				return o2.getT2() - o1.getT2() > 0 ? 1 : -1;
+			}
+		});
+	}
+
+	private void arSort(List<PlateResp> rl) {
+		Collections.sort(rl, new Comparator<PlateResp>() {
+			@Override
+			public int compare(PlateResp o1, PlateResp o2) {
+				if (o1.getT4() == o2.getT4()) {
+					return 0;
+				}
+				return o2.getT4() - o1.getT4() > 0 ? 1 : -1;
 			}
 		});
 	}

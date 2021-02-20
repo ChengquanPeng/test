@@ -66,22 +66,22 @@ body {
 			<div>
 				<div class="input-group">
 					板块/概念(aliasCode)：<input type="text" class="form-control"
-						id="aliasCode">
-					&nbsp;排序:<select id="sort1">
-								<option value="1">市赚率(股价)</option>
-								<option value="2">资产收益率(季报)</option>
-								<option value="3">毛利率(季报)</option>
-								</select>
+						id="aliasCode"> &nbsp;排序:<select id="sort1">
+						<option value="1">市赚率(股价)</option>
+						<option value="2">资产收益率(季报)</option>
+						<option value="3">毛利率(季报)</option>
+						<option value="4">应收账款占比(季报)</option>
+					</select>
 				</div>
 				<div class="input-group">
 					股票代码组：<input type="text" class="form-control" id="codes">
 				</div>
 			</div>
 			<div class="input-group">
-					<span class="input-group-btn">
-						<button class="btn btn-default" type="button" id="queryAction">
-							Go!</button>
-					</span>
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button" id="queryAction">
+						Go!</button>
+				</span>
 			</div>
 			<div id="rptList" style="width: 100%; hight: 100%; float: left；">
 				<table class="table table-hover" id="cusTable">
@@ -140,7 +140,7 @@ body {
 									param.aliasCode = $('#aliasCode').val();
 									param.codes = $('#codes').val();
 									param.sort = $('#sort1').val();
-									
+
 									return param;
 								},
 								columns : [
@@ -164,32 +164,52 @@ body {
 										{
 											field : 'suspectBigBoss',
 											title : '市赚率<br/>每日',
-											formatter : function(value, row,index) {
-													return row.t1+" avg:"+row.avgt1+" rank:"+row.ranking1;
+											formatter : function(value, row,
+													index) {
+												return row.t1 + " avg:"
+														+ row.avgt1 + " rank:"
+														+ row.ranking1;
 											}
 										},
 										{
 											field : 'inmid',
 											title : '资产收益率<br/>TTM(4季度平均)',
-											formatter : function(value, row,index) {
-												return row.t2+" avg:"+row.avgt2+" rank:"+row.ranking2;
+											formatter : function(value, row,
+													index) {
+												return row.t2 + " avg:"
+														+ row.avgt2 + " rank:"
+														+ row.ranking2;
 											}
 										},
 										{
 											field : 'inmid',
 											title : '资产收益率<br/>本年季度平均',
-											formatter : function(value, row,index) {
+											formatter : function(value, row,
+													index) {
 												return row.t2s;
 											}
 										},
 										{
 											field : 'yjlx',
-											title : '毛利率<br/>报告期',
-											formatter : function(value, row,index) {
-												return row.t3+" avg:"+row.avgt3+" rank:"+row.ranking3;
+											title : '毛利率',
+											formatter : function(value, row,
+													index) {
+												return row.t3 + " avg:"
+														+ row.avgt3 + " rank:"
+														+ row.ranking3;
 											}
-										}
-										],
+										},
+										{
+											field : 'yjlx',
+											title : '应收账款占比<br/>报告期',
+											formatter : function(value, row,
+													index) {
+												return row.t4 + "(" + row.t4e
+														+ ") avg:" + row.avgt4
+														+ " rank:"
+														+ row.ranking4;
+											}
+										} ],
 								responseHandler : function responseHandler(res) {
 
 									var s1 = JSON.stringify(res.result);
