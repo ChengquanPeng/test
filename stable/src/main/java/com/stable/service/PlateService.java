@@ -86,6 +86,7 @@ public class PlateService {
 					if (fbi.getAccountrecRatio() != 0) {
 						t4 += fbi.getAccountrecRatio();
 						c4++;
+						r.setT4(fbi.getAccountrecRatio());
 						r.setT4e(CurrencyUitl.covertToString(Double.valueOf(fbi.getAccountrec()).longValue()));
 					}
 				}
