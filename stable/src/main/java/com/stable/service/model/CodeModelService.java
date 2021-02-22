@@ -829,14 +829,20 @@ public class CodeModelService {
 				oneYearAgo);
 		if (jianchi != null) {
 			newOne.setBaseBlue(1);
-			sb3.append(yellow++).append(".股东/高管减持:" + (jianchi.getRptDate())).append(Constant.HTML_LINE);
+			sb3.append(".股东/高管减持:" + (jianchi.getRptDate())).append(Constant.HTML_LINE);
 		}
 		// 回购（半年内）
 		AnnouncementHist huigou = announcementService.getLastRecordType(code, AnnMentParamUtil.huigou.getType(),
 				halfYearAgo);
 		if (huigou != null) {
 			newOne.setBaseBlue(1);
-			sb3.append(yellow++).append(".回购:" + (huigou.getRptDate())).append(Constant.HTML_LINE);
+			sb3.append(".回购:" + (huigou.getRptDate())).append(Constant.HTML_LINE);
+		}
+		// 快预报
+		String ykb = financeService.getyjkb(fbi.getCode(), fbi.getYear(), fbi.getQuarter());
+		if (StringUtils.isNotBlank(ykb)) {
+			newOne.setBaseBlue(1);
+			sb3.append(ykb).append(Constant.HTML_LINE);
 		}
 
 		if (newOne.getBaseRed() > 0) {

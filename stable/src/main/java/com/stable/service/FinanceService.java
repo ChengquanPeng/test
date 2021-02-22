@@ -445,7 +445,7 @@ public class FinanceService {
 		return null;
 	}
 
-	private FinYjkb getLastFinaceKbByReportDate(String code, int currYear, int currQuarter) {
+	public FinYjkb getLastFinaceKbByReportDate(String code, int currYear, int currQuarter) {
 		FinYjkb yjkb = getLastFinaceKbByReportDate(code);
 		if (yjkb != null) {
 			if ((currYear == yjkb.getYear() && currQuarter < yjkb.getQuarter())// 同一年，季度大于
@@ -459,7 +459,7 @@ public class FinanceService {
 		return null;
 	}
 
-	private FinYjyg getLastFinaceYgByReportDate(String code, int currYear, int currQuarter) {
+	public FinYjyg getLastFinaceYgByReportDate(String code, int currYear, int currQuarter) {
 		FinYjyg yjyg = getLastFinaceYgByReportDate(code);
 		if (yjyg != null) {
 			if ((currYear == yjyg.getYear() && currQuarter < yjyg.getQuarter())// 同一年,季度大于
