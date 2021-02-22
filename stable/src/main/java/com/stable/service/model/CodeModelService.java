@@ -180,14 +180,15 @@ public class CodeModelService {
 					newOne.setMkvType(5);// 超大市值
 				}
 				// 增发自动监听
-				if (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()) {// 自动监听归0
+				if (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()
+						|| pool.getMonitor() == MonitorType.NO.getCode()) {// 自动监听归0
 					pool.setMonitor(MonitorType.NO.getCode());
 					pool.setRealtime(0);
 					pool.setUpTodayChange(0);
 					if (!poolList.contains(pool)) {
 						poolList.add(pool);
 					}
-
+					newOne.setMonitor(MonitorType.NO.getCode());
 				}
 				if (isweekend) {
 					newOne.setZfjjup(priceLifeService.noupYear(code));// 至少N年未大涨?
@@ -200,6 +201,7 @@ public class CodeModelService {
 						if (!poolList.contains(pool)) {
 							poolList.add(pool);
 						}
+						newOne.setMonitor(MonitorType.ZengFaAuto.getCode());
 					}
 				}
 			} catch (Exception e) {
