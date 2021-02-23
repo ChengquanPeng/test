@@ -56,7 +56,7 @@ public class ThsSpider {
 	private static int ths = 1;// 同花顺概念
 	private static int thsHye = 2;// 同花顺行业
 	private static int ths884 = 3;// 同花顺概念2
-	private static String START_THS = "THS";
+	public static String START_THS = "THS";
 	private static String SPIT = "/";
 //	private static Map<String, Concept> allmap = new HashMap<String, Concept>();
 //	static {

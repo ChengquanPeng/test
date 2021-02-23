@@ -24,10 +24,19 @@ public class FetchController {
 		JsonResult r = new JsonResult();
 		try {
 			Concept cp = null;
-			Map<String, Concept> m = thsSpider.getAllAliasCode();
-			for (String key : m.keySet()) {
-				if (code.equals(m.get(key).getAliasCode2())) {
-					cp = m.get(key);
+			if (code.startsWith("881") || code.startsWith("884")) {
+				cp = new Concept();
+				cp.setId(ThsSpider.START_THS + code);
+				cp.setName(code);
+				cp.setHref("http://q.10jqka.com.cn/thshy/detail/code/" + code + "/");
+				// http://q.10jqka.com.cn/thshy/detail/code/881107/
+				// http://q.10jqka.com.cn/thshy/detail/code/884001/
+			} else {
+				Map<String, Concept> m = thsSpider.getAllAliasCode();
+				for (String key : m.keySet()) {
+					if (code.equals(m.get(key).getAliasCode2())) {
+						cp = m.get(key);
+					}
 				}
 			}
 			r.setStatus(JsonResult.OK);
