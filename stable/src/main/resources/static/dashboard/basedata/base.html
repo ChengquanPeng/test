@@ -114,15 +114,8 @@
 					增发购买资产:<input type="checkbox" id="zfbuy" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					增发博弈(自+未):<input type="checkbox" id="susZfBoss" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					增发解禁:<input type="checkbox" id="zfjj" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					增发解禁未涨:<input type="checkbox" id="zfjjup" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					市值类型:<select id="mkvType">
-						<option value="0" selected="selected">无限制</option>
-						<option value="1">小市值(-100亿)</option>
-						<option value="2">中市值(-350亿)</option>
-						<option value="3">中大市值(-1k亿)</option>
-						<option value="4">大市值(-2k亿)</option>
-						<option value="5">超大市值(2k+)</option>
-					</select>
+					小票未涨:<input type="checkbox" id="zfjjup" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					市值大小:<input type="text" id="mkv" width="30" />
 				</div>
 			</div>
 			<div>
@@ -212,7 +205,7 @@
 									param.bsyl = $('#bsyl').val();
 
 									param.monitor = $('#monitor').val();
-									param.mkvType = $('#mkvType').val();
+									param.mkv = $('#mkv').val();
 
 									param.susBigBoss = 0;
 									param.susWhiteHors = 0;

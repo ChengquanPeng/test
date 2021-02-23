@@ -168,17 +168,6 @@ public class CodeModelService {
 				// 市值
 				DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code, 0, 1);
 				newOne.setMkv(d.getCircMarketVal());
-				if (d.getCircMarketVal() <= 100.0) {
-					newOne.setMkvType(1);// 小市值
-				} else if (d.getCircMarketVal() <= 350.0) {
-					newOne.setMkvType(2);// 中市值
-				} else if (d.getCircMarketVal() <= 1000.0) {
-					newOne.setMkvType(3);// 大市值
-				} else if (d.getCircMarketVal() <= 2000.0) {
-					newOne.setMkvType(4);// 大市值
-				} else {
-					newOne.setMkvType(5);// 超大市值
-				}
 				// 增发自动监听
 				if (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()
 						|| pool.getMonitor() == MonitorType.NO.getCode()) {// 自动监听归0
@@ -190,10 +179,10 @@ public class CodeModelService {
 					}
 					newOne.setMonitor(MonitorType.NO.getCode());
 				}
-				if (isweekend) {
+				if (isweekend && d.getCircMarketVal() <= 75.0) {
 					newOne.setZfjjup(priceLifeService.noupYear(code));// 至少N年未大涨?
 				}
-				if (newOne.getZfjjup() > 0 && newOne.getZfself() > 0 && d.getCircMarketVal() <= 200.0) {// 200亿以内的
+				if (newOne.getZfjjup() > 0 && newOne.getZfself() > 0 && d.getCircMarketVal() <= 75.0) {// 75亿以内的
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
 						pool.setMonitor(MonitorType.ZengFaAuto.getCode());
 						pool.setRealtime(1);
@@ -1128,8 +1117,11 @@ public class CodeModelService {
 		if (StringUtils.isNotBlank(mr.getBsyl())) {
 			bqb.must(QueryBuilders.matchPhraseQuery("sylType", Integer.valueOf(mr.getBsyl())));
 		}
-		if (mr.getMkvType() > 0) {
-			bqb.must(QueryBuilders.matchPhraseQuery("mkvType", mr.getMkvType()));
+		if (StringUtils.isNotBlank(mr.getMkv())) {
+			double mkv = Double.valueOf(mr.getMkv());
+			if (mkv > 0) {
+				bqb.must(QueryBuilders.rangeQuery("mkv").lte(mkv));
+			}
 		}
 		if (mr.getZfself() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfself", 1));

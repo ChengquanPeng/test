@@ -113,9 +113,6 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int holderDate;
 
-	// 市值类型
-	@Field(type = FieldType.Integer)
-	private int mkvType;// 1小市值，2中市值，3中大市值，4大市值
 	@Field(type = FieldType.Double)
 	private double mkv;// 市值
 
