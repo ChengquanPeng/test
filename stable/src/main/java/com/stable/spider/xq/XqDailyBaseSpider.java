@@ -169,8 +169,7 @@ public class XqDailyBaseSpider {
 								try {
 									String wy = s.split(SPLIT)[1].replace(CurrencyUitl.YI, "");
 									if (wy.contains(CurrencyUitl.WAN)) {
-										b.setCircMarketVal(
-												Double.valueOf(s.split(SPLIT)[1].replace(CurrencyUitl.YI, "")) * 10000);
+										b.setCircMarketVal(Double.valueOf(wy.replace(CurrencyUitl.WAN, "")) * 10000);
 									}
 								} catch (Exception e2) {
 
@@ -184,8 +183,7 @@ public class XqDailyBaseSpider {
 								try {
 									String wy = s.split(SPLIT)[1].replace(CurrencyUitl.YI, "");
 									if (wy.contains(CurrencyUitl.WAN)) {
-										b.setTotalMarketVal(
-												Double.valueOf(s.split(SPLIT)[1].replace(CurrencyUitl.YI, "")) * 10000);
+										b.setTotalMarketVal(Double.valueOf(wy.replace(CurrencyUitl.WAN, "")) * 10000);
 									}
 								} catch (Exception e2) {
 
@@ -279,7 +277,7 @@ public class XqDailyBaseSpider {
 		XqDailyBaseSpider x = new XqDailyBaseSpider();
 		x.htmlunitSpider = new HtmlunitSpider();
 		DaliyBasicInfo2 b = new DaliyBasicInfo2();
-		b.setCode("300519");
+		b.setCode("600519");
 		System.err.println(x.dofetch(b, DateUtil.getTodayYYYYMMDD()));
 		System.err.println(b);
 	}
