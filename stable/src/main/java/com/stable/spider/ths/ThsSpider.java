@@ -112,7 +112,7 @@ public class ThsSpider {
 //		esCodeConceptDao.deleteAll();
 //	}
 
-	private Map<String, Concept> getAllAliasCode() {
+	public Map<String, Concept> getAllAliasCode() {
 		Map<String, Concept> m = new HashMap<String, Concept>();
 		esConceptDao.findAll().forEach(x -> {
 			if (x.getType() == ths && StringUtils.isNotBlank(x.getAliasCode2()) && !"null".equals(x.getAliasCode2())) {
