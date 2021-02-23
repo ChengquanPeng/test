@@ -12,7 +12,7 @@ import com.stable.spider.ths.ThsSpider;
 import com.stable.vo.bus.Concept;
 import com.stable.vo.http.JsonResult;
 
-@RequestMapping("/fetch/m/")
+@RequestMapping("/fetch/m")
 @RestController
 public class FetchController {
 
@@ -23,8 +23,13 @@ public class FetchController {
 	public ResponseEntity<JsonResult> query(String code, int date) {
 		JsonResult r = new JsonResult();
 		try {
+			Concept cp = null;
 			Map<String, Concept> m = thsSpider.getAllAliasCode();
-			Concept cp = m.get(code);
+			for (String key : m.keySet()) {
+				if (code.equals(m.get(key).getAliasCode2())) {
+					cp = m.get(key);
+				}
+			}
 			r.setStatus(JsonResult.OK);
 			r.setResult(thsSpider.getConceptDaily(cp, cp.getHref(), date));
 		} catch (Exception e) {
