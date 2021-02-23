@@ -112,13 +112,15 @@ public class ThsHolderSpider {
 					HolderNum hn = new HolderNum();
 					hn.setCode(code);
 					try {
-						hn.setDate(DateUtil.convertDate2(jo.get(0).toString()));
-						hn.setNum(Double.valueOf(jo.get(1).toString()).intValue());
-						hn.setAvgPrice(Double.valueOf(jo.get(2).toString()));
-						hn.setId(code + hn.getDate());
-						hn.setSysdate(sysdate);
-						hns.add(hn);
-						fetched = true;
+						if (!"false".equals(jo.get(2).toString())) {
+							hn.setDate(DateUtil.convertDate2(jo.get(0).toString()));
+							hn.setNum(Double.valueOf(jo.get(1).toString()).intValue());
+							hn.setAvgPrice(Double.valueOf(jo.get(2).toString()));
+							hn.setId(code + hn.getDate());
+							hn.setSysdate(sysdate);
+							hns.add(hn);
+							fetched = true;
+						}
 					} catch (Exception e) {
 						log.info(res);
 						e.printStackTrace();
