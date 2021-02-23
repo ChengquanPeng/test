@@ -85,7 +85,9 @@ public class StockBaseInfo extends EsBase {
 	private double totalShare;// float 总股本 （万股）
 	@Field(type = FieldType.Double)
 	private double floatShare;// float 流通股本 （万股）
-	
+	@Field(type = FieldType.Double)
+	private double circZb;// 持股5%以上的股东占比
+
 	public StockBaseInfo() {
 
 	}

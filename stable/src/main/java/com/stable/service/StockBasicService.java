@@ -148,6 +148,14 @@ public class StockBasicService {
 		return jobSynStockList(false);
 	}
 
+	public void synBaseStockInfoCircZb(String code, double circZb) {
+		if (circZb > 0) {
+			StockBaseInfo b = this.getCode(code);
+			b.setCircZb(circZb);
+			redisUtil.set(code, b);
+		}
+	}
+
 	public void synBaseStockInfo(StockBaseInfo base, boolean fromNotTushare) {
 		// esStockBaseInfoDao.save(base);
 

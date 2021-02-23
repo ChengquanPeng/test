@@ -1213,6 +1213,7 @@ public class CodeModelService {
 		CodeBaseModelResp resp = new CodeBaseModelResp();
 		BeanUtils.copyProperties(dh, resp);
 		resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
+		resp.setCircZb(stockBasicService.getCode(dh.getCode()).getCircZb());
 		StringBuffer sb1 = new StringBuffer("");
 		if (dh.getBaseRed() == 1) {
 			sb1.append("<font color='red'>红:</font>" + dh.getBaseRedDesc());

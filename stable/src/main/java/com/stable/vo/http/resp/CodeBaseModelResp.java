@@ -11,6 +11,7 @@ public class CodeBaseModelResp extends CodeBaseModel2 {
 
 	private static final long serialVersionUID = 1L;
 	private String codeName;
+	private double circZb;
 	private String baseInfo;
 	private String sylDesc;
 	private String codeType;
