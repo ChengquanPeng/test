@@ -477,7 +477,7 @@ public class CodeModelService {
 		// 流动负债高于流动资产
 		if (fbi.getSumLasset() < fbi.getSumDebtLd()) {
 			newOne.setBaseYellow(1);
-			sb2.append(red++).append(".流动负债高于流动资产").append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".流动负债高于流动资产").append(Constant.HTML_LINE);
 			int c = 0;
 			int fort = 0;// 最近2年
 			if (fbis.size() > 2) {
