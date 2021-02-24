@@ -113,7 +113,7 @@ public class ThsHolderSpider {
 					HolderNum hn = new HolderNum();
 					hn.setCode(code);
 					try {
-						if (!"false".equals(jo.get(2).toString())) {
+						if (jo.get(1) != null && jo.get(2) != null && !"false".equals(jo.get(2).toString())) {
 							hn.setDate(DateUtil.convertDate2(jo.get(0).toString()));
 							hn.setNum(Double.valueOf(jo.get(1).toString()).intValue());
 							hn.setAvgPrice(Double.valueOf(jo.get(2).toString()));
@@ -154,22 +154,26 @@ public class ThsHolderSpider {
 						e.printStackTrace();
 					}
 					if (j == 1) {
-						// 十大流动股东
+						try {
+							// 十大流动股东
 //						HtmlElement bd_1 = body.getElementsByAttribute("div", "id", "bd_1").get(0);
 //						Iterator<DomElement> it1 = bd_1.getFirstElementChild().getFirstElementChild().getChildElements()
 //								.iterator();
-						key = "fher_" + j;
-						HtmlElement fher_x = body.getElementsByAttribute("div", "id", key).get(0);
-						ltbl(body, fher_x, code, hp5);
+							key = "fher_" + j;
+							HtmlElement fher_x = body.getElementsByAttribute("div", "id", key).get(0);
+							ltbl(body, fher_x, code, hp5);
 //						System.err.println("十大5%股东:");
 //						for (String name : hp5.getList_a()) {
 //							System.err.println(name);
 //						}
-						double circZb = 0.0;
-						for (Double zb : hp5.getList_l()) {
-							circZb += zb;
+							double circZb = 0.0;
+							for (Double zb : hp5.getList_l()) {
+								circZb += zb;
+							}
+							stockBasicService.synBaseStockInfoCircZb(code, circZb);
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-						stockBasicService.synBaseStockInfoCircZb(code, circZb);
 					}
 					j++;
 				}

@@ -149,12 +149,12 @@ trtd {
 	<br />------------------------------------------------------------
 	<br />
 	<div>
-		前3大股东占比:<span th:text="${topThree}">%</span>
-		流通市值:<span th:text="${codedetail.mkv}">亿</span>,持股5%以上股东占比:<span th:text="${codedetail.circZb}">%</span>
+		前3大股东占比:<span th:text="${topThree}"></span>%
+		流通市值:<span th:text="${codedetail.mkv}"></span>亿,持股5%以上股东占比:<span th:text="${codedetail.circZb}"></span>%
 	</div>
 	<div>
 		股东人数变化（幅度+次数):<span th:text="${codedetail.holderDate}"></span>--><span
-			th:text="${codedetail.holderNum}"></span>
+			th:text="${codedetail.holderNum}"></span>%
 	</div>
 	<div>
 		外资持股：比例：<span th:text="${fcratio}"></span>%,金额：<span

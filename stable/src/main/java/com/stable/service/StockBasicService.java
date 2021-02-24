@@ -22,6 +22,7 @@ import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
@@ -151,7 +152,7 @@ public class StockBasicService {
 	public void synBaseStockInfoCircZb(String code, double circZb) {
 		if (circZb > 0) {
 			StockBaseInfo b = this.getCode(code);
-			b.setCircZb(circZb);
+			b.setCircZb(CurrencyUitl.roundHalfUp(circZb));
 			redisUtil.set(code, b);
 		}
 	}
