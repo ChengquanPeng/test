@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsHolderNumDao;
 import com.stable.es.dao.base.EsHolderPercentDao;
 import com.stable.service.StockBasicService;
@@ -21,6 +22,7 @@ import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HtmlunitSpider;
+import com.stable.utils.RedisUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.HolderPercent5;
@@ -46,6 +48,8 @@ public class ThsHolderSpider {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
+	@Autowired
+	private RedisUtil redisUtil;
 
 	private String urlbase = "http://basic.10jqka.com.cn/%s/holder.html?t=%s";
 	private String host = "http://basic.10jqka.com.cn/";
@@ -67,17 +71,22 @@ public class ThsHolderSpider {
 		if (header == null) {
 			header = new HashMap<String, String>();
 		}
+		int chkdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(sysdate + "", -30));
 		List<HolderPercent> hps = new LinkedList<HolderPercent>();
 		List<HolderNum> hns = new LinkedList<HolderNum>();
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
 		for (StockBaseInfo s : codelist) {
 			try {
-				dofetchHolderInner(sysdate, s.getCode(), hns, hps);
-				if (hns.size() > 1000) {
-					esHolderNumDao.saveAll(hns);
-					esHolderPercentDao.saveAll(hps);
-					hps = new LinkedList<HolderPercent>();
-					hns = new LinkedList<HolderNum>();
+				String code = s.getCode();
+				if (redisUtil.get(RedisConstant.RDS_HOLDER_CODE_ + code, 0) <= chkdate
+						&& stockBasicService.online2YearChk(code, sysdate)) {
+					dofetchHolderInner(sysdate, code, hns, hps);
+					if (hns.size() > 1000) {
+						esHolderNumDao.saveAll(hns);
+						esHolderPercentDao.saveAll(hps);
+						hps = new LinkedList<HolderPercent>();
+						hns = new LinkedList<HolderNum>();
+					}
 				}
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
@@ -104,6 +113,8 @@ public class ThsHolderSpider {
 				HtmlPage page = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url, header);
 				HtmlElement body = page.getBody();
 				// System.err.println(body.asText());
+
+				// 股东人数变化
 				HtmlElement boardInfos = body.getElementsByAttribute("div", "id", "gdrsFlashData").get(0);
 				String res = boardInfos.asText();
 				JSONArray jar = JSON.parseArray(res);
@@ -121,12 +132,17 @@ public class ThsHolderSpider {
 							hn.setSysdate(sysdate);
 							hns.add(hn);
 							fetched = true;
+
+							if (i == 0) {
+								redisUtil.set(RedisConstant.RDS_HOLDER_CODE_ + code, hn.getDate());
+							}
 						}
 					} catch (Exception e) {
 						log.info(res);
 						e.printStackTrace();
 					}
 				}
+
 				// 十大股东
 				HtmlElement bd_0 = body.getElementsByAttribute("div", "id", "bd_0").get(0);
 				Iterator<DomElement> it0 = bd_0.getFirstElementChild().getFirstElementChild().getChildElements()
@@ -134,7 +150,6 @@ public class ThsHolderSpider {
 				int j = 1;
 				HolderPercent5 hp5 = new HolderPercent5();
 				while (it0.hasNext()) {
-
 					HtmlElement ther_x = null;
 					String key = "ther_" + j;
 					try {
@@ -155,7 +170,7 @@ public class ThsHolderSpider {
 					}
 					if (j == 1) {
 						try {
-							// 十大流动股东
+							// 十大流通股东最新页
 //						HtmlElement bd_1 = body.getElementsByAttribute("div", "id", "bd_1").get(0);
 //						Iterator<DomElement> it1 = bd_1.getFirstElementChild().getFirstElementChild().getChildElements()
 //								.iterator();

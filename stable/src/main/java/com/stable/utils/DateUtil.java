@@ -169,10 +169,7 @@ public class DateUtil {
 	public static Date addDate(String date, int days) {
 		try {
 			SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(format.parse(date));
-			cal.add(Calendar.DATE, days);
-			return cal.getTime();
+			return addDate(format.parse(date), days);
 		} catch (ParseException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
