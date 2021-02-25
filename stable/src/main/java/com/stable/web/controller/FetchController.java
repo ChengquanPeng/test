@@ -40,7 +40,7 @@ public class FetchController {
 				}
 			}
 			r.setStatus(JsonResult.OK);
-			r.setResult(thsSpider.getConceptDaily(cp, cp.getHref(), date));
+			r.setResult(thsSpider.getConceptDaily(cp, cp.getHref(), date, 1));
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
 			r.setStatus(JsonResult.ERROR);

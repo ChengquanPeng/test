@@ -142,11 +142,11 @@ public class ThsSpider {
 		startinner(date, isFirday);
 	}
 
-	private void startinner(int date, boolean isFirday) {
+	private synchronized void startinner(int date, boolean isFirday) {
 //		if (isFirday) {
 //			deleteAllCodeConcept();
 //		}
-
+		retryList = new LinkedList<Concept>();
 		Map<String, Concept> m = synchGnAndCode(isFirday);
 		if (m == null) {
 			try {
@@ -172,6 +172,17 @@ public class ThsSpider {
 			e.printStackTrace();
 		}
 		dofetchThs884xxx(isFirday);
+		if (retryList.size() > 0) {
+			try {
+				log.info("休眠10分钟-retry");
+				Thread.sleep(Duration.ofMinutes(10).toMillis());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			for (Concept cp : retryList) {
+				getConceptDaily(cp, cp.getHref(), date, 1);
+			}
+		}
 	}
 
 	private void synchConceptDaliy(int date, Map<String, Concept> m) {
@@ -266,7 +277,13 @@ public class ThsSpider {
 		}
 	}
 
+	private List<Concept> retryList = new LinkedList<Concept>();
+
 	public int getConceptDaily(Concept cp, String url, int date) {
+		return getConceptDaily(cp, url, date, 0);
+	}
+
+	public int getConceptDaily(Concept cp, String url, int date, int type) {
 		List<ConceptDaily> list = new LinkedList<ConceptDaily>();
 		int trytime = 0;
 		int r = 0;
@@ -320,6 +337,9 @@ public class ThsSpider {
 						fetched = true;
 						e2.printStackTrace();
 						WxPushUtil.pushSystem1("同花顺概念-每日交易出错," + cp.getName() + ",url=" + url);
+						if (type == 0) {
+							retryList.add(cp);
+						}
 					}
 				} else {
 					fetched = true;
