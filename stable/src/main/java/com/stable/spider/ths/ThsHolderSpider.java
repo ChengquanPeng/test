@@ -58,6 +58,7 @@ public class ThsHolderSpider {
 	public void dofetchHolder() {
 		try {
 			int sysdate = DateUtil.getTodayIntYYYYMMDD();
+			monitorPoolService.jobHolderWarningClearCache();
 			dofetchHolderInner(sysdate);
 			monitorPoolService.jobHolderWarning();
 		} catch (Exception e) {

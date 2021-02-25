@@ -23,6 +23,7 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.constant.RedisConstant;
 import com.stable.enums.MonitorType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
@@ -36,6 +37,7 @@ import com.stable.service.model.CodeModelService;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
+import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BonusHist;
 import com.stable.vo.bus.CodeBaseModel2;
@@ -69,14 +71,14 @@ public class MonitorPoolService {
 	private ConceptService conceptService;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
-//	@Autowired
-//	private AvgService avgService;
 	@Autowired
 	private ThsBonusSpider thsBonusSpider;
 	@Autowired
 	private ChipsZfService chipsZfService;
 	@Autowired
 	private ChipsService chipsService;
+	@Autowired
+	private RedisUtil redisUtil;
 
 	// 移除监听
 	public void delMonit(String code, String remark) {
@@ -331,6 +333,16 @@ public class MonitorPoolService {
 	}
 
 	// 股东人数预警
+	public void jobHolderWarningClearCache() {
+		List<MonitorPool> list = getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 1, 0, 0);
+		if (list != null) {
+			// 预警
+			for (MonitorPool mp : list) {
+				redisUtil.set(RedisConstant.RDS_HOLDER_CODE_ + mp.getCode(), 0);
+			}
+		}
+	}
+
 	public void jobHolderWarning() {
 		log.info("股东人数预警");
 		List<MonitorPool> list = getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 1, 0, 0);
