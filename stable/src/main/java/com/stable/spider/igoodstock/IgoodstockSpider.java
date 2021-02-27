@@ -45,7 +45,7 @@ public class IgoodstockSpider {
 	}
 
 	public void getwz() {
-		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
+		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
 		List<ForeignCapitalSum> upd = new LinkedList<ForeignCapitalSum>();
 		for (StockBaseInfo s : codelist) {
 			try {

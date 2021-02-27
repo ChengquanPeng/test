@@ -616,7 +616,7 @@ public class FinanceService {
 		log.info("行业对比开始");
 		cache = new HashMap<String, FinanceBaseInfoHangye>();
 		List<FinanceBaseInfoHangye> hys = new LinkedList<FinanceBaseInfoHangye>();
-		List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
 		for (StockBaseInfo s : list) {
 			String code = s.getCode();
 			try {
@@ -808,7 +808,7 @@ public class FinanceService {
 
 	public void fetchFinances(int type) {
 		log.info("同步财务报告报告[started]");
-		List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
 		int total = list.size();
 		log.info("股票总数：" + total);
 		List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();

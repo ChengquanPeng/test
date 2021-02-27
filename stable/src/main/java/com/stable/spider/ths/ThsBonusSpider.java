@@ -97,7 +97,7 @@ public class ThsBonusSpider {
 			List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
 			List<FenHong> fhl = new LinkedList<FenHong>();
 			List<BonusHist> bhl = new LinkedList<BonusHist>();
-			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
+			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 			for (StockBaseInfo s : codelist) {
 				try {
 					dofetchBonusInner(date, s.getCode(), zfdl, zfsl, fhl, bhl);
@@ -134,7 +134,7 @@ public class ThsBonusSpider {
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(urlbase, code, System.currentTimeMillis());
-		ThreadsUtil.sleepRandomSecBetween1And5();
+		ThreadsUtil.sleepRandomSecBetween5And15();
 		do {
 			try {
 				log.info(url);

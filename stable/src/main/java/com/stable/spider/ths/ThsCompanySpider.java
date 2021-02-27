@@ -71,7 +71,7 @@ public class ThsCompanySpider {
 		if (header == null) {
 			header = new HashMap<String, String>();
 		}
-		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
+		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
 		List<StockBaseInfo> upd = new LinkedList<StockBaseInfo>();
 		for (StockBaseInfo s : codelist) {
 			try {

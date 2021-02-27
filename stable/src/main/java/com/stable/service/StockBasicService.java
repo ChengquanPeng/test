@@ -187,7 +187,15 @@ public class StockBasicService {
 		}
 	}
 
-	public synchronized List<StockBaseInfo> getAllOnStatusList() {
+	public synchronized List<StockBaseInfo> getAllOnStatusListWithOutSort() {
+		return getAllOnStatusListWithSort(false);
+	}
+
+	public synchronized List<StockBaseInfo> getAllOnStatusListWithSort() {
+		return getAllOnStatusListWithSort(true);
+	}
+
+	private synchronized List<StockBaseInfo> getAllOnStatusListWithSort(boolean issort) {
 		if (LOCAL_ALL_ONLINE_LIST.isEmpty()) {
 			Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
 			// List<StockBaseInfo> list = new LinkedList<StockBaseInfo>();
@@ -202,7 +210,9 @@ public class StockBasicService {
 		}
 		List<StockBaseInfo> copy = new LinkedList<StockBaseInfo>();
 		copy.addAll(LOCAL_ALL_ONLINE_LIST);
-		Collections.sort(copy, sort);
+		if (issort) {
+			Collections.sort(copy, sort);
+		}
 		return copy;
 		// return dbStockBaseInfoDao.getListWithOnStauts();
 	}

@@ -146,7 +146,7 @@ public class CodeModelService {
 		// 基本面
 		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
 		List<CodeBaseModelHist> listHist = new LinkedList<CodeBaseModelHist>();
-		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
+		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
 		// 大牛
 		Map<String, MonitorPool> poolMap = monitorPoolService.getMonitorPoolMap();
 		List<MonitorPool> poolList = new LinkedList<MonitorPool>();
@@ -1308,7 +1308,7 @@ public class CodeModelService {
 
 	public List<String> listCodeByCodeConceptName(String conceptName) {
 		List<String> codes = new LinkedList<String>();
-		List<StockBaseInfo> l = stockBasicService.getAllOnStatusList();
+		List<StockBaseInfo> l = stockBasicService.getAllOnStatusListWithSort();
 		conceptName = conceptName.trim();
 		for (StockBaseInfo s : l) {
 			if (s.getThsIndustry().contains(conceptName)) {

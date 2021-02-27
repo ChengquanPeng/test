@@ -75,7 +75,7 @@ public class ThsHolderSpider {
 		int chkdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(sysdate + "", -30));
 		List<HolderPercent> hps = new LinkedList<HolderPercent>();
 		List<HolderNum> hns = new LinkedList<HolderNum>();
-		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusList();
+		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 		for (StockBaseInfo s : codelist) {
 			try {
 				String code = s.getCode();

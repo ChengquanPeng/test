@@ -66,7 +66,7 @@ public class ThsJiejinSpider {
 				header.put("Upgrade-Insecure-Requests", "1");
 			}
 			int sysdate = DateUtil.getTodayIntYYYYMMDD();
-			List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+			List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithOutSort();
 			List<Jiejin> savelist = new ArrayList<Jiejin>();
 			for (StockBaseInfo b : list) {
 				dofetch(b.getCode(), savelist, sysdate);
@@ -89,7 +89,7 @@ public class ThsJiejinSpider {
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(URL_S, code);
-		ThreadsUtil.sleepRandomSecBetween1And5();
+		ThreadsUtil.sleepRandomSecBetween5And15();
 		do {
 			try {
 				log.info(url);

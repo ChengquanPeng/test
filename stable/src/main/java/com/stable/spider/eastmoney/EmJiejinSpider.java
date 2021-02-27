@@ -40,7 +40,7 @@ public class EmJiejinSpider {
 			@Override
 			public void run() {
 				try {
-					List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+					List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
 					List<Jiejin> savelist = new ArrayList<Jiejin>();
 					for (StockBaseInfo b : list) {
 

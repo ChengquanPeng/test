@@ -43,7 +43,7 @@ public class ThsPlateSpider {
 			@Override
 			public void run() {
 				try {
-					List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+					List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
 					List<StockBaseInfo> upd = new LinkedList<StockBaseInfo>();
 					int needUpd = 0;
 

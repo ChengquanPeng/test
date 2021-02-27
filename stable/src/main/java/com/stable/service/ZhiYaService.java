@@ -40,7 +40,7 @@ public class ZhiYaService {
 	public void fetchBySun() {
 		int update = DateUtil.getTodayIntYYYYMMDD();
 		int endDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), (-365 * 5)));
-		List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
 		int total = list.size();
 		log.info("总数：" + total);
 		List<ZhiYa> rl = new LinkedList<ZhiYa>();

@@ -662,7 +662,7 @@ public class DaliyTradeHistroyService {
 				new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.MANUAL, "手动*全部历史,日交易,date=" + date) {
 					public Object mycall() {
 						log.info("手动*全部历史,日交易[started]");
-						List<StockBaseInfo> list = stockBasicService.getAllOnStatusList();
+						List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
 						for (StockBaseInfo s : list) {
 							redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + s.getCode());
 						}
