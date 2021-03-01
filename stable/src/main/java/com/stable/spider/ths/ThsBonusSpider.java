@@ -134,7 +134,7 @@ public class ThsBonusSpider {
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(urlbase, code, System.currentTimeMillis());
-		ThreadsUtil.sleepRandomSecBetween5And15();
+		ThreadsUtil.sleepRandomSecBetween15And30();
 		do {
 			try {
 				log.info(url);

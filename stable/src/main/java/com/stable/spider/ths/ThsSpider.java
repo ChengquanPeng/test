@@ -289,7 +289,7 @@ public class ThsSpider {
 		int r = 0;
 		boolean fetched = false;
 		do {
-			ThreadsUtil.sleepRandomSecBetween5And15();
+			ThreadsUtil.sleepRandomSecBetween15And30();
 			HtmlPage page = null;
 			HtmlElement body = null;
 			try {
@@ -389,7 +389,7 @@ public class ThsSpider {
 			DomElement table = null;
 			HtmlPage page = null;
 			try {
-				ThreadsUtil.sleepRandomSecBetween5And15();
+				ThreadsUtil.sleepRandomSecBetween15And30();
 				page = htmlunitSpider.getHtmlPageFromUrl(url);
 				table = page.getBody().getFirstElementChild();
 
@@ -499,7 +499,7 @@ public class ThsSpider {
 			cp.setAliasCode2(map.get(cp.getCode()).getAliasCode2());
 			return;
 		}
-		ThreadsUtil.sleepRandomSecBetween5And15();
+		ThreadsUtil.sleepRandomSecBetween15And30();
 
 		HtmlPage page = null;
 		try {
@@ -527,7 +527,7 @@ public class ThsSpider {
 		int trytime = 0;
 		int stcnt = 0;
 		do {
-			ThreadsUtil.sleepRandomSecBetween5And15();
+			ThreadsUtil.sleepRandomSecBetween15And30();
 
 			String url = String.format(urlbase, index, cp.getCode());
 			log.info(url);

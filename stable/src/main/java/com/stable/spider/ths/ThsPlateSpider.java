@@ -85,7 +85,7 @@ public class ThsPlateSpider {
 		boolean fetched = false;
 		String url = String.format(BASE_URL, code);
 		do {
-			ThreadsUtil.sleepRandomSecBetween1And5();
+			ThreadsUtil.sleepRandomSecBetween15And30();
 			HtmlPage page = null;
 			HtmlElement body = null;
 			try {
@@ -116,7 +116,7 @@ public class ThsPlateSpider {
 			}
 
 			trytime++;
-			ThreadsUtil.sleepRandomSecBetween1And5(trytime);
+			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 			if (trytime >= 10) {
 				fetched = true;
 				WxPushUtil.pushSystem1("同花顺-亮点，主营出错出错code=" + code + ",url=" + url);

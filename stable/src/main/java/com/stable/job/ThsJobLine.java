@@ -41,7 +41,6 @@ public class ThsJobLine {
 				|| week == Calendar.FRIDAY) {
 			log.info("每日股东人数任务开始执行");
 			// 交易日(周一到周五)
-			thsHolderSpider.dofetchHolder();
 		}
 
 		if (week == Calendar.SUNDAY) {
@@ -52,6 +51,7 @@ public class ThsJobLine {
 
 		if (week == Calendar.SATURDAY) {
 			log.info("周六");
+			thsHolderSpider.dofetchHolder();
 			thsBonusSpider.byJob();// 同花顺, 增发&分紅
 			thsJiejinSpider.byJob();// 同花顺, 解禁
 			log.info("同花顺-亮点，主营 fetchAll=true");
@@ -61,4 +61,5 @@ public class ThsJobLine {
 			thsPlateSpider.fetchAll(false);// 同花顺-亮点，主营 多线程
 		}
 	}
+
 }
