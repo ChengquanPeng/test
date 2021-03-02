@@ -89,7 +89,7 @@ public class ThsJiejinSpider {
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(URL_S, code);
-		ThreadsUtil.sleepRandomSecBetween15And30();
+		ThreadsUtil.sleepRandomSecBetween5And15Ths();
 		do {
 			try {
 				log.info(url);

@@ -106,7 +106,7 @@ public class ThsHolderSpider {
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(urlbase, code, System.currentTimeMillis());
-		ThreadsUtil.sleepRandomSecBetween15And30();
+		ThreadsUtil.sleepRandomSecBetween5And15Ths();
 		do {
 			try {
 				log.info(url);
@@ -192,6 +192,9 @@ public class ThsHolderSpider {
 						}
 					}
 					j++;
+					if (j >= 10) {
+						break;
+					}
 				}
 
 			} catch (Exception e2) {
@@ -238,6 +241,10 @@ public class ThsHolderSpider {
 			}
 			if (d >= 5.0) {
 				hp5.getList_a().add(name);
+			}
+
+			if (i >= 10) {
+				break;
 			}
 		}
 		hp.cuteTopTotol();

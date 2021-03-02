@@ -101,4 +101,7 @@ public class ThreadsUtil {
 		}
 	}
 
+	public static void sleepRandomSecBetween5And15Ths() {
+		sleepRandomSecBetween5And15();
+	}
 }

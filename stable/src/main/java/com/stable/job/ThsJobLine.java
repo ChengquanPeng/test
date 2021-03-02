@@ -3,6 +3,8 @@ package com.stable.job;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -62,4 +64,21 @@ public class ThsJobLine {
 		}
 	}
 
+	@PostConstruct
+	private void a() {
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				log.info("周六");
+				thsHolderSpider.dofetchHolder();
+				thsBonusSpider.byJob();// 同花顺, 增发&分紅
+				thsCompanySpider.byJob();// 周日，同花顺-公司资料
+				thsJiejinSpider.byJob();// 同花顺, 解禁
+				log.info("同花顺-亮点，主营 fetchAll=true");
+				thsPlateSpider.fetchAll(true);// 同花顺-亮点，主营 多线程
+			}
+		}).start();
+
+	}
 }

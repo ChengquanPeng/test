@@ -289,7 +289,7 @@ public class ThsSpider {
 		int r = 0;
 		boolean fetched = false;
 		do {
-			ThreadsUtil.sleepRandomSecBetween15And30();
+			ThreadsUtil.sleepRandomSecBetween5And15Ths();
 			HtmlPage page = null;
 			HtmlElement body = null;
 			try {
@@ -389,7 +389,7 @@ public class ThsSpider {
 			DomElement table = null;
 			HtmlPage page = null;
 			try {
-				ThreadsUtil.sleepRandomSecBetween15And30();
+				ThreadsUtil.sleepRandomSecBetween5And15Ths();
 				page = htmlunitSpider.getHtmlPageFromUrl(url);
 				table = page.getBody().getFirstElementChild();
 

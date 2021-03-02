@@ -85,7 +85,7 @@ public class ThsPlateSpider {
 		boolean fetched = false;
 		String url = String.format(BASE_URL, code);
 		do {
-			ThreadsUtil.sleepRandomSecBetween15And30();
+			ThreadsUtil.sleepRandomSecBetween5And15Ths();
 			HtmlPage page = null;
 			HtmlElement body = null;
 			try {
