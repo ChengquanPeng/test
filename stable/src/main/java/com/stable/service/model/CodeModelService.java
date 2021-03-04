@@ -179,6 +179,7 @@ public class CodeModelService {
 					}
 					newOne.setMonitor(MonitorType.NO.getCode());
 				}
+				newOne.setZfjjup(0);
 				if (isweekend && d.getCircMarketVal() <= 100.0) {
 					newOne.setZfjjup(priceLifeService.noupYear(code));// 至少N年未大涨?
 				}
