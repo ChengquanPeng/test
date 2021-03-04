@@ -179,11 +179,25 @@ public class CodeModelService {
 					}
 					newOne.setMonitor(MonitorType.NO.getCode());
 				}
-				newOne.setZfjjup(0);
-				if (isweekend && d.getCircMarketVal() <= 100.0) {
-					newOne.setZfjjup(priceLifeService.noupYear(code));// 至少N年未大涨?
+				// 周末计算-至少N年未大涨?
+				if (isweekend) {
+					newOne.setZfjjup(0);
+					if (d.getCircMarketVal() <= 100.0) {
+						newOne.setZfjjup(priceLifeService.noupYear(code));
+					}
 				}
-				if (newOne.getZfjjup() > 0 && newOne.getZfself() > 0 && d.getCircMarketVal() <= 75.0) {// 75亿以内的
+				// 人工审核是否时间到期？重置
+				if (newOne.getPlst() < tradeDate) {
+					newOne.setPls(0);
+					newOne.setPlst(0);
+				}
+				// 系统自动监听
+				// 1.人工没确认或者确认没问题的：newOne.getPls() != 2
+				// 2.未涨的
+				// 3.增发解禁且未涨
+				// 4.75亿以内（50x150%=75）
+				if (newOne.getPls() != 2 && newOne.getZfjj() > 0 && newOne.getZfjjup() >= 2
+						&& d.getCircMarketVal() <= 75.0) {// 75亿以内的
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
 						pool.setMonitor(MonitorType.ZengFaAuto.getCode());
 						pool.setRealtime(1);
@@ -260,17 +274,13 @@ public class CodeModelService {
 		String code = newOne.getCode();
 		int tradeDate = newOne.getDate();
 
-		if (newOne.getSortMode6Sure() < 2) {
-			// 短线模型6
-			if (sortV6Service.isWhiteHorseForSortV6(sortV6Service.is15DayTodayPriceOk(code, tradeDate))) {
-				newOne.setSortMode6(1);
-			}
+		// 短线模型6
+		if (sortV6Service.isWhiteHorseForSortV6(sortV6Service.is15DayTodayPriceOk(code, tradeDate))) {
+			newOne.setSortMode6(1);
 		}
-		if (newOne.getSortMode7Sure() < 2) {
-			// 短线模型7（箱体震荡新高，是否有波浪走势）
-			if (sortV6Service.isWhiteHorseForSortV7(code, tradeDate)) {
-				newOne.setSortMode7(1);
-			}
+		// 短线模型7（箱体震荡新高，是否有波浪走势）
+		if (sortV6Service.isWhiteHorseForSortV7(code, tradeDate)) {
+			newOne.setSortMode7(1);
 		}
 	}
 
@@ -344,9 +354,6 @@ public class CodeModelService {
 	}
 
 	private void susWhiteHorses(String code, CodeBaseModel2 newOne) {
-		if (newOne.getSusWhiteHorsSure() > 1) {
-			return;
-		}
 		// 是否中线(60日线),TODO,加上市值
 		if (priceLifeService.getLastIndex(code) >= 80
 				&& LineAvgPrice.isWhiteHorseForMidV2(avgService, code, newOne.getDate())) {
@@ -862,11 +869,6 @@ public class CodeModelService {
 		if (oldOne != null) {
 			// 复制一些属性
 			newOne.setMonitor(oldOne.getMonitor());
-			newOne.setSusZfBossSure(oldOne.getSusZfBossSure());
-			newOne.setSusBigBossSure(oldOne.getSusBigBossSure());
-			newOne.setSusWhiteHorsSure(oldOne.getSusWhiteHorsSure());
-			newOne.setSortMode6Sure(oldOne.getSortMode6Sure());
-			newOne.setSortMode7Sure(oldOne.getSortMode7Sure());
 			newOne.setZfjjup(oldOne.getZfjjup());
 		}
 	}
@@ -883,9 +885,6 @@ public class CodeModelService {
 
 	private void findBigBoss2(String code, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis) {
 		log.info("findBigBoss code:{}", code);
-		if (newOne.getSusBigBossSure() > 1) {
-			return;
-		}
 		// 是否符合中线、1.市盈率和ttm在50以内
 //		c.setKbygjl(0);
 //		c.setKbygys(0);
@@ -1101,7 +1100,9 @@ public class CodeModelService {
 				bqb.must(QueryBuilders.matchPhraseQuery("monitor", m));
 			}
 		}
-
+		if (mr.getPls() != -1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("pls", Integer.valueOf(mr.getPls())));
+		}
 		if (StringUtils.isNotBlank(mr.getBred())) {
 			bqb.must(QueryBuilders.matchPhraseQuery("baseRed", Integer.valueOf(mr.getBred())));
 		}
@@ -1253,6 +1254,14 @@ public class CodeModelService {
 		resp.setCodeType(sb4.toString());
 
 		StringBuffer sb5 = new StringBuffer();
+		if (dh.getPls() == 0) {
+			sb5.append("人工: 未确定").append(Constant.HTML_LINE);
+		} else if (dh.getPls() == 1) {
+			sb5.append("人工: 已确定").append(Constant.HTML_LINE);
+		} else if (dh.getPls() == 2) {
+			sb5.append("人工: 排除").append(Constant.HTML_LINE);
+		}
+		// 最近一次增发
 		if (dh.getZflastOkDate() > 0) {
 			sb5.append("日期:").append(dh.getZflastOkDate()).append(Constant.HTML_LINE);
 			if (dh.getZfbuy() == 1) {
@@ -1270,18 +1279,15 @@ public class CodeModelService {
 				sb5.append(",3年内有高送转").append(Constant.HTML_LINE);
 			}
 		}
-		resp.setZfInfo(sb5.toString());
 
+		// 解禁
 		if (dh.getZfjj() == 1) {
-			resp.setZfjjInfo("有增发解禁(" + dh.getZfjjDate() + ")");
+			sb5.append("有增发解禁(" + dh.getZfjjDate() + ")").append(Constant.HTML_LINE);
 		}
 		if (dh.getZfjjup() > 0) {
-			if (dh.getZfjj() == 1) {
-				resp.setZfjjInfo(resp.getZfjjInfo() + "<br/>" + dh.getZfjjup() + "年未大涨");
-			} else {
-				resp.setZfjjInfo(dh.getZfjjup() + "年未大涨");
-			}
+			sb5.append(dh.getZfjjup() + "年未大涨").append(Constant.HTML_LINE);
 		}
+		resp.setZfjjInfo(sb5.toString());
 //		resp.setIncomeShow(dh.getCurrIncomeTbzz() + "%");
 //		if (dh.getForestallIncomeTbzz() > 0) {
 //			resp.setIncomeShow(resp.getIncomeShow() + "(" + dh.getForestallIncomeTbzz() + "%)");
@@ -1318,14 +1324,11 @@ public class CodeModelService {
 		return codes;
 	}
 
-	private String fields[] = { "susZfBossSure", "susBigBossSure", "susWhiteHorsSure", "sortMode6Sure",
-			"sortMode7Sure" };
-
-	public void addManual(String code, int i, int timemonth) {
-		if (i < 0 || i > 4) {
-			throw new RuntimeException("i < 0 || i > 4 ? ");
+	public void addPlsManual(String code, int i, int timemonth) {
+		if (i != 1 && i != 2) {
+			throw new RuntimeException("i != 1 && i != 2 ? ");
 		}
-//		monitor 和上面的对应
+
 		int date = -1;
 		if (timemonth == 9) {
 			date = 0;
@@ -1349,58 +1352,9 @@ public class CodeModelService {
 		}
 		if (date != 1) {
 			CodeBaseModel2 c = getLastOneByCode2(code);
-			if (i == 0) {
-				c.setSusZfBossSure(date);
-			} else if (i == 1) {
-				c.setSusBigBossSure(date);
-			} else if (i == 2) {
-				c.setSusWhiteHorsSure(date);
-			} else if (i == 3) {
-				c.setSortMode6Sure(date);
-			} else if (i == 4) {
-				c.setSortMode7Sure(date);
-			}
+			c.setPls(i);
+			c.setPlst(DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), 365)));
 			codeBaseModel2Dao.save(c);
 		}
 	}
-
-	public void resetSureField() {
-		int date = DateUtil.getTodayIntYYYYMMDD();
-		for (int i = 0; i < fields.length; i++) {
-			List<CodeBaseModel2> l = getList(fields[i], date);
-			if (l != null) {
-				for (CodeBaseModel2 c : l) {
-					if (i == 0) {
-						c.setSusZfBoss(0);
-					} else if (i == 1) {
-						c.setSusBigBoss(0);
-					} else if (i == 2) {
-						c.setSusWhiteHorsSure(0);
-					} else if (i == 3) {
-						c.setSortMode6Sure(0);
-					} else if (i == 4) {
-						c.setSortMode7Sure(0);
-					}
-				}
-				codeBaseModel2Dao.saveAll(l);
-			}
-		}
-	}
-
-	private List<CodeBaseModel2> getList(String filed, int date) {
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.rangeQuery(filed).gt(1).lte(date));// 大于1，小于date
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		Pageable pageable = PageRequest.of(EsQueryPageUtil.queryPage9999.getPageNum(),
-				EsQueryPageUtil.queryPage9999.getPageSize());
-		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
-
-		Page<CodeBaseModel2> page = codeBaseModel2Dao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent();
-		}
-		log.info("no records CodeBaseModels");
-		return null;
-	}
-
 }

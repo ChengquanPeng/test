@@ -115,7 +115,13 @@
 					增发博弈(自+未):<input type="checkbox" id="susZfBoss" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					增发解禁:<input type="checkbox" id="zfjj" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					小票未涨:<input type="checkbox" id="zfjjup" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					市值大小:<input type="text" id="mkv" width="30" />
+					市值大小:<input type="text" id="mkv" width="30" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					人工状态:<select id="pls">
+						<option value="-1" selected="selected">无限制</option>
+						<option value="1">确定</option>
+						<option value="2">排除</option>
+						<option value="0">未确定</option>
+					</select>
 				</div>
 			</div>
 			<div>
@@ -206,6 +212,7 @@
 
 									param.monitor = $('#monitor').val();
 									param.mkv = $('#mkv').val();
+									param.pls = $('#pls').val();
 
 									param.susBigBoss = 0;
 									param.susWhiteHors = 0;
@@ -289,10 +296,6 @@
 										{
 											field : 'codeType',
 											title : '类型'
-										},
-										{
-											field : 'zfInfo',
-											title : '已完成增发'
 										},
 										{
 											field : 'zfjjInfo',

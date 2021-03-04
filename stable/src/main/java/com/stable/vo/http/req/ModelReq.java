@@ -26,4 +26,5 @@ public class ModelReq {
 	int zfjjup;
 	int zfself;
 	String mkv;
+	int pls;
 }
