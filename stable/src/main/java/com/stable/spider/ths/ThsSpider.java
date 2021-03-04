@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,10 +143,13 @@ public class ThsSpider {
 		startinner(date, isFirday);
 	}
 
+	private boolean threadslpChk = true;
+
 	private synchronized void startinner(int date, boolean isFirday) {
 //		if (isFirday) {
 //			deleteAllCodeConcept();
 //		}
+		threadslpChk = true;
 		retryList = new LinkedList<Concept>();
 		Map<String, Concept> m = synchGnAndCode(isFirday);
 		if (m == null) {
@@ -175,7 +179,7 @@ public class ThsSpider {
 		if (retryList.size() > 0) {
 			try {
 				log.info("休眠10分钟-retry");
-				Thread.sleep(Duration.ofMinutes(10).toMillis());
+				Thread.sleep(Duration.ofMinutes(61).toMillis());
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -330,6 +334,22 @@ public class ThsSpider {
 					}
 				}
 				if (!esistingHeading) {
+
+					if (threadslpChk) {
+						long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
+						String tt0 = DateUtil.getTodayYYYYMMDD();
+						long d1650 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+								DateUtil.parseDate(tt0 + "165000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+						long d1900 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+								DateUtil.parseDate(tt0 + "190000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+						if (d1650 <= now && now <= d1900) {
+							ThreadsUtil.sleep(1, TimeUnit.HOURS);
+						}
+						if (now > d1900) {
+							threadslpChk = false;
+						}
+					}
+
 					e2.printStackTrace();
 					trytime++;
 					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
