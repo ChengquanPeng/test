@@ -870,6 +870,8 @@ public class CodeModelService {
 			// 复制一些属性
 			newOne.setMonitor(oldOne.getMonitor());
 			newOne.setZfjjup(oldOne.getZfjjup());
+			newOne.setPls(oldOne.getPls());
+			newOne.setPlst(oldOne.getPlst());
 		}
 	}
 
