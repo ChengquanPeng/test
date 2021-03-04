@@ -179,7 +179,7 @@ public class CodeModelService {
 					}
 					newOne.setMonitor(MonitorType.NO.getCode());
 				}
-				if (isweekend && d.getCircMarketVal() <= 75.0) {
+				if (isweekend && d.getCircMarketVal() <= 100.0) {
 					newOne.setZfjjup(priceLifeService.noupYear(code));// 至少N年未大涨?
 				}
 				if (newOne.getZfjjup() > 0 && newOne.getZfself() > 0 && d.getCircMarketVal() <= 75.0) {// 75亿以内的
@@ -277,14 +277,13 @@ public class CodeModelService {
 	private void chkZf(CodeBaseModel2 newOne) {
 		newOne.setZfStatus(ZfStatus.NO.getCode());
 		newOne.setZfStatusDesc("");
-		ZengFa undone = chipsZfService.getLastZengFa(newOne.getCode(), ZfStatus.ING.getCode());// 是否有正在增发的
+		ZengFa undone = chipsZfService.getLastZengFa(newOne.getCode(), ZfStatus.ING.getCode());// 是否有正在增发的（正在增发的）
 		// start 一年以前
 		if (chipsZfService.isZfDateOk(undone, oneYearAgo)) {
 			newOne.setZfStatus(undone.getStatus());
 			newOne.setZfStatusDesc(undone.getStatusDesc());
 		} else {
-			ZengFa last = chipsZfService.getLastZengFa(newOne.getCode(), ZfStatus.NO.getCode());// 最新的增发
-			// start 一年以前
+			ZengFa last = chipsZfService.getLastZengFa(newOne.getCode(), ZfStatus.NO.getCode());// 最新的增发（一年中的增发)
 			if (chipsZfService.isZfDateOk(last, oneYearAgo)) {// 一年之类是否有增发
 				newOne.setZfStatus(last.getStatus());
 				newOne.setZfStatusDesc(last.getStatusDesc());

@@ -30,6 +30,7 @@ import com.stable.es.dao.base.EsFinYjkbDao;
 import com.stable.es.dao.base.EsFinYjygDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
+import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
@@ -87,8 +88,8 @@ public class FinanceService {
 	private ConceptService conceptService;
 	@Autowired
 	private JysSpider jysSpider;
-//	@Autowired
-//	private MonitorPoolDao monitorPoolDao;
+	@Autowired
+	private MonitorPoolDao monitorPoolDao;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
 
@@ -145,7 +146,7 @@ public class FinanceService {
 						}
 						if (find) {
 							mp.setYkb(0);
-							// monitorPoolDao.save(mp);
+							monitorPoolDao.save(mp);
 							if (mp.getYkb() == 1) {
 								sb.append("期望不亏");
 							} else {
