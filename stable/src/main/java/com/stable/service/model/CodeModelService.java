@@ -1336,6 +1336,7 @@ public class CodeModelService {
 
 		int date = -1;
 		if (timemonth == 9) {
+			i = 0;
 			date = 0;
 		} else {
 			int days = 0;
@@ -1358,7 +1359,7 @@ public class CodeModelService {
 		if (date != 1) {
 			CodeBaseModel2 c = getLastOneByCode2(code);
 			c.setPls(i);
-			c.setPlst(DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), 365)));
+			c.setPlst(date);
 			codeBaseModel2Dao.save(c);
 		}
 	}

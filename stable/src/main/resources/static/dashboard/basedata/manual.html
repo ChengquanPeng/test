@@ -140,14 +140,6 @@ body {
 	</script>
 	<script type="text/javascript">
 		function dianwo() {
-			var realtime = 0
-			if (document.getElementById("realtime").checked) {
-				realtime = 1;
-			}
-			var offline = 0
-			if (document.getElementById("offline").checked) {
-				offline = 1;
-			}
 			$.ajax({
 				url : "/web/model/addManual", //访问地址--action地址
 				//url : "http://127.0.0.1:8081/web/monitorPool/addMonitor", //访问地址--action地址
