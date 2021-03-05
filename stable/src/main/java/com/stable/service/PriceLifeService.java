@@ -183,7 +183,7 @@ public class PriceLifeService {
 		return null;
 	}
 
-	public int noupYear(String code) {
+	public int noupYear(String code, int listdate) {
 		// 第一种情况:一路下跌
 		PriceLife pl = getPriceLife(code);
 		Date now = new Date();
@@ -192,6 +192,9 @@ public class PriceLifeService {
 		int end = DateUtil.formatYYYYMMDDReturnInt(now);
 
 		for (int i = 1; i <= 5; i++) {
+			if (end < listdate) {
+				break;
+			}
 			int start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, i * days));
 			TradeHistInfoDaliy low = getlowest(code, start, end);
 			if (low != null) {// 停牌太久
@@ -213,8 +216,12 @@ public class PriceLifeService {
 		}
 		// 第二种情况:横盘
 		end = DateUtil.formatYYYYMMDDReturnInt(now);
+		int endt = Integer.MAX_VALUE;
 		for (int i = 1; i <= 5; i++) {
 			int start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, i * days));
+			if (endt < listdate) {
+				break;
+			}
 			TradeHistInfoDaliy low = getlowest(code, start, end);
 			if (low != null) {// 停牌太久
 				TradeHistInfoDaliy high = getHighest(code, start, end);
@@ -227,6 +234,7 @@ public class PriceLifeService {
 			} else {
 				break;
 			}
+			endt = start;
 		}
 		if (year >= 2) {
 			return year;
@@ -241,17 +249,17 @@ public class PriceLifeService {
 //			public void run() {
 //				ThreadsUtil.sleepRandomSecBetween1And5();
 //				String today = DateUtil.getTodayYYYYMMDD();
+//				String[] code = { "300873" };
 //				String[] code = { "002405", "002739", "600519", "002752", "300027" };
 //				System.err.println("==============");
 //				for (String c : code) {
 //					// daliyTradeHistroyService.spiderDaliyTradeHistoryInfoFromIPOCenter(c, today,
 //					// 0);
-//					System.err.println(c + ":" + noupYear(c));
+//					System.err.println(c + ":" + noupYear(c, 20150101));
 //				}
 //				System.err.println("==============");
 //			}
 //		}).start();
-//
 //	}
 
 }

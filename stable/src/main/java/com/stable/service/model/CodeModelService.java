@@ -183,7 +183,10 @@ public class CodeModelService {
 				if (isweekend) {
 					newOne.setZfjjup(0);
 					if (d.getCircMarketVal() <= 100.0) {
-						newOne.setZfjjup(priceLifeService.noupYear(code));
+						if (stockBasicService.online2YearChk(code, tradeDate)) {
+							int listdate = Integer.valueOf(s.getList_date());
+							newOne.setZfjjup(priceLifeService.noupYear(code, listdate));
+						}
 					}
 				}
 				// 人工审核是否时间到期？重置
