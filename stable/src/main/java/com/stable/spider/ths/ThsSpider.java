@@ -343,7 +343,7 @@ public class ThsSpider {
 						long d1900 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
 								DateUtil.parseDate(tt0 + "190000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 						if (d1650 <= now && now <= d1900) {
-							ThreadsUtil.sleep(1, TimeUnit.HOURS);
+							ThreadsUtil.sleep(30, TimeUnit.MINUTES);
 						}
 						if (now > d1900) {
 							threadslpChk = false;
@@ -356,9 +356,10 @@ public class ThsSpider {
 					if (trytime >= 10) {
 						fetched = true;
 						e2.printStackTrace();
-						WxPushUtil.pushSystem1("同花顺概念-每日交易出错," + cp.getName() + ",url=" + url);
 						if (type == 0) {
 							retryList.add(cp);
+						} else {
+							WxPushUtil.pushSystem1("同花顺概念-每日交易出错," + cp.getName() + ",url=" + url);
 						}
 					}
 				} else {
