@@ -186,6 +186,7 @@ public class ThsHolderSpider {
 							for (Double zb : hp5.getList_l()) {
 								circZb += zb;
 							}
+							log.info("{} 十大5%股东:{}", code, circZb);
 							stockBasicService.synBaseStockInfoCircZb(code, circZb);
 						} catch (Exception e) {
 							e.printStackTrace();

@@ -171,6 +171,7 @@ public class StockBasicService {
 			base.setCompnayType(old.getCompnayType());
 			base.setFloatShare(old.getFloatShare());
 			base.setTotalShare(old.getTotalShare());
+			base.setCircZb(old.getCircZb());
 		}
 
 		redisUtil.set(base.getCode(), base);
