@@ -73,6 +73,7 @@ public class ThsCompanySpider {
 		}
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
 		List<StockBaseInfo> upd = new LinkedList<StockBaseInfo>();
+		int c = 0;
 		for (StockBaseInfo s : codelist) {
 			try {
 				String r = dofetchInner3(s.getCode());
@@ -89,6 +90,8 @@ public class ThsCompanySpider {
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
 			}
+			c++;
+			log.info("current index:{}", c);
 		}
 		if (upd.size() > 0) {
 			esStockBaseInfoDao.saveAll(upd);

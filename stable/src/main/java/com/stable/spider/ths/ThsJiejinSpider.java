@@ -68,12 +68,15 @@ public class ThsJiejinSpider {
 			int sysdate = DateUtil.getTodayIntYYYYMMDD();
 			List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithOutSort();
 			List<Jiejin> savelist = new ArrayList<Jiejin>();
+			int c = 0;
 			for (StockBaseInfo b : list) {
 				dofetch(b.getCode(), savelist, sysdate);
 				if (savelist.size() > 100) {
 					jiejinDao.saveAll(savelist);
 					savelist = new ArrayList<Jiejin>();
 				}
+				c++;
+				log.info("current index:{}", c);
 			}
 			if (savelist.size() > 0) {
 				jiejinDao.saveAll(savelist);

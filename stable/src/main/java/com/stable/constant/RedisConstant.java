@@ -14,5 +14,5 @@ public class RedisConstant {
 	// 最后除权日
 	public static final String RDS_DIVIDEND_LAST_DAY_ = "RDS_DIVIDEND_LAST_DAY_";
 	// 持股人数(code)
-	public static final String RDS_HOLDER_CODE_ = "RDS_HOLDER_CODE_";
+//	public static final String RDS_HOLDER_CODE_ = "RDS_HOLDER_CODE_";
 }

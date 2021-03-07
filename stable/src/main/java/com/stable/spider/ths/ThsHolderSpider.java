@@ -14,7 +14,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsHolderNumDao;
 import com.stable.es.dao.base.EsHolderPercentDao;
 import com.stable.service.StockBasicService;
@@ -22,12 +21,12 @@ import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HtmlunitSpider;
-import com.stable.utils.RedisUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.HolderPercent5;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.HolderPercent;
+import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -48,18 +47,25 @@ public class ThsHolderSpider {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
-	@Autowired
-	private RedisUtil redisUtil;
 
 	private String urlbase = "http://basic.10jqka.com.cn/%s/holder.html?t=%s";
 	private String host = "http://basic.10jqka.com.cn/";
 	private Map<String, String> header;
 
-	public void dofetchHolder() {
+	public synchronized void dofetchHolder(boolean isWeekEnd) {
 		try {
+			List<String> codesw = null;
+			if (!isWeekEnd) {
+				List<MonitorPool> wlist = monitorPoolService.getHolderWarningList();
+				codesw = new LinkedList<String>();
+				if (wlist != null) {
+					for (MonitorPool mp : wlist) {
+						codesw.add(mp.getCode());
+					}
+				}
+			}
 			int sysdate = DateUtil.getTodayIntYYYYMMDD();
-			monitorPoolService.jobHolderWarningClearCache();
-			dofetchHolderInner(sysdate);
+			dofetchHolderInner(sysdate, isWeekEnd, codesw);
 			monitorPoolService.jobHolderWarning();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -68,30 +74,38 @@ public class ThsHolderSpider {
 		}
 	}
 
-	private void dofetchHolderInner(int sysdate) {
+	private void dofetchHolderInner(int sysdate, boolean isWeekEnd, List<String> codesw) {
 		if (header == null) {
 			header = new HashMap<String, String>();
 		}
-		int chkdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(sysdate + "", -30));
+
+		// int chkdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(sysdate + "",
+		// -30));
 		List<HolderPercent> hps = new LinkedList<HolderPercent>();
 		List<HolderNum> hns = new LinkedList<HolderNum>();
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
+		int c = 0;
 		for (StockBaseInfo s : codelist) {
 			try {
 				String code = s.getCode();
-				if (redisUtil.get(RedisConstant.RDS_HOLDER_CODE_ + code, 0) <= chkdate
-						&& stockBasicService.online2YearChk(code, sysdate)) {
-					dofetchHolderInner(sysdate, code, hns, hps);
-					if (hns.size() > 1000) {
-						esHolderNumDao.saveAll(hns);
-						esHolderPercentDao.saveAll(hps);
-						hps = new LinkedList<HolderPercent>();
-						hns = new LinkedList<HolderNum>();
+				// 周末全量，redisUtil.get(RedisConstant.RDS_HOLDER_CODE_ + code, 0) <= chkdate
+				// 预警，每天
+				if ((isWeekEnd) || codesw.contains(code)) {
+					if (stockBasicService.online2YearChk(code, sysdate)) {
+						dofetchHolderInner(sysdate, code, hns, hps);
+						if (hns.size() > 1000) {
+							esHolderNumDao.saveAll(hns);
+							esHolderPercentDao.saveAll(hps);
+							hps = new LinkedList<HolderPercent>();
+							hns = new LinkedList<HolderNum>();
+						}
 					}
 				}
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
 			}
+			c++;
+			log.info("current index:{}", c);
 		}
 		if (hns.size() > 0) {
 			esHolderNumDao.saveAll(hns);
@@ -134,9 +148,9 @@ public class ThsHolderSpider {
 							hns.add(hn);
 							fetched = true;
 
-							if (i == 0) {
-								redisUtil.set(RedisConstant.RDS_HOLDER_CODE_ + code, hn.getDate());
-							}
+//							if (i == 0) {
+//								redisUtil.set(RedisConstant.RDS_HOLDER_CODE_ + code, hn.getDate());
+//							}
 						}
 					} catch (Exception e) {
 						log.info(res);

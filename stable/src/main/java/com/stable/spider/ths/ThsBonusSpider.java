@@ -98,12 +98,15 @@ public class ThsBonusSpider {
 			List<FenHong> fhl = new LinkedList<FenHong>();
 			List<BonusHist> bhl = new LinkedList<BonusHist>();
 			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
+			int c = 0;
 			for (StockBaseInfo s : codelist) {
 				try {
 					dofetchBonusInner(date, s.getCode(), zfdl, zfsl, fhl, bhl);
 				} catch (Exception e) {
 					ErrorLogFileUitl.writeError(e, "", "", "");
 				}
+				c++;
+				log.info("current index:{}", c);
 			}
 			saveAll(zfdl, zfsl, fhl, bhl);
 			WxPushUtil.pushSystem1(date + " 分红&增发抓包同花顺已完成");

@@ -46,7 +46,7 @@ public class ThsPlateSpider {
 					List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
 					List<StockBaseInfo> upd = new LinkedList<StockBaseInfo>();
 					int needUpd = 0;
-
+					int c = 0;
 					for (StockBaseInfo b : list) {
 						boolean updateCache = false;
 						if (updateAll || StringUtils.isBlank(b.getThsLightspot())
@@ -63,6 +63,8 @@ public class ThsPlateSpider {
 						if (updateAll || updateCache) {
 							stockBasicService.synBaseStockInfo(b, true);
 						}
+						c++;
+						log.info("current index:{}", c);
 					}
 					if (upd.size() > 0) {
 						esStockBaseInfoDao.saveAll(upd);

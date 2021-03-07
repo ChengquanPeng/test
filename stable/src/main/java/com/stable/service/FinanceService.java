@@ -584,7 +584,7 @@ public class FinanceService {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				thsHolderSpider.dofetchHolder();
+				thsHolderSpider.dofetchHolder(true);
 				rtl.setThsHolderOk(true);
 			}
 		}).start();
