@@ -108,6 +108,9 @@ public class CodeBaseModel2 extends EsBase {
 
 	private int pls = 0;// 0未知，1在池子，2不在池子
 	private int plst = 0;// 时间
+	
+	
+	//
 
 	@Transient
 	public String getKeyString() {
