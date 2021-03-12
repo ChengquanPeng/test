@@ -91,8 +91,8 @@ public class FinanceBaseInfo extends EsBase {
 	private double interestPay;// 应付利息:如果较高，公司在大量有息借钱，关联到货币资金和未分配利润。如果货币资金和未分配利润较高，明明有钱为什么借钱，
 
 	// 计算字段
-//	@Field(type = FieldType.Double)
-//	private double goodWillRatioGsjlr; // 商誉净资产占比（净利润）
+	@Field(type = FieldType.Double)
+	private double goodWillRatioGsjlr; // 商誉净利润占比（净利润）
 	@Field(type = FieldType.Double)
 	private double goodWillRatioNetAsset; // 商誉净利润占比（净资产）
 	@Field(type = FieldType.Double)

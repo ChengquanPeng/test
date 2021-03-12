@@ -33,6 +33,7 @@ import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.CodeModelService;
+import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.jys.JysSpider;
@@ -808,6 +809,7 @@ public class FinanceService {
 	}
 
 	public void fetchFinances(int type) {
+		int tradeDate = DateUtil.getTodayIntYYYYMMDD();
 		log.info("同步财务报告报告[started]");
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
 		int total = list.size();
@@ -826,6 +828,40 @@ public class FinanceService {
 		if (rl.size() > 0) {
 			esFinanceBaseInfoDao.saveAll(rl);
 		}
+		ThreadsUtil.sleep(10, TimeUnit.MINUTES);
+		rl = new LinkedList<FinanceBaseInfo>();
+		for (StockBaseInfo s : list) {
+			List<FinanceBaseInfo> fbis = getFinacesReportByLteDate(s.getCode(), tradeDate,
+					EsQueryPageUtil.queryPage9999);
+			boolean onlineYear = stockBasicService.online1YearChk(s.getCode(), tradeDate);
+			if (fbis == null) {
+				if (onlineYear) {
+					ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), s.getCode(), tradeDate + "",
+							"Finance Service 错误");
+				} else {
+					log.info("{},Online 上市不足1年", s.getCode());
+				}
+				continue;
+			}
+			// 商誉净利润占比
+			FinanceAnalyzer fa = new FinanceAnalyzer();
+			for (FinanceBaseInfo fbi : fbis) {
+				fa.putJidu1(fbi);
+			}
+			FinanceBaseInfo fbi = fa.getCurrJidu();
+			if (fbi.getGoodWill() > 0) {
+				FinanceBaseInfo year = fa.getCurrYear();
+				if (year != null && year.getGsjlr() > 0) {
+					fbi.setGoodWillRatioGsjlr(CurrencyUitl.roundHalfUp(fbi.getGoodWill() / year.getGsjlr()));
+				} else {
+					fbi.setGoodWillRatioGsjlr(9999);
+				}
+			} else {
+				fbi.setGoodWillRatioGsjlr(0);
+			}
+			rl.add(fbi);
+		}
+		esFinanceBaseInfoDao.saveAll(rl);
 		log.info("同步财务报告报告[end]");
 		WxPushUtil.pushSystem1("同步股票财务报告完成！股票总数：[" + total + "],成功股票数[" + cnt + "],失败股票数=" + (total - cnt));
 	}

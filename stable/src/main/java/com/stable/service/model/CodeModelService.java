@@ -236,6 +236,7 @@ public class CodeModelService {
 		log.info("Code Model  processing for code:{}", code);
 		// 基本面池
 		CodeBaseModel2 newOne = new CodeBaseModel2();
+		copyProperty(newOne, oldOne);// copy原有属性
 		newOne.setId(code);
 		newOne.setCode(code);
 		newOne.setDate(tradeDate);
@@ -251,7 +252,6 @@ public class CodeModelService {
 			}
 			return newOne;
 		}
-		copyProperty(newOne, oldOne);// copy原有属性
 		baseAnalyseColor(s, newOne, fbis);// 基本面-红蓝绿
 		findBigBoss2(code, newOne, fbis);// 基本面-疑似大牛
 		susWhiteHorses(code, newOne);// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
@@ -367,6 +367,15 @@ public class CodeModelService {
 	}
 
 	private void baseAnalyseColor(StockBaseInfo s, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis) {
+		newOne.setBaseYellow(0);
+		newOne.setBaseRed(0);
+		newOne.setBaseBlue(0);
+		newOne.setBaseGreen(0);
+		newOne.setBaseYellowDesc("");
+		newOne.setBaseRedDesc("");
+		newOne.setBaseBlueDesc("");
+		newOne.setBaseGreenDesc("");
+
 		String code = newOne.getCode();
 		FinanceAnalyzer fa = new FinanceAnalyzer();
 		for (FinanceBaseInfo fbi : fbis) {
@@ -375,6 +384,11 @@ public class CodeModelService {
 		FinanceBaseInfo fbi = fa.getCurrJidu();
 		newOne.setCurrYear(fbi.getYear());
 		newOne.setCurrQuarter(fbi.getQuarter());
+		newOne.setZcfzl(fbi.getZcfzl());
+		newOne.setGsjlr(fa.getCurrYear().getGsjlr());// 年报的
+		newOne.setGoodWill(fbi.getGoodWill());
+		newOne.setGoodWillRatioGsjlr(fbi.getGoodWillRatioGsjlr());
+		newOne.setGoodWillRatioNetAsset(fbi.getGoodWillRatioNetAsset());
 
 		// ======== 红色警告 ========
 		// ======== 黄色警告 ========
@@ -848,33 +862,28 @@ public class CodeModelService {
 
 		if (newOne.getBaseRed() > 0) {
 			newOne.setBaseRedDesc(sb1.toString());
-		} else {
-			newOne.setBaseRedDesc("");
 		}
 		if (newOne.getBaseYellow() > 0) {
 			newOne.setBaseYellowDesc(sb2.toString());
-		} else {
-			newOne.setBaseYellowDesc("");
 		}
 		if (newOne.getBaseBlue() > 0) {
 			newOne.setBaseBlueDesc(sb3.toString());
-		} else {
-			newOne.setBaseBlueDesc("");
 		}
 		if (newOne.getBaseGreen() > 0) {
 			newOne.setBaseGreenDesc(sb4.toString());
-		} else {
-			newOne.setBaseGreenDesc("");
 		}
 	}
 
 	private void copyProperty(CodeBaseModel2 newOne, CodeBaseModel2 oldOne) {
 		if (oldOne != null) {
+			BeanCopy.copy(oldOne, newOne);
 			// 复制一些属性
-			newOne.setMonitor(oldOne.getMonitor());
-			newOne.setZfjjup(oldOne.getZfjjup());
-			newOne.setPls(oldOne.getPls());
-			newOne.setPlst(oldOne.getPlst());
+//			newOne.setMonitor(oldOne.getMonitor());
+//			newOne.setZfjjup(oldOne.getZfjjup());
+//			newOne.setPls(oldOne.getPls());
+//			newOne.setPlst(oldOne.getPlst());
+			// 筹码博弈
+
 		}
 	}
 
@@ -964,6 +973,7 @@ public class CodeModelService {
 		newOne.setSyl(currJidu.getJqjzcsyl());
 		newOne.setSylttm(plateService.getSylTtm(fbis));
 		newOne.setSyldjd(plateService.getSyldjd(currJidu));// 单季度？
+		newOne.setSylType(0);
 		if (newOne.getSyldjd() > newOne.getSylttm()) {
 			newOne.setSylType(1);// 自身收益率增长
 		}

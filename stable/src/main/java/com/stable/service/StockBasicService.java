@@ -154,6 +154,7 @@ public class StockBasicService {
 			StockBaseInfo b = this.getCode(code);
 			b.setCircZb(CurrencyUitl.roundHalfUp(circZb));
 			redisUtil.set(code, b);
+			esStockBaseInfoDao.save(b);
 		}
 	}
 

@@ -86,8 +86,10 @@ public class ThsHolderSpider {
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 		int c = 0;
 		for (StockBaseInfo s : codelist) {
+			c++;
 			try {
 				String code = s.getCode();
+				log.info("current index:{},{}", c, code);
 				// 周末全量，redisUtil.get(RedisConstant.RDS_HOLDER_CODE_ + code, 0) <= chkdate
 				// 预警，每天
 				if ((isWeekEnd) || codesw.contains(code)) {
@@ -104,8 +106,6 @@ public class ThsHolderSpider {
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
 			}
-			c++;
-			log.info("current index:{}", c);
 		}
 		if (hns.size() > 0) {
 			esHolderNumDao.saveAll(hns);
