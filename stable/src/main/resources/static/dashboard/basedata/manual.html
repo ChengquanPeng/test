@@ -95,7 +95,18 @@ table {
 					</td>
 					<td><a id="base1" target="_blank">同花顺基本面</a>&nbsp;&nbsp;&nbsp;<a
 						id="base2" target="_blank">系统基本面</a>&nbsp;&nbsp;&nbsp;上次更新日期:<span
-						id="lstmt"></span></td>
+						id="lstmt"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小市值，最好低于50Y，新股和st排除</td>
+				</tr>
+				<tr>
+					<td id="pre_buyType"></td>
+					<td>横盘情况(年)</td>
+					<td><select id="recentPriceYear">
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td>至少2年未涨，且对应股东人数持续减少，未炒过（炒作的有套牢盘，套牢盘不割肉，涨的概率小），k线W形态，底部横盘越长越好,横：没法跌</td>
 				</tr>
 				<tr>
 					<td id="pre_buyType"></td>
@@ -110,7 +121,8 @@ table {
 							<option value="6">6.增发：大宗交易异动</option>
 					</select></td>
 					<td></td>
-					<td>1.大股东的话，需要低于大股东价格 <br />2.重组:公告后一般会拉升一波，确定拉升那波人数是否减少（主力是否进货）
+					<td>1.大股东的话，需要低于大股东价格<br /> 2.自己人增发会打压价格(锁定期6个月的才考虑做)<br />
+						3.非自己人增发会拉升价格(如中国联通)<br />4.重组:公告后一般会拉升一波，确定拉升那波人数是否减少（主力是否进货）
 						增发完成会立即拉升,主力筹码无锁定期，且增发对象都是大股东
 					</td>
 				</tr>
@@ -314,7 +326,7 @@ table {
 							<option value="2">好</option>
 					</select></td>
 					<td></td>
-					<td><a id="dzjyOkq" target="_blank">查询</a></td>
+					<td><a id="dzjyOkq" target="_blank">查询</a>&nbsp;&nbsp;&nbsp;突然频繁大宗？筹码异动，价格在大宗交易价成本（公告价8折）以下最好</td>
 				</tr>
 				<tr>
 					<td id="pre_gdrsOk"></td>
@@ -362,10 +374,10 @@ table {
 				</tr>
 				<tr>
 					<td></td>
-					<td>卖出理由</td>
+					<td>卖出逻辑</td>
 					<td><textarea rows="3" cols="30" id="soldRea" name="soldRea"></textarea></td>
 					<td></td>
-					<td>卖出逻辑</td>
+					<td>目标位：定增逻辑的价格和之前K线的放量位置。</td>
 				</tr>
 			</table>
 

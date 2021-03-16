@@ -111,7 +111,9 @@ public class CodeBaseModel2 extends EsBase {
 	private int plst = 0;// 时间
 	@Field(type = FieldType.Integer)
 	private int lstmt = 0;// 上次更新日期
-
+	@Field(type = FieldType.Integer)
+	private int recentPriceYear = 0;// 是否横盘多年
+	
 	@Field(type = FieldType.Text)
 	private String buyRea; // 买入理由
 	@Field(type = FieldType.Text)
