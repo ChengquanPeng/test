@@ -105,9 +105,9 @@ public class CodeBaseModel2 extends EsBase {
 
 	// ==== 筹码博弈 ====
 	// 1.是否可买
-	@Field(type = FieldType.Integer)
+	@Field(type = FieldType.Long)
 	private int pls = 0;// 0不确定，1在池子，2不在池子
-	@Field(type = FieldType.Integer)
+	@Field(type = FieldType.Long)
 	private int plst = 0;// 时间
 	@Field(type = FieldType.Integer)
 	private int lstmt = 0;// 上次更新日期
@@ -141,7 +141,7 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int dgdjc = 0;// 是否有大股东减持
 	@Field(type = FieldType.Integer)
-	private int qujz = 0;// 是否集中，0差，1一般，2好
+	private int qujz = 0;// 股权是否集中，0差，1一般，2好
 
 	@Field(type = FieldType.Integer)
 	private int legalOk = 0;// 是否有违法情况，0差，1一般，2好

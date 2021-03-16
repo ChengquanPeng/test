@@ -10,7 +10,9 @@ import com.stable.service.TradeCalService;
 import com.stable.service.model.CodeModelService;
 import com.stable.utils.DateUtil;
 import com.stable.vo.http.JsonResult;
+import com.stable.vo.http.req.ModelManulReq;
 import com.stable.vo.http.req.ModelReq;
+import com.stable.vo.http.resp.CodeBaseModelResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 @RequestMapping("/model")
@@ -60,10 +62,27 @@ public class CodeModelController {
 	 * 人工
 	 */
 	@RequestMapping(value = "/addManual")
-	public ResponseEntity<JsonResult> addManual(String code, int pls, int timemonth) {
+	public ResponseEntity<JsonResult> addManual(ModelManulReq req) {
 		JsonResult r = new JsonResult();
 		try {
-			codeModelService.addPlsManual(code, pls, timemonth);
+			codeModelService.addPlsManual(req);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setStatus(JsonResult.FAIL);
+			r.setResult(e.getMessage());
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * chips
+	 */
+	@RequestMapping(value = "/chips")
+	public ResponseEntity<JsonResult> chips(String code) {
+		JsonResult r = new JsonResult();
+		try {
+			CodeBaseModelResp cbm = codeModelService.getLastOneByCodeResp(code);
+			r.setResult(cbm);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setStatus(JsonResult.FAIL);

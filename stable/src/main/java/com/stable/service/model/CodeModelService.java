@@ -68,6 +68,7 @@ import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaExt;
 import com.stable.vo.bus.ZhiYa;
+import com.stable.vo.http.req.ModelManulReq;
 import com.stable.vo.http.req.ModelReq;
 import com.stable.vo.http.resp.CodeBaseModelResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -1339,14 +1340,17 @@ public class CodeModelService {
 		return codes;
 	}
 
-	public void addPlsManual(String code, int i, int timemonth) {
-		if (i != 1 && i != 2) {
+	public void addPlsManual(ModelManulReq req) {
+		String code = req.getCode();
+		int pls = req.getPls();
+		int timemonth = req.getTimemonth();
+		if (pls != 1 && pls != 2) {
 			throw new RuntimeException("i != 1 && i != 2 ? ");
 		}
 
 		int date = -1;
 		if (timemonth == 9) {
-			i = 0;
+			pls = 0;
 			date = 0;
 		} else {
 			int days = 0;
@@ -1368,8 +1372,10 @@ public class CodeModelService {
 		}
 		if (date != 1) {
 			CodeBaseModel2 c = getLastOneByCode2(code);
-			c.setPls(i);
+			BeanCopy.copy(req, c);
+			c.setPls(pls);
 			c.setPlst(date);
+			c.setLstmt(DateUtil.getTodayIntYYYYMMDD());
 			codeBaseModel2Dao.save(c);
 		}
 	}

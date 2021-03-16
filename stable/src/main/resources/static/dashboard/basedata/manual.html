@@ -81,11 +81,12 @@ body {
 					<td></td>
 					<td>代码</td>
 					<td><span id="code"></span>&nbsp;<span id="codeName"></span>&nbsp;</td>
-					<td>市值:<span id="mkv"></span></td>
+					<td>流通市值:<span id="mkv"></span>亿
+					</td>
 					<td></td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_buyType"></td>
 					<td>买入类型</td>
 					<td><select id="buyType">
 							<option value="">无</option>
@@ -102,18 +103,18 @@ body {
 					</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_dzz"></td>
 					<td>计划/正在定增</td>
 					<td><select id="dzz">
 							<option value="">无</option>
-							<option value="0">无/已完成</option>
+							<option value="2">无/已完成</option>
 							<option value="1">正在进行中</option>
 					</select></td>
 					<td></td>
 					<td><a id="dzzq" target="_blank">公告查询</a></td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_dzOK"></td>
 					<td>历史定增情况</td>
 					<td><select id="dzOK">
 							<option value="">无</option>
@@ -126,9 +127,9 @@ body {
 						定增较多：新定增股东容易在二级成为空方</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_mainChipOk"></td>
 					<td>主力筹码情况</td>
-					<td><select id="dzOK">
+					<td><select id="mainChipOk">
 							<option value="">无</option>
 							<option value="0">差</option>
 							<option value="1">一般</option>
@@ -138,7 +139,7 @@ body {
 					<td>低于或者左右增发筹码价格</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_yj"></td>
 					<td>业绩类型</td>
 					<td><select id="yj">
 							<option value="0">无</option>
@@ -154,7 +155,7 @@ body {
 						id="yjq2" target="_blank">系统查询</a>&nbsp;&nbsp;&nbsp;现金流是否支持利润？是否主营业务亏损？业绩亏损是因为大环境原因而不是公司原因（如疫情下的航空，旅游）</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_hybk"></td>
 					<td>行业板块</td>
 					<td><select id="hybk">
 							<option value="0">无</option>
@@ -169,7 +170,7 @@ body {
 					<td></td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_mainBusi"></td>
 					<td>主营业务集中情况</td>
 					<td><select id="mainBusi">
 							<option value="">无</option>
@@ -181,18 +182,19 @@ body {
 					<td>主营业务构成/集中优先（拳头产品）</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_legalOk"></td>
 					<td>违法情况</td>
 					<td><select id="legalOk">
-							<option value="2">无</option>
-							<option value="0">较大风险</option>
+							<option value="0">无</option>
+							<option value="2">暂无风险</option>
 							<option value="1">一般风险</option>
+							<option value="0">较大风险</option>
 					</select></td>
 					<td></td>
 					<td><a target="_blank" id="legalOkq">同花顺</a></td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_glprojeckOk"></td>
 					<td>项目情况（概念）</td>
 					<td><select id="glprojeckOk">
 							<option value="">无</option>
@@ -205,7 +207,7 @@ body {
 						&nbsp;&nbsp;&nbsp; <a target="_blank" id="glprojeckOk2">东方财富</a></td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_bonus"></td>
 					<td>历史分红情况</td>
 					<td><select id="bonus">
 							<option value="">无</option>
@@ -217,7 +219,7 @@ body {
 					<td><a id="bonusq" target="_blank">系统查询</a></td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_jyxjlceOk"></td>
 					<td>现金流情况</td>
 					<td><select id="jyxjlceOk">
 							<option value="">无</option>
@@ -229,14 +231,15 @@ body {
 					<td>现金流是否支撑业绩</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_sylttm"></td>
 					<td>ROE</td>
-					<td><span id="sylttm"></span>x4</td>
-					<td></td>
+					<td>TTM:<span id="sylttm"></span>x4
+					</td>
+					<td>JD:<span id="syldjd"></span></td>
 					<td></td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_acRec"></td>
 					<td>应收账款情况</td>
 					<td><select id="acRec">
 							<option value="">无</option>
@@ -248,7 +251,7 @@ body {
 					<td>欠钱的都是大爷，容易坏账计提</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_acPay"></td>
 					<td>应付账款情况</td>
 					<td><select id="acPay">
 							<option value="">无</option>
@@ -260,7 +263,7 @@ body {
 					<td>话语权强</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_goodWillOk"></td>
 					<td>商誉情况</td>
 					<td><select id="goodWillOk">
 							<option value="">无</option>
@@ -272,14 +275,14 @@ body {
 					<td></td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_zcfzl"></td>
 					<td>资产负债率</td>
 					<td><span id="zcfzl"></span></td>
 					<td></td>
 					<td></td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_dgdjc"></td>
 					<td>大股东减持情况</td>
 					<td><select id="dgdjc">
 							<option value="">无</option>
@@ -290,7 +293,7 @@ body {
 					<td></td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_qujz"></td>
 					<td>股权集中</td>
 					<td><select id="qujz">
 							<option value="">无</option>
@@ -302,7 +305,7 @@ body {
 					<td>至少在40%以上，如：家族企业（本身就是小盘，还持股低，可能无心经营）</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_dzjyOk"></td>
 					<td>大宗交易情况</td>
 					<td><select id="dzjyOk">
 							<option value="">无</option>
@@ -314,7 +317,7 @@ body {
 					<td><a id="dzjyOkq" target="_blank">查询</a></td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_gdrsOk"></td>
 					<td>股东人数情况</td>
 					<td><select id="gdrsOk">
 							<option value="">无</option>
@@ -341,7 +344,7 @@ body {
 							<option value="4">半年</option>
 							<option value="9">归0</option>
 					</select></td>
-					<td></td>
+					<td><span id="plst"></span></td>
 					<td></td>
 				</tr>
 				<tr>
@@ -361,7 +364,7 @@ body {
 					<td>卖出逻辑</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td id="pre_profit"></td>
 					<td>利润空间</td>
 					<td><input type="text" id="profit"></td>
 					<td></td>
@@ -404,16 +407,47 @@ body {
 		$("#header").load("/web/header.html")
 		addActive("m_base");
 		$('#cusTable').bootstrapTable('destroy');
+
+		function ysw(id, type) {
+			if (type == 2) {
+				$('#' + id).html("<font color='#7FFF00'>√</font>");
+			} else if (type == 1) {
+				$('#' + id).html("<font color='#FF0000'>X</font>");
+			} else {
+				$('#' + id).html("<font color='#696969'>N</font>");
+			}
+		}
 	</script>
 	<script type="text/javascript">
 		function dianwo() {
 			$.ajax({
 				url : "/web/model/addManual", //访问地址--action地址
 				//url : "http://127.0.0.1:8081/web/monitorPool/addMonitor", //访问地址--action地址
-				type : "get", //提交方式
+				type : "post", //提交方式
 				data : {
 					code : $('#code').val(),
 					pls : $('#pls').val(),
+					buyReason : $('#buyReason').val(),
+					soldReason : $('#soldReason').val(),
+					profit : $('#profit').val(),
+					dzz : $('#dzz').val(),
+					buyType : $('#buyType').val(),
+					dzOK : $('#dzOK').val(),
+					yj : $('#yj').val(),
+					hybk : $('#hybk').val(),
+					mainBusi : $('#mainBusi').val(),
+					dgdjc : $('#dgdjc').val(),
+					qujz : $('#qujz').val(),
+					legalOk : $('#legalOk').val(),
+					glprojeckOk : $('#glprojeckOk').val(),
+					mainChipOk : $('#mainChipOk').val(),
+					bonus : $('#bonus').val(),
+					jyxjlceOk : $('#jyxjlceOk').val(),
+					acRec : $('#acRec').val(),
+					acPay : $('#acPay').val(),
+					dzjyOk : $('#dzjyOk').val(),
+					gdrsOk : $('#gdrsOk').val(),
+					goodWillOk : $('#goodWillOk').val(),
 					timemonth : $('#timemonth').val()
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
@@ -427,8 +461,9 @@ body {
 			});
 		}
 		var qc = getQueryVariable("code");
-		$.ajax({
-					url : "/web/code/" + qc, //访问地址--action地址
+		$
+				.ajax({
+					url : "/web/model/chips", //访问地址--action地址
 					//url : "http://127.0.0.1:8081/web/monitorPool/byCode", //访问地址--action地址
 					type : "get", //提交方式
 					data : {
@@ -497,6 +532,61 @@ body {
 								"href",
 								"/web/dashboard/basedata/dividend.html?code="
 										+ code);
+
+						//====系统值====
+						for ( var key in reData.result) {
+							if (document.getElementById(key)) {
+								$('#' + key).val(reData.result[key]);
+
+								if (document.getElementById("pre_" + key)) {
+									ysw("pre_" + key, reData.result[key]);
+								}
+							}
+						}
+						$('#mkv').html(reData.result.mkv);
+						var buyType = reData.result.buyType;
+						//买入
+						if (buyType > 0) {
+							$('#buyType').val(buyType);
+							ysw("pre_buyType", 2);
+						} else {
+							ysw("pre_buyType", 1);
+						}
+						//业绩
+						var yj = reData.result.yj;
+						if (yj > 0) {
+							$('#yj').val(yj);
+							if (yj == 6) {
+								ysw("pre_yj", 1);
+							} else {
+								ysw("pre_yj", 2);
+							}
+						} else {
+							ysw("pre_yj", 1);
+						}
+						//板块
+						var hybk = reData.result.hybk;
+						if (hybk > 0) {
+							$('#hybk').val(hybk);
+							if (hybk == 1 || hybk == 2) {
+								ysw("pre_hybk", 2);
+							} else {
+								ysw("pre_hybk", 0);
+							}
+						} else {
+							ysw("pre_hybk", 1);
+						}
+						//ROE
+						var sylttm = reData.result.sylttm;
+						if (sylttm > 0) {
+							if (sylttm > 3) {
+								ysw("pre_sylttm", 2);
+							} else {
+								ysw("pre_sylttm", 0);
+							}
+						} else {
+							ysw("pre_sylttm", 1);
+						}
 					}
 				});
 	</script>
