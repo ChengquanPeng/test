@@ -7,7 +7,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 
-<title>Dashboard Template for Bootstrap</title>
+<title>人工</title>
 
 <!-- Bootstrap core CSS -->
 <link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
@@ -58,6 +58,19 @@ body {
 .input-group {
 	margin-left: 120px;
 }
+
+table, table tr th, table tr td {
+	border: 1px solid #C0C0C0;
+}
+
+table {
+	min-height: 25px;
+	line-height: 25px;
+	text-align: left;
+	border-collapse: collapse;
+	padding: 1px;
+	font-size: 13px;
+}
 </style>
 </head>
 <body>
@@ -66,10 +79,7 @@ body {
 		<div class="row">
 			<div id="menu"></div>
 			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
-			上次更新:<span id="lstmt"></span>&nbsp;&nbsp;&nbsp;<a id="base1"
-				target="_blank">同花顺基本面</a>&nbsp;&nbsp;&nbsp;<a id="base2"
-				target="_blank">系统基本面</a>
-			<table style="font-size: 12px">
+			<table>
 				<tr>
 					<td>状态</td>
 					<td>清单事项</td>
@@ -83,13 +93,15 @@ body {
 					<td><span id="code"></span>&nbsp;<span id="codeName"></span>&nbsp;</td>
 					<td>流通市值:<span id="mkv"></span>亿
 					</td>
-					<td></td>
+					<td><a id="base1" target="_blank">同花顺基本面</a>&nbsp;&nbsp;&nbsp;<a
+						id="base2" target="_blank">系统基本面</a>&nbsp;&nbsp;&nbsp;上次更新日期:<span
+						id="lstmt"></span></td>
 				</tr>
 				<tr>
 					<td id="pre_buyType"></td>
 					<td>买入类型</td>
 					<td><select id="buyType">
-							<option value="">无</option>
+							<option value="0">无</option>
 							<option value="1">1.增发：纯大股东</option>
 							<option value="2">2.增发：自己人(大股东混合)</option>
 							<option value="3">3.增发：自己人(外部-6个月)</option>
@@ -106,7 +118,7 @@ body {
 					<td id="pre_dzz"></td>
 					<td>计划/正在定增</td>
 					<td><select id="dzz">
-							<option value="">无</option>
+							<option value="0">无</option>
 							<option value="2">无/已完成</option>
 							<option value="1">正在进行中</option>
 					</select></td>
@@ -117,7 +129,6 @@ body {
 					<td id="pre_dzOK"></td>
 					<td>历史定增情况</td>
 					<td><select id="dzOK">
-							<option value="">无</option>
 							<option value="0">差</option>
 							<option value="1">一般</option>
 							<option value="2">好</option>
@@ -130,7 +141,6 @@ body {
 					<td id="pre_mainChipOk"></td>
 					<td>主力筹码情况</td>
 					<td><select id="mainChipOk">
-							<option value="">无</option>
 							<option value="0">差</option>
 							<option value="1">一般</option>
 							<option value="2">好</option>
@@ -173,7 +183,6 @@ body {
 					<td id="pre_mainBusi"></td>
 					<td>主营业务集中情况</td>
 					<td><select id="mainBusi">
-							<option value="">无</option>
 							<option value="0">差</option>
 							<option value="1">一般</option>
 							<option value="2">好</option>
@@ -185,7 +194,6 @@ body {
 					<td id="pre_legalOk"></td>
 					<td>违法情况</td>
 					<td><select id="legalOk">
-							<option value="0">无</option>
 							<option value="2">暂无风险</option>
 							<option value="1">一般风险</option>
 							<option value="0">较大风险</option>
@@ -197,7 +205,6 @@ body {
 					<td id="pre_glprojeckOk"></td>
 					<td>项目情况（概念）</td>
 					<td><select id="glprojeckOk">
-							<option value="">无</option>
 							<option value="0">差</option>
 							<option value="1">一般</option>
 							<option value="2">好</option>
@@ -210,7 +217,6 @@ body {
 					<td id="pre_bonus"></td>
 					<td>历史分红情况</td>
 					<td><select id="bonus">
-							<option value="">无</option>
 							<option value="0">差</option>
 							<option value="1">一般</option>
 							<option value="2">好</option>
@@ -222,7 +228,6 @@ body {
 					<td id="pre_jyxjlceOk"></td>
 					<td>现金流情况</td>
 					<td><select id="jyxjlceOk">
-							<option value="">无</option>
 							<option value="0">差</option>
 							<option value="1">一般</option>
 							<option value="2">好</option>
@@ -242,7 +247,6 @@ body {
 					<td id="pre_acRec"></td>
 					<td>应收账款情况</td>
 					<td><select id="acRec">
-							<option value="">无</option>
 							<option value="0">差</option>
 							<option value="1">一般</option>
 							<option value="2">好</option>
@@ -254,7 +258,6 @@ body {
 					<td id="pre_acPay"></td>
 					<td>应付账款情况</td>
 					<td><select id="acPay">
-							<option value="">无</option>
 							<option value="0">差</option>
 							<option value="1">一般</option>
 							<option value="2">好</option>
@@ -266,7 +269,6 @@ body {
 					<td id="pre_goodWillOk"></td>
 					<td>商誉情况</td>
 					<td><select id="goodWillOk">
-							<option value="">无</option>
 							<option value="0">差</option>
 							<option value="1">一般</option>
 							<option value="2">好</option>
@@ -277,7 +279,7 @@ body {
 				<tr>
 					<td id="pre_zcfzl"></td>
 					<td>资产负债率</td>
-					<td><span id="zcfzl"></span></td>
+					<td><span id="zcfzl"></span>%</td>
 					<td></td>
 					<td></td>
 				</tr>
@@ -285,8 +287,8 @@ body {
 					<td id="pre_dgdjc"></td>
 					<td>大股东减持情况</td>
 					<td><select id="dgdjc">
-							<option value="">无</option>
-							<option value="0">无/已完成</option>
+							<option value="0">差</option>
+							<option value="2">无/已完成</option>
 							<option value="1">进行中</option>
 					</select></td>
 					<td></td>
@@ -296,7 +298,6 @@ body {
 					<td id="pre_qujz"></td>
 					<td>股权集中</td>
 					<td><select id="qujz">
-							<option value="">无</option>
 							<option value="0">差</option>
 							<option value="1">一般</option>
 							<option value="2">好</option>
@@ -308,7 +309,6 @@ body {
 					<td id="pre_dzjyOk"></td>
 					<td>大宗交易情况</td>
 					<td><select id="dzjyOk">
-							<option value="">无</option>
 							<option value="0">差</option>
 							<option value="1">一般</option>
 							<option value="2">好</option>
@@ -320,7 +320,6 @@ body {
 					<td id="pre_gdrsOk"></td>
 					<td>股东人数情况</td>
 					<td><select id="gdrsOk">
-							<option value="">无</option>
 							<option value="0">差</option>
 							<option value="1">一般</option>
 							<option value="2">好</option>
@@ -333,7 +332,7 @@ body {
 					<td></td>
 					<td>结果</td>
 					<td><select id="pls">
-							<option value="">-</option>
+							<option value="0">-</option>
 							<option value="1">确定</option>
 							<option value="2">排除</option>
 					</select>时间：<select id="timemonth">
@@ -348,27 +347,25 @@ body {
 					<td></td>
 				</tr>
 				<tr>
+					<td id="pre_profit"></td>
+					<td>利润空间</td>
+					<td><input type="text" id="profit"></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
 					<td></td>
 					<td>买入理由</td>
-					<td><textarea rows="3" cols="30" id="buyReason"
-							name="buyReason"></textarea></td>
+					<td><textarea rows="3" cols="30" id="buyRea" name="buyRea"></textarea></td>
 					<td></td>
 					<td>买入逻辑,有红色的人工确认后备注</td>
 				</tr>
 				<tr>
 					<td></td>
 					<td>卖出理由</td>
-					<td><textarea rows="3" cols="30" id="soldReason"
-							name="soldReason"></textarea></td>
+					<td><textarea rows="3" cols="30" id="soldRea" name="soldRea"></textarea></td>
 					<td></td>
 					<td>卖出逻辑</td>
-				</tr>
-				<tr>
-					<td id="pre_profit"></td>
-					<td>利润空间</td>
-					<td><input type="text" id="profit"></td>
-					<td></td>
-					<td></td>
 				</tr>
 			</table>
 
@@ -376,7 +373,7 @@ body {
 			<div class="input-group">
 				<span class="input-group-btn">
 					<button class="btn btn-default" type="button" id="queryAction"
-						onclick="dianwo()">Go!</button>
+						onclick="dianwo()">提交</button>
 				</span>
 			</div>
 		</div>
@@ -412,14 +409,19 @@ body {
 			if (type == 2) {
 				$('#' + id).html("<font color='#7FFF00'>√</font>");
 			} else if (type == 1) {
-				$('#' + id).html("<font color='#FF0000'>X</font>");
-			} else {
 				$('#' + id).html("<font color='#696969'>N</font>");
+			} else {
+				$('#' + id).html("<font color='#FF0000'>X</font>");
 			}
 		}
 	</script>
 	<script type="text/javascript">
 		function dianwo() {
+			if ($('#pls').val() == 0) {
+				alert("请选择-结果");
+				return;
+			}
+
 			$.ajax({
 				url : "/web/model/addManual", //访问地址--action地址
 				//url : "http://127.0.0.1:8081/web/monitorPool/addMonitor", //访问地址--action地址
@@ -427,8 +429,8 @@ body {
 				data : {
 					code : $('#code').val(),
 					pls : $('#pls').val(),
-					buyReason : $('#buyReason').val(),
-					soldReason : $('#soldReason').val(),
+					buyRea : $('#buyRea').val(),
+					soldRea : $('#soldRea').val(),
 					profit : $('#profit').val(),
 					dzz : $('#dzz').val(),
 					buyType : $('#buyType').val(),
@@ -578,6 +580,8 @@ body {
 						}
 						//ROE
 						var sylttm = reData.result.sylttm;
+						$('#sylttm').html(sylttm);
+						$('#syldjd').html(reData.result.syldjd);
 						if (sylttm > 0) {
 							if (sylttm > 3) {
 								ysw("pre_sylttm", 2);
@@ -586,6 +590,21 @@ body {
 							}
 						} else {
 							ysw("pre_sylttm", 1);
+						}
+						//资产负债率
+						var zcfzl = reData.result.zcfzl;
+						$('#zcfzl').html(zcfzl);
+						if (zcfzl > 0) {
+							if (zcfzl < 40) {
+								ysw("pre_zcfzl", 2);
+							}
+							if (zcfzl < 76) {
+								ysw("pre_zcfzl", 0);
+							} else {
+								ysw("pre_zcfzl", 1);
+							}
+						} else {
+							ysw("pre_zcfzl", 1);
 						}
 					}
 				});

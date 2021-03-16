@@ -9,8 +9,8 @@ public class ModelManulReq {
 	int timemonth;
 
 	private int lstmt = 0;// 上次更新日期
-	private String buyReason; // 买入理由
-	private String soldReason;// 卖出理由
+	private String buyRea; // 买入理由
+	private String soldRea;// 卖出理由
 	private int profit = 0;// 利润空间
 	private int dzz = 0;// 是否在定增中
 	private int buyType;
