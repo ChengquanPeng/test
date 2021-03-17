@@ -22,6 +22,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.MonitorType;
 import com.stable.enums.ZfStatus;
@@ -33,12 +34,14 @@ import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
+import com.stable.spider.eastmoney.EmDzjySpider;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BonusHist;
 import com.stable.vo.bus.CodeBaseModel2;
+import com.stable.vo.bus.Dzjy;
 import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.MonitorPool;
@@ -90,6 +93,7 @@ public class MonitorPoolService {
 		c.setBuyLowVol(0);
 		c.setHolderNum(0);
 		c.setXjl(0);
+		c.setDzjy(0);
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
 		} else {
@@ -108,7 +112,7 @@ public class MonitorPoolService {
 	// 加入监听
 	public void addMonitor(String code, int monitor, int realtime, int offline, double upPrice, double downPrice,
 			double upTodayChange, double downTodayChange, String remark, int ykb, int zfdone, int holderNum,
-			int buyLowVol, int xjl) {
+			int buyLowVol, int xjl, int dzjy) {
 		if (monitor <= 0) {
 			throw new RuntimeException("monitor<=0 ?");
 		}
@@ -133,6 +137,7 @@ public class MonitorPoolService {
 		c.setHolderNum(holderNum);
 		c.setBuyLowVol(buyLowVol);
 		c.setXjl(xjl);
+		c.setDzjy(dzjy);
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
 		} else {
@@ -256,6 +261,11 @@ public class MonitorPoolService {
 
 	public List<MonitorPool> getList(String code, int monitor, int monitoreq, int ykb, int zfdone,
 			EsQueryPageReq querypage, String aliasCode, int holderNum, int buyLowVol, int xjl) {
+		return getList(code, monitor, monitoreq, ykb, zfdone, querypage, aliasCode, holderNum, buyLowVol, xjl, 0);
+	}
+
+	public List<MonitorPool> getList(String code, int monitor, int monitoreq, int ykb, int zfdone,
+			EsQueryPageReq querypage, String aliasCode, int holderNum, int buyLowVol, int xjl, int dzjy) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -285,6 +295,9 @@ public class MonitorPoolService {
 		}
 		if (zfdone > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfdone", zfdone));
+		}
+		if (dzjy > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("dzjy", dzjy));
 		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort("updateDate").unmappedType("integer").order(SortOrder.DESC);
@@ -372,6 +385,31 @@ public class MonitorPoolService {
 				}
 			}
 		}
+	}
+
+	// 大宗交易
+	public void jobDzjyWarning() {
+		List<MonitorPool> list = getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0, 1);
+		List<String> l = new LinkedList<String>();
+		if (list != null) {
+			Integer today = DateUtil.getTodayIntYYYYMMDD();
+			for (MonitorPool mp : list) {
+				Dzjy dzjy = EmDzjySpider.dofetch(mp.getCode());
+				if (dzjy.getDate() >= mp.getDzjy()) {
+					l.add(mp.getCode());
+					mp.setDzjy(today);
+					monitorPoolDao.save(mp);
+				}
+			}
+			if (l.size() > 0) {
+				StringBuffer sb = new StringBuffer();
+				for (String s : l) {
+					sb.append(s).append(Constant.DOU_HAO);
+				}
+				WxPushUtil.pushSystem1("今日大宗交易:" + sb.toString());
+			}
+		}
+
 	}
 
 //	/**

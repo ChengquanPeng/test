@@ -1383,6 +1383,9 @@ public class CodeModelService {
 				pool.setMonitor(MonitorType.MANUAL.getCode());
 				pool.setRemark(c.getBuyRea() + " " + c.getSoldRea());
 				pool.setUpTodayChange(3);
+				int dt = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
+				pool.setDzjy(dt);
+				pool.setHolderNum(dt);
 			} else if (pls == 2) {
 				pool.setMonitor(MonitorType.NO.getCode());
 				pool.setRemark("人工复核去掉");
