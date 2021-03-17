@@ -1377,6 +1377,18 @@ public class CodeModelService {
 			c.setPlst(date);
 			c.setLstmt(DateUtil.getTodayIntYYYYMMDD());
 			codeBaseModel2Dao.save(c);
+
+			MonitorPool pool = monitorPoolService.getMonitorPool(code);
+			if (pls == 1) {// 1在池子，2不在池子
+				pool.setMonitor(MonitorType.MANUAL.getCode());
+				pool.setRemark(c.getBuyRea() + " " + c.getSoldRea());
+				pool.setUpTodayChange(3);
+			} else if (pls == 2) {
+				pool.setMonitor(MonitorType.NO.getCode());
+				pool.setRemark("人工复核去掉");
+				pool.setUpTodayChange(0);
+			}
+			monitorPoolDao.save(pool);
 		}
 	}
 }
