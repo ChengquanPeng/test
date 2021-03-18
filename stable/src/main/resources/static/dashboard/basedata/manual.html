@@ -341,6 +341,18 @@ table {
 						id="gdrsOkq2" target="_blank">系统查询</a></td>
 				</tr>
 				<tr>
+					<td id="pre_jjOk"></td>
+					<td>解禁情况</td>
+					<td><select id="jjOk">
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td><a id="jjOkq" target="_blank">系统查询</a></td>
+				</tr>
+
+				<tr>
 					<td></td>
 					<td>结果</td>
 					<td><select id="pls">
@@ -460,6 +472,7 @@ table {
 					acRec : $('#acRec').val(),
 					acPay : $('#acPay').val(),
 					dzjyOk : $('#dzjyOk').val(),
+					jjOk : $('#jjOk').val(),
 					gdrsOk : $('#gdrsOk').val(),
 					goodWillOk : $('#goodWillOk').val(),
 					timemonth : $('#timemonth').val()
@@ -545,6 +558,11 @@ table {
 						$('#bonusq').attr(
 								"href",
 								"/web/dashboard/basedata/dividend.html?code="
+										+ code);
+						//解禁
+						$('#jjOkq').attr(
+								"href",
+								"/web/dashboard/basedata/Jiejin.html?code="
 										+ code);
 
 						//====系统值====

@@ -166,6 +166,8 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int gdrsOk = 0; // 股东人数OK
 	@Field(type = FieldType.Integer)
+	private int jjOk = 0;// 解禁情况，0差，1一般，2好
+	@Field(type = FieldType.Integer)
 	private int goodWillOk = 0; // 商誉情况
 
 	@Field(type = FieldType.Long)

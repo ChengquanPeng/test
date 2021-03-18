@@ -31,6 +31,7 @@ public class ModelManulReq {
 	private int acPay = 0;// 应付账款情况，0差，1一般，2好
 
 	private int dzjyOk = 0;// 大宗交易情况，0差，1一般，2好
+	private int jjOk = 0;// 解禁情况，0差，1一般，2好
 	private int gdrsOk = 0; // 股东人数OK
 	private int goodWillOk = 0; // 商誉情况
 }

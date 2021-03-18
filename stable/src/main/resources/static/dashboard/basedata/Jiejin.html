@@ -129,7 +129,11 @@
 			//alert("abc");
 			loadData();
 		});
-		loadData();
+		var qc = getQueryVariable("code");
+		if (qc) {
+			$('#queryCode').val(qc);
+			loadData();
+		}
 	</script>
 </body>
 </html>
