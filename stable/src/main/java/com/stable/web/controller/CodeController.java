@@ -76,7 +76,6 @@ public class CodeController {
 		model.addAttribute("histList", codeModelService.getListByCode(code, EsQueryPageUtil.queryPage5));
 		model.addAttribute("concepts", conceptService.getCodeConcept(code));
 		model.addAttribute("codeBasic", stockBasicService.getCode(code));
-		model.addAttribute("topThree", chipsService.getLastHolderPercent(code));
 		FinanceBaseInfo fbi = financeService.getLastFinaceReport(code);
 		try {
 			model.addAttribute("yyzsr", CurrencyUitl.covertToString(fbi.getYyzsr()));

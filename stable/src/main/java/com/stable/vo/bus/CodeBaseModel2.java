@@ -82,7 +82,7 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int zfjj = 0; // 增发解禁
 	@Field(type = FieldType.Integer)
-	private int zfjjup = 0; // 增发未大涨
+	private int zfjjup = 0; // 小票未大涨
 
 	// 交易面
 	@Field(type = FieldType.Integer)
@@ -99,6 +99,10 @@ public class CodeBaseModel2 extends EsBase {
 
 	// 股东人数
 	@Field(type = FieldType.Double)
+	private double holderNumP5; // 十大股东：5%股东占比
+	@Field(type = FieldType.Double)
+	private double holderNumT3; // 十大股东：Top3%股东占比
+	@Field(type = FieldType.Double)
 	private double holderNum;
 	@Field(type = FieldType.Integer)
 	private int holderDate;
@@ -113,7 +117,7 @@ public class CodeBaseModel2 extends EsBase {
 	private int lstmt = 0;// 上次更新日期
 	@Field(type = FieldType.Integer)
 	private int recentPriceYear = 0;// 是否横盘多年
-	
+
 	@Field(type = FieldType.Text)
 	private String buyRea; // 买入理由
 	@Field(type = FieldType.Text)

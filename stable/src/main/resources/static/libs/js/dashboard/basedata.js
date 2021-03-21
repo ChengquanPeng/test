@@ -19,7 +19,9 @@ function getQueryVariable(variable) {
 	for (var i = 0; i < vars.length; i++) {
 		var pair = vars[i].split("=");
 		if (pair[0] == variable) {
-			return pair[1];
+			var r = pair[1];
+			document.title = document.title + " " + r;
+			return r;
 		}
 	}
 	return (false);

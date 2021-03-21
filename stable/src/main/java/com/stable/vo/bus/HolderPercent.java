@@ -33,25 +33,20 @@ public class HolderPercent extends EsBase {
 	@Field(type = FieldType.Double)
 	private double topThree;
 	@Field(type = FieldType.Double)
-	private double numOne;
-	@Field(type = FieldType.Double)
-	private double numTwo;
-	@Field(type = FieldType.Double)
-	private double numThree;
+	private double percent5;
 	@Field(type = FieldType.Integer)
 	private int sysdate;
 
-	public void addNum(double num) {
-		if (numOne <= 0) {
-			numOne = num;
-		} else if (numTwo <= 0) {
-			numTwo = num;
-		} else if (numThree <= 0) {
-			numThree = num;
-		}
+	public void addTop3(double num) {
+		topThree += num;
+	}
+
+	public void addPercent5(double num) {
+		percent5 += num;
 	}
 
 	public void cuteTopTotol() {
-		topThree = CurrencyUitl.roundHalfUp(numOne + numTwo + numThree);
+		topThree = CurrencyUitl.roundHalfUp(topThree);
+		percent5 = CurrencyUitl.roundHalfUp(percent5);
 	}
 }

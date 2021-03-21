@@ -119,6 +119,8 @@
 						<option value="3">资产收益率ttm</option>
 						<option value="4">资产收益率报告期</option>
 						<option value="5">资产收益评级</option>
+						<option value="6">股权集中</option>
+						<option value="7">小票未涨</option>
 					</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 倒序排序:<input type="checkbox"
 						id="asc" name="asc" checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
@@ -255,11 +257,15 @@
 																+ value
 																+ '</a><br/>'
 																+ row.codeName
-																+ '<br/>'
+																+ '<br/>十:P5:'
+																+ row.holderNumP5
+																+ '%<br/>十:T3:'
+																+ row.holderNumT3
+																+ '%<br/>流:'
 																+ row.mkv
-																+ '亿('
+																+ '亿<br/>P5流:'
 																+ row.circZb
-																+ '%)');
+																+ '%');
 												return actions.join('');
 											}
 										},

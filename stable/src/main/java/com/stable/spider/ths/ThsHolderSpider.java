@@ -240,7 +240,7 @@ public class ThsHolderSpider {
 //		System.err.println(tbody.getTagName());
 //		System.err.println(ther_x.asXml());
 		Iterator<DomElement> it3 = tbody.getChildElements().iterator();
-		int i = 1;
+		int i = 0;
 		while (it3.hasNext()) {
 			i++;
 			DomElement tr = it3.next();// th1
@@ -252,9 +252,10 @@ public class ThsHolderSpider {
 			String zb = it4.next().asText();// 占总股本比例
 			double d = Double.valueOf(zb.replace("%", ""));
 			if (i <= 3) {
-				hp.addNum(d);
+				hp.addTop3(d);
 			}
 			if (d >= 5.0) {
+				hp.addPercent5(d);
 				hp5.getList_a().add(name);
 			}
 
@@ -298,7 +299,7 @@ public class ThsHolderSpider {
 		ts.header = new HashMap<String, String>();
 		List<HolderPercent> hps = new LinkedList<HolderPercent>();
 		List<HolderNum> hns = new LinkedList<HolderNum>();
-		ts.dofetchHolderInner(DateUtil.getTodayIntYYYYMMDD(), "600340", hns, hps);
+		ts.dofetchHolderInner(DateUtil.getTodayIntYYYYMMDD(), "603686", hns, hps);
 		for (HolderNum h : hns) {
 			System.err.println(h);
 		}

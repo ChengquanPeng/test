@@ -98,7 +98,7 @@ table {
 						id="lstmt"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小市值，最好低于50Y，新股和st排除</td>
 				</tr>
 				<tr>
-					<td id="pre_buyType"></td>
+					<td id="pre_recentPriceYear"></td>
 					<td>横盘情况(年)</td>
 					<td><select id="recentPriceYear">
 							<option value="0">差</option>
@@ -119,6 +119,7 @@ table {
 							<option value="4">4.增发：不是自己人</option>
 							<option value="5">5.增发：重组</option>
 							<option value="6">6.增发：大宗交易异动</option>
+							<option value="7">7.小而美模型</option>
 					</select></td>
 					<td></td>
 					<td>1.大股东的话，需要低于大股东价格<br /> 2.自己人增发会打压价格(锁定期6个月的才考虑做)<br />
@@ -264,7 +265,7 @@ table {
 							<option value="2">好</option>
 					</select></td>
 					<td></td>
-					<td>欠钱的都是大爷，容易坏账计提</td>
+					<td><a id="yjq3" target="_blank">系统查询</a>&nbsp;&nbsp;&nbsp;欠钱的都是大爷，容易坏账计提</td>
 				</tr>
 				<tr>
 					<td id="pre_acPay"></td>
@@ -304,7 +305,7 @@ table {
 							<option value="1">进行中</option>
 					</select></td>
 					<td></td>
-					<td></td>
+					<td>1.有公告减持实际未减持？2.量不允许减持，要交给主力去减持？</td>
 				</tr>
 				<tr>
 					<td id="pre_qujz"></td>
@@ -472,6 +473,7 @@ table {
 					acRec : $('#acRec').val(),
 					acPay : $('#acPay').val(),
 					dzjyOk : $('#dzjyOk').val(),
+					recentPriceYear : $('#recentPriceYear').val(),
 					jjOk : $('#jjOk').val(),
 					gdrsOk : $('#gdrsOk').val(),
 					goodWillOk : $('#goodWillOk').val(),
@@ -531,6 +533,10 @@ table {
 								"http://basic.10jqka.com.cn/" + code
 										+ "/finance.html");
 						$('#yjq2').attr(
+								"href",
+								"/web/dashboard/basedata/income.html?code="
+										+ code);
+						$('#yjq3').attr(
 								"href",
 								"/web/dashboard/basedata/income.html?code="
 										+ code);
@@ -600,7 +606,7 @@ table {
 						var hybk = reData.result.hybk;
 						if (hybk > 0) {
 							$('#hybk').val(hybk);
-							if (hybk == 1 || hybk == 2) {
+							if (hybk == 1 || hybk == 2 || hybk == 6) {
 								ysw("pre_hybk", 2);
 							} else {
 								ysw("pre_hybk", 0);
@@ -616,7 +622,7 @@ table {
 							if (sylttm > 3) {
 								ysw("pre_sylttm", 2);
 							} else {
-								ysw("pre_sylttm", 0);
+								ysw("pre_sylttm", 1);
 							}
 						} else {
 							ysw("pre_sylttm", 0);
@@ -627,14 +633,34 @@ table {
 						if (zcfzl > 0) {
 							if (zcfzl < 40) {
 								ysw("pre_zcfzl", 2);
-							}
-							if (zcfzl < 76) {
-								ysw("pre_zcfzl", 0);
-							} else {
+							} else if (zcfzl < 76) {
 								ysw("pre_zcfzl", 1);
+							} else {
+								ysw("pre_zcfzl", 0);
 							}
 						} else {
-							ysw("pre_zcfzl", 1);
+							ysw("pre_zcfzl", 0);
+						}
+						//利润空间
+						var profit = reData.result.profit;
+
+						if (profit > 0) {
+							if (zcfzl < 50) {
+								ysw("pre_profit", 1);
+							} else {
+								ysw("pre_profit", 2);
+							}
+						} else {
+							ysw("pre_profit", 0);
+						}
+						//
+						$('#plst').html(reData.result.plst);
+						//dgdjc
+						var dgdjc = reData.result.dgdjc;
+						if (dgdjc == 2) {
+							ysw("pre_dgdjc", 2);
+						} else {
+							ysw("pre_dgdjc", 0);
 						}
 					}
 				});

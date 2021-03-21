@@ -62,6 +62,7 @@ import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
+import com.stable.vo.bus.HolderPercent;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockBaseInfo;
@@ -257,9 +258,13 @@ public class CodeModelService {
 		findBigBoss2(code, newOne, fbis);// 基本面-疑似大牛
 		susWhiteHorses(code, newOne);// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
 		zfBoss(newOne);// 已完成的增发，更多细节
+		// 股东人数
 		HolderAnalyse ha = chipsService.holderNumAnalyse(code);
 		newOne.setHolderNum(ha.getAnaRes());
 		newOne.setHolderDate(ha.getDate());
+		HolderPercent hp = chipsService.getLastHolderPercent(code);
+		newOne.setHolderNumP5(hp.getPercent5());
+		newOne.setHolderNumT3(hp.getTopThree());
 
 		newOne.setZfjj(0);
 		newOne.setZfjjDate(0);
@@ -1106,6 +1111,10 @@ public class CodeModelService {
 			field = "syl";
 		} else if (orderBy == 5) {
 			field = "sylType";
+		} else if (orderBy == 6) {
+			field = "holderNumP5";
+		} else if (orderBy == 7) {
+			field = "zfjjup";
 		}
 
 		if (StringUtils.isNotBlank(mr.getMonitor())) {

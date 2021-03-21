@@ -56,6 +56,10 @@ public class ThsJobLine {
 			thsBonusSpider.byJob();// 同花顺, 增发&分紅
 			log.info("同花顺, 解禁");
 			thsJiejinSpider.byJob();// 同花顺, 解禁
+
+		}
+
+		if (week == Calendar.MONDAY) {
 			log.info("同花顺-亮点，主营 fetchAll=true");
 			thsPlateSpider.fetchAll(true);// 同花顺-亮点，主营 多线程
 		} else {

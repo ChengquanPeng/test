@@ -165,7 +165,7 @@ public class ChipsService {
 	/**
 	 * 最新的前3大股东占比
 	 */
-	public double getLastHolderPercent(String code) {
+	public HolderPercent getLastHolderPercent(String code) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
@@ -173,9 +173,9 @@ public class ChipsService {
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
 		Page<HolderPercent> page = esHolderPercentDao.search(sq);
 		if (page != null && !page.isEmpty()) {
-			return page.getContent().get(0).getTopThree();
+			return page.getContent().get(0);
 		}
-		return 0.0;
+		return new HolderPercent();
 	}
 
 	/**
