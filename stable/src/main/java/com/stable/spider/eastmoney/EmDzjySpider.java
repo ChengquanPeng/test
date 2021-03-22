@@ -198,8 +198,8 @@ public class EmDzjySpider {
 				}
 				return;
 			} catch (Exception e) {
-				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 				e.printStackTrace();
+				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 			}
 		} while (trytime <= 10);
 		WxPushUtil.pushSystem1("东方财富-大宗交易-抓包出错,code=" + code);
