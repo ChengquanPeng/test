@@ -178,8 +178,8 @@ public class ThsSpider {
 		dofetchThs884xxx(isFirday);
 		if (retryList.size() > 0) {
 			try {
-				log.info("休眠32分钟-retry");
-				Thread.sleep(Duration.ofMinutes(32).toMillis());
+				log.info("休眠5分钟-retry");
+				Thread.sleep(Duration.ofMinutes(5).toMillis());
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

@@ -59,6 +59,7 @@ import com.stable.vo.bus.AnnouncementHist;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.DaliyBasicInfo2;
+import com.stable.vo.bus.Dzjy;
 import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
@@ -137,6 +138,11 @@ public class CodeModelService {
 
 	private synchronized void runByJobv2(int tradeDate, boolean isweekend) {
 		Date now = new Date();
+
+		int dzdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -240));// 最大8个月大宗
+		int jjstart = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
+		int jjend = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 370));
+
 		threYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -1000));
 		oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
 		halfYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -180));
@@ -170,16 +176,22 @@ public class CodeModelService {
 				// 市值
 				DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code, 0, 1);
 				newOne.setMkv(d.getCircMarketVal());
-				// 增发自动监听
-				if (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()
-						|| pool.getMonitor() == MonitorType.NO.getCode()) {// 自动监听归0
+
+				// 人工审核是否时间到期-重置
+				if (newOne.getPlst() < tradeDate) {
+					newOne.setPls(0);
+					newOne.setPlst(0);
+				}
+
+				// 增发自动监听-重置
+				if (newOne.getPls() != 1 && (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()
+						|| pool.getMonitor() == MonitorType.SMALL_AND_BEAUTIFUL.getCode()
+						|| pool.getMonitor() == MonitorType.NO.getCode())) {// 自动监听归0
 					pool.setMonitor(MonitorType.NO.getCode());
 					pool.setRealtime(0);
 					pool.setUpTodayChange(0);
-					if (!poolList.contains(pool)) {
-						poolList.add(pool);
-					}
 					newOne.setMonitor(MonitorType.NO.getCode());
+					newOne.setSmallModel(0);
 				}
 				// 周末计算-至少N年未大涨?
 				if (isweekend) {
@@ -191,18 +203,59 @@ public class CodeModelService {
 						}
 					}
 				}
-				// 人工审核是否时间到期？重置
-				if (newOne.getPlst() < tradeDate) {
-					newOne.setPls(0);
-					newOne.setPlst(0);
+
+				// 小而美模型：未涨&&年报 && 大股东集中
+				if (newOne.getPls() == 0 && newOne.getZfjjup() >= 2 && d.getCircMarketVal() <= 45.0) {// 流通45亿以内的
+					if (newOne.getHolderNumP5() >= 50) {
+						List<FinanceBaseInfo> l = financeService.getFinacesReportByYearRpt(code,
+								EsQueryPageUtil.queryPage5);
+						int c = l.size();
+						if (l != null) {
+							for (FinanceBaseInfo f : l) {
+								if (f.getGsjlr() <= 0) {
+									c--;
+								}
+							}
+						}
+						if (c >= (l.size() - 1)) {// 亏损最多一次
+							newOne.setMonitor(MonitorType.SMALL_AND_BEAUTIFUL.getCode());
+							pool.setMonitor(MonitorType.SMALL_AND_BEAUTIFUL.getCode());
+							pool.setRealtime(1);
+							pool.setUpTodayChange(3);
+
+							// 小而美类型： 0:无，1：普通，2，增发，3，大宗，4，增发+大宗
+							int smallModel = 1;
+							// 前后1年-定增解禁-
+							List<Jiejin> l1 = chipsService.getBf2yearJiejin(code, jjstart, jjend);
+							if (l1 != null) {
+								for (Jiejin jj : l1) {
+									if (jj.getType().contains("增")) {
+										smallModel = 2;
+									}
+								}
+							}
+							// 大宗
+							Dzjy dz = chipsService.getLastDzjy(code);
+							if (dz.getDate() >= dzdate) {
+								if (smallModel == 2) {
+									smallModel = 4;
+								} else {
+									smallModel = 3;
+								}
+							}
+							newOne.setSmallModel(smallModel);
+						}
+					}
 				}
+
 				// 系统自动监听
 				// 1.人工没确认或者确认没问题的：newOne.getPls() != 2
 				// 2.未涨的
 				// 3.增发解禁且未涨
 				// 4.75亿以内（50x150%=75）
-				if (newOne.getPls() != 2 && newOne.getZfjj() > 0 && newOne.getZfjjup() >= 2
-						&& d.getCircMarketVal() <= 75.0) {// 75亿以内的
+				if (newOne.getSmallModel() <= 0 && newOne.getPls() != 2 && newOne.getZfjj() > 0
+						&& newOne.getZfjjup() >= 2 && d.getCircMarketVal() <= 75.0) {// 75亿以内的
+
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
 						pool.setMonitor(MonitorType.ZengFaAuto.getCode());
 						pool.setRealtime(1);
@@ -1176,6 +1229,10 @@ public class CodeModelService {
 		if (mr.getZfjjup() == 1) {
 			bqb.must(QueryBuilders.rangeQuery("zfjjup").gte(1));
 		}
+		if (mr.getSmallModel() == 1) {
+			bqb.must(QueryBuilders.rangeQuery("smallModel").gte(1));
+		}
+
 //		<option value="3">资产收益率ttm</option>
 //		<option value="4">资产收益率报告期</option>
 //		<option value="5">资产收益评级</option>
@@ -1285,6 +1342,19 @@ public class CodeModelService {
 			sb5.append("人工: 已确定").append(Constant.HTML_LINE);
 		} else if (dh.getPls() == 2) {
 			sb5.append("人工: 排除").append(Constant.HTML_LINE);
+		}
+		if (dh.getSmallModel() > 0) {
+			sb5.append("小而美模型:");
+			if (dh.getSmallModel() == 1) {
+				sb5.append("普通");
+			} else if (dh.getSmallModel() == 2) {
+				sb5.append("增发");
+			} else if (dh.getSmallModel() == 3) {
+				sb5.append("大宗");
+			} else if (dh.getSmallModel() == 4) {
+				sb5.append("增发+大宗");
+			}
+			sb5.append(Constant.HTML_LINE);
 		}
 		// 最近一次增发
 		if (dh.getZflastOkDate() > 0) {

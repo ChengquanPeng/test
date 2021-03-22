@@ -27,4 +27,5 @@ public class ModelReq {
 	int zfself;
 	String mkv;
 	int pls;
+	int smallModel;
 }

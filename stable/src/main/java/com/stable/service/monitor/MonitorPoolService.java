@@ -34,7 +34,6 @@ import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
-import com.stable.spider.eastmoney.EmDzjySpider;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -394,7 +393,7 @@ public class MonitorPoolService {
 		if (list != null) {
 			Integer today = DateUtil.getTodayIntYYYYMMDD();
 			for (MonitorPool mp : list) {
-				Dzjy dzjy = EmDzjySpider.dofetch(mp.getCode());
+				Dzjy dzjy = chipsService.getLastDzjy(mp.getCode());
 				if (dzjy.getDate() >= mp.getDzjy()) {
 					l.add(mp.getCode());
 					mp.setDzjy(today);

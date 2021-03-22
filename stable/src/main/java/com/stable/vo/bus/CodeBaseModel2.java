@@ -94,7 +94,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int sortMode6 = 0;// 符合短线 //短线模型6(前期3-50%吸筹，深度回踩突然涨停后再2-5个交易日回踩拉起,涨停日不放量，超过涨停价格后买入，买入2内未大幅拉升放弃
 	@Field(type = FieldType.Integer)
 	private int sortMode7 = 0;// 突破箱体震荡 --//0未知，1待确认，2确认，3，不符合
-
+	@Field(type = FieldType.Integer)
+	private int smallModel = 0;// 0:无，1：普通，2，增发，3，大宗，4，增发+大宗
 	// 人工确定
 
 	// 股东人数

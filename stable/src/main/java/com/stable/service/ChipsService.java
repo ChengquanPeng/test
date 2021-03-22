@@ -18,6 +18,7 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.es.dao.base.DzjyDao;
 import com.stable.es.dao.base.EsHolderNumDao;
 import com.stable.es.dao.base.EsHolderPercentDao;
 import com.stable.es.dao.base.FenHongDao;
@@ -26,6 +27,7 @@ import com.stable.es.dao.base.JiejinDao;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.vo.HolderAnalyse;
+import com.stable.vo.bus.Dzjy;
 import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.ForeignCapitalSum;
 import com.stable.vo.bus.HolderNum;
@@ -50,6 +52,8 @@ public class ChipsService {
 	private JiejinDao jiejinDao;
 	@Autowired
 	private ForeignCapitalSumDao foreignCapitalSumDao;
+	@Autowired
+	private DzjyDao dzjyDao;
 
 	/**
 	 * 外资持股（每周末更新一次)
@@ -160,6 +164,22 @@ public class ChipsService {
 			return page.getContent();
 		}
 		return null;
+	}
+
+	/**
+	 * -解禁记录
+	 */
+	public Dzjy getLastDzjy(String code) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+		Page<Dzjy> page = dzjyDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		return new Dzjy();
 	}
 
 	/**

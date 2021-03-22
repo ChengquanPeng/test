@@ -8,6 +8,7 @@ import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.monitor.MonitorPoolService;
+import com.stable.spider.eastmoney.EmDzjySpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 
@@ -26,6 +27,8 @@ public class DaliyJobLine {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
+	@Autowired
+	private EmDzjySpider emDzjySpider;
 
 	public synchronized void start() {
 		log.info("DaliyJobLine start");
@@ -35,6 +38,7 @@ public class DaliyJobLine {
 		financeService.jobSpiderKuaiYuBao();
 		line1();
 		log.info("4.大宗交易");
+		emDzjySpider.byJob();// TODO-不抓全量
 		monitorPoolService.jobDzjyWarning();
 		log.info("EveryWorkingDayJob end");
 	}
