@@ -20,21 +20,21 @@ public class Dzjy {
 	@Field(type = FieldType.Integer)
 	private int date = 0;
 	@Field(type = FieldType.Text)
-	private String SECUCODE;
+	private String code;
 	@Field(type = FieldType.Double)
-	private double PRICE;// 价格
+	private double price;// 价格
 	@Field(type = FieldType.Double)
-	private double TVOL;// 交易量
+	private double tvol;// 交易量
 	@Field(type = FieldType.Double)
-	private double TVAL;// 交易额
+	private double tval;// 交易额
 	@Field(type = FieldType.Text)
-	private String BUYERNAME;// 买方
+	private String buyername;// 买方
 	@Field(type = FieldType.Text)
-	private String SALESNAME;// 卖方
+	private String salesname;// 卖方
 	@Field(type = FieldType.Double)
-	private double RCHANGE;// 溢折价
+	private double rchange;// 溢折价
 
 	public void setId() {
-		id = SECUCODE + date;
+		id = code + date;
 	}
 }
