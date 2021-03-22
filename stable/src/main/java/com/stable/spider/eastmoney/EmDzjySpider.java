@@ -32,10 +32,82 @@ public class EmDzjySpider {
 	private static String URL_S = "http://dcfm.eastmoney.com/em_mutisvcexpandinterface/api/js/get?callback=jQuery112300768465300321155_1615975430563&st=TDATE&sr=-1&ps=50&p=1&js=%7Bpages%3A(tp)%2Cdata%3A(x)%7D&token=70f12f2f4f091e459a279469fe49eca5&type=DZJYXQ&filter=(SECUCODE%3D%27";
 	private static String URL_E = "%27)";
 
+	private static String D0 = "jQuery112309582117234594003_1616421349409(";
+	private static String D1 = "http://dcfm.eastmoney.com/em_mutisvcexpandinterface/api/js/get?callback=jQuery112309582117234594003_1616421349409&st=SECUCODE&sr=1&ps=50&p=";
+	private static String D2 = "&type=DZJYXQ&js=%7Bpages%3A(tp)%2Cdata%3A(x)%7D&filter=(Stype%3D%27EQA%27)(TDATE%3E%3D%5E2021-03-22%5E+and+TDATE%3C%3D%5E";
+	private static String D3 = "%5E)&token=70f12f2f4f091e459a279469fe49eca5";
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
 	private DzjyDao dzjyDao;
+
+	public void byDaily(String d) {
+		List<Dzjy> dzl = new LinkedList<Dzjy>();
+		int page = 1;
+		while (true) {
+			if (page >= byDailyInner(page, d, dzl)) {
+				break;
+			}
+			page++;
+		}
+		if (dzl.size() > 0) {
+			dzjyDao.saveAll(dzl);
+		}
+	}
+
+	private int byDailyInner(int page, String d, List<Dzjy> list) {
+		int pages = 9999;
+		int trytime = 0;
+		do {
+			trytime++;
+			try {
+				String url = D1 + page + D2 + d + D3;
+				log.info(url);
+				String result = HttpUtil.doGet2(url);
+				result = result.substring(D0.length(), result.length() - 1);
+				JSONObject object = JSON.parseObject(result);
+				pages = object.getInteger("pages");
+				JSONArray objects = object.getJSONArray("data");
+				for (int i = 0; i < objects.size(); i++) {
+//						private String TDATE;
+//						private String SECUCODE;
+//						private String SNAME;
+//						private String PRICE;
+//						private String TVOL;
+//						private String TVAL;
+//						private String BUYERNAME;
+//						private String SALESNAME;
+//						private String RCHANGE;
+					try {
+						Dzjy dzjy = new Dzjy();
+						JSONObject data = objects.getJSONObject(i);
+						dzjy.setSECUCODE(data.getString("SECUCODE"));
+//						dzjy.setSNAME(data.getString("SNAME"));
+						String date = data.getString("TDATE").substring(0, 10);
+						// System.err.println(date);
+						dzjy.setDate(DateUtil.convertDate2(date));
+						dzjy.setPRICE(Double.valueOf(data.getString("PRICE")));
+						dzjy.setTVOL(Double.valueOf(data.getString("TVOL")));
+						dzjy.setTVAL(Double.valueOf(data.getString("TVAL")));
+						dzjy.setBUYERNAME(data.getString("BUYERNAME"));
+						dzjy.setSALESNAME(data.getString("SALESNAME"));
+						dzjy.setRCHANGE(Double.valueOf(data.getString("RCHANGE")));
+						dzjy.setId();
+						log.info(dzjy);
+						list.add(dzjy);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				return pages;
+			} catch (Exception e) {
+				e.printStackTrace();
+				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+			}
+		} while (trytime <= 10);
+		WxPushUtil.pushSystem1("东方财富-大宗交易(每日)-抓包出错,date=" + d);
+		return pages;
+	}
 
 	public void byJob() {
 		dofetchInner();
@@ -134,10 +206,11 @@ public class EmDzjySpider {
 
 	public static void main(String[] args) {
 		EmDzjySpider es = new EmDzjySpider();
-		String[] as = { "601989" };
-		for (int i = 0; i < as.length; i++) {
-			es.dofetch(as[i], null);
-		}
+//		String[] as = { "601989" };
+//		for (int i = 0; i < as.length; i++) {
+//			es.dofetch(as[i], null);
+//		}
+		es.byDaily("2021-03-22");
 	}
 
 }

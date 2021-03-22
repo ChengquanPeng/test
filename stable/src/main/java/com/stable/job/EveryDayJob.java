@@ -12,6 +12,7 @@ import com.stable.service.BuyBackService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
+import com.stable.spider.eastmoney.EmDzjySpider;
 import com.stable.spider.jys.JysSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.FileDeleteUitl;
@@ -38,12 +39,17 @@ public class EveryDayJob extends MySimpleJob {
 	private MonitorPoolService monitorPoolService;
 	@Autowired
 	private ChipsZfService chipsZfService;
+	@Autowired
+	private EmDzjySpider emDzjySpider;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+		log.info("大宗交易");
+		emDzjySpider.byDaily(DateUtil.formatYYYYMMDD2(cal.getTime()));
+		monitorPoolService.jobDzjyWarning();
 		log.info("回购公告");
 		buyBackService.jobFetchHistEveryDay();
 
