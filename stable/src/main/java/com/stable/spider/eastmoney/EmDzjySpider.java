@@ -130,6 +130,7 @@ public class EmDzjySpider {
 			int c = 0;
 			for (StockBaseInfo s : codelist) {
 				try {
+					ThreadsUtil.sleepSleep1Seconds();
 					dofetch(s.getCode(), dzl);
 				} catch (Exception e) {
 					ErrorLogFileUitl.writeError(e, "", "", "");
