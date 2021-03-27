@@ -13,7 +13,7 @@ import com.stable.service.ChipsZfService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EmDzjySpider;
-import com.stable.spider.jys.JysSpider;
+import com.stable.spider.official.JysSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.FileDeleteUitl;
 import com.stable.utils.SpringUtil;

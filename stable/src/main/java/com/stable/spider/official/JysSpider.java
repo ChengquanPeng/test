@@ -1,4 +1,4 @@
-package com.stable.spider.jys;
+package com.stable.spider.official;
 
 import java.util.Collection;
 import java.util.Date;

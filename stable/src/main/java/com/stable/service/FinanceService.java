@@ -37,7 +37,7 @@ import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.eastmoney.EmDzjySpider;
-import com.stable.spider.jys.JysSpider;
+import com.stable.spider.official.JysSpider;
 import com.stable.spider.ths.ThsHolderSpider;
 import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
