@@ -48,6 +48,7 @@ import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.data.LinePrice;
 import com.stable.service.monitor.MonitorPoolService;
+import com.stable.spider.ths.ThsAnnSpider;
 import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -159,6 +160,11 @@ public class CodeModelService {
 		Map<String, MonitorPool> poolMap = monitorPoolService.getMonitorPoolMap();
 		List<MonitorPool> poolList = new LinkedList<MonitorPool>();
 
+		// 到期提醒
+		StringBuffer sbc = new StringBuffer();
+		// 公告提醒
+		StringBuffer annc = new StringBuffer();
+
 		Map<String, CodeBaseModel2> histMap = getALLForMap();
 		for (StockBaseInfo s : codelist) {
 			try {
@@ -179,6 +185,9 @@ public class CodeModelService {
 
 				// 人工审核是否时间到期-重置
 				if (newOne.getPlst() < tradeDate) {
+					if (newOne.getPls() == 1) {
+						sbc.append(code).append(",");
+					}
 					newOne.setPls(0);
 					newOne.setPlst(0);
 				}
@@ -253,7 +262,7 @@ public class CodeModelService {
 				// 2.未涨的
 				// 3.增发解禁且未涨
 				// 4.75亿以内（50x150%=75）
-				if (newOne.getSmallModel() <= 0 && newOne.getPls() != 2 && newOne.getZfjj() > 0
+				if (newOne.getSmallModel() <= 0 && newOne.getPls() == 0 && newOne.getZfjj() > 0
 						&& newOne.getZfjjup() >= 2 && d.getCircMarketVal() <= 75.0) {// 75亿以内的
 
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
@@ -264,6 +273,13 @@ public class CodeModelService {
 							poolList.add(pool);
 						}
 						newOne.setMonitor(MonitorType.ZengFaAuto.getCode());
+					}
+				}
+
+				//
+				if (newOne.getPls() == 1) {
+					if (ThsAnnSpider.getLastAnn(code) > tradeDate) {
+						annc.append(code).append(",");
 					}
 				}
 			} catch (Exception e) {
@@ -281,7 +297,13 @@ public class CodeModelService {
 		}
 //		middleSortV1Service.start(tradeDate, list);
 		log.info("CodeModel v2 模型执行完成");
-		WxPushUtil.pushSystem1("CODE-MODEL V2-" + tradeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listHist.size());
+//		WxPushUtil.pushSystem1("CODE-MODEL V2-" + tradeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listHist.size());
+		if (sbc.length() > 0) {
+			WxPushUtil.pushSystem1("以下pls==1已到期:" + sbc.toString());
+		}
+		if (annc.length() > 0) {
+			WxPushUtil.pushSystem1("以下有最新公告:" + annc.toString());
+		}
 //		daliyTradeHistroyService.deleteData();
 	}
 
@@ -1229,8 +1251,12 @@ public class CodeModelService {
 		if (mr.getZfjjup() == 1) {
 			bqb.must(QueryBuilders.rangeQuery("zfjjup").gte(1));
 		}
-		if (mr.getSmallModel() == 1) {
-			bqb.must(QueryBuilders.rangeQuery("smallModel").gte(1));
+		if (mr.getSmallModel() > 0) {
+			if (mr.getSmallModel() == 9999) {
+				bqb.must(QueryBuilders.rangeQuery("smallModel").gte(1));
+			} else {
+				bqb.must(QueryBuilders.matchPhraseQuery("smallModel", mr.getSmallModel()));
+			}
 		}
 
 //		<option value="3">资产收益率ttm</option>
@@ -1465,10 +1491,16 @@ public class CodeModelService {
 				int dt = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
 				pool.setDzjy(dt);
 				pool.setHolderNum(dt);
+				pool.setYkb(1);
+				pool.setZfdone(1);
 			} else if (pls == 2) {
 				pool.setMonitor(MonitorType.NO.getCode());
 				pool.setRemark("人工复核去掉");
 				pool.setUpTodayChange(0);
+				pool.setDzjy(0);
+				pool.setHolderNum(0);
+				pool.setYkb(0);
+				pool.setZfdone(0);
 			}
 			monitorPoolDao.save(pool);
 		}

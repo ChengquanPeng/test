@@ -92,7 +92,14 @@
 						type="checkbox" id="susWhiteHors" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					箱体突破:<input type="checkbox" id="sort7" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					短线模型:<input type="checkbox" id="sort6" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					小而美模型:<input type="checkbox" id="smallModel" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					小而美模型:<select id="smallModel">
+						<option value="0" selected="selected">无限制</option>
+						<option value="9999">所有</option>
+						<option value="1">1普通</option>
+						<option value="2">2增发</option>
+						<option value="3">3大宗</option>
+						<option value="4">4增宗</option>
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				</div>
 			</div>
 			<div>
@@ -213,7 +220,7 @@
 									param.zfjj = 0;
 									param.zfjjup = 0;
 									param.zfself = 0;
-									param.smallModel = 0;
+									param.smallModel = $('#smallModel').val();
 
 									if (document.getElementById("zfself").checked) {
 										param.zfself = 1;
@@ -242,9 +249,7 @@
 									if (document.getElementById("zfjjup").checked) {
 										param.zfjjup = 1;
 									}
-									if (document.getElementById("smallModel").checked) {
-										param.smallModel = 1;
-									}
+
 									if (!document.getElementById("asc").checked) {
 										param.asc = 2;
 									}

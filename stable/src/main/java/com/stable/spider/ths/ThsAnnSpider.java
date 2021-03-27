@@ -87,11 +87,33 @@ public class ThsAnnSpider {
 		}
 	}
 
+	public static int getLastAnn(String code) {
+		try {
+			String url = String.format(BASE_URL, code, 1);
+			String org = HttpUtil.doGet2(url);
+//		UnicodeToCN = UnicodeUtil.UnicodeToCN(org); 整个json有双引号的情况，所以要下面title分开。
+			if (org.contains("parameter error")) {
+				return 0;
+			}
+			JSONArray objects = JSON.parseArray(org);
+			if (objects.size() > 0) {
+				JSONObject data = objects.getJSONObject(0);
+//			String title = UnicodeUtil.UnicodeToCN(data.getString("title"));
+				String date = data.getString("date");
+				return DateUtil.convertDate2(date);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
 	public static void main(String[] args) {
 //		String[] as = { "603385", "300676", "002405", "601369", "600789", "002612" };
 		String[] as = { "002612" };
 		for (int i = 0; i < as.length; i++) {
-			System.err.println(isBuyAsset(as[i], 20160101));
+//			System.err.println(isBuyAsset(as[i], 20160101));
+			System.err.println(getLastAnn(as[i]));
 		}
 	}
 
