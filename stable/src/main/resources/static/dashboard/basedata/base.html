@@ -110,6 +110,10 @@
 					增发博弈(自+未):<input type="checkbox" id="susZfBoss" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					增发解禁:<input type="checkbox" id="zfjj" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					小票未涨:<input type="checkbox" id="zfjjup" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					低于增发价:<input
+						type="checkbox" id="zfPriceLow" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					半年大宗超1亿:<input
+						type="checkbox" id="dzjyRct" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					市值大小:<input type="text" id="mkv" width="30" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					人工状态:<select id="pls">
 						<option value="-1" selected="selected">无限制</option>
@@ -221,7 +225,15 @@
 									param.zfjjup = 0;
 									param.zfself = 0;
 									param.smallModel = $('#smallModel').val();
-
+									param.zfPriceLow = 0;
+									param.dzjyRct = 0;
+									
+									if (document.getElementById("dzjyRct").checked) {
+										param.dzjyRct = 1;
+									}
+									if (document.getElementById("zfPriceLow").checked) {
+										param.zfPriceLow = 1;
+									}
 									if (document.getElementById("zfself").checked) {
 										param.zfself = 1;
 									}

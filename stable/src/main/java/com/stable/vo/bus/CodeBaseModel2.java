@@ -83,6 +83,10 @@ public class CodeBaseModel2 extends EsBase {
 	private int zfjj = 0; // 增发解禁
 	@Field(type = FieldType.Integer)
 	private int zfjjup = 0; // 小票未大涨
+	@Field(type = FieldType.Integer)
+	private int zfPriceLow = 0; // 低于增发价
+	@Field(type = FieldType.Integer)
+	private int dzjyRct = 0; // 最近半年大宗交易频繁
 
 	// 交易面
 	@Field(type = FieldType.Integer)

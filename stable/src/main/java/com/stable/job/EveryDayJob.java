@@ -48,7 +48,7 @@ public class EveryDayJob extends MySimpleJob {
 		cal.setTime(new Date());
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
 		log.info("大宗交易");
-		emDzjySpider.byDaily(DateUtil.formatYYYYMMDD2(cal.getTime()));
+		emDzjySpider.byDaily(DateUtil.formatYYYYMMDD2(cal.getTime()), date);
 //		emDzjySpider.byJob();
 		monitorPoolService.jobDzjyWarning();
 		log.info("回购公告");

@@ -37,6 +37,7 @@ import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
+import com.stable.service.DzjyService;
 import com.stable.service.FinanceService;
 import com.stable.service.PlateService;
 import com.stable.service.PriceLifeService;
@@ -121,6 +122,8 @@ public class CodeModelService {
 	private BonusService bonusService;
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
+	@Autowired
+	private DzjyService dzjyService;
 
 	public synchronized void runJobv2(int date, boolean isweekend) {
 		try {
@@ -144,7 +147,7 @@ public class CodeModelService {
 		int jjstart = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
 		int jjend = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 370));
 
-		threYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -1000));
+		threeYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -1000));
 		oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
 		halfYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -180));
 		log.info("CodeModel processing request date={}", tradeDate);
@@ -176,17 +179,21 @@ public class CodeModelService {
 					pool.setCode(code);
 					poolList.add(pool);
 				}
-				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listHist);
+				DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code, 0, 0);
+				if (d.getCircMarketVal() <= 0) {
+					d = daliyBasicHistroyService.queryLastest(code, 0, 1);
+				}
+				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listHist, d);
 				listLast.add(newOne);
 
 				// 市值
-				DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code, 0, 1);
+
 				newOne.setMkv(d.getCircMarketVal());
 
 				// 人工审核是否时间到期-重置
 				if (newOne.getPlst() < tradeDate) {
 					if (newOne.getPls() == 1) {
-						sbc.append(code).append(",");
+						sbc.append(stockBasicService.getCodeName(code)).append(",");
 					}
 					newOne.setPls(0);
 					newOne.setPlst(0);
@@ -275,12 +282,16 @@ public class CodeModelService {
 						newOne.setMonitor(MonitorType.ZengFaAuto.getCode());
 					}
 				}
-
-				//
+				// 公告通知
 				if (newOne.getPls() == 1) {
 					if (ThsAnnSpider.getLastAnn(code) > tradeDate) {
-						annc.append(code).append(",");
+						annc.append(stockBasicService.getCodeName(code)).append(",");
 					}
+				}
+				// 大宗交易超1亿
+				newOne.setDzjyRct(0);
+				if (d.getCircMarketVal() <= 75.0 && dzjyService.dzjyF(code, tradeDate)) {
+					newOne.setDzjyRct(1);
 				}
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
@@ -308,7 +319,7 @@ public class CodeModelService {
 	}
 
 	private CodeBaseModel2 getBaseAnalyse(StockBaseInfo s, int tradeDate, CodeBaseModel2 oldOne,
-			List<CodeBaseModelHist> listHist) {
+			List<CodeBaseModelHist> listHist, DaliyBasicInfo2 d) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
 		// 基本面池
@@ -332,7 +343,7 @@ public class CodeModelService {
 		baseAnalyseColor(s, newOne, fbis);// 基本面-红蓝绿
 		findBigBoss2(code, newOne, fbis);// 基本面-疑似大牛
 		susWhiteHorses(code, newOne);// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
-		zfBoss(newOne);// 已完成的增发，更多细节
+		lastDoneZfBoss(newOne, d);// 已完成的增发，更多细节
 		// 股东人数
 		HolderAnalyse ha = chipsService.holderNumAnalyse(code);
 		newOne.setHolderNum(ha.getAnaRes());
@@ -348,7 +359,7 @@ public class CodeModelService {
 
 		if (onlineYear) {
 			sortModel(newOne);// 短线模型
-			zfjj(newOne);// 限售解禁T
+			zfjj(newOne);// 限售解禁
 		}
 		saveHist(newOne, oldOne, listHist);// 历史
 		return newOne;
@@ -369,20 +380,14 @@ public class CodeModelService {
 	}
 
 	// 增发
-	private void chkZf(CodeBaseModel2 newOne) {
+	private void chkLastOneYearZf(CodeBaseModel2 newOne) {
 		newOne.setZfStatus(ZfStatus.NO.getCode());
 		newOne.setZfStatusDesc("");
-		ZengFa undone = chipsZfService.getLastZengFa(newOne.getCode(), ZfStatus.ING.getCode());// 是否有正在增发的（正在增发的）
+		ZengFa last = chipsZfService.getLastZengFa(newOne.getCode());
 		// start 一年以前
-		if (chipsZfService.isZfDateOk(undone, oneYearAgo)) {
-			newOne.setZfStatus(undone.getStatus());
-			newOne.setZfStatusDesc(undone.getStatusDesc());
-		} else {
-			ZengFa last = chipsZfService.getLastZengFa(newOne.getCode(), ZfStatus.NO.getCode());// 最新的增发（一年中的增发)
-			if (chipsZfService.isZfDateOk(last, oneYearAgo)) {// 一年之类是否有增发
-				newOne.setZfStatus(last.getStatus());
-				newOne.setZfStatusDesc(last.getStatusDesc());
-			}
+		if (chipsZfService.isZfDateOk(last, oneYearAgo)) {
+			newOne.setZfStatus(last.getStatus());
+			newOne.setZfStatusDesc(last.getStatusDesc());
 		}
 	}
 
@@ -395,16 +400,18 @@ public class CodeModelService {
 		}
 	}
 
-	private void zfBoss(CodeBaseModel2 newOne) {
+	private void lastDoneZfBoss(CodeBaseModel2 newOne, DaliyBasicInfo2 d) {
 		newOne.setSusZfBoss(0);
 		newOne.setZfself(0);
 		newOne.setZfbuy(0);
 		newOne.setGsz(0);
 		newOne.setZflastOkDate(0);
+		// 低于增发价
+		newOne.setZfPriceLow(0);
 
 		String code = newOne.getCode();
 		ZengFa zf = chipsZfService.getLastZengFa(code, ZfStatus.DONE.getCode());// 已完成的增发
-		if (chipsZfService.isZfDateOk(zf, threYearAgo)) {
+		if (chipsZfService.isZfDateOk(zf, threeYearAgo)) {
 			newOne.setZflastOkDate(zf.getEndDate());
 //			if (newOne.getSusZfBoss() == 1 && newOne.getSusZfBossSure() > 1) {
 //				return;
@@ -431,8 +438,15 @@ public class CodeModelService {
 			if (preCondi && newOne.getZfself() == 1) {
 				newOne.setSusZfBoss(1);
 			}
-			if (bonusService.isGsz(code, threYearAgo)) {
+			if (bonusService.isGsz(code, threeYearAgo)) {
 				newOne.setGsz(1);
+			}
+
+			// 一年的之中的增发(低于增发价)
+			if (chipsZfService.isZfDateOk(zf, oneYearAgo)) {
+				if (zf.getPrice() > d.getClosed()) {
+					newOne.setZfPriceLow(1);
+				}
 			}
 		}
 	}
@@ -908,7 +922,7 @@ public class CodeModelService {
 			sb4.append("资产收益率年超20%").append(Constant.HTML_LINE);
 		}
 		// 正在增发中
-		chkZf(newOne);
+		chkLastOneYearZf(newOne);
 		if (newOne.getZfStatus() == 1 || newOne.getZfStatus() == 2) {
 			newOne.setBaseBlue(1);
 			if (newOne.getZfStatus() == 1) {
@@ -1045,7 +1059,7 @@ public class CodeModelService {
 		}
 	}
 
-	private int threYearAgo = 0;// 三年以前
+	private int threeYearAgo = 0;// 三年以前
 	private int oneYearAgo = 0;// 一年以前
 	private int halfYearAgo = 0;// 半年以前
 
@@ -1227,11 +1241,17 @@ public class CodeModelService {
 		if (mr.getZfself() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfself", 1));
 		}
+		if (mr.getDzjyRct() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("dzjyRct", 1));
+		}
 		if (mr.getSusBigBoss() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("susBigBoss", 1));
 		}
 		if (mr.getZfbuy() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfbuy", 1));
+		}
+		if (mr.getZfPriceLow() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("zfPriceLow", 1));
 		}
 		if (mr.getSusWhiteHors() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));

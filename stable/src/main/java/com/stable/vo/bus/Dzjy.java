@@ -24,17 +24,19 @@ public class Dzjy {
 	@Field(type = FieldType.Double)
 	private double price;// 价格
 	@Field(type = FieldType.Double)
-	private double tvol;// 交易量
+	private double tvol;// 交易量（万股)
 	@Field(type = FieldType.Double)
-	private double tval;// 交易额
+	private double tval;// 交易额（万元）
 	@Field(type = FieldType.Text)
 	private String buyername;// 买方
 	@Field(type = FieldType.Text)
 	private String salesname;// 卖方
 	@Field(type = FieldType.Double)
 	private double rchange;// 溢折价
+	@Field(type = FieldType.Double)
+	private String dfcfid;// dfcfid
 
 	public void setId() {
-		id = code + date;
+		id = code + date + dfcfid;
 	}
 }

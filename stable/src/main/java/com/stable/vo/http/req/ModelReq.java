@@ -28,4 +28,6 @@ public class ModelReq {
 	String mkv;
 	int pls;
 	int smallModel;
+	int zfPriceLow;
+	int dzjyRct;
 }

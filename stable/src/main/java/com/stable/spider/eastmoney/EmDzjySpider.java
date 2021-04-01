@@ -1,6 +1,7 @@
 package com.stable.spider.eastmoney;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,6 +12,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.es.dao.base.DzjyDao;
+import com.stable.es.dao.base.DzjyYiTimeDao;
+import com.stable.service.DzjyService;
 import com.stable.service.StockBasicService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -18,6 +21,7 @@ import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.Dzjy;
+import com.stable.vo.bus.DzjyYiTime;
 import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -34,25 +38,58 @@ public class EmDzjySpider {
 
 	private static String D0 = "jQuery112309582117234594003_1616421349409(";
 	private static String D1 = "http://dcfm.eastmoney.com/em_mutisvcexpandinterface/api/js/get?callback=jQuery112309582117234594003_1616421349409&st=SECUCODE&sr=1&ps=50&p=";
-	private static String D2 = "&type=DZJYXQ&js=%7Bpages%3A(tp)%2Cdata%3A(x)%7D&filter=(Stype%3D%27EQA%27)(TDATE%3E%3D%5E2021-03-22%5E+and+TDATE%3C%3D%5E";
-	private static String D3 = "%5E)&token=70f12f2f4f091e459a279469fe49eca5";
+	private static String D2 = "&type=DZJYXQ&js=%7Bpages%3A(tp)%2Cdata%3A(x)%7D&filter=(Stype%3D%27EQA%27)(TDATE%3E%3D%5E";
+	private static String D3 = "%5E+and+TDATE%3C%3D%5E";
+	private static String D4 = "%5E)&token=70f12f2f4f091e459a279469fe49eca5";
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
 	private DzjyDao dzjyDao;
+	@Autowired
+	private DzjyYiTimeDao dzjyYiTimeDao;
+	@Autowired
+	private DzjyService dzjyService;
 
-	public void byDaily(String d) {
+	public synchronized void byDaily(String dateYYYY_, int today) {
 		List<Dzjy> dzl = new LinkedList<Dzjy>();
 		int page = 1;
 		while (true) {
-			if (page >= byDailyInner(page, d, dzl)) {
+			if (page >= byDailyInner(page, dateYYYY_, dzl)) {
 				break;
 			}
 			page++;
 		}
 		if (dzl.size() > 0) {
+			HashSet<String> set = listToMap(dzl);
 			dzjyDao.saveAll(dzl);
+
+			// 半年超1亿
+			List<DzjyYiTime> l = new LinkedList<DzjyYiTime>();
+			int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -210));// 7个月
+			for (String code : set) {
+				// 频繁交易，且金额超过1亿，近7个月
+				double totalAmt = dzjyService.halfOver1Yi(code, startDate);
+				if (totalAmt > 9999.0) {// 1亿
+					DzjyYiTime dyt = new DzjyYiTime();
+					dyt.setCode(code);
+					dyt.setDate(today);
+					dyt.setTotalAmt(totalAmt);
+					l.add(dyt);
+				}
+			}
+
+			if (l.size() > 0) {
+				dzjyYiTimeDao.saveAll(l);
+			}
 		}
+	}
+
+	private HashSet<String> listToMap(List<Dzjy> dzl) {
+		HashSet<String> set = new HashSet<String>();
+		for (Dzjy dzjy : dzl) {
+			set.add(dzjy.getCode());
+		}
+		return set;
 	}
 
 	private int byDailyInner(int page, String d, List<Dzjy> list) {
@@ -61,7 +98,7 @@ public class EmDzjySpider {
 		do {
 			trytime++;
 			try {
-				String url = D1 + page + D2 + d + D3;
+				String url = D1 + page + D2 + d + D3 + d + D4;
 				log.info(url);
 				String result = HttpUtil.doGet2(url);
 				result = result.substring(D0.length(), result.length() - 1);
@@ -92,6 +129,7 @@ public class EmDzjySpider {
 						dzjy.setBuyername(data.getString("BUYERNAME"));
 						dzjy.setSalesname(data.getString("SALESNAME"));
 						dzjy.setRchange(Double.valueOf(data.getString("RCHANGE")));
+						dzjy.setDfcfid(data.getString("Cjeltszb"));
 						dzjy.setId();
 						log.info(dzjy);
 						list.add(dzjy);
@@ -189,6 +227,7 @@ public class EmDzjySpider {
 						dzjy.setBuyername(data.getString("BUYERNAME"));
 						dzjy.setSalesname(data.getString("SALESNAME"));
 						dzjy.setRchange(Double.valueOf(data.getString("RCHANGE")));
+						dzjy.setDfcfid(data.getString("Cjeltszb"));
 						dzjy.setId();
 						log.info(dzjy);
 						list.add(dzjy);
@@ -207,11 +246,11 @@ public class EmDzjySpider {
 
 	public static void main(String[] args) {
 		EmDzjySpider es = new EmDzjySpider();
-//		String[] as = { "601989" };
-//		for (int i = 0; i < as.length; i++) {
-//			es.dofetch(as[i], null);
-//		}
-		es.byDaily("2021-03-22");
+		String[] as = { "601989" };
+		for (int i = 0; i < as.length; i++) {
+			es.dofetch(as[i], null);
+		}
+//		es.byDaily("2021-03-22");
 	}
 
 }
