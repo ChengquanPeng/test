@@ -1402,6 +1402,14 @@ public class CodeModelService {
 			}
 			sb5.append(Constant.HTML_LINE);
 		}
+		if (dh.getZfPriceLow() > 0) {
+			sb5.append("低于增发价");
+			sb5.append(Constant.HTML_LINE);
+		}
+		if (dh.getDzjyRct() > 0) {
+			sb5.append("半年大宗超亿");
+			sb5.append(Constant.HTML_LINE);
+		}
 		// 最近一次增发
 		if (dh.getZflastOkDate() > 0) {
 			sb5.append("日期:").append(dh.getZflastOkDate()).append(Constant.HTML_LINE);
