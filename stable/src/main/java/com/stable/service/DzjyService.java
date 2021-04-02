@@ -2,6 +2,9 @@ package com.stable.service;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.es.dao.base.DzjyDao;
 import com.stable.es.dao.base.DzjyYiTimeDao;
+import com.stable.vo.Dzjyt;
 import com.stable.vo.bus.Dzjy;
 import com.stable.vo.bus.DzjyYiTime;
 
@@ -30,19 +34,22 @@ public class DzjyService {
 	 * 
 	 * @param startDate 开始到现在
 	 */
-	public double halfOver1Yi(String code, int startDate) {
-		double t = 0.0;
+	public Dzjyt halfOver1Yi(String code, int startDate) {
+		Dzjyt t = new Dzjyt();
+		t.setTotal(0.0);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
 
 		Page<Dzjy> page = dzjyDao.search(sq);
-		if (page != null && !page.isEmpty()) {
+		if (page != null && !page.isEmpty() && page.getContent().size() > 0) {
 			for (Dzjy d : page.getContent()) {
-				t += d.getTval();
+				t.setTotal(t.getTotal() + d.getTval());
 			}
+			t.setLastDate(page.getContent().get(0).getDate());
 		}
 		return t;
 	}

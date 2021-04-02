@@ -20,6 +20,7 @@ import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.Dzjyt;
 import com.stable.vo.bus.Dzjy;
 import com.stable.vo.bus.DzjyYiTime;
 import com.stable.vo.bus.StockBaseInfo;
@@ -68,11 +69,12 @@ public class EmDzjySpider {
 			int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -210));// 7个月
 			for (String code : set) {
 				// 频繁交易，且金额超过1亿，近7个月
-				double totalAmt = dzjyService.halfOver1Yi(code, startDate);
+				Dzjyt t = dzjyService.halfOver1Yi(code, startDate);
+				double totalAmt = t.getTotal();
 				if (totalAmt > 9999.0) {// 1亿
 					DzjyYiTime dyt = new DzjyYiTime();
 					dyt.setCode(code);
-					dyt.setDate(today);
+					dyt.setDate(t.getLastDate());
 					dyt.setTotalAmt(totalAmt);
 					l.add(dyt);
 				}
@@ -82,6 +84,34 @@ public class EmDzjySpider {
 				dzjyYiTimeDao.saveAll(l);
 			}
 		}
+	}
+
+//	@PostConstruct
+	public void init() {
+		new Thread(new Runnable() {
+			public void run() {
+				List<DzjyYiTime> l = new LinkedList<DzjyYiTime>();
+				int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -210));// 7个月
+				List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
+				for (StockBaseInfo s : codelist) {
+					String code = s.getCode();
+					Dzjyt t = dzjyService.halfOver1Yi(code, startDate);
+					double totalAmt = t.getTotal();
+					if (totalAmt > 9999.0) {// 1亿
+						DzjyYiTime dyt = new DzjyYiTime();
+						dyt.setCode(code);
+						dyt.setDate(t.getLastDate());
+						dyt.setTotalAmt(totalAmt);
+						l.add(dyt);
+					}
+				}
+				if (l.size() > 0) {
+					dzjyYiTimeDao.saveAll(l);
+				}
+				log.info("init done");
+			}
+		}).start();
+
 	}
 
 	private HashSet<String> listToMap(List<Dzjy> dzl) {
@@ -245,11 +275,12 @@ public class EmDzjySpider {
 	}
 
 	public static void main(String[] args) {
-		EmDzjySpider es = new EmDzjySpider();
-		String[] as = { "601989" };
-		for (int i = 0; i < as.length; i++) {
-			es.dofetch(as[i], null);
-		}
+		System.err.println(DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -210)));// 7个月);
+//		EmDzjySpider es = new EmDzjySpider();
+//		String[] as = { "601989" };
+//		for (int i = 0; i < as.length; i++) {
+//			es.dofetch(as[i], null);
+//		}
 //		es.byDaily("2021-03-22");
 	}
 
