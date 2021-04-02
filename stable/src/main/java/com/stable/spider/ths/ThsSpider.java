@@ -13,7 +13,12 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -730,5 +735,19 @@ public class ThsSpider {
 		int c = list.size();
 		saveConcept(list);
 		log.info("dofetchThs884xxx size:{}", c);
+	}
+
+	public void deleteInvaildCodeConcept() {
+		int lastupdateTime = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -30));
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.rangeQuery("updateTime").lte(lastupdateTime));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+
+		Page<CodeConcept> page = esCodeConceptDao.search(sq);
+		if (page != null && !page.isEmpty() && page.getContent().size() > 0) {
+			esCodeConceptDao.deleteAll(page.getContent());
+		}
+		log.info("deleteAll invaild lte=" + lastupdateTime);
 	}
 }

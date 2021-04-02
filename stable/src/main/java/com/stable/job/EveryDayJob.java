@@ -13,6 +13,7 @@ import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EmDzjySpider;
 import com.stable.spider.official.JysSpider;
+import com.stable.spider.ths.ThsSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 
@@ -38,6 +39,8 @@ public class EveryDayJob extends MySimpleJob {
 	private ChipsZfService chipsZfService;
 	@Autowired
 	private EmDzjySpider emDzjySpider;
+	@Autowired
+	private ThsSpider thsSpider;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
@@ -73,6 +76,8 @@ public class EveryDayJob extends MySimpleJob {
 		} else {
 			WxPushUtil.pushSystem1("周五，周六，周日每晚23点不在运行定时运行 code model,周日下午在继续运行！");
 		}
+		log.info("无效概念");
+		thsSpider.deleteInvaildCodeConcept();
 	}
 //
 //	@Autowired

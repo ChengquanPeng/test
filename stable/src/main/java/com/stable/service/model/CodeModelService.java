@@ -444,8 +444,9 @@ public class CodeModelService {
 
 			// 一年的之中的增发(低于增发价)
 			if (chipsZfService.isZfDateOk(zf, oneYearAgo)) {
-				if (zf.getPrice() > d.getClosed()) {
-					newOne.setZfPriceLow(1);
+				if (zf.getPrice() > 0 && zf.getPrice() > d.getClosed()) {
+					newOne.setZfPriceLow(
+							Double.valueOf(CurrencyUitl.cutProfit(d.getClosed(), zf.getPrice())).intValue());
 				}
 			}
 		}
@@ -1204,6 +1205,8 @@ public class CodeModelService {
 			field = "holderNumP5";
 		} else if (orderBy == 7) {
 			field = "zfjjup";
+		} else if (orderBy == 8) {
+			field = "zfPriceLow";
 		}
 
 		if (StringUtils.isNotBlank(mr.getMonitor())) {
@@ -1251,7 +1254,7 @@ public class CodeModelService {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfbuy", 1));
 		}
 		if (mr.getZfPriceLow() == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("zfPriceLow", 1));
+			bqb.must(QueryBuilders.rangeQuery("zfPriceLow").gte(1));
 		}
 		if (mr.getSusWhiteHors() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));
@@ -1403,7 +1406,7 @@ public class CodeModelService {
 			sb5.append(Constant.HTML_LINE);
 		}
 		if (dh.getZfPriceLow() > 0) {
-			sb5.append("低于增发价");
+			sb5.append("低于增发价->").append(dh.getZfPriceLow()).append("%");
 			sb5.append(Constant.HTML_LINE);
 		}
 		if (dh.getDzjyRct() > 0) {

@@ -110,10 +110,8 @@
 					增发博弈(自+未):<input type="checkbox" id="susZfBoss" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					增发解禁:<input type="checkbox" id="zfjj" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					小票未涨:<input type="checkbox" id="zfjjup" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					低于增发价:<input
-						type="checkbox" id="zfPriceLow" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					半年大宗超亿:<input
-						type="checkbox" id="dzjyRct" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					低于增发价:<input type="checkbox" id="zfPriceLow" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					半年大宗超亿:<input type="checkbox" id="dzjyRct" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					市值大小:<input type="text" id="mkv" width="30" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					人工状态:<select id="pls">
 						<option value="-1" selected="selected">无限制</option>
@@ -133,6 +131,7 @@
 						<option value="5">资产收益评级</option>
 						<option value="6">股权集中</option>
 						<option value="7">小票未涨</option>
+						<option value="8">低于增发价</option>
 					</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 倒序排序:<input type="checkbox"
 						id="asc" name="asc" checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
@@ -227,7 +226,7 @@
 									param.smallModel = $('#smallModel').val();
 									param.zfPriceLow = 0;
 									param.dzjyRct = 0;
-									
+
 									if (document.getElementById("dzjyRct").checked) {
 										param.dzjyRct = 1;
 									}
