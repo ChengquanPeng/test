@@ -195,9 +195,9 @@ public class BuyBackService {
 		} else {
 			log.info("未获取到回购公告");
 		}
-		if (isJob) {
-			WxPushUtil.pushSystem1(start_date + " " + end_date + "获取回购记录条数=" + cnt);
-		}
+//		if (isJob) {
+//			WxPushUtil.pushSystem1(start_date + " " + end_date + "获取回购记录条数=" + cnt);
+//		}
 		log.info("同步回购公告列表[end],start_date={},end_date={},", start_date, end_date);
 		return cnt;
 	}

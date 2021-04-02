@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
-import com.stable.config.SpringConfig;
 import com.stable.service.BuyBackService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.model.CodeModelService;
@@ -15,8 +14,6 @@ import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EmDzjySpider;
 import com.stable.spider.official.JysSpider;
 import com.stable.utils.DateUtil;
-import com.stable.utils.FileDeleteUitl;
-import com.stable.utils.SpringUtil;
 import com.stable.utils.WxPushUtil;
 
 import lombok.extern.log4j.Log4j2;
@@ -54,11 +51,11 @@ public class EveryDayJob extends MySimpleJob {
 		log.info("回购公告");
 		buyBackService.jobFetchHistEveryDay();
 
-		log.info("过期文件的删除");
-		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
-		FileDeleteUitl.deletePastDateFile(efc.getModelImageFloder());
-		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloder());
-		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloderDesc());
+//		log.info("过期文件的删除");
+//		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
+//		FileDeleteUitl.deletePastDateFile(efc.getModelImageFloder());
+//		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloder());
+//		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloderDesc());
 
 		log.info("定增完成预警公告");
 		monitorPoolService.jobZfDoneWarning();

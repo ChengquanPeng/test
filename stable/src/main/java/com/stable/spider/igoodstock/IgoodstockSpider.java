@@ -44,30 +44,35 @@ public class IgoodstockSpider {
 		}).start();
 	}
 
-	public void getwz() {
-		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
-		List<ForeignCapitalSum> upd = new LinkedList<ForeignCapitalSum>();
-		for (StockBaseInfo s : codelist) {
-			try {
-				ForeignCapitalSum fcs = getWz(s.getCode());
-				if (fcs != null) {
-					if (s.getFloatShare() > 0) {
-						double fs = s.getFloatShare() * CurrencyUitl.YI_N.doubleValue();
+	private void getwz() {
+		try {
+			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
+			List<ForeignCapitalSum> upd = new LinkedList<ForeignCapitalSum>();
+			for (StockBaseInfo s : codelist) {
+				try {
+					ForeignCapitalSum fcs = getWz(s.getCode());
+					if (fcs != null) {
+						if (s.getFloatShare() > 0) {
+							double fs = s.getFloatShare() * CurrencyUitl.YI_N.doubleValue();
 //						System.err.println(CurrencyUitl.YI_N.doubleValue());
 //						System.err.println(String.valueOf(fs));
-						fcs.setHoldRatio(CurrencyUitl.roundHalfUpWhithPercent(fcs.getHoldVol() / fs));
+							fcs.setHoldRatio(CurrencyUitl.roundHalfUpWhithPercent(fcs.getHoldVol() / fs));
 //						System.err.println(fcs);
+						}
+						upd.add(fcs);
 					}
-					upd.add(fcs);
+				} catch (Exception e) {
+					ErrorLogFileUitl.writeError(e, "", "", "");
 				}
-			} catch (Exception e) {
-				ErrorLogFileUitl.writeError(e, "", "", "");
 			}
+			if (upd.size() > 0) {
+				foreignCapitalSumDao.saveAll(upd);
+			}
+			log.info("igoodstock-外资:done,size:{}", upd.size());
+		} catch (Exception e) {
+			e.printStackTrace();
+			WxPushUtil.pushSystem1("igoodstock-外资-抓包异常");
 		}
-		if (upd.size() > 0) {
-			foreignCapitalSumDao.saveAll(upd);
-		}
-		log.info("igoodstock-外资:done,size:{}", upd.size());
 	}
 
 	public ForeignCapitalSum getWz(String code) {

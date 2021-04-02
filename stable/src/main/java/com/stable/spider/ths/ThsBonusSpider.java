@@ -109,7 +109,8 @@ public class ThsBonusSpider {
 				log.info("current index:{}", c);
 			}
 			saveAll(zfdl, zfsl, fhl, bhl);
-			WxPushUtil.pushSystem1(date + " 分红&增发抓包同花顺已完成");
+			log.info("分红&增发抓包同花顺已完成");
+//			WxPushUtil.pushSystem1(date + " 分红&增发抓包同花顺已完成");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "同花顺分红&增发异常运行异常..", "", "");

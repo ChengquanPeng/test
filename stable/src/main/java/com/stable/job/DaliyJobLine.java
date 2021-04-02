@@ -58,7 +58,8 @@ public class DaliyJobLine {
 		log.info("获取日交易(分红除权)");
 		int result = tradeHistroyService.spiderTodayDaliyTrade(true, today);
 		if (result != 0) {
-			WxPushUtil.pushSystem1("Seq1=>正常执行=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:" + result);
+			// WxPushUtil.pushSystem1("Seq1=>正常执行=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:" +
+			// result);
 			return true;
 		} else {
 			WxPushUtil.pushSystem1("异常执行Seq1=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:0,以后的链条不会被执行");

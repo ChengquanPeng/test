@@ -26,7 +26,6 @@ import com.stable.job.MyCallable;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
-import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BonusHist;
 import com.stable.vo.http.resp.DividendHistoryResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -169,14 +168,15 @@ public class BonusService {
 										String.valueOf(d.getDividendDate()));
 //								sb.append(d.getCode()).append(",");
 							}
-							if (list.size() > 0) {
-								WxPushUtil.pushSystem1(start + "-" + end + " 实施[" + list.size() + "]条分红分股！");
-							} else {
-								WxPushUtil.pushSystem1(start + "-" + end + "无实施分红分股");
-							}
+							log.info(start + "-" + end + " 实施[" + list.size() + "]条分红分股！");
+//							if (list.size() > 0) {
+//								WxPushUtil.pushSystem1(start + "-" + end + " 实施[" + list.size() + "]条分红分股！");
+//							} else {
+//								WxPushUtil.pushSystem1(start + "-" + end + "无实施分红分股");
+//							}
 						} else {
 							log.info("今日无股票分红除权相关信息");
-							WxPushUtil.pushSystem1("今日无实施分红分股");
+//							WxPushUtil.pushSystem1("今日无实施分红分股");
 						}
 						return null;
 					}

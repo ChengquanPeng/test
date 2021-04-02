@@ -126,7 +126,7 @@ public class FinanceService {
 						StringBuffer sb = new StringBuffer();
 						// 业绩快报(准确的)
 						if (yjkb != null && yjkb.getAnnDate() >= startDate) {
-							sb.append(code);
+							sb.append(stockBasicService.getCodeName(code));
 							if (yjkb.getJlr() > 0) {
 								sb.append(",业绩快报不亏:");
 								find = true;
@@ -138,7 +138,7 @@ public class FinanceService {
 							// 业绩预告(类似天气预报,可能不准)
 							FinYjyg yjyg = getLastFinaceYgByReportDate(code, fbi.getYear(), fbi.getQuarter());
 							if (yjyg != null && yjyg.getAnnDate() >= startDate) {
-								sb.append(code);
+								sb.append(stockBasicService.getCodeName(code));
 								if (yjyg.getJlr() > 0) {
 									sb.append(",业绩预告不亏:");
 									find = true;
@@ -532,38 +532,44 @@ public class FinanceService {
 	public void jobSpiderKuaiYuBao() {
 		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.FINACE_FRIST, RunCycleEnum.DAY) {
 			public Object mycall() {
-				log.info("同步业绩预报和快报[started]");
-				int updateDate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-				List<FinYjkb> list1 = eastmoneySpider.getFinYjkb();
-				List<FinYjyg> list2 = eastmoneySpider.getFinYjyg();
-				StringBuffer sb = new StringBuffer();
-				if (list1.size() > 0) {
-					for (int i = 0; i < list1.size(); i++) {
-						FinYjkb fy = list1.get(i);
-						if (i < 5) {// 前面5条
-							sb.append(stockBasicService.getCodeName(fy.getCode())).append(",");
+				try {
+					log.info("同步业绩预报和快报[started]");
+					int updateDate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+					List<FinYjkb> list1 = eastmoneySpider.getFinYjkb();
+					List<FinYjyg> list2 = eastmoneySpider.getFinYjyg();
+					StringBuffer sb = new StringBuffer();
+					if (list1.size() > 0) {
+						for (int i = 0; i < list1.size(); i++) {
+							FinYjkb fy = list1.get(i);
+							if (i < 5) {// 前面5条
+								sb.append(stockBasicService.getCodeName(fy.getCode())).append(",");
+							}
+							fy.setUpdateDate(updateDate);
+							fy.setIsValid(1);
 						}
-						fy.setUpdateDate(updateDate);
-						fy.setIsValid(1);
+						esFinYjkbDao.saveAll(list1);
 					}
-					esFinYjkbDao.saveAll(list1);
-				}
-				if (list2.size() > 0) {
-					for (int i = 0; i < list2.size(); i++) {
-						FinYjyg fy = list2.get(i);
-						if (i <= 5) {
-							sb.append(stockBasicService.getCodeName(fy.getCode())).append(",");
+					if (list2.size() > 0) {
+						for (int i = 0; i < list2.size(); i++) {
+							FinYjyg fy = list2.get(i);
+							if (i <= 5) {
+								sb.append(stockBasicService.getCodeName(fy.getCode())).append(",");
+							}
+							fy.setUpdateDate(updateDate);
+							fy.setIsValid(1);
 						}
-						fy.setUpdateDate(updateDate);
-						fy.setIsValid(1);
+						esFinYjygDao.saveAll(list2);
 					}
-					esFinYjygDao.saveAll(list2);
+					log.info("同步业绩预报和快报[end],result=" + sb.toString());
+					// WxPushUtil.pushSystem1(
+					// "同步业绩预报和快报完成！" + (sb.length() > 0 ? ("今日快报或者预告:" + sb.toString()) :
+					// "今日无业绩快报或者预告"));
+					kybMonitor();
+				} catch (Exception e) {
+					e.printStackTrace();
+					WxPushUtil.pushSystem1("同步业绩预报和快报异常");
+					throw e;
 				}
-				log.info("同步业绩预报和快报[end]");
-
-				WxPushUtil.pushSystem1(
-						"同步业绩预报和快报完成！" + (sb.length() > 0 ? ("今日快报或者预告:" + sb.toString()) : "今日无业绩快报或者预告"));
-				kybMonitor();
 				return null;
 			}
 		});

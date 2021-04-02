@@ -134,10 +134,15 @@ public class StockBasicService {
 									esStockBaseInfoDao.saveAll(removelist);
 								}
 							}
-							log.info("同步股票列表[end]");
+							log.info("同步股票列表[end],cnt=" + cnt);
 							LOCAL_ALL_ONLINE_LIST.clear();// 清空缓存
-							WxPushUtil.pushSystem1("同步股票列表完成！记录条数=[" + cnt + "],异常股票数:" + removelist.size());
+							// WxPushUtil.pushSystem1("同步股票列表完成！记录条数=[" + cnt + "],异常股票数:" +
+							// removelist.size());
 							return null;
+						} catch (Exception e) {
+							e.printStackTrace();
+							WxPushUtil.pushSystem1("同步股票列表异常");
+							throw e;
 						} finally {
 							semap.release();
 						}

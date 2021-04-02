@@ -96,6 +96,7 @@ public class ThsCompanySpider {
 		if (upd.size() > 0) {
 			esStockBaseInfoDao.saveAll(upd);
 		}
+		log.info("同花顺公司资料 done");
 	}
 
 	private String dofetchInner3(String code) {

@@ -334,7 +334,7 @@ public class MonitorPoolService {
 				if (!chipsZfService.isZfDateOk(zf, oneYearAgo)) {
 					mp.setZfdone(0);
 					monitorPoolDao.save(mp);
-					WxPushUtil.pushSystem1(mp.getCode() + " 已完成增发");
+					WxPushUtil.pushSystem1(stockBasicService.getCodeName(mp.getCode()) + " 已完成增发");
 				}
 			}
 		}
@@ -356,7 +356,8 @@ public class MonitorPoolService {
 					HolderNum hn0 = hml.get(0);
 					if (hn0.getDate() >= mp.getHolderNum()) {
 						boolean islow = hml.get(1).getNum() > hn0.getNum();
-						WxPushUtil.pushSystem1(mp.getCode() + " 股东人数:" + (islow ? "下降" : "上涨"));
+						WxPushUtil.pushSystem1(
+								stockBasicService.getCodeName(mp.getCode()) + " 股东人数:" + (islow ? "下降" : "上涨"));
 						mp.setHolderNum(DateUtil.getTodayIntYYYYMMDD());
 						monitorPoolDao.save(mp);
 					}
@@ -379,8 +380,8 @@ public class MonitorPoolService {
 						.getVolume();
 				double factor = CurrencyUitl.topPriceN(l, 1.03);
 				if (tday.getVolume() <= factor) {
-					WxPushUtil.pushSystem1(mp.getCode() + " 差不多已经地量(" + mp.getBuyLowVol() + "交易日),日期从"
-							+ l2.get(l2.size() - 1).getDate() + " " + tday.getDate());
+					WxPushUtil.pushSystem1(stockBasicService.getCodeName(mp.getCode()) + " 差不多已经地量(" + mp.getBuyLowVol()
+							+ "交易日),日期从" + l2.get(l2.size() - 1).getDate() + " " + tday.getDate());
 				}
 			}
 		}
@@ -403,7 +404,7 @@ public class MonitorPoolService {
 			if (l.size() > 0) {
 				StringBuffer sb = new StringBuffer();
 				for (String s : l) {
-					sb.append(s).append(Constant.DOU_HAO);
+					sb.append(stockBasicService.getCodeName(s)).append(Constant.DOU_HAO);
 				}
 				WxPushUtil.pushSystem1("今日大宗交易:" + sb.toString());
 			}
