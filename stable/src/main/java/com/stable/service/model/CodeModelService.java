@@ -290,7 +290,7 @@ public class CodeModelService {
 				}
 				// 大宗交易超1亿
 				newOne.setDzjyRct(0);
-				if (d.getCircMarketVal() <= 75.0 && dzjyService.dzjyF(code, tradeDate)) {
+				if (d.getCircMarketVal() <= 75.0 && dzjyService.dzjyF(code, dzdate)) {
 					newOne.setDzjyRct(1);
 				}
 			} catch (Exception e) {
@@ -1412,7 +1412,7 @@ public class CodeModelService {
 		}
 		// 最近一次增发
 		if (dh.getZflastOkDate() > 0) {
-			sb5.append("日期:").append(dh.getZflastOkDate()).append(Constant.HTML_LINE);
+			sb5.append("增发:").append(dh.getZflastOkDate()).append(Constant.HTML_LINE);
 			if (dh.getZfbuy() == 1) {
 				sb5.append(",购买资产").append(Constant.HTML_LINE);
 			}
