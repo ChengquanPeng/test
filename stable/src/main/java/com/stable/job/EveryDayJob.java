@@ -15,7 +15,6 @@ import com.stable.spider.eastmoney.EmDzjySpider;
 import com.stable.spider.official.JysSpider;
 import com.stable.spider.ths.ThsSpider;
 import com.stable.utils.DateUtil;
-import com.stable.utils.WxPushUtil;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -74,9 +73,9 @@ public class EveryDayJob extends MySimpleJob {
 //			financeService.fetchFinances();
 			codeModelService.runJobv2(date, false);
 		} else {
-			WxPushUtil.pushSystem1("周五，周六，周日每晚23点不在运行定时运行 code model,周日下午在继续运行！");
+			// WxPushUtil.pushSystem1("周五，周六，周日每晚23点不在运行定时运行 code model,周日下午在继续运行！");
 		}
-		log.info("无效概念");
+		log.info("无效概念清除");
 		thsSpider.deleteInvaildCodeConcept();
 	}
 //

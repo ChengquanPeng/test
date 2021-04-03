@@ -138,8 +138,8 @@ public class BuyBackService {
 						log.info("未获取到回购公告");
 					}
 					redisUtil.set(RedisConstant.RDS_BUY_BACK_LAST_DAY, last);
-					log.info("同步回购公告列表[end],ann_date={}", ann_date);
-					WxPushUtil.pushSystem1(ann_date + " 获取到[" + cnt + "]条回购公告！");
+					log.info("同步回购公告列表[end]," + ann_date + " 获取到[" + cnt + "]条回购公告！");
+					// WxPushUtil.pushSystem1(ann_date + " 获取到[" + cnt + "]条回购公告！");
 				} while (true);
 				return null;
 			}
