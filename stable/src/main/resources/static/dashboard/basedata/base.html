@@ -34,23 +34,6 @@
 			</div>
 			<div>
 				<div class="input-group">
-					近一年的增发（含未完成）-->&nbsp;&nbsp;增发状态：<select id="zfStatus">
-						<option value="" selected="selected">不限制</option>
-						<option value="1">增发中</option>
-						<option value="2">增发完成</option>
-						<option value="3">增发终止</option>
-						<option value="0">无增发</option>
-					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 收益率:<select id="bsyl"
-						class="form-control">
-						<option value="" selected="selected">无限制</option>
-						<option value="1">增长</option>
-						<option value="2">年超20%</option>
-						<option value="4">增长&超20%</option>
-					</select>
-				</div>
-			</div>
-			<div>
-				<div class="input-group">
 					红色:<select id="bred">
 						<option value="" selected="selected">无限制</option>
 						<option value="1">有红色</option>
@@ -92,6 +75,33 @@
 						type="checkbox" id="susWhiteHors" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					箱体突破:<input type="checkbox" id="sort7" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					短线模型:<input type="checkbox" id="sort6" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					 收益率:<select id="bsyl"
+						class="form-control">
+						<option value="" selected="selected">无限制</option>
+						<option value="1">增长</option>
+						<option value="2">年超20%</option>
+						<option value="4">增长&超20%</option>
+					</select>
+				</div>
+			</div>
+			<div>
+				<div class="input-group">
+					已完成增发-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 自己人增发:<input
+						type="checkbox" id="zfself" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					增发购买资产:<input type="checkbox" id="zfbuy" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					增发博弈(自+未):<input type="checkbox" id="susZfBoss" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					增发解禁:<input type="checkbox" id="zfjj" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					近一年的增发（含未完成）-->&nbsp;&nbsp;增发状态：<select id="zfStatus">
+						<option value="" selected="selected">不限制</option>
+						<option value="1">增发中</option>
+						<option value="2">增发完成</option>
+						<option value="3">增发终止</option>
+						<option value="0">无增发</option>
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				</div>
+			</div>
+			<div>
+				<div class="input-group">
 					小而美模型:<select id="smallModel">
 						<option value="0" selected="selected">无限制</option>
 						<option value="9999">所有</option>
@@ -100,19 +110,10 @@
 						<option value="3">3大宗</option>
 						<option value="4">4增宗</option>
 					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				</div>
-			</div>
-			<div>
-				<div class="input-group">
-					已完成的增发-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 自己人增发:<input
-						type="checkbox" id="zfself" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					增发购买资产:<input type="checkbox" id="zfbuy" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					增发博弈(自+未):<input type="checkbox" id="susZfBoss" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					增发解禁:<input type="checkbox" id="zfjj" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					小票未涨:<input type="checkbox" id="zfjjup" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					低于增发价:<input type="checkbox" id="zfPriceLow" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					半年大宗超亿:<input type="checkbox" id="dzjyRct" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					市值大小:<input type="text" id="mkv" width="30" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					市值大小:<input type="text" id="mkv" width="10" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					人工状态:<select id="pls">
 						<option value="-1" selected="selected">无限制</option>
 						<option value="1">确定</option>
