@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
+import com.stable.service.model.CodeModelService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.MonitorPool;
@@ -28,6 +29,8 @@ public class RealtimeMonitoringService {
 	@Autowired
 	private StockBasicService stockBasicService;
 	private Map<String, RealtimeDetailsAnalyzer> map = null;
+	@Autowired
+	private CodeModelService codeModelService;
 
 	public synchronized void startObservable() {
 //		if (System.currentTimeMillis() > 0) {
@@ -62,12 +65,12 @@ public class RealtimeMonitoringService {
 					String code = cp.getCode();
 					log.info(code);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
-					int r = task.init(code, cp, resulter, stockBasicService.getCodeName(code));
+					int r = task.init(code, cp, resulter, stockBasicService.getCodeName(code),
+							codeModelService.getLastOneByCode2(code));
 					if (r == 1) {
 						new Thread(task).start();
 						list.add(task);
 						map.put(code, task);
-
 					} else {
 						if (r < 0) {
 							failtt++;

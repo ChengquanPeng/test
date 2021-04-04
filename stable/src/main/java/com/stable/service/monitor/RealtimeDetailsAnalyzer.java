@@ -8,6 +8,7 @@ import com.stable.spider.sina.SinaRealtimeUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MonitoringUitl;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPool;
 
 import lombok.extern.log4j.Log4j2;
@@ -26,12 +27,14 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private MonitorPool cp;
 	private boolean waitSend = true;
 	private boolean chkCodeClosed = false;
+	private CodeBaseModel2 cbm;
 
 	public void stop() {
 		isRunning = false;
 	}
 
-	public int init(String code, MonitorPool cp, RealtimeDetailsResulter resulter, String codeName) {
+	public int init(String code, MonitorPool cp, RealtimeDetailsResulter resulter, String codeName,
+			CodeBaseModel2 cbm) {
 		this.code = code;
 		this.codeName = codeName;
 		this.resulter = resulter;
@@ -47,11 +50,16 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			// WxPushUtil.pushSystem1(code + " " + codeName + "今日疑似停牌或者可能没有集合竞价");
 			chkCodeClosed = true;
 		}
+		this.cbm = cbm;
 		return 1;
 	}
 
 	public void run() {
-		String msg = MonitorType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
+		String msg = "";
+		if (cbm.getPls() == 1) {
+			msg = "人工已确定!";
+		}
+		msg += MonitorType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
 		if (chkCodeClosed) {
 			try {
 				Thread.sleep(TEN_MIN);
