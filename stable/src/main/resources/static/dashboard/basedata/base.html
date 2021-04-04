@@ -75,8 +75,7 @@
 						type="checkbox" id="susWhiteHors" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					箱体突破:<input type="checkbox" id="sort7" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					短线模型:<input type="checkbox" id="sort6" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					 收益率:<select id="bsyl"
-						class="form-control">
+					收益率:<select id="bsyl" class="form-control">
 						<option value="" selected="selected">无限制</option>
 						<option value="1">增长</option>
 						<option value="2">年超20%</option>
@@ -109,9 +108,9 @@
 						<option value="2">2增发</option>
 						<option value="3">3大宗</option>
 						<option value="4">4增宗</option>
-					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					小票未涨:<input type="checkbox" id="zfjjup" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					低于增发价:<input type="checkbox" id="zfPriceLow" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 小票未涨:<input type="checkbox"
+						id="zfjjup" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 低于增发价:<input
+						type="checkbox" id="zfPriceLow" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					半年大宗超亿:<input type="checkbox" id="dzjyRct" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					市值大小:<input type="text" id="mkv" width="10" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					人工状态:<select id="pls">
@@ -330,7 +329,11 @@
 											formatter : function(value, row,
 													index) {
 												return "<a target='_blank' href='/web/dashboard/basedata/manual.html?code="
-														+ row.code + "'>人工</a>";
+														+ row.code
+														+ "'>人工-小票</a><br/>"
+														+ "<a target='_blank' href='/web/dashboard/basedata/addMonitor.html?code="
+														+ row.code
+														+ "'>更改监听</a>";
 											}
 
 										} ],
