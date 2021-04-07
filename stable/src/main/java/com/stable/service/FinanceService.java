@@ -83,8 +83,6 @@ public class FinanceService {
 	@Autowired
 	private CodeModelService codeModelService;
 	@Autowired
-	private ZhiYaService zhiYaService;
-	@Autowired
 	private ThsHolderSpider thsHolderSpider;
 	@Autowired
 	private ConceptService conceptService;
@@ -596,13 +594,6 @@ public class FinanceService {
 			public void run() {
 				thsHolderSpider.dofetchHolder(true);// 股东人数
 				rtl.setThsHolderOk(true);
-			}
-		}).start();
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				zhiYaService.fetchBySun();// 质押
-				rtl.setDfZfOk(true);
 			}
 		}).start();
 		new Thread(new Runnable() {

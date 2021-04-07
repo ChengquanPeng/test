@@ -180,6 +180,9 @@ public class CodeModelService {
 					poolList.add(pool);
 				}
 				DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code, 0, 0);
+				if (d == null) {
+					d = new DaliyBasicInfo2();
+				}
 				if (d.getCircMarketVal() <= 0) {
 					d = daliyBasicHistroyService.queryLastest(code, 0, 1);
 				}

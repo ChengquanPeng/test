@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.service.BuyBackService;
 import com.stable.service.ChipsZfService;
+import com.stable.service.ZhiYaService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EmDzjySpider;
@@ -40,6 +41,8 @@ public class EveryDayJob extends MySimpleJob {
 	private EmDzjySpider emDzjySpider;
 	@Autowired
 	private ThsSpider thsSpider;
+	@Autowired
+	private ZhiYaService zhiYaService;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
@@ -77,6 +80,16 @@ public class EveryDayJob extends MySimpleJob {
 		}
 		log.info("无效概念清除");
 		thsSpider.deleteInvaildCodeConcept();
+
+		log.info("周五晚上，质押");
+		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					zhiYaService.fetchBySun();// 质押
+				}
+			}).start();
+		}
 	}
 //
 //	@Autowired
