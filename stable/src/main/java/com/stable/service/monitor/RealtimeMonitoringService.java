@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.stable.enums.MonitorType;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.CodeModelService;
@@ -63,6 +64,10 @@ public class RealtimeMonitoringService {
 				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
 				for (MonitorPool cp : allCode) {
 					String code = cp.getCode();
+					if (cp.getMonitor() == MonitorType.ZengFaAuto.getCode()) {
+						log.info(code + " ZengFaAuto continue");
+						continue;
+					}
 					log.info(code);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
 					int r = task.init(code, cp, resulter, stockBasicService.getCodeName(code),
