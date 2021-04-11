@@ -47,43 +47,39 @@ public class ChipsSortService {
 //		}).start();
 //	}
 
-	public boolean isCollectChips(String code, double mkv, int tradeDate) {
-		if (mkv > 0 && mkv <= 75.0) {
-			List<TradeHistInfoDaliyNofq> origlist = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0,
-					tradeDate, EsQueryPageUtil.queryPage180, SortOrder.DESC);
-			if (origlist != null && origlist.size() > 0) {
-				int okDate = redisUtil.get(RedisConstant.RDS_CHIPS_SORT_OK_DT_ + code, 0);
-				boolean stPrice = false;
-				int startChkDate = origlist.get(origlist.size() - 1).getDate();
-				if (okDate >= startChkDate) {
-					// OK
-					stPrice = true;
-				} else {
-					// check daliy
-					okDate = chkAndGetDate(code, origlist);
-					if (okDate > 0) {
-						stPrice = true;
-					}
-				}
-
-				// check 股东人数
-				if (stPrice) {
-					HolderNum nh = chipsService.getLastHolderNum(code);// 最新的
-					HolderNum nb = chipsService.getLastHolderNumBfDate(code, okDate);// 拉升之前的
-					if (nh != null && nb != null) {
-						if (nh.getNum() < nb.getNum()) {
-							return true;
-						}
-					}
-					log.info("{} 有冲高行为,但无吸筹行为", code);
-				} else {
-					log.info("{} 无冲高行为", code);
-				}
+	public boolean isCollectChips(String code, int tradeDate) {
+		List<TradeHistInfoDaliyNofq> origlist = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, tradeDate,
+				EsQueryPageUtil.queryPage180, SortOrder.DESC);
+		if (origlist != null && origlist.size() > 0) {
+			int okDate = redisUtil.get(RedisConstant.RDS_CHIPS_SORT_OK_DT_ + code, 0);
+			boolean stPrice = false;
+			int startChkDate = origlist.get(origlist.size() - 1).getDate();
+			if (okDate >= startChkDate) {
+				// OK
+				stPrice = true;
 			} else {
-				log.info("{} ignore,origlist is null", code);
+				// check daliy
+				okDate = chkAndGetDate(code, origlist);
+				if (okDate > 0) {
+					stPrice = true;
+				}
+			}
+
+			// check 股东人数
+			if (stPrice) {
+				HolderNum nh = chipsService.getLastHolderNum(code);// 最新的
+				HolderNum nb = chipsService.getLastHolderNumBfDate(code, okDate);// 拉升之前的
+				if (nh != null && nb != null) {
+					if (nh.getNum() < nb.getNum()) {
+						return true;
+					}
+				}
+				log.info("{} 有冲高行为,但无吸筹行为", code);
+			} else {
+				log.info("{} 无冲高行为", code);
 			}
 		} else {
-			log.info("{} ignore,大于75亿->{}", code, mkv);
+			log.info("{} ignore,origlist is null", code);
 		}
 		return false;
 	}

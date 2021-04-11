@@ -182,8 +182,8 @@ public class CodeModelService {
 				if (pool == null) {
 					pool = new MonitorPool();
 					pool.setCode(code);
-					poolList.add(pool);
 				}
+				poolList.add(pool);
 
 				boolean onlineYear = stockBasicService.online1YearChk(code, tradeDate);
 				if (!onlineYear) {
@@ -196,11 +196,12 @@ public class CodeModelService {
 				if (d.getCircMarketVal() <= 0) {
 					d = daliyBasicHistroyService.queryLastest(code, 0, 1);
 				}
+				double mkv = d.getCircMarketVal();
 				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listHist, d);
 				listLast.add(newOne);
 
 				// 市值
-				newOne.setMkv(d.getCircMarketVal());
+				newOne.setMkv(mkv);
 
 				// 人工审核是否时间到期-重置
 				if (newOne.getPlst() < tradeDate) {
@@ -229,7 +230,7 @@ public class CodeModelService {
 				// 周末计算-至少N年未大涨?
 				if (isweekend) {
 					newOne.setZfjjup(0);
-					if (d.getCircMarketVal() <= 100.0) {
+					if (mkv <= 100.0) {
 						if (stockBasicService.online2YearChk(code, tradeDate)) {
 							int listdate = Integer.valueOf(s.getList_date());
 							newOne.setZfjjup(priceLifeService.noupYear(code, listdate));
@@ -239,14 +240,15 @@ public class CodeModelService {
 				// 大宗交易超1亿
 				newOne.setDzjyRct(0);
 				DzjyYiTime dz = null;
-				if (d.getCircMarketVal() <= 75.0) {
+				if (mkv <= 75.0) {
 					dz = dzjyService.dzjyF(code, dzdate);
 					if (dz.getTotalAmt() > 9999.0) {// 1亿
 						newOne.setDzjyRct(1);
+						log.info("{} 大宗超1亿", code);
 					}
 				}
 				// 小而美模型：未涨&&年报 && 大股东集中
-				if (newOne.getPls() == 0 && newOne.getZfjjup() >= 2 && d.getCircMarketVal() <= 45.0) {// 流通45亿以内的
+				if (newOne.getPls() == 0 && newOne.getZfjjup() >= 2 && mkv <= 45.0) {// 流通45亿以内的
 					if (newOne.getHolderNumP5() >= 50) {
 						List<FinanceBaseInfo> l = financeService.getFinacesReportByYearRpt(code,
 								EsQueryPageUtil.queryPage5);
@@ -284,20 +286,19 @@ public class CodeModelService {
 								}
 							}
 							newOne.setSmallModel(smallModel);
+							log.info("{} 小而美模型", code);
 						}
 					}
 				}
-				// 收集筹码的短线-
+				// 收集筹码的短线-拉过一波，所以市值可以大一点
 				newOne.setSortChips(0);
-				if (chipsSortService.isCollectChips(code, d.getCircMarketVal(), tradeDate)) {
+				if (mkv > 0 && mkv <= 75.0 && newOne.getPls() != 2
+						&& chipsSortService.isCollectChips(code, tradeDate)) {
 					newOne.setSortChips(1);
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
 						pool.setMonitor(MonitorType.SORT_CHIPS.getCode());
 						pool.setRealtime(1);
 						pool.setUpTodayChange(9);
-						if (!poolList.contains(pool)) {
-							poolList.add(pool);
-						}
 						newOne.setMonitor(MonitorType.SORT_CHIPS.getCode());
 					}
 
@@ -305,6 +306,7 @@ public class CodeModelService {
 						newOne.setSortChipsNotice(1);
 						zlxc.append(stockBasicService.getCodeName(code)).append(",");
 					}
+					log.info("{} 主力筹码收集", code);
 				} else {
 					newOne.setSortChipsNotice(0);
 				}
@@ -313,18 +315,17 @@ public class CodeModelService {
 				// 2.未涨的
 				// 3.增发解禁且未涨
 				// 4.75亿以内（50x150%=75）
+
 				if (newOne.getSmallModel() <= 0 && newOne.getPls() == 0 && newOne.getZfjj() > 0
-						&& newOne.getZfjjup() >= 2 && d.getCircMarketVal() <= 75.0) {// 75亿以内的
+						&& newOne.getZfjjup() >= 2 && mkv <= 75.0) {// 75亿以内的
 
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
 						pool.setMonitor(MonitorType.ZengFaAuto.getCode());
 						pool.setRealtime(1);
 						pool.setUpTodayChange(9);
-						if (!poolList.contains(pool)) {
-							poolList.add(pool);
-						}
 						newOne.setMonitor(MonitorType.ZengFaAuto.getCode());
 					}
+					log.info("{} 增发自动监听", code);
 				}
 				// 公告通知
 //				if (newOne.getPls() == 1) {
@@ -333,7 +334,7 @@ public class CodeModelService {
 //					}
 //				}
 
-				if (newOne.getPlst() != 2 && d.getCircMarketVal() <= 75.0 && newOne.getZfPriceLowNotice() == 0
+				if (newOne.getPlst() != 2 && mkv <= 75.0 && newOne.getZfPriceLowNotice() == 0
 						&& ((newOne.getZfPriceLow() >= 18.0) || (newOne.getDzjyRct() == 1))) {
 					// 增发价低于18或者大宗超1亿
 					lowpricec.append(stockBasicService.getCodeName(code)).append(",");
