@@ -212,10 +212,14 @@ public class CodeModelService {
 				}
 
 				// 增发自动监听-重置
-				if (newOne.getPls() != 1 && (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()
-						|| pool.getMonitor() == MonitorType.SMALL_AND_BEAUTIFUL.getCode()
-						|| pool.getMonitor() == MonitorType.SORT_CHIPS.getCode()
-						|| pool.getMonitor() == MonitorType.NO.getCode())) {// 自动监听归0
+				if (newOne.getPls() != 1
+						&& (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()
+								|| pool.getMonitor() == MonitorType.SMALL_AND_BEAUTIFUL.getCode()
+								|| pool.getMonitor() == MonitorType.SORT_CHIPS.getCode()
+								|| pool.getMonitor() == MonitorType.NO.getCode()
+								|| newOne.getMonitor() == MonitorType.ZengFaAuto.getCode()
+								|| newOne.getMonitor() == MonitorType.SMALL_AND_BEAUTIFUL.getCode())
+						|| newOne.getMonitor() == MonitorType.SORT_CHIPS.getCode()) {// 自动监听归0
 					pool.setMonitor(MonitorType.NO.getCode());
 					pool.setRealtime(0);
 					pool.setUpTodayChange(0);
