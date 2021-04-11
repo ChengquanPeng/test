@@ -74,6 +74,20 @@ public class ThsHolderSpider {
 		}
 	}
 
+	public void doCodeFe(String code) {
+		header = new HashMap<String, String>();
+		List<HolderPercent> hps = new LinkedList<HolderPercent>();
+		List<HolderNum> hns = new LinkedList<HolderNum>();
+		dofetchHolderInner(DateUtil.getTodayIntYYYYMMDD(), code, hns, hps);
+		if (hns.size() > 0) {
+			esHolderNumDao.saveAll(hns);
+		}
+		if (hps.size() > 0) {
+			esHolderPercentDao.saveAll(hps);
+		}
+		log.info(code+" 股东人数/股东研究抓包同花顺已完成");
+	}
+
 	private void dofetchHolderInner(int sysdate, boolean isWeekEnd, List<String> codesw) {
 		if (header == null) {
 			header = new HashMap<String, String>();
@@ -113,7 +127,7 @@ public class ThsHolderSpider {
 		if (hps.size() > 0) {
 			esHolderPercentDao.saveAll(hps);
 		}
-		log.info("股东人数/股东研究抓包同花顺已完成");
+		log.info("所有股东人数/股东研究抓包同花顺已完成");
 		// WxPushUtil.pushSystem1(sysdate + " 股东人数/股东研究抓包同花顺已完成");
 	}
 

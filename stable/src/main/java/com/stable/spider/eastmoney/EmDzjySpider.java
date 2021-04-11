@@ -20,7 +20,6 @@ import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.Dzjyt;
 import com.stable.vo.bus.Dzjy;
 import com.stable.vo.bus.DzjyYiTime;
 import com.stable.vo.bus.StockBaseInfo;
@@ -68,16 +67,9 @@ public class EmDzjySpider {
 			List<DzjyYiTime> l = new LinkedList<DzjyYiTime>();
 			int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -210));// 7个月
 			for (String code : set) {
-				// 频繁交易，且金额超过1亿，近7个月
-				Dzjyt t = dzjyService.halfOver1Yi(code, startDate);
-				double totalAmt = t.getTotal();
-				if (totalAmt > 9999.0) {// 1亿
-					DzjyYiTime dyt = new DzjyYiTime();
-					dyt.setCode(code);
-					dyt.setDate(t.getLastDate());
-					dyt.setTotalAmt(totalAmt);
-					l.add(dyt);
-				}
+				// 频繁统计，近7个月
+				DzjyYiTime t = dzjyService.halfOver1Yi(code, startDate);
+				l.add(t);
 			}
 
 			if (l.size() > 0) {
@@ -86,6 +78,7 @@ public class EmDzjySpider {
 		}
 	}
 
+//TODO
 //	@PostConstruct
 	public void init() {
 		new Thread(new Runnable() {
@@ -94,16 +87,8 @@ public class EmDzjySpider {
 				int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -210));// 7个月
 				List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 				for (StockBaseInfo s : codelist) {
-					String code = s.getCode();
-					Dzjyt t = dzjyService.halfOver1Yi(code, startDate);
-					double totalAmt = t.getTotal();
-					if (totalAmt > 9999.0) {// 1亿
-						DzjyYiTime dyt = new DzjyYiTime();
-						dyt.setCode(code);
-						dyt.setDate(t.getLastDate());
-						dyt.setTotalAmt(totalAmt);
-						l.add(dyt);
-					}
+					DzjyYiTime t = dzjyService.halfOver1Yi(s.getCode(), startDate);
+					l.add(t);
 				}
 				if (l.size() > 0) {
 					dzjyYiTimeDao.saveAll(l);
@@ -111,7 +96,6 @@ public class EmDzjySpider {
 				log.info("init done");
 			}
 		}).start();
-
 	}
 
 	private HashSet<String> listToMap(List<Dzjy> dzl) {

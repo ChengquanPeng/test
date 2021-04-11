@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.es.dao.base.DzjyDao;
 import com.stable.es.dao.base.DzjyYiTimeDao;
-import com.stable.vo.Dzjyt;
+import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.Dzjy;
 import com.stable.vo.bus.DzjyYiTime;
 
@@ -34,9 +34,10 @@ public class DzjyService {
 	 * 
 	 * @param startDate 开始到现在
 	 */
-	public Dzjyt halfOver1Yi(String code, int startDate) {
-		Dzjyt t = new Dzjyt();
-		t.setTotal(0.0);
+	public DzjyYiTime halfOver1Yi(String code, int startDate) {
+		DzjyYiTime t = new DzjyYiTime();
+		t.setCode(code);
+		t.setTotalAmt(0.0);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));
@@ -46,15 +47,18 @@ public class DzjyService {
 
 		Page<Dzjy> page = dzjyDao.search(sq);
 		if (page != null && !page.isEmpty() && page.getContent().size() > 0) {
+			double num = 0.0;
 			for (Dzjy d : page.getContent()) {
-				t.setTotal(t.getTotal() + d.getTval());
+				num += d.getTvol();
+				t.setTotalAmt(t.getTotalAmt() + d.getTval());
 			}
-			t.setLastDate(page.getContent().get(0).getDate());
+			t.setAvgPrcie(CurrencyUitl.roundHalfUp(t.getTotalAmt() / num));
+			t.setDate(page.getContent().get(0).getDate());
 		}
 		return t;
 	}
 
-	public boolean dzjyF(String code, int date) {
+	public DzjyYiTime dzjyF(String code, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.rangeQuery("date").gte(date));
@@ -63,9 +67,8 @@ public class DzjyService {
 
 		Page<DzjyYiTime> page = dzjyYiTimeDao.search(sq);
 		if (page != null && !page.isEmpty()) {
-			return true;
+			return page.getContent().get(0);
 		}
-		return false;
-
+		return null;
 	}
 }

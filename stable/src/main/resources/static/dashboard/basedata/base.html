@@ -68,6 +68,8 @@
 						<option value="6">增发-系统自动</option>
 						<option value="7">股东人数</option>
 						<option value="8">买点-地量</option>
+						<option value="9">小而美</option>
+						<option value="10">短线-筹码收集</option>
 						<option value="0">无监听</option>
 						<option value="9999">有监听</option>
 					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 疑似大牛:<input type="checkbox"
@@ -75,6 +77,7 @@
 						type="checkbox" id="susWhiteHors" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					箱体突破:<input type="checkbox" id="sort7" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					短线模型:<input type="checkbox" id="sort6" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					短线-筹码收集:<input type="checkbox" id="sortChips" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					收益率:<select id="bsyl" class="form-control">
 						<option value="" selected="selected">无限制</option>
 						<option value="1">增长</option>
@@ -226,7 +229,11 @@
 									param.smallModel = $('#smallModel').val();
 									param.zfPriceLow = 0;
 									param.dzjyRct = 0;
+									param.sortChips = 0;
 
+									if (document.getElementById("sortChips").checked) {
+										param.sortChips = 1;
+									}
 									if (document.getElementById("dzjyRct").checked) {
 										param.dzjyRct = 1;
 									}

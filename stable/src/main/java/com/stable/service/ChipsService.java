@@ -199,6 +199,31 @@ public class ChipsService {
 	}
 
 	/**
+	 * 截止某个时间之前的最新记录
+	 */
+	public HolderNum getLastHolderNumBfDate(String code, int date) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("date").lte(date));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+		Page<HolderNum> page = esHolderNumDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		}
+		return null;
+	}
+
+	public HolderNum getLastHolderNum(String code) {
+		List<HolderNum> l = this.getHolderNumList45(code);
+		if (l != null && l.size() > 0) {
+			return l.get(0);
+		}
+		return null;
+	}
+
+	/**
 	 * 最近44条记录
 	 */
 	public List<HolderNum> getHolderNumList45(String code) {

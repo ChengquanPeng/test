@@ -30,4 +30,5 @@ public class ModelReq {
 	int smallModel;
 	int zfPriceLow;
 	int dzjyRct;
+	int sortChips;
 }

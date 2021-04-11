@@ -86,6 +86,8 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int zfPriceLow = 0; // 低于增发价
 	@Field(type = FieldType.Integer)
+	private int zfPriceLowNotice = 0; // 低于增发价
+	@Field(type = FieldType.Integer)
 	private int dzjyRct = 0; // 最近半年大宗交易频繁
 
 	// 交易面
@@ -100,6 +102,10 @@ public class CodeBaseModel2 extends EsBase {
 	private int sortMode7 = 0;// 突破箱体震荡 --//0未知，1待确认，2确认，3，不符合
 	@Field(type = FieldType.Integer)
 	private int smallModel = 0;// 0:无，1：普通，2，增发，3，大宗，4，增发+大宗
+	@Field(type = FieldType.Integer)
+	private int sortChips = 0;// 收集筹码的短线
+	@Field(type = FieldType.Integer)
+	private int sortChipsNotice = 0;// 收集筹码的短线-通知
 	// 人工确定
 
 	// 股东人数
@@ -117,7 +123,7 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Long)
 	private int pls = 0;// 0不确定，1在池子，2不在池子
 	@Field(type = FieldType.Long)
-	private int plst = 0;// 时间
+	private long plst = 0;// 时间
 	@Field(type = FieldType.Integer)
 	private int lstmt = 0;// 上次更新日期
 	@Field(type = FieldType.Integer)

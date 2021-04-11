@@ -22,7 +22,7 @@ public class EsQueryPageUtil {
 	public static final EsQueryPageReq queryPage100 = new EsQueryPageReq(100);
 	public static final EsQueryPageReq queryPage120 = new EsQueryPageReq(120);// 半年(20*6)
 	public static final EsQueryPageReq queryPage160 = new EsQueryPageReq(160);// 8个月(20*8)
-	public static final EsQueryPageReq queryPage180 = new EsQueryPageReq(180);// 8个月(20*9)
+	public static final EsQueryPageReq queryPage180 = new EsQueryPageReq(180);// 9个月(20*9)
 	public static final EsQueryPageReq queryPage250 = new EsQueryPageReq(250);// 一年
 	public static final EsQueryPageReq queryPage500 = new EsQueryPageReq(500);// 两年
 	public static final EsQueryPageReq queryPage9999 = new EsQueryPageReq(9999);
