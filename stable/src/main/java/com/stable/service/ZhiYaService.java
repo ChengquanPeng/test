@@ -38,6 +38,7 @@ public class ZhiYaService {
 	private StockBasicService stockBasicService;
 
 	public void fetchBySun() {
+		EastmoneyZytjSpider.errorcnt = new LinkedList<String>();
 		int update = DateUtil.getTodayIntYYYYMMDD();
 		int endDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), (-365 * 5)));
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();

@@ -2,11 +2,14 @@ package com.stable.spider.eastmoney;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.stable.constant.Constant;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
@@ -36,6 +39,7 @@ public class EastmoneyZytjSpider {
 	 * 质押统计
 	 */
 	static final String financeUrl = "http://f10.eastmoney.com/CompanyBigNews/GetPledgeHolder?code=%s&pageIndex=%s&t=%s";
+	public static List<String> errorcnt = new LinkedList<String>();
 
 	public static Map<String, Zya> getZy(String code, int endDate) {
 		ThreadsUtil.sleepRandomSecBetween1And5();
@@ -99,7 +103,15 @@ public class EastmoneyZytjSpider {
 				} catch (Exception e) {
 					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 					if (trytime >= 10) {
-						WxPushUtil.pushSystem1("东方财富-质押统计-抓包出错,code=" + code);
+						errorcnt.add(code);
+						if (errorcnt.size() >= 10) {
+							StringBuffer s = new StringBuffer();
+							for (String c : errorcnt) {
+								s.append(c).append(Constant.DOU_HAO);
+							}
+							WxPushUtil.pushSystem1("东方财富-质押统计-抓包出错,code=" + s.toString());
+							errorcnt = new LinkedList<String>();
+						}
 						fetch = true;
 						return m;
 					} else {
