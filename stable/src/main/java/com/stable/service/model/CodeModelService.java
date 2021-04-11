@@ -242,7 +242,7 @@ public class CodeModelService {
 				DzjyYiTime dz = null;
 				if (mkv <= 75.0) {
 					dz = dzjyService.dzjyF(code, dzdate);
-					if (dz.getTotalAmt() > 9999.0) {// 1亿
+					if (dz != null && dz.getTotalAmt() > 9999.0) {// 1亿
 						newOne.setDzjyRct(1);
 						log.info("{} 大宗超1亿", code);
 					}

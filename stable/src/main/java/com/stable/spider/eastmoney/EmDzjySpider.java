@@ -80,23 +80,23 @@ public class EmDzjySpider {
 
 //TODO
 //	@PostConstruct
-	public void init() {
-		new Thread(new Runnable() {
-			public void run() {
-				List<DzjyYiTime> l = new LinkedList<DzjyYiTime>();
-				int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -210));// 7个月
-				List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
-				for (StockBaseInfo s : codelist) {
-					DzjyYiTime t = dzjyService.halfOver1Yi(s.getCode(), startDate);
-					l.add(t);
-				}
-				if (l.size() > 0) {
-					dzjyYiTimeDao.saveAll(l);
-				}
-				log.info("init done");
-			}
-		}).start();
-	}
+//	public void init() {
+//		new Thread(new Runnable() {
+//			public void run() {
+//				List<DzjyYiTime> l = new LinkedList<DzjyYiTime>();
+//				int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -210));// 7个月
+//				List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
+//				for (StockBaseInfo s : codelist) {
+//					DzjyYiTime t = dzjyService.halfOver1Yi(s.getCode(), startDate);
+//					l.add(t);
+//				}
+//				if (l.size() > 0) {
+//					dzjyYiTimeDao.saveAll(l);
+//				}
+//				log.info("init done");
+//			}
+//		}).start();
+//	}
 
 	private HashSet<String> listToMap(List<Dzjy> dzl) {
 		HashSet<String> set = new HashSet<String>();
