@@ -310,6 +310,16 @@ public class DateUtil {
 		return Integer.valueOf(formatYYYYMMDD(py));
 	}
 
+	// 明4年
+	public static int getNext4Year(int yyyyMMdd) {
+//				Date date = new Date();//获取当前时间    
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(parseDate(yyyyMMdd));
+		calendar.add(Calendar.YEAR, 4);// 当前时间减去一年，即一年前的时间    
+		Date py = calendar.getTime();// 获取一年前的时间，或者一个月前的时间  
+		return Integer.valueOf(formatYYYYMMDD(py));
+	}
+
 	public static void main(String[] args) {
 		System.err.println(getNext2Year(20200501));
 		System.err.println(getPre2Year(20200421));

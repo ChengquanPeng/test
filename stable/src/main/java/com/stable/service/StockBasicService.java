@@ -262,4 +262,20 @@ public class StockBasicService {
 		}
 		return false;
 	}
+
+	/**
+	 * 上市时间年限chk-2年
+	 */
+	public boolean online4YearChk(String code, int today) {
+		String json = redisUtil.get(code);
+		if (StringUtils.isBlank(json)) {
+			return false;
+		}
+		StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
+		String listDate = base.getList_date();
+		if (today >= DateUtil.getNext4Year(Integer.valueOf(listDate))) {
+			return true;
+		}
+		return false;
+	}
 }

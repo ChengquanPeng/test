@@ -189,6 +189,7 @@ public class CodeModelService {
 				if (!onlineYear) {
 					continue;
 				}
+				boolean online4Year = stockBasicService.online4YearChk(code, tradeDate);
 				DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code, 0, 0);
 				if (d == null) {
 					d = new DaliyBasicInfo2();
@@ -223,6 +224,7 @@ public class CodeModelService {
 						|| newOne.getMonitor() == MonitorType.SORT_CHIPS.getCode()) {// 自动监听归0
 					pool.setMonitor(MonitorType.NO.getCode());
 					pool.setRealtime(0);
+					pool.setOffline(0);
 					pool.setUpTodayChange(0);
 					newOne.setMonitor(MonitorType.NO.getCode());
 					newOne.setSmallModel(0);
@@ -231,7 +233,7 @@ public class CodeModelService {
 				if (isweekend) {
 					newOne.setZfjjup(0);
 					if (mkv <= 100.0) {
-						if (stockBasicService.online2YearChk(code, tradeDate)) {
+						if (online4Year) {
 							int listdate = Integer.valueOf(s.getList_date());
 							newOne.setZfjjup(priceLifeService.noupYear(code, listdate));
 						}
@@ -248,60 +250,61 @@ public class CodeModelService {
 					}
 				}
 				// 小而美模型：未涨&&年报 && 大股东集中
-				if (newOne.getPls() == 0 && newOne.getZfjjup() >= 2 && mkv <= 45.0) {// 流通45亿以内的
-					if (newOne.getHolderNumP5() >= 50) {
-						List<FinanceBaseInfo> l = financeService.getFinacesReportByYearRpt(code,
-								EsQueryPageUtil.queryPage5);
-						int c = l.size();
-						if (l != null) {
-							for (FinanceBaseInfo f : l) {
-								if (f.getGsjlr() <= 0) {
-									c--;
+				if (newOne.getZfjjup() >= 2 && mkv <= 45.0 && newOne.getHolderNumP5() >= 50) {// 流通45亿以内的
+					List<FinanceBaseInfo> l = financeService.getFinacesReportByYearRpt(code,
+							EsQueryPageUtil.queryPage5);
+					int c = l.size();
+					if (l != null) {
+						for (FinanceBaseInfo f : l) {
+							if (f.getGsjlr() <= 0) {
+								c--;
+							}
+						}
+					}
+					if (c >= (l.size() - 1)) {// 亏损最多一次
+						// 小而美类型： 0:无，1：普通，2，增发，3，大宗，4，增发+大宗
+						int smallModel = 1;
+						// 前后1年-定增解禁-
+						List<Jiejin> l1 = chipsService.getBf2yearJiejin(code, jjstart, jjend);
+						if (l1 != null) {
+							for (Jiejin jj : l1) {
+								if (jj.getType().contains("增")) {
+									smallModel = 2;
 								}
 							}
 						}
-						if (c >= (l.size() - 1)) {// 亏损最多一次
-							newOne.setMonitor(MonitorType.SMALL_AND_BEAUTIFUL.getCode());
-							pool.setMonitor(MonitorType.SMALL_AND_BEAUTIFUL.getCode());
-							pool.setRealtime(1);
-							pool.setUpTodayChange(3);
+						// 大宗
+						if (dz != null && dz.getDate() >= dzdate && dz.getTotalAmt() > 4500.0) {// 4500万
+							if (smallModel == 2) {
+								smallModel = 4;
+							} else {
+								smallModel = 3;
+							}
+						}
+						newOne.setSmallModel(smallModel);
+						log.info("{} 小而美模型", code);
 
-							// 小而美类型： 0:无，1：普通，2，增发，3，大宗，4，增发+大宗
-							int smallModel = 1;
-							// 前后1年-定增解禁-
-							List<Jiejin> l1 = chipsService.getBf2yearJiejin(code, jjstart, jjend);
-							if (l1 != null) {
-								for (Jiejin jj : l1) {
-									if (jj.getType().contains("增")) {
-										smallModel = 2;
-									}
-								}
-							}
-							// 大宗
-							if (dz != null && dz.getDate() >= dzdate && dz.getTotalAmt() > 4500.0) {// 4500万
-								if (smallModel == 2) {
-									smallModel = 4;
-								} else {
-									smallModel = 3;
-								}
-							}
-							newOne.setSmallModel(smallModel);
-							log.info("{} 小而美模型", code);
+						if (pool.getMonitor() == MonitorType.NO.getCode()) {
+							pool.setMonitor(MonitorType.SMALL_AND_BEAUTIFUL.getCode());
+							pool.setOffline(1);
+							pool.setUpTodayChange(8);
+						}
+						if (newOne.getMonitor() == MonitorType.NO.getCode()) {
+							newOne.setMonitor(MonitorType.SMALL_AND_BEAUTIFUL.getCode());
 						}
 					}
 				}
 				// 收集筹码的短线-拉过一波，所以市值可以大一点
 				newOne.setSortChips(0);
-				if (mkv > 0 && mkv <= 75.0 && newOne.getPls() != 2
+				if (online4Year && mkv > 0 && mkv <= 75.0 && newOne.getPls() != 2
 						&& chipsSortService.isCollectChips(code, tradeDate)) {
 					newOne.setSortChips(1);
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
 						pool.setMonitor(MonitorType.SORT_CHIPS.getCode());
 						pool.setRealtime(1);
-						pool.setUpTodayChange(9);
+						pool.setUpTodayChange(5);
 						newOne.setMonitor(MonitorType.SORT_CHIPS.getCode());
 					}
-
 					if (newOne.getSortChipsNotice() == 0 && newOne.getPls() == 0) {
 						newOne.setSortChipsNotice(1);
 						zlxc.append(stockBasicService.getCodeName(code)).append(",");
@@ -321,7 +324,7 @@ public class CodeModelService {
 
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
 						pool.setMonitor(MonitorType.ZengFaAuto.getCode());
-						pool.setRealtime(1);
+						pool.setOffline(1);
 						pool.setUpTodayChange(9);
 						newOne.setMonitor(MonitorType.ZengFaAuto.getCode());
 					}
@@ -365,9 +368,6 @@ public class CodeModelService {
 //		if (annc.length() > 0) {
 //			WxPushUtil.pushSystem1("最新公告:" + annc.toString());
 //		}
-		if (lowpricec.length() > 0) {
-			WxPushUtil.pushSystem1("低于增发价20%或大宗超1亿:" + lowpricec.toString());
-		}
 		if (lowpricec.length() > 0) {
 			WxPushUtil.pushSystem1("低于增发价20%或大宗超1亿:" + lowpricec.toString());
 		}
