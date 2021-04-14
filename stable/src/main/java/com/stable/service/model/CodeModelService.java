@@ -295,7 +295,7 @@ public class CodeModelService {
 					}
 				}
 				// 收集筹码的短线-拉过一波，所以市值可以大一点
-				newOne.setSortChips(0);
+
 				if (online4Year && mkv > 0 && mkv <= 75.0 && newOne.getPls() != 2
 						&& chipsSortService.isCollectChips(code, tradeDate)) {
 					newOne.setSortChips(1);
@@ -305,12 +305,13 @@ public class CodeModelService {
 						pool.setUpTodayChange(5);
 						newOne.setMonitor(MonitorType.SORT_CHIPS.getCode());
 					}
-					if (newOne.getSortChipsNotice() == 0 && newOne.getPls() == 0) {
+					if (newOne.getSortChipsNotice() == 0) {
 						newOne.setSortChipsNotice(1);
 						zlxc.append(stockBasicService.getCodeName(code)).append(",");
 					}
 					log.info("{} 主力筹码收集", code);
 				} else {
+					newOne.setSortChips(0);
 					newOne.setSortChipsNotice(0);
 				}
 				// 系统自动监听
