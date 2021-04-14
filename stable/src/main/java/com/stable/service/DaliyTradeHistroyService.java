@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.stable.constant.Constant;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.MonitorType;
 import com.stable.enums.RunCycleEnum;
@@ -211,6 +212,10 @@ public class DaliyTradeHistroyService {
 		if (listNofq != null && listNofq.size() > 0) {
 			List<MonitorPool> list = monitorPoolService.getPoolListForMonitor(0, 1);
 			if (list != null) {
+				List<String> ZengFaAuto = new LinkedList<String>();
+				List<String> SMALL_AND_BEAUTIFUL = new LinkedList<String>();
+				List<String> Other = new LinkedList<String>();
+
 				Map<String, TradeHistInfoDaliyNofq> map = monitorPoolService.getPoolMap2(listNofq);
 				for (MonitorPool cp : list) {
 					if (cp.getDownPrice() <= 0 && cp.getDownTodayChange() <= 0 && cp.getUpPrice() <= 0
@@ -221,10 +226,30 @@ public class DaliyTradeHistroyService {
 					TradeHistInfoDaliyNofq d = map.get(cp.getCode());
 					if (d != null) {
 						if (MonitoringUitl.isOk(cp, d.getTodayChangeRate(), d.getHigh(), d.getLow())) {
-							String s = MonitorType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
-							WxPushUtil.pushSystem1(cp.getCode() + " " + s);
+							String s = stockBasicService.getCodeName(cp.getCode()) + " "
+									+ MonitorType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
+							if (cp.getMonitor() == MonitorType.ZengFaAuto.getCode()) {
+								ZengFaAuto.add(s);
+							} else if (cp.getMonitor() == MonitorType.SMALL_AND_BEAUTIFUL.getCode()) {
+								SMALL_AND_BEAUTIFUL.add(s);
+							} else {
+								Other.add(s);
+							}
 						}
 					}
+				}
+				StringBuffer s = new StringBuffer();
+				for (String a : Other) {
+					s.append(a).append(Constant.HTML_LINE);
+				}
+				for (String a : SMALL_AND_BEAUTIFUL) {
+					s.append(a).append(Constant.HTML_LINE);
+				}
+				for (String a : ZengFaAuto) {
+					s.append(a).append(Constant.HTML_LINE);
+				}
+				if (s.length() > 0) {
+					WxPushUtil.pushSystem2Html(s.toString());
 				}
 			}
 		}

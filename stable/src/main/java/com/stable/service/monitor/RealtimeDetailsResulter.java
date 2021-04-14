@@ -8,6 +8,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.stable.constant.Constant;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ScheduledWorker;
 import com.stable.utils.WxPushUtil;
@@ -16,7 +17,6 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class RealtimeDetailsResulter implements Runnable {
-	private static final String BR = "</br>";
 	private ReentrantLock lock = new ReentrantLock();
 	private Map<String, RealtimeMsg> msgs = new ConcurrentHashMap<String, RealtimeMsg>();
 
@@ -40,10 +40,10 @@ public class RealtimeDetailsResulter implements Runnable {
 					list.add(msgs.get(key));
 				}
 				StringBuffer sb = new StringBuffer("风险第一！！！>>");
-				sb.append(BR);
+				sb.append(Constant.HTML_LINE);
 				int index = 1;
 				for (RealtimeMsg rm : list) {
-					sb.append("序号:").append(index).append(",").append(rm.toMessage()).append(BR);
+					sb.append("序号:").append(index).append(",").append(rm.toMessage()).append(Constant.HTML_LINE);
 					index++;
 				}
 				sb.append("股票池+3.5%预警");
