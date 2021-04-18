@@ -69,6 +69,11 @@ trtd {
 		&nbsp;&nbsp;--><a target="_blank"
 			th:href="@{'http://f10.eastmoney.com/f10_v2/CapitalOperation.aspx?code='+${dfcfcode}+'#xmjd-0'}">东方财富</a>
 	</div>
+	<div>
+		<a target="_blank"
+			th:href="@{'http://data.eastmoney.com/bgcz/detail/'+${code}+'.html'}">并购重组记录</a>
+	</div>
+	002795
 	<br />------------------------------------------------------------
 	<br />
 	<b>财务报告年份：<span th:text="${codedetail.currYear}"></span>-<span
@@ -149,9 +154,10 @@ trtd {
 	<br />------------------------------------------------------------
 	<br />
 	<div>
-		5%股东占比:<span th:text="${codedetail.holderNumP5}"></span>%
-		前3大股东占比:<span th:text="${codedetail.holderNumT3}"></span>%
-		流通市值:<span th:text="${codedetail.mkv}"></span>亿,持股5%以上股东占比:<span th:text="${codedetail.circZb}"></span>%
+		5%股东占比:<span th:text="${codedetail.holderNumP5}"></span>% 前3大股东占比:<span
+			th:text="${codedetail.holderNumT3}"></span>% 流通市值:<span
+			th:text="${codedetail.mkv}"></span>亿,持股5%以上股东占比:<span
+			th:text="${codedetail.circZb}"></span>%
 	</div>
 	<div>
 		股东人数变化（幅度+次数):<span th:text="${codedetail.holderDate}"></span>--><span
