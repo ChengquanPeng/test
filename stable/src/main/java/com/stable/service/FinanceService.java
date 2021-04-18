@@ -124,7 +124,7 @@ public class FinanceService {
 						StringBuffer sb = new StringBuffer();
 						// 业绩快报(准确的)
 						if (yjkb != null && yjkb.getAnnDate() >= startDate) {
-							sb.append(stockBasicService.getCodeName(code));
+							sb.append(stockBasicService.getCodeName2(code));
 							if (yjkb.getJlr() > 0) {
 								sb.append(",业绩快报不亏:");
 								find = true;
@@ -147,13 +147,13 @@ public class FinanceService {
 							}
 						}
 						if (find) {
-							mp.setYkb(0);
-							monitorPoolDao.save(mp);
 							if (mp.getYkb() == 1) {
 								sb.append("期望不亏");
 							} else {
 								sb.append("期望亏损");
 							}
+							mp.setYkb(0);
+							monitorPoolDao.save(mp);
 							WxPushUtil.pushSystem1(sb.toString());
 						}
 					} catch (Exception e) {
@@ -258,29 +258,45 @@ public class FinanceService {
 				resp.setEndDate(String.valueOf(dh.getDate()));
 				resp.setEndType(dh.getYear(), dh.getQuarter());
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
-				resp.setYyzsr(CurrencyUitl.covertToString(dh.getYyzsr()));
-				resp.setGsjlr(CurrencyUitl.covertToString(dh.getGsjlr()));
-				resp.setKfjlr(CurrencyUitl.covertToString(dh.getKfjlr()));
+				resp.setYyzsr(getRedHtml(dh.getYyzsr()));
+				resp.setGsjlr(getRedHtml(dh.getGsjlr()));
+				resp.setKfjlr(getRedHtml(dh.getKfjlr()));
 				resp.setYyzsrtbzz(dh.getYyzsrtbzz());
 				resp.setGsjlrtbzz(dh.getGsjlrtbzz());
 				resp.setKfjlrtbzz(dh.getKfjlrtbzz());
 				resp.setJqjzcsyl(dh.getJqjzcsyl());
 				resp.setMgjyxjl(dh.getMgjyxjl());
 				resp.setMll(dh.getMll());
-				resp.setJyxjl(CurrencyUitl.covertToString(dh.getJyxjlce()));
+				resp.setJyxjl(getRedHtml2(dh.getJyxjlce()));
 				resp.setAccountrec(CurrencyUitl.covertToString(dh.getAccountrec()));
 				resp.setAccountPay(CurrencyUitl.covertToString(dh.getAccountPay()));
 				resp.setSumLasset(CurrencyUitl.covertToString(dh.getSumLasset()));
 				resp.setSumDebtLd(CurrencyUitl.covertToString(dh.getSumDebtLd()));
-				resp.setNetAsset(CurrencyUitl.covertToString(dh.getNetAsset()));
+				resp.setNetAsset(getRedHtml2(dh.getNetAsset()));
 				resp.setZcfzl(dh.getZcfzl());
 
-				resp.setTotalAmt(CurrencyUitl.covertToString(dh.getMonetaryFund() + dh.getTradeFinassetNotfvtpl()));
+				resp.setTotalAmt(getRedHtml2(dh.getMonetaryFund() + dh.getTradeFinassetNotfvtpl()));
 				resp.setBorrow(CurrencyUitl.covertToString(dh.getStborrow() + dh.getLtborrow()));
 				res.add(resp);
 			}
 		}
 		return res;
+	}
+
+	private String getRedHtml2(double v) {
+		String s = CurrencyUitl.covertToString(v);
+		if (v <= 0) {
+			s = "<font color='red'>" + s + "</font>";
+		}
+		return s;
+	}
+
+	private String getRedHtml(long v) {
+		String s = CurrencyUitl.covertToString(v);
+		if (v <= 0) {
+			s = "<font color='red'>" + s + "</font>";
+		}
+		return s;
 	}
 
 	public FinanceBaseInfo getFinaceReportByLteDate(String code, int date) {

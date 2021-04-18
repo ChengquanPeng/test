@@ -198,6 +198,10 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Double)
 	private double zcfzl; // 资产负债率
 
+	// 监听
+	@Field(type = FieldType.Double)
+	private int listenerGg; // 监听-公告
+
 	@Transient
 	public String getKeyString() {
 		StringBuffer sb = new StringBuffer();

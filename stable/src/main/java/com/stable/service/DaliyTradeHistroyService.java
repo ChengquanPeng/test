@@ -226,7 +226,7 @@ public class DaliyTradeHistroyService {
 					TradeHistInfoDaliyNofq d = map.get(cp.getCode());
 					if (d != null) {
 						if (MonitoringUitl.isOk(cp, d.getTodayChangeRate(), d.getHigh(), d.getLow())) {
-							String s = stockBasicService.getCodeName(cp.getCode()) + " "
+							String s = stockBasicService.getCodeName2(cp.getCode()) + " "
 									+ MonitorType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
 							if (cp.getMonitor() == MonitorType.ZengFaAuto.getCode()) {
 								ZengFaAuto.add(s);

@@ -70,7 +70,7 @@ public class RealtimeMonitoringService {
 					}
 					log.info(code);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
-					int r = task.init(code, cp, resulter, stockBasicService.getCodeName(code),
+					int r = task.init(code, cp, resulter, stockBasicService.getCodeName2(code),
 							codeModelService.getLastOneByCode2(code));
 					if (r == 1) {
 						new Thread(task).start();

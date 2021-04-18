@@ -54,6 +54,10 @@ public class StockBasicService {
 	// 只初始化一次，历史数据包含已下市股票
 	private boolean initedOneTime = true;
 
+	public String getCodeName2(String code) {
+		return getCodeName(code) + "(" + code + ")";
+	}
+
 	public String getCodeName(String code) {
 		String name = CODE_NAME_MAP_LOCAL_HASH.get(code);
 		if (name == null) {

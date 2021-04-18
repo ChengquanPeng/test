@@ -49,6 +49,7 @@ import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.data.LinePrice;
 import com.stable.service.monitor.MonitorPoolService;
+import com.stable.spider.ths.ThsAnnSpider;
 import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -167,7 +168,7 @@ public class CodeModelService {
 		// 到期提醒
 		StringBuffer sbc = new StringBuffer();
 		// 公告提醒
-//		StringBuffer annc = new StringBuffer();
+		StringBuffer annc = new StringBuffer();
 		// 低于增发价，低于大宗提醒
 		StringBuffer lowpricec = new StringBuffer();
 		// 吸筹行为
@@ -207,7 +208,7 @@ public class CodeModelService {
 				// 人工审核是否时间到期-重置
 				if (newOne.getPlst() < tradeDate) {
 					if (newOne.getPls() == 1) {
-						sbc.append(stockBasicService.getCodeName(code)).append(",");
+						sbc.append(stockBasicService.getCodeName2(code)).append(",");
 					}
 					newOne.setPls(0);
 					newOne.setPlst(0);
@@ -307,7 +308,7 @@ public class CodeModelService {
 					}
 					if (newOne.getSortChipsNotice() == 0) {
 						newOne.setSortChipsNotice(1);
-						zlxc.append(stockBasicService.getCodeName(code)).append(",");
+						zlxc.append(stockBasicService.getCodeName2(code)).append(",");
 					}
 					log.info("{} 主力筹码收集", code);
 				} else {
@@ -332,16 +333,16 @@ public class CodeModelService {
 					log.info("{} 增发自动监听", code);
 				}
 				// 公告通知
-//				if (newOne.getPls() == 1) {
-//					if (ThsAnnSpider.getLastAnn(code) > tradeDate) {
-//						annc.append(stockBasicService.getCodeName(code)).append(",");
-//					}
-//				}
+				if (newOne.getListenerGg() == 1) {
+					if (ThsAnnSpider.getLastAnn(code) > tradeDate) {
+						annc.append(stockBasicService.getCodeName2(code)).append(",");
+					}
+				}
 
 				if (newOne.getPlst() != 2 && mkv <= 75.0 && newOne.getZfPriceLowNotice() == 0
 						&& ((newOne.getZfPriceLow() >= 18.0) || (newOne.getDzjyRct() == 1))) {
 					// 增发价低于18或者大宗超1亿
-					lowpricec.append(stockBasicService.getCodeName(code)).append(",");
+					lowpricec.append(stockBasicService.getCodeName2(code)).append(",");
 					newOne.setZfPriceLowNotice(1);
 				} else if (newOne.getZfPriceLow() <= 0 || newOne.getDzjyRct() == 0) {
 					newOne.setZfPriceLowNotice(0);
@@ -366,9 +367,9 @@ public class CodeModelService {
 		if (sbc.length() > 0) {
 			WxPushUtil.pushSystem1("以下pls==1已到期:" + sbc.toString());
 		}
-//		if (annc.length() > 0) {
-//			WxPushUtil.pushSystem1("最新公告:" + annc.toString());
-//		}
+		if (annc.length() > 0) {
+			WxPushUtil.pushSystem1("最新公告:" + annc.toString());
+		}
 		if (lowpricec.length() > 0) {
 			WxPushUtil.pushSystem1("低于增发价20%或大宗超1亿:" + lowpricec.toString());
 		}
@@ -1572,6 +1573,7 @@ public class CodeModelService {
 			c.setPls(pls);
 			c.setPlst(date);
 			c.setLstmt(DateUtil.getTodayIntYYYYMMDD());
+			c.setListenerGg(req.getListenerGg());
 			codeBaseModel2Dao.save(c);
 
 			MonitorPool pool = monitorPoolService.getMonitorPool(code);
