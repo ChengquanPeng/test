@@ -67,11 +67,18 @@ public class ChipsSortService {
 
 			// check 股东人数
 			if (stPrice) {
-				HolderNum nh = chipsService.getLastHolderNum(code);// 最新的
 				HolderNum nb = chipsService.getLastHolderNumBfDate(code, okDate);// 拉升之前的
-				if (nh != null && nb != null) {
-					if (nh.getNum() < nb.getNum()) {
-						return true;
+				if (nb != null) {
+					List<HolderNum> holders = chipsService.getHolderNumList45(code, nb.getDate());
+					if (holders != null) {
+						HolderNum dmax = holders.stream().max(Comparator.comparingInt(HolderNum::getNum)).get();
+						HolderNum dmin = holders.stream().min(Comparator.comparingInt(HolderNum::getNum)).get();
+						if (dmax.getDate() < dmin.getDate()
+								&& CurrencyUitl.cutProfit(dmin.getNum(), dmax.getNum()) > 30) {
+							// 1.拉升后人数减少
+							// 2.人数减少30%以上
+							return true;
+						}
 					}
 				}
 				log.info("{} 有冲高行为,但无吸筹行为", code);

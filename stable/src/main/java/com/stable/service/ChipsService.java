@@ -223,15 +223,23 @@ public class ChipsService {
 		return null;
 	}
 
+	public List<HolderNum> getHolderNumList45(String code) {
+		return getHolderNumList45(code, 0);
+	}
+
 	/**
 	 * 最近44条记录
 	 */
-	public List<HolderNum> getHolderNumList45(String code) {
+	public List<HolderNum> getHolderNumList45(String code, int startDate) {
 		int pageNum = EsQueryPageUtil.queryPage45.getPageNum();
 		int size = EsQueryPageUtil.queryPage45.getPageSize();
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		if (startDate > 0) {
+			bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));
+		}
+
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();

@@ -251,7 +251,7 @@ public class CodeModelService {
 					}
 				}
 				// 小而美模型：未涨&&年报 && 大股东集中
-				if (newOne.getZfjjup() >= 2 && mkv <= 45.0 && newOne.getHolderNumP5() >= 50) {// 流通45亿以内的
+				if (newOne.getPls() != 2 && newOne.getZfjjup() >= 2 && mkv <= 45.0 && newOne.getHolderNumP5() >= 50) {// 流通45亿以内的
 					List<FinanceBaseInfo> l = financeService.getFinacesReportByYearRpt(code,
 							EsQueryPageUtil.queryPage5);
 					int c = l.size();
@@ -275,7 +275,7 @@ public class CodeModelService {
 							}
 						}
 						// 大宗
-						if (dz != null && dz.getDate() >= dzdate && dz.getTotalAmt() > 4500.0) {// 4500万
+						if (dz != null && dz.getDate() >= dzdate && newOne.getDzjyRct() > 0) {// 大宗超1亿
 							if (smallModel == 2) {
 								smallModel = 4;
 							} else {
@@ -297,8 +297,7 @@ public class CodeModelService {
 				}
 				// 收集筹码的短线-拉过一波，所以市值可以大一点
 
-				if (online4Year && mkv > 0 && mkv <= 75.0 && newOne.getPls() != 2
-						&& chipsSortService.isCollectChips(code, tradeDate)) {
+				if (online4Year && mkv > 0 && mkv <= 100.0 && chipsSortService.isCollectChips(code, tradeDate)) {
 					newOne.setSortChips(1);
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
 						pool.setMonitor(MonitorType.SORT_CHIPS.getCode());
@@ -340,7 +339,10 @@ public class CodeModelService {
 				}
 
 				if (newOne.getPlst() != 2 && mkv <= 75.0 && newOne.getZfPriceLowNotice() == 0
-						&& ((newOne.getZfPriceLow() >= 18.0) || (newOne.getDzjyRct() == 1))) {
+						&& ((newOne.getZfPriceLow() >= 18.0)
+								|| (newOne.getDzjyRct() == 1 && dz.getAvgPrcie() > d.getClosed()
+										&& Double.valueOf(CurrencyUitl.cutProfit(d.getClosed(), dz.getAvgPrcie()))
+												.intValue() >= 18.0))) {// 大宗超1亿，且低于15%大宗成本
 					// 增发价低于18或者大宗超1亿
 					lowpricec.append(stockBasicService.getCodeName2(code)).append(",");
 					newOne.setZfPriceLowNotice(1);
@@ -374,7 +376,7 @@ public class CodeModelService {
 			WxPushUtil.pushSystem1("低于增发价20%或大宗超1亿:" + lowpricec.toString());
 		}
 		if (zlxc.length() > 0) {
-			WxPushUtil.pushSystem1("拉升吸筹股东人数减少:" + zlxc.toString());
+			WxPushUtil.pushSystem1("拉升吸筹股东人数减少30%(股价是否平稳):" + zlxc.toString());
 		}
 //		daliyTradeHistroyService.deleteData();
 	}
