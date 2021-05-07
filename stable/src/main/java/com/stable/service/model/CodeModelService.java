@@ -233,12 +233,12 @@ public class CodeModelService {
 				// 周末计算-至少N年未大涨?
 				if (isweekend) {
 					newOne.setZfjjup(0);
-					if (mkv <= 100.0) {
-						if (online4Year) {
-							int listdate = Integer.valueOf(s.getList_date());
-							newOne.setZfjjup(priceLifeService.noupYear(code, listdate));
-						}
+					// if (mkv <= 100.0) {
+					if (online4Year) {
+						int listdate = Integer.valueOf(s.getList_date());
+						newOne.setZfjjup(priceLifeService.noupYear(code, listdate));
 					}
+					// }
 				}
 				// 大宗交易超1亿
 				newOne.setDzjyRct(0);
@@ -354,7 +354,9 @@ public class CodeModelService {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
 		}
-		if (listLast.size() > 0) {
+		if (listLast.size() > 0)
+
+		{
 			codeBaseModel2Dao.saveAll(listLast);
 		}
 		if (listHist.size() > 0) {
