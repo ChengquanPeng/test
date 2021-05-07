@@ -133,6 +133,14 @@ public class ThsBonusSpider {
 		}
 	}
 
+	private void getYear(BonusHist bh) {
+		try {
+			bh.setBonusYear(Integer.valueOf(bh.getRptYear().substring(0, 4)));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void dofetchBonusInner(int sysdate, String code, List<ZengFaDetail> zfdl, List<ZengFaSummary> zfsl,
 			List<FenHong> fhl, List<BonusHist> bhl) {
 		int trytime = 0;
@@ -166,6 +174,7 @@ public class ThsBonusSpider {
 								BonusHist bh = new BonusHist();
 								bh.setCode(code);
 								bh.setRptYear(rptYear.trim());
+								getYear(bh);
 								bh.setRptDate(DateUtil.convertDate2(rptDate.trim()));
 								bh.setDetail(detail.trim());
 								bh.setId(code + bh.getRptDate());
@@ -355,11 +364,15 @@ public class ThsBonusSpider {
 
 	public static void main(String[] args) {
 		ThsBonusSpider ts = new ThsBonusSpider();
-		ts.htmlunitSpider = new HtmlunitSpider();
-		List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
-		List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
-		List<FenHong> fhl = new LinkedList<FenHong>();
-		List<BonusHist> bhl = new LinkedList<BonusHist>();
-		ts.dofetchBonusInner(DateUtil.getTodayIntYYYYMMDD(), "002282", zfdl, zfsl, fhl, bhl);
+//		ts.htmlunitSpider = new HtmlunitSpider();
+//		List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
+//		List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
+//		List<FenHong> fhl = new LinkedList<FenHong>();
+//		List<BonusHist> bhl = new LinkedList<BonusHist>();
+//		ts.dofetchBonusInner(DateUtil.getTodayIntYYYYMMDD(), "002282", zfdl, zfsl, fhl, bhl);
+		BonusHist bh = new BonusHist();
+		bh.setRptYear("2020年报");
+		ts.getYear(bh);
+		System.err.println(bh);
 	}
 }

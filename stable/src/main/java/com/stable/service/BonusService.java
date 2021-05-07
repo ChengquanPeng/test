@@ -18,6 +18,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
@@ -62,7 +63,7 @@ public class BonusService {
 		if (StringUtils.isNotBlank(proc)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("status", proc));
 		}
-		if (StringUtils.isNotBlank(proc)) {
+		if (StringUtils.isNotBlank(zsg)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("hasZhuanGu", 1));
 		}
 		if (StringUtils.isNotBlank(queryYear)) {
@@ -80,6 +81,31 @@ public class BonusService {
 		}
 		log.info("no DividendHistory for code={},proc={}", code, proc);
 		return null;
+	}
+
+	public boolean isBousOk(String code, int startYear) {
+		int c = 0;
+		List<BonusHist> l = this.getListByCode(code, null, null, null, EsQueryPageUtil.queryPage10);
+		if (l != null) {
+			for (BonusHist bh : l) {
+				int y = getYear(bh);
+				if (y >= startYear) {
+					if (bh.getDetail().contains("元")) {
+						c++;
+					}
+				}
+			}
+		}
+		return (c >= 4);
+	}
+
+	private int getYear(BonusHist bh) {
+		try {
+			return Integer.valueOf(bh.getRptYear().substring(0, 4));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 
 	public boolean isGsz(String code, int start) {

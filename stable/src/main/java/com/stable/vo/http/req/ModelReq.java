@@ -31,4 +31,9 @@ public class ModelReq {
 	int zfPriceLow;
 	int dzjyRct;
 	int sortChips;
+
+	String zfStatusDesc;
+	int bousOK;
+	int finOK;
+	int compnayType;
 }

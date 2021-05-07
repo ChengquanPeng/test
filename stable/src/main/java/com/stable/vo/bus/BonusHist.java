@@ -21,6 +21,8 @@ public class BonusHist extends EsBase {
 	@Field(type = FieldType.Keyword)
 	private String code;
 	@Field(type = FieldType.Integer)
+	private int bonusYear;// 年
+	@Field(type = FieldType.Integer)
 	private int rptDate;// 董事会日期
 	@Field(type = FieldType.Text)
 	private String rptYear;// 报告期
@@ -37,8 +39,8 @@ public class BonusHist extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int update;
 	@Field(type = FieldType.Integer)
-	private int hasZhuanGu;//是否转股
-	
+	private int hasZhuanGu;// 是否转股
+
 	public BonusHist() {
 
 	}

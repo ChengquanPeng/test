@@ -32,6 +32,13 @@ public class CodeBaseModel2 extends EsBase {
 	protected int currQuarter;
 
 	@Field(type = FieldType.Integer)
+	private int compnayType;// 国资
+	@Field(type = FieldType.Integer)
+	private int finOK;// 5年业绩OK
+	@Field(type = FieldType.Integer)
+	private int bousOK;// 5年分红OK(至少4年分红)
+
+	@Field(type = FieldType.Integer)
 	protected int baseRed;// 基本面：红色
 	@Field(type = FieldType.Text)
 	private String baseRedDesc;

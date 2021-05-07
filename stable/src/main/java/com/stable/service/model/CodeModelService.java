@@ -148,6 +148,9 @@ public class CodeModelService {
 		int dzdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -240));// 最大8个月大宗
 		int jjstart = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
 		int jjend = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 370));
+		int currYear = DateUtil.getCurYYYY();
+		int checkYear = currYear - 1;
+		checkYear = currYear - 5;
 
 		threeYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -1000));
 		oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
@@ -230,6 +233,11 @@ public class CodeModelService {
 					newOne.setMonitor(MonitorType.NO.getCode());
 					newOne.setSmallModel(0);
 				}
+				newOne.setCompnayType(s.getCompnayType());
+
+				List<FinanceBaseInfo> l = financeService.getFinacesReportByYearRpt(code, EsQueryPageUtil.queryPage5);
+				int c = 0;
+
 				// 周末计算-至少N年未大涨?
 				if (isweekend) {
 					newOne.setZfjjup(0);
@@ -239,6 +247,25 @@ public class CodeModelService {
 						newOne.setZfjjup(priceLifeService.noupYear(code, listdate));
 					}
 					// }
+
+					newOne.setFinOK(0);
+					if (l != null) {
+						c = l.size();
+						for (FinanceBaseInfo f : l) {
+							if (f.getGsjlr() < 0 || f.getKfjlr() < 0) {
+								c--;
+							}
+						}
+						if (c == l.size()) {
+							newOne.setFinOK(1);
+						}
+					}
+
+					if (bonusService.isBousOk(code, checkYear)) {
+						newOne.setBousOK(1);
+					} else {
+						newOne.setBousOK(0);
+					}
 				}
 				// 大宗交易超1亿
 				newOne.setDzjyRct(0);
@@ -250,11 +277,10 @@ public class CodeModelService {
 						log.info("{} 大宗超1亿", code);
 					}
 				}
+
 				// 小而美模型：未涨&&年报 && 大股东集中
 				if (newOne.getPls() != 2 && newOne.getZfjjup() >= 2 && mkv <= 45.0 && newOne.getHolderNumP5() >= 50) {// 流通45亿以内的
-					List<FinanceBaseInfo> l = financeService.getFinacesReportByYearRpt(code,
-							EsQueryPageUtil.queryPage5);
-					int c = l.size();
+					c = l.size();
 					if (l != null) {
 						for (FinanceBaseInfo f : l) {
 							if (f.getGsjlr() <= 0) {
@@ -354,9 +380,7 @@ public class CodeModelService {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
 		}
-		if (listLast.size() > 0)
-
-		{
+		if (listLast.size() > 0) {
 			codeBaseModel2Dao.saveAll(listLast);
 		}
 		if (listHist.size() > 0) {
@@ -1333,6 +1357,19 @@ public class CodeModelService {
 		if (mr.getZfjj() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfjj", 1));
 		}
+		if (mr.getCompnayType() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("compnayType", 1));
+		}
+		if (mr.getFinOK() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("finOK", 1));
+		}
+		if (mr.getBousOK() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("bousOK", 1));
+		}
+		if (StringUtils.isNotBlank(mr.getZfStatusDesc())) {
+			bqb.must(QueryBuilders.matchPhraseQuery("zfStatusDesc", mr.getZfStatusDesc()));
+		}
+
 		if (mr.getZfjjup() == 1) {
 			bqb.must(QueryBuilders.rangeQuery("zfjjup").gte(1));
 		}
