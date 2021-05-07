@@ -1515,6 +1515,18 @@ public class CodeModelService {
 			sb5.append("半年大宗超亿");
 			sb5.append(Constant.HTML_LINE);
 		}
+		if (dh.getCompnayType() == 1) {
+			sb5.append("国企");
+			sb5.append(Constant.HTML_LINE);
+		}
+		if (dh.getFinOK() == 1) {
+			sb5.append("近5年业绩不亏");
+			sb5.append(Constant.HTML_LINE);
+		}
+		if (dh.getBonus() == 1) {
+			sb5.append("近5年分红");
+			sb5.append(Constant.HTML_LINE);
+		}
 		// 最近一次增发
 		if (dh.getZflastOkDate() > 0) {
 			sb5.append("增发:").append(dh.getZflastOkDate()).append(Constant.HTML_LINE);
