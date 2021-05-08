@@ -1523,7 +1523,7 @@ public class CodeModelService {
 			sb5.append("近5年业绩不亏");
 			sb5.append(Constant.HTML_LINE);
 		}
-		if (dh.getBonus() == 1) {
+		if (dh.getBousOK() == 1) {
 			sb5.append("近5年分红");
 			sb5.append(Constant.HTML_LINE);
 		}
