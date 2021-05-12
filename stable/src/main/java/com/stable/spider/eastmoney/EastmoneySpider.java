@@ -253,6 +253,7 @@ public class EastmoneySpider {
 											.roundHalfUpWhithPercent(page.getInventory() / page.getNetAsset()));
 								}
 							}
+							page.setFundNotOk(0);
 							// 资金紧张: 货币资金不能覆盖流动负债,则看比例
 							if ((page.getMonetaryFund() + page.getTradeFinassetNotfvtpl() - page.getSumDebtLd()) < 0) {
 								if (CurrencyUitl.cutProfit((page.getMonetaryFund() + page.getTradeFinassetNotfvtpl()),
