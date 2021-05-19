@@ -551,28 +551,32 @@ public class CodeModelService {
 		}
 		str.trim().replaceAll(" ", "");
 		int c6 = 0;
-		int cgt6 = 0;
+		int cgt12 = 0;
+		int cgt36 = 0;
 		if (str.contains(m6) && isM6(str, m6)) {
 			c6 = 1;
 		}
 		if (str.contains(m12)) {
-			cgt6 = 1;
+			cgt12 = 1;
 		}
 		if (str.contains(m24)) {
-			cgt6 = 1;
+			cgt12 = 1;
 		}
 		if (str.contains(m36)) {
-			cgt6 = 1;
+			cgt36 = 1;
 		}
 
-		if (c6 == 1 && cgt6 == 0) {
+		if (c6 == 1 && cgt12 == 0 && cgt36 == 0) {
 			return 1;// 纯外部
 		}
-		if (c6 == 1 && cgt6 == 1) {
-			return 2;// 内外混合
-		}
-		if (c6 == 0 && cgt6 == 1) {
+		if (c6 == 0 && cgt12 == 0 && cgt36 == 1) {
 			return 3;// 纯大股东
+		}
+		if (c6 == 1 && cgt36 == 1) {
+			return 2;// 内外混合6
+		}
+		if (c6 == 1 || cgt12 == 1 || cgt36 == 1) {
+			return 4;// 其他:关联
 		}
 		return 0;
 	}
@@ -1610,11 +1614,13 @@ public class CodeModelService {
 			}
 		}
 		if (dh.getZfObjType() == 1) {
-			sb5.append(",全部6个月").append(Constant.HTML_LINE);
+			sb5.append(",纯6个月").append(Constant.HTML_LINE);
 		} else if (dh.getZfObjType() == 2) {
-			sb5.append(",混合增发(6月+)").append(Constant.HTML_LINE);
+			sb5.append(",混合(6月+大股东)").append(Constant.HTML_LINE);
 		} else if (dh.getZfObjType() == 3) {
-			sb5.append(",大股东增发").append(Constant.HTML_LINE);
+			sb5.append(",纯大股东").append(Constant.HTML_LINE);
+		} else if (dh.getZfObjType() == 4) {
+			sb5.append(",其他混合").append(Constant.HTML_LINE);
 		}
 
 		// 解禁
