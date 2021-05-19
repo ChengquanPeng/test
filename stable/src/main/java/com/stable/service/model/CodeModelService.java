@@ -552,7 +552,7 @@ public class CodeModelService {
 		str.trim().replaceAll(" ", "");
 		int c6 = 0;
 		int cgt6 = 0;
-		if (str.contains(m6)) {
+		if (str.contains(m6) && isM6(str, m6)) {
 			c6 = 1;
 		}
 		if (str.contains(m12)) {
@@ -575,6 +575,25 @@ public class CodeModelService {
 			return 3;// 纯大股东
 		}
 		return 0;
+	}
+
+	public static boolean isM6(String allstr, String M) {
+		String pre = "";
+		while (allstr.indexOf(M) >= 0) {
+			String org = allstr;
+			allstr = allstr.substring(allstr.indexOf(M) + M.length());
+			pre = pre + org.substring(0, org.indexOf(M));
+
+			if (pre.endsWith("3")) {
+//				return false;
+			} else {
+				return true;
+			}
+			pre += M;
+			// System.err.println("前面:" + pre + " 剩余:" + allstr);
+		}
+		return false;
+//		System.err.println("count:" + count);
 	}
 
 	private void susWhiteHorses(String code, CodeBaseModel2 newOne) {
