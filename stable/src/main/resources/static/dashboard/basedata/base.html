@@ -108,6 +108,12 @@
 						<option value="2">增发完成</option>
 						<option value="3">增发终止</option>
 						<option value="0">无增发</option>
+					</select>&nbsp;&nbsp;
+					增发对象：<select id="zfObjType">
+						<option value="0" selected="selected">不限制</option>
+						<option value="1">6个月</option>
+						<option value="2">混合</option>
+						<option value="3">大股东</option>
 					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				</div>
 			</div>
@@ -244,6 +250,8 @@
 									param.bousOK = 0;
 									param.compnayType = 0;
 									param.zfStatusDesc = $('#zfStatusDesc').val();
+									param.zfObjType = $('#zfObjType').val();
+									
 									
 									if (document.getElementById("finOK").checked) {
 										param.finOK = 1;

@@ -36,4 +36,6 @@ public class ModelReq {
 	int bousOK;
 	int finOK;
 	int compnayType;
+	
+	int zfObjType;
 }

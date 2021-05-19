@@ -82,6 +82,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int susZfBoss = 0; // 增发博弈(自己人+未涨)
 	@Field(type = FieldType.Integer)
 	private int gsz = 0;// 三年高送转
+	@Field(type = FieldType.Integer)
+	private int zfObjType = 0;// 增发类型:1：6个月，2：混合，3大股东
 
 	// 增发解禁
 	@Field(type = FieldType.Integer)

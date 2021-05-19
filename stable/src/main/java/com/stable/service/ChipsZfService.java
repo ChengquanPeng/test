@@ -71,8 +71,8 @@ public class ChipsZfService {
 	private TushareSpider tushareSpider;
 
 	public boolean isZfDateOk(ZengFa zengfa, int agoDate) {
-		if (zengfa != null && (zengfa.getStartDate() > agoDate || zengfa.getEndDate() > agoDate
-				|| zengfa.getZjhDate() > agoDate)) {
+		if (zengfa != null && (zengfa.getEndDate() > agoDate || zengfa.getZjhDate() > agoDate)
+				|| zengfa.getStartDate() > agoDate) {
 			return true;
 		}
 		return false;

@@ -70,6 +70,7 @@ import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.ZengFa;
+import com.stable.vo.bus.ZengFaDetail;
 import com.stable.vo.bus.ZengFaExt;
 import com.stable.vo.bus.ZhiYa;
 import com.stable.vo.http.req.ModelManulReq;
@@ -491,10 +492,11 @@ public class CodeModelService {
 		newOne.setZflastOkDate(0);
 		// 低于增发价
 		newOne.setZfPriceLow(0);
+		newOne.setZfObjType(0);
 
 		String code = newOne.getCode();
 		ZengFa zf = chipsZfService.getLastZengFa(code, ZfStatus.DONE.getCode());// 已完成的增发
-		if (chipsZfService.isZfDateOk(zf, threeYearAgo)) {
+		if (chipsZfService.isZfDateOk(zf, oneYearAgo)) {
 			newOne.setZflastOkDate(zf.getEndDate());
 //			if (newOne.getSusZfBoss() == 1 && newOne.getSusZfBossSure() > 1) {
 //				return;
@@ -532,7 +534,47 @@ public class CodeModelService {
 							Double.valueOf(CurrencyUitl.cutProfit(d.getClosed(), zf.getPrice())).intValue());
 				}
 			}
+			// 实际增发类型
+			ZengFaDetail zfd = chipsZfService.getLastZengFaDetail(code, 0);
+			newOne.setZfObjType(zftype(zfd.getDetails()));
 		}
+	}
+
+	private String m6 = "6月";
+	private String m12 = "12月";
+	private String m24 = "24月";
+	private String m36 = "36月";
+
+	private int zftype(String str) {
+		if (str == null) {
+			return 0;
+		}
+		str.trim().replaceAll(" ", "");
+		int c6 = 0;
+		int cgt6 = 0;
+		if (str.contains(m6)) {
+			c6 = 1;
+		}
+		if (str.contains(m12)) {
+			cgt6 = 1;
+		}
+		if (str.contains(m24)) {
+			cgt6 = 1;
+		}
+		if (str.contains(m36)) {
+			cgt6 = 1;
+		}
+
+		if (c6 == 1 && cgt6 == 0) {
+			return 1;// 纯外部
+		}
+		if (c6 == 1 && cgt6 == 1) {
+			return 2;// 内外混合
+		}
+		if (c6 == 0 && cgt6 == 1) {
+			return 3;// 纯大股东
+		}
+		return 0;
 	}
 
 	private void susWhiteHorses(String code, CodeBaseModel2 newOne) {
@@ -1369,7 +1411,9 @@ public class CodeModelService {
 		if (StringUtils.isNotBlank(mr.getZfStatusDesc())) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfStatusDesc", mr.getZfStatusDesc()));
 		}
-
+		if (mr.getZfObjType() > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("zfObjType", mr.getZfObjType()));
+		}
 		if (mr.getZfjjup() == 1) {
 			bqb.must(QueryBuilders.rangeQuery("zfjjup").gte(1));
 		}
@@ -1494,6 +1538,7 @@ public class CodeModelService {
 		} else if (dh.getPls() == 2) {
 			sb5.append("人工: 排除").append(Constant.HTML_LINE);
 		}
+
 		if (dh.getSmallModel() > 0) {
 			sb5.append("小而美模型:");
 			if (dh.getSmallModel() == 1) {
@@ -1544,6 +1589,13 @@ public class CodeModelService {
 			if (dh.getGsz() == 1) {
 				sb5.append(",3年内有高送转").append(Constant.HTML_LINE);
 			}
+		}
+		if (dh.getZfObjType() == 1) {
+			sb5.append(",全部6个月").append(Constant.HTML_LINE);
+		} else if (dh.getZfObjType() == 2) {
+			sb5.append(",混合增发(6月+)").append(Constant.HTML_LINE);
+		} else if (dh.getZfObjType() == 3) {
+			sb5.append(",大股东增发").append(Constant.HTML_LINE);
 		}
 
 		// 解禁
