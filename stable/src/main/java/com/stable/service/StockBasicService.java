@@ -90,7 +90,9 @@ public class StockBasicService {
 		}
 		Optional<StockBaseInfo> db = esStockBaseInfoDao.findById(code);
 		if (!db.isPresent()) {
-			return new StockBaseInfo();
+			StockBaseInfo sb = new StockBaseInfo();
+			sb.setCode("no");
+			return sb;
 		}
 		return db.get();
 	}
