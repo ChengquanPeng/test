@@ -75,28 +75,33 @@ public class XqDailyBaseSpider {
 			String today = DateUtil.getTodayYYYYMMDD();
 			List<DaliyBasicInfo2> upd = new LinkedList<DaliyBasicInfo2>();
 			for (DaliyBasicInfo2 b : list) {
-				if (dofetch(b, today)) {
-					upd.add(b);
-				}
-				// 市赚率
-				// 市盈率/净资产收益率（PE/ROE）
-				FinanceBaseInfo fbi = financeService.getLastFinaceReport(b.getCode());
-				if (fbi != null && fbi.getJqjzcsyl() != 0.0 && b.getPeTtm() > 0) {
-					if (fbi.getSyldjd() != 0) {
-						b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / fbi.getSyldjd()));
-					} else {
-						double syldjd = CurrencyUitl.roundHalfUp(fbi.getJqjzcsyl() / (double) fbi.getQuarter());
-						b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / syldjd));
+				try {
+					if (dofetch(b, today)) {
+						upd.add(b);
 					}
-				}
-				// 流通股份
-				if (b.getFloatShare() > 0 && b.getTotalShare() > 0) {
-					StockBaseInfo base = stockBasicService.getCode(b.getCode());
-					base.setFloatShare(b.getFloatShare());
-					base.setTotalShare(b.getTotalShare());
-					stockBasicService.synBaseStockInfo(base, true);
-				}
+					// 市赚率
+					// 市盈率/净资产收益率（PE/ROE）
+					FinanceBaseInfo fbi = financeService.getLastFinaceReport(b.getCode());
+					if (fbi != null && fbi.getJqjzcsyl() != 0.0 && b.getPeTtm() > 0) {
+						if (fbi.getSyldjd() != 0) {
+							b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / fbi.getSyldjd()));
+						} else {
+							double syldjd = CurrencyUitl.roundHalfUp(fbi.getJqjzcsyl() / (double) fbi.getQuarter());
+							b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / syldjd));
+						}
+					}
+					// 流通股份
+					if (b.getFloatShare() > 0 && b.getTotalShare() > 0) {
+						StockBaseInfo base = stockBasicService.getCode(b.getCode());
+						base.setFloatShare(b.getFloatShare());
+						base.setTotalShare(b.getTotalShare());
+						stockBasicService.synBaseStockInfo(base, true);
+					}
 
+				} catch (Exception e) {
+					e.printStackTrace();
+					WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包出错,code=" + b.getCode());
+				}
 			}
 			if (upd.size() > 0) {
 				esDaliyBasicInfoDao.saveAll(list);
