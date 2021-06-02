@@ -132,6 +132,9 @@ public class FinanceService {
 								sb.append(",业绩快报亏损:");
 								find = true;
 							}
+							if (find) {
+								sb.append("业绩同比:").append(yjkb.getYyzsrtbzz()).append("%");
+							}
 						} else {
 							// 业绩预告(类似天气预报,可能不准)
 							FinYjyg yjyg = getLastFinaceYgByReportDate(code, fbi.getYear(), fbi.getQuarter());
@@ -144,9 +147,13 @@ public class FinanceService {
 									sb.append(",业绩预告亏损:");
 									find = true;
 								}
+								if (find) {
+									sb.append("业绩同比:").append(yjyg.getJlrtbzz()).append("%");
+								}
 							}
 						}
 						if (find) {
+
 							if (mp.getYkb() == 1) {
 								sb.append("期望不亏");
 							} else {
