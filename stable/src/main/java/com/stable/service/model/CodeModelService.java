@@ -1707,23 +1707,26 @@ public class CodeModelService {
 			codeBaseModel2Dao.save(c);
 
 			MonitorPool pool = monitorPoolService.getMonitorPool(code);
+			pool.setRealtime(0);
+			pool.setOffline(0);
+			pool.setUpTodayChange(0);
+			pool.setDzjy(0);
+			pool.setHolderNum(0);
+			pool.setYkb(0);
+			pool.setZfdone(0);
+			pool.setMonitor(MonitorType.NO.getCode());
 			if (pls == 1) {// 1在池子，2不在池子
 				pool.setMonitor(MonitorType.MANUAL.getCode());
 				pool.setRemark(c.getBuyRea() + " " + c.getSoldRea());
 				pool.setUpTodayChange(3);
+				pool.setRealtime(1);
 				int dt = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
 				pool.setDzjy(dt);
 				pool.setHolderNum(dt);
 				pool.setYkb(1);
 				pool.setZfdone(1);
 			} else if (pls == 2) {
-				pool.setMonitor(MonitorType.NO.getCode());
 				pool.setRemark("人工复核去掉");
-				pool.setUpTodayChange(0);
-				pool.setDzjy(0);
-				pool.setHolderNum(0);
-				pool.setYkb(0);
-				pool.setZfdone(0);
 			}
 			monitorPoolDao.save(pool);
 		}
