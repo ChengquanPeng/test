@@ -1554,6 +1554,7 @@ public class CodeModelService {
 		resp.setCodeType(sb4.toString());
 
 		StringBuffer sb5 = new StringBuffer();
+		sb5.append("股东人数:").append(dh.getHolderNum()).append(Constant.HTML_LINE);
 		if (dh.getPls() == 0) {
 			sb5.append("人工: 未确定").append(Constant.HTML_LINE);
 		} else if (dh.getPls() == 1) {
