@@ -108,7 +108,7 @@ public class DateUtil {
 		return format.format(new Date());
 	}
 
-	public static int getTodayYYYYMMDDHHMMSS(String time) {
+	public static int getDateStrToIntYYYYMMDDHHMMSS(String time) {
 		try {
 			SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
 			Date d = format.parse(time);

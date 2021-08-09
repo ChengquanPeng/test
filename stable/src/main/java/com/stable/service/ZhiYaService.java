@@ -1,6 +1,5 @@
 package com.stable.service;
 
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.Constant;
 import com.stable.es.dao.base.ZhiYaDao;
 import com.stable.spider.eastmoney.EastmoneyZytjSpider;
+import com.stable.spider.eastmoney.EastmoneyZytjSpider2;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -36,11 +36,13 @@ public class ZhiYaService {
 	private ZhiYaDao zhiYaDao;
 	@Autowired
 	private StockBasicService stockBasicService;
+	@Autowired
+	private EastmoneyZytjSpider2 eastmoneyZytjSpider;
 
 	public void fetchBySun() {
 		EastmoneyZytjSpider.errorcnt = new LinkedList<String>();
 		int update = DateUtil.getTodayIntYYYYMMDD();
-		int endDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), (-365 * 5)));
+//		int endDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), (-365 * 5)));
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
 		int total = list.size();
 		log.info("总数：" + total);
@@ -52,31 +54,33 @@ public class ZhiYaService {
 				zy.setCode(code);
 				boolean r1 = false;
 				StringBuffer sb = new StringBuffer("");
-				Map<String, Zya> m = EastmoneyZytjSpider.getZy(code, endDate);
-				Zya tzy = m.get(EastmoneyZytjSpider.TOTAL_BI);
-				double highRatio = 0.0;
-				for (String key : m.keySet()) {
-					Zya z = m.get(key);
+				Map<String, Zya> m = eastmoneyZytjSpider.getZy(code);
+				if (m != null) {
+					Zya tzy = m.get(EastmoneyZytjSpider.TOTAL_BI);
+					double highRatio = 0.0;
+					for (String key : m.keySet()) {
+						Zya z = m.get(key);
 //					System.err.println(key + "-> 次数:" + z.getC() + " 比例:" + z.getBi() + "%");
-					sb.append(key).append("->").append(Constant.HTML_LINE);
-					sb.append(" 次数:" + z.getC() + " 比例:" + CurrencyUitl.roundHalfUp(z.getBi()) + "%")
-							.append(Constant.HTML_LINE);
-					if (z.getBi() > 50.0) {
-						r1 = true;
+						sb.append(key).append("->").append(Constant.HTML_LINE);
+						sb.append(" 次数:" + z.getC() + " 比例:" + CurrencyUitl.roundHalfUp(z.getBi()) + "%")
+								.append(Constant.HTML_LINE);
+						if (z.getBi() >= 80.0) {
+							r1 = true;
+						}
+						if (z.getBi() > highRatio) {
+							highRatio = z.getBi();
+						}
 					}
-					if (z.getBi() > highRatio) {
-						highRatio = z.getBi();
+					zy.setDetail(sb.toString());
+					zy.setHighRatio(CurrencyUitl.roundHalfUp(highRatio));
+					zy.setTotalRatio(CurrencyUitl.roundHalfUp(tzy.getBi()));
+					zy.setUpdate(update);
+					zy.setHasRisk(0);
+					if (r1 && tzy.getBi() >= 10.0) {// 股东自身超过80%的质押，总股本超过10%
+						zy.setHasRisk(1);
 					}
+					rl.add(zy);
 				}
-				zy.setDetail(sb.toString());
-				zy.setHighRatio(CurrencyUitl.roundHalfUp(highRatio));
-				zy.setTotalRatio(CurrencyUitl.roundHalfUp(tzy.getBi()));
-				zy.setUpdate(update);
-				zy.setHasRisk(0);
-				if (r1 && tzy.getBi() > 7.0) {// 股东超过50%的质押，总股本超过10%
-					zy.setHasRisk(1);
-				}
-				rl.add(zy);
 			} catch (Exception e) {
 				WxPushUtil.pushSystem1("质押抓包异常:" + code);
 				ErrorLogFileUitl.writeError(e, "质押", "", "");

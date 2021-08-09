@@ -224,7 +224,7 @@ public class XqDailyBaseSpider {
 			ThreadsUtil.sleepRandomSecBetween1And5(trytime);
 			if (trytime >= 10) {
 				fetched = true;
-				WxPushUtil.pushSystem1("雪球每日信息出错(pe,pe-ttm),用tushare进行补充,code={}" + code + ",url=" + url);
+				WxPushUtil.pushSystem1("雪球每日信息出错(pe,pe-ttm),用tushare进行补充,code=" + code + ",url=" + url);
 				try {
 					JSONArray array = tushareSpider.getStockDaliyBasic(TushareSpider.formatCode(code), today)
 							.getJSONArray("items");

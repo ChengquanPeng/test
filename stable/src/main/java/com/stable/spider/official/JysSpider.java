@@ -111,7 +111,7 @@ public class JysSpider {
 								ah.setSoureId(d.getString("id"));
 								ah.setCode(d.getJSONArray("secCode").getString(0));
 								ah.setId(ah.getCode() + ah.getSoureId());
-								ah.setRptDate(DateUtil.getTodayYYYYMMDDHHMMSS(d.getString("publishTime")));
+								ah.setRptDate(DateUtil.getDateStrToIntYYYYMMDDHHMMSS(d.getString("publishTime")));
 								ah.setTitle(title);
 								ah.setUpdate(sysupdate);
 								ah.setType(type);
