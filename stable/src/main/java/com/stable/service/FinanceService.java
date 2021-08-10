@@ -133,7 +133,8 @@ public class FinanceService {
 								find = true;
 							}
 							if (find) {
-								sb.append("业绩同比:").append(yjkb.getYyzsrtbzz()).append("%");
+								sb.append("业绩同比:").append(yjkb.getJlrtbzz()).append("%");
+								sb.append(",营收同比:").append(yjkb.getYyzsrtbzz()).append("%");
 							}
 						} else {
 							// 业绩预告(类似天气预报,可能不准)
