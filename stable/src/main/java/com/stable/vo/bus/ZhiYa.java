@@ -29,6 +29,11 @@ public class ZhiYa extends EsBase {
 	@Field(type = FieldType.Text)
 	private String detail;// 质押明细
 
+	@Field(type = FieldType.Double)
+	private double warningLine = 0.0;
+	@Field(type = FieldType.Double)
+	private double openLine = 0.0;
+
 	public ZhiYa() {
 
 	}

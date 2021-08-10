@@ -177,6 +177,8 @@ public class CodeModelService {
 		StringBuffer lowpricec = new StringBuffer();
 		// 吸筹行为
 		StringBuffer zlxc = new StringBuffer();
+		// 高质押机会
+		StringBuffer gzyjh = new StringBuffer();
 
 		Map<String, CodeBaseModel2> histMap = getALLForMap();
 		for (StockBaseInfo s : codelist) {
@@ -202,8 +204,10 @@ public class CodeModelService {
 				if (d.getCircMarketVal() <= 0) {
 					d = daliyBasicHistroyService.queryLastest(code, 0, 1);
 				}
+				// 高质押
+				ZhiYa zy = zhiYaService.getZhiYa(code);
 				double mkv = d.getCircMarketVal();
-				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listHist, d);
+				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listHist, d, zy);
 				listLast.add(newOne);
 
 				// 市值
@@ -377,6 +381,10 @@ public class CodeModelService {
 					newOne.setZfPriceLowNotice(0);
 				}
 
+				// 高质押机会
+				if (d.getClosed() < zy.getWarningLine()) {
+					gzyjh.append(stockBasicService.getCodeName2(code)).append(",");
+				}
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -405,11 +413,14 @@ public class CodeModelService {
 		if (zlxc.length() > 0) {
 			WxPushUtil.pushSystem1("拉升吸筹股东人数减少30%(股价是否平稳):" + zlxc.toString());
 		}
+		if (gzyjh.length() > 0) {
+			WxPushUtil.pushSystem1("高质押机会股票:" + gzyjh.toString());
+		}
 //		daliyTradeHistroyService.deleteData();
 	}
 
 	private CodeBaseModel2 getBaseAnalyse(StockBaseInfo s, int tradeDate, CodeBaseModel2 oldOne,
-			List<CodeBaseModelHist> listHist, DaliyBasicInfo2 d) {
+			List<CodeBaseModelHist> listHist, DaliyBasicInfo2 d, ZhiYa zy) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
 		// 基本面池
@@ -426,7 +437,7 @@ public class CodeModelService {
 			ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, tradeDate + "", "Code Model错误");
 			return newOne;
 		}
-		baseAnalyseColor(s, newOne, fbis);// 基本面-红蓝绿
+		baseAnalyseColor(s, newOne, fbis, zy);// 基本面-红蓝绿
 		findBigBoss2(code, newOne, fbis);// 基本面-疑似大牛
 		susWhiteHorses(code, newOne);// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
 		lastDoneZfBoss(newOne, d);// 已完成的增发，更多细节
@@ -610,7 +621,7 @@ public class CodeModelService {
 		}
 	}
 
-	private void baseAnalyseColor(StockBaseInfo s, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis) {
+	private void baseAnalyseColor(StockBaseInfo s, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis, ZhiYa zy) {
 		newOne.setBaseYellow(0);
 		newOne.setBaseRed(0);
 		newOne.setBaseBlue(0);
@@ -1022,8 +1033,7 @@ public class CodeModelService {
 			sb2.append(yellow++).append(".股东/高管增持:" + (zengchi.getRptDate())).append(Constant.HTML_LINE);
 
 		}
-		// 高质押
-		ZhiYa zy = zhiYaService.getZhiYa(code);
+
 		if (zy.getHasRisk() == 1) {//
 			newOne.setBaseYellow(1);
 			sb2.append(yellow++).append(".高质押风险:" + zy.getDetail()).append(Constant.HTML_LINE);
