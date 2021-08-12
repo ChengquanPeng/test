@@ -3,6 +3,7 @@ package com.stable.spider.eastmoney;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -74,6 +75,9 @@ public class EastmoneyZytjSpider2 {
 					}
 					zyd.setHolderName(data.getString("HOLDER_NAME"));// 质押股东
 					zyd.setPurpose(data.getString("PF_PURPOSE"));// 质押目的
+					if (StringUtils.isBlank(zyd.getPurpose())) {
+						zyd.setPurpose("");
+					}
 					zyd.setNum(data.getLong("PF_NUM"));// 质押股份数量
 					zyd.setSelfRatio(data.getDouble("PF_HOLD_RATIO"));// 占所持比例
 					zyd.setTotalRatio(data.getDouble("PF_TSR"));// 占总股本比例
@@ -94,7 +98,10 @@ public class EastmoneyZytjSpider2 {
 					} catch (Exception e) {
 					}
 
-					String id = code + "_" + zyd.getNoticeDate() + "_" + zyd.getHolderName().hashCode();
+					zyd.setPfOrg(data.getString("PF_ORG"));
+
+					String id = code + "_" + zyd.getStartDate() + "_" + zyd.getHolderName().hashCode() + "_"
+							+ zyd.getPfOrg().hashCode();
 					zyd.setId(id);
 					l.add(zyd);
 //					System.err.println(zyd.toString());

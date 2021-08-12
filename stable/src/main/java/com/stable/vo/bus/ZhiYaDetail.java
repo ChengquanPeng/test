@@ -23,6 +23,8 @@ public class ZhiYaDetail extends EsBase {
 	private String code;
 	@Field(type = FieldType.Text)
 	private String holderName;// 质押股东
+	@Field(type = FieldType.Text)
+	private String pfOrg;// 质押方
 	@Field(type = FieldType.Long)
 	private long num;// 质押数量
 	@Field(type = FieldType.Integer)
