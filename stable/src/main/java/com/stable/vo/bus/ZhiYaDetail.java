@@ -44,7 +44,7 @@ public class ZhiYaDetail extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int noticeDate;// 公告日期
 	@Field(type = FieldType.Integer)
-	private int startDate;// 开始日期
+	private int startDate = 0;// 开始日期
 	@Field(type = FieldType.Integer)
 	private int unfreezeDate;// 结束日期
 	@Field(type = FieldType.Text)

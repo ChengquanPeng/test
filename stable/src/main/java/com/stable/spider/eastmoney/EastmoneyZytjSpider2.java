@@ -3,7 +3,6 @@ package com.stable.spider.eastmoney;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -36,12 +35,12 @@ public class EastmoneyZytjSpider2 {
 		do {
 			try {
 				ThreadsUtil.sleepRandomSecBetween1And2();
-				log.info(url);
-				System.err.println(url);
+//				log.info(url);
+//				System.err.println(url);
 				String result = HttpUtil.doGet2(url);
-				System.err.println(result);
+				log.info(result);
 				result = result.substring(FIXIED.length() + 1, result.length() - 2);
-				System.err.println(result);
+				log.info(result);
 				JSONObject object = JSON.parseObject(result);
 				if (object == null || !object.getBooleanValue("success")) {
 					// 未ok、
@@ -73,11 +72,8 @@ public class EastmoneyZytjSpider2 {
 					} else {
 						zyd.setState(4);
 					}
-					zyd.setHolderName(data.getString("HOLDER_NAME"));// 质押股东
-					zyd.setPurpose(data.getString("PF_PURPOSE"));// 质押目的
-					if (StringUtils.isBlank(zyd.getPurpose())) {
-						zyd.setPurpose("");
-					}
+					zyd.setHolderName(getStr(data.getString("HOLDER_NAME")));// 质押股东
+					zyd.setPurpose(getStr(data.getString("PF_PURPOSE")));// 质押目的
 					zyd.setNum(data.getLong("PF_NUM"));// 质押股份数量
 					zyd.setSelfRatio(data.getDouble("PF_HOLD_RATIO"));// 占所持比例
 					zyd.setTotalRatio(data.getDouble("PF_TSR"));// 占总股本比例
@@ -98,7 +94,7 @@ public class EastmoneyZytjSpider2 {
 					} catch (Exception e) {
 					}
 
-					zyd.setPfOrg(data.getString("PF_ORG"));
+					zyd.setPfOrg(getStr(data.getString("PF_ORG")));
 
 					String id = code + "_" + zyd.getStartDate() + "_" + zyd.getHolderName().hashCode() + "_"
 							+ zyd.getPfOrg().hashCode();
@@ -132,6 +128,13 @@ public class EastmoneyZytjSpider2 {
 			}
 		} while (!fetched);
 		return null;
+	}
+
+	public String getStr(String s) {
+		if (s == null) {
+			return "0";
+		}
+		return s.trim();
 	}
 
 	public static void main(String[] args) {

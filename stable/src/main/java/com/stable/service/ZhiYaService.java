@@ -44,6 +44,21 @@ public class ZhiYaService {
 	@Autowired
 	private ZhiYaDetailDao zhiYaDetailDao;
 
+//	@PostConstruct
+//	private void start() {
+//		new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				try {
+//					Thread.sleep(60 * 1000);
+//					fetchBySun();
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}).start();
+//	}
+
 	public synchronized void fetchBySun() {
 		EastmoneyZytjSpider.errorcnt = new LinkedList<String>();
 		int update = DateUtil.getTodayIntYYYYMMDD();
