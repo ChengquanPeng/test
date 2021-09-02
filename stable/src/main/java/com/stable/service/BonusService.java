@@ -1,7 +1,9 @@
 package com.stable.service;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -84,19 +86,21 @@ public class BonusService {
 	}
 
 	public boolean isBousOk(String code, int startYear) {
-		int c = 0;
+//		int c = 0;
 		List<BonusHist> l = this.getListByCode(code, null, null, null, EsQueryPageUtil.queryPage10);
+		Set<Integer> set = new HashSet<Integer>();
 		if (l != null) {
 			for (BonusHist bh : l) {
 				int y = getYear(bh);
 				if (y >= startYear) {
 					if (bh.getDetail().contains("元")) {
-						c++;
+//						c++;
+						set.add(y);
 					}
 				}
 			}
 		}
-		return (c >= 4);
+		return (set.size() >= 4);
 	}
 
 	private int getYear(BonusHist bh) {

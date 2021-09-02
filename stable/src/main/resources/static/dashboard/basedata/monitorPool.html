@@ -238,7 +238,6 @@ body {
 														+ "&nbsp;&nbsp;<a href='#' onclick='dianwo3(\""
 														+ row.code
 														+ "\",\""
-														+ row.remark
 														+ "\")'>移除</a>";
 											}
 										} ],
@@ -266,7 +265,7 @@ body {
 	</script>
 	<script type="text/javascript">
 		function dianwo3(code, remark) {
-			var remark = prompt(code + " 移除监听", remark + " 移除");
+			var remark = prompt(code + " 移除监听", "");
 			$.ajax({
 				url : "/web/monitorPool/delMonit", //访问地址--action地址
 				type : "post", //提交方式
