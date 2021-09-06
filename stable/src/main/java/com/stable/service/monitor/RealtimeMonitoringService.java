@@ -64,8 +64,12 @@ public class RealtimeMonitoringService {
 				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
 				for (MonitorPool cp : allCode) {
 					String code = cp.getCode();
-					if (cp.getMonitor() == MonitorType.ZengFaAuto.getCode()) {
-						log.info(code + " ZengFaAuto continue");
+//					if (cp.getMonitor() == MonitorType.ZengFaAuto.getCode()) {
+//						log.info(code + " ZengFaAuto continue");
+//						continue;
+//					}
+					if (cp.getMonitor() != MonitorType.MANUAL.getCode()) {
+						log.info(code + " not -MANUAL continue");
 						continue;
 					}
 					log.info(code);
