@@ -323,9 +323,10 @@ public class MonitorPoolService {
 			List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
 			List<FenHong> fhl = new LinkedList<FenHong>();
 			List<BonusHist> bhl = new LinkedList<BonusHist>();
+			List<ZengFa> zfl = new LinkedList<ZengFa>();
 			// 抓包
 			for (MonitorPool mp : list) {
-				thsBonusSpider.dofetchBonusInner(sysdate, mp.getCode(), zfdl, zfsl, fhl, bhl);
+				thsBonusSpider.dofetchBonusInner(sysdate, mp.getCode(), zfdl, zfsl, fhl, bhl, zfl, 0);
 			}
 			thsBonusSpider.saveAll(zfdl, zfsl, fhl, bhl);
 			// 预警

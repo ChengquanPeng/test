@@ -102,6 +102,7 @@
 					增发购买资产:<input type="checkbox" id="zfbuy" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					增发博弈(自+未):<input type="checkbox" id="susZfBoss" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					增发解禁:<input type="checkbox" id="zfjj" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					增发金额:<input type="text" id="zfYjAmt" width="10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					近一年的增发（含未完成）-->&nbsp;&nbsp;增发状态：<select id="zfStatus">
 						<option value="" selected="selected">不限制</option>
 						<option value="1">增发中</option>
@@ -240,6 +241,8 @@
 									param.sort6 = 0;
 									param.zfbuy = 0;
 									param.zfjj = 0;
+									param.zfYjAmt = $('#zfYjAmt').val();;
+									
 									param.zfjjup = 0;
 									param.zfself = 0;
 									param.smallModel = $('#smallModel').val();

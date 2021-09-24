@@ -62,6 +62,7 @@ public class ThsBonusSpider {
 	private ZengFaSummaryDao zengFaSummaryDao;
 	@Autowired
 	private BonusHistDao bonusHistDao;
+	private final long highMoney = 4000000000l;// 40亿
 
 //1、先由董事会作出决议：方案
 //2、提请股东大会批准
@@ -93,15 +94,17 @@ public class ThsBonusSpider {
 	private void dofetchInner() {
 		try {
 			int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
+			int oneWeekDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -7));// 一周之前
 			List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
 			List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
 			List<FenHong> fhl = new LinkedList<FenHong>();
 			List<BonusHist> bhl = new LinkedList<BonusHist>();
+			List<ZengFa> zfl = new LinkedList<ZengFa>();
 			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 			int c = 0;
 			for (StockBaseInfo s : codelist) {
 				try {
-					dofetchBonusInner(date, s.getCode(), zfdl, zfsl, fhl, bhl);
+					dofetchBonusInner(date, s.getCode(), zfdl, zfsl, fhl, bhl, zfl, oneWeekDate);
 				} catch (Exception e) {
 					ErrorLogFileUitl.writeError(e, "", "", "");
 				}
@@ -109,6 +112,14 @@ public class ThsBonusSpider {
 				log.info("current index:{}", c);
 			}
 			saveAll(zfdl, zfsl, fhl, bhl);
+			if (zfl.size() > 0) {
+				StringBuffer sb = new StringBuffer();
+				sb.append("本周超过40亿的增发预案:");
+				for (ZengFa zf : zfl) {
+					sb.append(stockBasicService.getCodeName2(zf.getCode())).append(",");
+				}
+				WxPushUtil.pushSystem1(sb.toString());
+			}
 			log.info("分红&增发抓包同花顺已完成");
 //			WxPushUtil.pushSystem1(date + " 分红&增发抓包同花顺已完成");
 		} catch (Exception e) {
@@ -142,7 +153,7 @@ public class ThsBonusSpider {
 	}
 
 	public void dofetchBonusInner(int sysdate, String code, List<ZengFaDetail> zfdl, List<ZengFaSummary> zfsl,
-			List<FenHong> fhl, List<BonusHist> bhl) {
+			List<FenHong> fhl, List<BonusHist> bhl, List<ZengFa> zfl, int oneWeekDate) {
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(urlbase, code, System.currentTimeMillis());
@@ -283,14 +294,14 @@ public class ThsBonusSpider {
 							} catch (Exception e) {
 								// e.printStackTrace();
 							}
-							tr.next();
-							tr.next();
+							tr.next();// 预案发行价格&发审委公告日
+							tr.next();// 预案发行数量&股东大会公告日
 							DomElement tr6 = tr.next();
 							// 董事会公告日
 							String s5 = tr6.getLastElementChild().asText().replaceAll(" ", "").split("：")[1];
 							zf.setStartDate(DateUtil.convertDate2(s5));
 							zf.setUpdate(sysdate);
-							try {// 实际募资净额
+							try {// 公告预计募资额
 								String s = tr6.getFirstElementChild().asText().replaceAll(" ", "").split("：")[1];
 								zf.setYjamt(CurrencyUitl.covertToLong(s));
 							} catch (Exception e) {
@@ -301,6 +312,9 @@ public class ThsBonusSpider {
 
 							zengFaDao.save(zf);
 
+							if (zf.getYjamt() >= highMoney && zf.getStatus() == 1 && zf.getStartDate() >= oneWeekDate) {
+								zfl.add(zf);
+							}
 						} catch (Exception e) {
 //							log.error(h.asXml());
 //							e.fillInStackTrace();

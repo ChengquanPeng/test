@@ -478,11 +478,13 @@ public class CodeModelService {
 	private void chkLastOneYearZf(CodeBaseModel2 newOne) {
 		newOne.setZfStatus(ZfStatus.NO.getCode());
 		newOne.setZfStatusDesc("");
+		newOne.setZfYjAmt(0);
 		ZengFa last = chipsZfService.getLastZengFa(newOne.getCode());
 		// start 一年以前
 		if (chipsZfService.isZfDateOk(last, oneYearAgo)) {
 			newOne.setZfStatus(last.getStatus());
 			newOne.setZfStatusDesc(last.getStatusDesc());
+			newOne.setZfYjAmt(last.getYjamt());
 		}
 	}
 
@@ -1449,6 +1451,9 @@ public class CodeModelService {
 		}
 		if (mr.getZfjjup() == 1) {
 			bqb.must(QueryBuilders.rangeQuery("zfjjup").gte(1));
+		}
+		if (mr.getZfYjAmt() > 0) {
+			bqb.must(QueryBuilders.rangeQuery("zfYjAmt").gte(mr.getZfYjAmt() * 100000000));
 		}
 		if (mr.getSmallModel() > 0) {
 			if (mr.getSmallModel() == 9999) {
