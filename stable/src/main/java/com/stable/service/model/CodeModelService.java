@@ -1452,8 +1452,11 @@ public class CodeModelService {
 		if (mr.getZfjjup() == 1) {
 			bqb.must(QueryBuilders.rangeQuery("zfjjup").gte(1));
 		}
-		if (mr.getZfYjAmt() > 0) {
-			bqb.must(QueryBuilders.rangeQuery("zfYjAmt").gte(mr.getZfYjAmt() * 100000000));
+		if (StringUtils.isNotBlank(mr.getZfYjAmt())) {
+			Long zfYjAmt = Long.valueOf(mr.getZfYjAmt());
+			if (zfYjAmt > 0) {
+				bqb.must(QueryBuilders.rangeQuery("zfYjAmt").gte(zfYjAmt * 100000000));
+			}
 		}
 		if (mr.getSmallModel() > 0) {
 			if (mr.getSmallModel() == 9999) {
@@ -1627,6 +1630,10 @@ public class CodeModelService {
 			}
 			if (dh.getGsz() == 1) {
 				sb5.append(",3年内有高送转").append(Constant.HTML_LINE);
+			}
+			if (dh.getZfYjAmt() > 0) {
+				resp.setZfAmtInfo(CurrencyUitl.covertToString(dh.getZfYjAmt()));
+				sb5.append(",").append(resp.getZfAmtInfo()).append(Constant.HTML_LINE);
 			}
 		}
 		if (dh.getZfObjType() == 1) {
