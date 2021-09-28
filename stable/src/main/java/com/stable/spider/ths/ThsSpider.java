@@ -270,11 +270,11 @@ public class ThsSpider {
 				e2.printStackTrace();
 				trytime++;
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
-				if (trytime >= 10) {
+				//if (trytime >= 10) { //884不在维护
 					fetched = true;
 					e2.printStackTrace();
-					WxPushUtil.pushSystem1("同花顺概念-每日交易出错884," + cp.getName() + ",url=" + url);
-				}
+					//WxPushUtil.pushSystem1("同花顺概念-每日交易出错884," + cp.getName() + ",url=" + url);
+				//}
 			} finally {
 				htmlunitSpider.close();
 			}
