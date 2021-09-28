@@ -1386,12 +1386,12 @@ public class CodeModelService {
 		if (StringUtils.isNotBlank(mr.getByellow())) {
 			bqb.must(QueryBuilders.matchPhraseQuery("baseYellow", Integer.valueOf(mr.getByellow())));
 		}
-		if (StringUtils.isNotBlank(mr.getBblue())) {
-			bqb.must(QueryBuilders.matchPhraseQuery("baseBlue", Integer.valueOf(mr.getBblue())));
-		}
-		if (StringUtils.isNotBlank(mr.getBgreen())) {
-			bqb.must(QueryBuilders.matchPhraseQuery("baseGreen", Integer.valueOf(mr.getBgreen())));
-		}
+//		if (StringUtils.isNotBlank(mr.getBblue())) {
+//			bqb.must(QueryBuilders.matchPhraseQuery("baseBlue", Integer.valueOf(mr.getBblue())));
+//		}
+//		if (StringUtils.isNotBlank(mr.getBgreen())) {
+//			bqb.must(QueryBuilders.matchPhraseQuery("baseGreen", Integer.valueOf(mr.getBgreen())));
+//		}
 		if (StringUtils.isNotBlank(mr.getBsyl())) {
 			bqb.must(QueryBuilders.matchPhraseQuery("sylType", Integer.valueOf(mr.getBsyl())));
 		}
@@ -1631,10 +1631,10 @@ public class CodeModelService {
 			if (dh.getGsz() == 1) {
 				sb5.append(",3年内有高送转").append(Constant.HTML_LINE);
 			}
-			if (dh.getZfYjAmt() > 0) {
-				resp.setZfAmtInfo(CurrencyUitl.covertToString(dh.getZfYjAmt()));
-				sb5.append(",").append(resp.getZfAmtInfo()).append(Constant.HTML_LINE);
-			}
+		}
+		if (dh.getZfYjAmt() > 0) {
+			resp.setZfAmtInfo(CurrencyUitl.covertToString(dh.getZfYjAmt()));
+			sb5.append(",").append(resp.getZfAmtInfo()).append(Constant.HTML_LINE);
 		}
 		if (dh.getZfObjType() == 1) {
 			sb5.append(",纯6个月").append(Constant.HTML_LINE);

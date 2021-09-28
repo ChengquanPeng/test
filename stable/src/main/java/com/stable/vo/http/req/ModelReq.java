@@ -13,8 +13,6 @@ public class ModelReq {
 	String monitor;
 	String bred;
 	String byellow;
-	String bblue;
-	String bgreen;
 	String bsyl;
 	int susBigBoss;
 	int susWhiteHors;

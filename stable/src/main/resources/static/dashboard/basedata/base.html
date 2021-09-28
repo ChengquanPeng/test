@@ -52,17 +52,7 @@
 						<option value="" selected="selected">无限制</option>
 						<option value="1">有黄色</option>
 						<option value="0">无黄色</option>
-					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 蓝色:<select id="bblue"
-						class="form-control">
-						<option value="" selected="selected">无限制</option>
-						<option value="1">有蓝色</option>
-						<option value="0">无蓝色</option>
-					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 绿色:<select id="bgreen"
-						class="form-control">
-						<option value="" selected="selected">无限制</option>
-						<option value="1">有绿色</option>
-						<option value="0">无绿色</option>
-					</select>
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 				</div>
 			</div>
 			<div>
@@ -226,8 +216,6 @@
 
 									param.bred = $('#bred').val();
 									param.byellow = $('#byellow').val();
-									param.bblue = $('#bblue').val();
-									param.bgreen = $('#bgreen').val();
 									param.bsyl = $('#bsyl').val();
 
 									param.monitor = $('#monitor').val();
@@ -320,6 +308,8 @@
 																+ value
 																+ '</a><br/>'
 																+ row.codeName
+																+ '<br/>' + row.currYear + '-'
+																+ row.currQuarter
 																+ '<br/>十:P5:'
 																+ row.holderNumP5
 																+ '%<br/>十:T3:'
@@ -333,25 +323,12 @@
 											}
 										},
 										{
-											field : 'currYear',
-											title : '报告期',
-											formatter : function(value, row,
-													index) {
-												return row.currYear + "-"
-														+ row.currQuarter;
-											}
-										},
-										{
 											field : 'baseInfo',
 											title : '避雷区'
 										},
 										{
 											field : 'sylDesc',
 											title : '收益率'
-										},
-										{
-											field : 'codeType',
-											title : '类型'
 										},
 										{
 											field : 'zfjjInfo',
