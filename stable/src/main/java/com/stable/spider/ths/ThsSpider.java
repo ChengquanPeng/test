@@ -273,7 +273,7 @@ public class ThsSpider {
 				//if (trytime >= 10) { //884不在维护
 					fetched = true;
 					e2.printStackTrace();
-					//WxPushUtil.pushSystem1("同花顺概念-每日交易出错884," + cp.getName() + ",url=" + url);
+					WxPushUtil.pushSystem1("同花顺概念-每日交易出错884," + cp.getName() + ",url=" + url);
 				//}
 			} finally {
 				htmlunitSpider.close();
@@ -715,7 +715,26 @@ public class ThsSpider {
 		int date = DateUtil.getTodayIntYYYYMMDD();
 		for (int code = 884001; code <= end884; code++) {
 			if (code == 884038 || code == 884061 || code == 884102 || code == 884103 || code == 884104 || code == 884108
-					|| code == 884166 || code == 884170 || code == 884175) {
+					|| code == 884166 || code == 884170 || code == 884175
+					|| code == 884017
+					|| code == 884019
+					|| code == 884029
+					|| code == 884037
+					|| code == 884040
+					|| code == 884042
+					|| code == 884047
+					|| code == 884049
+					|| code == 884058
+					|| code == 884070
+					|| code == 884072
+					|| code == 884087
+					|| code == 884097
+					|| code == 884107
+					|| code == 884109
+					|| code == 884110
+					|| code == 884111
+					|| code == 884114
+					|| code == 884115) {
 				continue;
 			}
 			Concept cp = new Concept();
