@@ -734,7 +734,27 @@ public class ThsSpider {
 					|| code == 884110
 					|| code == 884111
 					|| code == 884114
-					|| code == 884115) {
+					|| code == 884115
+					|| code == 884079
+					|| code == 884121
+					|| code == 884122
+					|| code == 884127
+					|| code == 884129
+					|| code == 884133
+					|| code == 884134
+					|| code == 884135
+					|| code == 884138
+					|| code == 884148
+					|| code == 884151
+					|| code == 884152
+					|| code == 884169
+					|| code == 884171
+					|| code == 884173
+					|| code == 884179
+					|| code == 884185
+					|| code == 884187
+					|| code == 884190
+					) {
 				continue;
 			}
 			Concept cp = new Concept();
