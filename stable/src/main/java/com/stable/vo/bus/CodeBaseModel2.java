@@ -93,7 +93,7 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int zfjj = 0; // 增发解禁
 	@Field(type = FieldType.Integer)
-	private int zfjjup = 0; // 小票未大涨
+	private int zfjjup = 0; // 票未涨
 	@Field(type = FieldType.Integer)
 	private int zfPriceLow = 0; // 低于增发价
 	@Field(type = FieldType.Integer)
