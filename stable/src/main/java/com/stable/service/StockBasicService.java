@@ -215,7 +215,7 @@ public class StockBasicService {
 			while (it.hasNext()) {
 				StockBaseInfo e = it.next();
 				// list_status='L'
-				if ("L".equals(e.getList_status()) && !"4".equals(e.getCode())) {// 排除4开头的
+				if ("L".equals(e.getList_status()) && (!"4".startsWith(e.getCode()) && !"8".startsWith(e.getCode()))) {// 排除4,8开头的
 					// list.add(e);
 					LOCAL_ALL_ONLINE_LIST.add(e);
 				}
