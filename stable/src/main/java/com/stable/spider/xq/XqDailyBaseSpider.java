@@ -88,6 +88,7 @@ public class XqDailyBaseSpider {
 					}
 					// 市赚率
 					// 市盈率/净资产收益率（PE/ROE）
+					b.setSzl(0);
 					FinanceBaseInfo fbi = financeService.getLastFinaceReport(b.getCode());
 					if (fbi != null && fbi.getJqjzcsyl() != 0.0 && b.getPeTtm() > 0) {
 						if (fbi.getSyldjd() != 0) {
