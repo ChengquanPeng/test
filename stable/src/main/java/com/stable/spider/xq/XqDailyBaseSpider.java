@@ -79,6 +79,13 @@ public class XqDailyBaseSpider {
 					if (dofetch(b, today)) {
 						upd.add(b);
 					}
+					// 流通股份
+					if (b.getFloatShare() > 0 && b.getTotalShare() > 0) {
+						StockBaseInfo base = stockBasicService.getCode(b.getCode());
+						base.setFloatShare(b.getFloatShare());
+						base.setTotalShare(b.getTotalShare());
+						stockBasicService.synBaseStockInfo(base, true);
+					}
 					// 市赚率
 					// 市盈率/净资产收益率（PE/ROE）
 					FinanceBaseInfo fbi = financeService.getLastFinaceReport(b.getCode());
@@ -87,17 +94,11 @@ public class XqDailyBaseSpider {
 							b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / fbi.getSyldjd()));
 						} else {
 							double syldjd = CurrencyUitl.roundHalfUp(fbi.getJqjzcsyl() / (double) fbi.getQuarter());
-							b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / syldjd));
+							if (syldjd != 0) {
+								b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / syldjd));
+							}
 						}
 					}
-					// 流通股份
-					if (b.getFloatShare() > 0 && b.getTotalShare() > 0) {
-						StockBaseInfo base = stockBasicService.getCode(b.getCode());
-						base.setFloatShare(b.getFloatShare());
-						base.setTotalShare(b.getTotalShare());
-						stockBasicService.synBaseStockInfo(base, true);
-					}
-
 				} catch (Exception e) {
 					e.printStackTrace();
 					WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包出错,code=" + b.getCode());
