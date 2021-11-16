@@ -39,6 +39,8 @@ public class TushareSpider {
 			return String.format("%s.SH", code);
 		} else if (code.startsWith("0")) {
 			return String.format("%s.SZ", code);
+		} else if (code.startsWith("8")) {
+			return String.format("%s.BJ", code);
 		} else if (code.matches("^60.*|^5.*")) {
 			return String.format("%s.SH", code);
 		}
@@ -157,7 +159,7 @@ public class TushareSpider {
 			JSONObject items = datas.getJSONObject("data");
 			return items;
 		} finally {
-			//ThreadsUtil.tuShareSleepRandom();
+			// ThreadsUtil.tuShareSleepRandom();
 		}
 	}
 

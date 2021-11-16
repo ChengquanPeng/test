@@ -57,6 +57,8 @@ public class XqDailyBaseSpider {
 		// 5开头，沪市基金或权证 60开头上证
 		if (code.startsWith("6")) {
 			return String.format("SH%s", code);
+		} else if (code.startsWith("8")) {
+			return String.format("BJ%s", code);
 		} else {
 			return String.format("SZ%s", code);
 		}
