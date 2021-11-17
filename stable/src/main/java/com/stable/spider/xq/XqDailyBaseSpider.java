@@ -57,11 +57,13 @@ public class XqDailyBaseSpider {
 		// 5开头，沪市基金或权证 60开头上证
 		if (code.startsWith("6")) {
 			return String.format("SH%s", code);
-		} else if (code.startsWith("8")) {
-			return String.format("BJ%s", code);
-		} else {
+		} else if (code.startsWith("0") || code.matches("3")) {
 			return String.format("SZ%s", code);
+		} else if (code.startsWith("8") || code.startsWith("4")) {
+			return String.format("BJ%s", code);
 		}
+		return code;
+
 	}
 
 	public void fetchAll(List<DaliyBasicInfo2> list) {

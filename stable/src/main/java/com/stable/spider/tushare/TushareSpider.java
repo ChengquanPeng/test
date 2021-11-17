@@ -34,21 +34,18 @@ public class TushareSpider {
 	 * 
 	 */
 	public static String formatCode(String code) {
-		// 5开头，沪市基金或权证 60开头上证
-		if (code.startsWith("6")) {
+		if (code.startsWith("6")) {// 6
 			return String.format("%s.SH", code);
-		} else if (code.startsWith("0")) {
+		} else if (code.startsWith("0") || code.matches("3")) {// 0,3
 			return String.format("%s.SZ", code);
-		} else if (code.startsWith("8")) {
+		} else if (code.startsWith("8") || code.startsWith("4")) {// 8,4
 			return String.format("%s.BJ", code);
-		} else if (code.matches("^60.*|^5.*")) {
+		} else if (code.matches("5")) {// 5开头，沪市基金或权证
 			return String.format("%s.SH", code);
-		}
-		// 1开头的，是深市基金 00开头是深圳
-		else if (code.matches("^1.*|^00.*|^300...")) {
+		} else if (code.matches("1")) {// 1开头的，是深市基金
 			return String.format("%s.SZ", code);
 		}
-		return null;
+		return code;
 	}
 
 	public static String removets(String tscode) {
