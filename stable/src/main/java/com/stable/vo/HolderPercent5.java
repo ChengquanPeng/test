@@ -9,6 +9,8 @@ import lombok.Data;
 public class HolderPercent5 {
 	// 十大
 	private List<String> list_a = new LinkedList<String>();
-	// 流通
+	// 流通(总股本)
 	private List<Double> list_l = new LinkedList<Double>();
+	// 流通(流通股本)
+	private List<Double> list_lt = new LinkedList<Double>();
 }

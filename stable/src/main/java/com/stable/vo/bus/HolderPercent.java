@@ -31,9 +31,11 @@ public class HolderPercent extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int date;
 	@Field(type = FieldType.Double)
-	private double topThree;
+	private double topThree;// 总股本
 	@Field(type = FieldType.Double)
-	private double percent5;
+	private double percent5;// 总股本占比
+	@Field(type = FieldType.Double)
+	private double percent5circZb;// 流通股占比
 	@Field(type = FieldType.Integer)
 	private int sysdate;
 

@@ -19,4 +19,5 @@ public class CodeBaseModelResp extends CodeBaseModel2 {
 	private String sortInfo;
 	private String monitorDesc;
 	private String zfAmtInfo;
+	private String tagInfo;
 }

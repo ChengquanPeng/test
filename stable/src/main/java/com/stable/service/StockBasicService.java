@@ -141,7 +141,7 @@ public class StockBasicService {
 								}
 							}
 							log.info("同步股票列表[end],cnt=" + cnt);
-							LOCAL_ALL_ONLINE_LIST.clear();// 清空缓存
+							LOCAL_ALL_ONLINE_LIST = new CopyOnWriteArrayList<StockBaseInfo>();// 清空缓存
 							// WxPushUtil.pushSystem1("同步股票列表完成！记录条数=[" + cnt + "],异常股票数:" +
 							// removelist.size());
 							return null;
@@ -215,7 +215,7 @@ public class StockBasicService {
 			while (it.hasNext()) {
 				StockBaseInfo e = it.next();
 				// list_status='L'
-				if ("L".equals(e.getList_status()) && (!"4".startsWith(e.getCode()) && !"8".startsWith(e.getCode()))) {// 排除4,8开头的
+				if ("L".equals(e.getList_status()) && (!e.getCode().startsWith("4") && !e.getCode().startsWith("8"))) {// 排除4,8开头的
 					// list.add(e);
 					LOCAL_ALL_ONLINE_LIST.add(e);
 				}

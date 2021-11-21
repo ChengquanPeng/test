@@ -16,6 +16,78 @@ import lombok.Setter;
 public class CodeBaseModel2 extends EsBase {
 	private static final long serialVersionUID = 1L;
 
+	// Step.1.市值大小，股价K线形态是否横盘多年，且常年分红
+	@Field(type = FieldType.Double)
+	private double mkv;// 流通市值
+	@Field(type = FieldType.Double)
+	private double actMkv;// 除去5%以上股东意外的市值
+	@Field(type = FieldType.Integer)
+	private int finOK;// 5年业绩OK
+	@Field(type = FieldType.Integer)
+	private int bousOK;// 5年分红OK(至少4年分红)
+	@Field(type = FieldType.Integer)
+	private int zfjjup = 0; // 票未涨
+	// Step.2.公司所处行业，大股股东股权结构和持股比例，增发和大宗情况，股东人数增长，基金是否参与。
+	// 股东人数
+	@Field(type = FieldType.Double)
+	private double holderNumP5; // 十大股东：5%股东占比
+	@Field(type = FieldType.Double)
+	private double holderNumT3; // 十大股东：Top3%股东占比
+	@Field(type = FieldType.Double)
+	private double holderNum;
+	@Field(type = FieldType.Integer)
+	private int holderDate;
+	@Field(type = FieldType.Integer)
+	private int dzjyRct = 0; // 最近1年大宗交易频繁
+	@Field(type = FieldType.Double)
+	private double dzjyAvgPrice = 0; // 最近1年大宗交易均价
+	@Field(type = FieldType.Integer)
+	private int tagDzPriceLow = 0;// 低于大宗均价
+	// 增发和大宗情况
+	// 增发(最近的增发，包含正在增发）
+	@Field(type = FieldType.Integer)
+	private int zfStatus;// 增发状态（近1年）: 0无增发，1增发中，2增发完成，3，增发终止
+	@Field(type = FieldType.Long)
+	private long zfYjAmt = 0;// 增发预计金额
+	@Field(type = FieldType.Double)
+	private double zfPrice = 0; // 增发价格
+	@Field(type = FieldType.Text)
+	private String zfStatusDesc;// 增发进度
+	// 已完成的增发
+	@Field(type = FieldType.Integer)
+	private int zflastOkDate = 0;// 最后已实施时间
+	@Field(type = FieldType.Integer)
+	private int zfself = 0;// 自己人在增发
+	@Field(type = FieldType.Integer)
+	private int gsz = 0;// 三年高送转
+	@Field(type = FieldType.Integer)
+	private int zfObjType = 0;// 增发类型:1：6个月，2：混合，3大股东
+	@Field(type = FieldType.Integer)
+	private int zfPriceLow = 0; // 低于增发价
+	// 增发解禁
+	@Field(type = FieldType.Integer)
+	private int zfjjDate = 0;// 最近的增发解禁时间
+	@Field(type = FieldType.Integer)
+	private int zfjj = 0; // 增发解禁
+
+	@Field(type = FieldType.Integer)
+	private int compnayType;// 国资
+
+	// 标签
+	@Field(type = FieldType.Integer)
+	private int tagSmallAndBeatf;// 小而美
+	@Field(type = FieldType.Integer)
+	protected int tagHighZyChance;// 高质押机会
+	@Field(type = FieldType.Integer)
+	private int sortChips = 0;// 吸筹-收集筹码短线
+	@Field(type = FieldType.Integer)
+	private int susBigBoss; // // 交易面疑似大牛
+	@Field(type = FieldType.Integer)
+	private int susWhiteHors; // // 交易面疑似白马
+
+	@Field(type = FieldType.Integer)
+	private int monitor;// 是否监听
+
 	@Id
 	private String id;
 	@Field(type = FieldType.Text)
@@ -24,19 +96,9 @@ public class CodeBaseModel2 extends EsBase {
 	protected int date;
 
 	@Field(type = FieldType.Integer)
-	private int monitor;// 是否监听
-
-	@Field(type = FieldType.Integer)
 	protected int currYear;
 	@Field(type = FieldType.Integer)
 	protected int currQuarter;
-
-	@Field(type = FieldType.Integer)
-	private int compnayType;// 国资
-	@Field(type = FieldType.Integer)
-	private int finOK;// 5年业绩OK
-	@Field(type = FieldType.Integer)
-	private int bousOK;// 5年分红OK(至少4年分红)
 
 	@Field(type = FieldType.Integer)
 	protected int baseRed;// 基本面：红色
@@ -65,69 +127,12 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int sylType;// 收益率类型:1:自身收益率增长,2: 年收益率超过5.0%*4=20%,4:同时包含12
 
-	// 增发(最近的增发，包含正在增发）
-	@Field(type = FieldType.Integer)
-	private int zfStatus;// 增发状态（近1年）: 0无增发，1增发中，2增发完成，3，增发终止
-	@Field(type = FieldType.Long)
-	private long zfYjAmt = 0;// 增发预计金额
-	@Field(type = FieldType.Text)
-	private String zfStatusDesc;// 增发进度
-
-	// 已完成的增发
-	@Field(type = FieldType.Integer)
-	private int zflastOkDate = 0;// 最后已实施时间
-	@Field(type = FieldType.Integer)
-	private int zfself = 0;// 自己人在增发
-	@Field(type = FieldType.Integer)
-	private int zfbuy = 0;// 是否购买资产
-	@Field(type = FieldType.Integer)
-	private int susZfBoss = 0; // 增发博弈(自己人+未涨)
-	@Field(type = FieldType.Integer)
-	private int gsz = 0;// 三年高送转
-	@Field(type = FieldType.Integer)
-	private int zfObjType = 0;// 增发类型:1：6个月，2：混合，3大股东
-
-	// 增发解禁
-	@Field(type = FieldType.Integer)
-	private int zfjjDate = 0;// 最近的增发解禁时间
-	@Field(type = FieldType.Integer)
-	private int zfjj = 0; // 增发解禁
-	@Field(type = FieldType.Integer)
-	private int zfjjup = 0; // 票未涨
-	@Field(type = FieldType.Integer)
-	private int zfPriceLow = 0; // 低于增发价
-	@Field(type = FieldType.Integer)
-	private int zfPriceLowNotice = 0; // 低于增发价
-	@Field(type = FieldType.Integer)
-	private int dzjyRct = 0; // 最近半年大宗交易频繁
-
-	// 交易面
-	@Field(type = FieldType.Integer)
-	private int susBigBoss; // 疑似大牛
-	@Field(type = FieldType.Integer)
-	private int susWhiteHors; // 疑似白马
 	// 短线
 	@Field(type = FieldType.Integer)
 	private int sortMode6 = 0;// 符合短线 //短线模型6(前期3-50%吸筹，深度回踩突然涨停后再2-5个交易日回踩拉起,涨停日不放量，超过涨停价格后买入，买入2内未大幅拉升放弃
 	@Field(type = FieldType.Integer)
 	private int sortMode7 = 0;// 突破箱体震荡 --//0未知，1待确认，2确认，3，不符合
-	@Field(type = FieldType.Integer)
-	private int smallModel = 0;// 0:无，1：普通，2，增发，3，大宗，4，增发+大宗
-	@Field(type = FieldType.Integer)
-	private int sortChips = 0;// 收集筹码的短线
-	@Field(type = FieldType.Integer)
-	private int sortChipsNotice = 0;// 收集筹码的短线-通知
 	// 人工确定
-
-	// 股东人数
-	@Field(type = FieldType.Double)
-	private double holderNumP5; // 十大股东：5%股东占比
-	@Field(type = FieldType.Double)
-	private double holderNumT3; // 十大股东：Top3%股东占比
-	@Field(type = FieldType.Double)
-	private double holderNum;
-	@Field(type = FieldType.Integer)
-	private int holderDate;
 
 	// ==== 筹码博弈 ====
 	// 1.是否可买
@@ -157,8 +162,7 @@ public class CodeBaseModel2 extends EsBase {
 	private int dzOK = 0;// 定增情况，0差，1一般，2好
 
 	// 3.基本面排雷清单/优选
-	@Field(type = FieldType.Double)
-	private double mkv;// 流通市值
+
 	@Field(type = FieldType.Integer)
 	private int yj = 0; // 1.持续增长-扣非(主营）,2.持续增长-归属,3.波动不大，较平稳,4.下降趋势，但是不亏,5.扣非亏损，至少归属不亏
 	@Field(type = FieldType.Integer)
@@ -208,7 +212,6 @@ public class CodeBaseModel2 extends EsBase {
 	private double netAsset; // 净资产
 	@Field(type = FieldType.Double)
 	private double zcfzl; // 资产负债率
-
 	// 监听
 	@Field(type = FieldType.Double)
 	private int listenerGg; // 监听-公告

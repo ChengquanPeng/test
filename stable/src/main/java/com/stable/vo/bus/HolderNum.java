@@ -29,10 +29,12 @@ public class HolderNum extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int date;
 	@Field(type = FieldType.Integer)
-	private int num;
+	private int num;// 人数
 	@Field(type = FieldType.Double)
-	private double avgPrice;
+	private double avgPrice;// 股价
 	@Field(type = FieldType.Integer)
 	private int sysdate;
+	@Field(type = FieldType.Long)
+	private long avgNumP5;// 除开5%以上股东外的人均持股
 
 }

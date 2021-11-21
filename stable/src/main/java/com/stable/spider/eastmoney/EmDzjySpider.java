@@ -65,7 +65,7 @@ public class EmDzjySpider {
 
 			// 半年超1亿
 			List<DzjyYiTime> l = new LinkedList<DzjyYiTime>();
-			int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -210));// 7个月
+			int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));// 7个月
 			for (String code : set) {
 				// 频繁统计，近7个月
 				DzjyYiTime t = dzjyService.halfOver1Yi(code, startDate);

@@ -146,9 +146,7 @@ public class CodeModelService {
 	private synchronized void runByJobv2(int tradeDate, boolean isweekend) {
 		Date now = new Date();
 
-		int dzdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -240));// 最大8个月大宗
-		int jjstart = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
-		int jjend = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 370));
+		int dzdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));// 最近1年大宗
 		int currYear = DateUtil.getCurYYYY();
 		int checkYear = currYear - 1;
 		checkYear = currYear - 5;
@@ -173,12 +171,6 @@ public class CodeModelService {
 		StringBuffer sbc = new StringBuffer();
 		// 公告提醒
 		StringBuffer annc = new StringBuffer();
-		// 低于增发价，低于大宗提醒
-		StringBuffer lowpricec = new StringBuffer();
-		// 吸筹行为
-		StringBuffer zlxc = new StringBuffer();
-		// 高质押机会
-		StringBuffer gzyjh = new StringBuffer();
 
 		Map<String, CodeBaseModel2> histMap = getALLForMap();
 		for (StockBaseInfo s : codelist) {
@@ -210,8 +202,13 @@ public class CodeModelService {
 				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listHist, d, zy);
 				listLast.add(newOne);
 
+				newOne.setTagDzPriceLow(0);
+				newOne.setTagHighZyChance(0);
 				// 市值
 				newOne.setMkv(mkv);
+				if (mkv > 0 && s.getCircZb() > 0) {
+//					newOne.setActMkv(actMkv);
+				}
 
 				// 人工审核是否时间到期-重置
 				if (newOne.getPlst() < tradeDate) {
@@ -223,20 +220,15 @@ public class CodeModelService {
 				}
 
 				// 增发自动监听-重置
-				if (newOne.getPls() != 1
-						&& (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()
-								|| pool.getMonitor() == MonitorType.SMALL_AND_BEAUTIFUL.getCode()
-								|| pool.getMonitor() == MonitorType.SORT_CHIPS.getCode()
-								|| pool.getMonitor() == MonitorType.NO.getCode()
-								|| newOne.getMonitor() == MonitorType.ZengFaAuto.getCode()
-								|| newOne.getMonitor() == MonitorType.SMALL_AND_BEAUTIFUL.getCode())
-						|| newOne.getMonitor() == MonitorType.SORT_CHIPS.getCode()) {// 自动监听归0
+				if (newOne.getPls() != 1 && (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()// 增发
+						|| pool.getMonitor() == MonitorType.SMALL_AND_BEAUTIFUL.getCode()// 小而美
+						|| pool.getMonitor() == MonitorType.SORT_CHIPS.getCode()// 短线-收集
+						|| pool.getMonitor() == MonitorType.NO.getCode())) {// 自动监听归0
 					pool.setMonitor(MonitorType.NO.getCode());
 					pool.setRealtime(0);
 					pool.setOffline(0);
 					pool.setUpTodayChange(0);
 					newOne.setMonitor(MonitorType.NO.getCode());
-					newOne.setSmallModel(0);
 				}
 				newOne.setCompnayType(s.getCompnayType());
 
@@ -279,12 +271,13 @@ public class CodeModelService {
 					dz = dzjyService.dzjyF(code, dzdate);
 					if (dz != null && dz.getTotalAmt() > 9999.0) {// 1亿
 						newOne.setDzjyRct(1);
+						newOne.setDzjyAvgPrice(dz.getAvgPrcie());
 						log.info("{} 大宗超1亿", code);
 					}
 				}
 
 				// 小而美模型：未涨&&年报 && 大股东集中
-				if (newOne.getPls() != 2 && newOne.getZfjjup() >= 2 && mkv <= 45.0 && newOne.getHolderNumP5() >= 50) {// 流通45亿以内的
+				if (newOne.getZfjjup() >= 2 && mkv <= 50.0 && newOne.getHolderNumP5() >= 50) {// 流通45亿以内的
 					c = l.size();
 					if (l != null) {
 						for (FinanceBaseInfo f : l) {
@@ -294,56 +287,25 @@ public class CodeModelService {
 						}
 					}
 					if (c >= (l.size() - 1)) {// 亏损最多一次
-						// 小而美类型： 0:无，1：普通，2，增发，3，大宗，4，增发+大宗
-						int smallModel = 1;
-						// 前后1年-定增解禁-
-						List<Jiejin> l1 = chipsService.getBf2yearJiejin(code, jjstart, jjend);
-						if (l1 != null) {
-							for (Jiejin jj : l1) {
-								if (jj.getType().contains("增")) {
-									smallModel = 2;
-								}
-							}
-						}
-						// 大宗
-						if (dz != null && dz.getDate() >= dzdate && newOne.getDzjyRct() > 0) {// 大宗超1亿
-							if (smallModel == 2) {
-								smallModel = 4;
-							} else {
-								smallModel = 3;
-							}
-						}
-						newOne.setSmallModel(smallModel);
+						newOne.setTagSmallAndBeatf(1);
 						log.info("{} 小而美模型", code);
-
 						if (pool.getMonitor() == MonitorType.NO.getCode()) {
 							pool.setMonitor(MonitorType.SMALL_AND_BEAUTIFUL.getCode());
 							pool.setOffline(1);
 							pool.setUpTodayChange(8);
 						}
-						if (newOne.getMonitor() == MonitorType.NO.getCode()) {
-							newOne.setMonitor(MonitorType.SMALL_AND_BEAUTIFUL.getCode());
-						}
 					}
 				}
 				// 收集筹码的短线-拉过一波，所以市值可以大一点
-
+				newOne.setSortChips(0);
 				if (online4Year && mkv > 0 && mkv <= 100.0 && chipsSortService.isCollectChips(code, tradeDate)) {
 					newOne.setSortChips(1);
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
 						pool.setMonitor(MonitorType.SORT_CHIPS.getCode());
 						pool.setRealtime(1);
 						pool.setUpTodayChange(5);
-						newOne.setMonitor(MonitorType.SORT_CHIPS.getCode());
-					}
-					if (newOne.getSortChipsNotice() == 0) {
-						newOne.setSortChipsNotice(1);
-						zlxc.append(stockBasicService.getCodeName2(code)).append(",");
 					}
 					log.info("{} 主力筹码收集", code);
-				} else {
-					newOne.setSortChips(0);
-					newOne.setSortChipsNotice(0);
 				}
 				// 系统自动监听
 				// 1.人工没确认或者确认没问题的：newOne.getPls() != 2
@@ -351,16 +313,15 @@ public class CodeModelService {
 				// 3.增发解禁且未涨
 				// 4.75亿以内（50x150%=75）
 
-				if (newOne.getSmallModel() <= 0 && newOne.getPls() == 0 && newOne.getZfjj() > 0
-						&& newOne.getZfjjup() >= 2 && mkv <= 75.0) {// 75亿以内的
-
+				if (newOne.getZfjj() > 0 && newOne.getZfjjup() >= 2 && mkv <= 75.0) {// 75亿以内的
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
 						pool.setMonitor(MonitorType.ZengFaAuto.getCode());
 						pool.setOffline(1);
 						pool.setUpTodayChange(9);
 						newOne.setMonitor(MonitorType.ZengFaAuto.getCode());
+						log.info("{} 增发自动监听", code);
 					}
-					log.info("{} 增发自动监听", code);
+
 				}
 				// 公告通知
 				if (newOne.getListenerGg() == 1) {
@@ -368,22 +329,13 @@ public class CodeModelService {
 						annc.append(stockBasicService.getCodeName2(code)).append(",");
 					}
 				}
-
-				if (newOne.getPlst() != 2 && mkv <= 75.0 && newOne.getZfPriceLowNotice() == 0
-						&& ((newOne.getZfPriceLow() >= 18.0)
-								|| (newOne.getDzjyRct() == 1 && dz.getAvgPrcie() > d.getClosed()
-										&& Double.valueOf(CurrencyUitl.cutProfit(d.getClosed(), dz.getAvgPrcie()))
-												.intValue() >= 18.0))) {// 大宗超1亿，且低于15%大宗成本
-					// 增发价低于18或者大宗超1亿
-					lowpricec.append(stockBasicService.getCodeName2(code)).append(",");
-					newOne.setZfPriceLowNotice(1);
-				} else if (newOne.getZfPriceLow() <= 0 || newOne.getDzjyRct() == 0) {
-					newOne.setZfPriceLowNotice(0);
+				if (newOne.getDzjyRct() == 1 && dz.getAvgPrcie() > d.getClosed()) {
+					newOne.setTagDzPriceLow(
+							Double.valueOf(CurrencyUitl.cutProfit(d.getClosed(), dz.getAvgPrcie())).intValue());
 				}
-
 				// 高质押机会
 				if (d.getClosed() < zy.getWarningLine()) {
-					gzyjh.append(stockBasicService.getCodeName2(code)).append(",");
+					newOne.setTagHighZyChance(1);
 				}
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
@@ -406,15 +358,6 @@ public class CodeModelService {
 		}
 		if (annc.length() > 0) {
 			WxPushUtil.pushSystem1("最新公告:" + annc.toString());
-		}
-		if (lowpricec.length() > 0) {
-			WxPushUtil.pushSystem1("低于增发价20%或大宗超1亿:" + lowpricec.toString());
-		}
-		if (zlxc.length() > 0) {
-			WxPushUtil.pushSystem1("拉升吸筹股东人数减少30%(股价是否平稳):" + zlxc.toString());
-		}
-		if (gzyjh.length() > 0) {
-			WxPushUtil.pushSystem1("高质押机会股票:" + gzyjh.toString());
 		}
 //		daliyTradeHistroyService.deleteData();
 	}
@@ -479,12 +422,14 @@ public class CodeModelService {
 		newOne.setZfStatus(ZfStatus.NO.getCode());
 		newOne.setZfStatusDesc("");
 		newOne.setZfYjAmt(0);
+		newOne.setZfPrice(0.0);
 		ZengFa last = chipsZfService.getLastZengFa(newOne.getCode());
 		// start 一年以前
 		if (chipsZfService.isZfDateOk(last, oneYearAgo)) {
 			newOne.setZfStatus(last.getStatus());
 			newOne.setZfStatusDesc(last.getStatusDesc());
 			newOne.setZfYjAmt(last.getYjamt());
+			newOne.setZfPrice(last.getPrice());
 		}
 	}
 
@@ -498,9 +443,7 @@ public class CodeModelService {
 	}
 
 	private void lastDoneZfBoss(CodeBaseModel2 newOne, DaliyBasicInfo2 d) {
-		newOne.setSusZfBoss(0);
 		newOne.setZfself(0);
-		newOne.setZfbuy(0);
 		newOne.setGsz(0);
 		newOne.setZflastOkDate(0);
 		// 低于增发价
@@ -511,35 +454,13 @@ public class CodeModelService {
 		ZengFa zf = chipsZfService.getLastZengFa(code, ZfStatus.DONE.getCode());// 已完成的增发
 		if (chipsZfService.isZfDateOk(zf, oneYearAgo)) {
 			newOne.setZflastOkDate(zf.getEndDate());
-//			if (newOne.getSusZfBoss() == 1 && newOne.getSusZfBossSure() > 1) {
-//				return;
-//			}
-			boolean preCondi = false;
-			if (zf.getPrice() > 0) {
-				// 价格对比,增发价没超60%
-				double chkline = CurrencyUitl.topPriceN(zf.getPrice(), 1.5);
-				double close = daliyTradeHistroyService.queryLastNofq(code).getClosed();
-				if (close <= chkline) {
-					preCondi = true;
-				}
-			} else {
-				// 没有价格对比就看一年涨幅
-				if (LinePrice.priceCheckForMid(daliyTradeHistroyService, code, newOne.getDate(), chkdouble)) {
-					preCondi = true;
-				}
-			}
 			ZengFaExt zfe = chipsZfService.getZengFaExtById(zf.getId());
 			if (zfe != null) {
-				newOne.setZfbuy(zfe.getBuy());
 				newOne.setZfself(zfe.getSelfzf());
-			}
-			if (preCondi && newOne.getZfself() == 1) {
-				newOne.setSusZfBoss(1);
 			}
 			if (bonusService.isGsz(code, threeYearAgo)) {
 				newOne.setGsz(1);
 			}
-
 			// 一年的之中的增发(低于增发价)
 			if (chipsZfService.isZfDateOk(zf, oneYearAgo)) {
 				if (zf.getPrice() > 0 && zf.getPrice() > d.getClosed()) {
@@ -1416,9 +1337,7 @@ public class CodeModelService {
 		if (mr.getZfbuy() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfbuy", 1));
 		}
-		if (mr.getZfPriceLow() == 1) {
-			bqb.must(QueryBuilders.rangeQuery("zfPriceLow").gte(1));
-		}
+
 		if (mr.getSusWhiteHors() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));
 		}
@@ -1449,21 +1368,34 @@ public class CodeModelService {
 		if (mr.getZfObjType() > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfObjType", mr.getZfObjType()));
 		}
-		if (mr.getZfjjup() == 1) {
-			bqb.must(QueryBuilders.rangeQuery("zfjjup").gte(1));
+		if (StringUtils.isNotBlank(mr.getZfjjup())) {
+			int t = Integer.valueOf(mr.getZfjjup().trim());
+			if (t > 0) {
+				bqb.must(QueryBuilders.rangeQuery("zfjjup").gte(t));
+			}
 		}
+		if (StringUtils.isNotBlank(mr.getZfPriceLow())) {
+			int t = Integer.valueOf(mr.getZfPriceLow().trim());
+			if (t > 0) {
+				bqb.must(QueryBuilders.rangeQuery("zfPriceLow").gte(t));
+			}
+		}
+		if (StringUtils.isNotBlank(mr.getHolderNumT3())) {
+			double t = Double.valueOf(mr.getHolderNumT3().trim());
+			if (t > 0) {
+				bqb.must(QueryBuilders.rangeQuery("holderNumT3").gte(t));
+			}
+		}
+
+		// 增发金额小于等于
 		if (StringUtils.isNotBlank(mr.getZfYjAmt())) {
 			Long zfYjAmt = Long.valueOf(mr.getZfYjAmt());
 			if (zfYjAmt > 0) {
-				bqb.must(QueryBuilders.rangeQuery("zfYjAmt").gte(zfYjAmt * 100000000));
+				bqb.must(QueryBuilders.rangeQuery("zfYjAmt").lte(zfYjAmt * 100000000));
 			}
 		}
 		if (mr.getSmallModel() > 0) {
-			if (mr.getSmallModel() == 9999) {
-				bqb.must(QueryBuilders.rangeQuery("smallModel").gte(1));
-			} else {
-				bqb.must(QueryBuilders.matchPhraseQuery("smallModel", mr.getSmallModel()));
-			}
+			bqb.must(QueryBuilders.rangeQuery("tagSmallAndBeatf").gte(1));
 		}
 
 //		<option value="3">资产收益率ttm</option>
@@ -1551,9 +1483,10 @@ public class CodeModelService {
 				.append(dh.getSyldjd());
 		resp.setSylDesc(sb2.toString());
 
+		// 短线
 		StringBuffer sb3 = new StringBuffer("");
 		if (dh.getSortChips() == 1) {
-			sb3.append("短线-主力拉升筹码").append(Constant.HTML_LINE);
+			sb3.append("吸筹-收集筹码短线").append(Constant.HTML_LINE);
 		}
 		if (dh.getSortMode6() == 1) {
 			sb3.append("短线6").append(Constant.HTML_LINE);
@@ -1562,96 +1495,108 @@ public class CodeModelService {
 			sb3.append("箱体突破").append(Constant.HTML_LINE);
 		}
 		resp.setSortInfo(sb3.toString());
-		StringBuffer sb4 = new StringBuffer("");
+
+		// 标签
+		StringBuffer tag = new StringBuffer("");
+		if (dh.getTagSmallAndBeatf() > 0) {
+			tag.append("小而美").append(Constant.HTML_LINE);
+		}
+		if (dh.getSortChips() > 0) {
+			tag.append("吸筹-收集筹码短线").append(Constant.HTML_LINE);
+		}
+		if (dh.getTagHighZyChance() > 0) {
+			tag.append("高质押机会?").append(Constant.HTML_LINE);
+		}
 		if (dh.getSusBigBoss() == 1) {
-			sb4.append("疑似大牛").append(Constant.HTML_LINE);
+			tag.append("疑似大牛").append(Constant.HTML_LINE);
 		}
 		if (dh.getSusWhiteHors() == 1) {
-			sb4.append("疑似白马").append(Constant.HTML_LINE);
+			tag.append("疑似白马").append(Constant.HTML_LINE);
 		}
-		resp.setCodeType(sb4.toString());
+		resp.setTagInfo(tag.toString());
 
+		// 博弈-基本面
 		StringBuffer sb5 = new StringBuffer();
-		sb5.append("股东人数:").append(dh.getHolderNum()).append(Constant.HTML_LINE);
+		sb5.append("流通:").append(dh.getMkv()).append("亿,");
+		if (dh.getZfjjup() > 0) {
+			sb5.append(dh.getZfjjup() + "年未大涨,");
+		}
+		if (dh.getBousOK() == 1) {
+			sb5.append("近5年业绩不亏,");
+		}
+		if (dh.getFinOK() == 1) {
+			sb5.append("近5年分红,");
+		}
+		sb5.append("前3大股东:").append(dh.getHolderNumT3()).append("%,");
+		sb5.append("股东人数:").append(dh.getHolderNum()).append("%,");
+		sb5.append(Constant.HTML_LINE);
+
+		// 博弈-增发
+		if (dh.getZfStatus() == 1 || dh.getZfStatus() == 2) {
+			if (dh.getZfStatus() == 1) {
+				sb5.append("<font color='red'>");
+			} else {
+				sb5.append("<font color='green'>");
+			}
+			sb5.append("增发进度" + (dh.getCompnayType() == 1 ? "(国资)" : "") + ":" + dh.getZfStatusDesc());
+			sb5.append("</font>");
+
+			if (dh.getZfStatus() == 1) {
+				if (dh.getZfYjAmt() > 0) {
+					sb5.append(",预增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
+				}
+			} else {
+				if (dh.getZfYjAmt() > 0) {
+					sb5.append(",增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
+				}
+				sb5.append(",增发价格:").append(dh.getZfPrice());
+			}
+
+		}
+		// 最近一次增发
+		if (dh.getZflastOkDate() > 0) {
+			sb5.append("实施日期:").append(dh.getZflastOkDate()).append(",");
+			if (dh.getZfself() == 1) {
+				sb5.append("自己人增发,");
+			}
+			if (dh.getZfPriceLow() > 0) {
+				sb5.append("低于增发价:").append(dh.getZfPriceLow()).append("%,");
+			}
+			if (dh.getGsz() == 1) {
+				sb5.append("3年内有高送转,");
+			}
+			if (dh.getZfObjType() == 1) {
+				sb5.append("纯6个月,");
+			} else if (dh.getZfObjType() == 2) {
+				sb5.append("混合(6月+大股东),");
+			} else if (dh.getZfObjType() == 3) {
+				sb5.append("纯大股东,");
+			} else if (dh.getZfObjType() == 4) {
+				sb5.append("其他混合,");
+			}
+		}
+		// 解禁
+		if (dh.getZfjj() == 1) {
+			sb5.append("增发解禁(" + dh.getZfjjDate() + ")").append(Constant.HTML_LINE);
+		}
+		sb5.append(Constant.HTML_LINE);
+		// 大宗
+		if (dh.getDzjyRct() > 0) {
+			sb5.append("1年大宗超亿");
+			if (dh.getTagDzPriceLow() > 0) {
+				sb5.append(",低于大宗均价(").append(dh.getDzjyAvgPrice()).append("):").append(dh.getTagDzPriceLow())
+						.append("%");
+			}
+		}
+		sb5.append(Constant.HTML_LINE);
+
+		// 是否确定
 		if (dh.getPls() == 0) {
 			sb5.append("人工: 未确定").append(Constant.HTML_LINE);
 		} else if (dh.getPls() == 1) {
 			sb5.append("人工: 已确定").append(Constant.HTML_LINE);
 		} else if (dh.getPls() == 2) {
 			sb5.append("人工: 排除").append(Constant.HTML_LINE);
-		}
-
-		if (dh.getSmallModel() > 0) {
-			sb5.append("小而美模型:");
-			if (dh.getSmallModel() == 1) {
-				sb5.append("普通");
-			} else if (dh.getSmallModel() == 2) {
-				sb5.append("增发");
-			} else if (dh.getSmallModel() == 3) {
-				sb5.append("大宗");
-			} else if (dh.getSmallModel() == 4) {
-				sb5.append("增发+大宗");
-			}
-			sb5.append(Constant.HTML_LINE);
-		}
-		if (dh.getZfPriceLow() > 0) {
-			sb5.append("低于增发价->").append(dh.getZfPriceLow()).append("%");
-			sb5.append(Constant.HTML_LINE);
-		}
-		if (dh.getDzjyRct() > 0) {
-			sb5.append("半年大宗超亿");
-			sb5.append(Constant.HTML_LINE);
-		}
-		if (dh.getCompnayType() == 1) {
-			sb5.append("国企");
-			sb5.append(Constant.HTML_LINE);
-		}
-		if (dh.getFinOK() == 1) {
-			sb5.append("近5年业绩不亏");
-			sb5.append(Constant.HTML_LINE);
-		}
-		if (dh.getBousOK() == 1) {
-			sb5.append("近5年分红");
-			sb5.append(Constant.HTML_LINE);
-		}
-		// 最近一次增发
-		if (dh.getZflastOkDate() > 0) {
-			sb5.append("增发:").append(dh.getZflastOkDate()).append(Constant.HTML_LINE);
-			if (dh.getZfbuy() == 1) {
-				sb5.append(",购买资产").append(Constant.HTML_LINE);
-			}
-			if (dh.getZfself() == 1) {
-				sb5.append(",打压增发价").append(Constant.HTML_LINE);
-			} else {
-				sb5.append(",增发价正常").append(Constant.HTML_LINE);
-			}
-			if (dh.getSusZfBoss() == 1) {
-				sb5.append(",增发筹码博弈").append(Constant.HTML_LINE);
-			}
-			if (dh.getGsz() == 1) {
-				sb5.append(",3年内有高送转").append(Constant.HTML_LINE);
-			}
-		}
-		if (dh.getZfYjAmt() > 0) {
-			resp.setZfAmtInfo(CurrencyUitl.covertToString(dh.getZfYjAmt()));
-			sb5.append(",").append(resp.getZfAmtInfo()).append(Constant.HTML_LINE);
-		}
-		if (dh.getZfObjType() == 1) {
-			sb5.append(",纯6个月").append(Constant.HTML_LINE);
-		} else if (dh.getZfObjType() == 2) {
-			sb5.append(",混合(6月+大股东)").append(Constant.HTML_LINE);
-		} else if (dh.getZfObjType() == 3) {
-			sb5.append(",纯大股东").append(Constant.HTML_LINE);
-		} else if (dh.getZfObjType() == 4) {
-			sb5.append(",其他混合").append(Constant.HTML_LINE);
-		}
-
-		// 解禁
-		if (dh.getZfjj() == 1) {
-			sb5.append("有增发解禁(" + dh.getZfjjDate() + ")").append(Constant.HTML_LINE);
-		}
-		if (dh.getZfjjup() > 0) {
-			sb5.append(dh.getZfjjup() + "年未大涨").append(Constant.HTML_LINE);
 		}
 		resp.setZfjjInfo(sb5.toString());
 //		resp.setIncomeShow(dh.getCurrIncomeTbzz() + "%");

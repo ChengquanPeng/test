@@ -21,13 +21,13 @@ public class ModelReq {
 	int sort7;
 	int zfbuy;
 	int zfjj;
-	int zfjjup;
+	String zfjjup;
 	int zfself;
 	String zfYjAmt;
 	String mkv;
 	int pls;
 	int smallModel;
-	int zfPriceLow;
+	String zfPriceLow;
 	int dzjyRct;
 	int sortChips;
 
@@ -37,4 +37,6 @@ public class ModelReq {
 	int compnayType;
 	
 	int zfObjType;
+	String holderNumT3;
+	
 }
