@@ -35,6 +35,8 @@ public class CodeBaseModel2 extends EsBase {
 	private double holderNumT3; // 十大股东：Top3%股东占比
 	@Field(type = FieldType.Double)
 	private double holderNum;
+	@Field(type = FieldType.Long)
+	private long avgNum;// 除开5%股东的人均流通持股
 	@Field(type = FieldType.Integer)
 	private int holderDate;
 	@Field(type = FieldType.Integer)
@@ -147,8 +149,6 @@ public class CodeBaseModel2 extends EsBase {
 
 	@Field(type = FieldType.Text)
 	private String buyRea; // 买入理由
-	@Field(type = FieldType.Text)
-	private String soldRea;// 卖出理由
 	@Field(type = FieldType.Integer)
 	private int profit = 0;// 利润空间
 	@Field(type = FieldType.Integer)
@@ -212,9 +212,6 @@ public class CodeBaseModel2 extends EsBase {
 	private double netAsset; // 净资产
 	@Field(type = FieldType.Double)
 	private double zcfzl; // 资产负债率
-	// 监听
-	@Field(type = FieldType.Double)
-	private int listenerGg; // 监听-公告
 
 	@Transient
 	public String getKeyString() {

@@ -20,4 +20,5 @@ public class CodeBaseModelResp extends CodeBaseModel2 {
 	private String monitorDesc;
 	private String zfAmtInfo;
 	private String tagInfo;
+	private String bankuai;
 }

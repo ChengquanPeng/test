@@ -18,6 +18,10 @@ public class MonitorPool {
 	private String code;
 	@Field(type = FieldType.Integer)
 	private int updateDate = 0;
+
+	// 监听-公告
+	@Field(type = FieldType.Double)
+	private int listenerGg; // 监听-公告
 	// ---------------------------
 	// 监听:0不监听，1大牛，2中线，3人工，4短线，5.增发监听,6系统自动监听
 	@Field(type = FieldType.Integer)

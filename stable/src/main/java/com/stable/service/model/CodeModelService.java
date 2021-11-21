@@ -207,8 +207,10 @@ public class CodeModelService {
 				// 市值
 				newOne.setMkv(mkv);
 				if (mkv > 0 && s.getCircZb() > 0) {
-//					newOne.setActMkv(actMkv);
+					newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (s.getCircZb() / 100.0))));
 				}
+				// 同步-备注
+				newOne.setBuyRea(pool.getRemark());
 
 				// 人工审核是否时间到期-重置
 				if (newOne.getPlst() < tradeDate) {
@@ -324,7 +326,7 @@ public class CodeModelService {
 
 				}
 				// 公告通知
-				if (newOne.getListenerGg() == 1) {
+				if (pool.getListenerGg() == 1) {
 					if (ThsAnnSpider.getLastAnn(code) > tradeDate) {
 						annc.append(stockBasicService.getCodeName2(code)).append(",");
 					}
@@ -388,6 +390,7 @@ public class CodeModelService {
 		HolderAnalyse ha = chipsService.holderNumAnalyse(code);
 		newOne.setHolderNum(ha.getAnaRes());
 		newOne.setHolderDate(ha.getDate());
+		newOne.setAvgNum(ha.getAvgNum());// 除开5%股东的人均流通持股
 		HolderPercent hp = chipsService.getLastHolderPercent(code);
 		newOne.setHolderNumP5(hp.getPercent5());
 		newOne.setHolderNumT3(hp.getTopThree());
@@ -1288,6 +1291,8 @@ public class CodeModelService {
 			field = "zfjjup";
 		} else if (orderBy == 8) {
 			field = "zfPriceLow";
+		} else if (orderBy == 9) {
+			field = "avgNum";
 		}
 
 		if (StringUtils.isNotBlank(mr.getMonitor())) {
@@ -1461,7 +1466,9 @@ public class CodeModelService {
 		CodeBaseModelResp resp = new CodeBaseModelResp();
 		BeanUtils.copyProperties(dh, resp);
 		resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
-		resp.setCircZb(stockBasicService.getCode(dh.getCode()).getCircZb());
+		StockBaseInfo s = stockBasicService.getCode(dh.getCode());
+		resp.setCircZb(s.getCircZb());
+		resp.setBankuai(s.getThsIndustry() + "<br/> " + s.getThsLightspot());
 		StringBuffer sb1 = new StringBuffer("");
 		if (dh.getBaseRed() == 1) {
 			sb1.append("<font color='red'>红:</font>" + dh.getBaseRedDesc());
@@ -1518,6 +1525,7 @@ public class CodeModelService {
 		// 博弈-基本面
 		StringBuffer sb5 = new StringBuffer();
 		sb5.append("流通:").append(dh.getMkv()).append("亿,");
+		sb5.append("5%以下:").append(dh.getActMkv()).append("亿,");
 		if (dh.getZfjjup() > 0) {
 			sb5.append(dh.getZfjjup() + "年未大涨,");
 		}
@@ -1528,6 +1536,7 @@ public class CodeModelService {
 			sb5.append("近5年分红,");
 		}
 		sb5.append("前3大股东:").append(dh.getHolderNumT3()).append("%,");
+		sb5.append("人均持股(除5%):").append(dh.getAvgNum()).append(",");
 		sb5.append("股东人数:").append(dh.getHolderNum()).append("%,");
 		sb5.append(Constant.HTML_LINE);
 
@@ -1666,12 +1675,13 @@ public class CodeModelService {
 			}
 		}
 		if (date != 1) {
+			String remark = req.getBuyRea() + " " + req.getSoldRea();
 			CodeBaseModel2 c = getLastOneByCode2(code);
 			BeanCopy.copy(req, c);
 			c.setPls(pls);
 			c.setPlst(date);
 			c.setLstmt(DateUtil.getTodayIntYYYYMMDD());
-			c.setListenerGg(req.getListenerGg());
+			c.setBuyRea(remark);
 			codeBaseModel2Dao.save(c);
 
 			MonitorPool pool = monitorPoolService.getMonitorPool(code);
@@ -1683,9 +1693,10 @@ public class CodeModelService {
 			pool.setYkb(0);
 			pool.setZfdone(0);
 			pool.setMonitor(MonitorType.NO.getCode());
+			pool.setListenerGg(req.getListenerGg());
 			if (pls == 1) {// 1在池子，2不在池子
 				pool.setMonitor(MonitorType.MANUAL.getCode());
-				pool.setRemark(c.getBuyRea() + " " + c.getSoldRea());
+				pool.setRemark(remark);
 				pool.setUpTodayChange(3);
 				pool.setRealtime(1);
 				int dt = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
