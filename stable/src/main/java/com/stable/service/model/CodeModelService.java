@@ -1566,7 +1566,7 @@ public class CodeModelService {
 		if (dh.getZflastOkDate() > 0) {
 			sb5.append("实施日期:").append(dh.getZflastOkDate()).append(",");
 			if (dh.getZfself() == 1) {
-				sb5.append("自己人增发,");
+				sb5.append("底部增发,");
 			}
 			if (dh.getZfPriceLow() > 0) {
 				sb5.append("低于增发价:").append(dh.getZfPriceLow()).append("%,");
@@ -1575,13 +1575,13 @@ public class CodeModelService {
 				sb5.append("3年内有高送转,");
 			}
 			if (dh.getZfObjType() == 1) {
-				sb5.append("纯6个月,");
+				sb5.append("6个月,");
 			} else if (dh.getZfObjType() == 2) {
 				sb5.append("混合(6月+大股东),");
 			} else if (dh.getZfObjType() == 3) {
-				sb5.append("纯大股东,");
+				sb5.append("大股东,");
 			} else if (dh.getZfObjType() == 4) {
-				sb5.append("其他混合,");
+				sb5.append("其他,");
 			}
 		}
 		// 解禁

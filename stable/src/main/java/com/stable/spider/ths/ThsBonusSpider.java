@@ -76,7 +76,7 @@ public class ThsBonusSpider {
 //	<tr><td>2、提请股东大会批准；</td></tr>
 //	<tr><td>3、由保荐人保荐，并向中国证监会申报；</td>	</tr>
 //	<tr><td>4、由发行审核委员会审核，报证监会审核；</td></tr>
-//	<tr><td>5、上市公司自证监会审核之日起6个月内发行股票。</td></tr>
+//	<tr><td>5、上市公司自证监会审核之日起12个月内发行股票。</td></tr>
 
 	public void byJob() {
 		dofetchInner();

@@ -135,7 +135,7 @@ public class ChipsController {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					chipsZfService.jobZengFaExt(false);
+					chipsZfService.jobZengFaExt(false, -360);
 				}
 			}).start();
 			r.setResult(JsonResult.OK);

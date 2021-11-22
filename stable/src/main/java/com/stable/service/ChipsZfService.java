@@ -1,10 +1,8 @@
 package com.stable.service;
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -29,15 +27,15 @@ import com.stable.es.dao.base.ZengFaDao;
 import com.stable.es.dao.base.ZengFaDetailDao;
 import com.stable.es.dao.base.ZengFaExtDao;
 import com.stable.es.dao.base.ZengFaSummaryDao;
+import com.stable.service.model.CodeModelService;
 import com.stable.spider.ths.ThsAnnSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
-import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
-import com.stable.vo.bus.TradeHistInfoDaliy;
+import com.stable.vo.bus.PriceLife;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
 import com.stable.vo.bus.ZengFaExt;
@@ -64,11 +62,13 @@ public class ChipsZfService {
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
-	private DaliyTradeHistroyService daliyTradeHistroyService;
-	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private TushareSpider tushareSpider;
+	@Autowired
+	private CodeModelService codeModelService;
+	@Autowired
+	private PriceLifeService priceLifeService;
 
 	public boolean isZfDateOk(ZengFa zengfa, int agoDate) {
 		if (zengfa != null && (zengfa.getEndDate() > agoDate || zengfa.getZjhDate() > agoDate)
@@ -190,12 +190,11 @@ public class ChipsZfService {
 	}
 
 	public synchronized void jobZengFaExt(boolean isJob) {
-		int endDate = 0; // 全部
-		if (isJob) {
-			endDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -90));
-		} else {
-			endDate = 20180101;
-		}
+		jobZengFaExt(isJob, -90);
+	}
+
+	public synchronized void jobZengFaExt(boolean isJob, int date) {
+		int endDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), date)); // 全部
 		StringBuffer sb = new StringBuffer();
 		List<ZengFa> l = getZengFaList("", ZfStatus.DONE.getCode() + "", endDate, EsQueryPageUtil.queryPage9999);
 		if (l != null) {
@@ -204,6 +203,9 @@ public class ChipsZfService {
 				try {
 					log.info("zf code:{}", zf.getCode());
 					ZengFaExt zfe = getZengFaExtById(zf.getId());
+					if (!isJob) {// 手动全部执行
+						zfe = null;
+					}
 					if (zfe == null) {
 						zfe = new ZengFaExt();
 						zfe.setId(zf.getId());
@@ -216,7 +218,7 @@ public class ChipsZfService {
 							sb.append(zfe.getCode()).append(",");
 						}
 						zfe.setSelfzf(0);
-						ws(zfe, zf.getEndDate());
+						ws(zfe, zf.getEndDate(), zf.getPrice());
 						zengFaExtDao.save(zfe);
 						log.info("done:{}", zf.getCode());
 					}
@@ -232,39 +234,40 @@ public class ChipsZfService {
 			WxPushUtil.pushSystem1("增发完成且是购买资产：" + sb.toString());
 		}
 
-		ThreadsUtil.sleep(3, TimeUnit.MINUTES);
-		// 以下代码一个月后去掉，2020-01-28
-		List<ZengFaExt> exts = getZengFaExtListWithChk();
-		if (exts != null) {
-			log.info("List<ZengFaExt> exts:{}", exts.size());
-			for (ZengFaExt z : exts) {
-				try {
-					log.info("ZengFaExt code:{}", z.getCode());
-					ZengFa orig = this.getZengFaById(z.getId());
-					ws(z, orig.getEndDate());
-				} catch (Exception e) {
-					ErrorLogFileUitl.writeError(e, "ZengFaExt 是否自己人在增发出错", "", "");
-				}
-			}
-			zengFaExtDao.saveAll(exts);
-		}
+//		ThreadsUtil.sleep(3, TimeUnit.MINUTES);
+//		// 以下代码一个月后去掉，2020-01-28
+//		List<ZengFaExt> exts = getZengFaExtListWithChk();
+//		if (exts != null) {
+//			log.info("List<ZengFaExt> exts:{}", exts.size());
+//			for (ZengFaExt z : exts) {
+//				try {
+//					log.info("ZengFaExt code:{}", z.getCode());
+//					ZengFa orig = this.getZengFaById(z.getId());
+//					ws(z, orig.getEndDate());
+//				} catch (Exception e) {
+//					ErrorLogFileUitl.writeError(e, "ZengFaExt 是否自己人在增发出错", "", "");
+//				}
+//			}
+//			zengFaExtDao.saveAll(exts);
+//		}
 		log.info("List<ZengFaExt> done");
 	}
 
-	private void ws(ZengFaExt z, int zfEndDate) {
+	private void ws(ZengFaExt z, int zfEndDate, double zfprice) {
 		String code = z.getCode();
-		// 20个交易日股价
-		List<TradeHistInfoDaliy> befor45 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, zfEndDate,
-				EsQueryPageUtil.queryPage60, SortOrder.DESC);
-		double end = befor45.get(0).getClosed();
-		double max = befor45.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed)).get().getClosed();
-		z.setSelfzf(2);
-		if (max > end) {
-			if (CurrencyUitl.cutProfit(end, max) >= 15.0) {
-				z.setSelfzf(1);// 增发前跌幅在20%以上
+		if (codeModelService.getHistOneById(code).getZfjjup() >= 2) {// 起码2年未涨
+			PriceLife pl = priceLifeService.getPriceLife(code, zfEndDate);
+			if (pl != null) {
+				if (priceLifeService.priceIndex(pl, zfprice) <= 15) {// 增发价的水位
+					z.setSelfzf(1);// 底部增发
+				}
 			}
 		}
+
+		// 国企
 		z.setCompType(stockBasicService.getCode(code).getCompnayType());
+
+		// 增发时的市值
 		if (zfEndDate >= 20210125) {
 			DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code, zfEndDate);
 			if (d == null) {

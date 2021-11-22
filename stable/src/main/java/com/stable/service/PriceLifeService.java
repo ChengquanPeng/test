@@ -85,7 +85,7 @@ public class PriceLifeService {
 		return Integer.valueOf(redisUtil.get(RedisConstant.RDS_PRICE_LIFE_INDEX_ + code, "100"));
 	}
 
-	private int priceIndex(PriceLife pl, double price) {
+	public int priceIndex(PriceLife pl, double price) {
 		if (pl == null || price <= pl.getLowest()) {
 			return 0;
 		} else if (price >= pl.getHighest()) {
@@ -126,6 +126,24 @@ public class PriceLifeService {
 		return pl;
 	}
 
+	public PriceLife getPriceLife(String code, int enddate) {
+		PriceLife pl = new PriceLife();
+		pl.setCode(code);
+		TradeHistInfoDaliy ti = getHighest(code, 0, enddate);// 找出历史最高价
+		if (ti == null) {
+			return null;
+		}
+		pl.setHighest(ti.getHigh());
+		pl.setHighDate(ti.getDate());
+		TradeHistInfoDaliy t2 = getlowest(code, ti.getDate(), enddate);// 找出历史最高价--到enddate之前的最低价
+		if (t2 != null) {
+			pl.setLowDate(t2.getDate());
+			pl.setLowest(t2.getLow());
+			return pl;
+		}
+		return null;
+	}
+
 	/**
 	 * 复权-重新获取
 	 */
@@ -142,7 +160,7 @@ public class PriceLifeService {
 	/**
 	 * 获取历史最高价格
 	 */
-	private TradeHistInfoDaliy getHighest(String code, int start, int end) {
+	public TradeHistInfoDaliy getHighest(String code, int start, int end) {
 		Pageable pageable = PageRequest.of(0, 1);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -164,7 +182,7 @@ public class PriceLifeService {
 	/**
 	 * 获取历史最低价格
 	 */
-	private TradeHistInfoDaliy getlowest(String code, int start, int end) {
+	public TradeHistInfoDaliy getlowest(String code, int start, int end) {
 		Pageable pageable = PageRequest.of(0, 1);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
