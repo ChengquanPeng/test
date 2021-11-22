@@ -609,8 +609,13 @@ public class FinanceService {
 
 	public synchronized void byJob() {
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-		log.info("交易所公告");
-		jysSpider.byJob();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				log.info("交易所公告");
+				jysSpider.byJob();
+			}
+		}).start();
 		log.info("模型开始之前运行执行：1.质押，2.股东人数");
 		WeekendFinFetchRtl rtl = new WeekendFinFetchRtl();
 		new Thread(new Runnable() {
