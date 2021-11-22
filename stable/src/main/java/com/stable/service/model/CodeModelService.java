@@ -1186,8 +1186,10 @@ public class CodeModelService {
 	public Map<String, CodeBaseModel2> getALLForMap() {
 		List<CodeBaseModel2> list = getALLForList();
 		Map<String, CodeBaseModel2> map = new HashMap<String, CodeBaseModel2>();
-		for (CodeBaseModel2 c : list) {
-			map.put(c.getCode(), c);
+		if (list != null) {
+			for (CodeBaseModel2 c : list) {
+				map.put(c.getCode(), c);
+			}
 		}
 		return map;
 	}
