@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -76,17 +77,29 @@ public class ThsCompanySpider {
 		int c = 0;
 		for (StockBaseInfo s : codelist) {
 			try {
-				String r = dofetchInner3(s.getCode());
-				if (r != null) {
-					s.setFinalControl(r.trim());
-					if (r.contains(f1) || r.contains(f2) || r.contains(f3) || r.contains(f4) || r.contains(f5)) {
-						s.setCompnayType(1);
-					} else {
-						s.setCompnayType(0);
+				FetchRes fr = dofetchInner3(s.getCode());
+
+				// 控股股东
+				String h = fr.getHolder();
+				s.setHolderName(h);
+				if (StringUtils.isNotBlank(h)) {
+					try {
+						s.setHolderZb(Double.valueOf(h.split("比例：")[1].split("%")[0]));
+					} catch (Exception e) {
 					}
-					upd.add(s);
-					stockBasicService.synBaseStockInfo(s, true);
+				} else {
+					s.setHolderZb(0.0);
 				}
+				// 最终控制人
+				String r = fr.getFindHolder();
+				s.setFinalControl(r.trim());
+				if (r.contains(f1) || r.contains(f2) || r.contains(f3) || r.contains(f4) || r.contains(f5)) {
+					s.setCompnayType(1);
+				} else {
+					s.setCompnayType(0);
+				}
+				upd.add(s);
+				stockBasicService.synBaseStockInfo(s, true);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
 			}
@@ -99,7 +112,29 @@ public class ThsCompanySpider {
 		log.info("同花顺公司资料 done");
 	}
 
-	private String dofetchInner3(String code) {
+	class FetchRes {
+		String holder = "";
+		String findHolder = "无控制人";
+
+		public String getHolder() {
+			return holder;
+		}
+
+		public void setHolder(String holder) {
+			this.holder = holder;
+		}
+
+		public String getFindHolder() {
+			return findHolder;
+		}
+
+		public void setFindHolder(String findHolder) {
+			this.findHolder = findHolder;
+		}
+	}
+
+	private FetchRes dofetchInner3(String code) {
+		FetchRes fr = new FetchRes();
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(urlbase, code, System.currentTimeMillis());
@@ -117,9 +152,18 @@ public class ThsCompanySpider {
 				it0.next();// 主营业务
 				it0.next();// 产品名称
 				DomElement holder = it0.next();// 控股股东
+
 				DomElement finalHolder = it0.next();// 实际控制人
 
 				try {
+					try {
+						String s = holder.asText();
+						String holderstr = s.trim().substring(5).trim();
+						// System.err.println(holderstr);
+						fr.setHolder(holderstr);
+					} catch (Exception e) {
+
+					}
 					DomElement finaletr = it0.next();// 最终控制人
 					DomElement td = finaletr.getFirstElementChild();
 					DomElement div = td.getFirstElementChild();
@@ -130,14 +174,17 @@ public class ThsCompanySpider {
 					DomElement finale = it1.next();
 					String res = finale.asText();
 //				System.err.println(res);
-					return res;
+					fr.setFindHolder(res.trim());
+					return fr;
 				} catch (Exception e) {
+
 					try {
 						DomElement td = finalHolder.getFirstElementChild();
 						DomElement div = td.getFirstElementChild();
 						Iterator<DomElement> it1 = div.getChildElements().iterator();
 						it1.next();
-						return it1.next().asText();
+						fr.setFindHolder(it1.next().asText());
+						return fr;
 					} catch (Exception e2) {
 
 						try {
@@ -145,9 +192,10 @@ public class ThsCompanySpider {
 							DomElement div = td.getFirstElementChild();
 							Iterator<DomElement> it1 = div.getChildElements().iterator();
 							it1.next();
-							return it1.next().asText();
+							fr.setFindHolder(it1.next().asText());
+							return fr;
 						} catch (Exception e3) {
-							return "无控制人";
+							return fr;
 						}
 					}
 				}
@@ -164,13 +212,17 @@ public class ThsCompanySpider {
 				htmlunitSpider.close();
 			}
 		} while (!fetched);
-		return "";
+		return fr;
 	}
 
 	public static void main(String[] args) {
 		ThsCompanySpider ts = new ThsCompanySpider();
 		ts.htmlunitSpider = new HtmlunitSpider();
 		ts.header = new HashMap<String, String>();
-		System.err.println(ts.dofetchInner3("000002"));
+		FetchRes fr = ts.dofetchInner3("002752");
+		System.err.println(fr.getHolder());
+		System.err.println(Double.valueOf(fr.getHolder().split("比例：")[1].split("%")[0]));
+		System.err.println(fr.getFindHolder());
+
 	}
 }

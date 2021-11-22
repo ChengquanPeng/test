@@ -184,6 +184,8 @@ public class StockBasicService {
 			base.setFloatShare(old.getFloatShare());
 			base.setTotalShare(old.getTotalShare());
 			base.setCircZb(old.getCircZb());
+			base.setHolderName(old.getHolderName());
+			base.setHolderZb(old.getHolderZb());
 		}
 
 		redisUtil.set(base.getCode(), base);

@@ -209,6 +209,7 @@ public class CodeModelService {
 				if (mkv > 0 && s.getCircZb() > 0) {
 					newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (s.getCircZb() / 100.0))));
 				}
+				newOne.setHolderZb(s.getHolderZb());
 				// 同步-备注
 				newOne.setBuyRea(pool.getRemark());
 
