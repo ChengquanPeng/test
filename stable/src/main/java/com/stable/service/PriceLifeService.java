@@ -201,6 +201,18 @@ public class PriceLifeService {
 		return null;
 	}
 
+//	@PostConstruct
+	public void testnoupYear() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				String code = "002752";
+				int listdate = 20100101;
+				System.err.println("code=" + code + ",noupYear=" + (noupYear(code, listdate)));
+			}
+		}).start();
+	}
+
 	public int noupYear(String code, int listdate) {
 		// 第一种情况:一路下跌
 		PriceLife pl = getPriceLife(code);
@@ -217,10 +229,10 @@ public class PriceLifeService {
 			TradeHistInfoDaliy low = getlowest(code, start, end);
 			if (low != null) {// 停牌太久
 				TradeHistInfoDaliy high = getHighest(code, start, end);
-				pl.setLowest(low.getLow());//设置当前年的最低水位
+				pl.setLowest(low.getLow());// 设置当前年的最低水位
 //				pl.setLowDate(low.getDate());
 				int index = priceIndex(pl, high.getClosed());
-				if (index <= 30) {
+				if (index <= 30) {// 涨幅定义的严格程度
 					year = i;
 				} else {
 					break;
