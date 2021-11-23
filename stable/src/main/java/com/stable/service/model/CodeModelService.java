@@ -1546,9 +1546,10 @@ public class CodeModelService {
 			sb5.append("近5年分红,");
 		}
 		sb5.append("前3大股东:").append(dh.getHolderNumT3()).append("%");
-		sb5.append(",股东人数(少):").append(CurrencyUitl.covertToString(dh.getLastNum())).append(",变化：")
-				.append(dh.getHolderNum()).append("%");
+		sb5.append(",股东人数(少):").append(CurrencyUitl.covertToString(dh.getLastNum()));
 		sb5.append(",人均持股(高):").append(CurrencyUitl.covertToString(dh.getAvgNum()));
+		sb5.append(",变化:").append(dh.getHolderNum()).append("%");
+
 		// 博弈-增发
 		if (dh.getZfStatus() == 1 || dh.getZfStatus() == 2) {
 			if (dh.getZfStatus() == 1) {
