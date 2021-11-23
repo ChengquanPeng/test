@@ -197,6 +197,7 @@ public class ChipsZfService {
 		int endDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), date)); // 全部
 		StringBuffer sb = new StringBuffer();
 		List<ZengFa> l = getZengFaList("", ZfStatus.DONE.getCode() + "", endDate, EsQueryPageUtil.queryPage9999);
+		List<ZengFaExt> zfxl = new LinkedList<ZengFaExt>();
 		if (l != null) {
 			log.info("List<ZengFa> size:{}", l.size());
 			for (ZengFa zf : l) {
@@ -219,15 +220,20 @@ public class ChipsZfService {
 						}
 						zfe.setSelfzf(0);
 						ws(zfe, zf.getEndDate(), zf.getPrice());
-						zengFaExtDao.save(zfe);
+//						zengFaExtDao.save(zfe);
+						zfxl.add(zfe);
 						log.info("done:{}", zf.getCode());
 					}
 				} catch (Exception e) {
-					ErrorLogFileUitl.writeError(e, "ZengFaExt 增发是否购买资产出错", zf.getCode(), "");
+					ErrorLogFileUitl.writeError(e, "ZengFaExt 增发ext出错", zf.getCode(), "");
 				}
 			}
 		} else {
 			log.info("List<ZengFa> size:ooo");
+		}
+		log.info("zengFaExtDao size:{}", zfxl.size());
+		if (zfxl.size() > 0) {
+			zengFaExtDao.saveAll(zfxl);
 		}
 		log.info("List<ZengFa> done");
 		if (sb.length() > 0) {
@@ -255,7 +261,7 @@ public class ChipsZfService {
 
 	private void ws(ZengFaExt z, int zfEndDate, double zfprice) {
 		String code = z.getCode();
-		if (codeModelService.getHistOneById(code).getZfjjup() >= 2) {// 起码2年未涨
+		if (codeModelService.getLastOneByCode2(code).getZfjjup() >= 2) {// 起码2年未涨
 			PriceLife pl = priceLifeService.getPriceLife(code, zfEndDate);
 			if (pl != null) {
 				if (priceLifeService.priceIndex(pl, zfprice) <= 15) {// 增发价的水位
