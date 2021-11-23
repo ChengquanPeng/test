@@ -263,6 +263,7 @@ public class ChipsService {
 		try {
 			List<HolderNum> list = getHolderNumList45(code);
 			if (list != null && list.size() > 1) {
+				r.setLastNum(list.get(0).getNum());
 				r.setAvgNum(list.get(0).getAvgNumP5());
 				r.setDate(list.get(0).getDate());
 				int c2 = 0;

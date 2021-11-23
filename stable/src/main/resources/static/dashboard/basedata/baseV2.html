@@ -33,7 +33,7 @@
 				概念id：<input type="text" id="conceptId" width="30">
 			</div>
 			<div>
-				市值大小:<input type="text" id="mkv" width="10" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				流通市值小于:<input type="text" id="mkv" width="10" />亿&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				业绩OK(近5年不亏):<input type="checkbox" id="finOK" title="近5年不亏" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				分红OK(近5年分红):<input type="checkbox" id="bousOK" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				几年未涨:<input type="text" id="zfjjup" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -188,7 +188,7 @@
 									param.zfjjup = $('#zfjjup').val();
 									param.zfself = 0;
 									param.smallModel = $('#smallModel').val();
-									param.zfPriceLow = 0;
+									param.zfPriceLow = $('#zfPriceLow').val();
 									param.dzjyRct = 0;
 									param.sortChips = 0;
 
@@ -208,9 +208,6 @@
 									}
 									if (document.getElementById("dzjyRct").checked) {
 										param.dzjyRct = 1;
-									}
-									if (document.getElementById("zfPriceLow").checked) {
-										param.zfPriceLow = 1;
 									}
 									if (document.getElementById("zfself").checked) {
 										param.zfself = 1;

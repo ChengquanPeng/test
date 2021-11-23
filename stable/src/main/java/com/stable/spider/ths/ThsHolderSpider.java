@@ -146,6 +146,7 @@ public class ThsHolderSpider {
 	}
 
 	public void reinit() {
+		log.info("所有股东人数/股东研究-重新计算start");
 		List<HolderNum> hns = new LinkedList<HolderNum>();
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 		int c = 0;

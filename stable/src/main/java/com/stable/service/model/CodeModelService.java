@@ -392,6 +392,7 @@ public class CodeModelService {
 		newOne.setHolderNum(ha.getAnaRes());
 		newOne.setHolderDate(ha.getDate());
 		newOne.setAvgNum(ha.getAvgNum());// 除开5%股东的人均流通持股
+		newOne.setLastNum(ha.getLastNum());
 		HolderPercent hp = chipsService.getLastHolderPercent(code);
 		newOne.setHolderNumP5(hp.getPercent5());
 		newOne.setHolderNumT3(hp.getTopThree());
@@ -1544,11 +1545,10 @@ public class CodeModelService {
 		if (dh.getFinOK() == 1) {
 			sb5.append("近5年分红,");
 		}
-		sb5.append("前3大股东:").append(dh.getHolderNumT3()).append("%,");
-		sb5.append("人均持股(除5%):").append(CurrencyUitl.covertToString(dh.getAvgNum())).append(",");
-		sb5.append("股东人数:").append(dh.getHolderNum()).append("%,");
-		sb5.append(Constant.HTML_LINE);
-
+		sb5.append("前3大股东:").append(dh.getHolderNumT3()).append("%");
+		sb5.append(",股东人数(少):").append(CurrencyUitl.covertToString(dh.getLastNum())).append(",变化：")
+				.append(dh.getHolderNum()).append("%");
+		sb5.append(",人均持股(高):").append(CurrencyUitl.covertToString(dh.getAvgNum()));
 		// 博弈-增发
 		if (dh.getZfStatus() == 1 || dh.getZfStatus() == 2) {
 			if (dh.getZfStatus() == 1) {
@@ -1575,10 +1575,10 @@ public class CodeModelService {
 		if (dh.getZflastOkDate() > 0) {
 			sb5.append(",实施日期:").append(dh.getZflastOkDate()).append(",");
 			if (dh.getZfself() == 1) {
-				sb5.append("底部增发,");
+				sb5.append("<font color='green'>底部增发</font>,");
 			}
 			if (dh.getZfPriceLow() > 0) {
-				sb5.append("低于增发价:").append(dh.getZfPriceLow()).append("%,");
+				sb5.append("<font color='red'>低于增发价:").append(dh.getZfPriceLow()).append("%</font>,");
 			}
 			if (dh.getGsz() == 1) {
 				sb5.append("3年内有高送转,");

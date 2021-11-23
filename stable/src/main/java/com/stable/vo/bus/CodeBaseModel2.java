@@ -34,7 +34,9 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Double)
 	private double holderNumT3; // 十大股东：Top3%股东占比
 	@Field(type = FieldType.Double)
-	private double holderNum;
+	private double holderNum;// 股东人数变化
+	@Field(type = FieldType.Long)
+	private long lastNum;// 最新股东人数
 	@Field(type = FieldType.Double)
 	private double holderZb;// 控股股东占比
 	@Field(type = FieldType.Long)
