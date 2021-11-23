@@ -40,40 +40,30 @@
 			</div>
 			<div>
 				<div class="input-group">
-					已完成增发-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 自己人增发:<input
-						type="checkbox" id="zfself" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					显示增发购买资产??&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					增发金额:<input type="text" id="zfYjAmt" width="10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					</div>
-				</div>
-			<div>
-				<div class="input-group">
-					大股东持股比例:<input type="text" id="holderNumT3" />%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					前3股东持股比例:<input type="text" id="holderNumT3" width="30"/>%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				</div>
 			</div>
 			<div>
 				<div class="input-group">
-					近一年的增发（含未完成）-->&nbsp;&nbsp;增发状态：<select id="zfStatus">
+					底部增发:<input type="checkbox" id="zfself" />&nbsp;&nbsp;
+					增发状态：<select id="zfStatus">
 						<option value="" selected="selected">不限制</option>
 						<option value="1">增发中</option>
+						<option value="6">证监会核准</option>
 						<option value="2">增发完成</option>
+						<option value="8">增发中和完成</option>
 						<option value="3">增发终止</option>
 						<option value="0">无增发</option>
-					</select>&nbsp;&nbsp;
-					增发进度:<select id="zfStatusDesc">
-						<option value="" selected="selected"></option>
-						<option value="证监会核准">证监会核准</option>
-					</select>
-					增发对象：<select id="zfObjType">
+					</select>&nbsp;&nbsp; 增发对象：<select id="zfObjType">
 						<option value="0" selected="selected">不限制</option>
-						<option value="1">纯6个月</option>
+						<option value="1">6个月</option>
 						<option value="2">混合</option>
-						<option value="3">纯大股东</option>
-						<option value="4">关联混合</option>
-					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					低于增发价:<input
-						type="text" id="zfPriceLow" />%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					1年大宗超亿:<input type="checkbox" id="dzjyRct" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;显示大宗均价？
+						<option value="3">大股东</option>
+						<option value="4">其他</option>
+					</select>&nbsp;&nbsp;
+					增发金额:<input type="text" id="zfYjAmt" width="10" width="30">&nbsp;&nbsp;
+					低于增发价:<input type="text" id="zfPriceLow" width="30"/>%&nbsp;&nbsp;
+					1年大宗超亿:<input type="checkbox" id="dzjyRct" />
 				</div>
 			</div>
 			<div>
@@ -86,10 +76,7 @@
 						<option value="2">2增发</option>
 						<option value="3">3大宗</option>
 						<option value="4">4增宗</option>
-					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-					
-					
-					人工状态:<select id="pls">
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 人工状态:<select id="pls">
 						<option value="-1" selected="selected">无限制</option>
 						<option value="1">确定</option>
 						<option value="2">排除</option>
@@ -197,7 +184,7 @@
 									param.zfjj = 0;
 									param.zfYjAmt = $('#zfYjAmt').val();
 									param.holderNumT3 = $('#holderNumT3').val();
-									
+
 									param.zfjjup = $('#zfjjup').val();
 									param.zfself = 0;
 									param.smallModel = $('#smallModel').val();
@@ -208,10 +195,8 @@
 									param.finOK = 0;
 									param.bousOK = 0;
 									param.compnayType = 0;
-									param.zfStatusDesc = $('#zfStatusDesc').val();
 									param.zfObjType = $('#zfObjType').val();
-									
-									
+
 									if (document.getElementById("finOK").checked) {
 										param.finOK = 1;
 									}
@@ -260,7 +245,8 @@
 										{
 											field : 'baseInfo',
 											title : '避雷区'
-										},{
+										},
+										{
 											field : 'tagInfo',
 											title : '标签'
 										},

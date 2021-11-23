@@ -17,6 +17,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsHolderNumDao;
 import com.stable.es.dao.base.EsHolderPercentDao;
+import com.stable.service.ChipsService;
 import com.stable.service.StockBasicService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
@@ -49,6 +50,8 @@ public class ThsHolderSpider {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
+	@Autowired
+	private ChipsService chipsService;
 
 	private String urlbase = "http://basic.10jqka.com.cn/%s/holder.html?t=%s";
 	private String host = "http://basic.10jqka.com.cn/";
@@ -133,12 +136,45 @@ public class ThsHolderSpider {
 		// WxPushUtil.pushSystem1(sysdate + " 股东人数/股东研究抓包同花顺已完成");
 	}
 
-	private void cutAvgPrcent(String code, double p5circZb, List<HolderNum> hns) {
-		if (hns != null && hns.size() > 0) {
+	public void re() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				reinit();
+			}
+		}).start();
+	}
+
+	public void reinit() {
+		List<HolderNum> hns = new LinkedList<HolderNum>();
+		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
+		int c = 0;
+		for (StockBaseInfo s : codelist) {
+			c++;
+			try {
+				String code = s.getCode();
+				log.info("current index:{},{}", c, code);
+				HolderNum hn = cutAvgPrcent(code, s.getCircZb(), chipsService.getHolderNumList45(code));
+				if (hn != null) {
+					hns.add(hn);
+				}
+			} catch (Exception e) {
+				ErrorLogFileUitl.writeError(e, "", "", "");
+			}
+		}
+		if (hns.size() > 0) {
+			esHolderNumDao.saveAll(hns);
+		}
+		log.info("所有股东人数/股东研究抓包同花顺已完成-重新计算");
+		WxPushUtil.pushSystem1("所有股东人数/股东研究抓包同花顺已完成-重新计算");
+	}
+
+	private HolderNum cutAvgPrcent(String code, Double p5circZb, List<HolderNum> hns) {
+		if (p5circZb != null && hns != null && hns.size() > 0) {
 			HolderNum maxn = hns.stream().max(Comparator.comparing(HolderNum::getDate)).get();
 			if (maxn.getNum() <= 0) {
 				log.warn("{} 计算实际人均持股错误，Num()<=0", code);
-				return;
+				return null;
 			}
 			StockBaseInfo sb = stockBasicService.getCode(code);
 			if (p5circZb <= 0.0) {
@@ -146,17 +182,21 @@ public class ThsHolderSpider {
 			}
 			if (p5circZb <= 0.0) {
 				log.warn("{} 计算实际人均持股错误，5%的持股股东数据为空", code);
-				return;
+				return null;
 			}
 			long fs = CurrencyUitl.covertToLong(sb.getFloatShare() + CurrencyUitl.YI);// 流通股份
 
 			// 人均：出去5%股东的人均(100-5%股东持股）x流通股数 除以股东人数
-			long avgNum = Double.valueOf((((100 - p5circZb) * fs) / maxn.getNum())).longValue();
+			// 除以100是 p5circZb 百分比
+			long avgNum = Double.valueOf((((100 - p5circZb) * fs / 100) / maxn.getNum())).longValue();
 			maxn.setAvgNumP5(avgNum);
-			log.warn("{} 计算实际人均持股 {}", code, avgNum);
+			log.warn("{} 计算实际流通股份{},散户占比：{}%,股东人数({}):{}  人均持股: {}", code, sb.getFloatShare(), (100 - p5circZb),
+					maxn.getDate(), maxn.getNum(), avgNum);
+			return maxn;
 		} else {
 			log.warn("{} 计算实际人均持股错误，股东数据为空", code);
 		}
+		return null;
 	}
 
 	private void dofetchHolderInner(int sysdate, String code, List<HolderNum> hnsx, List<HolderPercent> hpsx) {

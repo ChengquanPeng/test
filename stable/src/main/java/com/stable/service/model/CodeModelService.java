@@ -1274,9 +1274,7 @@ public class CodeModelService {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			}
 		}
-		if (StringUtils.isNotBlank(mr.getZfStatus())) {
-			bqb.must(QueryBuilders.matchPhraseQuery("zfStatus", Integer.valueOf(mr.getZfStatus())));
-		}
+
 		String field = "baseGreen";
 
 		int orderBy = mr.getOrderBy();
@@ -1370,8 +1368,16 @@ public class CodeModelService {
 		if (mr.getBousOK() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("bousOK", 1));
 		}
-		if (StringUtils.isNotBlank(mr.getZfStatusDesc())) {
-			bqb.must(QueryBuilders.matchPhraseQuery("zfStatusDesc", mr.getZfStatusDesc()));
+
+		if (StringUtils.isNotBlank(mr.getZfStatus())) {
+			int t = Integer.valueOf(mr.getZfStatus());
+			if (t == 6) {// 证监会核准
+				bqb.must(QueryBuilders.matchPhraseQuery("zfStatusDesc", "证监会核准"));
+			} else if (t == 8) {// 增发中或已完成
+				bqb.must(QueryBuilders.rangeQuery("zfStatus").gte(1).lte(2));
+			} else {
+				bqb.must(QueryBuilders.matchPhraseQuery("zfStatus", t));
+			}
 		}
 		if (mr.getZfObjType() > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfObjType", mr.getZfObjType()));
@@ -1539,7 +1545,7 @@ public class CodeModelService {
 			sb5.append("近5年分红,");
 		}
 		sb5.append("前3大股东:").append(dh.getHolderNumT3()).append("%,");
-		sb5.append("人均持股(除5%):").append(dh.getAvgNum()).append(",");
+		sb5.append("人均持股(除5%):").append(CurrencyUitl.covertToString(dh.getAvgNum())).append(",");
 		sb5.append("股东人数:").append(dh.getHolderNum()).append("%,");
 		sb5.append(Constant.HTML_LINE);
 
@@ -1567,7 +1573,7 @@ public class CodeModelService {
 		}
 		// 最近一次增发
 		if (dh.getZflastOkDate() > 0) {
-			sb5.append("实施日期:").append(dh.getZflastOkDate()).append(",");
+			sb5.append(",实施日期:").append(dh.getZflastOkDate()).append(",");
 			if (dh.getZfself() == 1) {
 				sb5.append("底部增发,");
 			}
@@ -1594,10 +1600,9 @@ public class CodeModelService {
 		sb5.append(Constant.HTML_LINE);
 		// 大宗
 		if (dh.getDzjyRct() > 0) {
-			sb5.append("1年大宗超亿");
+			sb5.append(",1年大宗超亿(均价:").append(dh.getDzjyAvgPrice()).append(")");
 			if (dh.getTagDzPriceLow() > 0) {
-				sb5.append(",低于大宗均价(").append(dh.getDzjyAvgPrice()).append("):").append(dh.getTagDzPriceLow())
-						.append("%");
+				sb5.append(",低于均价:").append(dh.getTagDzPriceLow()).append("%");
 			}
 		}
 		sb5.append(Constant.HTML_LINE);
