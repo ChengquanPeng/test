@@ -217,9 +217,10 @@ public class PriceLifeService {
 			TradeHistInfoDaliy low = getlowest(code, start, end);
 			if (low != null) {// 停牌太久
 				TradeHistInfoDaliy high = getHighest(code, start, end);
-				pl.setLowest(low.getLow());
+				pl.setLowest(low.getLow());//设置当前年的最低水位
+//				pl.setLowDate(low.getDate());
 				int index = priceIndex(pl, high.getClosed());
-				if (index <= 25) {
+				if (index <= 30) {
 					year = i;
 				} else {
 					break;
