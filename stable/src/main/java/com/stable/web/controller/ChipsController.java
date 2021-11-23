@@ -129,13 +129,21 @@ public class ChipsController {
 	 * 同花顺-增发-ext
 	 */
 	@RequestMapping(value = "/fetchZengfaExt", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> fetchZengfaExt() {
+	public ResponseEntity<JsonResult> fetchZengfaExt(String date) {
 		JsonResult r = new JsonResult();
 		try {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					chipsZfService.jobZengFaExt(false, -360);
+					int d = -360;
+					if (StringUtils.isNotBlank(date)) {
+						try {
+							d = -Integer.valueOf(date);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					chipsZfService.jobZengFaExt(false, d);
 				}
 			}).start();
 			r.setResult(JsonResult.OK);
