@@ -33,17 +33,18 @@
 				概念id：<input type="text" id="conceptId" width="30">
 			</div>
 			<div>
-				流通市值小于:<input type="text" id="mkv" width="10" />亿&nbsp;&nbsp;&nbsp;
+				<div class="input-group">
+					流通市值小于:<input type="text" id="mkv" width="10" />亿&nbsp;&nbsp;
+					前3股东持股比例:<input type="text" id="holderNumT3" width="30"/>%&nbsp;&nbsp;
+				</div>
+			</div>
+			<div>
 				业绩OK(近5年不亏):<input type="checkbox" id="finOK" title="近5年不亏" />&nbsp;&nbsp;&nbsp;
 				分红OK(近5年分红):<input type="checkbox" id="bousOK" />&nbsp;&nbsp;&nbsp;
 				几年未涨:<input type="text" id="zfjjup" />&nbsp;&nbsp;&nbsp;
 				几年未涨stable:<input type="text" id="zfjjupStable" />&nbsp;&nbsp;&nbsp;
 			</div>
-			<div>
-				<div class="input-group">
-					前3股东持股比例:<input type="text" id="holderNumT3" width="30"/>%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				</div>
-			</div>
+			
 			<div>
 				<div class="input-group">
 					底部增发:<input type="checkbox" id="zfself" />&nbsp;&nbsp;
@@ -251,7 +252,7 @@
 										},
 										{
 											field : 'buyRea',
-											title : '人工备注'
+											title : '备注'
 										},
 										{
 											field : 'a',
