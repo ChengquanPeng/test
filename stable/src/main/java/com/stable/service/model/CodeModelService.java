@@ -83,6 +83,9 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class CodeModelService {
+	private static final String ZF_ZJHHZ = "证监会核准";
+	private static final long ZF_50YI = 50 * 100000000;
+
 	@Autowired
 	private AnnouncementService announcementService;
 	@Autowired
@@ -145,8 +148,8 @@ public class CodeModelService {
 
 	private synchronized void runByJobv2(int tradeDate, boolean isweekend) {
 		Date now = new Date();
-
 		int dzdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));// 最近1年大宗
+		int dzdate2 = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -60));// 最近2个月大宗
 		int currYear = DateUtil.getCurYYYY();
 		int checkYear = currYear - 1;
 		checkYear = currYear - 5;
@@ -171,6 +174,10 @@ public class CodeModelService {
 		StringBuffer sbc = new StringBuffer();
 		// 公告提醒
 		StringBuffer annc = new StringBuffer();
+		// 行情指标1：小票，底部大宗超5千万（机构代持？非董监高减持大宗）
+		StringBuffer shootNotice1 = new StringBuffer();
+		// 行情指标2：大票，底部增发超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停。
+		StringBuffer shootNotice2 = new StringBuffer();
 
 		Map<String, CodeBaseModel2> histMap = getALLForMap();
 		for (StockBaseInfo s : codelist) {
@@ -273,14 +280,11 @@ public class CodeModelService {
 				}
 				// 大宗交易超1亿
 				newOne.setDzjyRct(0);
-				DzjyYiTime dz = null;
-				if (mkv <= 75.0) {
-					dz = dzjyService.dzjyF(code, dzdate);
-					if (dz != null && dz.getTotalAmt() > 9999.0) {// 1亿
-						newOne.setDzjyRct(1);
-						newOne.setDzjyAvgPrice(dz.getAvgPrcie());
-						log.info("{} 大宗超1亿", code);
-					}
+				DzjyYiTime dz = dzjyService.dzjyF(code, dzdate);
+				if (dz != null && dz.getTotalAmt() > 9999.0) {// 1亿
+					newOne.setDzjyRct(1);
+					newOne.setDzjyAvgPrice(dz.getAvgPrcie());
+					log.info("{} 大宗超1亿", code);
 				}
 
 				// 小而美模型：未涨&&年报 && 大股东集中
@@ -344,6 +348,44 @@ public class CodeModelService {
 				if (d.getClosed() < zy.getWarningLine()) {
 					newOne.setTagHighZyChance(1);
 				}
+
+				boolean isOk1 = false;
+				boolean isOk2 = false;
+				if (newOne.getZfjjupStable() >= 2) {
+					// 行情指标1：小票，底部大宗超5千万（机构代持？非董监高减持大宗）
+					// 行情指标2：大票，底部增发超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停。
+					if (mkv <= 75) {
+						DzjyYiTime dz2 = dzjyService.dzjyF(code, dzdate2);
+						if (dz2 != null && dz2.getTotalAmt() > 4999.0) {// 5千万
+							log.info("{} 小票，底部大宗超5千万", code);
+							isOk1 = true;
+						}
+					} else {
+						if (newOne.getZfYjAmt() >= ZF_50YI && ZF_ZJHHZ.equals(newOne.getZfStatusDesc())) {
+							log.info("{} 大票，底部增发超过50亿", code);
+							isOk2 = true;
+						}
+					}
+				}
+
+				if (isOk1) {
+					if (newOne.getShooting1() == 0) {
+						newOne.setShooting1(1);
+						shootNotice1.append(stockBasicService.getCodeName2(code)).append(",");
+					}
+				} else {
+					newOne.setShooting1(0);
+				}
+
+				if (isOk2) {
+					if (newOne.getShooting2() == 0) {
+						newOne.setShooting2(1);
+						shootNotice2.append(stockBasicService.getCodeName2(code)).append(",");
+					}
+				} else {
+					newOne.setShooting2(0);
+				}
+
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -365,6 +407,12 @@ public class CodeModelService {
 		}
 		if (annc.length() > 0) {
 			WxPushUtil.pushSystem1("最新公告:" + annc.toString());
+		}
+		if (shootNotice1.length() > 0) {
+			WxPushUtil.pushSystem1("行情指标1：小票，底部大宗超5千万（机构代持？非董监高减持大宗）:" + shootNotice1.toString());
+		}
+		if (shootNotice2.length() > 0) {
+			WxPushUtil.pushSystem1("行情指标2：大票，底部增发超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停:" + shootNotice1.toString());
 		}
 //		daliyTradeHistroyService.deleteData();
 	}
@@ -1377,7 +1425,7 @@ public class CodeModelService {
 		if (StringUtils.isNotBlank(mr.getZfStatus())) {
 			int t = Integer.valueOf(mr.getZfStatus());
 			if (t == 6) {// 证监会核准
-				bqb.must(QueryBuilders.matchPhraseQuery("zfStatusDesc", "证监会核准"));
+				bqb.must(QueryBuilders.matchPhraseQuery("zfStatusDesc", ZF_ZJHHZ));
 			} else if (t == 8) {// 增发中或已完成
 				bqb.must(QueryBuilders.rangeQuery("zfStatus").gte(1).lte(2));
 			} else {

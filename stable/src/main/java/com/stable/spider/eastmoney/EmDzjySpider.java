@@ -65,10 +65,12 @@ public class EmDzjySpider {
 
 			// 半年超1亿
 			List<DzjyYiTime> l = new LinkedList<DzjyYiTime>();
-			int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));// 7个月
+			int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));// 12个月
+			int startDate2 = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -60));// 2个月
 			for (String code : set) {
-				// 频繁统计，近7个月
-				DzjyYiTime t = dzjyService.halfOver1Yi(code, startDate);
+				// 频繁统计
+				DzjyYiTime t = dzjyService.halfOver1Yi(code, startDate);// 12个月
+				dzjyService.halfOver60d(code, startDate2, t);// 2个月
 				l.add(t);
 			}
 

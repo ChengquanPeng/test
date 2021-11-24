@@ -24,4 +24,6 @@ public class DzjyYiTime {
 	private double totalAmt;// 总额
 	@Field(type = FieldType.Double)
 	private double avgPrcie;// 均价
+	@Field(type = FieldType.Double)
+	private double totalAmt60d;// 总额
 }

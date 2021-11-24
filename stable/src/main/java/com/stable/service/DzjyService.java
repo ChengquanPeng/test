@@ -58,6 +58,22 @@ public class DzjyService {
 		return t;
 	}
 
+	public void halfOver60d(String code, int startDate, DzjyYiTime t) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+
+		Page<Dzjy> page = dzjyDao.search(sq);
+		if (page != null && !page.isEmpty() && page.getContent().size() > 0) {
+			for (Dzjy d : page.getContent()) {
+				t.setTotalAmt60d(t.getTotalAmt60d() + d.getTval());
+			}
+		}
+	}
+
 	public DzjyYiTime dzjyF(String code, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
