@@ -14,9 +14,6 @@ public class ModelReq {
 	String bred;
 	String byellow;
 	String bsyl;
-	int susBigBoss;
-	int susWhiteHors;
-	int susZfBoss;
 	int sort6;
 	int sort7;
 	int zfbuy;
@@ -27,10 +24,10 @@ public class ModelReq {
 	String zfYjAmt;
 	String mkv;
 	int pls;
-	int smallModel;
+	int tagIndex;
+	int shooting;
 	String zfPriceLow;
 	int dzjyRct;
-	int sortChips;
 
 	int bousOK;
 	int finOK;

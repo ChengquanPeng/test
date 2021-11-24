@@ -1381,28 +1381,38 @@ public class CodeModelService {
 				bqb.must(QueryBuilders.rangeQuery("mkv").lte(mkv));
 			}
 		}
+		if (mr.getTagIndex() > 0) {
+			if (mr.getTagIndex() == 1) {
+				bqb.must(QueryBuilders.matchPhraseQuery("sortChips", 1));// 吸筹-收集筹码短线
+			} else if (mr.getTagIndex() == 2) {
+				bqb.must(QueryBuilders.matchPhraseQuery("susBigBoss", 1));// 交易面疑似大牛
+			} else if (mr.getTagIndex() == 3) {
+				bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));// 交易面疑似白马
+			} else if (mr.getTagIndex() == 5) {
+				bqb.must(QueryBuilders.matchPhraseQuery("tagSmallAndBeatf", 1));// 小而美
+			} else if (mr.getTagIndex() == 4) {
+				bqb.must(QueryBuilders.matchPhraseQuery("tagHighZyChance", 1));// 高质押机会
+			}
+		}
+		if (mr.getShooting() > 0) {
+			if (mr.getShooting() == 1) {
+				bqb.must(QueryBuilders.matchPhraseQuery("shooting1", 1));
+			} else if (mr.getShooting() == 2) {
+				bqb.must(QueryBuilders.matchPhraseQuery("shooting2", 1));
+			}
+		}
+
 		if (mr.getZfself() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfself", 1));
 		}
 		if (mr.getDzjyRct() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("dzjyRct", 1));
 		}
-		if (mr.getSortChips() == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("sortChips", 1));
-		}
-		if (mr.getSusBigBoss() == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("susBigBoss", 1));
-		}
+
 		if (mr.getZfbuy() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfbuy", 1));
 		}
 
-		if (mr.getSusWhiteHors() == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));
-		}
-		if (mr.getSusZfBoss() == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("susZfBoss", 1));
-		}
 		if (mr.getSort6() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("sortMode6", 1));
 		}
@@ -1468,13 +1478,7 @@ public class CodeModelService {
 				bqb.must(QueryBuilders.rangeQuery("zfYjAmt").lte(zfYjAmt * 100000000));
 			}
 		}
-		if (mr.getSmallModel() > 0) {
-			bqb.must(QueryBuilders.rangeQuery("tagSmallAndBeatf").gte(1));
-		}
 
-//		<option value="3">资产收益率ttm</option>
-//		<option value="4">资产收益率报告期</option>
-//		<option value="5">资产收益评级</option>
 		SortOrder order = SortOrder.DESC;
 		if (mr.getAsc() == 2) {
 			order = SortOrder.ASC;
@@ -1593,6 +1597,17 @@ public class CodeModelService {
 
 		// 博弈-基本面
 		StringBuffer sb5 = new StringBuffer();
+		if (dh.getShooting1() > 0 || dh.getShooting2() > 0) {
+			sb5.append("<font color='red'>");
+			if (dh.getShooting1() > 0) {
+				sb5.append("小票底部大宗超5千万,机构代持？非董监高减持");
+			}
+			if (dh.getShooting2() > 0) {
+				sb5.append("大票底部增发超过50亿(越大越好),证监会-底部拿筹涨停?");
+			}
+			sb5.append("</font>").append(Constant.HTML_LINE);
+		}
+		// 流通
 		sb5.append("流通:").append(dh.getMkv()).append("亿,");
 		sb5.append("5%以下:").append(dh.getActMkv()).append("亿,");
 		if (dh.getZfjjup() > 0) {
@@ -1608,11 +1623,12 @@ public class CodeModelService {
 		if (dh.getFinOK() == 1) {
 			sb5.append("近5年分红,");
 		}
+		sb5.append(Constant.HTML_LINE);
 		sb5.append("前3大股东:").append(dh.getHolderNumT3()).append("%");
 		sb5.append(",股东人数(少):").append(CurrencyUitl.covertToString(dh.getLastNum()));
 		sb5.append(",人均持股(高):").append(CurrencyUitl.covertToString(dh.getAvgNum()));
 		sb5.append(",变化:").append(dh.getHolderNum()).append("%");
-
+		sb5.append(Constant.HTML_LINE);
 		// 博弈-增发
 		if (dh.getZfStatus() == 1 || dh.getZfStatus() == 2) {
 			if (dh.getZfStatus() == 1) {
