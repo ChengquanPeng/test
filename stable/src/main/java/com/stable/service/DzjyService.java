@@ -34,7 +34,7 @@ public class DzjyService {
 	 * 
 	 * @param startDate 开始到现在
 	 */
-	public DzjyYiTime halfOver1Yi(String code, int startDate) {
+	public DzjyYiTime halfOver1Yi(String code, int startDate, int startDate2) {
 		DzjyYiTime t = new DzjyYiTime();
 		t.setCode(code);
 		t.setTotalAmt(0.0);
@@ -54,6 +54,7 @@ public class DzjyService {
 			}
 			t.setAvgPrcie(CurrencyUitl.roundHalfUp(t.getTotalAmt() / num));
 			t.setDate(page.getContent().get(0).getDate());
+			this.halfOver60d(code, startDate2, t);// 2个月
 		}
 		return t;
 	}

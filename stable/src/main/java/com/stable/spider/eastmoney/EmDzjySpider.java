@@ -69,8 +69,7 @@ public class EmDzjySpider {
 			int startDate2 = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -60));// 2个月
 			for (String code : set) {
 				// 频繁统计
-				DzjyYiTime t = dzjyService.halfOver1Yi(code, startDate);// 12个月
-				dzjyService.halfOver60d(code, startDate2, t);// 2个月
+				DzjyYiTime t = dzjyService.halfOver1Yi(code, startDate, startDate2);// 12个月
 				l.add(t);
 			}
 
@@ -80,16 +79,17 @@ public class EmDzjySpider {
 		}
 	}
 
-//TODO
 //	@PostConstruct
 //	public void init() {
 //		new Thread(new Runnable() {
 //			public void run() {
+//				log.info("init start");
 //				List<DzjyYiTime> l = new LinkedList<DzjyYiTime>();
-//				int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -210));// 7个月
+//				int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));// 12个月
+//				int startDate2 = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -60));// 2个月
 //				List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 //				for (StockBaseInfo s : codelist) {
-//					DzjyYiTime t = dzjyService.halfOver1Yi(s.getCode(), startDate);
+//					DzjyYiTime t = dzjyService.halfOver1Yi(s.getCode(), startDate, startDate2);// 12个月
 //					l.add(t);
 //				}
 //				if (l.size() > 0) {
