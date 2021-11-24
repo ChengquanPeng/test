@@ -26,6 +26,8 @@ public class MyApplicationRunner implements ApplicationRunner {
 	private RealtimeJob realtimeJob;
 	// @Autowired
 	// private FinanceService financeService;
+//	@Autowired
+//	private CodeModelService codeModelService;
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
@@ -48,6 +50,12 @@ public class MyApplicationRunner implements ApplicationRunner {
 		}
 		WxPushUtil.pushSystem1("系统正常启动");
 
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+//				codeModelService.runJobv2(DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1)), true);
+			}
+		}).start();
 //		financeService.jobSpiderFirstFinaceHistoryInfo();
 //		financeService.jobSpiderFinaceHistoryInfo();
 

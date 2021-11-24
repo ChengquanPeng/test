@@ -1548,7 +1548,11 @@ public class CodeModelService {
 		sb5.append("流通:").append(dh.getMkv()).append("亿,");
 		sb5.append("5%以下:").append(dh.getActMkv()).append("亿,");
 		if (dh.getZfjjup() > 0) {
-			sb5.append(dh.getZfjjup() + "年未大涨,");
+			sb5.append(dh.getZfjjup());
+			if (dh.getZfjjupStable() > 0) {
+				sb5.append("<font color='red'>/stable").append(dh.getZfjjupStable()).append("</font>");
+			}
+			sb5.append("年未大涨,");
 		}
 		if (dh.getBousOK() == 1) {
 			sb5.append("近5年业绩不亏,");
