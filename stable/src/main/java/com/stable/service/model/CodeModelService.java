@@ -241,10 +241,14 @@ public class CodeModelService {
 				// 周末计算-至少N年未大涨?
 				if (isweekend) {
 					newOne.setZfjjup(0);
+					newOne.setZfjjupStable(0);
 					// if (mkv <= 100.0) {
 					if (online4Year) {
 						int listdate = Integer.valueOf(s.getList_date());
 						newOne.setZfjjup(priceLifeService.noupYear(code, listdate));
+						if (newOne.getZfjjup() >= 2) {
+							newOne.setZfjjupStable(priceLifeService.noupYearstable(code, listdate));
+						}
 					}
 					// }
 
@@ -1389,6 +1393,13 @@ public class CodeModelService {
 				bqb.must(QueryBuilders.rangeQuery("zfjjup").gte(t));
 			}
 		}
+		if (StringUtils.isNotBlank(mr.getZfjjupStable())) {
+			int t = Integer.valueOf(mr.getZfjjupStable().trim());
+			if (t > 0) {
+				bqb.must(QueryBuilders.rangeQuery("zfjjupStable").gte(t));
+			}
+		}
+
 		if (StringUtils.isNotBlank(mr.getZfPriceLow())) {
 			int t = Integer.valueOf(mr.getZfPriceLow().trim());
 			if (t > 0) {

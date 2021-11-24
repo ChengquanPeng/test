@@ -27,6 +27,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int bousOK;// 5年分红OK(至少4年分红)
 	@Field(type = FieldType.Integer)
 	private int zfjjup = 0; // 票未涨
+	@Field(type = FieldType.Integer)
+	private int zfjjupStable = 0; // 票未涨
 	// Step.2.公司所处行业，大股股东股权结构和持股比例，增发和大宗情况，股东人数增长，基金是否参与。
 	// 股东人数
 	@Field(type = FieldType.Double)

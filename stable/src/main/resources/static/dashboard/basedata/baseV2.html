@@ -33,10 +33,11 @@
 				概念id：<input type="text" id="conceptId" width="30">
 			</div>
 			<div>
-				流通市值小于:<input type="text" id="mkv" width="10" />亿&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				业绩OK(近5年不亏):<input type="checkbox" id="finOK" title="近5年不亏" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				分红OK(近5年分红):<input type="checkbox" id="bousOK" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				几年未涨:<input type="text" id="zfjjup" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				流通市值小于:<input type="text" id="mkv" width="10" />亿&nbsp;&nbsp;&nbsp;
+				业绩OK(近5年不亏):<input type="checkbox" id="finOK" title="近5年不亏" />&nbsp;&nbsp;&nbsp;
+				分红OK(近5年分红):<input type="checkbox" id="bousOK" />&nbsp;&nbsp;&nbsp;
+				几年未涨:<input type="text" id="zfjjup" />&nbsp;&nbsp;&nbsp;
+				几年未涨stable:<input type="text" id="zfjjupStable" />&nbsp;&nbsp;&nbsp;
 			</div>
 			<div>
 				<div class="input-group">
@@ -186,6 +187,7 @@
 									param.holderNumT3 = $('#holderNumT3').val();
 
 									param.zfjjup = $('#zfjjup').val();
+									param.zfjjupStable = $('#zfjjupStable').val();
 									param.zfself = 0;
 									param.smallModel = $('#smallModel').val();
 									param.zfPriceLow = $('#zfPriceLow').val();

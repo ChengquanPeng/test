@@ -22,6 +22,7 @@ public class ModelReq {
 	int zfbuy;
 	int zfjj;
 	String zfjjup;
+	String zfjjupStable;
 	int zfself;
 	String zfYjAmt;
 	String mkv;
@@ -34,8 +35,8 @@ public class ModelReq {
 	int bousOK;
 	int finOK;
 	int compnayType;
-	
+
 	int zfObjType;
 	String holderNumT3;
-	
+
 }

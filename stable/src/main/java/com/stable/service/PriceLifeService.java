@@ -206,14 +206,22 @@ public class PriceLifeService {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				String code = "002752";
+				String code = "601500";
 				int listdate = 20100101;
-				System.err.println("code=" + code + ",noupYear=" + (noupYear(code, listdate)));
+				System.err.println("code=" + code + ",noupYear=" + (noupYear(code, listdate, 10)));
 			}
 		}).start();
 	}
 
 	public int noupYear(String code, int listdate) {
+		return noupYear(code, listdate, 30);// 涨幅定义的波动程度，是否平稳
+	}
+
+	public int noupYearstable(String code, int listdate) {
+		return noupYear(code, listdate, 15);// 涨幅定义的波动程度，是否平稳
+	}
+
+	private int noupYear(String code, int listdate, int stable) {
 		// 第一种情况:一路下跌
 		PriceLife pl = getPriceLife(code);
 		Date now = new Date();
@@ -232,7 +240,7 @@ public class PriceLifeService {
 				pl.setLowest(low.getLow());// 设置当前年的最低水位
 //				pl.setLowDate(low.getDate());
 				int index = priceIndex(pl, high.getClosed());
-				if (index <= 30) {// 涨幅定义的严格程度
+				if (index <= stable) {// 涨幅定义的严格程度
 					year = i;
 				} else {
 					break;
