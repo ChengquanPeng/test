@@ -84,7 +84,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class CodeModelService {
 	private static final String ZF_ZJHHZ = "证监会核准";
-	private static final long ZF_50YI = 50 * 100000000;
+	private static final long ZF_50YI = 50 * 100000000l;
 
 	@Autowired
 	private AnnouncementService announcementService;
@@ -355,10 +355,12 @@ public class CodeModelService {
 					// 行情指标1：小票，底部大宗超5千万（机构代持？非董监高减持大宗）
 					// 行情指标2：大票，底部增发超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停。
 					if (mkv <= 75) {
-						DzjyYiTime dz2 = dzjyService.dzjyF(code, dzdate2);
-						if (dz2 != null && dz2.getTotalAmt() > 4999.0) {// 5千万
-							log.info("{} 小票，底部大宗超5千万", code);
-							isOk1 = true;
+						if (newOne.getHolderNumT3() > 45.0) {// 三大股东
+							DzjyYiTime dz2 = dzjyService.dzjyF(code, dzdate2);
+							if (dz2 != null && dz2.getTotalAmt() > 4999.0) {// 5千万
+								log.info("{} 小票，底部大宗超5千万", code);
+								isOk1 = true;
+							}
 						}
 					} else {
 						if (newOne.getZfYjAmt() >= ZF_50YI && ZF_ZJHHZ.equals(newOne.getZfStatusDesc())) {
@@ -412,7 +414,7 @@ public class CodeModelService {
 			WxPushUtil.pushSystem1("行情指标1：小票，底部大宗超5千万（机构代持？非董监高减持大宗）:" + shootNotice1.toString());
 		}
 		if (shootNotice2.length() > 0) {
-			WxPushUtil.pushSystem1("行情指标2：大票，底部增发超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停:" + shootNotice1.toString());
+			WxPushUtil.pushSystem1("行情指标2：大票，底部增发超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停:" + shootNotice2.toString());
 		}
 //		daliyTradeHistroyService.deleteData();
 	}
