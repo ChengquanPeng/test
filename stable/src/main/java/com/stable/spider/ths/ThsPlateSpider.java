@@ -38,7 +38,7 @@ public class ThsPlateSpider {
 	@Autowired
 	private EastmoneyCompanySpider eastmoneyCompanySpider;
 
-	public void fetchAll(boolean updateAll) {
+	public synchronized void fetchAll(boolean updateAll) {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {

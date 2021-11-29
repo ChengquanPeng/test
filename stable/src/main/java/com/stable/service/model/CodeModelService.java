@@ -1477,7 +1477,7 @@ public class CodeModelService {
 		if (StringUtils.isNotBlank(mr.getZfYjAmt())) {
 			Long zfYjAmt = Long.valueOf(mr.getZfYjAmt());
 			if (zfYjAmt > 0) {
-				bqb.must(QueryBuilders.rangeQuery("zfYjAmt").lte(zfYjAmt * 100000000));
+				bqb.must(QueryBuilders.rangeQuery("zfYjAmt").lte(zfYjAmt * 100000000l));
 			}
 		}
 
