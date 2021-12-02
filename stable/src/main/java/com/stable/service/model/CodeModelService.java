@@ -281,10 +281,13 @@ public class CodeModelService {
 				// 大宗交易超1亿
 				newOne.setDzjyRct(0);
 				DzjyYiTime dz = dzjyService.dzjyF(code, dzdate);
-				if (dz != null && dz.getTotalAmt() > 9999.0) {// 1亿
-					newOne.setDzjyRct(1);
+				if (dz != null) {// 1亿
+					if (dz.getTotalAmt() > 9999.0) {
+						newOne.setDzjyRct(1);
+						log.info("{} 大宗超1亿", code);
+					}
 					newOne.setDzjyAvgPrice(dz.getAvgPrcie());
-					log.info("{} 大宗超1亿", code);
+					newOne.setDzjy60d(dz.getTotalAmt60d());
 				}
 
 				// 小而美模型：未涨&&年报 && 大股东集中
@@ -392,7 +395,9 @@ public class CodeModelService {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
 		}
-		if (listLast.size() > 0) {
+		if (listLast.size() > 0)
+
+		{
 			codeBaseModel2Dao.saveAll(listLast);
 		}
 		if (listHist.size() > 0) {
@@ -1686,6 +1691,9 @@ public class CodeModelService {
 			if (dh.getTagDzPriceLow() > 0) {
 				sb5.append(",低于均价:").append(dh.getTagDzPriceLow()).append("%");
 			}
+		}
+		if (dh.getDzjy60d() > 0) {
+			sb5.append(",2个月大宗:").append(dh.getDzjy60d()).append("亿");
 		}
 		sb5.append(Constant.HTML_LINE);
 
