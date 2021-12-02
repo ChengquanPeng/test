@@ -1327,11 +1327,15 @@ public class CodeModelService {
 			List<String> list = conceptService.listCodesByAliasCode(mr.getConceptId());
 			if (list != null) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
+			} else {
+				return new LinkedList<CodeBaseModel2>();
 			}
 		} else if (StringUtils.isNotBlank(mr.getConceptName())) {
 			List<String> list = listCodeByCodeConceptName(mr.getConceptName());
 			if (list.size() > 0) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
+			} else {
+				return new LinkedList<CodeBaseModel2>();
 			}
 		}
 
@@ -1693,7 +1697,7 @@ public class CodeModelService {
 			}
 		}
 		if (dh.getDzjy60d() > 0) {
-			sb5.append(",2个月大宗:").append(dh.getDzjy60d()).append("亿");
+			sb5.append(",2个月大宗:").append(dh.getDzjy60d()).append("万");
 		}
 		sb5.append(Constant.HTML_LINE);
 
@@ -1735,7 +1739,7 @@ public class CodeModelService {
 		List<StockBaseInfo> l = stockBasicService.getAllOnStatusListWithSort();
 		conceptName = conceptName.trim();
 		for (StockBaseInfo s : l) {
-			if (s.getThsIndustry().contains(conceptName)) {
+			if (s.getThsIndustry() != null && s.getThsIndustry().trim().contains(conceptName)) {
 				codes.add(s.getCode());
 			}
 		}
