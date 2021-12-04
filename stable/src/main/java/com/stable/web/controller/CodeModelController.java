@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.TradeCalService;
 import com.stable.service.model.CodeModelService;
+import com.stable.service.model.ModelWebService;
 import com.stable.utils.DateUtil;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.http.req.ModelManulReq;
@@ -18,7 +19,8 @@ import com.stable.vo.spi.req.EsQueryPageReq;
 @RequestMapping("/model")
 @RestController
 public class CodeModelController {
-
+	@Autowired
+	private ModelWebService modelWebService;
 	@Autowired
 	private CodeModelService codeModelService;
 	@Autowired
@@ -28,7 +30,7 @@ public class CodeModelController {
 	public ResponseEntity<JsonResult> codemodellist(ModelReq mr, EsQueryPageReq querypage) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(codeModelService.getListForWeb(mr, querypage));
+			r.setResult(modelWebService.getListForWeb(mr, querypage));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -65,7 +67,7 @@ public class CodeModelController {
 	public ResponseEntity<JsonResult> addManual(ModelManulReq req) {
 		JsonResult r = new JsonResult();
 		try {
-			codeModelService.addPlsManual(req);
+			modelWebService.addPlsManual(req);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setStatus(JsonResult.FAIL);
@@ -81,7 +83,7 @@ public class CodeModelController {
 	public ResponseEntity<JsonResult> chips(String code) {
 		JsonResult r = new JsonResult();
 		try {
-			CodeBaseModelResp cbm = codeModelService.getLastOneByCodeResp(code);
+			CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code);
 			r.setResult(cbm);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {

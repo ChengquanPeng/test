@@ -27,7 +27,7 @@ import com.stable.es.dao.base.ZengFaDao;
 import com.stable.es.dao.base.ZengFaDetailDao;
 import com.stable.es.dao.base.ZengFaExtDao;
 import com.stable.es.dao.base.ZengFaSummaryDao;
-import com.stable.service.model.CodeModelService;
+import com.stable.service.model.ModelWebService;
 import com.stable.spider.ths.ThsAnnSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
@@ -66,7 +66,7 @@ public class ChipsZfService {
 	@Autowired
 	private TushareSpider tushareSpider;
 	@Autowired
-	private CodeModelService codeModelService;
+	private ModelWebService modelWebService;
 	@Autowired
 	private PriceLifeService priceLifeService;
 
@@ -261,7 +261,7 @@ public class ChipsZfService {
 
 	private void ws(ZengFaExt z, int zfEndDate, double zfprice) {
 		String code = z.getCode();
-		if (codeModelService.getLastOneByCode2(code).getZfjjup() >= 2) {// 起码2年未涨
+		if (modelWebService.getLastOneByCode2(code).getZfjjup() >= 2) {// 起码2年未涨
 			PriceLife pl = priceLifeService.getPriceLife(code, zfEndDate);
 			if (pl != null) {
 				if (priceLifeService.priceIndex(pl, zfprice) <= 15) {// 增发价的水位

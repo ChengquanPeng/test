@@ -19,6 +19,7 @@ import com.stable.service.ConceptService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
+import com.stable.service.model.ModelWebService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.FinanceBaseInfo;
@@ -29,7 +30,8 @@ import com.stable.vo.http.resp.CodeBaseModelResp;
 
 @Controller
 public class CodeController {
-
+	@Autowired
+	private ModelWebService modelWebService;
 	@Autowired
 	private CodeModelService codeModelService;
 	@Autowired
@@ -49,7 +51,7 @@ public class CodeController {
 	@RequestMapping(value = "/code/{code}", method = RequestMethod.GET)
 	public String detail(@PathVariable(value = "code") String code, Model model) {
 		try {
-			CodeBaseModelResp cbm = codeModelService.getLastOneByCodeResp(code);
+			CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code);
 			model.addAttribute("codedetail", cbm);
 			prepare(model, code);
 		} catch (Exception e) {
@@ -230,7 +232,7 @@ public class CodeController {
 			} else {
 				quarter--;
 			}
-			CodeBaseModelResp cbm = codeModelService.getHistOneByCodeYearQuarter(code, year, quarter);
+			CodeBaseModelResp cbm = modelWebService.getHistOneByCodeYearQuarter(code, year, quarter);
 			if (cbm == null) {
 				response.setCharacterEncoding("UTF-8");
 				response.setHeader("Content-Type", "text/html; charset=UTF-8");
@@ -252,7 +254,7 @@ public class CodeController {
 	@RequestMapping(value = "/codehist/{id}", method = RequestMethod.GET)
 	public String id(@PathVariable(value = "id") String id, Model model) {
 		try {
-			CodeBaseModelResp cbm = codeModelService.getHistOneById(id);
+			CodeBaseModelResp cbm = modelWebService.getHistOneById(id);
 			String code = cbm.getCode();
 			model.addAttribute("codedetail", cbm);
 			prepare(model, code);

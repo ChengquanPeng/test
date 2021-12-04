@@ -33,7 +33,7 @@ import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
-import com.stable.service.model.CodeModelService;
+import com.stable.service.model.ModelWebService;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -64,7 +64,8 @@ public class MonitorPoolService {
 	@Autowired
 	private EsCodeBaseModel2Dao codeBaseModel2Dao;
 	@Autowired
-	private CodeModelService codeModelService;
+	private ModelWebService modelWebService;
+
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -103,7 +104,7 @@ public class MonitorPoolService {
 	}
 
 	private void updateBaseMoniStatus(String code, int monitor) {
-		CodeBaseModel2 cbm = codeModelService.getLastOneByCode2(code);
+		CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(code);
 		cbm.setMonitor(monitor);
 		codeBaseModel2Dao.save(cbm);
 	}
