@@ -297,7 +297,7 @@ public class MonitorPoolService {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfdone", zfdone));
 		}
 		if (dzjy > 0) {
-			bqb.must(QueryBuilders.matchPhraseQuery("dzjy", dzjy));
+			bqb.must(QueryBuilders.rangeQuery("dzjy").gt(0));
 		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort("updateDate").unmappedType("integer").order(SortOrder.DESC);
