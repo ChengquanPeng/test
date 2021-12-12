@@ -135,22 +135,30 @@ public class EastmoneySpider {
 	 * @param type 0按报告期、1=年报
 	 * @return http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=1&code=SZ300750
 	 */
-	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=%s&code=%s";
+//	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=%s&code=%s";
+	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/ZYZBAjaxNew?type=%s&code=%s";
 	static final double Yi10 = CurrencyUitl.YI_N.doubleValue() * 10;// 10亿
 
-	public static List<FinanceBaseInfoPage> getNewFinanceAnalysis(String code, int type) {
+	public static List<FinanceBaseInfoPage> getNewFinanceAnalysis(String code) {
 		int trytime = 0;
 		do {
 			trytime++;
 			try {
 				List<FinanceBaseInfoPage> list = new ArrayList<FinanceBaseInfoPage>();
-				String url = String.format(financeUrl, type, formatCode2(code));
+				String url = String.format(financeUrl, 0, formatCode2(code));
+				System.err.println(url);
 				String result = HttpUtil.doGet2(url);
-				JSONArray objects = JSON.parseArray(result);
+				System.err.println(result);
+				JSONObject jsonobj = JSON.parseObject(result);
+				JSONArray objects = jsonobj.getJSONArray("data");
 				for (int i = 0; i < objects.size(); i++) {
 					JSONObject data = objects.getJSONObject(i);
-					String date = data.get("date").toString(); // 年报日期
-					FinanceBaseInfoPage page = new FinanceBaseInfoPage(code, Integer.valueOf(date.replaceAll("-", "")));
+					String date = data.get("REPORT_DATE").toString(); // 年报日期
+					System.err.println(date);
+					System.err.println(date.substring(0, 10));
+					System.err.println(date.substring(0, 10).replaceAll("-", ""));
+					FinanceBaseInfoPage page = new FinanceBaseInfoPage(code,
+							Integer.valueOf(date.substring(0, 10).replaceAll("-", "")));
 					try {
 						Double yyzsrtbzz = data.getDouble("yyzsrtbzz"); // 营业总收入同比增长(%)
 						page.setYyzsrtbzz(yyzsrtbzz);
@@ -212,8 +220,12 @@ public class EastmoneySpider {
 					list.add(page);
 				}
 				if (list.size() > 0) {
-					Map<String, FinanceZcfzb> fzb = EastmoneyZcfzbSpider.getZcfzb(code, type);
-					Map<String, FinanceZcfzb> llb = EastmoneyZcfzbSpider.getXjllb(code, type);
+					String dates = EastmoneyZcfzbSpider.getDates(code);
+					if (dates == null) {
+						throw new RuntimeException("未获取到dates参数");
+					}
+					Map<String, FinanceZcfzb> fzb = EastmoneyZcfzbSpider.getZcfzb(code, dates);
+					Map<String, FinanceZcfzb> llb = EastmoneyZcfzbSpider.getXjllb(code, dates);
 					for (FinanceBaseInfoPage page : list) {
 						FinanceZcfzb llba = llb.get(page.getId());
 						if (llba != null) {
@@ -669,14 +681,16 @@ public class EastmoneySpider {
 	}
 
 	public static void main(String[] args) {
-//		EastmoneySpider.getNewFinanceAnalysis("000002", 0);
+//		EastmoneySpider.getNewFinanceAnalysis("000001", 0);
 //		String result = HttpUtil.doGet2(yjygBase);
 //		EastmoneySpider es = new EastmoneySpider();
 //		es.getFinYjkb();
-//		List<FinanceBaseInfoPage> l = EastmoneySpider.getNewFinanceAnalysis("300027", 0);
-//		for (FinanceBaseInfoPage r : l) {
-//			System.err.println(r);
-//		}
-		System.err.println(YearQuarter(2021, 1));
+
+		List<FinanceBaseInfoPage> l = EastmoneySpider.getNewFinanceAnalysis("000001");
+		for (FinanceBaseInfoPage r : l) {
+			System.err.println(r);
+		}
+
+		// System.err.println(YearQuarter(2021, 1));
 	}
 }

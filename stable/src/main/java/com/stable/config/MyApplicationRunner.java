@@ -56,7 +56,7 @@ public class MyApplicationRunner implements ApplicationRunner {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				//codeModelService.runJobv2(DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1)), true);
+//				codeModelService.runJobv2(DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1)), true);
 			}
 		}).start();
 //		financeService.jobSpiderFirstFinaceHistoryInfo();

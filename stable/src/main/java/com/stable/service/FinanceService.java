@@ -178,7 +178,7 @@ public class FinanceService {
 	 */
 	public boolean spiderFinaceHistoryInfoFromStart(String code) {
 		List<FinanceBaseInfo> list = new LinkedList<FinanceBaseInfo>();
-		if (spiderFinaceHistoryInfo(code, list, 1)) {
+		if (spiderFinaceHistoryInfo(code, list)) {
 			if (list.size() > 0) {
 				esFinanceBaseInfoDao.saveAll(list);
 			}
@@ -187,26 +187,9 @@ public class FinanceService {
 		return false;
 	}
 
-	private boolean spiderFinaceHistoryInfo(String code, List<FinanceBaseInfo> list, int type) {
+	private boolean spiderFinaceHistoryInfo(String code, List<FinanceBaseInfo> list) {
 		try {
-			if (type == 1) {
-				List<FinanceBaseInfoPage> datas = EastmoneySpider.getNewFinanceAnalysis(code, 1);
-				if (datas == null || datas.size() <= 0) {
-					log.warn("未从东方财富抓取到Finane记录(年报),code={}", code);
-					WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录(年报),code=" + code);
-				} else {
-					log.warn("年度-从东方财富抓取到Finane记录{}条,code={}", datas.size(), code);
-					// 数据无误的则加入
-					for (FinanceBaseInfoPage p : datas) {
-						if (p.isDataOk()) {
-							FinanceBaseInfo f = new FinanceBaseInfo();
-							BeanCopy.copy(p, f);
-							list.add(f);
-						}
-					}
-				}
-			}
-			List<FinanceBaseInfoPage> datas = EastmoneySpider.getNewFinanceAnalysis(code, 0);// 0按报告期、1=年报
+			List<FinanceBaseInfoPage> datas = EastmoneySpider.getNewFinanceAnalysis(code);// 0按报告期、1=年报
 			if (datas == null || datas.size() <= 0) {
 				log.warn("未从东方财富抓取到Finane记录,code={}", code);
 				WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录,code=" + code);
@@ -601,7 +584,7 @@ public class FinanceService {
 		TasksWorker.getInstance().getService()
 				.submit(new MyCallable(RunLogBizTypeEnum.FINACE_HISTORY, RunCycleEnum.WEEK) {
 					public Object mycall() {
-						fetchFinances(1);
+						fetchFinances();
 						return null;
 					}
 				});
@@ -628,7 +611,7 @@ public class FinanceService {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				fetchFinances(0);// 财务
+				fetchFinances();// 财务
 				rtl.setDfFinOk(true);
 			}
 		}).start();
@@ -844,7 +827,7 @@ public class FinanceService {
 		});
 	}
 
-	public void fetchFinances(int type) {
+	public void fetchFinances() {
 		int tradeDate = DateUtil.getTodayIntYYYYMMDD();
 		log.info("同步财务报告报告[started]");
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
@@ -853,7 +836,7 @@ public class FinanceService {
 		List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
 		int cnt = 0;
 		for (StockBaseInfo s : list) {
-			if (spiderFinaceHistoryInfo(s.getCode(), rl, type)) {
+			if (spiderFinaceHistoryInfo(s.getCode(), rl)) {
 				cnt++;
 			}
 			if (rl.size() > 1000) {

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.stable.constant.Constant;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
@@ -40,27 +41,66 @@ public class EastmoneyZcfzbSpider {
 	 * @param type 0按报告期、1=年报
 	 *             http://f10.eastmoney.com/NewFinanceAnalysis/zcfzbAjax?companyType=4&reportDateType=0&reportType=2&endDate=&code=SZ002752
 	 */
-	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/zcfzbAjax?companyType=4&reportDateType=%s&reportType=2&endDate=&code=%s&t=%s";
+	public static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/zcfzbAjaxNew?companyType=4&reportDateType=0&reportType=1&dates=%s&code=%s";
+	public static final String fud = "http://f10.eastmoney.com/NewFinanceAnalysis/lrbDateAjaxNew?companyType=4&reportDateType=0&code=%s";
 
-	@SuppressWarnings("deprecation")
-	public static Map<String, FinanceZcfzb> getZcfzb(String code, int type) {
+	public static String getDates(String code) {
+		int trytime = 0;
+		do {
+			trytime++;
+			try {
+
+				ThreadsUtil.sleepRandomSecBetween1And2();
+				String url = String.format(fud, formatCode2(code), System.currentTimeMillis());
+				System.err.println(url);
+				String result = HttpUtil.doGet2(url);
+				System.err.println(result);
+				JSONObject jsonobj = JSON.parseObject(result);
+				JSONArray objects = jsonobj.getJSONArray("data");
+
+				StringBuffer sb = new StringBuffer();
+				for (int i = 0; i < objects.size(); i++) {
+					JSONObject data = objects.getJSONObject(i);
+					FinanceZcfzb fzb = new FinanceZcfzb();
+					fzb.setCode(code);
+					String date = data.get("REPORT_DATE").toString(); // 年报日期
+					date = date.substring(0, 10);
+					sb.append(date);
+					if (i >= 5) {
+						break;
+					}
+					sb.append(Constant.DOU_HAO);
+				}
+				return sb.toString();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+		} while (trytime <= 10);
+		WxPushUtil.pushSystem1("东方财富-财务(资产负债表-dates)-抓包出错,code=" + code);
+		return null;
+	}
+
+	public static Map<String, FinanceZcfzb> getZcfzb(String code, String dates) {
 		int trytime = 0;
 		do {
 			trytime++;
 			try {
 				ThreadsUtil.sleepRandomSecBetween1And2();
 				Map<String, FinanceZcfzb> m = new HashMap<String, FinanceZcfzb>();
-				String url = String.format(financeUrl, type, formatCode2(code), System.currentTimeMillis());
+				String url = String.format(financeUrl, dates, formatCode2(code), System.currentTimeMillis());
+				System.err.println(url);
 				String result = HttpUtil.doGet2(url);
-				result = result.substring(1, result.length() - 1);
-				result = StringUtils.replaceAll(result, "\\\\", "");
-				JSONArray objects = JSON.parseArray(result);
+				System.err.println(result);
+				JSONObject jsonobj = JSON.parseObject(result);
+				JSONArray objects = jsonobj.getJSONArray("data");
 				for (int i = 0; i < objects.size(); i++) {
 					JSONObject data = objects.getJSONObject(i);
 					FinanceZcfzb fzb = new FinanceZcfzb();
 					fzb.setCode(code);
-					String date = data.get("REPORTDATE").toString(); // 年报日期
-					fzb.setDate(DateUtil.formatYYYYMMDDReturnInt(DateUtil.parseDate3(date)));
+					String date = data.get("REPORT_DATE").toString(); // 年报日期
+					fzb.setDate(
+							DateUtil.formatYYYYMMDDReturnInt(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS)));
 					fzb.setId(code + "_" + fzb.getDate());
 
 					try {
@@ -68,11 +108,11 @@ public class EastmoneyZcfzbSpider {
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setSumAsset(Double.valueOf(data.getString("SUMASSET")));// 总资产
+						fzb.setSumAsset(Double.valueOf(data.getString("SUMASSET")));// 总资产 x
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setSumDebt(Double.valueOf(data.getString("SUMLIAB")));// 负债总计
+						fzb.setSumDebt(Double.valueOf(data.getString("SUMLIAB")));// 负债总计 x
 					} catch (Exception e) {
 					}
 					try {
@@ -146,10 +186,12 @@ public class EastmoneyZcfzbSpider {
 	// "http://data.eastmoney.com/bbsj/yjyg/%s.html";
 
 	public static void main(String[] args) {
-		Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getXjllb("002405", 1);
+		String code = "600446";
+		Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getZcfzb(code, EastmoneyZcfzbSpider.getDates(code));
 		for (String key : m.keySet()) {
 			System.err.println(m.get(key));
 		}
+//		System.err.println(EastmoneyZcfzbSpider.getDates("002405"));
 //		System.err.println(CurrencyUitl.roundHalfUp( 5.9548019532E8/4.56697178601E9));
 	}
 
@@ -162,15 +204,16 @@ public class EastmoneyZcfzbSpider {
 	 */
 	static final String financeUrlxjl = "http://f10.eastmoney.com/NewFinanceAnalysis/xjllbAjax?companyType=4&reportDateType=%s&reportType=1&endDate=&code=%s";
 
+	// http://f10.eastmoney.com/NewFinanceAnalysis/lrbAjaxNew?companyType=4&reportDateType=0&reportType=1&dates=2021-09-30%2C2021-06-30%2C2021-03-31%2C2020-12-31%2C2020-09-30&code=SH600446
 	@SuppressWarnings("deprecation")
-	public static Map<String, FinanceZcfzb> getXjllb(String code, int type) {
+	public static Map<String, FinanceZcfzb> getXjllb(String code, String dates) {
 		int trytime = 0;
 		do {
 			trytime++;
 			try {
 				ThreadsUtil.sleepRandomSecBetween1And2();
 				Map<String, FinanceZcfzb> m = new HashMap<String, FinanceZcfzb>();
-				String url = String.format(financeUrlxjl, type, formatCode2(code), System.currentTimeMillis());
+				String url = String.format(financeUrlxjl, formatCode2(code), System.currentTimeMillis());
 				String result = HttpUtil.doGet2(url);
 				result = result.substring(1, result.length() - 1);
 				result = StringUtils.replaceAll(result, "\\\\", "");
