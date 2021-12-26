@@ -12,6 +12,7 @@ import com.stable.service.ChipsZfService;
 import com.stable.service.ZhiYaService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
+import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.eastmoney.EmDzjySpider;
 import com.stable.spider.official.JysSpider;
 import com.stable.spider.ths.ThsSpider;
@@ -43,6 +44,8 @@ public class EveryDayJob extends MySimpleJob {
 	private ThsSpider thsSpider;
 	@Autowired
 	private ZhiYaService zhiYaService;
+	@Autowired
+	private EastmoneySpider eastmoneySpider;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
@@ -85,6 +88,11 @@ public class EveryDayJob extends MySimpleJob {
 		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
 			new Thread(new Runnable() {
 				@Override
+				public void run() {
+					eastmoneySpider.getDwcfCompanyTypeByJob();// 周五，东方财富更新企业类型
+				}
+			}).start();
+			new Thread(new Runnable() {
 				public void run() {
 					zhiYaService.fetchBySun();// 质押
 				}

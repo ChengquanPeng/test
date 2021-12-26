@@ -176,20 +176,20 @@ public class FinanceService {
 	 * 删除redis，从头开始获取
 	 */
 	public boolean spiderFinaceHistoryInfoFromStart(String code) {
-		List<FinanceBaseInfo> list = new LinkedList<FinanceBaseInfo>();
-		if (spiderFinaceHistoryInfo(code, list)) {
-			if (list.size() > 0) {
-				esFinanceBaseInfoDao.saveAll(list);
-			}
-			return true;
-		}
+//		List<FinanceBaseInfo> list = new LinkedList<FinanceBaseInfo>();
+//		if (spiderFinaceHistoryInfo(code, list)) {
+//			if (list.size() > 0) {
+//				esFinanceBaseInfoDao.saveAll(list);
+//			}
+//			return true;
+//		}
+		// 东方财富限制，目前最多抓取5条,暂时够用，有需要在慢慢完善。
 		return false;
 	}
 
-	private boolean spiderFinaceHistoryInfo(String code, List<FinanceBaseInfo> list) {
+	private boolean spiderFinaceHistoryInfo(String code, List<FinanceBaseInfo> list, int companyType) {
 		try {
-
-			List<FinanceBaseInfoPage> datas = EastmoneySpider.getNewFinanceAnalysis(code, 0);// 0按报告期、1=年报,TODO
+			List<FinanceBaseInfoPage> datas = eastmoneySpider.getNewFinanceAnalysis(code, companyType);// 0按报告期、1=年报
 			if (datas == null || datas.size() <= 0) {
 				log.warn("未从东方财富抓取到Finane记录,code={}", code);
 				WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录,code=" + code);
@@ -836,7 +836,7 @@ public class FinanceService {
 		List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
 		int cnt = 0;
 		for (StockBaseInfo s : list) {
-			if (spiderFinaceHistoryInfo(s.getCode(), rl)) {
+			if (spiderFinaceHistoryInfo(s.getCode(), rl, s.getDfcwCompnayType())) {
 				cnt++;
 			}
 			if (rl.size() > 1000) {

@@ -20,8 +20,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.es.dao.base.EsFinYjkbDao;
 import com.stable.es.dao.base.EsFinYjygDao;
+import com.stable.service.StockBasicService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
+import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
@@ -29,6 +31,7 @@ import com.stable.vo.FinanceZcfzb;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfoPage;
+import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -39,6 +42,10 @@ public class EastmoneySpider {
 	private EsFinYjygDao esFinYjygDao;
 	@Autowired
 	private EsFinYjkbDao esFinYjkbDao;
+	@Autowired
+	private HtmlunitSpider htmlunitSpider;
+	@Autowired
+	private StockBasicService stockBasicService;
 
 	public static int formatCode(String code) {
 		if (code.startsWith("6")) {
@@ -83,7 +90,14 @@ public class EastmoneySpider {
 	static final int FETCH_CNT = 5;// 所以默认返回5条
 
 	// companyType:1券商，2保险,3银行，4企业
-	public static List<FinanceBaseInfoPage> getNewFinanceAnalysis(String code, int companyType) {
+	public List<FinanceBaseInfoPage> getNewFinanceAnalysis(String code, int companyType) {
+		if (companyType == 0) {
+			companyType = getcompanyType(code);
+			if (companyType == 0) {
+				WxPushUtil.pushSystem1("东方财富-财务companyType-抓包出错,code=" + code);
+				return null;
+			}
+		}
 		int trytime = 0;
 		do {
 			trytime++;
@@ -619,17 +633,45 @@ public class EastmoneySpider {
 		return null;
 	}
 
+	private String urlbase = "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=%s";
+
+	private int getcompanyType(String code) {
+		String url = String.format(urlbase, formatCode2(code));
+		try {
+			String s = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url).getElementById("hidctype").getAttribute("value");
+			int r = Integer.valueOf(s);
+			if (r > 0) {
+				stockBasicService.synDwcfCompanyType(code, r);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	public void getDwcfCompanyTypeByJob() {
+		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
+		for (StockBaseInfo s : list) {
+			if (s.getDfcwCompnayType() <= 0) {
+				getcompanyType(s.getCode());
+			}
+		}
+	}
+
 	public static void main(String[] args) {
-//		EastmoneySpider.getNewFinanceAnalysis("000001", 0);
+		EastmoneySpider es = new EastmoneySpider();
+		es.htmlunitSpider = new HtmlunitSpider();
+		String code = "000001";
+//		EastmoneySpider.getNewFinanceAnalysis(code, 0);
 //		String result = HttpUtil.doGet2(yjygBase);
 //		EastmoneySpider es = new EastmoneySpider();
 //		es.getFinYjkb();
 
-		List<FinanceBaseInfoPage> l = EastmoneySpider.getNewFinanceAnalysis("000498", 4);
-		for (FinanceBaseInfoPage r : l) {
-			System.err.println(r);
-		}
-
+//		List<FinanceBaseInfoPage> l = es.getNewFinanceAnalysis(code, 4);
+//		for (FinanceBaseInfoPage r : l) {
+//			System.err.println(r);
+//		}
+		System.err.println(es.getcompanyType(code));
 		// System.err.println(YearQuarter(2021, 1));
 	}
 }

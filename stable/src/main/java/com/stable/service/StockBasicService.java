@@ -160,6 +160,13 @@ public class StockBasicService {
 		return jobSynStockList(false);
 	}
 
+	public void synDwcfCompanyType(String code, int dfcwCompnayType) {
+		StockBaseInfo b = this.getCode(code);
+		b.setDfcwCompnayType(dfcwCompnayType);
+		redisUtil.set(code, b);
+		esStockBaseInfoDao.save(b);
+	}
+
 	public void synBaseStockInfoCircZb(String code, double circZb) {
 		if (circZb > 0) {
 			StockBaseInfo b = this.getCode(code);
@@ -172,7 +179,7 @@ public class StockBasicService {
 	public void synBaseStockInfo(StockBaseInfo base, boolean fromNotTushare) {
 		// esStockBaseInfoDao.save(base);
 
-		if (!fromNotTushare) {// 部门字段来自同花顺
+		if (!fromNotTushare) {// 以下字段来自同花顺,雪球,东方财富,需要进行同步
 			StockBaseInfo old = getCode(base.getCode());
 			base.setThsIndustry(old.getThsIndustry());
 			base.setThsLightspot(old.getThsLightspot());
@@ -186,6 +193,7 @@ public class StockBasicService {
 			base.setCircZb(old.getCircZb());
 			base.setHolderName(old.getHolderName());
 			base.setHolderZb(old.getHolderZb());
+			base.setDfcwCompnayType(old.getDfcwCompnayType());
 		}
 
 		redisUtil.set(base.getCode(), base);
