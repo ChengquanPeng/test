@@ -154,7 +154,6 @@ public class FinanceService {
 							}
 						}
 						if (find) {
-
 							if (mp.getYkb() == 1) {
 								sb.append("期望不亏");
 							} else {
@@ -189,12 +188,14 @@ public class FinanceService {
 
 	private boolean spiderFinaceHistoryInfo(String code, List<FinanceBaseInfo> list) {
 		try {
-			List<FinanceBaseInfoPage> datas = EastmoneySpider.getNewFinanceAnalysis(code);// 0按报告期、1=年报
+
+			List<FinanceBaseInfoPage> datas = EastmoneySpider.getNewFinanceAnalysis(code, 0);// 0按报告期、1=年报,TODO
 			if (datas == null || datas.size() <= 0) {
 				log.warn("未从东方财富抓取到Finane记录,code={}", code);
 				WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录,code=" + code);
 				return false;
 			}
+			// 东方财富限制，目前最多抓取5条
 			log.warn("季度-从东方财富抓取到Finane记录{}条,code={}", datas.size(), code);
 			// 数据无误的则加入
 			for (FinanceBaseInfoPage p : datas) {
@@ -204,7 +205,6 @@ public class FinanceService {
 					list.add(f);
 				}
 			}
-
 		} finally {
 			ThreadsUtil.sleepRandomSecBetween1And5();
 		}
@@ -828,9 +828,6 @@ public class FinanceService {
 	}
 
 	public void fetchFinances() {
-		if (1 == 1) {
-			return;
-		}
 		int tradeDate = DateUtil.getTodayIntYYYYMMDD();
 		log.info("同步财务报告报告[started]");
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();

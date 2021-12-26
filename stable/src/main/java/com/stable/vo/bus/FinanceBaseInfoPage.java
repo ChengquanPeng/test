@@ -48,8 +48,8 @@ public class FinanceBaseInfoPage extends EsBase {
 	private double jqjzcsyl; // 加权净资产收益率(%) -加权净资产收益率=当期净利润/当期加权平均净资产
 	@Field(type = FieldType.Double)
 	private double syldjd;// 加权净资产收益率+单季度百分比
-	@Field(type = FieldType.Double)
-	private double tbjzcsyl; // 摊薄净资产收益率(%) -摊薄净资产收益率=报告期净利润/期末净资产
+//	@Field(type = FieldType.Double)
+//	private double tbjzcsyl; // 摊薄净资产收益率(%) -摊薄净资产收益率=报告期净利润/期末净资产
 
 	@Field(type = FieldType.Double)
 	private double mll; // 毛利率

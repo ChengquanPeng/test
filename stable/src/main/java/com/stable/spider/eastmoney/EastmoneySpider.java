@@ -35,15 +35,10 @@ import lombok.extern.log4j.Log4j2;
 @Component
 @Log4j2
 public class EastmoneySpider {
-	// 东方财富分笔数据
-//	private static final String URL_FORMAT = "https://push2.eastmoney.com/api/qt/stock/details/get?secid=%s.%s&fields1=f1,f2,f3,f4,f5&fields2=f51,f52,f53,f54,f55&pos=-111125&";
 	@Autowired
 	private EsFinYjygDao esFinYjygDao;
 	@Autowired
 	private EsFinYjkbDao esFinYjkbDao;
-
-	// @Autowired
-	// private RedisUtil redisUtil;
 
 	public static int formatCode(String code) {
 		if (code.startsWith("6")) {
@@ -68,164 +63,108 @@ public class EastmoneySpider {
 		}
 	}
 
-//	public synchronized static List<String> getRealtimeTickByJob(String code) {
-//		try {
-//			int mk = EastmoneySpider.formatCode(code);
-//			JSONObject result = HttpUtil.doGet(String.format(URL_FORMAT, mk, code));
-//			JSONObject data = (JSONObject) result.get("data");
-//			JSONArray details = (JSONArray) data.get("details");
-//			List<String> list = new LinkedList<String>();
-//			for (int i = 0; i < details.size(); i++) {
-//				String line = details.get(i).toString();
-//				if (i <= 50) {
-//					TickData d = TickDataUitl.getDataObjectFromEasymoney(line);
-//					// 排除集合竞价
-//					if (Integer.valueOf(d.getTime().replaceAll(":", "")) >= 92500) {
-//						list.add(line);
-//					}
-//				} else {
-//					list.add(line);
-//				}
-//			}
-//			if (list.size() < 20) {
-//				return null;
-//			}
-//			return list;
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return null;
-//		} finally {
-//		}
-//	}
-//
-//	public static List<TickData> getRealtimeTick(String code) {
-//		try {
-//			int mk = EastmoneySpider.formatCode(code);
-//			JSONObject result = HttpUtil.doGet(String.format(URL_FORMAT, mk, code));
-//			JSONObject data = (JSONObject) result.get("data");
-//			JSONArray details = (JSONArray) data.get("details");
-//			List<TickData> list = new LinkedList<TickData>();
-//			for (int i = 0; i < details.size(); i++) {
-//				String line = details.get(i).toString();
-//				TickData d = TickDataUitl.getDataObjectFromEasymoney(line);
-//				if (i <= 100) {
-//					// 排除集合竞价
-//					if (Integer.valueOf(d.getTime().replaceAll(":", "")) >= 92500) {
-//						list.add(d);
-//					}
-//				} else {
-//					list.add(d);
-//				}
-//			}
-//			if (list.size() > 0) {
-//				list.get(0).setType(TickDataUitl.UN);
-//			}
-//			return list;
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			WxPushUtil.pushSystem1("东方财富获取分笔失败:code=" + code);
-//			return Collections.emptyList();
-//		}
-//	}
-
 	/**
-	 * 财务信息
+	 * 财务信息-主要指标
 	 * 
 	 * @param code 6位普通股票代码
 	 * @param type 0按报告期、1=年报
-	 * @return http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=1&code=SZ300750
+	 * @return http://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=sz000001
 	 */
-//	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=%s&code=%s";
-	static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/ZYZBAjaxNew?type=%s&code=%s";
+	static final String financeUrl = "http://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew?type=%s&code=%s";
 	static final double Yi10 = CurrencyUitl.YI_N.doubleValue() * 10;// 10亿
 
-	public static List<FinanceBaseInfoPage> getNewFinanceAnalysis(String code) {
+	// http://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=sz000001
+	// 1.主要指标ZYZBAjaxNew 返回9条记录
+	// 2.杜邦分析DBFXAjaxNew 返回9条记录
+	// 3.百分比分析bfbbbAjaxNew 返回12条记录
+	// 4.资产负债表zcfzbAjaxNew 返回5条记录
+	// 5.利润表lrbAjaxNew 返回5条记录
+	// 6.现金流xjllbAjaxNew 返回5条记录
+	static final int FETCH_CNT = 5;// 所以默认返回5条
+
+	// companyType:1券商，2保险,3银行，4企业
+	public static List<FinanceBaseInfoPage> getNewFinanceAnalysis(String code, int companyType) {
 		int trytime = 0;
 		do {
 			trytime++;
 			try {
 				List<FinanceBaseInfoPage> list = new ArrayList<FinanceBaseInfoPage>();
 				String url = String.format(financeUrl, 0, formatCode2(code));
-				System.err.println(url);
 				String result = HttpUtil.doGet2(url);
-				System.err.println(result);
 				JSONObject jsonobj = JSON.parseObject(result);
 				JSONArray objects = jsonobj.getJSONArray("data");
 				for (int i = 0; i < objects.size(); i++) {
 					JSONObject data = objects.getJSONObject(i);
 					String date = data.get("REPORT_DATE").toString(); // 年报日期
-					System.err.println(date);
-					System.err.println(date.substring(0, 10));
-					System.err.println(date.substring(0, 10).replaceAll("-", ""));
 					FinanceBaseInfoPage page = new FinanceBaseInfoPage(code,
 							Integer.valueOf(date.substring(0, 10).replaceAll("-", "")));
 					try {
-						Double yyzsrtbzz = data.getDouble("yyzsrtbzz"); // 营业总收入同比增长(%)
+						Double yyzsrtbzz = data.getDouble("TOTALOPERATEREVETZ"); // 营业总收入同比增长(%)
 						page.setYyzsrtbzz(yyzsrtbzz);
 					} catch (Exception e) {
 					}
 					try {
-						Double gsjlrtbzz = data.getDouble("gsjlrtbzz"); // 归属净利润同比增长(%)
+						Double gsjlrtbzz = data.getDouble("PARENTNETPROFITTZ"); // 归属净利润同比增长(%)
 						page.setGsjlrtbzz(gsjlrtbzz);
 					} catch (Exception e) {
 					}
 					try {
-						Double kfjlrtbzz = data.getDouble("kfjlrtbzz"); // 扣非净利润同比增长(%)
+						Double kfjlrtbzz = data.getDouble("KCFJCXSYJLRTZ"); // 扣非净利润同比增长(%)
 						page.setKfjlrtbzz(kfjlrtbzz);
 					} catch (Exception e) {
 					}
 
 					try {
-						Long yyzsr = CurrencyUitl.covertToLong(data.get("yyzsr").toString()); // 营业总收入
+						Long yyzsr = CurrencyUitl.covertToLong(data.get("TOTALOPERATEREVE").toString()); // 营业总收入
 						page.setYyzsr(yyzsr);
 					} catch (Exception e) {
 					}
 					try {
-						Long gsjlr = CurrencyUitl.covertToLong(data.get("gsjlr").toString()); // 归属净利润
+						Long gsjlr = CurrencyUitl.covertToLong(data.get("PARENTNETPROFIT").toString()); // 归属净利润
 						page.setGsjlr(gsjlr);
 					} catch (Exception e) {
 					}
 					try {
-						Long kfjlr = CurrencyUitl.covertToLong(data.get("kfjlr").toString()); // 扣非净利润同比增长(%)
+						Long kfjlr = CurrencyUitl.covertToLong(data.get("KCFJCXSYJLR").toString()); // 扣非净利润
 						page.setKfjlr(kfjlr);
 					} catch (Exception e) {
 					}
 					try {
-						Double jqjzcsyl = data.getDouble("jqjzcsyl"); // 加权净资产收益率(%)
+						Double jqjzcsyl = data.getDouble("ROEJQ"); // 加权净资产收益率(%)
 						page.setJqjzcsyl(CurrencyUitl.roundHalfUp(jqjzcsyl));
 						page.setSyldjd(CurrencyUitl.roundHalfUp(jqjzcsyl / (double) page.getQuarter()));
 					} catch (Exception e) {
 					}
 					try {
-						Double tbjzcsyl = data.getDouble("tbjzcsyl"); // 摊薄净资产收益率(%)
-						page.setTbjzcsyl(CurrencyUitl.roundHalfUp(tbjzcsyl));
-					} catch (Exception e) {
-					}
-					try {
-						Double mgjyxjl = data.getDouble("mgjyxjl");
+						Double mgjyxjl = data.getDouble("MGJYXJJE");
 						page.setMgjyxjl(CurrencyUitl.roundHalfUp(mgjyxjl));
 					} catch (Exception e) {
 					}
 					try {
-						Double mll = data.getDouble("mll");
+						Double mll = data.getDouble("XSMLL");
 						page.setMll(CurrencyUitl.roundHalfUp(mll));
 					} catch (Exception e) {
 					}
 					try {
-						Double zcfzl = data.getDouble("zcfzl");
+						Double zcfzl = data.getDouble("ZCFZL");
 						page.setZcfzl(zcfzl);
 					} catch (Exception e) {
 					}
 
 					list.add(page);
+					if (list.size() >= FETCH_CNT) {
+						break;
+					}
 				}
 				if (list.size() > 0) {
-					String dates = EastmoneyZcfzbSpider.getDates(code);
+					// String dates = EastmoneyZcfzbSpider.getDates(code, list.size());
+					String dates = EastmoneyZcfzbSpider.getDates(list);
 					if (dates == null) {
 						throw new RuntimeException("未获取到dates参数");
 					}
-					Map<String, FinanceZcfzb> fzb = EastmoneyZcfzbSpider.getZcfzb(code, dates);
-					Map<String, FinanceZcfzb> llb = EastmoneyZcfzbSpider.getXjllb(code, dates);
+
+					Map<String, FinanceZcfzb> fzb = EastmoneyZcfzbSpider.getZcfzb(code, companyType, dates);
+					Map<String, FinanceZcfzb> llb = EastmoneyZcfzbSpider.getXjllb(code, companyType, dates);
 					for (FinanceBaseInfoPage page : list) {
 						FinanceZcfzb llba = llb.get(page.getId());
 						if (llba != null) {
@@ -686,7 +625,7 @@ public class EastmoneySpider {
 //		EastmoneySpider es = new EastmoneySpider();
 //		es.getFinYjkb();
 
-		List<FinanceBaseInfoPage> l = EastmoneySpider.getNewFinanceAnalysis("000001");
+		List<FinanceBaseInfoPage> l = EastmoneySpider.getNewFinanceAnalysis("000498", 4);
 		for (FinanceBaseInfoPage r : l) {
 			System.err.println(r);
 		}

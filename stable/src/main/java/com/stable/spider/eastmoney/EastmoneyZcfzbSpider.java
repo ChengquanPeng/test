@@ -1,9 +1,9 @@
 package com.stable.spider.eastmoney;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -15,6 +15,7 @@ import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.FinanceZcfzb;
+import com.stable.vo.bus.FinanceBaseInfoPage;
 
 //**
 //资产负债表
@@ -34,24 +35,25 @@ public class EastmoneyZcfzbSpider {
 		}
 	}
 
-	/**
-	 * 财务信息
-	 * 
-	 * @param code 6位普通股票代码
-	 * @param type 0按报告期、1=年报
-	 *             http://f10.eastmoney.com/NewFinanceAnalysis/zcfzbAjax?companyType=4&reportDateType=0&reportType=2&endDate=&code=SZ002752
-	 */
-	public static final String financeUrl = "http://f10.eastmoney.com/NewFinanceAnalysis/zcfzbAjaxNew?companyType=4&reportDateType=0&reportType=1&dates=%s&code=%s";
-	public static final String fud = "http://f10.eastmoney.com/NewFinanceAnalysis/lrbDateAjaxNew?companyType=4&reportDateType=0&code=%s";
+	public static final String financeUrl = "http://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/zcfzbAjaxNew?companyType=%s&reportDateType=0&reportType=1&dates=%s&code=%s";
+	public static final String fud = "http://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/lrbDateAjaxNew?companyType=%s&reportDateType=0&code=%s";
 
-	public static String getDates(String code) {
+	public static String getDates(List<FinanceBaseInfoPage> list) {
+		StringBuffer sb = new StringBuffer();
+		for (FinanceBaseInfoPage r : list) {
+			sb.append(DateUtil.parseDateStr(r.getDate())).append(Constant.DOU_HAO);
+		}
+		return sb.toString();
+	}
+
+	public static String getDates(String code, int companyType, int cnt) {
 		int trytime = 0;
 		do {
 			trytime++;
 			try {
 
 				ThreadsUtil.sleepRandomSecBetween1And2();
-				String url = String.format(fud, formatCode2(code), System.currentTimeMillis());
+				String url = String.format(fud, companyType, formatCode2(code), System.currentTimeMillis());
 				System.err.println(url);
 				String result = HttpUtil.doGet2(url);
 				System.err.println(result);
@@ -65,12 +67,12 @@ public class EastmoneyZcfzbSpider {
 					fzb.setCode(code);
 					String date = data.get("REPORT_DATE").toString(); // 年报日期
 					date = date.substring(0, 10);
-					sb.append(date);
-					if (i >= 5) {
+					sb.append(date).append(Constant.DOU_HAO);
+					if (i >= cnt) {
 						break;
 					}
-					sb.append(Constant.DOU_HAO);
 				}
+				// return sb.deleteCharAt(sb.length()-1).toString();
 				return sb.toString();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -81,17 +83,18 @@ public class EastmoneyZcfzbSpider {
 		return null;
 	}
 
-	public static Map<String, FinanceZcfzb> getZcfzb(String code, String dates) {
+	public static Map<String, FinanceZcfzb> getZcfzb(String code, int companyType, String dates) {
 		int trytime = 0;
 		do {
 			trytime++;
 			try {
 				ThreadsUtil.sleepRandomSecBetween1And2();
 				Map<String, FinanceZcfzb> m = new HashMap<String, FinanceZcfzb>();
-				String url = String.format(financeUrl, dates, formatCode2(code), System.currentTimeMillis());
-				System.err.println(url);
+				String url = String.format(financeUrl, companyType, dates, formatCode2(code),
+						System.currentTimeMillis());
+//				System.err.println(url);
 				String result = HttpUtil.doGet2(url);
-				System.err.println(result);
+//				System.err.println(result);
 				JSONObject jsonobj = JSON.parseObject(result);
 				JSONArray objects = jsonobj.getJSONArray("data");
 				for (int i = 0; i < objects.size(); i++) {
@@ -108,19 +111,19 @@ public class EastmoneyZcfzbSpider {
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setSumAsset(Double.valueOf(data.getString("SUMASSET")));// 总资产 x
+						fzb.setSumAsset(Double.valueOf(data.getString("TOTAL_ASSETS")));// 总资产 x
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setSumDebt(Double.valueOf(data.getString("SUMLIAB")));// 负债总计 x
+						fzb.setSumDebt(Double.valueOf(data.getString("TOTAL_LIABILITIES")));// 负债总计 x
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setSumDebtLd(Double.valueOf(data.getString("SUMLLIAB")));// 流动负债总计
+						fzb.setSumDebtLd(Double.valueOf(data.getString("TOTAL_CURRENT_LIAB")));// 流动负债总计
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setNetAsset(Double.valueOf(data.getString("SUMSHEQUITY")));// 净资产
+						fzb.setNetAsset(Double.valueOf(data.getString("TOTAL_EQUITY")));// 净资产
 					} catch (Exception e) {
 					}
 					try {
@@ -129,27 +132,27 @@ public class EastmoneyZcfzbSpider {
 					}
 
 					try {
-						fzb.setAccountrec(Double.valueOf(data.getString("ACCOUNTREC")));// 应收账款（是否自己贴钱在干活，同行业比较）
+						fzb.setAccountrec(Double.valueOf(data.getString("ACCOUNTS_RECE")));// 应收账款（是否自己贴钱在干活，同行业比较）
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setInterestPay(Double.valueOf(data.getString("INTERESTPAY")));// 应付利息:如果较高，公司在大量有息借钱，关联到货币资金和未分配利润。如果货币资金和未分配利润较高，明明有钱为什么借钱，
+						fzb.setInterestPay(Double.valueOf(data.getString("INTEREST_PAYABLE")));// 应付利息:如果较高，公司在大量有息借钱，关联到货币资金和未分配利润。如果货币资金和未分配利润较高，明明有钱为什么借钱，
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setAccountPay(Double.valueOf(data.getString("ACCOUNTPAY")));// 应付账款:欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算
+						fzb.setAccountPay(Double.valueOf(data.getString("ACCOUNTS_PAYABLE")));// 应付账款:欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setRetaineDearning(Double.valueOf(data.getString("RETAINEDEARNING")));// 未分配利润
+						fzb.setRetaineDearning(Double.valueOf(data.getString("UNASSIGN_RPOFIT")));// 未分配利润
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setSumLasset(Double.valueOf(data.getString("SUMLASSET")));// 流动资产合计
+						fzb.setSumLasset(Double.valueOf(data.getString("TOTAL_CURRENT_ASSETS")));// 流动资产合计
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setMonetaryFund(Double.valueOf(data.getString("MONETARYFUND")));// 货币资金
+						fzb.setMonetaryFund(Double.valueOf(data.getString("MONETARYFUNDS")));// 货币资金
 					} catch (Exception e) {
 					}
 					try {
@@ -158,11 +161,11 @@ public class EastmoneyZcfzbSpider {
 					}
 
 					try {
-						fzb.setStborrow(Double.valueOf(data.getString("STBORROW")));// 短期借款-STBORROW
+						fzb.setStborrow(Double.valueOf(data.getString("SHORT_LOAN")));// 短期借款-STBORROW
 					} catch (Exception e) {
 					}
 					try {
-						fzb.setLtborrow(Double.valueOf(data.getString("LTBORROW")));// 长期借款-LTBORROW
+						fzb.setLtborrow(Double.valueOf(data.getString("LONG_LOAN")));// 长期借款-LTBORROW
 					} catch (Exception e) {
 					}
 //					System.err.println(fzb + " " + CurrencyUitl.covertToString(fzb.getSumAsset()) + " "
@@ -187,7 +190,9 @@ public class EastmoneyZcfzbSpider {
 
 	public static void main(String[] args) {
 		String code = "600446";
-		Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getZcfzb(code, EastmoneyZcfzbSpider.getDates(code));
+		int companyType = 3;
+		Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getZcfzb(code, companyType,
+				EastmoneyZcfzbSpider.getDates(code, companyType, 5));
 		for (String key : m.keySet()) {
 			System.err.println(m.get(key));
 		}
@@ -202,32 +207,31 @@ public class EastmoneyZcfzbSpider {
 	 * @param type 0按报告期、1=年报
 	 * @return http://f10.eastmoney.com/NewFinanceAnalysis/MainTargetAjax?type=1&code=SZ300750
 	 */
-	static final String financeUrlxjl = "http://f10.eastmoney.com/NewFinanceAnalysis/xjllbAjax?companyType=4&reportDateType=%s&reportType=1&endDate=&code=%s";
+	static final String financeUrlxjl = "http://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/xjllbAjaxNew?companyType=%s&reportDateType=0&reportType=1&dates=%s&code=%s&t=%s";
 
-	// http://f10.eastmoney.com/NewFinanceAnalysis/lrbAjaxNew?companyType=4&reportDateType=0&reportType=1&dates=2021-09-30%2C2021-06-30%2C2021-03-31%2C2020-12-31%2C2020-09-30&code=SH600446
-	@SuppressWarnings("deprecation")
-	public static Map<String, FinanceZcfzb> getXjllb(String code, String dates) {
+	public static Map<String, FinanceZcfzb> getXjllb(String code, int companyType, String dates) {
 		int trytime = 0;
 		do {
 			trytime++;
 			try {
 				ThreadsUtil.sleepRandomSecBetween1And2();
 				Map<String, FinanceZcfzb> m = new HashMap<String, FinanceZcfzb>();
-				String url = String.format(financeUrlxjl, formatCode2(code), System.currentTimeMillis());
+				String url = String.format(financeUrlxjl, companyType, dates, formatCode2(code),
+						System.currentTimeMillis());
 				String result = HttpUtil.doGet2(url);
-				result = result.substring(1, result.length() - 1);
-				result = StringUtils.replaceAll(result, "\\\\", "");
-				JSONArray objects = JSON.parseArray(result);
+				JSONObject jsonobj = JSON.parseObject(result);
+				JSONArray objects = jsonobj.getJSONArray("data");
 				for (int i = 0; i < objects.size(); i++) {
 					JSONObject data = objects.getJSONObject(i);
 					FinanceZcfzb fzb = new FinanceZcfzb();
 					fzb.setCode(code);
-					String date = data.get("REPORTDATE").toString(); // 年报日期
-					fzb.setDate(DateUtil.formatYYYYMMDDReturnInt(DateUtil.parseDate3(date)));
+					String date = data.get("REPORT_DATE").toString(); // 年报日期
+					fzb.setDate(
+							DateUtil.formatYYYYMMDDReturnInt(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS)));
 					fzb.setId(code + "_" + fzb.getDate());
 
 					try {
-						fzb.setGoodWill(Double.valueOf(data.getString("NETOPERATECASHFLOW")));// 商誉
+						fzb.setGoodWill(Double.valueOf(data.getString("NETCASH_OPERATE")));// 经营活动产生的现金流量净额 <--
 					} catch (Exception e) {
 					}
 //					System.err.println(fzb + " " + CurrencyUitl.covertToString(fzb.getSumAsset()) + " "

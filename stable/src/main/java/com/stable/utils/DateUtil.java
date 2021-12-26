@@ -73,6 +73,17 @@ public class DateUtil {
 		return Integer.valueOf(formatYYYYMMDD(date));
 	}
 
+	public static String parseDateStr(int yyyyMMdd) {
+		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
+		SimpleDateFormat format2 = new SimpleDateFormat(YYYY_MM_DD2);
+		try {
+			return format2.format(format.parse(String.valueOf(yyyyMMdd)));
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new RuntimeException("ParseException:yyyyMMdd:" + yyyyMMdd);
+		}
+	}
+
 	public static Date parseDate(int yyyyMMdd) {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD);
 		try {
