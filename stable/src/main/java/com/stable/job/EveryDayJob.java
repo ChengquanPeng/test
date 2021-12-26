@@ -49,8 +49,6 @@ public class EveryDayJob extends MySimpleJob {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-		log.info("大宗交易");
-		emDzjySpider.byDaily(DateUtil.formatYYYYMMDD2(cal.getTime()), date);
 //		emDzjySpider.byJob();
 		monitorPoolService.jobDzjyWarning();
 		log.info("回购公告");
@@ -74,6 +72,8 @@ public class EveryDayJob extends MySimpleJob {
 		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY
 				&& cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
 //			financeService.fetchFinances();
+			log.info("大宗交易");
+			emDzjySpider.byDaily(DateUtil.formatYYYYMMDD2(cal.getTime()));
 			codeModelService.runJobv2(date, false);
 		} else {
 			// WxPushUtil.pushSystem1("周五，周六，周日每晚23点不在运行定时运行 code model,周日下午在继续运行！");

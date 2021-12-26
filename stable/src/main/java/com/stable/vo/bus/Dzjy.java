@@ -33,10 +33,14 @@ public class Dzjy {
 	private String salesname;// 卖方
 	@Field(type = FieldType.Double)
 	private double rchange;// 溢折价
-	@Field(type = FieldType.Double)
-	private String dfcfid;// dfcfid
+	@Field(type = FieldType.Text)
+	private String saleCode;// saleCode
+	@Field(type = FieldType.Text)
+	private String buyCode;// buyCode
+	@Field(type = FieldType.Integer)
+	private int dailyRank;// dailyRank
 
 	public void setId() {
-		id = code + date + dfcfid;
+		id = code + date + dailyRank + tval + "|" + saleCode + "|" + buyCode;
 	}
 }

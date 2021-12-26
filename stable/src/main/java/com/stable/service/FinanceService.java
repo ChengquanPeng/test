@@ -618,7 +618,7 @@ public class FinanceService {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				emDzjySpider.byJob();// 大宗
+				emDzjySpider.dofetchInnerByAll();// 大宗
 				rtl.setDzjyOk(true);
 			}
 		}).start();
@@ -828,6 +828,9 @@ public class FinanceService {
 	}
 
 	public void fetchFinances() {
+		if (1 == 1) {
+			return;
+		}
 		int tradeDate = DateUtil.getTodayIntYYYYMMDD();
 		log.info("同步财务报告报告[started]");
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
