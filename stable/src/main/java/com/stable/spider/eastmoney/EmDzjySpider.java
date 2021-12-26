@@ -137,6 +137,7 @@ public class EmDzjySpider {
 
 	}
 
+//	@PostConstruct
 	public void byWeb() {
 		new Thread(new Runnable() {
 			@Override
@@ -218,13 +219,19 @@ public class EmDzjySpider {
 					log.info(url);
 					String result = HttpUtil.doGet2(url);
 					result = result.substring(jQuery112303025386501906322_1640499199509.length(), result.length() - 2);
-					JSONObject object = JSON.parseObject(result).getJSONObject("result");
-					totPage = object.getIntValue("pages");
-					JSONArray objects = object.getJSONArray("data");
-					for (int i = 0; i < objects.size(); i++) {
-						getData(objects.getJSONObject(i), list);
+					JSONObject object = JSON.parseObject(result);
+
+					if (object.getBooleanValue("success")) {
+						object = object.getJSONObject("result");
+						totPage = object.getIntValue("pages");
+						JSONArray objects = object.getJSONArray("data");
+						for (int i = 0; i < objects.size(); i++) {
+							getData(objects.getJSONObject(i), list);
+						}
+					} else {
+						log.info("{} 未获取到大宗交易", code);
 					}
-					break;
+					break;// 获取完成，退出
 				} catch (Exception e) {
 					e.printStackTrace();
 					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
