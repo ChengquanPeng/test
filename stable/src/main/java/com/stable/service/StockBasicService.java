@@ -210,6 +210,13 @@ public class StockBasicService {
 		}
 	}
 
+	public synchronized void recashToRedis() {
+		List<StockBaseInfo> list = getAllOnStatusListWithSort();
+		for (StockBaseInfo b : list) {
+			redisUtil.set(b.getCode(), b);
+		}
+	}
+
 	public synchronized List<StockBaseInfo> getAllOnStatusListWithOutSort() {
 		return getAllOnStatusListWithSort(false);
 	}

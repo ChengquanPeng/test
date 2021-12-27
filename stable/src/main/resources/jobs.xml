@@ -52,7 +52,7 @@
 		class="com.stable.job.EveryDayMorningJob"
 		registry-center-ref="regCenter" cron="0 05 1 ? * * *"
 		sharding-item-parameters="0=a"
-		description="每日凌晨01点05执行任务(股东人数)" sharding-total-count="1"
+		description="每日凌晨01点05执行每日任务" sharding-total-count="1"
 		overwrite="true" />
 	
 	<job:simple id="EveryWeekMonJob"
