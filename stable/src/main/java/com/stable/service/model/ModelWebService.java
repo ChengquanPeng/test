@@ -174,13 +174,16 @@ public class ModelWebService {
 
 		// 博弈-基本面
 		StringBuffer sb5 = new StringBuffer();
-		if (dh.getShooting1() > 0 || dh.getShooting2() > 0) {
+		if (dh.getShooting1() > 0 || dh.getShooting2() > 0 || dh.getShooting3() > 0) {
 			sb5.append("<font color='red'>");
 			if (dh.getShooting1() > 0) {
 				sb5.append("小票底部大宗超5千万,机构代持？非董监高减持");
 			}
 			if (dh.getShooting2() > 0) {
 				sb5.append("大票底部增发超过50亿(越大越好),证监会-底部拿筹涨停?");
+			}
+			if (dh.getShooting3() > 0) {
+				sb5.append("融资余额暴增?");
 			}
 			sb5.append("</font>").append(Constant.HTML_LINE);
 		}
@@ -475,6 +478,8 @@ public class ModelWebService {
 				bqb.must(QueryBuilders.matchPhraseQuery("shooting1", 1));
 			} else if (mr.getShooting() == 2) {
 				bqb.must(QueryBuilders.matchPhraseQuery("shooting2", 1));
+			} else if (mr.getShooting() == 3) {
+				bqb.must(QueryBuilders.matchPhraseQuery("shooting3", 1));
 			}
 		}
 

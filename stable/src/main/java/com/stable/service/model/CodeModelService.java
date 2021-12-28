@@ -65,6 +65,7 @@ import com.stable.vo.bus.FinanceBaseInfoHangye;
 import com.stable.vo.bus.HolderPercent;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.Rztj;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
@@ -197,12 +198,14 @@ public class CodeModelService {
 				}
 				// 高质押
 				ZhiYa zy = zhiYaService.getZhiYa(code);
+				Rztj rztj = dzjyService.getLastRztj(code);
 				double mkv = d.getCircMarketVal();
 				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listHist, d, zy);
 				listLast.add(newOne);
 
 				newOne.setTagDzPriceLow(0);
 				newOne.setTagHighZyChance(0);
+				newOne.setShooting3(rztj.getValid());
 				// 市值
 				newOne.setMkv(mkv);
 				if (mkv > 0 && s.getCircZb() > 0) {

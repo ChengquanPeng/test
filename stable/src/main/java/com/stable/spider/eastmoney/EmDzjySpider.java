@@ -114,9 +114,7 @@ public class EmDzjySpider {
 				String url = URL_S1 + page + URL_S2 + d + URL_E;
 				log.info(url);
 				String result = HttpUtil.doGet2(url);
-				System.err.println(result);
 				result = result.substring(J_QUERY112306735504837667934_1610722345186.length(), result.length() - 2);
-				System.err.println(result);
 				JSONObject object = JSON.parseObject(result).getJSONObject("result");
 				pages = object.getInteger("pages");
 				JSONArray objects = object.getJSONArray("data");
@@ -230,6 +228,7 @@ public class EmDzjySpider {
 						}
 					} else {
 						log.info("{} 未获取到大宗交易", code);
+						return;
 					}
 					break;// 获取完成，退出
 				} catch (Exception e) {
