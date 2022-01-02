@@ -104,7 +104,7 @@ public class DzjyService {
 	int size1 = EsQueryPageUtil.queryPage20.getPageSize();
 	Pageable pageable1 = PageRequest.of(pageNum1, size1);
 
-	public boolean rzrqAvg20d(String code, double validLine, Rztj rztj) {
+	public boolean rzrqAvg20d(String code, double validPersentLine, double validBlance, Rztj rztj) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
@@ -114,6 +114,9 @@ public class DzjyService {
 		Page<RzrqDaliy> page = rzrqDaliyDao.search(sq);
 		if (page != null && !page.isEmpty() && page.getContent().size() > 1) {
 			RzrqDaliy daliy = page.getContent().get(0);
+			if (daliy.getBalance() < validBlance) {// 融资余额太少
+				return false;
+			}
 			double t = 0.0d;
 			for (int i = 0; i < page.getContent().size(); i++) {
 				RzrqDaliy rd = page.getContent().get(i);
@@ -124,7 +127,7 @@ public class DzjyService {
 			double avg = t / (page.getContent().size() - 1);// 除去最新的一天
 			rztj.setTotalAmt(daliy.getBalance());
 			rztj.setAvgAmt(CurrencyUitl.roundHalfUp(avg));
-			if (CurrencyUitl.cutProfit(rztj.getAvgAmt(), daliy.getBalance()) > validLine) {
+			if (CurrencyUitl.cutProfit(rztj.getAvgAmt(), daliy.getBalance()) > validPersentLine) {
 				return true;
 			}
 		}

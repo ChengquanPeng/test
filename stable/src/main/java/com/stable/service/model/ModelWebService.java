@@ -183,7 +183,8 @@ public class ModelWebService {
 				sb5.append("大票底部增发超过50亿(越大越好),证监会-底部拿筹涨停?");
 			}
 			if (dh.getShooting3() > 0) {
-				sb5.append("融资余额暴增?");
+				sb5.append("<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/" + dh.getCode()
+						+ ".html'>融资余额暴增?</a>");
 			}
 			sb5.append("</font>").append(Constant.HTML_LINE);
 		}

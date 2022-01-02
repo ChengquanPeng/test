@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import com.stable.es.dao.base.RzrqDaliyDao;
 import com.stable.es.dao.base.RztjDao;
 import com.stable.service.DzjyService;
 import com.stable.service.StockBasicService;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HttpUtil;
@@ -74,6 +76,7 @@ public class RzrqSpider {
 	}
 
 	private double vaildLine = 30.0;// 超过平均数20%认为有效
+	private double validBlance = 1.5 * CurrencyUitl.YI_N.doubleValue();// 1.5亿
 
 	private synchronized void exeRzrqTime(Set<String> codes, int date) {
 		int validDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(DateUtil.parseDate(date), 20));// 有效期
@@ -83,7 +86,7 @@ public class RzrqSpider {
 			Rztj rztj = dzjyService.getLastRztj(code);
 			rztj.setUpdateDate(date);
 			if (rztj.getValidDate() < date) {// 失效了，重新统计
-				if (dzjyService.rzrqAvg20d(code, vaildLine, rztj)) {
+				if (dzjyService.rzrqAvg20d(code, vaildLine, validBlance, rztj)) {
 					rztj.setValid(1);
 					rztj.setValidDate(validDate);
 				} else {
@@ -134,7 +137,20 @@ public class RzrqSpider {
 		return pages;
 	}
 
-//	@PostConstruct
+	public void byWeb(Callable<Boolean> back) {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				dofetchInnerByAll();
+				try {
+					back.call();// 顺序执行
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	}
+
 	public void byWeb() {
 		new Thread(new Runnable() {
 			@Override
@@ -257,7 +273,7 @@ public class RzrqSpider {
 //		es.byDaily("2021-12-24");
 
 		List<RzrqDaliy> list = new LinkedList<RzrqDaliy>();
-		es.dofetchByCode("000498", list);
+		es.dofetchByCode("000728", list);
 		System.err.println(list.size());
 
 	}

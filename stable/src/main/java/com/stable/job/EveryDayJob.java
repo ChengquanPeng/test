@@ -9,11 +9,13 @@ import org.springframework.stereotype.Component;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.service.BuyBackService;
 import com.stable.service.ChipsZfService;
+import com.stable.service.TradeCalService;
 import com.stable.service.ZhiYaService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.eastmoney.EmDzjySpider;
+import com.stable.spider.eastmoney.RzrqSpider;
 import com.stable.spider.official.JysSpider;
 import com.stable.spider.ths.ThsSpider;
 import com.stable.utils.DateUtil;
@@ -41,49 +43,37 @@ public class EveryDayJob extends MySimpleJob {
 	@Autowired
 	private EmDzjySpider emDzjySpider;
 	@Autowired
+	private RzrqSpider rzrqSpider;
+	@Autowired
 	private ThsSpider thsSpider;
 	@Autowired
 	private ZhiYaService zhiYaService;
 	@Autowired
 	private EastmoneySpider eastmoneySpider;
+	@Autowired
+	private TradeCalService tradeCalService;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-//		emDzjySpider.byJob();
 		monitorPoolService.jobDzjyWarning();
 		log.info("回购公告");
 		buyBackService.jobFetchHistEveryDay();
-
+		log.info("定增完成预警公告");
+		monitorPoolService.jobZfDoneWarning();
+		log.info("定增扩展属性");
+		chipsZfService.jobZengFaExt(true);
+		log.info("无效概念清除");
+		thsSpider.deleteInvaildCodeConcept();
+		log.info("交易所公告");
+		jysSpider.byJob();
 //		log.info("过期文件的删除");
 //		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 //		FileDeleteUitl.deletePastDateFile(efc.getModelImageFloder());
 //		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloder());
 //		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloderDesc());
-
-		log.info("定增完成预警公告");
-		monitorPoolService.jobZfDoneWarning();
-		log.info("定增扩展属性");
-		chipsZfService.jobZengFaExt(true);
-
-		log.info("交易所公告");
-		jysSpider.byJob();
-
-		// 周一周4执行，每周末抓完财报后运行
-		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY
-				&& cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
-//			financeService.fetchFinances();
-			log.info("大宗交易");
-			emDzjySpider.byDaily(DateUtil.formatYYYYMMDD2(cal.getTime()));
-			codeModelService.runJobv2(date, false);
-		} else {
-			// WxPushUtil.pushSystem1("周五，周六，周日每晚23点不在运行定时运行 code model,周日下午在继续运行！");
-		}
-		log.info("无效概念清除");
-		thsSpider.deleteInvaildCodeConcept();
-
 		log.info("周五晚上，质押");
 		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
 			new Thread(new Runnable() {
@@ -98,8 +88,24 @@ public class EveryDayJob extends MySimpleJob {
 				}
 			}).start();
 		}
+		if (!tradeCalService.isOpen(date)) {
+			return;
+		}
+
+		String dateYYYY_ = DateUtil.formatYYYYMMDD2(cal.getTime());
+		// 周一周4执行，每周末抓完财报后运行
+		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY
+				&& cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
+			log.info("大宗交易");
+			emDzjySpider.byDaily(dateYYYY_);
+			log.info("融资融券");
+			rzrqSpider.byDaily(dateYYYY_, date);
+			codeModelService.runJobv2(date, false);
+			// WxPushUtil.pushSystem1("周五，周六，周日每晚23点不在运行定时运行 code model,周日下午在继续运行！");
+		}
+		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+			log.info("融资融券");
+			rzrqSpider.byDaily(dateYYYY_, date);
+		}
 	}
-//
-//	@Autowired
-//	private FinanceService financeService;
 }

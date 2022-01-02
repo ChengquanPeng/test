@@ -63,7 +63,7 @@
 
 	<job:simple id="EveryMonthJob"
 		class="com.stable.job.EveryMonthJob" registry-center-ref="regCenter"
-		cron="1 5 1 1 * ?" sharding-item-parameters="0=a"
+		cron="1 5 7 1 * ?" sharding-item-parameters="0=a"
 		description="每月1日凌晨执行（日历同步）" sharding-total-count="1" overwrite="true" />
 
 </beans>
