@@ -637,12 +637,13 @@ public class EastmoneySpider {
 
 	private int getcompanyType(String code) {
 		String url = String.format(urlbase, formatCode2(code));
-		log.info("{} 东方财富company type", code);
 		try {
+			log.info("{} 东方财富 company type", code);
 			String s = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url).getElementById("hidctype").getAttribute("value");
 			int r = Integer.valueOf(s);
 			if (r > 0) {
 				stockBasicService.synDwcfCompanyType(code, r);
+				return r;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -662,7 +663,7 @@ public class EastmoneySpider {
 	public static void main(String[] args) {
 		EastmoneySpider es = new EastmoneySpider();
 		es.htmlunitSpider = new HtmlunitSpider();
-		String code = "000001";
+		String code = "603176";
 //		EastmoneySpider.getNewFinanceAnalysis(code, 0);
 //		String result = HttpUtil.doGet2(yjygBase);
 //		EastmoneySpider es = new EastmoneySpider();
