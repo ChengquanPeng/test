@@ -23,7 +23,7 @@ public class EveryMonthJob extends MySimpleJob {
 	@Autowired
 	private RzrqSpider rzrqSpider;
 
-	public void myexecute(ShardingContext sc) {
+	public synchronized void myexecute(ShardingContext sc) {
 		log.info("开始同步日历");
 		tradeCalService.josSynTradeCal();
 		rzrqSpider.byWeb(new Callable<Boolean>() {

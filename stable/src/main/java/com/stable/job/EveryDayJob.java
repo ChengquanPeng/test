@@ -93,19 +93,15 @@ public class EveryDayJob extends MySimpleJob {
 		}
 
 		String dateYYYY_ = DateUtil.formatYYYYMMDD2(cal.getTime());
+		log.info("大宗交易");
+		emDzjySpider.byDaily(dateYYYY_);
+		log.info("融资融券");
+		rzrqSpider.byDaily(dateYYYY_, date);
 		// 周一周4执行，每周末抓完财报后运行
 		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY
 				&& cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
-			log.info("大宗交易");
-			emDzjySpider.byDaily(dateYYYY_);
-			log.info("融资融券");
-			rzrqSpider.byDaily(dateYYYY_, date);
 			codeModelService.runJobv2(date, false);
 			// WxPushUtil.pushSystem1("周五，周六，周日每晚23点不在运行定时运行 code model,周日下午在继续运行！");
-		}
-		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-			log.info("融资融券");
-			rzrqSpider.byDaily(dateYYYY_, date);
 		}
 	}
 }

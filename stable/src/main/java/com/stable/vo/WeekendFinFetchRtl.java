@@ -7,9 +7,8 @@ public class WeekendFinFetchRtl {
 
 	private boolean thsHolderOk = false;
 	private boolean dfFinOk = false;
-	private boolean dzjyOk = false;
 
 	public boolean isAllOk() {
-		return (thsHolderOk && dfFinOk && dzjyOk);
+		return (thsHolderOk && dfFinOk);
 	}
 }

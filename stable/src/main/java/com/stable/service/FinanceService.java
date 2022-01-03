@@ -36,7 +36,6 @@ import com.stable.service.model.CodeModelService;
 import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
-import com.stable.spider.eastmoney.EmDzjySpider;
 import com.stable.spider.official.JysSpider;
 import com.stable.spider.ths.ThsHolderSpider;
 import com.stable.utils.BeanCopy;
@@ -92,8 +91,6 @@ public class FinanceService {
 	private MonitorPoolDao monitorPoolDao;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
-	@Autowired
-	private EmDzjySpider emDzjySpider;
 
 	// 经营现金流转正监听
 	public void jobXjlWarning() {
@@ -613,13 +610,6 @@ public class FinanceService {
 			public void run() {
 				fetchFinances();// 财务
 				rtl.setDfFinOk(true);
-			}
-		}).start();
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				emDzjySpider.dofetchInnerByAll();// 大宗
-				rtl.setDzjyOk(true);
 			}
 		}).start();
 
