@@ -197,11 +197,11 @@ public class EmDzjySpider {
 				dzjyDao.saveAll(dzl);
 			}
 			exeDzjyYiTime(codes);
-			WxPushUtil.pushSystem1(date + " 东方财富大宗交易-已完成");
+			WxPushUtil.pushSystem1(date + " 东方财富-大宗交易-已完成-ALL");
 		} catch (Exception e) {
 			e.printStackTrace();
-			ErrorLogFileUitl.writeError(e, "东方财富大宗交易-运行异常..", "", "");
-			WxPushUtil.pushSystem1("东方财富大宗交易-运行异常");
+			ErrorLogFileUitl.writeError(e, "东方财富-大宗交易-运行异常..", "", "");
+			WxPushUtil.pushSystem1("东方财富-大宗交易-运行异常");
 		}
 	}
 

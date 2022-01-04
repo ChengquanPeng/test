@@ -399,7 +399,7 @@ public class MonitorPoolService {
 			Integer today = DateUtil.getTodayIntYYYYMMDD();
 			for (MonitorPool mp : list) {
 				Dzjy dzjy = chipsService.getLastDzjy(mp.getCode());
-				if (dzjy.getDate() >= mp.getDzjy()) {
+				if (dzjy.getDate() > mp.getDzjy()) {
 					l.add(mp.getCode());
 					mp.setDzjy(today);
 					monitorPoolDao.save(mp);
@@ -410,7 +410,7 @@ public class MonitorPoolService {
 				for (String s : l) {
 					sb.append(stockBasicService.getCodeName2(s)).append(Constant.DOU_HAO);
 				}
-				WxPushUtil.pushSystem1("今日大宗交易:" + sb.toString());
+				WxPushUtil.pushSystem1("关注票的大宗交易:" + sb.toString());
 			}
 		}
 

@@ -215,7 +215,7 @@ public class RzrqSpider {
 				rzrqDaliyDao.saveAll(dzl);
 			}
 			exeRzrqTime(codes, date);
-			WxPushUtil.pushSystem1(date + " 东方财富-融资融券-已完成");
+			WxPushUtil.pushSystem1(date + " 东方财富-融资融券-已完成-ALL");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "东方财富-融资融券-运行异常..", "", "");
