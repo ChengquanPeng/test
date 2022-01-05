@@ -69,7 +69,7 @@ public class RzrqSpider {
 		if (l.size() > 0) {
 			rzrqDaliyDao.saveAll(l);
 		}
-		log.info("codes size:{}", 0);
+		log.info("codes size:{}", codes.size());
 
 		// STEP3:计算-最新涨幅是否超过20%
 		exeRzrqTime(codes, date);
@@ -127,7 +127,7 @@ public class RzrqSpider {
 						codes.add(rd.getCode());
 					}
 				}
-				return 0;
+				return pages;
 			} catch (Exception e) {
 				e.printStackTrace();
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
@@ -270,11 +270,11 @@ public class RzrqSpider {
 	public static void main(String[] args) {
 
 		RzrqSpider es = new RzrqSpider();
-//		es.byDaily("2021-12-24");
+		es.byDaily("2022-01-04", 20220104);
 
-		List<RzrqDaliy> list = new LinkedList<RzrqDaliy>();
-		es.dofetchByCode("000728", list);
-		System.err.println(list.size());
+//		List<RzrqDaliy> list = new LinkedList<RzrqDaliy>();
+//		es.dofetchByCode("000728", list);
+//		System.err.println(list.size());
 
 	}
 

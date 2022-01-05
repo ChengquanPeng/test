@@ -15,7 +15,6 @@ import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.eastmoney.EmDzjySpider;
-import com.stable.spider.eastmoney.RzrqSpider;
 import com.stable.spider.official.JysSpider;
 import com.stable.spider.ths.ThsSpider;
 import com.stable.utils.DateUtil;
@@ -42,8 +41,6 @@ public class EveryDayJob extends MySimpleJob {
 	private ChipsZfService chipsZfService;
 	@Autowired
 	private EmDzjySpider emDzjySpider;
-	@Autowired
-	private RzrqSpider rzrqSpider;
 	@Autowired
 	private ThsSpider thsSpider;
 	@Autowired
@@ -95,8 +92,6 @@ public class EveryDayJob extends MySimpleJob {
 		String dateYYYY_ = DateUtil.formatYYYYMMDD2(cal.getTime());
 		log.info("大宗交易");
 		emDzjySpider.byDaily(dateYYYY_);
-		log.info("融资融券");
-		rzrqSpider.byDaily(dateYYYY_, date);
 		// 周一周4执行，每周末抓完财报后运行
 		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY
 				&& cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {

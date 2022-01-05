@@ -200,14 +200,12 @@ public class CodeModelService {
 				}
 				// 高质押
 				ZhiYa zy = zhiYaService.getZhiYa(code);
-				Rztj rztj = dzjyService.getLastRztj(code);
 				double mkv = d.getCircMarketVal();
 				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listHist, d, zy);
 				listLast.add(newOne);
 
 				newOne.setTagDzPriceLow(0);
 				newOne.setTagHighZyChance(0);
-				newOne.setShooting3(rztj.getValid());
 				// 市值
 				newOne.setMkv(mkv);
 				if (mkv > 0 && s.getCircZb() > 0) {
