@@ -37,8 +37,8 @@ public class RzrqJob extends MySimpleJob {
 			return;
 		}
 		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
-			String dateYYYY_ = DateUtil.formatYYYYMMDD2(cal.getTime());
-			log.info("融资融券-交易日开始");
+			String dateYYYY_ = DateUtil.formatYYYYMMDD2(yes);
+			log.info("融资融券-交易日开始:{}", dateYYYY_);
 			rzrqSpider.byDaily(dateYYYY_, date);
 		} else {
 			log.info("融资融券-周末");

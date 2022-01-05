@@ -65,7 +65,6 @@ import com.stable.vo.bus.FinanceBaseInfoHangye;
 import com.stable.vo.bus.HolderPercent;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.MonitorPool;
-import com.stable.vo.bus.Rztj;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
@@ -171,7 +170,7 @@ public class CodeModelService {
 		StringBuffer shootNotice1 = new StringBuffer();
 		// 行情指标2：大票，底部增发超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停。
 		StringBuffer shootNotice2 = new StringBuffer();
-		// 行情指标3：融资大增，股价振浮30%以内
+		// 行情指标3：融资大增，股价振浮30%以内:TODO
 		StringBuffer shootNotice3 = new StringBuffer();
 
 		Map<String, CodeBaseModel2> histMap = getALLForMap();

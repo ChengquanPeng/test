@@ -41,6 +41,13 @@
 		sharding-item-parameters="0=a" description="每日晚上18点01执行任务-每日指标-模型"
 		sharding-total-count="1" overwrite="true" />
 
+	<job:simple id="RzrqJob"
+		class="com.stable.job.RzrqJob"
+		registry-center-ref="regCenter" cron="0 05 9 ? * * *"
+		sharding-item-parameters="0=a"
+		description="每日晚上09点05执行任务(融资融券T+1更新)" sharding-total-count="1"
+		overwrite="true" />
+		
 	<job:simple id="EveryDayJob"
 		class="com.stable.job.EveryDayJob"
 		registry-center-ref="regCenter" cron="0 05 23 ? * * *"
