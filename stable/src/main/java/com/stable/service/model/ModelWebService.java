@@ -180,7 +180,7 @@ public class ModelWebService {
 				sb5.append("小票底部大宗超5千万,机构代持？非董监高减持");
 			}
 			if (dh.getShooting2() > 0) {
-				sb5.append("大票底部增发超过50亿(越大越好),证监会-底部拿筹涨停?");
+				sb5.append("大票底部增发超过50亿(越大越好),股东集中，证监会核准-底部拿筹涨停?");
 			}
 			if (dh.getShooting3() > 0) {
 				sb5.append("<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/" + dh.getCode()
