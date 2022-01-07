@@ -377,7 +377,7 @@ public class ModelWebService {
 				pool.setYkb(1);
 				pool.setZfdone(1);
 			} else if (pls == 2) {
-				pool.setRemark("人工复核去掉");
+				pool.setRemark("");
 			}
 			monitorPoolDao.save(pool);
 		}
