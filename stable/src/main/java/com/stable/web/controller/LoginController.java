@@ -40,14 +40,19 @@ public class LoginController {
 		return ResponseEntity.ok(r);
 	}
 
-	@RequestMapping(value = "/mylogin", method = RequestMethod.GET)
+	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> mylogin(HttpServletRequest req) {
 		JsonResult r = new JsonResult();
-		req.getSession().setAttribute(Constant.SESSION_USER, Constant.SESSION_USER);
-		String logmsg = "mylogin 成功登录，时间：" + (new Date());
-		r.setStatus("ok");
-		r.setResult(logmsg);
-		log.info(logmsg);
+		if ("3n10b".equals(req.getParameter("key"))) {
+			req.getSession().setAttribute(Constant.SESSION_USER, Constant.SESSION_USER);
+			String logmsg = "mylogin 成功登录，时间：" + (new Date());
+			r.setStatus("ok");
+			r.setResult(logmsg);
+			log.info(logmsg);
+		} else {
+			r.setStatus("No");
+			r.setResult("登录失败");
+		}
 		return ResponseEntity.ok(r);
 	}
 

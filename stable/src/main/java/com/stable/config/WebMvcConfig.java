@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,22 +17,28 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stable.interceptor.LoginInterceptor;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MyBeanSerializerModifier;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    //private LoginInterceptor loginInterceptor;
-	
+	@Autowired
+	private LoginInterceptor loginInterceptor;
+
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
 	}
-	
+
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		//registry.addInterceptor(loginInterceptor).addPathPatterns("/**").excludePathPatterns("/login","/mylogin");
+		// registry.addInterceptor(loginInterceptor).addPathPatterns("/**").excludePathPatterns("/login",
+		// "/mylogin");
+		// 以下连接需要鉴权
+		registry.addInterceptor(loginInterceptor).addPathPatterns("/monitorPool/addMonitor",
+				"/model/addManual");
 		WebMvcConfigurer.super.addInterceptors(registry);
 	}
 
