@@ -35,7 +35,9 @@ public class HolderPercent extends EsBase {
 	@Field(type = FieldType.Double)
 	private double percent5;// 总股本占比
 	@Field(type = FieldType.Double)
-	private double percent5circZb;// 流通股占比
+	private double percent5circZb;// 流通股5%占比
+	@Field(type = FieldType.Double)
+	private double top10circZb;// top10流通股占比
 	@Field(type = FieldType.Integer)
 	private int sysdate;
 
@@ -50,5 +52,6 @@ public class HolderPercent extends EsBase {
 	public void cuteTopTotol() {
 		topThree = CurrencyUitl.roundHalfUp(topThree);
 		percent5 = CurrencyUitl.roundHalfUp(percent5);
+		top10circZb = CurrencyUitl.roundHalfUp(top10circZb);
 	}
 }

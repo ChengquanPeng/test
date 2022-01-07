@@ -155,7 +155,8 @@ public class ThsHolderSpider {
 			try {
 				String code = s.getCode();
 				log.info("current index:{},{}", c, code);
-				HolderNum hn = cutAvgPrcent(code, s.getCircZb(), chipsService.getHolderNumList45(code));
+				HolderNum hn = cutAvgPrcent(code, chipsService.getLastHolderPercent(code).getTop10circZb(),
+						chipsService.getHolderNumList45(code));
 				if (hn != null) {
 					hns.add(hn);
 				}
@@ -170,28 +171,26 @@ public class ThsHolderSpider {
 		WxPushUtil.pushSystem1("所有股东人数/股东研究抓包同花顺已完成-重新计算");
 	}
 
-	private HolderNum cutAvgPrcent(String code, Double p5circZb, List<HolderNum> hns) {
-		if (p5circZb != null && hns != null && hns.size() > 0) {
+	private HolderNum cutAvgPrcent(String code, Double circZb, List<HolderNum> hns) {
+		if (circZb != null && hns != null && hns.size() > 0) {
 			HolderNum maxn = hns.stream().max(Comparator.comparing(HolderNum::getDate)).get();
 			if (maxn.getNum() <= 0) {
 				log.warn("{} 计算实际人均持股错误，Num()<=0", code);
 				return null;
 			}
+			if (circZb <= 0.0) {
+				log.warn("{} 计算实际人均持股错误，top10的持股股东数据为空", code);
+				maxn.setAvgNumP5(0);
+				return maxn;
+			}
 			StockBaseInfo sb = stockBasicService.getCode(code);
-			if (p5circZb <= 0.0) {
-				p5circZb = sb.getCircZb();
-			}
-			if (p5circZb <= 0.0) {
-				log.warn("{} 计算实际人均持股错误，5%的持股股东数据为空", code);
-				return null;
-			}
 			long fs = CurrencyUitl.covertToLong(sb.getFloatShare() + CurrencyUitl.YI);// 流通股份
 
 			// 人均：出去5%股东的人均(100-5%股东持股）x流通股数 除以股东人数
 			// 除以100是 p5circZb 百分比
-			long avgNum = Double.valueOf((((100 - p5circZb) * fs / 100) / maxn.getNum())).longValue();
+			long avgNum = Double.valueOf((((100 - circZb) * fs / 100) / maxn.getNum())).longValue();
 			maxn.setAvgNumP5(avgNum);
-			log.warn("{} 计算实际流通股份{},散户占比：{}%,股东人数({}):{}  人均持股: {}", code, sb.getFloatShare(), (100 - p5circZb),
+			log.warn("{} 计算实际流通股份{},散户占比：{}%,股东人数({}):{}  人均持股: {}", code, sb.getFloatShare(), (100 - circZb),
 					maxn.getDate(), maxn.getNum(), avgNum);
 			return maxn;
 		} else {
@@ -264,14 +263,15 @@ public class ThsHolderSpider {
 						fetched = true;
 
 						if (j == 1) {
+							key = "fher_" + j;
+							HtmlElement fher_x = null;
 							try {
 								// 十大流通股东最新页
 //							HtmlElement bd_1 = body.getElementsByAttribute("div", "id", "bd_1").get(0);
 //							Iterator<DomElement> it1 = bd_1.getFirstElementChild().getFirstElementChild().getChildElements()
 //									.iterator();
-								key = "fher_" + j;
-								HtmlElement fher_x = body.getElementsByAttribute("div", "id", key).get(0);
-								ltbl(body, fher_x, code, hp5);
+								fher_x = body.getElementsByAttribute("div", "id", key).get(0);
+								double p10Zb = ltbl(body, fher_x, code, hp5);
 //							System.err.println("十大5%股东:");
 //							for (String name : hp5.getList_a()) {
 //								System.err.println(name);
@@ -280,14 +280,20 @@ public class ThsHolderSpider {
 								for (Double zb : hp5.getList_l()) {
 									p5circZb += zb;
 								}
-								log.info("{} 十大5%股东流通股占比:{}", code, p5circZb);
+								log.info("{} 十大5%股东流通股占比:{},Top10股东流通股占比:{}", code, p5circZb, p10Zb);
 								hp.setPercent5circZb(p5circZb);
+								hp.setTop10circZb(p10Zb);
+								cutAvgPrcent(code, p10Zb, hnsl);
 								stockBasicService.synBaseStockInfoCircZb(code, p5circZb);
-								cutAvgPrcent(code, p5circZb, hnsl);
 							} catch (Exception e) {
+								log.info(key);
+								if (fher_x != null) {
+									log.info(fher_x.asXml());
+								}
 								e.printStackTrace();
 							}
 						}
+						hp.cuteTopTotol();
 					} catch (Exception e) {
 						log.info(key);
 						if (ther_x != null) {
@@ -317,6 +323,7 @@ public class ThsHolderSpider {
 		} while (!fetched);
 	}
 
+	// 10大股东名单
 	private HolderPercent holderAll(HtmlElement body, HtmlElement ther_x, String code, HolderPercent5 hp5) {
 		HolderPercent hp = new HolderPercent();
 		Iterator<DomElement> it = ther_x.getChildElements().iterator();
@@ -341,10 +348,10 @@ public class ThsHolderSpider {
 			it4.next();// 持股变化(股)
 			String zb = it4.next().asText();// 占总股本比例
 			double d = Double.valueOf(zb.replace("%", ""));
-			if (i <= 3) {
+			if (i <= 3) {// 前三大股东
 				hp.addTop3(d);
 			}
-			if (d >= 5.0) {
+			if (d >= 5.0) {// 持股5%股东
 				hp.addPercent5(d);
 				hp5.getList_a().add(name);
 			}
@@ -353,34 +360,39 @@ public class ThsHolderSpider {
 				break;
 			}
 		}
-		hp.cuteTopTotol();
 		return hp;
 	}
 
-	private void ltbl(HtmlElement body, HtmlElement ther_x, String code, HolderPercent5 hp5) {
-		Iterator<DomElement> it = ther_x.getChildElements().iterator();
-		it.next();// div
-		DomElement table = it.next();// table
+	// 流通股东
+	private double ltbl(HtmlElement body, HtmlElement ther_x, String code, HolderPercent5 hp5) {
+//		Iterator<DomElement> it = ther_x.getChildElements().iterator();
+//		it.next();// div
+//		DomElement table = it.next();// table
+		DomElement table = ther_x.getElementsByTagName("table").get(0);
 		Iterator<DomElement> it2 = table.getChildElements().iterator();
 		it2.next();// caption
 		it2.next();// thead
 		// tbody
 		DomElement tbody = it2.next();
-//		System.err.println(tbody.getTagName());
-//		System.err.println(ther_x.asXml());
+//			System.err.println(tbody.getTagName());
+//			System.err.println(ther_x.asXml());
 		Iterator<DomElement> it3 = tbody.getChildElements().iterator();
+		double p10Zb = 0.0;
 		while (it3.hasNext()) {
 			DomElement tr = it3.next();// th1
 			Iterator<DomElement> it4 = tr.getChildElements().iterator();
-//			it4.next();//
+//				it4.next();//
 			String name = it4.next().asText().trim();// 机构或基金名称
 			it4.next();// 持有数量(股)
 			it4.next();// 持股变化(股)
+			String zb = it4.next().asText();// 占流通股比例
+			double zbd = Double.valueOf(zb.replace("%", ""));
 			if (hp5.getList_a().contains(name)) {
-				String zb = it4.next().asText();// 占流通股比例
-				hp5.getList_l().add(Double.valueOf(zb.replace("%", "")));
+				hp5.getList_l().add(zbd);
 			}
+			p10Zb += zbd;
 		}
+		return p10Zb;
 	}
 
 	public static void main(String[] args) {
@@ -389,7 +401,7 @@ public class ThsHolderSpider {
 		ts.header = new HashMap<String, String>();
 		List<HolderPercent> hps = new LinkedList<HolderPercent>();
 		List<HolderNum> hns = new LinkedList<HolderNum>();
-		ts.dofetchHolderInner(DateUtil.getTodayIntYYYYMMDD(), "002752", hns, hps);
+		ts.dofetchHolderInner(DateUtil.getTodayIntYYYYMMDD(), "000001", hns, hps);
 		for (HolderNum h : hns) {
 			System.err.println(h);
 		}

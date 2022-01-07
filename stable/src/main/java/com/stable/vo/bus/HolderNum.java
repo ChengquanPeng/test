@@ -35,6 +35,6 @@ public class HolderNum extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int sysdate;
 	@Field(type = FieldType.Long)
-	private long avgNumP5;// 除开5%以上股东外的人均持股
+	private long avgNumP5;// 除开流通十大股东外的人均持股
 
 }
