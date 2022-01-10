@@ -249,9 +249,9 @@ public class FinanceService {
 				resp.setYyzsr(getRedHtml(dh.getYyzsr()));
 				resp.setGsjlr(getRedHtml(dh.getGsjlr()));
 				resp.setKfjlr(getRedHtml(dh.getKfjlr()));
-				resp.setYyzsrtbzz(dh.getYyzsrtbzz());
-				resp.setGsjlrtbzz(dh.getGsjlrtbzz());
-				resp.setKfjlrtbzz(dh.getKfjlrtbzz());
+				resp.setYyzsrtbzz(CurrencyUitl.roundHalfUp(dh.getYyzsrtbzz()));
+				resp.setGsjlrtbzz(CurrencyUitl.roundHalfUp(dh.getGsjlrtbzz()));
+				resp.setKfjlrtbzz(CurrencyUitl.roundHalfUp(dh.getKfjlrtbzz()));
 				resp.setJqjzcsyl(dh.getJqjzcsyl());
 				resp.setMgjyxjl(dh.getMgjyxjl());
 				resp.setMll(dh.getMll());
@@ -261,7 +261,7 @@ public class FinanceService {
 				resp.setSumLasset(CurrencyUitl.covertToString(dh.getSumLasset()));
 				resp.setSumDebtLd(CurrencyUitl.covertToString(dh.getSumDebtLd()));
 				resp.setNetAsset(getRedHtml2(dh.getNetAsset()));
-				resp.setZcfzl(dh.getZcfzl());
+				resp.setZcfzl(CurrencyUitl.roundHalfUp(dh.getZcfzl()));
 
 				resp.setTotalAmt(getRedHtml2(dh.getMonetaryFund() + dh.getTradeFinassetNotfvtpl()));
 				resp.setBorrow(CurrencyUitl.covertToString(dh.getStborrow() + dh.getLtborrow()));
