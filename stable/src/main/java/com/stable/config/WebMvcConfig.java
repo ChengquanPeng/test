@@ -37,8 +37,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		// registry.addInterceptor(loginInterceptor).addPathPatterns("/**").excludePathPatterns("/login",
 		// "/mylogin");
 		// 以下连接需要鉴权
-		registry.addInterceptor(loginInterceptor).addPathPatterns("/monitorPool/addMonitor",
-				"/model/addManual");
+		registry.addInterceptor(loginInterceptor).addPathPatterns("/monitorPool/addMonitor", "/model/addManual",
+				"/monitorPool/delMonit");
 		WebMvcConfigurer.super.addInterceptors(registry);
 	}
 
