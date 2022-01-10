@@ -195,7 +195,9 @@ public class StockBasicService {
 			base.setHolderZb(old.getHolderZb());
 			base.setDfcwCompnayType(old.getDfcwCompnayType());
 		}
-
+		if (fromNotTushare) {// 非tushare需要更新，tushare 统一更新
+			esStockBaseInfoDao.save(base);
+		}
 		redisUtil.set(base.getCode(), base);
 		// dbStockBaseInfoDao.saveOrUpdate(base);
 		CODE_NAME_MAP_LOCAL_HASH.put(base.getCode(), base.getName());

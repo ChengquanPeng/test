@@ -1,6 +1,5 @@
 package com.stable.spider.ths;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.service.StockBasicService;
 import com.stable.spider.eastmoney.EastmoneyCompanySpider;
 import com.stable.utils.HtmlunitSpider;
@@ -30,8 +28,6 @@ import lombok.extern.log4j.Log4j2;
 public class ThsPlateSpider {
 	@Autowired
 	private HtmlunitSpider htmlunitSpider;// = new HtmlunitSpider();
-	@Autowired
-	private EsStockBaseInfoDao esStockBaseInfoDao;
 	private String BASE_URL = "http://basic.10jqka.com.cn/%s/";
 	@Autowired
 	private StockBasicService stockBasicService;
@@ -44,8 +40,8 @@ public class ThsPlateSpider {
 			public void run() {
 				try {
 					List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
-					List<StockBaseInfo> upd = new LinkedList<StockBaseInfo>();
 					int needUpd = 0;
+					int upded = 0;
 					int c = 0;
 					for (StockBaseInfo b : list) {
 						boolean updateCache = false;
@@ -53,7 +49,6 @@ public class ThsPlateSpider {
 								|| StringUtils.isBlank(b.getThsMainBiz())) {
 							needUpd++;
 							if (dofetch(b)) {
-								upd.add(b);
 								updateCache = true;
 							}
 						}
@@ -62,15 +57,13 @@ public class ThsPlateSpider {
 						}
 						if (updateAll || updateCache) {
 							stockBasicService.synBaseStockInfo(b, true);
+							upded++;
 						}
 						c++;
 						log.info("current index:{}", c);
 					}
-					if (upd.size() > 0) {
-						esStockBaseInfoDao.saveAll(upd);
-					}
-					if (needUpd > 0 && needUpd != upd.size()) {
-						WxPushUtil.pushSystem1("同花顺-亮点，主营-抓包不完整，需要更新数={" + needUpd + "},实际更新数={" + upd.size() + "}");
+					if (needUpd > 0 && needUpd != upded) {
+						WxPushUtil.pushSystem1("同花顺-亮点，主营-抓包不完整，需要更新数={" + needUpd + "},实际更新数={" + upded + "}");
 					}
 					log.info("同花顺-亮点，主营,东方财富曾用名，网站完成");
 				} catch (Exception e) {

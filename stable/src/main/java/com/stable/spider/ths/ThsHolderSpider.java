@@ -59,18 +59,25 @@ public class ThsHolderSpider {
 
 	public synchronized void dofetchHolder(boolean isWeekEnd) {
 		try {
-			List<String> codesw = null;
-			if (!isWeekEnd) {
+			List<String> codesw = new LinkedList<String>();
+			if (isWeekEnd) {
+				List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
+				if (codelist != null) {
+					for (StockBaseInfo s : codelist) {
+						codesw.add(s.getCode());
+					}
+				}
+			} else {
 				List<MonitorPool> wlist = monitorPoolService.getHolderWarningList();
-				codesw = new LinkedList<String>();
 				if (wlist != null) {
 					for (MonitorPool mp : wlist) {
 						codesw.add(mp.getCode());
 					}
 				}
 			}
+			log.info("codesw size={},isWeekEnd={}", codesw.size(), isWeekEnd);
 			int sysdate = DateUtil.getTodayIntYYYYMMDD();
-			dofetchHolderInner(sysdate, isWeekEnd, codesw);
+			dofetchHolderInner(sysdate, codesw);
 			monitorPoolService.jobHolderWarning();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -93,33 +100,31 @@ public class ThsHolderSpider {
 		log.info(code + " 股东人数/股东研究抓包同花顺已完成");
 	}
 
-	private void dofetchHolderInner(int sysdate, boolean isWeekEnd, List<String> codesw) {
+	private void dofetchHolderInner(int sysdate, List<String> codesw) {
+		if (codesw.size() <= 0) {
+			return;
+		}
 		if (header == null) {
 			header = new HashMap<String, String>();
 		}
-
 		// int chkdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(sysdate + "",
 		// -30));
 		List<HolderPercent> hps = new LinkedList<HolderPercent>();
 		List<HolderNum> hns = new LinkedList<HolderNum>();
-		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 		int c = 0;
-		for (StockBaseInfo s : codelist) {
+		for (String code : codesw) {
 			c++;
 			try {
-				String code = s.getCode();
 				log.info("current index:{},{}", c, code);
 				// 周末全量，redisUtil.get(RedisConstant.RDS_HOLDER_CODE_ + code, 0) <= chkdate
 				// 预警，每天
-				if ((isWeekEnd) || codesw.contains(code)) {
-					if (stockBasicService.online2YearChk(code, sysdate)) {
-						dofetchHolderInner(sysdate, code, hns, hps);
-						if (hns.size() > 1000) {
-							esHolderNumDao.saveAll(hns);
-							esHolderPercentDao.saveAll(hps);
-							hps = new LinkedList<HolderPercent>();
-							hns = new LinkedList<HolderNum>();
-						}
+				if (stockBasicService.online2YearChk(code, sysdate)) {
+					dofetchHolderInner(sysdate, code, hns, hps);
+					if (hns.size() > 1000) {
+						esHolderNumDao.saveAll(hns);
+						esHolderPercentDao.saveAll(hps);
+						hps = new LinkedList<HolderPercent>();
+						hns = new LinkedList<HolderNum>();
 					}
 				}
 			} catch (Exception e) {
@@ -232,7 +237,6 @@ public class ThsHolderSpider {
 							hnsl.add(hn);
 							hnsx.add(hn);
 							fetched = true;
-
 //							if (i == 0) {
 //								redisUtil.set(RedisConstant.RDS_HOLDER_CODE_ + code, hn.getDate());
 //							}

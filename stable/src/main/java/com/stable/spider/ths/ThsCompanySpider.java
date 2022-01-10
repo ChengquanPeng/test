@@ -2,7 +2,6 @@ package com.stable.spider.ths;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.service.StockBasicService;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HtmlunitSpider;
@@ -29,8 +27,6 @@ import lombok.extern.log4j.Log4j2;
 @Component
 @Log4j2
 public class ThsCompanySpider {
-	@Autowired
-	private EsStockBaseInfoDao esStockBaseInfoDao;
 	@Autowired
 	private HtmlunitSpider htmlunitSpider;
 	@Autowired
@@ -73,7 +69,6 @@ public class ThsCompanySpider {
 			header = new HashMap<String, String>();
 		}
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
-		List<StockBaseInfo> upd = new LinkedList<StockBaseInfo>();
 		int c = 0;
 		for (StockBaseInfo s : codelist) {
 			try {
@@ -98,16 +93,12 @@ public class ThsCompanySpider {
 				} else {
 					s.setCompnayType(0);
 				}
-				upd.add(s);
 				stockBasicService.synBaseStockInfo(s, true);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
 			}
 			c++;
 			log.info("current index:{}", c);
-		}
-		if (upd.size() > 0) {
-			esStockBaseInfoDao.saveAll(upd);
 		}
 		log.info("同花顺公司资料 done");
 	}
