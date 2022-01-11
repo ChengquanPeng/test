@@ -209,7 +209,7 @@ public class CodeModelService {
 				newOne.setMkv(mkv);
 				newOne.setActMkv(0);
 				if (mkv > 0 && s.getCircZb() > 0) {
-					newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (100 - s.getCircZb()))));
+					newOne.setActMkv(Double.valueOf(mkv * (s.getCircZb() / 100)));
 				}
 				newOne.setHolderZb(s.getHolderZb());
 				// 同步-备注
