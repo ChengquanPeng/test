@@ -49,6 +49,9 @@ public class DzjyService {
 		DzjyYiTime t = new DzjyYiTime();
 		t.setCode(code);
 		t.setTotalAmt(0.0);
+		t.setAvgPrcie(0.0);
+		t.setDate(0);
+		t.setTotalAmt60d(0.0);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));

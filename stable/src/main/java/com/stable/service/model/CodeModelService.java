@@ -166,9 +166,9 @@ public class CodeModelService {
 		StringBuffer sbc = new StringBuffer();
 		// 公告提醒
 		StringBuffer annc = new StringBuffer();
-		// 行情指标1：小票，底部大宗超5千万（机构代持？非董监高减持大宗）
+		// 行情指标1：小票，底部大宗超5千万(机构代持？非董监高减持大宗)
 		StringBuffer shootNotice1 = new StringBuffer();
-		// 行情指标2：大票，底部增发超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停。
+		// 行情指标2：大票，底部增发超过50亿(越大越好)，且证监会通过-之前有明显底部拿筹痕迹-涨停。
 		StringBuffer shootNotice2 = new StringBuffer();
 		// 行情指标3：融资大增，股价振浮30%以内:TODO
 		StringBuffer shootNotice3 = new StringBuffer();
@@ -320,7 +320,7 @@ public class CodeModelService {
 				// 1.人工没确认或者确认没问题的：newOne.getPls() != 2
 				// 2.未涨的
 				// 3.增发解禁且未涨
-				// 4.75亿以内（50x150%=75）
+				// 4.75亿以内(50x150%=75)
 
 				if (newOne.getZfjj() > 0 && newOne.getZfjjup() >= 2 && mkv <= 75.0) {// 75亿以内的
 					if (pool.getMonitor() == MonitorType.NO.getCode()) {
@@ -330,7 +330,6 @@ public class CodeModelService {
 						newOne.setMonitor(MonitorType.ZengFaAuto.getCode());
 						log.info("{} 增发自动监听", code);
 					}
-
 				}
 				// 公告通知
 				if (pool.getListenerGg() == 1) {
@@ -350,8 +349,8 @@ public class CodeModelService {
 				boolean isOk1 = false;
 				boolean isOk2 = false;
 				if (newOne.getZfjjupStable() >= 2) {
-					// 行情指标1：小票，底部大宗超5千万（机构代持？非董监高减持大宗）
-					// 行情指标2：大票，底部增发超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停。
+					// 行情指标1：小票，底部大宗超5千万(机构代持？非董监高减持大宗)
+					// 行情指标2：大票，底部增发超过50亿(越大越好)，且证监会通过-之前有明显底部拿筹痕迹-涨停。
 					if (mkv <= 75) {
 						if (newOne.getHolderNumT3() > 45.0) {// 三大股东
 							DzjyYiTime dz2 = dzjyService.dzjyF(code, dzdate2);
@@ -411,10 +410,10 @@ public class CodeModelService {
 			WxPushUtil.pushSystem1("最新公告:" + annc.toString());
 		}
 		if (shootNotice1.length() > 0) {
-			WxPushUtil.pushSystem1("行情指标1：小票，底部大宗超5千万（机构代持？非董监高减持大宗）:" + shootNotice1.toString());
+			WxPushUtil.pushSystem1("行情指标1：小票，底部大宗超5千万(机构代持？非董监高减持大宗):" + shootNotice1.toString());
 		}
 		if (shootNotice2.length() > 0) {
-			WxPushUtil.pushSystem1("行情指标2：大票，底部增发超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停:" + shootNotice2.toString());
+			WxPushUtil.pushSystem1("行情指标2：大票，底部增发超过50亿(越大越好)，且证监会通过-之前有明显底部拿筹痕迹-涨停:" + shootNotice2.toString());
 		}
 //		daliyTradeHistroyService.deleteData();
 	}
@@ -470,7 +469,7 @@ public class CodeModelService {
 		if (sortV6Service.isWhiteHorseForSortV6(sortV6Service.is15DayTodayPriceOk(code, tradeDate))) {
 			newOne.setSortMode6(1);
 		}
-		// 短线模型7（箱体震荡新高，是否有波浪走势）
+		// 短线模型7(箱体震荡新高，是否有波浪走势)
 		if (sortV6Service.isWhiteHorseForSortV7(code, tradeDate)) {
 			newOne.setSortMode7(1);
 		}
@@ -1007,7 +1006,7 @@ public class CodeModelService {
 				}
 			}
 		}
-		// 股东增持（一年）
+		// 股东增持(一年)
 		AnnouncementHist zengchi = announcementService.getLastRecordType(code, AnnMentParamUtil.zhengchi.getType(),
 				oneYearAgo);
 		if (zengchi != null) {
@@ -1026,7 +1025,7 @@ public class CodeModelService {
 			newOne.setBaseYellow(1);
 			sb2.append(yellow++).append(".无分红记录").append(Constant.HTML_LINE);
 		}
-		// 限售股解禁（2年：前后1年）
+		// 限售股解禁(2年：前后1年)
 		List<Jiejin> jj = chipsService.getBf2yearJiejin(code);
 		if (jj != null) {
 			newOne.setBaseYellow(1);
@@ -1075,14 +1074,14 @@ public class CodeModelService {
 			sb3.append("</font>");
 			sb3.append(Constant.HTML_LINE);
 		}
-		// 股东减持（一年）
+		// 股东减持(一年)
 		AnnouncementHist jianchi = announcementService.getLastRecordType(code, AnnMentParamUtil.jianchi.getType(),
 				oneYearAgo);
 		if (jianchi != null) {
 			newOne.setBaseBlue(1);
 			sb3.append(".股东/高管减持:" + (jianchi.getRptDate())).append(Constant.HTML_LINE);
 		}
-		// 回购（半年内）
+		// 回购(半年内)
 		AnnouncementHist huigou = announcementService.getLastRecordType(code, AnnMentParamUtil.huigou.getType(),
 				halfYearAgo);
 		if (huigou != null) {
