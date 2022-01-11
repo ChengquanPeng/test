@@ -647,6 +647,8 @@ public class EastmoneySpider {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			htmlunitSpider.close();
 		}
 		return 0;
 	}

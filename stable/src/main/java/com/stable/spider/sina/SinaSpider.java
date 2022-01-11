@@ -89,6 +89,7 @@ public class SinaSpider {
 			e.printStackTrace();
 			return null;
 		} finally {
+			htmlunitSpider.close();
 			ThreadsUtil.sinaSleepRandom();
 		}
 	}
