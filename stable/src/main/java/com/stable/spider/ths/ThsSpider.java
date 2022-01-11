@@ -17,6 +17,8 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Component;
@@ -26,6 +28,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeConceptDao;
 import com.stable.es.dao.base.EsConceptDailyDao;
 import com.stable.es.dao.base.EsConceptDao;
@@ -772,12 +775,14 @@ public class ThsSpider {
 
 	// 超过30天未更新,则删除
 	public void deleteInvaildCodeConcept() {
+		Pageable pageable = PageRequest.of(EsQueryPageUtil.queryPage9999.getPageNum(),
+				EsQueryPageUtil.queryPage9999.getPageSize());
 		int lastupdateTime = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -30));
 		log.info("deleteAll invaild lte=" + lastupdateTime);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.rangeQuery("updateTime").lte(lastupdateTime));
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
 
 		Page<CodeConcept> page = esCodeConceptDao.search(sq);
 		if (page != null && !page.isEmpty() && page.getContent().size() > 0) {

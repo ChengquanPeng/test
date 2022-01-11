@@ -55,7 +55,6 @@ public class EveryDayJob extends MySimpleJob {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-		monitorPoolService.jobDzjyWarning();
 		log.info("回购公告");
 		buyBackService.jobFetchHistEveryDay();
 		log.info("定增完成预警公告");
@@ -92,6 +91,8 @@ public class EveryDayJob extends MySimpleJob {
 		String dateYYYY_ = DateUtil.formatYYYYMMDD2(cal.getTime());
 		log.info("大宗交易");
 		emDzjySpider.byDaily(dateYYYY_);
+		log.info("大宗交易-预警");
+		monitorPoolService.jobDzjyWarning();
 		// 周一周4执行，每周末抓完财报后运行
 		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY
 				&& cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {

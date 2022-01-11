@@ -37,6 +37,7 @@ import com.stable.service.model.ModelWebService;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
+import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BonusHist;
 import com.stable.vo.bus.CodeBaseModel2;
@@ -393,6 +394,7 @@ public class MonitorPoolService {
 
 	// 大宗交易
 	public void jobDzjyWarning() {
+		ThreadsUtil.sleepRandomSecBetween15And30();
 		List<MonitorPool> list = getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0, 1);
 		List<String> l = new LinkedList<String>();
 		if (list != null) {
