@@ -76,7 +76,7 @@ public class MonitorPoolController {
 	@RequestMapping(value = "/addMonitor")
 	public ResponseEntity<JsonResult> addMonitor(String code, String monitor, String realtime, String offline,
 			String upPrice, String downPrice, String upTodayChange, String downTodayChange, String remark, String ykb,
-			String zfdone, String holderNum, String buyLowVol, String xjl, String dzjy) {
+			String zfdone, String holderNum, String buyLowVol, String xjl, String dzjy, String listenerGg) {
 		JsonResult r = new JsonResult();
 		try {
 			monitorPoolService.addMonitor(code, StringUtils.isNotBlank(monitor) ? Integer.valueOf(monitor) : 0,
@@ -91,7 +91,8 @@ public class MonitorPoolController {
 					StringUtils.isNotBlank(holderNum) ? DateUtil.getTodayIntYYYYMMDD() : 0,
 					StringUtils.isNotBlank(buyLowVol) ? Integer.valueOf(buyLowVol) : 0,
 					StringUtils.isNotBlank(xjl) ? Integer.valueOf(xjl) : 0,
-					StringUtils.isNotBlank(dzjy) ? DateUtil.getTodayIntYYYYMMDD() : 0);
+					StringUtils.isNotBlank(dzjy) ? DateUtil.getTodayIntYYYYMMDD() : 0,
+					StringUtils.isNotBlank(listenerGg) ? Integer.valueOf(listenerGg) : 0);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setStatus(JsonResult.FAIL);

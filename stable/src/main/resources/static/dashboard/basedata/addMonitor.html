@@ -136,6 +136,9 @@ body {
 					大宗交易：<input type="checkbox" id="dzjy" name="dzjy" />&nbsp;&nbsp;&nbsp;<span
 						id="dzjyDate"></span>
 				</div>
+				<div class="input-group">
+					监听公告：<input type="checkbox" id="listenerGg" name="listenerGg" />
+				</div>
 				<br />
 				<div class="input-group">
 					<span class="input-group-btn">
@@ -195,6 +198,10 @@ body {
 			if (document.getElementById("xjl").checked) {
 				xjl = 1;
 			}
+			var listenerGg = 0
+			if (document.getElementById("listenerGg").checked) {
+				listenerGg = 1;
+			}
 
 			$.ajax({
 				url : "/web/monitorPool/addMonitor", //访问地址--action地址
@@ -215,6 +222,7 @@ body {
 					dzjy : dzjy,
 					buyLowVol : $('#buyLowVol').val(),
 					zfdone : $('#zfdone').val(),
+					listenerGg : listenerGg,
 					downTodayChange : $('#downTodayChange').val()
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
@@ -241,6 +249,9 @@ body {
 				$('#remark').val(reData.result.remark);
 				if (reData.result.realtime == 1) {
 					$('#realtime').attr("checked", 'checked');
+				}
+				if (reData.result.listenerGg == 1) {
+					$('#listenerGg').attr("checked", 'checked');
 				}
 				if (reData.result.offline == 1) {
 					$('#offline').attr("checked", 'checked');

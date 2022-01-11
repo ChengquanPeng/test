@@ -357,18 +357,20 @@ public class ModelWebService {
 			codeBaseModel2Dao.save(c);
 
 			MonitorPool pool = monitorPoolService.getMonitorPool(code);
-			pool.setRealtime(0);
-			pool.setOffline(0);
-			pool.setUpTodayChange(0);
-			pool.setDzjy(0);
-			pool.setHolderNum(0);
-			pool.setYkb(0);
-			pool.setZfdone(0);
-			pool.setMonitor(MonitorType.NO.getCode());
-			pool.setListenerGg(req.getListenerGg());
-			if (pls == 1) {// 1在池子，2不在池子
+			if (pls == 2) {// 2不在池子
+				pool.setMonitor(MonitorType.NO.getCode());
+				pool.setUpTodayChange(0);
+				pool.setRealtime(0);
+				pool.setOffline(0);
+				pool.setDzjy(0);
+				pool.setHolderNum(0);
+				pool.setYkb(0);
+				pool.setZfdone(0);
+				pool.setRemark("");
+				pool.setListenerGg(0);
+				monitorPoolDao.save(pool);
+			} else if (pls == 1 && c.getPls() != 1) {// 1不在池子，且原来不等于1
 				pool.setMonitor(MonitorType.MANUAL.getCode());
-				pool.setRemark(remark);
 				pool.setUpTodayChange(3);
 				pool.setRealtime(1);
 				int dt = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
@@ -376,10 +378,10 @@ public class ModelWebService {
 				pool.setHolderNum(dt);
 				pool.setYkb(1);
 				pool.setZfdone(1);
-			} else if (pls == 2) {
-				pool.setRemark("");
+				pool.setRemark(remark);
+				pool.setListenerGg(req.getListenerGg());
+				monitorPoolDao.save(pool);
 			}
-			monitorPoolDao.save(pool);
 		}
 	}
 
