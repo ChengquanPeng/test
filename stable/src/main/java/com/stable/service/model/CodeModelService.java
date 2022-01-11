@@ -207,8 +207,9 @@ public class CodeModelService {
 				newOne.setTagHighZyChance(0);
 				// 市值
 				newOne.setMkv(mkv);
+				newOne.setActMkv(0);
 				if (mkv > 0 && s.getCircZb() > 0) {
-					newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (s.getCircZb() / 100.0))));
+					newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (100 - s.getCircZb()))));
 				}
 				newOne.setHolderZb(s.getHolderZb());
 				// 同步-备注

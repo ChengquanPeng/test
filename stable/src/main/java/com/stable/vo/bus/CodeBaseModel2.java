@@ -26,7 +26,7 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Double)
 	private double mkv;// 流通市值
 	@Field(type = FieldType.Double)
-	private double actMkv;// 除去5%以上股东意外的市值
+	private double actMkv;// 除去5%以上股东以外的市值
 	@Field(type = FieldType.Integer)
 	private int finOK;// 5年业绩OK
 	@Field(type = FieldType.Integer)
