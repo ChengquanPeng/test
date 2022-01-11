@@ -32,6 +32,7 @@ import com.stable.es.dao.base.EsConceptDao;
 import com.stable.service.TradeCalService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
+import com.stable.utils.Htmlunit404Exception;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
@@ -61,7 +62,7 @@ public class ThsSpider {
 	private String GN_LIST = "http://q.10jqka.com.cn/gn/index/field/addtime/order/desc/page/%s/ajax/1/";
 	private static int ths = 1;// 同花顺概念
 	private static int thsHye = 2;// 同花顺行业
-	private static int ths884 = 3;// 同花顺概念2
+	private static int ths884 = 3;// 同花顺概念-细分行业
 	public static String START_THS = "THS";
 	private static String SPIT = "/";
 //	private static Map<String, Concept> allmap = new HashMap<String, Concept>();
@@ -119,9 +120,14 @@ public class ThsSpider {
 //	}
 
 	public Map<String, Concept> getAllAliasCode() {
+		return getAllAliasCode(ths);
+	}
+
+	private Map<String, Concept> getAllAliasCode(int thsType) {
 		Map<String, Concept> m = new HashMap<String, Concept>();
 		esConceptDao.findAll().forEach(x -> {
-			if (x.getType() == ths && StringUtils.isNotBlank(x.getAliasCode2()) && !"null".equals(x.getAliasCode2())) {
+			if (x.getType() == thsType && StringUtils.isNotBlank(x.getAliasCode2())
+					&& !"null".equals(x.getAliasCode2())) {
 				m.put(x.getCode(), x);
 				log.info(x);
 			}
@@ -173,14 +179,14 @@ public class ThsSpider {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		dofetchHye(isFirday);
+		dofetchHye(isFirday, date);
 		try {
 			log.info("休眠5分钟-884板块");
 			Thread.sleep(Duration.ofMinutes(5).toMillis());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		dofetchThs884xxx(isFirday);
+		dofetchThs884xxx(isFirday, date);
 		if (retryList.size() > 0) {
 			try {
 				log.info("休眠5分钟-retry");
@@ -227,7 +233,17 @@ public class ThsSpider {
 	private String start = "quotebridge_v4_line_bk_881109_01_today({'bk_881109':";
 	private double ex = 10000 * 100;
 
-	public int getConceptDailyFor884(Concept cp) {
+	public static void main(String[] args) {
+		ThsSpider ts = new ThsSpider();
+		ts.htmlunitSpider = new HtmlunitSpider();
+		Concept cp = new Concept();
+		cp.setCode("884192");
+		System.err.println(ts.getSubCodeList(ts.urlSubBase, cp, ThsSpider.ths884));
+	}
+
+	boolean get404 = true;
+
+	public int getConceptDailyFor884(Concept cp, boolean needRetry) {
 		if (header == null) {
 			header = new HashMap<String, String>();
 			header.put("Host", "d.10jqka.com.cn");
@@ -240,7 +256,7 @@ public class ThsSpider {
 		ThreadsUtil.sleepRandomSecBetween1And5();
 		do {
 			try {
-				HtmlPage page = htmlunitSpider.getHtmlPageFromUrl(url, header);
+				HtmlPage page = htmlunitSpider.getHtmlPageFromUrl(url, header, get404);
 				HtmlElement body = page.getBody();
 //				String res = HttpUtil.doGet2(url, header);
 				String res = body.asText();
@@ -266,15 +282,24 @@ public class ThsSpider {
 				log.info(cd);
 				list.add(cd);
 				fetched = true;
+				cp.setNotime(0);
+			} catch (Htmlunit404Exception e) {
+				log.warn("{} get 404", cp.getCode());
+				fetched = true;
+				int not = cp.getNotime() + 1;
+				cp.setNotime(not >= 5 ? 5 : not);
 			} catch (Exception e2) {
+				if (!needRetry) {// 不存在，在不需要重试
+					return 0;
+				}
 				e2.printStackTrace();
 				trytime++;
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
-				//if (trytime >= 10) { //884不在维护
-					fetched = true;
-					e2.printStackTrace();
-					WxPushUtil.pushSystem1("同花顺概念-每日交易出错884," + cp.getName() + ",url=" + url);
-				//}
+				// if (trytime >= 10) { //884不在维护
+				fetched = true;
+				e2.printStackTrace();
+				WxPushUtil.pushSystem1("同花顺概念-每日交易出错884," + cp.getName() + ",url=" + url);
+				// }
 			} finally {
 				htmlunitSpider.close();
 			}
@@ -615,9 +640,8 @@ public class ThsSpider {
 	private String urlb = "http://q.10jqka.com.cn/thshy/index/field/199112/order/desc/page/%s/ajax/1/";
 	private String urlSubBase = "http://q.10jqka.com.cn/thshy/detail/field/199112/order/desc/page/%s/ajax/1/code/%s";
 
-	public void dofetchHye(boolean isFirday) {
+	public void dofetchHye(boolean isFirday, int date) {
 		List<Concept> list = new LinkedList<Concept>();
-		int date = DateUtil.getTodayIntYYYYMMDD();
 		int j = 1;
 		boolean isbraek = false;
 		for (;;) {// 翻页
@@ -706,69 +730,39 @@ public class ThsSpider {
 	}
 
 	// 884001-884191
-	private int end884 = 884191;
+	private int end884 = 884274;
 	private String url884 = "http://q.10jqka.com.cn/thshy/detail/code/%s/";
 
-	public void dofetchThs884xxx(boolean isFirday) {
+	public void dofetchThs884xxx(boolean isFirday, int date) {
 		log.info("dofetchThs884xxx start");
+		Map<String, Concept> map = getAllAliasCode(ths884);
 		List<Concept> list = new LinkedList<Concept>();
-		int date = DateUtil.getTodayIntYYYYMMDD();
 		for (int code = 884001; code <= end884; code++) {
-			if (code == 884038 || code == 884061 || code == 884102 || code == 884103 || code == 884104 || code == 884108
-					|| code == 884166 || code == 884170 || code == 884175
-					|| code == 884017
-					|| code == 884019
-					|| code == 884029
-					|| code == 884037
-					|| code == 884040
-					|| code == 884042
-					|| code == 884047
-					|| code == 884049
-					|| code == 884058
-					|| code == 884070
-					|| code == 884072
-					|| code == 884087
-					|| code == 884097
-					|| code == 884107
-					|| code == 884109
-					|| code == 884110
-					|| code == 884111
-					|| code == 884114
-					|| code == 884115
-					|| code == 884079
-					|| code == 884121
-					|| code == 884122
-					|| code == 884127
-					|| code == 884129
-					|| code == 884133
-					|| code == 884134
-					|| code == 884135
-					|| code == 884138
-					|| code == 884148
-					|| code == 884151
-					|| code == 884152
-					|| code == 884169
-					|| code == 884171
-					|| code == 884173
-					|| code == 884179
-					|| code == 884185
-					|| code == 884187
-					|| code == 884190
-					) {
-				continue;
+			boolean needRetry = true;// 是否需要重试
+			Concept cp = null;
+			if (map.containsKey(String.valueOf(code))) {
+				cp = map.get(String.valueOf(code));
+				if (cp.getNotime() >= 5) {
+					continue;// 连续超过5次，则跳过
+				}
+				if (cp.getNotime() > 0) {// 在0-4次之间则不需要重试
+					needRetry = false;
+				}
+			} else {
+				cp = new Concept();
+				cp.setId(ThsSpider.START_THS + code);
+				cp.setCode(code + "");
+				cp.setHref(String.format(url884, code));
+				cp.setName(cp.getCode());
+				cp.setDate(date);
+				cp.setAliasCode2(cp.getCode());
+				cp.setType(ThsSpider.ths884);
+				needRetry = false;
 			}
-			Concept cp = new Concept();
-			cp.setId(ThsSpider.START_THS + code);
-			cp.setCode(code + "");
-			cp.setHref(String.format(url884, code));
-			cp.setName(cp.getCode());
-			cp.setDate(date);
-			cp.setAliasCode2(cp.getCode());
-			cp.setType(ThsSpider.ths884);
-			getConceptDailyFor884(cp);
+			getConceptDailyFor884(cp, needRetry);
+			list.add(cp);
 			if (isFirday) {
 				cp.setCnt(getSubCodeList(urlSubBase, cp, ThsSpider.ths884));
-				list.add(cp);
 			}
 		}
 		int c = list.size();
@@ -776,8 +770,10 @@ public class ThsSpider {
 		log.info("dofetchThs884xxx size:{}", c);
 	}
 
+	// 超过30天未更新,则删除
 	public void deleteInvaildCodeConcept() {
 		int lastupdateTime = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -30));
+		log.info("deleteAll invaild lte=" + lastupdateTime);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.rangeQuery("updateTime").lte(lastupdateTime));
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
@@ -785,8 +781,11 @@ public class ThsSpider {
 
 		Page<CodeConcept> page = esCodeConceptDao.search(sq);
 		if (page != null && !page.isEmpty() && page.getContent().size() > 0) {
+			log.info("deleteAll size=" + page.getContent().size());
 			esCodeConceptDao.deleteAll(page.getContent());
+		} else {
+			log.info("deleteAll size=0");
 		}
-		log.info("deleteAll invaild lte=" + lastupdateTime);
+		log.info("deleteAll done");
 	}
 }

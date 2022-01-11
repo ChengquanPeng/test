@@ -20,10 +20,14 @@ import lombok.extern.log4j.Log4j2;
 public class HtmlunitSpider {
 
 	private WebClient create() {
+		return create(false);
+	}
+
+	private WebClient create(boolean get404) {
 		WebClient webClient = new WebClient();
 		webClient = new WebClient(BrowserVersion.CHROME);// 新建一个模拟谷歌Chrome浏览器的浏览器客户端对象
 		webClient.getOptions().setThrowExceptionOnScriptError(false);// 当JS执行出错的时候是否抛出异常, 这里选择不需要
-		webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);// 当HTTP的状态非200时是否抛出异常, 这里选择不需要
+		webClient.getOptions().setThrowExceptionOnFailingStatusCode(get404);// 当HTTP的状态非200时是否抛出异常, 这里选择不需要
 		webClient.getOptions().setActiveXNative(false);
 		webClient.getOptions().setCssEnabled(false);// 是否启用CSS, 因为不需要展现页面, 所以不需要启用
 		webClient.getOptions().setJavaScriptEnabled(true); // 很重要，启用JS。有些网站要开启！
@@ -68,7 +72,11 @@ public class HtmlunitSpider {
 //	WebClient webclient = WebClientPoolFactory.getWebClient();
 
 	public HtmlPage getHtmlPageFromUrl(String url, Map<String, String> header) {
-		WebClient webclient = create();
+		return getHtmlPageFromUrl(url, header, false);
+	}
+
+	public HtmlPage getHtmlPageFromUrl(String url, Map<String, String> header, boolean get404) {
+		WebClient webclient = create(get404);
 		try {
 			if (header != null) {
 				header.keySet().forEach(key -> {
@@ -78,6 +86,11 @@ public class HtmlunitSpider {
 			tl.set(webclient);
 			return webclient.getPage(url);
 		} catch (Exception e) {
+			if (get404) {
+				if (e.getMessage().contains("404")) {
+					throw new Htmlunit404Exception();
+				}
+			}
 			e.printStackTrace();
 			log.error("Http 页面异常，链接地址:" + url);
 			return null;

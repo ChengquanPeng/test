@@ -36,5 +36,7 @@ public class Concept extends EsBase {
 	private String aliasCode2;
 	@Field(type = FieldType.Integer)
 	private int updateDate;
+	@Field(type = FieldType.Integer)
+	private int notime;// 884xxx 部分不存在，用来计数，直接调过。
 
 }
