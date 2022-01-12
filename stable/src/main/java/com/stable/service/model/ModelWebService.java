@@ -389,7 +389,7 @@ public class ModelWebService {
 	}
 
 	public List<CodeBaseModel2> getList(ModelReq mr, EsQueryPageReq querypage) {
-		boolean pageYes = true;
+//		boolean pageYes = true;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(mr.getCode())) {
 			String[] cc = mr.getCode().split(",");
@@ -399,10 +399,10 @@ public class ModelWebService {
 				bqb.must(QueryBuilders.termsQuery("code", cc));
 			}
 		} else if (StringUtils.isNotBlank(mr.getConceptId())) {
-			List<String> list = conceptService.listCodesByAliasCode(mr.getConceptId(), querypage);
+			List<String> list = conceptService.listCodesByAliasCode(mr.getConceptId(), EsQueryPageUtil.queryPage9999);
 			if (list != null) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
-				pageYes = false;// 已经在这里分页了。不需要在下面分页。 这里查询有20条，但是结果可能没有20，可能是新股，没有进入codeModel
+				// pageYes = false;// 已经在这里分页了。不需要在下面分页。 这里查询有20条，但是结果可能没有20，可能是新股，没有进入codeModel
 			} else {
 				return new LinkedList<CodeBaseModel2>();
 			}
@@ -577,13 +577,14 @@ public class ModelWebService {
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		NativeSearchQueryBuilder builder = queryBuilder.withQuery(bqb);
-		if (pageYes) {
-			Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
-			builder.withPageable(pageable).withSort(sort);
-		} else {
-			Pageable pageable = PageRequest.of(0, querypage.getPageSize());// 不设置分页，会默认10条
-			builder.withPageable(pageable);
-		}
+		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+		builder.withPageable(pageable).withSort(sort);
+//		if (pageYes) {
+//			
+//		} else {
+//			Pageable pageable = PageRequest.of(0, querypage.getPageSize());// 不设置分页，会默认10条
+//			builder.withPageable(pageable);
+//		}
 		SearchQuery sq = builder.build();
 		Page<CodeBaseModel2> page = codeBaseModel2Dao.search(sq);
 		if (page != null && !page.isEmpty()) {
