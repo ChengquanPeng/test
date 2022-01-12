@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.Concept;
 import com.stable.vo.bus.DaliyBasicInfo2;
@@ -46,7 +47,7 @@ public class PlateService {
 			} else {
 				log.warn("未获取到aliasCode={}", aliasCode);
 			}
-			list = conceptService.listCodesByAliasCode(aliasCode);
+			list = conceptService.listCodesByAliasCode(aliasCode, EsQueryPageUtil.queryPage9999);
 		}
 		if (list != null) {
 			double t1 = 0.0;// 市赚率

@@ -174,8 +174,7 @@ public class ConceptService {
 	/**
 	 * 根据板块/概率获取相关股票
 	 */
-	public List<String> listCodesByAliasCode(String aliasCode) {
-		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
+	public List<String> listCodesByAliasCode(String aliasCode, EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		Concept cp = getConceptId(aliasCode);
 		if (cp == null) {
@@ -187,10 +186,10 @@ public class ConceptService {
 		} else {
 			return null;
 		}
-
+		FieldSortBuilder sort = SortBuilders.fieldSort("code").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
-		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 
 		Page<CodeConcept> page = esCodeConceptDao.search(sq);
 		if (page != null && !page.isEmpty()) {

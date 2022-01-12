@@ -272,7 +272,7 @@ public class MonitorPoolService {
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		} else if (StringUtils.isNotBlank(aliasCode)) {
-			List<String> list = this.conceptService.listCodesByAliasCode(aliasCode);
+			List<String> list = this.conceptService.listCodesByAliasCode(aliasCode, EsQueryPageUtil.queryPage9999);
 			if (list != null) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			}

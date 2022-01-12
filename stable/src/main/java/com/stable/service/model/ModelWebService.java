@@ -20,6 +20,7 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.MonitorType;
 import com.stable.enums.SylType;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
@@ -304,7 +305,7 @@ public class ModelWebService {
 		return res;
 	}
 
-	public List<String> listCodeByCodeConceptName(String conceptName) {
+	public List<String> listCodeByCodeConceptName(String conceptName, EsQueryPageReq querypage) {
 		List<String> codes = new LinkedList<String>();
 		List<StockBaseInfo> l = stockBasicService.getAllOnStatusListWithSort();
 		conceptName = conceptName.trim();
@@ -388,6 +389,7 @@ public class ModelWebService {
 	}
 
 	public List<CodeBaseModel2> getList(ModelReq mr, EsQueryPageReq querypage) {
+		boolean pageYes = true;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(mr.getCode())) {
 			String[] cc = mr.getCode().split(",");
@@ -397,14 +399,15 @@ public class ModelWebService {
 				bqb.must(QueryBuilders.termsQuery("code", cc));
 			}
 		} else if (StringUtils.isNotBlank(mr.getConceptId())) {
-			List<String> list = conceptService.listCodesByAliasCode(mr.getConceptId());
+			List<String> list = conceptService.listCodesByAliasCode(mr.getConceptId(), querypage);
 			if (list != null) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
+				pageYes = false;// 已经在这里分页了。不需要在下面分页。
 			} else {
 				return new LinkedList<CodeBaseModel2>();
 			}
 		} else if (StringUtils.isNotBlank(mr.getConceptName())) {
-			List<String> list = listCodeByCodeConceptName(mr.getConceptName());
+			List<String> list = listCodeByCodeConceptName(mr.getConceptName(), EsQueryPageUtil.queryPage9999);
 			if (list.size() > 0) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
 			} else {
@@ -573,9 +576,15 @@ public class ModelWebService {
 		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
-		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).withSort(sort).build();
-
+		NativeSearchQueryBuilder builder = queryBuilder.withQuery(bqb);
+		if (pageYes) {
+			Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+			builder.withPageable(pageable).withSort(sort);
+		} else {
+			Pageable pageable = PageRequest.of(0, querypage.getPageSize());// 不设置分页，会默认10条
+			builder.withPageable(pageable);
+		}
+		SearchQuery sq = builder.build();
 		Page<CodeBaseModel2> page = codeBaseModel2Dao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			return page.getContent();

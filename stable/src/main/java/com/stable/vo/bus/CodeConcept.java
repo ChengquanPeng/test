@@ -20,7 +20,7 @@ public class CodeConcept extends EsBase {
 	private static final long serialVersionUID = 8129067850969692849L;
 	@Id
 	private String id;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Text, fielddata = true)
 	private String code;
 	@Field(type = FieldType.Text)
 	private String conceptId;
