@@ -402,7 +402,7 @@ public class ModelWebService {
 			List<String> list = conceptService.listCodesByAliasCode(mr.getConceptId(), querypage);
 			if (list != null) {
 				bqb.must(QueryBuilders.termsQuery("code", list));
-				pageYes = false;// 已经在这里分页了。不需要在下面分页。
+				pageYes = false;// 已经在这里分页了。不需要在下面分页。 这里查询有20条，但是结果可能没有20，可能是新股，没有进入codeModel
 			} else {
 				return new LinkedList<CodeBaseModel2>();
 			}
