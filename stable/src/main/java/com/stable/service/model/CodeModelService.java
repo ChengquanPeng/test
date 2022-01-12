@@ -186,7 +186,12 @@ public class CodeModelService {
 				poolList.add(pool);
 
 				boolean onlineYear = stockBasicService.online1YearChk(code, tradeDate);
-				if (!onlineYear) {
+				if (!onlineYear) {//不买卖新股
+					CodeBaseModel2 tone = new CodeBaseModel2();
+					tone.setId(code);
+					tone.setCode(code);
+					tone.setDate(tradeDate);
+					listLast.add(tone);
 					continue;
 				}
 				boolean online4Year = stockBasicService.online4YearChk(code, tradeDate);
