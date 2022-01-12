@@ -21,6 +21,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int shooting2 = 0;// 行情指标2：大票，底部增发超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停。
 	@Field(type = FieldType.Integer)
 	private int shooting3 = 0;// 行情指标3：融资票
+	@Field(type = FieldType.Integer)
+	private int shooting4 = 0;// 行情指标4：股东人数底部大幅减少
 	
 	// Step.1.市值大小，股价K线形态是否横盘多年，且常年分红
 	@Field(type = FieldType.Double)

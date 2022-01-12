@@ -229,6 +229,21 @@ public class SortV6Service {
 			return false;
 		}
 		return true;
+	}
 
+	/**
+	 * 1.15个交易日内有9.5%的涨幅,且涨停日有回调
+	 */
+	public TradeHistInfoDaliyNofq is10DayTodayPriceOk(String code, int date) {
+		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
+				EsQueryPageUtil.queryPage10, SortOrder.DESC);
+
+		double maxPrice = l2.stream().max(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getHigh)).get().getHigh();
+		double minPrice = l2.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getLow)).get().getLow();
+		double persent3 = CurrencyUitl.cutProfit(minPrice, maxPrice);
+		if (persent3 <= 30.0 && isTradeOkBefor5ForVol(code, 00)) {
+			// ?
+		}
+		return null;
 	}
 }

@@ -1,5 +1,6 @@
 package com.stable.service;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -228,11 +229,19 @@ public class ChipsService {
 	}
 
 	/**
-	 * 最近44条记录
+	 * 最近记录
 	 */
 	public List<HolderNum> getHolderNumList45(String code, int startDate) {
-		int pageNum = EsQueryPageUtil.queryPage45.getPageNum();
-		int size = EsQueryPageUtil.queryPage45.getPageSize();
+		int pageNum = 0;
+		int size = 0;
+		if (startDate <= 0) {
+			pageNum = EsQueryPageUtil.queryPage45.getPageNum();
+			size = EsQueryPageUtil.queryPage45.getPageSize();
+		} else {
+			pageNum = EsQueryPageUtil.queryPage9999.getPageNum();
+			size = EsQueryPageUtil.queryPage9999.getPageSize();
+		}
+
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -251,77 +260,93 @@ public class ChipsService {
 	}
 
 	/**
-	 * 股东人数增长/减少分析（幅度+次数）
+	 * 股东人数增长/减少分析
 	 */
-	public HolderAnalyse holderNumAnalyse(String code) {
+	public HolderAnalyse holderNumAnalyse(String code, int fourYearAgo) {
 		HolderAnalyse r = new HolderAnalyse();
-		r.setAnaRes(holderNumAnalyse(code, r));
-		return r;
-	}
-
-	private double holderNumAnalyse(String code, HolderAnalyse r) {
 		try {
-			List<HolderNum> list = getHolderNumList45(code);
+			List<HolderNum> list = getHolderNumList45(code, fourYearAgo);
 			if (list != null && list.size() > 1) {
-				r.setLastNum(list.get(0).getNum());
-				r.setAvgNum(list.get(0).getAvgNumP5());
-				r.setDate(list.get(0).getDate());
-				int c2 = 0;
-				int lowNum = 0;
-				// 增加
-				for (int i = 0; i < list.size() - 1; i++) {
-					if (list.get(i).getNum() >= list.get(i + 1).getNum()) {
-						c2++;
-						lowNum = list.get(i + 1).getNum();
-					} else {
-						break;
-					}
-				}
-				if (c2 > 0) {
-					int start = list.get(0).getNum();
-					// lowNum/start
-					int reducePresent = Double
-							.valueOf(CurrencyUitl.cutProfit(Double.valueOf(lowNum), Double.valueOf(start))).intValue();
-					if (c2 < 10) {
-						return Double.valueOf(reducePresent + ".0" + c2);
-					} else {
-						return Double.valueOf(reducePresent + "." + c2);
-					}
-				}
-				// 减少
-				int c1 = 0;
-				int highNum = 0;
-				for (int i = 0; i < list.size() - 1; i++) {
-					if (list.get(i).getNum() <= list.get(i + 1).getNum()) {
-						c1++;
-						highNum = list.get(i + 1).getNum();
-					} else {
-						break;
-					}
-				}
-				if (c1 > 0) {
-					int start = list.get(0).getNum();
-					// start/lowNum
-					int reducePresent = Double
-							.valueOf(CurrencyUitl.cutProfit(Double.valueOf(highNum), Double.valueOf(start))).intValue();
-					double t = 0.0;
-					if (c1 < 10) {
-						t = Double.valueOf(reducePresent + ".0" + c1);
-					} else {
-						t = Double.valueOf(reducePresent + "." + c1);
-					}
-					// 变化太小导致reducePresent=0，没有-负数符号
-					if (reducePresent == 0) {
-						return (0 - t);
-					} else {
-						return t;
-					}
+				HolderNum dmax = list.stream().max(Comparator.comparingInt(HolderNum::getNum)).get();
+				HolderNum curr = list.get(0);
+				r.setLastNum(curr.getNum());
+				r.setAvgNum(curr.getAvgNumP5());
+				r.setDate(curr.getDate());
+				if (dmax.getDate() < curr.getDate() && dmax.getNum() > curr.getNum()) {
+					double reduce = CurrencyUitl.cutProfit(dmax.getNum(), curr.getNum());
+					r.setAnaRes(reduce);
 				}
 			}
-			return 0.0;
+			return r;
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 	}
+
+//	private double holderNumAnalyse(String code, HolderAnalyse r) {
+//		try {
+//			List<HolderNum> list = getHolderNumList45(code);
+//			if (list != null && list.size() > 1) {
+//				r.setLastNum(list.get(0).getNum());
+//				r.setAvgNum(list.get(0).getAvgNumP5());
+//				r.setDate(list.get(0).getDate());
+//				int c2 = 0;
+//				int lowNum = 0;
+//				// 增加
+//				for (int i = 0; i < list.size() - 1; i++) {
+//					if (list.get(i).getNum() >= list.get(i + 1).getNum()) {
+//						c2++;
+//						lowNum = list.get(i + 1).getNum();
+//					} else {
+//						break;
+//					}
+//				}
+//				if (c2 > 0) {
+//					int start = list.get(0).getNum();
+//					// lowNum/start
+//					int reducePresent = Double
+//							.valueOf(CurrencyUitl.cutProfit(Double.valueOf(lowNum), Double.valueOf(start))).intValue();
+//					if (c2 < 10) {
+//						return Double.valueOf(reducePresent + ".0" + c2);
+//					} else {
+//						return Double.valueOf(reducePresent + "." + c2);
+//					}
+//				}
+//				// 减少
+//				int c1 = 0;
+//				int highNum = 0;
+//				for (int i = 0; i < list.size() - 1; i++) {
+//					if (list.get(i).getNum() <= list.get(i + 1).getNum()) {
+//						c1++;
+//						highNum = list.get(i + 1).getNum();
+//					} else {
+//						break;
+//					}
+//				}
+//				if (c1 > 0) {
+//					int start = list.get(0).getNum();
+//					// start/lowNum
+//					int reducePresent = Double
+//							.valueOf(CurrencyUitl.cutProfit(Double.valueOf(highNum), Double.valueOf(start))).intValue();
+//					double t = 0.0;
+//					if (c1 < 10) {
+//						t = Double.valueOf(reducePresent + ".0" + c1);
+//					} else {
+//						t = Double.valueOf(reducePresent + "." + c1);
+//					}
+//					// 变化太小导致reducePresent=0，没有-负数符号
+//					if (reducePresent == 0) {
+//						return (0 - t);
+//					} else {
+//						return t;
+//					}
+//				}
+//			}
+//			return 0.0;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			throw new RuntimeException(e);
+//		}
+//	}
 }

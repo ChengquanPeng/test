@@ -147,6 +147,7 @@ public class CodeModelService {
 		checkYear = currYear - 5;
 
 		threeYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -1000));
+		int fourYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -1460));
 		oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
 		halfYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -180));
 		log.info("CodeModel processing request date={}", tradeDate);
@@ -170,8 +171,9 @@ public class CodeModelService {
 		StringBuffer shootNotice1 = new StringBuffer();
 		// 行情指标2：大票，底部增发超过50亿(越大越好)，且证监会通过-之前有明显底部拿筹痕迹-涨停。
 		StringBuffer shootNotice2 = new StringBuffer();
-		// 行情指标3：融资大增，股价振浮30%以内:TODO
-		StringBuffer shootNotice3 = new StringBuffer();
+		// 行情指标3：融资大增，股价振浮30%以内(融资融券是第二天更新的)
+		// 行情指标4：股东人数底部大幅减少
+		StringBuffer shootNotice4 = new StringBuffer();
 
 		Map<String, CodeBaseModel2> histMap = getALLForMap();
 		for (StockBaseInfo s : codelist) {
@@ -186,7 +188,7 @@ public class CodeModelService {
 				poolList.add(pool);
 
 				boolean onlineYear = stockBasicService.online1YearChk(code, tradeDate);
-				if (!onlineYear) {//不买卖新股
+				if (!onlineYear) {// 不买卖新股
 					CodeBaseModel2 tone = new CodeBaseModel2();
 					tone.setId(code);
 					tone.setCode(code);
@@ -205,7 +207,8 @@ public class CodeModelService {
 				// 高质押
 				ZhiYa zy = zhiYaService.getZhiYa(code);
 				double mkv = d.getCircMarketVal();
-				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listHist, d, zy);
+				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listHist, d, zy,
+						fourYearAgo);
 				listLast.add(newOne);
 
 				newOne.setTagDzPriceLow(0);
@@ -219,7 +222,7 @@ public class CodeModelService {
 				newOne.setHolderZb(s.getHolderZb());
 				// 同步-备注
 				newOne.setBuyRea(pool.getRemark());
-
+				newOne.setShooting3(0);
 				// 人工审核是否时间到期-重置
 				if (newOne.getPlst() < tradeDate) {
 					if (newOne.getPls() == 1) {
@@ -249,7 +252,6 @@ public class CodeModelService {
 				if (isweekend) {
 					newOne.setZfjjup(0);
 					newOne.setZfjjupStable(0);
-					// if (mkv <= 100.0) {
 					if (online4Year) {
 						int listdate = Integer.valueOf(s.getList_date());
 						newOne.setZfjjup(priceLifeService.noupYear(code, listdate));
@@ -257,7 +259,6 @@ public class CodeModelService {
 							newOne.setZfjjupStable(priceLifeService.noupYearstable(code, listdate));
 						}
 					}
-					// }
 
 					newOne.setFinOK(0);
 					if (l != null) {
@@ -353,6 +354,7 @@ public class CodeModelService {
 
 				boolean isOk1 = false;
 				boolean isOk2 = false;
+				boolean isOk4 = false;
 				if (newOne.getZfjjupStable() >= 2) {
 					// 行情指标1：小票，底部大宗超5千万(机构代持？非董监高减持大宗)
 					// 行情指标2：大票，底部增发超过50亿(越大越好)，且证监会通过-之前有明显底部拿筹痕迹-涨停。
@@ -371,6 +373,10 @@ public class CodeModelService {
 						}
 					}
 				}
+				if (newOne.getZfjjup() >= 3 && newOne.getHolderNum() < -40.0) {// 股价3年没大涨，人数少了接近一半人
+					log.info("{} 股东人数少了一半人", code);
+					isOk4 = true;
+				}
 
 				if (isOk1) {
 					if (newOne.getShooting1() == 0) {
@@ -388,6 +394,14 @@ public class CodeModelService {
 					}
 				} else {
 					newOne.setShooting2(0);
+				}
+				if (isOk4) {
+					if (newOne.getShooting4() == 0) {
+						newOne.setShooting4(1);
+						shootNotice4.append(stockBasicService.getCodeName2(code)).append(",");
+					}
+				} else {
+					newOne.setShooting4(0);
 				}
 
 			} catch (Exception e) {
@@ -418,13 +432,17 @@ public class CodeModelService {
 			WxPushUtil.pushSystem1("行情指标1：小票，底部大宗超5千万(机构代持？非董监高减持大宗):" + shootNotice1.toString());
 		}
 		if (shootNotice2.length() > 0) {
-			WxPushUtil.pushSystem1("行情指标2：大票，底部增发超过50亿(越大越好)，且证监会通过-之前有明显底部拿筹痕迹-涨停:" + shootNotice2.toString());
+			WxPushUtil.pushSystem1("行情指标2：大票，底部增发超过50亿(越大越好)，且证监会已核准-之前有明显底部拿筹痕迹-涨停:" + shootNotice2.toString());
 		}
+		if (shootNotice4.length() > 0) {
+			WxPushUtil.pushSystem1("行情指标4：股东人数在底部大幅减少(3年+ -40%):" + shootNotice4.toString());
+		}
+
 //		daliyTradeHistroyService.deleteData();
 	}
 
 	private CodeBaseModel2 getBaseAnalyse(StockBaseInfo s, int tradeDate, CodeBaseModel2 oldOne,
-			List<CodeBaseModelHist> listHist, DaliyBasicInfo2 d, ZhiYa zy) {
+			List<CodeBaseModelHist> listHist, DaliyBasicInfo2 d, ZhiYa zy, int fourYearAgo) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
 		// 基本面池
@@ -446,7 +464,7 @@ public class CodeModelService {
 		susWhiteHorses(code, newOne);// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
 		lastDoneZfBoss(newOne, d);// 已完成的增发，更多细节
 		// 股东人数
-		HolderAnalyse ha = chipsService.holderNumAnalyse(code);
+		HolderAnalyse ha = chipsService.holderNumAnalyse(code, fourYearAgo);
 		newOne.setHolderNum(ha.getAnaRes());
 		newOne.setHolderDate(ha.getDate());
 		newOne.setAvgNum(ha.getAvgNum());// 除开5%股东的人均流通持股

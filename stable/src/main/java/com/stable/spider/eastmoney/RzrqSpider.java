@@ -17,6 +17,7 @@ import com.stable.es.dao.base.RzrqDaliyDao;
 import com.stable.es.dao.base.RztjDao;
 import com.stable.service.DzjyService;
 import com.stable.service.StockBasicService;
+import com.stable.service.model.ModelWebService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -45,7 +46,8 @@ public class RzrqSpider {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private DzjyService dzjyService;
-
+	@Autowired
+	private ModelWebService modelWebService;
 	@Autowired
 	private RzrqDaliyDao rzrqDaliyDao;
 	@Autowired
@@ -70,7 +72,6 @@ public class RzrqSpider {
 			rzrqDaliyDao.saveAll(l);
 		}
 		log.info("codes size:{}", codes.size());
-
 		// STEP3:计算-最新涨幅是否超过20%
 		exeRzrqTime(codes, date);
 	}
@@ -82,20 +83,24 @@ public class RzrqSpider {
 		int validDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(DateUtil.parseDate(date), 20));// 有效期
 		ThreadsUtil.sleepRandomSecBetween15And30();
 		List<Rztj> l = new LinkedList<Rztj>();
+//		List<CodeBaseModel2> update = new LinkedList<CodeBaseModel2>();
+
 		for (String code : codes) {
+
 			Rztj rztj = dzjyService.getLastRztj(code);
 			rztj.setUpdateDate(date);
-			if (rztj.getValidDate() < date) {// 失效了，重新统计
-				if (dzjyService.rzrqAvg20d(code, vaildLine, validBlance, rztj)) {
-					rztj.setValid(1);
-					rztj.setValidDate(validDate);
-				} else {
-					rztj.setValid(0);
-					rztj.setValidDate(0);
-				}
+			if (dzjyService.rzrqAvg20d(code, vaildLine, validBlance, rztj)) {
+				rztj.setValid(1);
+				rztj.setValidDate(validDate);
+			} else {
+				rztj.setValid(0);
+				rztj.setValidDate(0);
 			}
 			l.add(rztj);
 
+//			if (rztj.getValid() > 0) {
+//				CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(code);
+//			}
 			if (l.size() > 200) {
 				rztjDao.saveAll(l);
 				l = new LinkedList<Rztj>();
