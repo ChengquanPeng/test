@@ -33,9 +33,13 @@ public class FinanceBaseInfoResp {
 
 	public void setEndType(int year, int q) {
 		if (q == 4) {
-			endType = year + "-年报";
+			endType = year + "-年";
 		} else {
 			endType = year + "-" + q;
 		}
 	}
+
+	private String goodWill; // 商誉
+	private String intangibleAsset; // 无形资产
+
 }

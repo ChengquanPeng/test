@@ -28,4 +28,5 @@ public class FinanceZcfzb {
 	private double tradeFinassetNotfvtpl; // 交易性金融资产
 	private double stborrow;// 短期借款
 	private double ltborrow;// 长期借款
+	private double intangibleAsset; // 无形资产
 }

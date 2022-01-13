@@ -292,7 +292,7 @@ public class ThsHolderSpider {
 							} catch (Exception e) {
 								log.info(key);
 								if (fher_x != null) {
-									log.info(fher_x.asXml());
+									//log.info(fher_x.asXml());
 								}
 								e.printStackTrace();
 							}

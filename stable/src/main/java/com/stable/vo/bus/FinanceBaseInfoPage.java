@@ -60,6 +60,8 @@ public class FinanceBaseInfoPage extends EsBase {
 	@Field(type = FieldType.Double)
 	private double goodWill; // 商誉
 	@Field(type = FieldType.Double)
+	private double intangibleAsset; // 无形资产
+	@Field(type = FieldType.Double)
 	private double sumLasset; // 流动资产合计
 	@Field(type = FieldType.Double)
 	private double sumAsset; // 总资产

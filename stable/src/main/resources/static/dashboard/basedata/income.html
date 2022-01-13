@@ -112,13 +112,13 @@
 					}
 				}, {
 					field : 'gsjlr',
-					title : '归属净利<br/>(TB%)',
+					title : 'gs净利<br/>(TB%)',
 					formatter : function(value, row, index) {
 						return row.gsjlr + "<br/>(" + row.gsjlrtbzz + "%)";
 					}
 				}, {
 					field : 'kfjlr',
-					title : '扣非净利<br/>(TB%)',
+					title : 'kf净利<br/>(TB%)',
 					formatter : function(value, row, index) {
 						return row.kfjlr + "<br/>(" + row.kfjlrtbzz + "%)";
 					}
@@ -130,13 +130,13 @@
 					}
 				}, {
 					field : 'sumDebtLd',
-					title : '流动负债<br/>(应付款)',
+					title : 'ld负债<br/>(应付款)',
 					formatter : function(value, row, index) {
 						return row.sumDebtLd + "<br/>(" + row.accountPay + ")";
 					}
 				}, {
 					field : 'sumLasset',
-					title : '流动资产<br/>(应收款)',
+					title : 'ld资产<br/>(应收款)',
 					formatter : function(value, row, index) {
 						return row.sumLasset + "<br/>(" + row.accountrec + ")";
 					}
@@ -151,13 +151,16 @@
 					title : '净资产'
 				}, {
 					field : 'zcfzl',
-					title : '资产负债%'
+					title : '负债'
 				}, {
 					field : 'jqjzcsyl',
-					title : '资产收益%'
+					title : '收益'
 				}, {
 					field : 'mll',
-					title : '毛利%'
+					title : '毛利'
+				} , {
+					field : 'goodWill',
+					title : '商誉/无形'
 				} ],
 				responseHandler : function responseHandler(res) {
 

@@ -189,6 +189,7 @@ public class EastmoneySpider {
 							page.setDataOk(true);
 							// 基础数
 							page.setGoodWill(zcfzb.getGoodWill());
+							page.setIntangibleAsset(zcfzb.getIntangibleAsset());
 							page.setSumAsset(zcfzb.getSumAsset());
 							page.setSumDebt(zcfzb.getSumDebt());
 							page.setNetAsset(zcfzb.getNetAsset());

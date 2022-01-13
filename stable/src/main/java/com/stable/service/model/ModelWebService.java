@@ -175,7 +175,7 @@ public class ModelWebService {
 
 		// 博弈-基本面
 		StringBuffer sb5 = new StringBuffer();
-		if (dh.getShooting1() > 0 || dh.getShooting2() > 0 || dh.getShooting3() > 0) {
+		if (dh.getShooting1() > 0 || dh.getShooting2() > 0 || dh.getShooting3() > 0 || dh.getShooting4() > 0) {
 			sb5.append("<font color='red'>");
 			if (dh.getShooting1() > 0) {
 				sb5.append("底部小票大宗超5千万,机构代持？非董监高减持");
@@ -204,10 +204,10 @@ public class ModelWebService {
 			sb5.append("年未大涨,");
 		}
 		if (dh.getBousOK() == 1) {
-			sb5.append("近5年业绩不亏,");
+			sb5.append("近5年分红,");
 		}
 		if (dh.getFinOK() == 1) {
-			sb5.append("近5年分红,");
+			sb5.append("近5年业绩不亏,");
 		}
 		sb5.append(Constant.HTML_LINE);
 		sb5.append("前3大股东:").append(dh.getHolderNumT3()).append("%");

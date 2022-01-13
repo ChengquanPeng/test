@@ -111,6 +111,11 @@ public class EastmoneyZcfzbSpider {
 					} catch (Exception e) {
 					}
 					try {
+						fzb.setIntangibleAsset(Double.valueOf(data.getString("INTANGIBLE_ASSET")));// 商誉
+					} catch (Exception e) {
+					}
+
+					try {
 						fzb.setSumAsset(Double.valueOf(data.getString("TOTAL_ASSETS")));// 总资产 x
 					} catch (Exception e) {
 					}
