@@ -281,14 +281,14 @@ table {
 
 				<tr>
 					<td id="pre_goodWillOk"></td>
-					<td>商誉情况</td>
+					<td>商誉&坏账准备</td>
 					<td><select id="goodWillOk">
 							<option value="0">差</option>
 							<option value="1">一般</option>
 							<option value="2">好</option>
 					</select></td>
 					<td></td>
-					<td><a id="base3" target="_blank">系统基本面</a>&nbsp;&nbsp;&nbsp;</td>
+					<td><a id="base3" target="_blank">系统基本面</a>&nbsp;&nbsp;&nbsp;商誉减值，坏账准备：应收帐款/票据，固定资产折旧，无形资产（专利商标）减值，库存跌价，股债权投资等</td>
 				</tr>
 				<tr>
 					<td id="pre_zcfzl"></td>
@@ -522,7 +522,10 @@ table {
 						$('#base1').attr("href",
 								"http://basic.10jqka.com.cn/" + code);
 						$('#base2').attr("href", "/web/code/" + code);
-						$('#base3').attr("href", "/web/code/" + code);
+						$('#base3').attr(
+								"href",
+								"/web/dashboard/basedata/income.html?code="
+										+ code);
 						//股东人数
 						$('#gdrsOkq1').attr(
 								"href",
