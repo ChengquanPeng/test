@@ -120,7 +120,7 @@ public class FinanceService {
 						boolean find = false;
 						StringBuffer sb = new StringBuffer();
 						// 业绩快报(准确的)
-						if (yjkb != null && yjkb.getAnnDate() >= startDate) {
+						if (yjkb != null && yjkb.getAnnDate() > startDate) {
 							sb.append(stockBasicService.getCodeName2(code));
 							if (yjkb.getJlr() > 0) {
 								sb.append(",业绩快报不亏:");
@@ -130,13 +130,15 @@ public class FinanceService {
 								find = true;
 							}
 							if (find) {
+								mp.setYkb(yjkb.getDate());
 								sb.append("业绩同比:").append(yjkb.getJlrtbzz()).append("%");
 								sb.append(",营收同比:").append(yjkb.getYyzsrtbzz()).append("%");
 							}
-						} else {
-							// 业绩预告(类似天气预报,可能不准)
+						}
+						// 业绩预告(类似天气预报,可能不准)
+						if (!find) {
 							FinYjyg yjyg = getLastFinaceYgByReportDate(code, fbi.getYear(), fbi.getQuarter());
-							if (yjyg != null && yjyg.getAnnDate() >= startDate) {
+							if (yjyg != null && yjyg.getAnnDate() > startDate) {
 								sb.append(stockBasicService.getCodeName(code));
 								if (yjyg.getJlr() > 0) {
 									sb.append(",业绩预告不亏:");
@@ -146,7 +148,25 @@ public class FinanceService {
 									find = true;
 								}
 								if (find) {
+									mp.setYkb(yjkb.getDate());
 									sb.append("业绩同比:").append(yjyg.getJlrtbzz()).append("%");
+								}
+							}
+						}
+						if (!find) {
+							if (fbi.getDate() >= startDate) {
+								sb.append(stockBasicService.getCodeName(code));
+								if (fbi.getGsjlr() > 0) {
+									sb.append(",业绩不亏:");
+									find = true;
+								} else if (fbi.getGsjlr() < 0) {
+									sb.append(",业绩亏损:");
+									find = true;
+								}
+								if (find) {
+									mp.setYkb(yjkb.getDate());
+									sb.append("业绩同比:").append(fbi.getGsjlrtbzz()).append("%");
+									sb.append(",营收同比:").append(fbi.getYyzsrtbzz()).append("%");
 								}
 							}
 						}
@@ -156,7 +176,6 @@ public class FinanceService {
 							} else {
 								sb.append("期望亏损");
 							}
-							mp.setYkb(0);
 							monitorPoolDao.save(mp);
 							WxPushUtil.pushSystem1(sb.toString());
 						}
