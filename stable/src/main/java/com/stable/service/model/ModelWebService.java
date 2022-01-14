@@ -352,7 +352,7 @@ public class ModelWebService {
 			}
 		}
 		if (date != 1) {
-			String remark = req.getBuyRea() + " " + req.getSoldRea();
+			String remark = (req.getBuyRea() + " " + req.getSoldRea()).trim();
 			CodeBaseModel2 c = getLastOneByCode2(code);
 			BeanCopy.copy(req, c);
 			c.setPls(pls);
@@ -371,7 +371,7 @@ public class ModelWebService {
 				pool.setHolderNum(0);
 				pool.setYkb(0);
 				pool.setZfdone(0);
-				pool.setRemark("");
+				pool.setRemark(remark);
 				pool.setListenerGg(0);
 				pool.setBuyLowVol(30);
 				monitorPoolDao.save(pool);

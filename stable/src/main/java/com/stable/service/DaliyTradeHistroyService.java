@@ -1,5 +1,6 @@
 package com.stable.service;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.Constant;
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.MonitorType;
 import com.stable.enums.RunCycleEnum;
@@ -732,6 +734,16 @@ public class DaliyTradeHistroyService {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+
+	// 一年新高的价格（前复权）
+	public TradeHistInfoDaliy queryHighRecord(String code, int date) {
+		List<TradeHistInfoDaliy> list = queryListByCodeWithLastQfq(code, 0, date, EsQueryPageUtil.queryPage250,
+				SortOrder.DESC);
+		if (list != null && list.size() > 0) {
+			return list.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+		}
+		return new TradeHistInfoDaliy();
 	}
 
 	public TradeHistInfoDaliy queryLastfq(String code) {

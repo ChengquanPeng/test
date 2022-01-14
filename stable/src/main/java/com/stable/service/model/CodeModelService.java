@@ -66,6 +66,7 @@ import com.stable.vo.bus.HolderPercent;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockBaseInfo;
+import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
 import com.stable.vo.bus.ZengFaExt;
@@ -220,8 +221,7 @@ public class CodeModelService {
 					newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (s.getCircZb() / 100))));
 				}
 				newOne.setHolderZb(s.getHolderZb());
-				// 同步-备注
-				newOne.setBuyRea(pool.getRemark());
+
 				newOne.setShooting3(0);
 				// 人工审核是否时间到期-重置
 				if (newOne.getPlst() < tradeDate) {
@@ -242,6 +242,12 @@ public class CodeModelService {
 					pool.setOffline(0);
 					pool.setUpTodayChange(0);
 					newOne.setMonitor(MonitorType.NO.getCode());
+				}
+				if (newOne.getPls() == 1) {
+					TradeHistInfoDaliy high = daliyTradeHistroyService.queryHighRecord(code, tradeDate);
+					pool.setYearHigh1(high.getHigh());// 一年新高的价格（前复权）
+				} else {
+					pool.setYearHigh1(0);
 				}
 				newOne.setCompnayType(s.getCompnayType());
 
@@ -423,7 +429,7 @@ public class CodeModelService {
 		log.info("CodeModel v2 模型执行完成");
 //		WxPushUtil.pushSystem1("CODE-MODEL V2-" + tradeDate + " 共[" + codelist.size() + "]条,今日更新条数:" + listHist.size());
 		if (sbc.length() > 0) {
-			WxPushUtil.pushSystem1("以下pls==1已到期:" + sbc.toString());
+			WxPushUtil.pushSystem1("人工pls==1已到期:" + sbc.toString());
 		}
 		if (annc.length() > 0) {
 			WxPushUtil.pushSystem1("最新公告:" + annc.toString());

@@ -53,6 +53,8 @@ public class MonitorPool {
 	private int xjl = 0;// 现金流净额转正(0不预警，1预警）
 	@Field(type = FieldType.Integer)
 	private int dzjy = 0;// 大宗交易(0不预警，date:截止日期）
+	@Field(type = FieldType.Double)
+	private double yearHigh1 = 0;// 1年历史新高
 	// 增发
 
 	// 短线

@@ -101,12 +101,13 @@ public class MonitorPoolService {
 			c.setRemark(remark + c.getUpdateDate());
 		}
 		monitorPoolDao.save(c);
-		updateBaseMoniStatus(code, c.getMonitor());
+		updateBaseMoniStatus(code, c.getMonitor(), c.getRemark());
 	}
 
-	private void updateBaseMoniStatus(String code, int monitor) {
+	private void updateBaseMoniStatus(String code, int monitor, String buyRea) {
 		CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(code);
 		cbm.setMonitor(monitor);
+		cbm.setBuyRea(buyRea);// 同步-备注
 		codeBaseModel2Dao.save(cbm);
 	}
 
@@ -146,7 +147,7 @@ public class MonitorPoolService {
 			c.setRemark(remark + " " + c.getUpdateDate());
 		}
 		monitorPoolDao.save(c);
-		updateBaseMoniStatus(code, c.getMonitor());
+		updateBaseMoniStatus(code, c.getMonitor(), c.getRemark());
 	}
 
 	public MonitorPool getMonitorPool(String code) {

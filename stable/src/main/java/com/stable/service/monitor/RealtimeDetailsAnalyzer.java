@@ -28,6 +28,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean waitSend = true;
 	private boolean chkCodeClosed = false;
 	private CodeBaseModel2 cbm;
+	private boolean highPriceGot = false;
 
 	public void stop() {
 		isRunning = false;
@@ -105,6 +106,10 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						WxPushUtil.pushSystem1(code + " " + codeName + " " + rm.getModeName());
 						waitSend = false;
 					}
+				}
+				if (cp.getYearHigh1() > 0 && srt.getHigh() > cp.getYearHigh1() && !highPriceGot) {
+					WxPushUtil.pushSystem1(codeName + "(" + code + ") 一年新高! 备注:" + cp.getRemark());
+					highPriceGot = true;
 				}
 				if (now > d1450) {
 					WAIT_MIN = ONE_MIN;
