@@ -385,7 +385,6 @@ public class ModelWebService {
 				pool.setYkb(1);
 				pool.setZfdone(1);
 				pool.setRemark(remark);
-				pool.setListenerGg(req.getListenerGg());
 				pool.setBuyLowVol(0);
 				monitorPoolDao.save(pool);
 			}

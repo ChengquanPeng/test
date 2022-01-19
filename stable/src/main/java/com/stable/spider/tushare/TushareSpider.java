@@ -129,38 +129,6 @@ public class TushareSpider {
 	}
 
 	/**
-	 * 日线行情-每日指标
-	 * 
-	 * @param ts_code    ts代码
-	 * @param start_date 开始日期 (格式：YYYYMMDD)
-	 * @param end_date   结束日期 (格式：YYYYMMDD)
-	 * @return
-	 */
-	private final String stockdaliybasic_fields = "ts_code,trade_date,close,turnover_rate,turnover_rate_f,volume_ratio,pe,pe_ttm,pb,ps,ps_ttm,dv_ratio,dv_ttm,total_share,float_share,free_share,total_mv,circ_mv";
-
-	public JSONObject getStockDaliyBasic(String ts_code, String trade_date) {
-		try {
-			StockDaliyReq req = new StockDaliyReq();
-			req.setTrade_date(trade_date);
-			req.setTs_code(ts_code);
-//			req.setStart_date(start_date);  , String start_date, String end_date
-//			req.setEnd_date(end_date);
-
-			JSONObject json = new JSONObject();
-			json.put("api_name", "daily_basic");
-			json.put("params", JSON.parse(JSON.toJSONString(req)));
-			json.put("fields", stockdaliybasic_fields);
-
-			String result = post(json);
-			JSONObject datas = JSON.parseObject(result);
-			JSONObject items = datas.getJSONObject("data");
-			return items;
-		} finally {
-			// ThreadsUtil.tuShareSleepRandom();
-		}
-	}
-
-	/**
 	 * 交易日历
 	 * 
 	 * @param ts_code    ts代码
@@ -185,59 +153,5 @@ public class TushareSpider {
 			ThreadsUtil.tuShareSleepRandom();
 		}
 	}
-
-	/**
-	 * 回购
-	 * 
-	 * @param ts_code    ts代码
-	 * @param start_date 开始日期 (格式：YYYYMMDD)
-	 * @param end_date   结束日期 (格式：YYYYMMDD)
-	 * @return 如果都不填，单次默认返回2000条
-	 */
-	private final String buyback_fields = "ts_code,ann_date,end_date,proc,exp_date,vol,amount,high_limit,low_limit";
-
-	public JSONArray getBuyBackList(String start_date, String end_date, String ann_date) {
-		try {
-			JSONObject json = new JSONObject();
-			json.put("api_name", "repurchase");
-			if (StringUtils.isNotBlank(start_date) && StringUtils.isNotBlank(end_date)) {
-				json.put("params", JSON.parse("{'start_date':'" + start_date + "','end_date':'" + end_date + "'}"));
-			} else if (StringUtils.isNotBlank(ann_date)) {
-				json.put("params", JSON.parse("{'ann_date':'" + ann_date + "'}"));
-			}
-			json.put("fields", buyback_fields);
-
-			String result = post(json);
-			JSONObject datas = JSON.parseObject(result);
-			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
-			return items;
-		} finally {
-			ThreadsUtil.tuShareSleepRandom();
-		}
-	}
-
-//	/**
-//	 * 质押统计
-//	 * 
-//	 * @param ts_code  ts代码
-//	 * @param end_date 结束日期 (格式：YYYYMMDD)
-//	 */
-//	private final String pledge_stat_fields = "ts_code,end_date,pledge_count,unrest_pledge,rest_pledge,total_share,pledge_ratio";
-//
-//	public JSONArray getPledgeStatList(String ts_code, String end_date) {
-//		try {
-//			JSONObject json = new JSONObject();
-//			json.put("api_name", "pledge_stat");
-//			json.put("params", JSON.parse("{'ts_code':'" + ts_code + "','end_date':'" + end_date + "'}"));
-//			json.put("fields", pledge_stat_fields);
-//
-//			String result = post(json);
-//			JSONObject datas = JSON.parseObject(result);
-//			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
-//			return items;
-//		} finally {
-//			ThreadsUtil.tuShareSleepRandom();
-//		}
-//	}
 
 }

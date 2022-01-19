@@ -19,8 +19,6 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.ZengFaDao;
@@ -29,8 +27,6 @@ import com.stable.es.dao.base.ZengFaExtDao;
 import com.stable.es.dao.base.ZengFaSummaryDao;
 import com.stable.service.model.ModelWebService;
 import com.stable.spider.ths.ThsAnnSpider;
-import com.stable.spider.tushare.TushareSpider;
-import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.WxPushUtil;
@@ -63,8 +59,6 @@ public class ChipsZfService {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
-	@Autowired
-	private TushareSpider tushareSpider;
 	@Autowired
 	private ModelWebService modelWebService;
 	@Autowired
@@ -282,19 +276,19 @@ public class ChipsZfService {
 			z.setCircMarketVal(d.getCircMarketVal());
 			z.setTotalMarketVal(d.getTotalMarketVal());
 		} else {
-			try {
-				JSONObject js = tushareSpider.getStockDaliyBasic(TushareSpider.formatCode(code), zfEndDate + "");
-				JSONArray arr = js.getJSONArray("items").getJSONArray(0);
-				int length = arr.size();
-				double c = arr.getDoubleValue(length - 1);// 流通市值
-				double t = arr.getDoubleValue(length - 2);// 总市值
-				String s1 = CurrencyUitl.covertToString(c).replace(CurrencyUitl.YI, "").replace(CurrencyUitl.WAN, "");
-				z.setCircMarketVal(Double.valueOf(s1));
-				String s2 = CurrencyUitl.covertToString(t).replace(CurrencyUitl.YI, "").replace(CurrencyUitl.WAN, "");
-				z.setTotalMarketVal(Double.valueOf(s2));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+//			try {
+//				JSONObject js = tushareSpider.getStockDaliyBasic(TushareSpider.formatCode(code), zfEndDate + "");
+//				JSONArray arr = js.getJSONArray("items").getJSONArray(0);
+//				int length = arr.size();
+//				double c = arr.getDoubleValue(length - 1);// 流通市值
+//				double t = arr.getDoubleValue(length - 2);// 总市值
+//				String s1 = CurrencyUitl.covertToString(c).replace(CurrencyUitl.YI, "").replace(CurrencyUitl.WAN, "");
+//				z.setCircMarketVal(Double.valueOf(s1));
+//				String s2 = CurrencyUitl.covertToString(t).replace(CurrencyUitl.YI, "").replace(CurrencyUitl.WAN, "");
+//				z.setTotalMarketVal(Double.valueOf(s2));
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 		}
 
 	}

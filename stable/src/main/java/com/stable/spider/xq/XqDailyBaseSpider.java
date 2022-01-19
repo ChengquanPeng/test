@@ -7,14 +7,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONArray;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
-import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
@@ -36,8 +34,6 @@ public class XqDailyBaseSpider {
 	private EsDaliyBasicInfoDao esDaliyBasicInfoDao;
 	@Autowired
 	private FinanceService financeService;
-	@Autowired
-	private TushareSpider tushareSpider;
 	@Autowired
 	private StockBasicService stockBasicService;
 
@@ -230,54 +226,7 @@ public class XqDailyBaseSpider {
 			ThreadsUtil.sleepRandomSecBetween1And5(trytime);
 			if (trytime >= 10) {
 				fetched = true;
-				WxPushUtil.pushSystem1("雪球每日信息出错(pe,pe-ttm),用tushare进行补充,code=" + code + ",url=" + url);
-				try {
-					JSONArray array = tushareSpider.getStockDaliyBasic(TushareSpider.formatCode(code), today)
-							.getJSONArray("items");
-					JSONArray arr = array.getJSONArray(0);
-
-					int i = 0;
-					arr.getString(i++);// ts_code
-					arr.getString(i++);
-					arr.getString(i++);
-					arr.getString(i++);
-					arr.getString(i++);
-					arr.getString(i++);
-
-					try {
-						b.setPe(Double.valueOf(arr.getString(i++)));
-					} catch (Exception e) {
-					}
-					try {
-						b.setPeTtm(Double.valueOf(arr.getString(i++)));
-					} catch (Exception e) {
-					}
-					try {
-						b.setPb(Double.valueOf(arr.getString(i++)));
-					} catch (Exception e) {
-					}
-					arr.getString(i++);
-					arr.getString(i++);
-					arr.getString(i++);
-					arr.getString(i++);
-					try {
-						b.setTotalShare(Double.valueOf(arr.getString(i++)));
-					} catch (Exception e) {
-					}
-					try {
-						b.setFloatShare(Double.valueOf(arr.getString(i++)));
-					} catch (Exception e) {
-					}
-					try {
-						b.setTotalMarketVal(Double.valueOf(arr.getString(i++)));
-					} catch (Exception e) {
-					}
-					try {
-						b.setCircMarketVal(Double.valueOf(arr.getString(i++)));
-					} catch (Exception e) {
-					}
-				} catch (Exception e) {
-				}
+				WxPushUtil.pushSystem1("雪球每日信息出错(pe,pe-ttm),code=" + code + ",url=" + url);
 			}
 		} while (!fetched);
 		return false;

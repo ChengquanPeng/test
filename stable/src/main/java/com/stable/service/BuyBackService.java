@@ -20,16 +20,12 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
-import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsBuyBackInfoDao;
 import com.stable.job.MyCallable;
-import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
-import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BuyBackInfo;
@@ -49,13 +45,9 @@ public class BuyBackService {
 	public static final String GDDH = "股东大会通过";
 	public static final String SS = "实施";
 	@Autowired
-	private TushareSpider tushareSpider;
-	@Autowired
 	private EsBuyBackInfoDao buyBackInfoDao;
 	@Autowired
 	private StockBasicService stockBasicService;
-	@Autowired
-	private RedisUtil redisUtil;
 
 	public void spiderBuyBackHistoryInfo(String start_date, String end_date) {
 		TasksWorker.getInstance().getService()
@@ -104,43 +96,43 @@ public class BuyBackService {
 	public void jobFetchHistEveryDay() {
 		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.BUY_BACK, RunCycleEnum.DAY) {
 			public Object mycall() {
-				String rv = redisUtil.get(RedisConstant.RDS_BUY_BACK_LAST_DAY);
-				Date lastDate = null;
-				Date todayDate = new Date();
-				if (StringUtils.isBlank(rv)) {
-					lastDate = DateUtil.addDate(todayDate, -1);
-				} else {
-					lastDate = DateUtil.parseDate(rv);
-				}
-				int today = Integer.valueOf(DateUtil.getYYYYMMDD(todayDate));
-				do {
-					lastDate = DateUtil.addDate(lastDate, 1);// 加一天
-					int last = Integer.valueOf(DateUtil.getYYYYMMDD(lastDate));
-					if (last > today) {
-						break;
-					}
-					String ann_date = String.valueOf(last);
-					log.info("同步回购公告列表[started],ann_date={},", ann_date);
-					JSONArray array = tushareSpider.getBuyBackList(null, null, ann_date);
-					// System.err.println(array.toJSONString());
-					int cnt = 0;
-					if (array != null && array.size() > 0) {
-						List<BuyBackInfo> list = new LinkedList<BuyBackInfo>();
-						log.info("获取到回购公告记录条数={}", array.size());
-						for (int i = 0; i < array.size(); i++) {
-							BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
-							// buyBackInfoDao.save(base);
-							list.add(base);
-						}
-						buyBackInfoDao.saveAll(list);
-						cnt = list.size();
-					} else {
-						log.info("未获取到回购公告");
-					}
-					redisUtil.set(RedisConstant.RDS_BUY_BACK_LAST_DAY, last);
-					log.info("同步回购公告列表[end]," + ann_date + " 获取到[" + cnt + "]条回购公告！");
-					// WxPushUtil.pushSystem1(ann_date + " 获取到[" + cnt + "]条回购公告！");
-				} while (true);
+//				String rv = redisUtil.get(RedisConstant.RDS_BUY_BACK_LAST_DAY);
+//				Date lastDate = null;
+//				Date todayDate = new Date();
+//				if (StringUtils.isBlank(rv)) {
+//					lastDate = DateUtil.addDate(todayDate, -1);
+//				} else {
+//					lastDate = DateUtil.parseDate(rv);
+//				}
+//				int today = Integer.valueOf(DateUtil.getYYYYMMDD(todayDate));
+//				do {
+//					lastDate = DateUtil.addDate(lastDate, 1);// 加一天
+//					int last = Integer.valueOf(DateUtil.getYYYYMMDD(lastDate));
+//					if (last > today) {
+//						break;
+//					}
+//					String ann_date = String.valueOf(last);
+//					log.info("同步回购公告列表[started],ann_date={},", ann_date);
+//					JSONArray array = tushareSpider.getBuyBackList(null, null, ann_date);
+//					// System.err.println(array.toJSONString());
+//					int cnt = 0;
+//					if (array != null && array.size() > 0) {
+//						List<BuyBackInfo> list = new LinkedList<BuyBackInfo>();
+//						log.info("获取到回购公告记录条数={}", array.size());
+//						for (int i = 0; i < array.size(); i++) {
+//							BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
+//							// buyBackInfoDao.save(base);
+//							list.add(base);
+//						}
+//						buyBackInfoDao.saveAll(list);
+//						cnt = list.size();
+//					} else {
+//						log.info("未获取到回购公告");
+//					}
+//					redisUtil.set(RedisConstant.RDS_BUY_BACK_LAST_DAY, last);
+//					log.info("同步回购公告列表[end]," + ann_date + " 获取到[" + cnt + "]条回购公告！");
+//					// WxPushUtil.pushSystem1(ann_date + " 获取到[" + cnt + "]条回购公告！");
+//				} while (true);
 				return null;
 			}
 		});
@@ -179,27 +171,28 @@ public class BuyBackService {
 
 	private int fetchHist(String start_date, String end_date, boolean isJob) {
 		log.info("同步回购公告列表[started],start_date={},end_date={},", start_date, end_date);
-		JSONArray array = tushareSpider.getBuyBackList(start_date, end_date, null);
-		// System.err.println(array.toJSONString());
-		int cnt = 0;
-		if (array != null && array.size() > 0) {
-			log.info("{},{},获取到回购公告记录条数={}", start_date, end_date, array.size());
-			List<BuyBackInfo> list = new LinkedList<BuyBackInfo>();
-			for (int i = 0; i < array.size(); i++) {
-				BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
-				// buyBackInfoDao.save(base);
-				list.add(base);
-			}
-			buyBackInfoDao.saveAll(list);
-			cnt = list.size();
-		} else {
-			log.info("未获取到回购公告");
-		}
-//		if (isJob) {
-//			WxPushUtil.pushSystem1(start_date + " " + end_date + "获取回购记录条数=" + cnt);
+//		JSONArray array = tushareSpider.getBuyBackList(start_date, end_date, null);
+//		// System.err.println(array.toJSONString());
+//		int cnt = 0;
+//		if (array != null && array.size() > 0) {
+//			log.info("{},{},获取到回购公告记录条数={}", start_date, end_date, array.size());
+//			List<BuyBackInfo> list = new LinkedList<BuyBackInfo>();
+//			for (int i = 0; i < array.size(); i++) {
+//				BuyBackInfo base = new BuyBackInfo(array.getJSONArray(i));
+//				// buyBackInfoDao.save(base);
+//				list.add(base);
+//			}
+//			buyBackInfoDao.saveAll(list);
+//			cnt = list.size();
+//		} else {
+//			log.info("未获取到回购公告");
 //		}
-		log.info("同步回购公告列表[end],start_date={},end_date={},", start_date, end_date);
-		return cnt;
+////		if (isJob) {
+////			WxPushUtil.pushSystem1(start_date + " " + end_date + "获取回购记录条数=" + cnt);
+////		}
+//		log.info("同步回购公告列表[end],start_date={},end_date={},", start_date, end_date);
+//		return cnt;
+		return 0;
 	}
 
 	private void fetchHist(String start_date, String end_date) {

@@ -393,13 +393,6 @@ table {
 					<td></td>
 					<td>目标位：定增逻辑的价格和之前K线的放量位置。</td>
 				</tr>
-				<tr>
-					<td></td>
-					<td>公告监听</td>
-					<td><input type="checkbox" id="listenerGg" /></td>
-					<td></td>
-					<td></td>
-				</tr>
 			</table>
 
 			<br />
@@ -455,11 +448,6 @@ table {
 				return;
 			}
 
-			var listenerGg = 0;
-			if (document.getElementById("listenerGg").checked) {
-				listenerGg = 1;
-			}
-
 			$.ajax({
 				url : "/web/model/addManual", //访问地址--action地址
 				//url : "http://127.0.0.1:8081/web/monitorPool/addMonitor", //访问地址--action地址
@@ -490,8 +478,7 @@ table {
 					jjOk : $('#jjOk').val(),
 					gdrsOk : $('#gdrsOk').val(),
 					goodWillOk : $('#goodWillOk').val(),
-					timemonth : $('#timemonth').val(),
-					listenerGg : listenerGg
+					timemonth : $('#timemonth').val()
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
 					if ("OK" == reData.status) {
@@ -679,11 +666,6 @@ table {
 							ysw("pre_dgdjc", 2);
 						} else {
 							ysw("pre_dgdjc", 0);
-						}
-
-						//监听-公告
-						if (reData.result.listenerGg > 0) {
-							$('#listenerGg').attr("checked", 'checked');
 						}
 					}
 				});
