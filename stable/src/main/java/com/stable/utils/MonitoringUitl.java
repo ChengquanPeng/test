@@ -1,13 +1,13 @@
 package com.stable.utils;
 
-import com.stable.spider.sina.SinaRealTime;
+import com.stable.spider.realtime.RealTime;
 import com.stable.vo.bus.MonitorPool;
 
 //@Log4j2
 public class MonitoringUitl {
 
 	// 实时
-	public static final boolean isOkForRt(MonitorPool cp, SinaRealTime srt) {
+	public static final boolean isOkForRt(MonitorPool cp, RealTime srt) {
 		return isOk(cp, CurrencyUitl.cutProfit(srt.getYesterday(), srt.getNow()), srt.getHigh(), srt.getLow());
 	}
 

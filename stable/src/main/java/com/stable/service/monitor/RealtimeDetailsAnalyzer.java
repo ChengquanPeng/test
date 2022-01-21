@@ -3,8 +3,8 @@ package com.stable.service.monitor;
 import java.util.Date;
 
 import com.stable.enums.MonitorType;
-import com.stable.spider.sina.SinaRealTime;
-import com.stable.spider.sina.SinaRealtimeUitl;
+import com.stable.spider.realtime.RealTime;
+import com.stable.spider.realtime.RealtimeCallProxy;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MonitoringUitl;
 import com.stable.utils.WxPushUtil;
@@ -45,7 +45,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			log.info("{} {} 没有在线价格监听", code, codeName);
 			return 0;
 		}
-		SinaRealTime srt = SinaRealtimeUitl.get(code);
+		RealTime srt = RealtimeCallProxy.get(code);
 		if (srt.getOpen() == 0.0 && srt.getBuy1() == 0.0 && srt.getSell1() == 0.0) {
 			log.info("{} {} SINA 今日疑似停牌或者可能没有集合竞价", code, codeName);
 			// WxPushUtil.pushSystem1(code + " " + codeName + "今日疑似停牌或者可能没有集合竞价");
@@ -67,7 +67,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			SinaRealTime srt = SinaRealtimeUitl.get(code);
+			RealTime srt = RealtimeCallProxy.get(code);
 			if (srt.getOpen() == 0.0) {
 				log.info("{} {} SINA 今日停牌,{}", code, codeName, msg);
 				WxPushUtil.pushSystem1(code + " " + codeName + "今日停牌:" + msg);
@@ -97,7 +97,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					}
 				}
 
-				SinaRealTime srt = SinaRealtimeUitl.get(code);
+				RealTime srt = RealtimeCallProxy.get(code);
 				boolean isOk = MonitoringUitl.isOkForRt(cp, srt);
 				if (isOk) {
 					rm.tiggerMessage();

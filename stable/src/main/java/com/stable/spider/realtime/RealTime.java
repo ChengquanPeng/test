@@ -1,9 +1,9 @@
-package com.stable.spider.sina;
+package com.stable.spider.realtime;
 
 import lombok.Data;
 
 @Data
-public class SinaRealTime {
+public class RealTime {
 
 	private double open;
 	private double yesterday;
@@ -12,6 +12,6 @@ public class SinaRealTime {
 	private double low;
 	private double buy1;
 	private double sell1;
-	private long dealNums;// 股
-	private double dealAmt;// 元
+//	private long dealNums;// 股
+//	private double dealAmt;// 元
 }
