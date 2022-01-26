@@ -11,6 +11,7 @@ import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
+import com.stable.service.DataChangeService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.utils.CurrencyUitl;
@@ -36,6 +37,8 @@ public class XqDailyBaseSpider {
 	private FinanceService financeService;
 	@Autowired
 	private StockBasicService stockBasicService;
+	@Autowired
+	private DataChangeService dataChangeService;
 
 	private String F1 = "市盈率(静)";
 	private String F2 = "市盈率(动)";
@@ -107,6 +110,7 @@ public class XqDailyBaseSpider {
 			}
 			if (upd.size() > 0) {
 				esDaliyBasicInfoDao.saveAll(list);
+				dataChangeService.setPeTtmData(upd);
 			}
 			log.info("雪球=>每日指标-市盈率完成,期望数:{" + list.size() + "},实际成功数:" + upd.size());
 			if (upd.size() != list.size()) {

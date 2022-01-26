@@ -34,6 +34,7 @@ import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
+import com.stable.service.DataChangeService;
 import com.stable.service.DzjyService;
 import com.stable.service.FinanceService;
 import com.stable.service.PlateService;
@@ -123,6 +124,8 @@ public class CodeModelService {
 	private DzjyService dzjyService;
 	@Autowired
 	private ChipsSortService chipsSortService;
+	@Autowired
+	private DataChangeService dataChangeService;
 
 	public synchronized void runJobv2(int date, boolean isweekend) {
 		try {
@@ -211,7 +214,8 @@ public class CodeModelService {
 				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listHist, d, zy,
 						fourYearAgo);
 				listLast.add(newOne);
-
+				// 市盈率ttm
+				newOne.setPettm(dataChangeService.getPeTtmData(code));
 				newOne.setTagDzPriceLow(0);
 				newOne.setTagHighZyChance(0);
 				// 市值

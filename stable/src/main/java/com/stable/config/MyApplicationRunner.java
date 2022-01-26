@@ -1,6 +1,5 @@
 package com.stable.config;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -16,8 +15,6 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import com.stable.job.RealtimeJob;
-import com.stable.service.model.CodeModelService;
-import com.stable.utils.DateUtil;
 import com.stable.utils.OSystemUtil;
 import com.stable.utils.SpringUtil;
 import com.stable.utils.WxPushUtil;
@@ -29,8 +26,8 @@ public class MyApplicationRunner implements ApplicationRunner {
 	private RealtimeJob realtimeJob;
 	// @Autowired
 	// private FinanceService financeService;
-	@Autowired
-	private CodeModelService codeModelService;
+	// @Autowired
+	// private CodeModelService codeModelService;
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {

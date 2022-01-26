@@ -564,6 +564,12 @@ public class ModelWebService {
 				bqb.must(QueryBuilders.rangeQuery("holderNumT3").gte(t));
 			}
 		}
+		if (StringUtils.isNotBlank(mr.getPettm())) {
+			double t = Double.valueOf(mr.getPettm().trim());
+			if (t > 0) {
+				bqb.must(QueryBuilders.rangeQuery("pettm").gt(0).lte(t));
+			}
+		}
 
 		// 增发金额小于等于
 		if (StringUtils.isNotBlank(mr.getZfYjAmt())) {

@@ -228,7 +228,9 @@ public class CodeBaseModel2 extends EsBase {
 	private double netAsset; // 净资产
 	@Field(type = FieldType.Double)
 	private double zcfzl; // 资产负债率
-
+	@Field(type = FieldType.Double)
+	private double pettm;// 市盈率ttm
+	
 	@Transient
 	public String getKeyString() {
 		StringBuffer sb = new StringBuffer();

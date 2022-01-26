@@ -35,5 +35,5 @@ public class ModelReq {
 
 	int zfObjType;
 	String holderNumT3;
-
+	String pettm;
 }
