@@ -115,7 +115,7 @@ public class EastmoneySpider {
 					try {
 						String noticeDate = data.get("NOTICE_DATE").toString(); // 公告日期
 						page.setAnnDate(Integer.valueOf(noticeDate.substring(0, 10).replaceAll("-", "")));
-					}catch (Exception e) {
+					} catch (Exception e) {
 					}
 					try {
 						Double yyzsrtbzz = data.getDouble("TOTALOPERATEREVETZ"); // 营业总收入同比增长(%)
@@ -672,7 +672,10 @@ public class EastmoneySpider {
 		EastmoneySpider es = new EastmoneySpider();
 		es.htmlunitSpider = new HtmlunitSpider();
 		String code = "603176";
-//		EastmoneySpider.getNewFinanceAnalysis(code, 0);
+//		List<FinanceBaseInfoPage> l = es.getNewFinanceAnalysis(code, 4);
+//		for (FinanceBaseInfoPage f : l) {
+//			System.err.println(f);
+//		}
 //		String result = HttpUtil.doGet2(yjygBase);
 //		EastmoneySpider es = new EastmoneySpider();
 //		es.getFinYjkb();
