@@ -23,7 +23,7 @@ public class CodeBaseModel2 extends EsBase {
 	private int shooting3 = 0;// 行情指标3：融资票
 	@Field(type = FieldType.Integer)
 	private int shooting4 = 0;// 行情指标4：股东人数底部大幅减少
-	
+
 	// Step.1.市值大小，股价K线形态是否横盘多年，且常年分红
 	@Field(type = FieldType.Double)
 	private double mkv;// 流通市值
@@ -229,8 +229,8 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Double)
 	private double zcfzl; // 资产负债率
 	@Field(type = FieldType.Double)
-	private double pettm;// 市盈率ttm
-	
+	private double pettm = 0.0;// 市盈率ttm
+
 	@Transient
 	public String getKeyString() {
 		StringBuffer sb = new StringBuffer();

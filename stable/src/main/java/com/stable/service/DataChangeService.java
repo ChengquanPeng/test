@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
 
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.DaliyBasicInfo2;
 
 @Service
@@ -13,18 +14,19 @@ public class DataChangeService {
 
 	private Map<String, Double> m1 = new ConcurrentHashMap<String, Double>();
 
-	public void setPeTtmData(List<DaliyBasicInfo2> upd) {
+	public void putPeTtmData(List<DaliyBasicInfo2> upd) {
 		m1 = new ConcurrentHashMap<String, Double>();
 		for (DaliyBasicInfo2 db : upd) {
 			m1.put(db.getCode(), db.getPeTtm());
 		}
 	}
 
-	public Double getPeTtmData(String code) {
+	public void getPeTtmData(String code, CodeBaseModel2 newOne, CodeBaseModel2 oldOne) {
 		Double d = m1.get(code);
-		if (d == null) {
-			return 0.0;
+		if (d != null) {
+			newOne.setPettm(d);
+		} else if (oldOne.getPettm() != 0.0) {
+			newOne.setPettm(oldOne.getPettm());
 		}
-		return d;
 	}
 }

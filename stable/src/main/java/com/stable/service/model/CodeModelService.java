@@ -211,11 +211,11 @@ public class CodeModelService {
 				// 高质押
 				ZhiYa zy = zhiYaService.getZhiYa(code);
 				double mkv = d.getCircMarketVal();
-				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, histMap.get(s.getCode()), listHist, d, zy,
-						fourYearAgo);
+				CodeBaseModel2 oldOne = histMap.get(s.getCode());
+				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, oldOne, listHist, d, zy, fourYearAgo);
 				listLast.add(newOne);
 				// 市盈率ttm
-				newOne.setPettm(dataChangeService.getPeTtmData(code));
+				dataChangeService.getPeTtmData(code, newOne, oldOne);
 				newOne.setTagDzPriceLow(0);
 				newOne.setTagHighZyChance(0);
 				// 市值

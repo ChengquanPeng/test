@@ -207,7 +207,8 @@ public class ModelWebService {
 			sb5.append("近5年分红,");
 		}
 		if (dh.getFinOK() == 1) {
-			sb5.append("近5年业绩不亏,");
+			sb5.append("近5年业绩不亏,市盈率ttm:").append(dh.getPettm());
+
 		}
 		sb5.append(Constant.HTML_LINE);
 		sb5.append("前3大股东:").append(dh.getHolderNumT3()).append("%");

@@ -110,7 +110,7 @@ public class XqDailyBaseSpider {
 			}
 			if (upd.size() > 0) {
 				esDaliyBasicInfoDao.saveAll(list);
-				dataChangeService.setPeTtmData(upd);
+				dataChangeService.putPeTtmData(upd);
 			}
 			log.info("雪球=>每日指标-市盈率完成,期望数:{" + list.size() + "},实际成功数:" + upd.size());
 			if (upd.size() != list.size()) {
