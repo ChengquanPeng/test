@@ -134,17 +134,31 @@ public class MonitorPoolService {
 		c.setDownTodayChange(downTodayChange);
 		c.setUpPrice(upPrice);
 		c.setUpTodayChange(upTodayChange);
-		c.setYkb(ykb);
 		c.setZfdone(zfdone);
-		c.setHolderNum(holderNum);
 		c.setBuyLowVol(buyLowVol);
 		c.setXjl(xjl);
-		c.setDzjy(dzjy);
+
 		c.setListenerGg(listenerGg);
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
 		} else {
 			c.setRemark(remark + " " + c.getUpdateDate());
+		}
+		int dt = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
+		if (ykb > 0) {
+			c.setYkb(dt);
+		} else {
+			c.setYkb(0);
+		}
+		if (holderNum > 0) {
+			c.setHolderNum(dt);
+		} else {
+			c.setHolderNum(0);
+		}
+		if (dzjy > 0) {
+			c.setDzjy(dt);
+		} else {
+			c.setDzjy(0);
 		}
 		monitorPoolDao.save(c);
 		updateBaseMoniStatus(code, c.getMonitor(), c.getRemark());

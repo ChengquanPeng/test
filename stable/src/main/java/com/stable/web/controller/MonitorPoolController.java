@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.StockBasicService;
 import com.stable.service.monitor.MonitorPoolService;
-import com.stable.utils.DateUtil;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.http.resp.MonitorPoolResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -88,10 +87,10 @@ public class MonitorPoolController {
 					StringUtils.isNotBlank(downTodayChange) ? Double.valueOf(downTodayChange) : 0, remark,
 					StringUtils.isNotBlank(ykb) ? Integer.valueOf(ykb) : 0,
 					StringUtils.isNotBlank(zfdone) ? Integer.valueOf(zfdone) : 0,
-					StringUtils.isNotBlank(holderNum) ? DateUtil.getTodayIntYYYYMMDD() : 0,
+					StringUtils.isNotBlank(holderNum) ? Integer.valueOf(holderNum) : 0,
 					StringUtils.isNotBlank(buyLowVol) ? Integer.valueOf(buyLowVol) : 0,
 					StringUtils.isNotBlank(xjl) ? Integer.valueOf(xjl) : 0,
-					StringUtils.isNotBlank(dzjy) ? DateUtil.getTodayIntYYYYMMDD() : 0,
+					StringUtils.isNotBlank(dzjy) ? Integer.valueOf(dzjy) : 0,
 					StringUtils.isNotBlank(listenerGg) ? Integer.valueOf(listenerGg) : 0);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {

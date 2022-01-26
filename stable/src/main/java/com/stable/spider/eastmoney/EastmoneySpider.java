@@ -113,6 +113,11 @@ public class EastmoneySpider {
 					FinanceBaseInfoPage page = new FinanceBaseInfoPage(code,
 							Integer.valueOf(date.substring(0, 10).replaceAll("-", "")));
 					try {
+						String noticeDate = data.get("NOTICE_DATE").toString(); // 公告日期
+						page.setAnnDate(Integer.valueOf(noticeDate.substring(0, 10).replaceAll("-", "")));
+					}catch (Exception e) {
+					}
+					try {
 						Double yyzsrtbzz = data.getDouble("TOTALOPERATEREVETZ"); // 营业总收入同比增长(%)
 						page.setYyzsrtbzz(yyzsrtbzz);
 					} catch (Exception e) {

@@ -110,11 +110,8 @@ body {
 					低于某涨幅：<input type="text" class="form-control" id="downTodayChange">&nbsp;
 				</div>
 				<div class="input-group">
-					快预报：<select id="ykb">
-						<option value="0">不预警</option>
-						<option value="1">期望不亏</option>
-						<option value="2">期望亏损</option>
-					</select>
+					快预报：<input type="checkbox" id="ykb" name="ykb" />&nbsp;&nbsp;&nbsp;<span
+						id="ykbDate"></span>
 				</div>
 				<div class="input-group">
 					定增完成：<select id="zfdone">
@@ -202,6 +199,10 @@ body {
 			if (document.getElementById("listenerGg").checked) {
 				listenerGg = 1;
 			}
+			var ykb = 0
+			if (document.getElementById("ykb").checked) {
+				ykb = 1;
+			}
 
 			$.ajax({
 				url : "/web/monitorPool/addMonitor", //访问地址--action地址
@@ -216,7 +217,7 @@ body {
 					upPrice : $('#upPrice').val(),
 					downPrice : $('#downPrice').val(),
 					upTodayChange : $('#upTodayChange').val(),
-					ykb : $('#ykb').val(),
+					ykb : ykb,
 					xjl : xjl,
 					holderNum : holderNum,
 					dzjy : dzjy,
@@ -272,7 +273,10 @@ body {
 				$('#upTodayChange').val(reData.result.upTodayChange);
 				$('#downTodayChange').val(reData.result.downTodayChange);
 				$('#monitor').val(reData.result.monitor);
-				$('#ykb').val(reData.result.ykb);
+				if (reData.result.ykb > 0) {
+					$('#ykb').attr("checked", 'checked');
+					$('#ykbDate').html(reData.result.ykb);
+				}
 				$('#zfdone').val(reData.result.zfdone);
 				$('#buyLowVol').val(reData.result.buyLowVol);
 			}

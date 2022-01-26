@@ -2,7 +2,6 @@ package com.stable.service;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -110,7 +109,6 @@ public class FinanceService {
 	private void kybMonitor() {
 		List<MonitorPool> list = monitorPoolService.getList("", 0, 0, 1, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0);
 		if (list != null) {
-			int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -15));
 			for (MonitorPool mp : list) {
 				if (mp.getYkb() > 0) {
 					try {
@@ -119,18 +117,18 @@ public class FinanceService {
 						FinYjkb yjkb = getLastFinaceKbByReportDate(code, fbi.getYear(), fbi.getQuarter());
 						boolean find = false;
 						StringBuffer sb = new StringBuffer();
+
 						// 业绩快报(准确的)
-						if (yjkb != null && yjkb.getAnnDate() > startDate) {
+						if (yjkb != null && yjkb.getAnnDate() > mp.getYkb()) {
 							sb.append(stockBasicService.getCodeName2(code));
 							if (yjkb.getJlr() > 0) {
-								sb.append(",业绩快报不亏:");
 								find = true;
 							} else if (yjkb.getJlr() < 0) {
-								sb.append(",业绩快报亏损:");
+								sb.append(",快报[亏损]:");
 								find = true;
 							}
 							if (find) {
-								mp.setYkb(yjkb.getDate());
+								mp.setYkb(yjkb.getAnnDate());
 								sb.append("业绩同比:").append(yjkb.getJlrtbzz()).append("%");
 								sb.append(",营收同比:").append(yjkb.getYyzsrtbzz()).append("%");
 							}
@@ -138,8 +136,13 @@ public class FinanceService {
 						// 业绩预告(类似天气预报,可能不准)
 						if (!find) {
 							FinYjyg yjyg = getLastFinaceYgByReportDate(code, fbi.getYear(), fbi.getQuarter());
-							if (yjyg != null && yjyg.getAnnDate() > startDate) {
+							if (yjyg != null && yjyg.getAnnDate() > mp.getYkb()) {
 								sb.append(stockBasicService.getCodeName(code));
+								if (mp.getYkb() > 1) {
+									sb.append(",期望不亏");
+								} else {
+									sb.append(",期望亏损");
+								}
 								if (yjyg.getJlr() > 0) {
 									sb.append(",业绩预告不亏:");
 									find = true;
@@ -148,13 +151,13 @@ public class FinanceService {
 									find = true;
 								}
 								if (find) {
-									mp.setYkb(yjkb.getDate());
+									mp.setYkb(yjkb.getAnnDate());
 									sb.append("业绩同比:").append(yjyg.getJlrtbzz()).append("%");
 								}
 							}
 						}
 						if (!find) {
-							if (fbi.getDate() >= startDate) {
+							if (fbi.getAnnDate() > mp.getYkb()) {
 								sb.append(stockBasicService.getCodeName(code));
 								if (fbi.getGsjlr() > 0) {
 									sb.append(",业绩不亏:");
@@ -164,18 +167,13 @@ public class FinanceService {
 									find = true;
 								}
 								if (find) {
-									mp.setYkb(yjkb.getDate());
+									mp.setYkb(fbi.getAnnDate());
 									sb.append("业绩同比:").append(fbi.getGsjlrtbzz()).append("%");
 									sb.append(",营收同比:").append(fbi.getYyzsrtbzz()).append("%");
 								}
 							}
 						}
 						if (find) {
-							if (mp.getYkb() == 1) {
-								sb.append("期望不亏");
-							} else {
-								sb.append("期望亏损");
-							}
 							monitorPoolDao.save(mp);
 							WxPushUtil.pushSystem1(sb.toString());
 						}

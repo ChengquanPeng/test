@@ -382,7 +382,7 @@ public class ModelWebService {
 				int dt = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
 				pool.setDzjy(dt);
 				pool.setHolderNum(dt);
-				pool.setYkb(1);
+				pool.setYkb(dt);
 				pool.setZfdone(1);
 				pool.setRemark(remark);
 				pool.setBuyLowVol(0);
