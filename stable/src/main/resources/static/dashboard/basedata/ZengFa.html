@@ -26,8 +26,8 @@
 			<div>
 				<div class="input-group">
 					股票代码：<input type="text" class="form-control" id="queryCode">&nbsp;&nbsp;
-					预计金额(最大)：<input type="text" class="form-control" id="maxVal">&nbsp;&nbsp;
-					预计金额(最小)：<input type="text" class="form-control" id="minVal">&nbsp;&nbsp;
+					预计金额&gt;=<input type="text" class="form-control" id="maxVal">&nbsp;&nbsp;
+					预计金额&lt;=<input type="text" class="form-control" id="minVal">&nbsp;&nbsp;
 					&nbsp; 增发状态:<select id="status">
 						<option value="">无限制</option>
 						<option value="1">未实施</option>
@@ -108,9 +108,7 @@
 														.push('<a target="_blank" href="/web/code/' + value + '">'
 																+ value
 																+ '</a><br/>'
-																+ row.codeName
-																+ '<br/>'
-																+ row.bankuai);
+																+ row.codeName);
 												return actions.join('');
 											}
 										},
@@ -132,7 +130,7 @@
 										},
 										{
 											field : 'amt',
-											title : '金额'
+											title : '金额-实'
 										},
 										{
 											field : 'zjhDate',
@@ -151,10 +149,6 @@
 											title : '发行方式'
 										},
 										{
-											field : 'buy',
-											title : '买资产?'
-										},
-										{
 											field : 'selfzf',
 											title : '自己人'
 										},
@@ -168,7 +162,7 @@
 										},
 										{
 											field : 'update',
-											title : '最后增发详情',
+											title : '详情',
 											formatter : function(value, row,
 													index) {
 												var actions = [];

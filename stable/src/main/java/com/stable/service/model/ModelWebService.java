@@ -355,12 +355,6 @@ public class ModelWebService {
 		if (date != 1) {
 			String remark = (req.getBuyRea() + " " + req.getSoldRea()).trim();
 			CodeBaseModel2 c = getLastOneByCode2(code);
-			BeanCopy.copy(req, c);
-			c.setPls(pls);
-			c.setPlst(date);
-			c.setLstmt(DateUtil.getTodayIntYYYYMMDD());
-			c.setBuyRea(remark);
-			codeBaseModel2Dao.save(c);
 
 			MonitorPool pool = monitorPoolService.getMonitorPool(code);
 			if (pls == 2) {// 2不在池子
@@ -374,7 +368,7 @@ public class ModelWebService {
 				pool.setZfdone(0);
 				pool.setRemark(remark);
 				pool.setListenerGg(0);
-				pool.setBuyLowVol(30);
+				pool.setBuyLowVol(0);
 				monitorPoolDao.save(pool);
 			} else if (pls == 1 && c.getPls() != 1) {// 1不在池子，且原来不等于1
 				pool.setMonitor(MonitorType.MANUAL.getCode());
@@ -386,9 +380,16 @@ public class ModelWebService {
 				pool.setYkb(dt);
 				pool.setZfdone(1);
 				pool.setRemark(remark);
-				pool.setBuyLowVol(0);
+				pool.setBuyLowVol(30);
 				monitorPoolDao.save(pool);
 			}
+			
+			BeanCopy.copy(req, c);
+			c.setPls(pls);
+			c.setPlst(date);
+			c.setLstmt(DateUtil.getTodayIntYYYYMMDD());
+			c.setBuyRea(remark);
+			codeBaseModel2Dao.save(c);
 		}
 	}
 

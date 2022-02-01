@@ -263,13 +263,6 @@ public class MonitorPoolService {
 				BeanUtils.copyProperties(dh, resp);
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
 				resp.setMonitorDesc(MonitorType.getCodeName(dh.getMonitor()));
-				if (dh.getYkb() == 0) {
-					resp.setYkbDesc("-");
-				} else if (dh.getYkb() == 1) {
-					resp.setYkbDesc("不亏");
-				} else if (dh.getYkb() == 2) {
-					resp.setYkbDesc("亏损");
-				}
 				res.add(resp);
 			}
 		}
