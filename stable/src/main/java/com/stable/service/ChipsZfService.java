@@ -27,10 +27,10 @@ import com.stable.es.dao.base.ZengFaExtDao;
 import com.stable.es.dao.base.ZengFaSummaryDao;
 import com.stable.service.model.ModelWebService;
 import com.stable.spider.ths.ThsAnnSpider;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.PriceLife;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
@@ -57,8 +57,6 @@ public class ChipsZfService {
 	private ZengFaExtDao zengFaExtDao;
 	@Autowired
 	private StockBasicService stockBasicService;
-	@Autowired
-	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private ModelWebService modelWebService;
 	@Autowired
@@ -135,8 +133,9 @@ public class ChipsZfService {
 	/**
 	 * -增发记录
 	 */
-	public List<ZengFaResp> getZengFaListForWeb(String code, String status, EsQueryPageReq querypage) {
-		List<ZengFa> list = getZengFaList(code, status, querypage);
+	public List<ZengFaResp> getZengFaListForWeb(String code, String status, int minVal, int maxVal,
+			EsQueryPageReq querypage) {
+		List<ZengFa> list = this.getZengFaList(code, status, 0, minVal, maxVal, querypage);
 		if (list != null) {
 			List<ZengFaResp> l = new LinkedList<ZengFaResp>();
 			for (ZengFa zf : list) {
@@ -165,10 +164,10 @@ public class ChipsZfService {
 						} else {
 							r.setCompType("-");
 						}
-						r.setMarketVal(ext.getCircMarketVal() + "<br/>" + ext.getTotalMarketVal());// 总市值
+//						r.setMarketVal(ext.getCircMarketVal() + "<br/>" + ext.getTotalMarketVal());// 总市值
 					}
 				}
-
+				r.setYujiVal(CurrencyUitl.covertToString(zf.getYjamt()));
 				l.add(r);
 			}
 			return l;
@@ -268,14 +267,14 @@ public class ChipsZfService {
 		z.setCompType(stockBasicService.getCode(code).getCompnayType());
 
 		// 增发时的市值
-		if (zfEndDate >= 20210125) {
-			DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code, zfEndDate);
-			if (d == null) {
-				d = daliyBasicHistroyService.queryLastest(code, 0);
-			}
-			z.setCircMarketVal(d.getCircMarketVal());
-			z.setTotalMarketVal(d.getTotalMarketVal());
-		} else {
+//		if (zfEndDate >= 20210125) {
+//			DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code, zfEndDate);
+//			if (d == null) {
+//				d = daliyBasicHistroyService.queryLastest(code, 0);
+//			}
+//			z.setCircMarketVal(d.getCircMarketVal());
+//			z.setTotalMarketVal(d.getTotalMarketVal());
+//		} else {
 //			try {
 //				JSONObject js = tushareSpider.getStockDaliyBasic(TushareSpider.formatCode(code), zfEndDate + "");
 //				JSONArray arr = js.getJSONArray("items").getJSONArray(0);
@@ -289,7 +288,7 @@ public class ChipsZfService {
 //			} catch (Exception e) {
 //				e.printStackTrace();
 //			}
-		}
+//		}
 
 	}
 
@@ -334,6 +333,13 @@ public class ChipsZfService {
 	}
 
 	public List<ZengFa> getZengFaList(String code, String status, int endDate, EsQueryPageReq querypage) {
+		return getZengFaList(code, status, endDate, 0, 0, querypage);
+	}
+
+	private long YI = 100000000l;
+
+	public List<ZengFa> getZengFaList(String code, String status, int endDate, int maxVal, int minVal,
+			EsQueryPageReq querypage) {
 		int pageNum = querypage.getPageNum();
 		int size = querypage.getPageSize();
 		Pageable pageable = PageRequest.of(pageNum, size);
@@ -343,6 +349,12 @@ public class ChipsZfService {
 		}
 		if (endDate > 0) {
 			bqb.must(QueryBuilders.rangeQuery("endDate").from(endDate));
+		}
+		if (maxVal > 0) {
+			bqb.must(QueryBuilders.rangeQuery("yjamt").lte(maxVal * YI));
+		}
+		if (minVal > 0) {
+			bqb.must(QueryBuilders.rangeQuery("yjamt").gte(minVal * YI));
 		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("startDate").unmappedType("integer").order(SortOrder.DESC);
 		if (StringUtils.isNotBlank(status)) {

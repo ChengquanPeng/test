@@ -25,7 +25,9 @@
 			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
 			<div>
 				<div class="input-group">
-					股票代码：<input type="text" class="form-control" id="queryCode">
+					股票代码：<input type="text" class="form-control" id="queryCode">&nbsp;&nbsp;
+					预计金额(最大)：<input type="text" class="form-control" id="maxVal">&nbsp;&nbsp;
+					预计金额(最小)：<input type="text" class="form-control" id="minVal">&nbsp;&nbsp;
 					&nbsp; 增发状态:<select id="status">
 						<option value="">无限制</option>
 						<option value="1">未实施</option>
@@ -91,16 +93,26 @@
 									};
 									param.code = $('#queryCode').val();
 									param.status = $('#status').val();
+									param.minVal = $('#minVal').val();
+									param.maxVal = $('#maxVal').val();
 									return param;
 								},
 								columns : [
 										{
 											field : 'code',
-											title : '代码'
-										},
-										{
-											field : 'codeName',
-											title : '名称'
+											title : '代码',
+											formatter : function(value, row,
+													index) {
+												var actions = [];
+												actions
+														.push('<a target="_blank" href="/web/code/' + value + '">'
+																+ value
+																+ '</a><br/>'
+																+ row.codeName
+																+ '<br/>'
+																+ row.bankuai);
+												return actions.join('');
+											}
 										},
 										{
 											field : 'startDate',
@@ -113,6 +125,10 @@
 										{
 											field : 'price',
 											title : '价格'
+										},
+										{
+											field : 'yujiVal',
+											title : '金额-预'
 										},
 										{
 											field : 'amt',
@@ -145,10 +161,6 @@
 										{
 											field : 'compType',
 											title : '企业'
-										},
-										{
-											field : 'marketVal',
-											title : '市值'
 										},
 										{
 											field : 'update',

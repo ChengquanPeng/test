@@ -54,10 +54,19 @@ public class ChipsController {
 	 * 根据code查询增发
 	 */
 	@RequestMapping(value = "/zengfa/list", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> zengfalist(String code, String status, EsQueryPageReq querypage) {
+	public ResponseEntity<JsonResult> zengfalist(String code, String status, String minVal, String maxVal,
+			EsQueryPageReq querypage) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(chipsZfService.getZengFaListForWeb(code, status, querypage));
+			int min = 0;
+			if (StringUtils.isNotBlank(minVal)) {
+				min = Integer.valueOf(minVal);
+			}
+			int max = 0;
+			if (StringUtils.isNotBlank(maxVal)) {
+				max = Integer.valueOf(maxVal);
+			}
+			r.setResult(chipsZfService.getZengFaListForWeb(code, status, min, max, querypage));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
