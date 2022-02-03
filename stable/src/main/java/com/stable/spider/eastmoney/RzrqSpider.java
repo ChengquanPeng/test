@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.RzrqDaliyDao;
 import com.stable.es.dao.base.RztjDao;
 import com.stable.service.DzjyService;
@@ -24,6 +25,7 @@ import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.RzrqDaliy;
 import com.stable.vo.bus.Rztj;
 import com.stable.vo.bus.StockBaseInfo;
@@ -42,6 +44,8 @@ public class RzrqSpider {
 	private static String URL_CODE_S2 = "%22)";
 	private static String URL_CODE_S3 = "&st=date&p=%s&pageNo=%s&pageNum=%s&pageNumber=%s&_=%s";
 
+	@Autowired
+	private EsCodeBaseModel2Dao codeBaseModel2Dao;
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -83,32 +87,40 @@ public class RzrqSpider {
 		int validDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(DateUtil.parseDate(date), 20));// 有效期
 		ThreadsUtil.sleepRandomSecBetween15And30();
 		List<Rztj> l = new LinkedList<Rztj>();
-//		List<CodeBaseModel2> update = new LinkedList<CodeBaseModel2>();
+		List<CodeBaseModel2> update = new LinkedList<CodeBaseModel2>();
 
 		for (String code : codes) {
-
 			Rztj rztj = dzjyService.getLastRztj(code);
-			rztj.setUpdateDate(date);
-			if (dzjyService.rzrqAvg20d(code, vaildLine, validBlance, rztj)) {
-				rztj.setValid(1);
-				rztj.setValidDate(validDate);
-			} else {
-				rztj.setValid(0);
-				rztj.setValidDate(0);
-			}
-			l.add(rztj);
+			if (date > rztj.getValidDate()) {// 已失效
+				rztj.setUpdateDate(date);
+				if (dzjyService.rzrqAvg20d(code, vaildLine, validBlance, rztj)) {
+					rztj.setValid(1);
+					rztj.setValidDate(validDate);
+				} else {
+					rztj.setValid(0);
+					rztj.setValidDate(0);
+				}
 
-//			if (rztj.getValid() > 0) {
-//				CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(code);
-//			}
-			if (l.size() > 200) {
-				rztjDao.saveAll(l);
-				l = new LinkedList<Rztj>();
+				CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(code);
+				if (rztj.getValid() > 0) {
+					cbm.setShooting3(1);
+				} else {
+					cbm.setShooting3(0);
+				}
+
+				l.add(rztj);
+				if (l.size() > 200) {
+					rztjDao.saveAll(l);
+					l = new LinkedList<Rztj>();
+				}
 			}
 		}
 
 		if (l.size() > 0) {
 			rztjDao.saveAll(l);
+		}
+		if (update.size() > 0) {
+			codeBaseModel2Dao.saveAll(update);
 		}
 	}
 
