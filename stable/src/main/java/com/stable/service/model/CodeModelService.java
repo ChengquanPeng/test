@@ -9,9 +9,6 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.sort.FieldSortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +22,6 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.MonitorType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
-import com.stable.es.dao.base.EsCodeBaseModelHistDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.service.AnnouncementService;
@@ -45,7 +41,6 @@ import com.stable.service.ZhiYaService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.model.data.LineAvgPrice;
-import com.stable.service.model.data.LinePrice;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.ths.ThsAnnSpider;
 import com.stable.utils.BeanCopy;
@@ -57,7 +52,6 @@ import com.stable.vo.AnnMentParamUtil;
 import com.stable.vo.HolderAnalyse;
 import com.stable.vo.bus.AnnouncementHist;
 import com.stable.vo.bus.CodeBaseModel2;
-import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.DzjyYiTime;
 import com.stable.vo.bus.FenHong;
@@ -92,8 +86,6 @@ public class CodeModelService {
 	private EsCodeBaseModel2Dao codeBaseModel2Dao;
 	@Autowired
 	private EsFinanceBaseInfoHyDao esFinanceBaseInfoHyDao;
-	@Autowired
-	private EsCodeBaseModelHistDao codeBaseModelHistDao;
 	@Autowired
 	private FinanceService financeService;
 	@Autowired
@@ -161,7 +153,6 @@ public class CodeModelService {
 		log.info("Actually processing request date={}", tradeDate);
 		// 基本面
 		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
-		List<CodeBaseModelHist> listHist = new LinkedList<CodeBaseModelHist>();
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
 		// 大牛
 		Map<String, MonitorPool> poolMap = monitorPoolService.getMonitorPoolMap();
@@ -212,7 +203,7 @@ public class CodeModelService {
 				ZhiYa zy = zhiYaService.getZhiYa(code);
 				double mkv = d.getCircMarketVal();
 				CodeBaseModel2 oldOne = histMap.get(s.getCode());
-				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, oldOne, listHist, d, zy, fourYearAgo);
+				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, oldOne, d, zy, fourYearAgo);
 				listLast.add(newOne);
 				// 市盈率ttm
 				dataChangeService.getPeTtmData(code, newOne, oldOne);
@@ -418,13 +409,8 @@ public class CodeModelService {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
 		}
-		if (listLast.size() > 0)
-
-		{
+		if (listLast.size() > 0) {
 			codeBaseModel2Dao.saveAll(listLast);
-		}
-		if (listHist.size() > 0) {
-			codeBaseModelHistDao.saveAll(listHist);
 		}
 		if (poolList.size() > 0) {
 			monitorPoolDao.saveAll(poolList);
@@ -451,8 +437,8 @@ public class CodeModelService {
 //		daliyTradeHistroyService.deleteData();
 	}
 
-	private CodeBaseModel2 getBaseAnalyse(StockBaseInfo s, int tradeDate, CodeBaseModel2 oldOne,
-			List<CodeBaseModelHist> listHist, DaliyBasicInfo2 d, ZhiYa zy, int fourYearAgo) {
+	private CodeBaseModel2 getBaseAnalyse(StockBaseInfo s, int tradeDate, CodeBaseModel2 oldOne, DaliyBasicInfo2 d,
+			ZhiYa zy, int fourYearAgo) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
 		// 基本面池
@@ -486,11 +472,9 @@ public class CodeModelService {
 		newOne.setZfjj(0);
 		newOne.setZfjjDate(0);
 		newOne.setSortMode7(0);
-		newOne.setSortMode6(0);
 
 		sortModel(newOne);// 短线模型
 		zfjj(newOne);// 限售解禁
-		saveHist(newOne, oldOne, listHist);// 历史
 		return newOne;
 	}
 
@@ -498,10 +482,6 @@ public class CodeModelService {
 		String code = newOne.getCode();
 		int tradeDate = newOne.getDate();
 
-		// 短线模型6
-		if (sortV6Service.isWhiteHorseForSortV6(sortV6Service.is15DayTodayPriceOk(code, tradeDate))) {
-			newOne.setSortMode6(1);
-		}
 		// 短线模型7(箱体震荡新高，是否有波浪走势)
 		if (sortV6Service.isWhiteHorseForSortV7(code, tradeDate)) {
 			newOne.setSortMode7(1);
@@ -1155,27 +1135,8 @@ public class CodeModelService {
 		}
 	}
 
-	private void saveHist(CodeBaseModel2 newOne, CodeBaseModel2 oldOne, List<CodeBaseModelHist> listHist) {
-		// copy history
-		CodeBaseModelHist hist = new CodeBaseModelHist();
-		BeanCopy.copy(newOne, hist);
-		hist.setId(hist.getCode() + "_" + hist.getCurrYear() + "_" + hist.getCurrQuarter());
-		listHist.add(hist);
-	}
-
-	private double chkdouble = 80.0;// 10跌倒5.x
-
 	private void findBigBoss2(String code, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis) {
 		log.info("findBigBoss code:{}", code);
-		// 是否符合中线、1.市盈率和ttm在50以内
-//		c.setKbygjl(0);
-//		c.setKbygys(0);
-//		if (yjkb != null) {
-//			c.setKbygys(yjkb.getYyzsrtbzz());
-//			c.setKbygjl(yjkb.getJlrtbzz());
-//		} else if (yjyg != null) {
-//			c.setKbygjl(yjyg.getJlrtbzz());
-//		}
 
 		// 业绩连续
 		int continueJidu1 = 0;
@@ -1223,10 +1184,7 @@ public class CodeModelService {
 			}
 		}
 		if (isok) {
-			// 1年整幅未超过80% -- //chkdouble = 80.0;// 10跌倒5.x
-			if (LinePrice.priceCheckForMid(daliyTradeHistroyService, code, newOne.getDate(), chkdouble)) {
-				newOne.setSusBigBoss(1);
-			}
+			newOne.setSusBigBoss(1);
 		} else {
 			newOne.setSusBigBoss(0);
 		}
@@ -1278,24 +1236,6 @@ public class CodeModelService {
 			return page.getContent();
 		}
 		log.info("no records CodeBaseModels");
-		return null;
-	}
-
-	public List<CodeBaseModelHist> getListByCode(String code, EsQueryPageReq querypage) {
-		log.info("getListByCode:{}", code);
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
-
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
-		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).withSort(sort).build();
-
-		Page<CodeBaseModelHist> page = codeBaseModelHistDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent();
-		}
-		log.info("no records CodeBaseModelHists");
 		return null;
 	}
 

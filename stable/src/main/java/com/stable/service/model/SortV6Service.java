@@ -28,7 +28,9 @@ public class SortV6Service {
 	private AvgService avgService;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
-
+	// 符合短线 //短线模型6(前期3-50%吸筹，深度回踩突然涨停后再2-5个交易日回踩拉起,涨停日不放量，超过涨停价格后买入，买入2内未大幅拉升放弃
+	//sortV6Service.isWhiteHorseForSortV6(sortV6Service.is15DayTodayPriceOk(code, tradeDate))
+	
 	/**
 	 * 1.15个交易日内有9.5%的涨幅,且涨停日有回调
 	 */

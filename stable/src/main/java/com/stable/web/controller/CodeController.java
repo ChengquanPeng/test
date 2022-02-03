@@ -3,8 +3,6 @@ package com.stable.web.controller;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,13 +10,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
-import com.stable.service.model.CodeModelService;
 import com.stable.service.model.ModelWebService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
@@ -32,8 +28,6 @@ import com.stable.vo.http.resp.CodeBaseModelResp;
 public class CodeController {
 	@Autowired
 	private ModelWebService modelWebService;
-	@Autowired
-	private CodeModelService codeModelService;
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -75,7 +69,6 @@ public class CodeController {
 		model.addAttribute("fcratio", fc.getHoldRatio());
 		model.addAttribute("dfcfcode", EastmoneySpider.formatCode2(code));
 		model.addAttribute("code", code);
-		model.addAttribute("histList", codeModelService.getListByCode(code, EsQueryPageUtil.queryPage5));
 		model.addAttribute("concepts", conceptService.getCodeConcept(code));
 		model.addAttribute("codeBasic", stockBasicService.getCode(code));
 		FinanceBaseInfo fbi = financeService.getLastFinaceReport(code);
@@ -217,51 +210,6 @@ public class CodeController {
 		// 快预报
 		String kb = financeService.getyjkb(code, fbi.getYear(), fbi.getQuarter());
 		model.addAttribute("kb", kb);
-	}
-
-	/**
-	 * 历史状态（上一季度）
-	 */
-	@RequestMapping(value = "/codehist/pre/{code}/{year}/{quarter}", method = RequestMethod.GET)
-	public String pre(@PathVariable(value = "code") String code, @PathVariable(value = "year") int year,
-			@PathVariable(value = "quarter") int quarter, Model model, HttpServletResponse response) {
-		try {
-			if (quarter == 1) {
-				quarter = 4;
-				year--;
-			} else {
-				quarter--;
-			}
-			CodeBaseModelResp cbm = modelWebService.getHistOneByCodeYearQuarter(code, year, quarter);
-			if (cbm == null) {
-				response.setCharacterEncoding("UTF-8");
-				response.setHeader("Content-Type", "text/html; charset=UTF-8");
-				response.getWriter().write("未找到" + year + "年" + quarter + "季度数据");
-				response.getWriter().close();
-				return null;
-			}
-			model.addAttribute("codedetail", cbm);
-			prepare(model, code);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return "code";
-	}
-
-	/**
-	 * 历史状态
-	 */
-	@RequestMapping(value = "/codehist/{id}", method = RequestMethod.GET)
-	public String id(@PathVariable(value = "id") String id, Model model) {
-		try {
-			CodeBaseModelResp cbm = modelWebService.getHistOneById(id);
-			String code = cbm.getCode();
-			model.addAttribute("codedetail", cbm);
-			prepare(model, code);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return "code";
 	}
 
 }

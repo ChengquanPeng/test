@@ -24,7 +24,6 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.MonitorType;
 import com.stable.enums.SylType;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
-import com.stable.es.dao.base.EsCodeBaseModelHistDao;
 import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
@@ -33,7 +32,6 @@ import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.vo.bus.CodeBaseModel2;
-import com.stable.vo.bus.CodeBaseModelHist;
 import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.req.ModelManulReq;
@@ -51,8 +49,6 @@ public class ModelWebService {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private EsCodeBaseModel2Dao codeBaseModel2Dao;
-	@Autowired
-	private EsCodeBaseModelHistDao codeBaseModelHistDao;
 	@Autowired
 	private ConceptService conceptService;
 	@Autowired
@@ -78,39 +74,6 @@ public class ModelWebService {
 
 	public CodeBaseModelResp getLastOneByCodeResp(String code) {
 		return getModelResp(getLastOneByCode2(code));
-	}
-
-	public CodeBaseModelResp getHistOneByCodeYearQuarter(String code, int year, int quarter) {
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		bqb.must(QueryBuilders.matchPhraseQuery("currYear", year));
-		bqb.must(QueryBuilders.matchPhraseQuery("currQuarter", quarter));
-		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
-		Page<CodeBaseModelHist> page = codeBaseModelHistDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			CodeBaseModelHist dh = page.getContent().get(0);
-			return getModelResp(dh);
-		}
-		return null;
-
-	}
-
-	public CodeBaseModelResp getHistOneById(String id) {
-		log.info("getHistOneById:{}", id);
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("id", id));
-
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).build();
-
-		Page<CodeBaseModelHist> page = codeBaseModelHistDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			CodeBaseModelHist dh = page.getContent().get(0);
-			return getModelResp(dh);
-		}
-		return null;
 	}
 
 	private CodeBaseModelResp getModelResp(CodeBaseModel2 dh) {
@@ -141,35 +104,25 @@ public class ModelWebService {
 				.append(dh.getSyldjd());
 		resp.setSylDesc(sb2.toString());
 
-		// 短线
-		StringBuffer sb3 = new StringBuffer("");
-		if (dh.getSortChips() == 1) {
-			sb3.append("吸筹-收集筹码短线").append(Constant.HTML_LINE);
-		}
-		if (dh.getSortMode6() == 1) {
-			sb3.append("短线6").append(Constant.HTML_LINE);
-		}
-		if (dh.getSortMode7() == 1) {
-			sb3.append("箱体突破").append(Constant.HTML_LINE);
-		}
-		resp.setSortInfo(sb3.toString());
-
 		// 标签
 		StringBuffer tag = new StringBuffer("");
 		if (dh.getTagSmallAndBeatf() > 0) {
 			tag.append("小而美").append(Constant.HTML_LINE);
 		}
-		if (dh.getSortChips() > 0) {
-			tag.append("吸筹-收集筹码短线").append(Constant.HTML_LINE);
-		}
 		if (dh.getTagHighZyChance() > 0) {
 			tag.append("高质押机会?").append(Constant.HTML_LINE);
 		}
 		if (dh.getSusBigBoss() == 1) {
-			tag.append("疑似大牛").append(Constant.HTML_LINE);
+			tag.append("业绩较牛?").append(Constant.HTML_LINE);
 		}
 		if (dh.getSusWhiteHors() == 1) {
-			tag.append("疑似白马").append(Constant.HTML_LINE);
+			tag.append("白马走势?").append(Constant.HTML_LINE);
+		}
+		if (dh.getSortChips() == 1) {
+			tag.append("拉升吸筹?").append(Constant.HTML_LINE);
+		}
+		if (dh.getSortMode7() == 1) {
+			tag.append("突破箱体").append(Constant.HTML_LINE);
 		}
 		resp.setTagInfo(tag.toString());
 
@@ -383,7 +336,7 @@ public class ModelWebService {
 				pool.setBuyLowVol(30);
 				monitorPoolDao.save(pool);
 			}
-			
+
 			BeanCopy.copy(req, c);
 			c.setPls(pls);
 			c.setPlst(date);
