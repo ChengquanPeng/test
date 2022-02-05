@@ -76,8 +76,9 @@ public class RzrqSpider {
 			rzrqDaliyDao.saveAll(l);
 		}
 		log.info("codes size:{}", codes.size());
-		// STEP3:计算-最新涨幅是否超过20%
+		// STEP3:
 		exeRzrqTime(codes, date);
+		log.info("STEP3:done");
 	}
 
 	private double vaildLine = 30.0;// 超过平均数20%认为有效
