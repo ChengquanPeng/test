@@ -106,7 +106,7 @@ public class MonitorPoolService {
 
 	private void updateBaseMoniStatus(String code, int monitor, String buyRea) {
 		CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(code);
-		cbm.setMonitor(monitor);
+//		cbm.setMonitor(monitor);
 		cbm.setBuyRea(buyRea);// 同步-备注
 		codeBaseModel2Dao.save(cbm);
 	}

@@ -97,7 +97,6 @@ public class ModelWebService {
 			sb1.append("<font color='green'>绿:</font>" + dh.getBaseGreenDesc());
 		}
 		resp.setBaseInfo(sb1.toString());
-		resp.setMonitorDesc(MonitorType.getCodeName(dh.getMonitor()));
 		// 收益率
 		StringBuffer sb2 = new StringBuffer(SylType.getCodeName(dh.getSylType()));
 		sb2.append(Constant.HTML_LINE).append("ttm/jd").append(Constant.HTML_LINE).append(dh.getSylttm()).append("/")

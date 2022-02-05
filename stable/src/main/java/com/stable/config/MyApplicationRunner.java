@@ -26,8 +26,8 @@ public class MyApplicationRunner implements ApplicationRunner {
 	private RealtimeJob realtimeJob;
 	// @Autowired
 	// private FinanceService financeService;
-	// @Autowired
-	// private CodeModelService codeModelService;
+//	 @Autowired
+//	 private CodeModelService codeModelService;
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {

@@ -105,8 +105,8 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int susWhiteHors; // // 交易面疑似白马
 
-	@Field(type = FieldType.Integer)
-	private int monitor;// 是否监听
+//	@Field(type = FieldType.Integer)
+//	private int monitor;// 是否监听
 
 	@Id
 	private String id;

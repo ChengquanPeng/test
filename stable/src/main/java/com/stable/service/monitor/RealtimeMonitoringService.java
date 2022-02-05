@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.stable.enums.MonitorType;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.ModelWebService;
@@ -69,10 +68,10 @@ public class RealtimeMonitoringService {
 //						log.info(code + " ZengFaAuto continue");
 //						continue;
 //					}
-					if (cp.getMonitor() != MonitorType.MANUAL.getCode()) {
-						log.info(code + " not -MANUAL continue");
-						continue;
-					}
+//					if (cp.getMonitor() != MonitorType.MANUAL.getCode()) {
+//						log.info(code + " not -MANUAL continue");
+//						continue;
+//					}
 					log.info(code);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
 					int r = task.init(code, cp, resulter, stockBasicService.getCodeName2(code),

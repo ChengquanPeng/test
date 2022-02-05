@@ -232,17 +232,6 @@ public class CodeModelService {
 				}
 
 				// 增发自动监听-重置
-				if (newOne.getPls() != 1 && (pool.getMonitor() == 9// 增发
-						|| pool.getMonitor() == 10// 小而美
-						|| pool.getMonitor() == MonitorType.NO.getCode())) {// 自动监听归0
-					pool.setMonitor(MonitorType.NO.getCode());
-					pool.setRealtime(0);
-					pool.setOffline(0);
-					pool.setUpTodayChange(0);
-					newOne.setMonitor(MonitorType.NO.getCode());
-				}
-
-				// 增发自动监听-重置
 				if (newOne.getPls() != 1 && (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()// 增发
 						|| pool.getMonitor() == 9// 小而美
 						|| pool.getMonitor() == 10// 短线-收集
@@ -251,7 +240,7 @@ public class CodeModelService {
 					pool.setRealtime(0);
 					pool.setOffline(0);
 					pool.setUpTodayChange(0);
-					newOne.setMonitor(MonitorType.NO.getCode());
+//					newOne.setMonitor(MonitorType.NO.getCode());
 				}
 				if (pool.getYearHigh1() <= 0.0 && newOne.getPls() == 1) {
 					TradeHistInfoDaliy high = daliyTradeHistroyService.queryHighRecord(code, tradeDate);
@@ -339,7 +328,7 @@ public class CodeModelService {
 						pool.setMonitor(MonitorType.ZengFaAuto.getCode());
 						pool.setOffline(1);
 						pool.setUpTodayChange(9);
-						newOne.setMonitor(MonitorType.ZengFaAuto.getCode());
+//						newOne.setMonitor(MonitorType.ZengFaAuto.getCode());
 						log.info("{} 增发自动监听", code);
 					}
 				}
