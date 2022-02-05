@@ -322,6 +322,7 @@ public class ModelWebService {
 				pool.setRemark(remark);
 				pool.setListenerGg(0);
 				pool.setBuyLowVol(0);
+				pool.setYearHigh1(0.0);
 				monitorPoolDao.save(pool);
 			} else if (pls == 1 && c.getPls() != 1) {// 1不在池子，且原来不等于1
 				pool.setMonitor(MonitorType.MANUAL.getCode());

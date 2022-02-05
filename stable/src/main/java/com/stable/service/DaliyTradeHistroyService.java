@@ -215,7 +215,6 @@ public class DaliyTradeHistroyService {
 			List<MonitorPool> list = monitorPoolService.getPoolListForMonitor(0, 1);
 			if (list != null) {
 				List<String> ZengFaAuto = new LinkedList<String>();
-				List<String> SMALL_AND_BEAUTIFUL = new LinkedList<String>();
 				List<String> Other = new LinkedList<String>();
 
 				Map<String, TradeHistInfoDaliyNofq> map = monitorPoolService.getPoolMap2(listNofq);
@@ -232,8 +231,6 @@ public class DaliyTradeHistroyService {
 									+ MonitorType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
 							if (cp.getMonitor() == MonitorType.ZengFaAuto.getCode()) {
 								ZengFaAuto.add(s);
-							} else if (cp.getMonitor() == MonitorType.SMALL_AND_BEAUTIFUL.getCode()) {
-								SMALL_AND_BEAUTIFUL.add(s);
 							} else {
 								Other.add(s);
 							}
@@ -242,9 +239,6 @@ public class DaliyTradeHistroyService {
 				}
 				StringBuffer s = new StringBuffer();
 				for (String a : Other) {
-					s.append(a).append(Constant.HTML_LINE);
-				}
-				for (String a : SMALL_AND_BEAUTIFUL) {
 					s.append(a).append(Constant.HTML_LINE);
 				}
 				for (String a : ZengFaAuto) {

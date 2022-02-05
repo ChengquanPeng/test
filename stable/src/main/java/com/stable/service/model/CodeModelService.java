@@ -118,6 +118,8 @@ public class CodeModelService {
 	private ChipsSortService chipsSortService;
 	@Autowired
 	private DataChangeService dataChangeService;
+	@Autowired
+	private Sort1ModeService sort1ModeService;
 
 	public synchronized void runJobv2(int date, boolean isweekend) {
 		try {
@@ -169,6 +171,8 @@ public class CodeModelService {
 		// 行情指标3：融资大增，股价振浮30%以内(融资融券是第二天更新的)
 		// 行情指标4：股东人数底部大幅减少
 		StringBuffer shootNotice4 = new StringBuffer();
+		// 行情指标5：短线1
+		StringBuffer shootNotice5 = new StringBuffer();
 
 		Map<String, CodeBaseModel2> histMap = getALLForMap();
 		for (StockBaseInfo s : codelist) {
@@ -228,9 +232,8 @@ public class CodeModelService {
 				}
 
 				// 增发自动监听-重置
-				if (newOne.getPls() != 1 && (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()// 增发
-						|| pool.getMonitor() == MonitorType.SMALL_AND_BEAUTIFUL.getCode()// 小而美
-						|| pool.getMonitor() == MonitorType.SORT_CHIPS.getCode()// 短线-收集
+				if (newOne.getPls() != 1 && (pool.getMonitor() == 9// 增发
+						|| pool.getMonitor() == 10// 小而美
 						|| pool.getMonitor() == MonitorType.NO.getCode())) {// 自动监听归0
 					pool.setMonitor(MonitorType.NO.getCode());
 					pool.setRealtime(0);
@@ -238,7 +241,19 @@ public class CodeModelService {
 					pool.setUpTodayChange(0);
 					newOne.setMonitor(MonitorType.NO.getCode());
 				}
-				if (newOne.getPls() == 1) {
+
+				// 增发自动监听-重置
+				if (newOne.getPls() != 1 && (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()// 增发
+						|| pool.getMonitor() == 9// 小而美
+						|| pool.getMonitor() == 10// 短线-收集
+						|| pool.getMonitor() == MonitorType.NO.getCode())) {// 自动监听归0
+					pool.setMonitor(MonitorType.NO.getCode());
+					pool.setRealtime(0);
+					pool.setOffline(0);
+					pool.setUpTodayChange(0);
+					newOne.setMonitor(MonitorType.NO.getCode());
+				}
+				if (pool.getYearHigh1() <= 0.0 && newOne.getPls() == 1) {
 					TradeHistInfoDaliy high = daliyTradeHistroyService.queryHighRecord(code, tradeDate);
 					pool.setYearHigh1(high.getHigh());// 一年新高的价格（前复权）
 				} else {
@@ -305,22 +320,12 @@ public class CodeModelService {
 					if (c >= (l.size() - 1)) {// 亏损最多一次
 						newOne.setTagSmallAndBeatf(1);
 						log.info("{} 小而美模型", code);
-						if (pool.getMonitor() == MonitorType.NO.getCode()) {
-							pool.setMonitor(MonitorType.SMALL_AND_BEAUTIFUL.getCode());
-							pool.setOffline(1);
-							pool.setUpTodayChange(8);
-						}
 					}
 				}
 				// 收集筹码的短线-拉过一波，所以市值可以大一点
 				newOne.setSortChips(0);
 				if (online4Year && mkv > 0 && mkv <= 100.0 && chipsSortService.isCollectChips(code, tradeDate)) {
 					newOne.setSortChips(1);
-					if (pool.getMonitor() == MonitorType.NO.getCode()) {
-						pool.setMonitor(MonitorType.SORT_CHIPS.getCode());
-						pool.setRealtime(1);
-						pool.setUpTodayChange(5);
-					}
 					log.info("{} 主力筹码收集", code);
 				}
 				// 系统自动监听
@@ -405,6 +410,8 @@ public class CodeModelService {
 					newOne.setShooting4(0);
 				}
 
+				sort1ModeService.sort1ModeChk(newOne, pool, tradeDate, shootNotice5);
+
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -433,7 +440,9 @@ public class CodeModelService {
 		if (shootNotice4.length() > 0) {
 			WxPushUtil.pushSystem1("行情指标4：股东人数在底部大幅减少(3年+ -40%):" + shootNotice4.toString());
 		}
-
+		if (shootNotice5.length() > 0) {
+			WxPushUtil.pushSystem1("行情指标5：短线极速拉升:" + shootNotice5.toString());
+		}
 //		daliyTradeHistroyService.deleteData();
 	}
 
