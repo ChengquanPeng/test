@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.stable.service.ChipsDzjyService;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.spider.eastmoney.EmJiejinSpider;
@@ -32,6 +33,8 @@ public class ChipsController {
 	private ThsJiejinSpider thsJiejinSpider;
 	@Autowired
 	private IgoodstockSpider igoodstockSpider;
+	@Autowired
+	private ChipsDzjyService chipsDzjyService;
 
 	/**
 	 * 根据code查询股东人数
@@ -219,4 +222,33 @@ public class ChipsController {
 		return ResponseEntity.ok(r);
 	}
 
+	/**
+	 * 根据code查询增发
+	 */
+	@RequestMapping(value = "/dzjy/list", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> dzjylist(String code, String date, String totalAmt, String totalAmt60d,
+			EsQueryPageReq querypage) {
+		JsonResult r = new JsonResult();
+		try {
+			int d = 0;
+			if (StringUtils.isNotBlank(date)) {
+				d = Integer.valueOf(date);
+			}
+			int ta = 0;
+			if (StringUtils.isNotBlank(totalAmt)) {
+				ta = Integer.valueOf(totalAmt);
+			}
+			int ta6 = 0;
+			if (StringUtils.isNotBlank(totalAmt60d)) {
+				ta6 = Integer.valueOf(totalAmt60d);
+			}
+			r.setResult(chipsDzjyService.getDzjyTimeListForWeb(code, d, ta, ta6, querypage));
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
 }

@@ -55,6 +55,7 @@ public class ModelWebService {
 	private MonitorPoolService monitorPoolService;
 	@Autowired
 	private MonitorPoolDao monitorPoolDao;
+	private long WAN = CurrencyUitl.WAN_N.longValue();
 
 	public CodeBaseModel2 getLastOneByCode2(String code) {
 		log.info("getLastOneByCode:{}", code);
@@ -395,6 +396,10 @@ public class ModelWebService {
 			field = "zfPriceLow";
 		} else if (orderBy == 9) {
 			field = "avgNum";
+		} else if (orderBy == 10) {
+			field = "dzjy60d";
+		} else if (orderBy == 11) {
+			field = "dzjy365d";
 		}
 
 		if (StringUtils.isNotBlank(mr.getMonitor())) {
@@ -455,7 +460,12 @@ public class ModelWebService {
 				bqb.must(QueryBuilders.matchPhraseQuery("shooting5", 1));
 			}
 		}
-
+		if (StringUtils.isNotBlank(mr.getTotalAmt())) {
+			bqb.must(QueryBuilders.rangeQuery("totalAmt").gte(Integer.valueOf(mr.getTotalAmt()) * WAN));
+		}
+		if (StringUtils.isNotBlank(mr.getTotalAmt60d())) {
+			bqb.must(QueryBuilders.rangeQuery("totalAmt60d").gte(Integer.valueOf(mr.getTotalAmt60d()) * WAN));
+		}
 		if (mr.getZfself() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfself", 1));
 		}

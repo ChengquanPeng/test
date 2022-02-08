@@ -17,11 +17,11 @@ public class DzjyYiTime {
 	@Field(type = FieldType.Integer)
 	private int date = 0;
 	@Field(type = FieldType.Double)
-	private double totalAmt;// 总额
+	private double totalAmt;// 总额-1年
 	@Field(type = FieldType.Double)
-	private double avgPrcie;// 均价
+	private double avgPrcie;// 均价-1年
 	@Field(type = FieldType.Double)
-	private double totalAmt60d;// 总额
+	private double totalAmt60d;// 总额-60天
 
 	public String getCode() {
 		return code;

@@ -36,4 +36,7 @@ public class ModelReq {
 	int zfObjType;
 	String holderNumT3;
 	String pettm;
+
+	String totalAmt;
+	String totalAmt60d;
 }

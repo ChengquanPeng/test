@@ -45,7 +45,6 @@
 				几年未涨:<input type="text" id="zfjjup" />&nbsp;&nbsp;&nbsp;
 				几年未涨stable:<input type="text" id="zfjjupStable" />&nbsp;&nbsp;&nbsp;
 			</div>
-
 			<div>
 				<div class="input-group">
 					底部增发:<input type="checkbox" id="zfself" />&nbsp;&nbsp; 增发状态：<select
@@ -65,8 +64,14 @@
 						<option value="4">其他</option>
 					</select>&nbsp;&nbsp; 增发金额:<input type="text" id="zfYjAmt" width="10"
 						width="30">&nbsp;&nbsp; 低于增发价:<input type="text"
-						id="zfPriceLow" width="30" />%&nbsp;&nbsp; 1年大宗超亿:<input
-						type="checkbox" id="dzjyRct" />
+						id="zfPriceLow" width="30" />%&nbsp;&nbsp;
+				</div>
+			</div>
+			<div>
+				<div class="input-group">
+					1年大宗超亿:<input type="checkbox" id="dzjyRct" />&nbsp;&nbsp;
+					2月交易金额&gt;=<input type="text" class="form-control" id="totalAmt60d">&nbsp;&nbsp;
+					1年交易金额&gt;=<input type="text" class="form-control" id="totalAmt">&nbsp;&nbsp;
 				</div>
 			</div>
 			<div>
@@ -77,8 +82,7 @@
 						<option value="2">底部大票定增超过50亿</option>
 						<option value="4">底部股东人数大幅减少</option>
 						<option value="5">短线1:确定极速拉升带小平台新高？</option>
-					</select>&nbsp;&nbsp; 
-					标签:<select id="tagIndex">
+					</select>&nbsp;&nbsp; 标签:<select id="tagIndex">
 						<option value="-1" selected="selected">无限制</option>
 						<option value="1">拉升吸筹?</option>
 						<option value="2">业绩较牛</option>
@@ -90,8 +94,8 @@
 			</div>
 			<div>
 				<div class="input-group">
-					国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp; 
-					人工状态:<select id="pls">
+					国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp; 人工状态:<select
+						id="pls">
 						<option value="-1" selected="selected">无限制</option>
 						<option value="1">确定</option>
 						<option value="2">排除</option>
@@ -110,6 +114,8 @@
 						<option value="6">股权集中</option>
 						<option value="7">小票未涨</option>
 						<option value="8">低于增发价</option>
+						<option value="10">大宗2月</option>
+						<option value="11">大宗1年</option>
 					</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 倒序排序:<input type="checkbox"
 						id="asc" name="asc" checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
@@ -205,6 +211,8 @@
 									param.tagIndex = $('#tagIndex').val();
 									param.shooting = $('#shooting').val();
 									param.zfPriceLow = $('#zfPriceLow').val();
+									param.totalAmt = $('#totalAmt').val();
+									param.totalAmt60d = $('#totalAmt60d').val();
 									param.dzjyRct = 0;
 
 									param.finOK = 0;

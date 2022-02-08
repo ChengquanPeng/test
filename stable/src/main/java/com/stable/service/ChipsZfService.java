@@ -336,7 +336,7 @@ public class ChipsZfService {
 		return getZengFaList(code, status, endDate, 0, 0, querypage);
 	}
 
-	private long YI = 100000000l;
+	public static long YI = CurrencyUitl.YI_N.longValue();
 
 	public List<ZengFa> getZengFaList(String code, String status, int endDate, int maxVal, int minVal,
 			EsQueryPageReq querypage) {

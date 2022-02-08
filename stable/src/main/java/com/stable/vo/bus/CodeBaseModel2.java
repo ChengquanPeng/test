@@ -61,6 +61,8 @@ public class CodeBaseModel2 extends EsBase {
 	private double dzjyAvgPrice = 0; // 最近1年大宗交易均价
 	@Field(type = FieldType.Double)
 	private double dzjy60d = 0.0;// 2个月大宗
+	@Field(type = FieldType.Double)
+	private double dzjy365d = 0.0;// 1年大宗
 	@Field(type = FieldType.Integer)
 	private int tagDzPriceLow = 0;// 低于大宗均价
 	// 增发和大宗情况

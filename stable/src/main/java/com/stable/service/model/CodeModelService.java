@@ -294,6 +294,7 @@ public class CodeModelService {
 					}
 					newOne.setDzjyAvgPrice(dz.getAvgPrcie());
 					newOne.setDzjy60d(dz.getTotalAmt60d());
+					newOne.setDzjy365d(dz.getTotalAmt());
 				}
 
 				// 小而美模型：未涨&&年报 && 大股东集中
