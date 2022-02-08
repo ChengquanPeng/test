@@ -36,7 +36,6 @@ public class Realtime163 {
 			rt.setSell1(t.getDoubleValue("ask1"));
 			return rt;
 		} catch (Exception e) {
-			e.printStackTrace();
 			return null;
 		}
 

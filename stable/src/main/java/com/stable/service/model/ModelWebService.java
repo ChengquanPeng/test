@@ -23,6 +23,7 @@ import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.MonitorType;
 import com.stable.enums.SylType;
+import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.service.ConceptService;
@@ -322,6 +323,7 @@ public class ModelWebService {
 				pool.setHolderNum(0);
 				pool.setYkb(0);
 				pool.setZfdone(0);
+				pool.setZfdoneZjh(0);
 				pool.setRemark(remark);
 				pool.setListenerGg(0);
 				pool.setBuyLowVol(0);
@@ -499,7 +501,7 @@ public class ModelWebService {
 		if (StringUtils.isNotBlank(mr.getZfStatus())) {
 			int t = Integer.valueOf(mr.getZfStatus());
 			if (t == 6) {// 证监会核准
-				bqb.must(QueryBuilders.matchPhraseQuery("zfStatusDesc", CodeModelService.ZF_ZJHHZ));
+				bqb.must(QueryBuilders.matchPhraseQuery("zfStatusDesc", ZfStatus.ZF_ZJHHZ.getDesc()));
 			} else if (t == 8) {// 增发中或已完成
 				bqb.must(QueryBuilders.rangeQuery("zfStatus").gte(1).lte(2));
 			} else {

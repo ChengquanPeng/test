@@ -345,9 +345,17 @@ public class MonitorPoolService {
 				ZengFa zf = chipsZfService.getLastZengFa(mp.getCode(), ZfStatus.ING.getCode());
 				if (!chipsZfService.isZfDateOk(zf, oneYearAgo)) {
 					mp.setZfdone(0);
+					mp.setZfdoneZjh(0);
 					monitorPoolDao.save(mp);
 					WxPushUtil
 							.pushSystem1(stockBasicService.getCodeName2(mp.getCode()) + " 已完成增发,备注:" + mp.getRemark());
+				} else {
+					if (mp.getZfdoneZjh() == 0 && zf != null
+							&& ZfStatus.ZF_ZJHHZ.getDesc().equals(zf.getStatusDesc())) {
+						mp.setZfdoneZjh(1);
+						WxPushUtil.pushSystem1(
+								stockBasicService.getCodeName2(mp.getCode()) + " 增发已通过证监会核准！ 备注:" + mp.getRemark());
+					}
 				}
 			}
 		}

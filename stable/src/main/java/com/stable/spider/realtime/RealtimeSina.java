@@ -1,10 +1,18 @@
 package com.stable.spider.realtime;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.stable.utils.HttpUtil;
 
 public class RealtimeSina {
 
 	private static final String URL_FORMAT = "http://hq.sinajs.cn/list=%s";
+
+	private static Map<String, String> header = new HashMap<String, String>();
+	static {
+		header.put("referer", "http://finance.sina.com.cn");
+	}
 
 	private static String getUrl(String code) {
 		if (code.startsWith("6")) {
@@ -42,7 +50,7 @@ public class RealtimeSina {
 //		31：”15:05:32″，时间；
 
 		try {
-			String str = HttpUtil.doGet2(getUrl(code));
+			String str = HttpUtil.doGet2(getUrl(code), header);
 			String[] rs = str.split("=")[1].split(",");
 			RealTime rt = new RealTime();
 			rt.setOpen(Double.valueOf(rs[1]));
@@ -62,6 +70,6 @@ public class RealtimeSina {
 	}
 
 	public static void main(String[] args) {
-		System.err.println(get("300568"));
+		System.err.println(get("601288"));
 	}
 }

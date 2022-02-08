@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.BonusHistDao;
 import com.stable.es.dao.base.FenHongDao;
 import com.stable.es.dao.base.ZengFaDao;
@@ -235,7 +236,7 @@ public class ThsBonusSpider {
 						try {
 							ZengFa zf = new ZengFa();
 							zf.setCode(code);
-							zf.setStatus(1);
+							zf.setStatus(ZfStatus.ING.getCode());
 							Iterator<DomElement> it0 = h.getChildElements().iterator();
 							String title = it0.next().asText();
 							title = title.replaceAll("方案进度：", ",").replaceAll("发行类型：", ",").replaceAll("发行方式：", ",")
@@ -245,12 +246,12 @@ public class ThsBonusSpider {
 							zf.setIssueClz(ts[2]);
 							zf.setIssueType(ts[3]);
 							if (zf.getStatusDesc().contains(DONE)) {// 已完成
-								zf.setStatus(2);
+								zf.setStatus(ZfStatus.DONE.getCode());
 								getDetail = true;
 							} else if (zf.getStatusDesc().contains(NO_PASS) || zf.getStatusDesc().contains(STOP)
 									|| zf.getStatusDesc().contains(TIME_OUT)) {
 								// 停止
-								zf.setStatus(3);
+								zf.setStatus(ZfStatus.ZUOFEI.getCode());
 							}
 //						实际发行价格：17.0200元 新股上市公告日：2017-03-22
 //						实际发行数量：1.97亿股 发行新股日：2017-03-22
