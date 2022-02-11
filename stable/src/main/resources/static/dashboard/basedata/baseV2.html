@@ -37,6 +37,7 @@
 					流通市值小于:<input type="text" id="mkv" width="10" />亿&nbsp;&nbsp;
 					前3股东持股比例:<input type="text" id="holderNumT3" width="30" />%&nbsp;&nbsp;
 					最低市盈率ttm:<input type="text" id="pettm" width="20" />&nbsp;&nbsp;
+					国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp;
 				</div>
 			</div>
 			<div>
@@ -70,8 +71,9 @@
 			<div>
 				<div class="input-group">
 					1年大宗超亿:<input type="checkbox" id="dzjyRct" />&nbsp;&nbsp;
-					2月交易金额&gt;=<input type="text" class="form-control" id="totalAmt60d">&nbsp;&nbsp;
-					1年交易金额&gt;=<input type="text" class="form-control" id="totalAmt">&nbsp;&nbsp;
+					2月交易金额&gt;=<input type="text" width="10" width="30"
+						id="totalAmt60d">&nbsp;&nbsp; 1年交易金额&gt;=<input
+						type="text" width="10" width="30" id="totalAmt">
 				</div>
 			</div>
 			<div>
@@ -89,13 +91,7 @@
 						<option value="3">白马走势?</option>
 						<option value="5">小而美</option>
 						<option value="4">高质押机会</option>
-					</select>
-				</div>
-			</div>
-			<div>
-				<div class="input-group">
-					国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp; 人工状态:<select
-						id="pls">
+					</select>&nbsp;&nbsp;人工状态:<select id="pls">
 						<option value="-1" selected="selected">无限制</option>
 						<option value="1">确定</option>
 						<option value="2">排除</option>

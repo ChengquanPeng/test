@@ -73,7 +73,6 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class CodeModelService {
-	public static final String ZF_ZJHHZ = "证监会核准";
 	private static final long ZF_50YI = 50 * 100000000l;
 
 	@Autowired
@@ -159,7 +158,7 @@ public class CodeModelService {
 		// 大牛
 		Map<String, MonitorPool> poolMap = monitorPoolService.getMonitorPoolMap();
 		List<MonitorPool> poolList = new LinkedList<MonitorPool>();
-
+//		int tdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 365));
 		// 到期提醒
 		StringBuffer sbc = new StringBuffer();
 		// 公告提醒
@@ -172,6 +171,9 @@ public class CodeModelService {
 		// 行情指标4：股东人数底部大幅减少
 		StringBuffer shootNotice4 = new StringBuffer();
 		// 行情指标5：短线1
+//		短线拉的急，说明货多。
+//		一倍了，说明资金已经投入。
+//		新高:说明出货失败或者有更多的想法，要继续拉。
 		StringBuffer shootNotice5 = new StringBuffer();
 
 		Map<String, CodeBaseModel2> histMap = getALLForMap();
@@ -363,7 +365,8 @@ public class CodeModelService {
 							}
 						}
 					} else {
-						if (newOne.getZfYjAmt() >= ZF_50YI && ZF_ZJHHZ.equals(newOne.getZfStatusDesc())) {
+						if (newOne.getZfYjAmt() >= ZF_50YI
+								&& ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
 							log.info("{} 大票，底部增发超过50亿", code);
 							isOk2 = true;
 						}
@@ -430,9 +433,9 @@ public class CodeModelService {
 		if (shootNotice4.length() > 0) {
 			WxPushUtil.pushSystem1("行情指标4：股东人数在底部大幅减少(3年+ -40%):" + shootNotice4.toString());
 		}
-		if (shootNotice5.length() > 0) {
-			WxPushUtil.pushSystem1("行情指标5：短线极速拉升:" + shootNotice5.toString());
-		}
+//		if (shootNotice5.length() > 0) {
+//			WxPushUtil.pushSystem1("行情指标5：短线极速拉升:" + shootNotice5.toString());
+//		}
 //		daliyTradeHistroyService.deleteData();
 	}
 

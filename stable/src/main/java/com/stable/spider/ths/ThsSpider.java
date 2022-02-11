@@ -247,6 +247,9 @@ public class ThsSpider {
 	boolean get404 = true;
 
 	public int getConceptDailyFor884(Concept cp, boolean needRetry) {
+		if (1 == 1) {
+			return 0;
+		}
 		if (header == null) {
 			header = new HashMap<String, String>();
 			header.put("Host", "d.10jqka.com.cn");
@@ -322,6 +325,9 @@ public class ThsSpider {
 	}
 
 	public int getConceptDaily(Concept cp, String url, int date, int type) {
+		if (1 == 1) {
+			return 0;
+		}
 		List<ConceptDaily> list = new LinkedList<ConceptDaily>();
 		int trytime = 0;
 		int r = 0;

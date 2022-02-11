@@ -224,13 +224,14 @@ public class ModelWebService {
 		sb5.append(Constant.HTML_LINE);
 		// 大宗
 		if (dh.getDzjyRct() > 0) {
-			sb5.append(",1年大宗超亿(均价:").append(dh.getDzjyAvgPrice()).append(")");
+			sb5.append(",1年大宗").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WAN)).append("(均价:")
+					.append(dh.getDzjyAvgPrice()).append(")");
 			if (dh.getTagDzPriceLow() > 0) {
 				sb5.append(",低于均价:").append(dh.getTagDzPriceLow()).append("%");
 			}
 		}
 		if (dh.getDzjy60d() > 0) {
-			sb5.append(",2个月大宗:").append(dh.getDzjy60d()).append("万");
+			sb5.append(",2个月大宗:").append(CurrencyUitl.covertToString(dh.getDzjy60d() * WAN));
 		}
 		sb5.append(Constant.HTML_LINE);
 
@@ -463,10 +464,10 @@ public class ModelWebService {
 			}
 		}
 		if (StringUtils.isNotBlank(mr.getTotalAmt())) {
-			bqb.must(QueryBuilders.rangeQuery("totalAmt").gte(Integer.valueOf(mr.getTotalAmt()) * WAN));
+			bqb.must(QueryBuilders.rangeQuery("dzjy365d").gte(Integer.valueOf(mr.getTotalAmt()) * WAN));
 		}
 		if (StringUtils.isNotBlank(mr.getTotalAmt60d())) {
-			bqb.must(QueryBuilders.rangeQuery("totalAmt60d").gte(Integer.valueOf(mr.getTotalAmt60d()) * WAN));
+			bqb.must(QueryBuilders.rangeQuery("dzjy60d").gte(Integer.valueOf(mr.getTotalAmt60d()) * WAN));
 		}
 		if (mr.getZfself() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfself", 1));
