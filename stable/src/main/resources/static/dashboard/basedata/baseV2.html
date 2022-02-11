@@ -70,10 +70,8 @@
 			</div>
 			<div>
 				<div class="input-group">
-					1年大宗超亿:<input type="checkbox" id="dzjyRct" />&nbsp;&nbsp;
-					2月交易金额&gt;=<input type="text" width="10" width="30"
-						id="totalAmt60d">&nbsp;&nbsp; 1年交易金额&gt;=<input
-						type="text" width="10" width="30" id="totalAmt">
+					大宗:1年交易金额&gt;=<input type="text" width="10" width="30" id="totalAmt">&nbsp;&nbsp; 
+						2月交易金额&gt;=<input type="text" width="10" width="30" id="totalAmt60d">
 				</div>
 			</div>
 			<div>
@@ -209,7 +207,6 @@
 									param.zfPriceLow = $('#zfPriceLow').val();
 									param.totalAmt = $('#totalAmt').val();
 									param.totalAmt60d = $('#totalAmt60d').val();
-									param.dzjyRct = 0;
 
 									param.finOK = 0;
 									param.bousOK = 0;
@@ -225,9 +222,7 @@
 									if (document.getElementById("compnayType").checked) {
 										param.compnayType = 1;
 									}
-									if (document.getElementById("dzjyRct").checked) {
-										param.dzjyRct = 1;
-									}
+									
 									if (document.getElementById("zfself").checked) {
 										param.zfself = 1;
 									}

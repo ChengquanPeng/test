@@ -172,7 +172,7 @@ public class ModelWebService {
 		sb5.append(",股东人数(少):").append(CurrencyUitl.covertToString(dh.getLastNum()));
 		sb5.append(",人均持股(高):").append(CurrencyUitl.covertToString(dh.getAvgNum()));
 		sb5.append(",变化:").append(dh.getHolderNum()).append("%");
-		sb5.append(Constant.HTML_LINE);
+		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 		// 博弈-增发
 		if (dh.getZfStatus() == 1 || dh.getZfStatus() == 2) {
 			if (dh.getZfStatus() == 1) {
@@ -223,25 +223,26 @@ public class ModelWebService {
 		}
 		sb5.append(Constant.HTML_LINE);
 		// 大宗
-		if (dh.getDzjyRct() > 0) {
-			sb5.append(",1年大宗").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WAN)).append("(均价:")
+		if (dh.getDzjy365d() > 0) {
+			sb5.append("大宗1年交易:").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WAN)).append("(均价:")
 					.append(dh.getDzjyAvgPrice()).append(")");
 			if (dh.getTagDzPriceLow() > 0) {
 				sb5.append(",低于均价:").append(dh.getTagDzPriceLow()).append("%");
 			}
+			if (dh.getDzjy60d() > 0) {
+				sb5.append(",2月交易:").append(CurrencyUitl.covertToString(dh.getDzjy60d() * WAN));
+			}
 		}
-		if (dh.getDzjy60d() > 0) {
-			sb5.append(",2个月大宗:").append(CurrencyUitl.covertToString(dh.getDzjy60d() * WAN));
-		}
+
 		sb5.append(Constant.HTML_LINE);
 
 		// 是否确定
 		if (dh.getPls() == 0) {
-			sb5.append("人工: 未确定").append(Constant.HTML_LINE);
+			sb5.append("人工: 未确定");
 		} else if (dh.getPls() == 1) {
-			sb5.append("人工: 已确定").append(Constant.HTML_LINE);
+			sb5.append("人工: 已确定");
 		} else if (dh.getPls() == 2) {
-			sb5.append("人工: 排除").append(Constant.HTML_LINE);
+			sb5.append("人工: 排除");
 		}
 		resp.setZfjjInfo(sb5.toString());
 //		resp.setIncomeShow(dh.getCurrIncomeTbzz() + "%");
@@ -464,10 +465,10 @@ public class ModelWebService {
 			}
 		}
 		if (StringUtils.isNotBlank(mr.getTotalAmt())) {
-			bqb.must(QueryBuilders.rangeQuery("dzjy365d").gte(Integer.valueOf(mr.getTotalAmt()) * WAN));
+			bqb.must(QueryBuilders.rangeQuery("dzjy365d").gte(Double.valueOf(mr.getTotalAmt()) * WAN));
 		}
 		if (StringUtils.isNotBlank(mr.getTotalAmt60d())) {
-			bqb.must(QueryBuilders.rangeQuery("dzjy60d").gte(Integer.valueOf(mr.getTotalAmt60d()) * WAN));
+			bqb.must(QueryBuilders.rangeQuery("dzjy60d").gte(Double.valueOf(mr.getTotalAmt60d()) * WAN));
 		}
 		if (mr.getZfself() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfself", 1));

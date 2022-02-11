@@ -287,13 +287,9 @@ public class CodeModelService {
 					}
 				}
 				// 大宗交易超1亿
-				newOne.setDzjyRct(0);
+//				newOne.setDzjyRct(0);
 				DzjyYiTime dz = dzjyService.dzjyF(code, dzdate);
 				if (dz != null) {// 1亿
-					if (dz.getTotalAmt() > 9999.0) {
-						newOne.setDzjyRct(1);
-						log.info("{} 大宗超1亿", code);
-					}
 					newOne.setDzjyAvgPrice(dz.getAvgPrcie());
 					newOne.setDzjy60d(dz.getTotalAmt60d());
 					newOne.setDzjy365d(dz.getTotalAmt());
