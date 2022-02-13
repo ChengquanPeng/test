@@ -228,14 +228,14 @@ public class ModelWebService {
 		}
 		// 大宗
 		if (dh.getDzjy365d() > 0) {
-			sb5.append("大宗1年交易:").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WAN)).append("(占比:")
+			sb5.append("大宗1年:").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WAN)).append("(占比:")
 					.append(dh.getDzjyp365d()).append("%,均价:").append(dh.getDzjyAvgPrice()).append(")");
 			if (dh.getTagDzPriceLow() > 0) {
 				sb5.append(",低于均价:").append(dh.getTagDzPriceLow()).append("%");
 			}
 			if (dh.getDzjy60d() > 0) {
-				sb5.append(",2月交易:").append(CurrencyUitl.covertToString(dh.getDzjy60d() * WAN)).append("(占比:")
-						.append(dh.getDzjyp365d()).append("%");
+				sb5.append(",2月:").append(CurrencyUitl.covertToString(dh.getDzjy60d() * WAN)).append("(")
+						.append(dh.getDzjyp365d()).append("%)");
 			}
 		}
 		sb5.append(Constant.HTML_LINE);
