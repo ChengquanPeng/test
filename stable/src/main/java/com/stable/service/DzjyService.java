@@ -23,6 +23,7 @@ import com.stable.vo.bus.Dzjy;
 import com.stable.vo.bus.DzjyYiTime;
 import com.stable.vo.bus.RzrqDaliy;
 import com.stable.vo.bus.Rztj;
+import com.stable.vo.bus.StockBaseInfo;
 
 /**
  * 
@@ -45,13 +46,16 @@ public class DzjyService {
 	 * 
 	 * @param startDate 开始到现在
 	 */
-	public DzjyYiTime halfOver1Yi(String code, int startDate, int startDate2) {
+	public DzjyYiTime halfOver1Yi(StockBaseInfo s, int startDate, int startDate2) {
+		String code = s.getCode();
 		DzjyYiTime t = new DzjyYiTime();
 		t.setCode(code);
 		t.setTotalAmt(0.0);
 		t.setAvgPrcie(0.0);
 		t.setDate(0);
 		t.setTotalAmt60d(0.0);
+		t.setP365d(0.0);
+		t.setP60d(0.0);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));
@@ -68,12 +72,15 @@ public class DzjyService {
 			}
 			t.setAvgPrcie(CurrencyUitl.roundHalfUp(t.getTotalAmt() / num));
 			t.setDate(page.getContent().get(0).getDate());
-			this.halfOver60d(code, startDate2, t);// 2个月
+			if (s.getFloatShare() > 0) {
+				t.setP365d(CurrencyUitl.roundHalfUp(num / s.getFloatShare()));// 都是万股
+			}
+			this.halfOver60d(code, s, startDate2, t);// 2个月
 		}
 		return t;
 	}
 
-	public void halfOver60d(String code, int startDate, DzjyYiTime t) {
+	public void halfOver60d(String code, StockBaseInfo s, int startDate, DzjyYiTime t) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));
@@ -83,16 +90,20 @@ public class DzjyService {
 
 		Page<Dzjy> page = dzjyDao.search(sq);
 		if (page != null && !page.isEmpty() && page.getContent().size() > 0) {
+			double num = 0.0;
 			for (Dzjy d : page.getContent()) {
+				num += d.getTvol();
 				t.setTotalAmt60d(CurrencyUitl.roundHalfUp(t.getTotalAmt60d() + d.getTval()));
+			}
+			if (s.getFloatShare() > 0) {
+				t.setP60d(CurrencyUitl.roundHalfUp(num / s.getFloatShare()));// 都是万股
 			}
 		}
 	}
 
-	public DzjyYiTime dzjyF(String code, int date) {
+	public DzjyYiTime dzjyF(String code) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		bqb.must(QueryBuilders.rangeQuery("date").gte(date));
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).build();
 
@@ -100,7 +111,7 @@ public class DzjyService {
 		if (page != null && !page.isEmpty()) {
 			return page.getContent().get(0);
 		}
-		return null;
+		return new DzjyYiTime();
 	}
 
 	int pageNum1 = EsQueryPageUtil.queryPage20.getPageNum();

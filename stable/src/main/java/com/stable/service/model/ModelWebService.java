@@ -228,13 +228,14 @@ public class ModelWebService {
 		}
 		// 大宗
 		if (dh.getDzjy365d() > 0) {
-			sb5.append("大宗1年交易:").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WAN)).append("(均价:")
-					.append(dh.getDzjyAvgPrice()).append(")");
+			sb5.append("大宗1年交易:").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WAN)).append("(占比:")
+					.append(dh.getDzjyp365d()).append("%,均价:").append(dh.getDzjyAvgPrice()).append(")");
 			if (dh.getTagDzPriceLow() > 0) {
 				sb5.append(",低于均价:").append(dh.getTagDzPriceLow()).append("%");
 			}
 			if (dh.getDzjy60d() > 0) {
-				sb5.append(",2月交易:").append(CurrencyUitl.covertToString(dh.getDzjy60d() * WAN));
+				sb5.append(",2月交易:").append(CurrencyUitl.covertToString(dh.getDzjy60d() * WAN)).append("(占比:")
+						.append(dh.getDzjyp365d()).append("%");
 			}
 		}
 		sb5.append(Constant.HTML_LINE);
@@ -406,6 +407,8 @@ public class ModelWebService {
 			field = "dzjy60d";
 		} else if (orderBy == 11) {
 			field = "dzjy365d";
+		} else if (orderBy == 12) {
+			field = "dzjyp365d";
 		}
 
 		if (StringUtils.isNotBlank(mr.getMonitor())) {

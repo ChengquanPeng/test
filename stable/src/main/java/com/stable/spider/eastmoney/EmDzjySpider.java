@@ -33,6 +33,7 @@ public class EmDzjySpider {
 
 	// http://data.eastmoney.com/dxf/q/601989.html
 
+	private static final int NUM_10000 = 10000;
 	private static final String J_QUERY112306735504837667934_1610722345186 = "jQuery11230594221138091166_1640497702907(";
 	private static String URL_S1 = "https://datacenter-web.eastmoney.com/api/data/v1/get?callback=jQuery11230594221138091166_1640497702905&sortColumns=SECURITY_CODE&sortTypes=1&pageSize=50&pageNumber=";
 	private static String URL_S2 = "&reportName=RPT_DATA_BLOCKTRADE&columns=TRADE_DATE%2CSECURITY_CODE%2CSECUCODE%2CSECURITY_NAME_ABBR%2CCHANGE_RATE%2CCLOSE_PRICE%2CDEAL_PRICE%2CPREMIUM_RATIO%2CDEAL_VOLUME%2CDEAL_AMT%2CTURNOVER_RATE%2CBUYER_NAME%2CSELLER_NAME%2CCHANGE_RATE_1DAYS%2CCHANGE_RATE_5DAYS%2CCHANGE_RATE_10DAYS%2CCHANGE_RATE_20DAYS%2CBUYER_CODE%2CSELLER_CODE&source=WEB&client=WEB&filter=(SECURITY_TYPE_WEB%3D%221%22)(TRADE_DATE%3D%27";
@@ -86,17 +87,18 @@ public class EmDzjySpider {
 			}
 		}
 		// STEP3:计算-半年超1亿
-		exeDzjyYiTime(codes);
+		exeDzjyYiTime();
 	}
 
-	private void exeDzjyYiTime(Set<String> codes) {
+	private void exeDzjyYiTime() {
+		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 		ThreadsUtil.sleepRandomSecBetween15And30();
 		List<DzjyYiTime> l = new LinkedList<DzjyYiTime>();
 		int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));// 12个月
 		int startDate2 = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -60));// 2个月
-		for (String code : codes) {
+		for (StockBaseInfo s : codelist) {
 			// 频繁统计
-			DzjyYiTime t = dzjyService.halfOver1Yi(code, startDate, startDate2);// 12个月
+			DzjyYiTime t = dzjyService.halfOver1Yi(s, startDate, startDate2);// 12个月
 			l.add(t);
 		}
 
@@ -154,8 +156,8 @@ public class EmDzjySpider {
 			// System.err.println(date);
 			dzjy.setDate(DateUtil.convertDate2(date));
 			dzjy.setPrice(Double.valueOf(data.getString("DEAL_PRICE")));
-			dzjy.setTvol(Double.valueOf(data.getString("DEAL_VOLUME")) / 10000);// 万股
-			dzjy.setTval(Double.valueOf(data.getString("DEAL_AMT")) / 10000);// 万元
+			dzjy.setTvol(Double.valueOf(data.getString("DEAL_VOLUME")) / NUM_10000);// 万股
+			dzjy.setTval(Double.valueOf(data.getString("DEAL_AMT")) / NUM_10000);// 万元
 			dzjy.setBuyername(data.getString("BUYER_NAME"));
 			dzjy.setSalesname(data.getString("SELLER_NAME"));
 			dzjy.setRchange(Double.valueOf(data.getString("PREMIUM_RATIO")));
@@ -176,11 +178,9 @@ public class EmDzjySpider {
 			List<Dzjy> dzl = new LinkedList<Dzjy>();
 			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 			int c = 0;
-			Set<String> codes = new HashSet<String>();
 			for (StockBaseInfo s : codelist) {
 				try {
 					ThreadsUtil.sleepSleep1Seconds();
-					codes.add(s.getCode());
 					dofetchByCode(s.getCode(), dzl, true);
 				} catch (Exception e) {
 					ErrorLogFileUitl.writeError(e, "", "", "");
@@ -196,7 +196,7 @@ public class EmDzjySpider {
 			if (dzl.size() > 0) {
 				dzjyDao.saveAll(dzl);
 			}
-			exeDzjyYiTime(codes);
+			exeDzjyYiTime();
 			WxPushUtil.pushSystem1(date + " 东方财富-大宗交易-已完成-ALL");
 		} catch (Exception e) {
 			e.printStackTrace();

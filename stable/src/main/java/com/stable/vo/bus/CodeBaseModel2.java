@@ -63,6 +63,10 @@ public class CodeBaseModel2 extends EsBase {
 	private double dzjy60d = 0.0;// 2个月大宗
 	@Field(type = FieldType.Double)
 	private double dzjy365d = 0.0;// 1年大宗
+	@Field(type = FieldType.Double)
+	private double dzjyp60d;// 占比-1年
+	@Field(type = FieldType.Double)
+	private double dzjyp365d;// 占比-60天
 	@Field(type = FieldType.Integer)
 	private int tagDzPriceLow = 0;// 低于大宗均价
 	// 增发和大宗情况

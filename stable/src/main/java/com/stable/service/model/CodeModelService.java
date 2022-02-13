@@ -137,8 +137,6 @@ public class CodeModelService {
 
 	private synchronized void runByJobv2(int tradeDate, boolean isweekend) {
 		Date now = new Date();
-		int dzdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));// 最近1年大宗
-		int dzdate2 = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -60));// 最近2个月大宗
 		int currYear = DateUtil.getCurYYYY();
 		int checkYear = currYear - 1;
 		checkYear = currYear - 5;
@@ -286,14 +284,14 @@ public class CodeModelService {
 						newOne.setBousOK(0);
 					}
 				}
-				// 大宗交易超1亿
+				// 大宗交易
 //				newOne.setDzjyRct(0);
-				DzjyYiTime dz = dzjyService.dzjyF(code, dzdate);
-				if (dz != null) {// 1亿
-					newOne.setDzjyAvgPrice(dz.getAvgPrcie());
-					newOne.setDzjy60d(dz.getTotalAmt60d());
-					newOne.setDzjy365d(dz.getTotalAmt());
-				}
+				DzjyYiTime dz = dzjyService.dzjyF(code);
+				newOne.setDzjyAvgPrice(dz.getAvgPrcie());
+				newOne.setDzjy60d(dz.getTotalAmt60d());
+				newOne.setDzjy365d(dz.getTotalAmt());
+				newOne.setDzjyp365d(dz.getP365d());
+				newOne.setDzjyp60d(dz.getP60d());
 
 				// 小而美模型：未涨&&年报 && 大股东集中
 				if (newOne.getZfjjup() >= 2 && mkv <= 50.0 && newOne.getHolderNumP5() >= 50) {// 流通45亿以内的
@@ -354,8 +352,7 @@ public class CodeModelService {
 					// 行情指标2：大票，底部增发超过50亿(越大越好)，且证监会通过-之前有明显底部拿筹痕迹-涨停。
 					if (mkv <= 75) {
 						if (newOne.getHolderNumT3() > 45.0) {// 三大股东
-							DzjyYiTime dz2 = dzjyService.dzjyF(code, dzdate2);
-							if (dz2 != null && dz2.getTotalAmt() > 4999.0) {// 5千万
+							if (dz.getTotalAmt() > 4999.0) {// 5千万
 								log.info("{} 小票，底部大宗超5千万", code);
 								isOk1 = true;
 							}
