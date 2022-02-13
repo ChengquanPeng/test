@@ -627,6 +627,7 @@ public class FinanceService {
 			@Override
 			public void run() {
 				fetchFinances();// 财务
+				executeHangye(date);
 				rtl.setDfFinOk(true);
 			}
 		}).start();
@@ -636,7 +637,6 @@ public class FinanceService {
 			ThreadsUtil.sleep(15, TimeUnit.MINUTES);
 		}
 		log.info("已完成所有事项");
-		executeHangye(date);
 		// 运行完财务和行业对比后,重新运行
 		codeModelService.runJobv2(date, true);
 	}
