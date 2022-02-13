@@ -66,7 +66,6 @@ public class MonitorPoolService {
 	private EsCodeBaseModel2Dao codeBaseModel2Dao;
 	@Autowired
 	private ModelWebService modelWebService;
-
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -102,6 +101,10 @@ public class MonitorPoolService {
 		}
 		monitorPoolDao.save(c);
 		updateBaseMoniStatus(code, c.getMonitor(), c.getRemark());
+	}
+	
+	public void saveOrUpdate(MonitorPool mp) {
+		monitorPoolDao.save(mp);
 	}
 
 	private void updateBaseMoniStatus(String code, int monitor, String buyRea) {

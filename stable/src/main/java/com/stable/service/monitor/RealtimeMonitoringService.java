@@ -111,6 +111,11 @@ public class RealtimeMonitoringService {
 //				if (t.getSelled() != null) {
 //					selledList.add(t.getSelled());
 //				}
+				if (t.highPriceGot) {
+					MonitorPool mpt = monitorPoolService.getMonitorPool(t.code);
+					mpt.setYearHigh1(0.0);
+					monitorPoolService.saveOrUpdate(mpt);
+				}
 			}
 //			WxPushUtil.pushSystem2Html("交易日结束监听!");
 			// sendEndMessaget(buyedList, selledList);

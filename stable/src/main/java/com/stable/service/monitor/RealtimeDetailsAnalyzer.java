@@ -19,7 +19,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private static final long FIVE_MIN = 5 * 60 * 1000;// 5MIN
 	private static final long TEN_MIN = 10 * 60 * 1000;// 5MIN
 	private long WAIT_MIN = FIVE_MIN;
-	private String code;
+	public String code;
 	private String codeName;
 	private boolean isRunning = true;
 	private String today = DateUtil.getTodayYYYYMMDD();
@@ -28,7 +28,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean waitSend = true;
 	private boolean chkCodeClosed = false;
 	private CodeBaseModel2 cbm;
-	private boolean highPriceGot = false;
+	public boolean highPriceGot = false;
 
 	public void stop() {
 		isRunning = false;
