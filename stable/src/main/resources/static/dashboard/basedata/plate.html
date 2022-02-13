@@ -67,7 +67,6 @@ body {
 				<div class="input-group">
 					板块/概念(aliasCode)：<input type="text" class="form-control"
 						id="aliasCode"> &nbsp;排序:<select id="sort1">
-						<option value="1">市赚率(股价)</option>
 						<option value="2">资产收益率(季报)</option>
 						<option value="3">毛利率(季报)</option>
 						<option value="4">应收账款占比(季报)</option>
@@ -160,16 +159,6 @@ body {
 										{
 											field : 'codeName',
 											title : '名称'
-										},
-										{
-											field : 'suspectBigBoss',
-											title : '市赚率<br/>每日',
-											formatter : function(value, row,
-													index) {
-												return row.t1 + " avg:"
-														+ row.avgt1 + " rank:"
-														+ row.ranking1;
-											}
 										},
 										{
 											field : 'inmid',

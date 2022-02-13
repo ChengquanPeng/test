@@ -127,7 +127,7 @@ public class ModelWebService {
 		}
 		resp.setTagInfo(tag.toString());
 
-		// 博弈-基本面
+		// 博弈-行情指标
 		StringBuffer sb5 = new StringBuffer();
 		if (dh.getShooting1() > 0 || dh.getShooting2() > 0 || dh.getShooting3() > 0 || dh.getShooting4() > 0
 				|| dh.getShooting5() > 0) {
@@ -150,78 +150,82 @@ public class ModelWebService {
 			}
 			sb5.append("</font>").append(Constant.HTML_LINE);
 		}
-		// 流通
+		// 基本面-筹码
 		sb5.append("流通:").append(dh.getMkv()).append("亿,");
 		sb5.append("5%以下:").append(dh.getActMkv()).append("亿,");
-		if (dh.getZfjjup() > 0) {
-			sb5.append(dh.getZfjjup());
-			if (dh.getZfjjupStable() > 0) {
-				sb5.append("<font color='red'>/stable").append(dh.getZfjjupStable()).append("</font>");
-			}
-			sb5.append("年未大涨,");
-		}
-		if (dh.getBousOK() == 1) {
-			sb5.append("近5年分红,");
-		}
-		if (dh.getFinOK() == 1) {
-			sb5.append("近5年业绩不亏,市盈率ttm:").append(dh.getPettm());
-
-		}
-		sb5.append(Constant.HTML_LINE);
 		sb5.append("前3大股东:").append(dh.getHolderNumT3()).append("%");
 		sb5.append(",股东人数(少):").append(CurrencyUitl.covertToString(dh.getLastNum()));
 		sb5.append(",人均持股(高):").append(CurrencyUitl.covertToString(dh.getAvgNum()));
 		sb5.append(",变化:").append(dh.getHolderNum()).append("%");
 		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
-		// 博弈-增发
-		if (dh.getZfStatus() == 1 || dh.getZfStatus() == 2) {
-			if (dh.getZfStatus() == 1) {
-				sb5.append("<font color='red'>");
-			} else {
-				sb5.append("<font color='green'>");
-			}
-			sb5.append("增发进度" + (dh.getCompnayType() == 1 ? "(国资)" : "") + ":" + dh.getZfStatusDesc());
-			sb5.append("</font>");
-
-			if (dh.getZfStatus() == 1) {
-				if (dh.getZfYjAmt() > 0) {
-					sb5.append(",预增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
+		// 行情-财务
+		if (dh.getZfjjup() > 0 || dh.getBousOK() == 1 || dh.getFinOK() == 1) {
+			if (dh.getZfjjup() > 0) {
+				sb5.append(dh.getZfjjup());
+				if (dh.getZfjjupStable() > 0) {
+					sb5.append("<font color='red'>/stable").append(dh.getZfjjupStable()).append("</font>");
 				}
-			} else {
-				if (dh.getZfYjAmt() > 0) {
-					sb5.append(",增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
+				sb5.append("年未大涨,");
+			}
+			if (dh.getBousOK() == 1) {
+				sb5.append("近5年分红,");
+			}
+			if (dh.getFinOK() == 1) {
+				sb5.append("近5年业绩不亏,市盈率ttm:").append(dh.getPettm());
+			}
+			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
+		}
+		// 增发
+		if (dh.getZfStatus() == 1 || dh.getZfStatus() == 2 || dh.getZflastOkDate() > 0 || dh.getZfjj() == 1) {
+			if (dh.getZfStatus() == 1 || dh.getZfStatus() == 2) {
+				if (dh.getZfStatus() == 1) {
+					sb5.append("<font color='red'>");
+				} else {
+					sb5.append("<font color='green'>");
 				}
-				sb5.append(",增发价格:").append(dh.getZfPrice());
-			}
+				sb5.append("增发进度" + (dh.getCompnayType() == 1 ? "(国资)" : "") + ":" + dh.getZfStatusDesc());
+				sb5.append("</font>");
 
+				if (dh.getZfStatus() == 1) {
+					if (dh.getZfYjAmt() > 0) {
+						sb5.append(",预增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
+					}
+				} else {
+					if (dh.getZfYjAmt() > 0) {
+						sb5.append(",增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
+					}
+					sb5.append(",增发价格:").append(dh.getZfPrice());
+				}
+
+			}
+			// 最近一次增发
+			if (dh.getZflastOkDate() > 0) {
+				sb5.append(",实施日期:").append(dh.getZflastOkDate()).append(",");
+				if (dh.getZfself() == 1) {
+					sb5.append("<font color='green'>底部增发</font>,");
+				}
+				if (dh.getZfPriceLow() > 0) {
+					sb5.append("<font color='red'>低于增发价:").append(dh.getZfPriceLow()).append("%</font>,");
+				}
+				if (dh.getGsz() == 1) {
+					sb5.append("3年内有高送转,");
+				}
+				if (dh.getZfObjType() == 1) {
+					sb5.append("6个月,");
+				} else if (dh.getZfObjType() == 2) {
+					sb5.append("混合(6月+大股东),");
+				} else if (dh.getZfObjType() == 3) {
+					sb5.append("大股东,");
+				} else if (dh.getZfObjType() == 4) {
+					sb5.append("其他,");
+				}
+			}
+			// 解禁
+			if (dh.getZfjj() == 1) {
+				sb5.append("增发解禁(" + dh.getZfjjDate() + ")");
+			}
+			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 		}
-		// 最近一次增发
-		if (dh.getZflastOkDate() > 0) {
-			sb5.append(",实施日期:").append(dh.getZflastOkDate()).append(",");
-			if (dh.getZfself() == 1) {
-				sb5.append("<font color='green'>底部增发</font>,");
-			}
-			if (dh.getZfPriceLow() > 0) {
-				sb5.append("<font color='red'>低于增发价:").append(dh.getZfPriceLow()).append("%</font>,");
-			}
-			if (dh.getGsz() == 1) {
-				sb5.append("3年内有高送转,");
-			}
-			if (dh.getZfObjType() == 1) {
-				sb5.append("6个月,");
-			} else if (dh.getZfObjType() == 2) {
-				sb5.append("混合(6月+大股东),");
-			} else if (dh.getZfObjType() == 3) {
-				sb5.append("大股东,");
-			} else if (dh.getZfObjType() == 4) {
-				sb5.append("其他,");
-			}
-		}
-		// 解禁
-		if (dh.getZfjj() == 1) {
-			sb5.append("增发解禁(" + dh.getZfjjDate() + ")").append(Constant.HTML_LINE);
-		}
-		sb5.append(Constant.HTML_LINE);
 		// 大宗
 		if (dh.getDzjy365d() > 0) {
 			sb5.append("大宗1年交易:").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WAN)).append("(均价:")
@@ -233,9 +237,7 @@ public class ModelWebService {
 				sb5.append(",2月交易:").append(CurrencyUitl.covertToString(dh.getDzjy60d() * WAN));
 			}
 		}
-
 		sb5.append(Constant.HTML_LINE);
-
 		// 是否确定
 		if (dh.getPls() == 0) {
 			sb5.append("人工: 未确定");
