@@ -29,9 +29,9 @@ public class Sort1ModeService {
 	private StockBasicService stockBasicService;
 
 	public void sort1ModeChk(CodeBaseModel2 cbm, MonitorPool mp, int date, StringBuffer shootNotice5) {
-		if (cbm.getShooting5() <= 0) {
+		if (cbm.getShooting5() <= 0 || date > cbm.getShooting5()) {// 需要验证是否OK //或者已过期
 			double maxPrice = this.is30DayTodayPriceOk(cbm.getCode(), date);
-			if (maxPrice > 0.0) {
+			if (maxPrice > 0.0) {// OK
 				String name = stockBasicService.getCodeName2(cbm.getCode());
 				if (!name.contains("ST")) {
 					cbm.setShooting5(DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), 30)));// 30天,一定要尽快新高
@@ -41,15 +41,19 @@ public class Sort1ModeService {
 						mp.setRealtime(1);
 					}
 					shootNotice5.append(stockBasicService.getCodeName2(cbm.getCode())).append(",");
-				} else {
+				} else {// NotOK
 					reset(cbm, mp);
 					cbm.setShooting5(DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), 180)));// 180天
 				}
-			} else {
+			} else {// NotOK
 				reset(cbm, mp);
 			}
-		} else if (date >= cbm.getShooting5()) {
-			reset(cbm, mp);
+		} else {
+			// 一直OK，则更新价格
+			if (MonitorType.SORT1.getCode() == mp.getMonitor()) {
+				double maxPrice = this.is30DayTodayPriceOk(cbm.getCode(), date);
+				mp.setUpPrice(maxPrice);
+			}
 		}
 	}
 
