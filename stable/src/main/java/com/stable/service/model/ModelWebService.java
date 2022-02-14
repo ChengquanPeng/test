@@ -466,7 +466,7 @@ public class ModelWebService {
 			} else if (mr.getShooting() == 4) {
 				bqb.must(QueryBuilders.matchPhraseQuery("shooting4", 1));
 			} else if (mr.getShooting() == 5) {
-				bqb.must(QueryBuilders.matchPhraseQuery("shooting5", 1));
+				bqb.must(QueryBuilders.rangeQuery("shooting5").gte(1));
 			}
 		}
 		if (StringUtils.isNotBlank(mr.getTotalAmt())) {

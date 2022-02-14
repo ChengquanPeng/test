@@ -242,9 +242,11 @@ public class CodeModelService {
 					pool.setUpTodayChange(0);
 //					newOne.setMonitor(MonitorType.NO.getCode());
 				}
-				if (pool.getYearHigh1() <= 0.0 && newOne.getPls() == 1) {
-					TradeHistInfoDaliy high = daliyTradeHistroyService.queryHighRecord(code, tradeDate);
-					pool.setYearHigh1(high.getHigh());// 一年新高的价格（前复权）
+				if (newOne.getPls() == 1) {
+					if (pool.getYearHigh1() <= 0.0) {
+						TradeHistInfoDaliy high = daliyTradeHistroyService.queryHighRecord(code, tradeDate);
+						pool.setYearHigh1(high.getHigh());// 一年新高的价格（前复权）
+					}
 				} else {
 					pool.setYearHigh1(0);
 				}
