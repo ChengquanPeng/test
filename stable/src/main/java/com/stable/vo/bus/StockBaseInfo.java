@@ -82,9 +82,9 @@ public class StockBaseInfo extends EsBase {
 	@Field(type = FieldType.Text)
 	private int compnayType;// 公司性质：0普通，1国企
 	@Field(type = FieldType.Double)
-	private double totalShare;// float 总股本 （万股）
+	private double totalShare;// float 总股本 （亿股）
 	@Field(type = FieldType.Double)
-	private double floatShare;// float 流通股本 （万股）
+	private double floatShare;// float 流通股本 （亿股）
 	@Field(type = FieldType.Double)
 	private double circZb;// 持股5%以上的股东占比-流通
 	@Field(type = FieldType.Text)

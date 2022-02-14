@@ -235,7 +235,7 @@ public class ModelWebService {
 			}
 			if (dh.getDzjy60d() > 0) {
 				sb5.append(",2月:").append(CurrencyUitl.covertToString(dh.getDzjy60d() * WAN)).append("(")
-						.append(dh.getDzjyp365d()).append("%)");
+						.append(dh.getDzjyp60d()).append("%)");
 			}
 		}
 		sb5.append(Constant.HTML_LINE);

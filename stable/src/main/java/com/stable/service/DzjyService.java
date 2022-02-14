@@ -73,7 +73,7 @@ public class DzjyService {
 			t.setAvgPrcie(CurrencyUitl.roundHalfUp(t.getTotalAmt() / num));
 			t.setDate(page.getContent().get(0).getDate());
 			if (s.getFloatShare() > 0) {
-				t.setP365d(CurrencyUitl.roundHalfUp(num / s.getFloatShare()));// 都是万股
+				t.setP365d(CurrencyUitl.roundHalfUp((num / (s.getFloatShare() * 100))));// 万股/亿股,百分比
 			}
 			this.halfOver60d(code, s, startDate2, t);// 2个月
 		}
@@ -96,7 +96,7 @@ public class DzjyService {
 				t.setTotalAmt60d(CurrencyUitl.roundHalfUp(t.getTotalAmt60d() + d.getTval()));
 			}
 			if (s.getFloatShare() > 0) {
-				t.setP60d(CurrencyUitl.roundHalfUp(num / s.getFloatShare()));// 都是万股
+				t.setP60d(CurrencyUitl.roundHalfUp(num / (s.getFloatShare() * 100)));// 万股/亿股,百分比
 			}
 		}
 	}
