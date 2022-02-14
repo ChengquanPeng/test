@@ -272,7 +272,12 @@ body {
 					remark : remark
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
-					alert("已移除");
+					if ("OK" == reData.status) {
+						alert("已移除");
+						window.close();
+					} else {
+						alert("失败:" + reData.result);
+					}
 				}
 			});
 		}
