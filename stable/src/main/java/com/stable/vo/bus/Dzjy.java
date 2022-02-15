@@ -41,6 +41,6 @@ public class Dzjy {
 	private int dailyRank;// dailyRank
 
 	public void setId() {
-		id = code + date + dailyRank + tval + "|" + saleCode + "|" + buyCode;
+		id = code + date + "|" + tval + "|" + saleCode + "|" + buyCode;
 	}
 }
