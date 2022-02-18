@@ -201,6 +201,7 @@ public class DaliyTradeHistroyService {
 			}
 			// 离线价格监听
 			if (isJob) {
+				ThreadsUtil.sleepRandomSecBetween15And30();
 				priceChk(listNofq, Integer.valueOf(today));
 				monitorPoolService.jobBuyLowVolWarning();
 			}

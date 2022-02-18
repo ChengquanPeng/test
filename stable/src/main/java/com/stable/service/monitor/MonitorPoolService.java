@@ -182,6 +182,27 @@ public class MonitorPoolService {
 		return cp;
 	}
 
+	public void init() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				List<MonitorPool> l = getMonitorPool();
+				List<MonitorPool> u = new LinkedList<MonitorPool>();
+				for (MonitorPool mp : l) {
+					if (mp.getMonitor() == MonitorType.MANUAL.getCode()
+							|| mp.getMonitor() == MonitorType.ZengFaAuto.getCode()) {
+						mp.setShotPointCheck(1);
+						u.add(mp);
+					}
+				}
+				if (u.size() > 0) {
+					monitorPoolDao.saveAll(u);
+				}
+				log.info("done.init");
+			}
+		}).start();
+	}
+
 	// 所有监听池
 	public List<MonitorPool> getMonitorPool() {
 		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
