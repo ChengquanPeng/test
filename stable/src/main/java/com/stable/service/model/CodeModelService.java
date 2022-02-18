@@ -240,7 +240,7 @@ public class CodeModelService {
 					pool.setRealtime(0);
 					pool.setOffline(0);
 					pool.setUpTodayChange(0);
-//					newOne.setMonitor(MonitorType.NO.getCode());
+					pool.setShotPointCheck(0);
 				}
 				if (newOne.getPls() == 1) {
 					if (pool.getYearHigh1() <= 0.0) {
@@ -327,7 +327,7 @@ public class CodeModelService {
 						pool.setMonitor(MonitorType.ZengFaAuto.getCode());
 						pool.setOffline(1);
 						pool.setUpTodayChange(9);
-//						newOne.setMonitor(MonitorType.ZengFaAuto.getCode());
+						pool.setShotPointCheck(1);
 						log.info("{} 增发自动监听", code);
 					}
 				}

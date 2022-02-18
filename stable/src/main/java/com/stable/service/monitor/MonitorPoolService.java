@@ -102,7 +102,7 @@ public class MonitorPoolService {
 		monitorPoolDao.save(c);
 		updateBaseMoniStatus(code, c.getMonitor(), c.getRemark());
 	}
-	
+
 	public void saveOrUpdate(MonitorPool mp) {
 		monitorPoolDao.save(mp);
 	}
@@ -117,7 +117,7 @@ public class MonitorPoolService {
 	// 加入监听
 	public void addMonitor(String code, int monitor, int realtime, int offline, double upPrice, double downPrice,
 			double upTodayChange, double downTodayChange, String remark, int ykb, int zfdone, int holderNum,
-			int buyLowVol, int xjl, int dzjy, int listenerGg) {
+			int buyLowVol, int xjl, int dzjy, int listenerGg, int shotPointCheck) {
 		if (monitor <= 0) {
 			throw new RuntimeException("monitor<=0 ?");
 		}
@@ -140,7 +140,7 @@ public class MonitorPoolService {
 		c.setZfdone(zfdone);
 		c.setBuyLowVol(buyLowVol);
 		c.setXjl(xjl);
-
+		c.setShotPointCheck(shotPointCheck);
 		c.setListenerGg(listenerGg);
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
