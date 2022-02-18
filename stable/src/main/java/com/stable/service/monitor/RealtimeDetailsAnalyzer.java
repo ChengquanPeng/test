@@ -3,6 +3,7 @@ package com.stable.service.monitor;
 import java.util.Date;
 
 import com.stable.enums.MonitorType;
+import com.stable.service.model.ShotPointCheck;
 import com.stable.spider.realtime.RealTime;
 import com.stable.spider.realtime.RealtimeCallProxy;
 import com.stable.utils.DateUtil;
@@ -10,6 +11,7 @@ import com.stable.utils.MonitoringUitl;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.ShotPoint;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -29,13 +31,15 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean chkCodeClosed = false;
 	private CodeBaseModel2 cbm;
 	public boolean highPriceGot = false;
+	private boolean burstPointCheck = false;// 起爆点
+	private ShotPointCheck shotPointCheck;
 
 	public void stop() {
 		isRunning = false;
 	}
 
-	public int init(String code, MonitorPool cp, RealtimeDetailsResulter resulter, String codeName,
-			CodeBaseModel2 cbm) {
+	public int init(String code, MonitorPool cp, RealtimeDetailsResulter resulter, String codeName, CodeBaseModel2 cbm,
+			ShotPointCheck shotPointCheck) {
 		this.code = code;
 		this.codeName = codeName;
 		this.resulter = resulter;
@@ -52,6 +56,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			chkCodeClosed = true;
 		}
 		this.cbm = cbm;
+		this.shotPointCheck = shotPointCheck;
 		return 1;
 	}
 
@@ -97,8 +102,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					}
 				}
 
-				RealTime srt = RealtimeCallProxy.get(code);
-				boolean isOk = MonitoringUitl.isOkForRt(cp, srt);
+				RealTime rt = RealtimeCallProxy.get(code);
+				boolean isOk = MonitoringUitl.isOkForRt(cp, rt);
 				if (isOk) {
 					rm.tiggerMessage();
 					resulter.addBuyMessage(code, rm);
@@ -107,12 +112,19 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						waitSend = false;
 					}
 				}
-				if (cp.getYearHigh1() > 0 && srt.getHigh() > cp.getYearHigh1() && !highPriceGot) {
+				if (cp.getYearHigh1() > 0 && rt.getHigh() > cp.getYearHigh1() && !highPriceGot) {
 					WxPushUtil.pushSystem1(codeName + "(" + code + ") 一年新高! 备注:" + cp.getRemark());
 					highPriceGot = true;
 				}
 				if (now > d1450) {
 					WAIT_MIN = ONE_MIN;
+					if (!burstPointCheck && cp.getShotPointCheck() == 1) {
+						burstPointCheck = true;
+						ShotPoint sp = shotPointCheck.check(code, 0, rt);
+						if (sp.getResult()) {
+							WxPushUtil.pushSystem1(codeName + "(" + code + ") 疑似起爆:" + sp.getMsg());
+						}
+					}
 				}
 				Thread.sleep(WAIT_MIN);
 			} catch (Exception e) {

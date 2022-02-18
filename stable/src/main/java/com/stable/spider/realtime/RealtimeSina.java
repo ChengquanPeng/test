@@ -60,7 +60,7 @@ public class RealtimeSina {
 			rt.setLow(Double.valueOf(rs[5]));
 			rt.setBuy1(Double.valueOf(rs[6]));
 			rt.setSell1(Double.valueOf(rs[7]));
-//			rt.setDealNums(Long.valueOf(rs[8]));// 成交的股票数，由于股票交易以一百股为基本单位，所以在使用时，通常把该值除以一百；
+			rt.setDealNums(Long.valueOf(rs[8]));// 成交的股票数，由于股票交易以一百股为基本单位，所以在使用时，通常把该值除以一百；
 //			rt.setDealAmt(Double.valueOf(rs[9]));// 成交金额，单位为“元”，为了一目了然，通常以“万元”为成交金额的单位，所以通常把该值除以一万；
 			return rt;
 		} catch (Exception e) {

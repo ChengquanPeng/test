@@ -35,6 +35,7 @@ import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
 import com.stable.job.MyCallable;
+import com.stable.service.model.ShotPointCheck;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
@@ -50,6 +51,7 @@ import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.ShotPoint;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
@@ -87,6 +89,8 @@ public class DaliyTradeHistroyService {
 	private XqDailyBaseSpider xqDailyBaseSpider;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
+	@Autowired
+	private ShotPointCheck shotPointCheck;
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -197,7 +201,7 @@ public class DaliyTradeHistroyService {
 			}
 			// 离线价格监听
 			if (isJob) {
-				priceChk(listNofq);
+				priceChk(listNofq, Integer.valueOf(today));
 				monitorPoolService.jobBuyLowVolWarning();
 			}
 			return list.size();
@@ -210,7 +214,7 @@ public class DaliyTradeHistroyService {
 	}
 
 	// 离线价格监听
-	private void priceChk(List<TradeHistInfoDaliyNofq> listNofq) {
+	private void priceChk(List<TradeHistInfoDaliyNofq> listNofq, int tradeDate) {
 		if (listNofq != null && listNofq.size() > 0) {
 			List<MonitorPool> list = monitorPoolService.getPoolListForMonitor(0, 1);
 			if (list != null) {
@@ -233,6 +237,13 @@ public class DaliyTradeHistroyService {
 								ZengFaAuto.add(s);
 							} else {
 								Other.add(s);
+							}
+						}
+						if (cp.getShotPointCheck() == 1) {
+							ShotPoint sp = shotPointCheck.check(cp.getCode(), tradeDate, null);
+							if (sp.getResult()) {
+								WxPushUtil.pushSystem1(
+										stockBasicService.getCodeName2(cp.getCode()) + " 疑似起爆:" + sp.getMsg());
 							}
 						}
 					}

@@ -34,6 +34,7 @@ public class Realtime163 {
 			rt.setLow(t.getDoubleValue("low"));
 			rt.setBuy1(t.getDoubleValue("bid1"));
 			rt.setSell1(t.getDoubleValue("ask1"));
+			rt.setDealNums(t.getLongValue("volume"));// 成交的股票数，由于股票交易以一百股为基本单位，所以在使用时，通常把该值除以一百；
 			return rt;
 		} catch (Exception e) {
 			return null;
@@ -42,6 +43,6 @@ public class Realtime163 {
 	}
 
 	public static void main(String[] args) {
-		System.err.println(get("600030"));
+		System.err.println(get("601288"));
 	}
 }
