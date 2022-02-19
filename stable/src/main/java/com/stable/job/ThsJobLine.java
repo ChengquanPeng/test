@@ -10,7 +10,6 @@ import com.stable.spider.igoodstock.IgoodstockSpider;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.spider.ths.ThsCompanySpider;
 import com.stable.spider.ths.ThsHolderSpider;
-import com.stable.spider.ths.ThsJiejinSpider;
 import com.stable.spider.ths.ThsPlateSpider;
 
 import lombok.extern.log4j.Log4j2;
@@ -18,8 +17,6 @@ import lombok.extern.log4j.Log4j2;
 @Component
 @Log4j2
 public class ThsJobLine {
-	@Autowired
-	private ThsJiejinSpider thsJiejinSpider;
 	@Autowired
 	private ThsHolderSpider thsHolderSpider;
 	@Autowired
@@ -54,9 +51,6 @@ public class ThsJobLine {
 			log.info("周六");
 			log.info("同花顺, 增发&分紅");
 			thsBonusSpider.byJob();// 同花顺, 增发&分紅
-			log.info("同花顺, 解禁");
-			thsJiejinSpider.byJob();// 同花顺, 解禁
-
 		}
 
 		if (week == Calendar.MONDAY) {
@@ -67,21 +61,4 @@ public class ThsJobLine {
 			thsPlateSpider.fetchAll(false);// 同花顺-亮点，主营 多线程
 		}
 	}
-
-//	@PostConstruct
-//	private void a() {
-//		new Thread(new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				log.info("周六");
-//				thsHolderSpider.dofetchHolder();
-//				thsBonusSpider.byJob();// 同花顺, 增发&分紅
-//				thsCompanySpider.byJob();// 周日，同花顺-公司资料
-//				thsJiejinSpider.byJob();// 同花顺, 解禁
-//				log.info("同花顺-亮点，主营 fetchAll=true");
-//				thsPlateSpider.fetchAll(true);// 同花顺-亮点，主营 多线程
-//			}
-//		}).start();
-//	}
 }

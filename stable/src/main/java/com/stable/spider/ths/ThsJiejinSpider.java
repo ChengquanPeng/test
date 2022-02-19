@@ -45,10 +45,6 @@ public class ThsJiejinSpider {
 	private String host = "http://basic.10jqka.com.cn";
 	private Map<String, String> header;
 
-	public void byJob() {
-		dofetch();
-	}
-
 	public void byWeb() {
 		new Thread(new Runnable() {
 			@Override
