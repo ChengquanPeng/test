@@ -15,7 +15,6 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import com.stable.job.RealtimeJob;
-import com.stable.service.model.CodeModelService;
 import com.stable.utils.OSystemUtil;
 import com.stable.utils.SpringUtil;
 import com.stable.utils.WxPushUtil;
@@ -27,8 +26,8 @@ public class MyApplicationRunner implements ApplicationRunner {
 	private RealtimeJob realtimeJob;
 	// @Autowired
 	// private FinanceService financeService;
-	@Autowired
-	private CodeModelService codeModelService;
+//	@Autowired
+//	private com.stable.service.model.CodeModelService codeModelService;
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
@@ -54,13 +53,10 @@ public class MyApplicationRunner implements ApplicationRunner {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				codeModelService.runJobv2(com.stable.utils.DateUtil
-						.formatYYYYMMDDReturnInt(com.stable.utils.DateUtil.addDate(new java.util.Date(), -1)), true);
+//				codeModelService.runJobv2(com.stable.utils.DateUtil
+//						.formatYYYYMMDDReturnInt(com.stable.utils.DateUtil.addDate(new java.util.Date(), -1)), true);
 			}
 		}).start();
-//		financeService.jobSpiderFirstFinaceHistoryInfo();
-//		financeService.jobSpiderFinaceHistoryInfo();
-
 	}
 
 	private void printUrl() {
@@ -76,7 +72,7 @@ public class MyApplicationRunner implements ApplicationRunner {
 			final Set<String> patterns = k.getPatternsCondition().getPatterns();
 			for (RequestMethod requestMethod : methods) {
 				for (String pattern : patterns) {
-					System.err.println("method：" + requestMethod + ",pattern:" + pattern);
+					System.err.println("method:" + requestMethod + ",pattern:" + pattern);
 				}
 			}
 		});
