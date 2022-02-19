@@ -133,22 +133,22 @@ public class ModelWebService {
 				|| dh.getShooting5() > 0) {
 			sb5.append("<font color='red'>");
 			if (dh.getShooting1() > 0) {
-				sb5.append("底部小票大宗超5千万,机构代持,非董监高减持?");
+				sb5.append("底部小票大宗超5千万,机构代持,非董监高减持?").append(Constant.HTML_LINE);
 			}
 			if (dh.getShooting2() > 0) {
-				sb5.append("底部大票增发超过50亿(越大越好),股东集中,证监会核准-底部拿筹涨停?");
+				sb5.append("底部大票增发超过50亿(越大越好),股东集中,证监会核准-底部拿筹涨停?").append(Constant.HTML_LINE);
 			}
 			if (dh.getShooting3() > 0) {
 				sb5.append("<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/" + dh.getCode()
-						+ ".html'>底部融资余额暴增?</a>");
+						+ ".html'>底部融资余额暴增?</a>").append(Constant.HTML_LINE);
 			}
 			if (dh.getShooting4() > 0) {
-				sb5.append("底部股东人数大幅减少(3年减少40%)");
+				sb5.append("底部股东人数大幅减少(3年减少40%)").append(Constant.HTML_LINE);
 			}
 			if (dh.getShooting5() > 0) {
-				sb5.append("短线1:确定极速拉升带小平台新高?");
+				sb5.append("短线1:确定极速拉升带小平台新高?").append(Constant.HTML_LINE);
 			}
-			sb5.append("</font>").append(Constant.HTML_LINE);
+			sb5.append("</font>");
 		}
 		// 基本面-筹码
 		sb5.append("流通:").append(dh.getMkv()).append("亿,");
