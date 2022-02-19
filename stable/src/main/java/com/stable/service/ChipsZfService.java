@@ -212,7 +212,7 @@ public class ChipsZfService {
 							sb.append(zfe.getCode()).append(",");
 						}
 						zfe.setSelfzf(0);
-						ws(zfe, zf.getEndDate(), zf.getPrice());
+						isLowZengfa(zfe, zf.getEndDate(), zf.getPrice());
 //						zengFaExtDao.save(zfe);
 						zfxl.add(zfe);
 						log.info("done:{}", zf.getCode());
@@ -252,7 +252,7 @@ public class ChipsZfService {
 		log.info("List<ZengFaExt> done");
 	}
 
-	private void ws(ZengFaExt z, int zfEndDate, double zfprice) {
+	private void isLowZengfa(ZengFaExt z, int zfEndDate, double zfprice) {
 		String code = z.getCode();
 		if (modelWebService.getLastOneByCode2(code).getZfjjup() >= 2) {// 起码2年未涨
 			PriceLife pl = priceLifeService.getPriceLife(code, zfEndDate);

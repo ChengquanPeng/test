@@ -161,7 +161,7 @@ public class CodeBaseModel2 extends EsBase {
 	// ==== 筹码博弈 ====
 	// 1.是否可买
 	@Field(type = FieldType.Long)
-	private int pls = 0;// 0不确定，1在池子，2不在池子
+	private int pls = 0;// 0不确定，1确定，2排除
 	@Field(type = FieldType.Long)
 	private long plst = 0;// 时间
 	@Field(type = FieldType.Integer)

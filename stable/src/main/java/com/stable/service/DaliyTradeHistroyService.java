@@ -221,6 +221,7 @@ public class DaliyTradeHistroyService {
 			if (list != null) {
 				List<String> ZengFaAuto = new LinkedList<String>();
 				List<String> Other = new LinkedList<String>();
+				List<String> bao = new LinkedList<String>();
 
 				Map<String, TradeHistInfoDaliyNofq> map = monitorPoolService.getPoolMap2(listNofq);
 				for (MonitorPool cp : list) {
@@ -243,8 +244,8 @@ public class DaliyTradeHistroyService {
 						if (cp.getShotPointCheck() == 1) {
 							ShotPoint sp = shotPointCheck.check(cp.getCode(), tradeDate, null);
 							if (sp.getResult()) {
-								WxPushUtil.pushSystem1(
-										stockBasicService.getCodeName2(cp.getCode()) + " 疑似起爆:" + sp.getMsg());
+								bao.add(stockBasicService.getCodeName2(cp.getCode()) + " "
+										+ MonitorType.getCode(cp.getMonitor()) + " 疑似点:" + sp.getMsg());
 							}
 						}
 					}
@@ -256,8 +257,18 @@ public class DaliyTradeHistroyService {
 				for (String a : ZengFaAuto) {
 					s.append(a).append(Constant.HTML_LINE);
 				}
+
 				if (s.length() > 0) {
 					WxPushUtil.pushSystem2Html(s.toString());
+				}
+				// 起爆点
+				StringBuffer s1 = new StringBuffer();
+				for (String a : bao) {
+					s1.append(a).append(Constant.HTML_LINE);
+				}
+				if (s1.length() > 0) {
+					WxPushUtil.pushSystem2Html("75亿以内的=> 1>底部增发,2>4年没涨&(5年分红|5年不亏),3>大额大宗 ==> 疑似起爆点:"
+							+ Constant.HTML_LINE + s1.toString());
 				}
 			}
 		}

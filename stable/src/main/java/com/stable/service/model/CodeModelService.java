@@ -232,10 +232,9 @@ public class CodeModelService {
 				}
 
 				// 增发自动监听-重置
-				if (newOne.getPls() != 1 && (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()// 增发
-						|| pool.getMonitor() == 9// 小而美
-						|| pool.getMonitor() == 10// 短线-收集
-						|| pool.getMonitor() == MonitorType.NO.getCode())) {// 自动监听归0
+				if (newOne.getPls() == 0 && (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()// 增发
+						|| pool.getMonitor() == MonitorType.NO.getCode()
+						|| pool.getMonitor() == MonitorType.DZJY.getCode())) {// 自动监听归0
 					pool.setMonitor(MonitorType.NO.getCode());
 					pool.setRealtime(0);
 					pool.setOffline(0);
@@ -322,13 +321,32 @@ public class CodeModelService {
 				// 3.增发解禁且未涨
 				// 4.75亿以内(50x150%=75)
 
-				if (newOne.getZfjj() > 0 && newOne.getZfjjup() >= 2 && mkv <= 75.0) {// 75亿以内的
-					if (pool.getMonitor() == MonitorType.NO.getCode()) {
-						pool.setMonitor(MonitorType.ZengFaAuto.getCode());
-						pool.setOffline(1);
-						pool.setUpTodayChange(9);
-						pool.setShotPointCheck(1);
-						log.info("{} 增发自动监听", code);
+				if (newOne.getPls() == 0 && newOne.getZfjjup() >= 2 && mkv <= 75.0) {
+					// 大宗超过5%
+					if (newOne.getDzjy365d() >= 4.8 && newOne.getZfjjup() >= 4) {
+						if (pool.getMonitor() == MonitorType.NO.getCode()) {
+							pool.setMonitor(MonitorType.DZJY.getCode());
+							pool.setOffline(1);
+							pool.setUpTodayChange(7.5);
+							pool.setShotPointCheck(1);
+							log.info("{} 增发自动监听", code);
+						}
+					}
+
+					// 增发
+					if (newOne.getZfStatus() == ZfStatus.DONE.getCode() && (newOne.getZfself() == 1
+							|| (newOne.getZfjjup() >= 4 && (newOne.getBousOK() == 1 || newOne.getFinOK() == 1)))) {
+						// 75亿以内的：
+						// 1.底部增发
+						// 2.4年没涨&5年分红
+						// 2.4年没涨&5年不亏
+						if (pool.getMonitor() == MonitorType.NO.getCode()) {
+							pool.setMonitor(MonitorType.ZengFaAuto.getCode());
+							pool.setOffline(1);
+							pool.setUpTodayChange(7.5);
+							pool.setShotPointCheck(1);
+							log.info("{} 增发自动监听", code);
+						}
 					}
 				}
 				// 公告通知
