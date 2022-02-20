@@ -16,7 +16,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Component
 @Log4j2
-public class ThsJobLine {
+public class ThsBaseInfoJobLine {
 	@Autowired
 	private ThsHolderSpider thsHolderSpider;
 	@Autowired
@@ -43,8 +43,8 @@ public class ThsJobLine {
 
 		if (week == Calendar.SUNDAY) {
 			log.info("周日，同花顺-公司资料");
-			thsCompanySpider.byJob();// 周日，同花顺-公司资料
 			igoodstockSpider.byWeb();// 外资持股
+			thsCompanySpider.byJob();// 周日，同花顺-公司资料
 		}
 
 		if (week == Calendar.SATURDAY) {
@@ -53,12 +53,7 @@ public class ThsJobLine {
 			thsBonusSpider.byJob();// 同花顺, 增发&分紅
 		}
 
-		if (week == Calendar.MONDAY) {
-			log.info("同花顺-亮点，主营 fetchAll=true");
-			thsPlateSpider.fetchAll(true);// 同花顺-亮点，主营 多线程
-		} else {
-			log.info("同花顺-亮点，主营 fetchAll=false");
-			thsPlateSpider.fetchAll(false);// 同花顺-亮点，主营 多线程
-		}
+		log.info("同花顺-亮点，主营 fetchAll=false");
+		thsPlateSpider.fetchAll(false);// 同花顺-亮点，主营 多线程
 	}
 }

@@ -323,7 +323,7 @@ public class CodeModelService {
 
 				if (newOne.getPls() == 0 && newOne.getZfjjup() >= 2 && mkv <= 75.0) {
 					// 大宗超过5%
-					if (newOne.getDzjy365d() >= 4.8 && newOne.getZfjjup() >= 4) {
+					if (newOne.getDzjyp365d() >= 4.8 && newOne.getZfjjup() >= 4) {
 						if (pool.getMonitor() == MonitorType.NO.getCode()) {
 							pool.setMonitor(MonitorType.DZJY.getCode());
 							pool.setOffline(1);
