@@ -48,8 +48,7 @@ public class ThsBaseInfoJobLine {
 		}
 
 		if (week == Calendar.SATURDAY) {
-			log.info("周六");
-			log.info("同花顺, 增发&分紅");
+			log.info("周六,同花顺, 增发&分紅");
 			thsBonusSpider.byJob();// 同花顺, 增发&分紅
 		}
 
