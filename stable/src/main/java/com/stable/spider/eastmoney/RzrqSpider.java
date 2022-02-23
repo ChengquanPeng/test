@@ -123,6 +123,7 @@ public class RzrqSpider {
 					rztj.setValidDate(invalidDate);
 				}
 				l.add(rztj);
+				update.add(cbm);
 				if (l.size() > 200) {
 					rztjDao.saveAll(l);
 					l = new LinkedList<Rztj>();
