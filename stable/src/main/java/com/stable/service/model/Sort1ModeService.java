@@ -18,19 +18,18 @@ import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 
-import lombok.extern.log4j.Log4j2;
-
 @Service
-@Log4j2
 public class Sort1ModeService {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private StockBasicService stockBasicService;
 
+	private final double sort1checkLine = 80.0;
+
 	public void sort1ModeChk(CodeBaseModel2 cbm, MonitorPool mp, int date, StringBuffer shootNotice5) {
 		if (cbm.getShooting5() <= 0 || date > cbm.getShooting5()) {// 需要验证是否OK //或者已过期
-			double maxPrice = this.is30DayTodayPriceOk(cbm.getCode(), date);
+			double maxPrice = this.daIs30DayTodayPriceOk(cbm.getCode(), date, sort1checkLine);
 			if (maxPrice > 0.0) {// OK
 				String name = stockBasicService.getCodeName2(cbm.getCode());
 				if (!name.contains("ST")) {
@@ -51,7 +50,7 @@ public class Sort1ModeService {
 		} else {
 			// 一直OK，则更新价格
 			if (MonitorType.SORT1.getCode() == mp.getMonitor()) {
-				double maxPrice = this.is30DayTodayPriceOk(cbm.getCode(), date);
+				double maxPrice = this.daIs30DayTodayPriceOk(cbm.getCode(), date, sort1checkLine);
 				mp.setUpPrice(maxPrice);
 			}
 		}
@@ -67,9 +66,9 @@ public class Sort1ModeService {
 	}
 
 	/**
-	 * 1.30个交易日内振幅超80%的涨幅
+	 * 1.30个交易日内振幅超的涨幅
 	 */
-	private double is30DayTodayPriceOk(String code, int date) {
+	public double daIs30DayTodayPriceOk(String code, int date, double checkLine) {
 		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
 				EsQueryPageUtil.queryPage30, SortOrder.DESC);
 
@@ -81,11 +80,34 @@ public class Sort1ModeService {
 				.get();
 		double minPrice = lowDate.getLow();
 		// d1.getDate() < d2.getDate():是上涨趋势。
-		if (lowDate.getDate() < topDate.getDate() && CurrencyUitl.cutProfit(minPrice, maxPrice) >= 80.0) {
-			log.info("AAABBB{},tradedate={},topDate={},{} topDate={},{} ", code, date, topDate.getDate(), maxPrice,
-					lowDate.getDate(), minPrice);
+		if (lowDate.getDate() < topDate.getDate() && CurrencyUitl.cutProfit(minPrice, maxPrice) >= checkLine) {
+//			log.info("AAABBB{},tradedate={},topDate={},{} topDate={},{} ", code, date, topDate.getDate(), maxPrice,
+//					lowDate.getDate(), minPrice);
 			return maxPrice;
 		}
 		return 0.0;
+	}
+
+	/**
+	 * 1.30个交易日内振幅超的涨幅
+	 */
+	public boolean xyIs30DayTodayPriceOk(String code, int date, double checkLine) {
+		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
+				EsQueryPageUtil.queryPage30, SortOrder.DESC);
+
+		TradeHistInfoDaliyNofq topDate = l2.stream().max(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getHigh))
+				.get();
+		double maxPrice = topDate.getHigh();
+
+		TradeHistInfoDaliyNofq lowDate = l2.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getLow))
+				.get();
+		double minPrice = lowDate.getLow();
+		// d1.getDate() < d2.getDate():是上涨趋势。
+		if (lowDate.getDate() < topDate.getDate() && CurrencyUitl.cutProfit(minPrice, maxPrice) <= checkLine) {
+//			log.info("AAABBB{},tradedate={},topDate={},{} topDate={},{} ", code, date, topDate.getDate(), maxPrice,
+//					lowDate.getDate(), minPrice);
+			return true;
+		}
+		return false;
 	}
 }

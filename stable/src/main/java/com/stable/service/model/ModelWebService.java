@@ -1,8 +1,10 @@
 package com.stable.service.model;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -25,6 +27,7 @@ import com.stable.enums.MonitorType;
 import com.stable.enums.SylType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
+import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
@@ -33,6 +36,7 @@ import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.vo.bus.CodeBaseModel2;
+import com.stable.vo.bus.FinanceBaseInfoHangye;
 import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.req.ModelManulReq;
@@ -45,7 +49,8 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class ModelWebService {
-
+	@Autowired
+	private EsFinanceBaseInfoHyDao esFinanceBaseInfoHyDao;
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -140,7 +145,7 @@ public class ModelWebService {
 			}
 			if (dh.getShooting3() > 0) {
 				sb5.append("<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/" + dh.getCode()
-						+ ".html'>底部融资余额暴增?</a>").append(Constant.HTML_LINE);
+						+ ".html'>底部融资融券飙升,散户没买入空间？</a>").append(Constant.HTML_LINE);
 			}
 			if (dh.getShooting4() > 0) {
 				sb5.append("底部股东人数大幅减少(3年减少40%)").append(Constant.HTML_LINE);
@@ -586,4 +591,56 @@ public class ModelWebService {
 		return null;
 	}
 
+	public Map<String, CodeBaseModel2> getALLForMap() {
+		List<CodeBaseModel2> list = getALLForList();
+		Map<String, CodeBaseModel2> map = new HashMap<String, CodeBaseModel2>();
+		if (list != null) {
+			for (CodeBaseModel2 c : list) {
+				map.put(c.getCode(), c);
+			}
+		}
+		return map;
+	}
+
+	private List<CodeBaseModel2> getALLForList() {
+		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+
+		Page<CodeBaseModel2> page = codeBaseModel2Dao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		log.info("no records CodeBaseModels");
+		return null;
+	}
+
+	public FinanceBaseInfoHangye getFinanceBaseInfoHangye(String code, int year, int quarter) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.matchPhraseQuery("year", year));
+		bqb.must(QueryBuilders.matchPhraseQuery("quarter", quarter));
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+
+		Page<FinanceBaseInfoHangye> page = esFinanceBaseInfoHyDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0);
+		} else {
+//			bqb = QueryBuilders.boolQuery();
+//			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+//			queryBuilder = new NativeSearchQueryBuilder();
+//			FieldSortBuilder sort = SortBuilders.fieldSort("updateDate").unmappedType("integer").order(SortOrder.DESC);
+//			sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+//			page = esFinanceBaseInfoHyDao.search(sq);
+//			if (page != null && !page.isEmpty()) {
+//				return page.getContent().get(0);
+//			}
+		}
+		return null;
+	}
 }

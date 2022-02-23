@@ -19,6 +19,7 @@ import com.stable.es.dao.base.RztjDao;
 import com.stable.service.DzjyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.ModelWebService;
+import com.stable.service.model.Sort1ModeService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -56,6 +57,8 @@ public class RzrqSpider {
 	private RzrqDaliyDao rzrqDaliyDao;
 	@Autowired
 	private RztjDao rztjDao;
+	@Autowired
+	private Sort1ModeService sort1ModeService;
 
 	public synchronized void byDaily(String dateYYYY_, int date) {
 		Set<String> codes = new HashSet<String>();
@@ -81,34 +84,44 @@ public class RzrqSpider {
 		log.info("STEP3:done");
 	}
 
-	private double vaildLine = 30.0;// 超过平均数20%认为有效
-	private double validBlance = 1.5 * CurrencyUitl.YI_N.doubleValue();// 1.5亿
+	private double vaildLine = 18.0;// 超过平均数15%认为有效
+	private double validBlance = 2.5 * CurrencyUitl.YI_N.doubleValue();// 至少2.5亿
+	private double checkLine = 65.0;// 低于65%
 
+	// 底部融资余额飙升。顶部融券余额飙升。（300339）
+	// 融资融券可以大概率判断多空双发的态度。
 	private synchronized void exeRzrqTime(Set<String> codes, int date) {
-		int validDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(DateUtil.parseDate(date), 20));// 有效期
+		int invalidDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(DateUtil.parseDate(date), 30));// 不满足有效期
 		ThreadsUtil.sleepRandomSecBetween15And30();
 		List<Rztj> l = new LinkedList<Rztj>();
 		List<CodeBaseModel2> update = new LinkedList<CodeBaseModel2>();
-
+		StringBuffer shootNotice3 = new StringBuffer();
 		for (String code : codes) {
 			Rztj rztj = dzjyService.getLastRztj(code);
 			if (date > rztj.getValidDate()) {// 已失效
 				rztj.setUpdateDate(date);
 				if (dzjyService.rzrqAvg20d(code, vaildLine, validBlance, rztj)) {
 					rztj.setValid(1);
-					rztj.setValidDate(validDate);
-				} else {
-					rztj.setValid(0);
-					rztj.setValidDate(0);
 				}
 
 				CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(code);
-				if (rztj.getValid() > 0) {
-					cbm.setShooting3(1);
+				cbm.setShooting3(0);
+				// 1：2年没涨，200亿以下
+				if (cbm.getZfjjupStable() >= 2 && cbm.getZfjjupStable() >= 2 && cbm.getMkv() <= 200.0) {
+					// 2：融资满足条件
+					if (rztj.getValid() > 0) {
+						// 3:涨幅在65%以下
+						if (sort1ModeService.xyIs30DayTodayPriceOk(code, date, checkLine)) {
+							cbm.setShooting3(1);
+							shootNotice3.append(stockBasicService.getCodeName2(code)).append(",");
+						} else {
+							rztj.setValidDate(invalidDate);
+						}
+					}
+					// 200亿以下，继续监听融资余额
 				} else {
-					cbm.setShooting3(0);
+					rztj.setValidDate(invalidDate);
 				}
-
 				l.add(rztj);
 				if (l.size() > 200) {
 					rztjDao.saveAll(l);
@@ -122,6 +135,9 @@ public class RzrqSpider {
 		}
 		if (update.size() > 0) {
 			codeBaseModel2Dao.saveAll(update);
+		}
+		if (shootNotice3.length() > 0) {
+			WxPushUtil.pushSystem1("行情指标3：融资暴涨，股价涨幅在65%以下，散户没有充足的空间融资买入，只有主力可以,(短线):" + shootNotice3.toString());
 		}
 	}
 
@@ -201,6 +217,7 @@ public class RzrqSpider {
 //			String jmr = CurrencyUitl.covertToString(data.getDouble("RZJME"));
 //			System.err.println(date + " " + code + " " + ye + " " + mr + " " + mc + " " + jmr);
 		} catch (Exception e) {
+			log.error(data.toJSONString());
 			e.printStackTrace();
 		}
 		return null;

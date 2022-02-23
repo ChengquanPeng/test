@@ -1,20 +1,12 @@
 package com.stable.service.model;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
@@ -22,7 +14,6 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.MonitorType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
-import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.service.AnnouncementService;
 import com.stable.service.BonusService;
@@ -66,7 +57,6 @@ import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
 import com.stable.vo.bus.ZengFaExt;
 import com.stable.vo.bus.ZhiYa;
-import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -84,7 +74,7 @@ public class CodeModelService {
 	@Autowired
 	private EsCodeBaseModel2Dao codeBaseModel2Dao;
 	@Autowired
-	private EsFinanceBaseInfoHyDao esFinanceBaseInfoHyDao;
+	private ModelWebService modelWebService;
 	@Autowired
 	private FinanceService financeService;
 	@Autowired
@@ -174,7 +164,7 @@ public class CodeModelService {
 //		新高:说明出货失败或者有更多的想法，要继续拉。
 		StringBuffer shootNotice5 = new StringBuffer();
 
-		Map<String, CodeBaseModel2> histMap = getALLForMap();
+		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
 		for (StockBaseInfo s : codelist) {
 			try {
 				String code = s.getCode();
@@ -221,7 +211,7 @@ public class CodeModelService {
 				}
 				newOne.setHolderZb(s.getHolderZb());
 
-				newOne.setShooting3(0);
+//				newOne.setShooting3(0);
 				// 人工审核是否时间到期-重置
 				if (newOne.getPlst() < tradeDate) {
 					if (newOne.getPls() == 1) {
@@ -995,7 +985,7 @@ public class CodeModelService {
 			}
 		}
 		// 行业对比:毛利，应收账款，现金流
-		FinanceBaseInfoHangye hy = this.getFinanceBaseInfoHangye(code, fbi.getYear(), fbi.getQuarter());
+		FinanceBaseInfoHangye hy = this.modelWebService.getFinanceBaseInfoHangye(code, fbi.getYear(), fbi.getQuarter());
 		if (hy != null) {
 			if (hy.getMll() > 0 && hy.getMll() > hy.getMllAvg() && hy.getMllRank() <= 5) {
 				newOne.setBaseYellow(1);
@@ -1225,59 +1215,6 @@ public class CodeModelService {
 				newOne.setSylType(2);// 年收益率超过5.0%*4=20%
 			}
 		}
-	}
-
-	public Map<String, CodeBaseModel2> getALLForMap() {
-		List<CodeBaseModel2> list = getALLForList();
-		Map<String, CodeBaseModel2> map = new HashMap<String, CodeBaseModel2>();
-		if (list != null) {
-			for (CodeBaseModel2 c : list) {
-				map.put(c.getCode(), c);
-			}
-		}
-		return map;
-	}
-
-	private List<CodeBaseModel2> getALLForList() {
-		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
-		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
-
-		Page<CodeBaseModel2> page = codeBaseModel2Dao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent();
-		}
-		log.info("no records CodeBaseModels");
-		return null;
-	}
-
-	private FinanceBaseInfoHangye getFinanceBaseInfoHangye(String code, int year, int quarter) {
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		bqb.must(QueryBuilders.matchPhraseQuery("year", year));
-		bqb.must(QueryBuilders.matchPhraseQuery("quarter", quarter));
-
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).build();
-
-		Page<FinanceBaseInfoHangye> page = esFinanceBaseInfoHyDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent().get(0);
-		} else {
-//			bqb = QueryBuilders.boolQuery();
-//			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-//			queryBuilder = new NativeSearchQueryBuilder();
-//			FieldSortBuilder sort = SortBuilders.fieldSort("updateDate").unmappedType("integer").order(SortOrder.DESC);
-//			sq = queryBuilder.withQuery(bqb).withSort(sort).build();
-//			page = esFinanceBaseInfoHyDao.search(sq);
-//			if (page != null && !page.isEmpty()) {
-//				return page.getContent().get(0);
-//			}
-		}
-		return null;
 	}
 
 }
