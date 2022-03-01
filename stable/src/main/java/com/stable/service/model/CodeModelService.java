@@ -357,27 +357,31 @@ public class CodeModelService {
 				boolean isOk1 = false;
 				boolean isOk2 = false;
 				boolean isOk4 = false;
-				if (newOne.getZfjjupStable() >= 2) {
-					// 行情指标1：小票，底部大宗超5千万(机构代持？非董监高减持大宗)
-					// 行情指标2：大票，底部增发超过50亿(越大越好)，且证监会通过-之前有明显底部拿筹痕迹-涨停。
-					if (mkv <= 75) {
-						if (newOne.getHolderNumT3() > 45.0) {// 三大股东
-							if (dz.getTotalAmt() > 4999.0) {// 5千万
-								log.info("{} 小票，底部大宗超5千万", code);
-								isOk1 = true;
+
+				// 基本面没有什么大问题
+				if (newOne.getBousOK() == 1 || newOne.getFinOK() == 1) {
+					if (newOne.getZfjjupStable() >= 2) {
+						// 行情指标1：小票，底部大宗超5千万(机构代持？非董监高减持大宗)
+						// 行情指标2：大票，底部增发超过50亿(越大越好)，且证监会通过-之前有明显底部拿筹痕迹-涨停。
+						if (mkv <= 75) {
+							if (newOne.getHolderNumT3() > 45.0) {// 三大股东
+								if (dz.getTotalAmt() > 4999.0) {// 5千万
+									log.info("{} 小票，底部大宗超5千万", code);
+									isOk1 = true;
+								}
+							}
+						} else {
+							if (newOne.getZfYjAmt() >= ZF_50YI
+									&& ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
+								log.info("{} 大票，底部增发超过50亿", code);
+								isOk2 = true;
 							}
 						}
-					} else {
-						if (newOne.getZfYjAmt() >= ZF_50YI
-								&& ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
-							log.info("{} 大票，底部增发超过50亿", code);
-							isOk2 = true;
-						}
 					}
-				}
-				if (newOne.getZfjjup() >= 3 && newOne.getHolderNum() < -40.0) {// 股价3年没大涨，人数少了接近一半人
-					log.info("{} 股东人数少了一半人", code);
-					isOk4 = true;
+					if (newOne.getZfjjup() >= 3 && newOne.getHolderNum() < -40.0) {// 股价3年没大涨，人数少了接近一半人
+						log.info("{} 股东人数少了一半人", code);
+						isOk4 = true;
+					}
 				}
 
 				if (isOk1) {
