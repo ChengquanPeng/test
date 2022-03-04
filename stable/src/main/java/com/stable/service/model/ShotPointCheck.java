@@ -33,10 +33,9 @@ public class ShotPointCheck {
 
 	// 版本V1起爆点
 	private boolean checkV1(String code, int tradeDate, RealTime rt) {
-		TradeHistInfoDaliyNofq preDate = null;
 		if (rt != null) {
 			if (priceChkV1(rt.getYesterday(), rt.getNow())) {
-				preDate = daliyTradeHistroyService.queryLastNofq(code);
+				TradeHistInfoDaliyNofq preDate = daliyTradeHistroyService.queryLastNofq(code);
 				return (volChkV1(preDate.getVolume(), rt.getDealNums()));
 			} else {
 				return false;
@@ -48,7 +47,7 @@ public class ShotPointCheck {
 
 			TradeHistInfoDaliyNofq today = list.get(0);
 			if (priceChkV1(today.getYesterdayPrice(), today.getClosed())) {
-				preDate = list.get(1);
+				TradeHistInfoDaliyNofq preDate = list.get(1);
 				return (volChkV1(preDate.getVolume(), today.getVolume()));
 			} else {
 				return false;
