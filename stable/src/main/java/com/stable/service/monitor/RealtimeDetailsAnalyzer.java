@@ -62,11 +62,13 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 	public void run() {
 		String msg = "";
+		msg += MonitorType.getCodeName(cp.getMonitor()) + "!" + cp.getRemark();
 		if (cbm.getPls() == 1) {
-			msg = "人工确定!";
+			msg += " " + cbm.getZfjjInfo();
 		}
-		msg += MonitorType.getCodeName(cp.getMonitor()) + cbm.getBuyRea() + " " + cbm.getZfjjInfo() + " " + cp.getMsg();
-		if (chkCodeClosed) {
+		msg += " " + cp.getMsg();
+
+		if (chkCodeClosed) {// 重新检测停牌
 			try {
 				Thread.sleep(TEN_MIN);
 			} catch (InterruptedException e) {
