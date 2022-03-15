@@ -9,9 +9,9 @@ import com.stable.spider.realtime.RealtimeCallProxy;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MonitoringUitl;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.ShotPoint;
+import com.stable.vo.http.resp.CodeBaseModelResp;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -29,7 +29,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private MonitorPool cp;
 	private boolean waitSend = true;
 	private boolean chkCodeClosed = false;
-	private CodeBaseModel2 cbm;
+	private CodeBaseModelResp cbm;
 	public boolean highPriceGot = false;
 	private boolean burstPointCheck = false;// 起爆点
 	private ShotPointCheck shotPointCheck;
@@ -38,8 +38,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		isRunning = false;
 	}
 
-	public int init(String code, MonitorPool cp, RealtimeDetailsResulter resulter, String codeName, CodeBaseModel2 cbm,
-			ShotPointCheck shotPointCheck) {
+	public int init(String code, MonitorPool cp, RealtimeDetailsResulter resulter, String codeName,
+			CodeBaseModelResp cbm, ShotPointCheck shotPointCheck) {
 		this.code = code;
 		this.codeName = codeName;
 		this.resulter = resulter;
@@ -63,9 +63,9 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	public void run() {
 		String msg = "";
 		if (cbm.getPls() == 1) {
-			msg = "人工已确定!";
+			msg = "人工确定!";
 		}
-		msg += MonitorType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
+		msg += MonitorType.getCodeName(cp.getMonitor()) + cbm.getBuyRea() + " " + cbm.getZfjjInfo() + " " + cp.getMsg();
 		if (chkCodeClosed) {
 			try {
 				Thread.sleep(TEN_MIN);

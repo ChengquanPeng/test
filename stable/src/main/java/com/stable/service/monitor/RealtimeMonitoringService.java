@@ -78,7 +78,7 @@ public class RealtimeMonitoringService {
 					log.info(code);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
 					int r = task.init(code, cp, resulter, stockBasicService.getCodeName2(code),
-							modelWebService.getLastOneByCode2(code), shotPointCheck);
+							modelWebService.getLastOneByCodeResp(code), shotPointCheck);
 					if (r == 1) {
 						new Thread(task).start();
 						list.add(task);
