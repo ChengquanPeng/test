@@ -136,7 +136,8 @@ table {
 							<option value="1">正在进行中</option>
 					</select></td>
 					<td></td>
-					<td><a id="dzzq" target="_blank">东方财富-公告</a></td>
+					<td><a id="dzzq" target="_blank">东方财富-公告</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a
+						id="rzrq" target="_blank">融资融券</a></td>
 				</tr>
 				<tr>
 					<td id="pre_dzOK"></td>
@@ -147,7 +148,7 @@ table {
 							<option value="2">好</option>
 					</select></td>
 					<td></td>
-					<td><a id="dzOKq" target="_blank">系统查询</a> &nbsp;&nbsp;&nbsp;
+					<td><a id="dzOKq" target="_blank">系统查询</a>&nbsp;&nbsp;&nbsp;
 						定增较多：新定增股东容易在二级成为空方</td>
 				</tr>
 				<tr>
@@ -532,6 +533,12 @@ table {
 								"href",
 								"http://data.eastmoney.com/notices/stock/"
 										+ code + ".html");
+						//融资融券
+						$('#rzrq').attr(
+								"href",
+								"https://data.eastmoney.com/rzrq/detail/"
+										+ code + ".html");
+
 						//财务 yjq2
 						$('#yjq1').attr(
 								"href",

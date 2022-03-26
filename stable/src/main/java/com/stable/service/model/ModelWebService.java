@@ -391,33 +391,6 @@ public class ModelWebService {
 			}
 		}
 
-		String field = "baseGreen";
-
-		int orderBy = mr.getOrderBy();
-		if (orderBy == 2) {
-			field = "zflastOkDate";
-		} else if (orderBy == 3) {
-			field = "sylttm";
-		} else if (orderBy == 4) {
-			field = "syl";
-		} else if (orderBy == 5) {
-			field = "sylType";
-		} else if (orderBy == 6) {
-			field = "holderNumP5";
-		} else if (orderBy == 7) {
-			field = "zfjjup";
-		} else if (orderBy == 8) {
-			field = "zfPriceLow";
-		} else if (orderBy == 9) {
-			field = "avgNum";
-		} else if (orderBy == 10) {
-			field = "dzjy60d";
-		} else if (orderBy == 11) {
-			field = "dzjy365d";
-		} else if (orderBy == 12) {
-			field = "dzjyp365d";
-		}
-
 		if (StringUtils.isNotBlank(mr.getMonitor())) {
 			int m = Integer.valueOf(mr.getMonitor());
 			if (m == 9999) {
@@ -569,6 +542,35 @@ public class ModelWebService {
 		if (mr.getAsc() == 2) {
 			order = SortOrder.ASC;
 		}
+		String field = "baseGreen";
+
+		int orderBy = mr.getOrderBy();
+		if (orderBy == 2) {
+			field = "zflastOkDate";
+		} else if (orderBy == 3) {
+			field = "sylttm";
+		} else if (orderBy == 4) {
+			field = "syl";
+		} else if (orderBy == 5) {
+			field = "sylType";
+		} else if (orderBy == 6) {
+			field = "holderNumP5";
+		} else if (orderBy == 7) {
+			field = "zfjjup";
+		} else if (orderBy == 8) {
+			field = "zfPriceLow";
+		} else if (orderBy == 9) {
+			field = "avgNum";
+		} else if (orderBy == 10) {
+			field = "dzjy60d";
+		} else if (orderBy == 11) {
+			field = "dzjy365d";
+		} else if (orderBy == 12) {
+			field = "dzjyp365d";
+		} else if (orderBy == 13) {
+			field = "holderNum";
+			order = SortOrder.ASC;
+		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);
 
@@ -576,12 +578,6 @@ public class ModelWebService {
 		NativeSearchQueryBuilder builder = queryBuilder.withQuery(bqb);
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
 		builder.withPageable(pageable).withSort(sort);
-//		if (pageYes) {
-//			
-//		} else {
-//			Pageable pageable = PageRequest.of(0, querypage.getPageSize());// 不设置分页，会默认10条
-//			builder.withPageable(pageable);
-//		}
 		SearchQuery sq = builder.build();
 		Page<CodeBaseModel2> page = codeBaseModel2Dao.search(sq);
 		if (page != null && !page.isEmpty()) {
