@@ -542,17 +542,11 @@ public class ModelWebService {
 		if (mr.getAsc() == 2) {
 			order = SortOrder.ASC;
 		}
-		String field = "baseGreen";
 
+		String field = "baseGreen";
 		int orderBy = mr.getOrderBy();
-		if (orderBy == 2) {
-			field = "zflastOkDate";
-		} else if (orderBy == 3) {
+		if (orderBy == 3) {
 			field = "sylttm";
-		} else if (orderBy == 4) {
-			field = "syl";
-		} else if (orderBy == 5) {
-			field = "sylType";
 		} else if (orderBy == 6) {
 			field = "holderNumP5";
 		} else if (orderBy == 7) {
