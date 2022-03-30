@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.stable.utils.DateUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.spi.req.StockDaliyReq;
 
@@ -97,6 +98,20 @@ public class TushareSpider {
 	 * @return
 	 */
 	private final String daily_fields = "ts_code,trade_date,open,high,low,close,pre_close,change,pct_chg,vol,amount";
+
+	public static void main(String[] args) {
+		try {
+			
+			TushareSpider tushareSpider = new TushareSpider();
+			String today = DateUtil.getTodayYYYYMMDD();
+			tushareSpider.tuToken = "f7b8fb50ce43ba5e6e3a45f9ff24539e13319b3ab5e7a1824d032cc6";
+			tushareSpider.restTemplate = new RestTemplate();
+			JSONArray array = tushareSpider.getStockDaliyTrade(null, today, null, null);
+			System.err.println(array);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	public JSONArray getStockDaliyTrade(String ts_code, String trade_date, String start_date, String end_date) {
 		try {

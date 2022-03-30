@@ -34,6 +34,15 @@ public class DaliyJobLine {
 		log.info("EveryWorkingDayJob end");
 	}
 
+//	@PostConstruct
+//	private void a() {
+//		new Thread(new Runnable() {
+//			public void run() {
+//				line1();
+//			}
+//		}).start();
+//	}
+
 	private void line1() {
 		log.info("3.流水任务 [started]");
 		String today = DateUtil.getTodayYYYYMMDD();
@@ -44,7 +53,7 @@ public class DaliyJobLine {
 		}
 		try {
 			// 日交易
-			next1TradeHistroyJob(today);
+			next1TradeHistroyJob(today, true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -54,7 +63,7 @@ public class DaliyJobLine {
 		log.info("流水任务 [end]");
 	}
 
-	private boolean next1TradeHistroyJob(String today) {
+	private boolean next1TradeHistroyJob(String today, boolean retry) {
 		log.info("获取日交易(分红除权)");
 		int result = tradeHistroyService.spiderTodayDaliyTrade(true, today);
 		if (result != 0) {
@@ -62,8 +71,12 @@ public class DaliyJobLine {
 			// result);
 			return true;
 		} else {
-			WxPushUtil.pushSystem1("异常执行Seq1=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:0,以后的链条不会被执行");
-			return false;
+			if (retry) {
+				return next1TradeHistroyJob(today, false);// 重试
+			} else {
+				WxPushUtil.pushSystem1("异常执行Seq1=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:0,以后的链条不会被执行");
+				return false;
+			}
 		}
 	}
 }
