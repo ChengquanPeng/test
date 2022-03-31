@@ -94,8 +94,9 @@ table {
 					<td>流通市值:<span id="mkv"></span>亿
 					</td>
 					<td><a id="base1" target="_blank">同花顺基本面</a>&nbsp;&nbsp;&nbsp;<a
-						id="base2" target="_blank">系统基本面</a>&nbsp;&nbsp;&nbsp;上次更新日期:<span
-						id="lstmt"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小市值，最好低于50Y，新股和st排除</td>
+						id="base2" target="_blank">系统基本面</a>&nbsp;&nbsp;&nbsp;<a
+						id="tzzfd" target="_blank">投资者互动</a>&nbsp;&nbsp;&nbsp;<a id="jgdy"
+						target="_blank">机构调研</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小市值，最好低于50Y，新股和st排除</td>
 				</tr>
 				<tr>
 					<td id="pre_recentPriceYear"></td>
@@ -505,7 +506,6 @@ table {
 						var dfcode = getDfCode(code) + code;
 						$('#code').html(code);
 						$('#codeName').html(reData.result.codeName);
-						$('#lstmt').html(reData.result.lstmt);
 						//基本面
 						$('#base1').attr("href",
 								"http://basic.10jqka.com.cn/" + code);
@@ -572,6 +572,11 @@ table {
 								"href",
 								"http://basic.10jqka.com.cn/" + code
 										+ "/event.html");
+						//机构调研
+						$('#jgdy').attr(
+								"href",
+								"http://basic.10jqka.com.cn/" + code
+										+ "/event.html#holder");
 						//分红
 						$('#bonusq').attr(
 								"href",
@@ -582,6 +587,11 @@ table {
 								"href",
 								"/web/dashboard/basedata/Jiejin.html?code="
 										+ code);
+						//投资者互动
+						$('#tzzfd').attr(
+								"href",
+								"http://basic.10jqka.com.cn/" + code
+										+ "/interactive.html#interactive");
 
 						//====系统值====
 						for ( var key in reData.result) {
