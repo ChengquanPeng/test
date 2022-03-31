@@ -49,8 +49,6 @@ public class CodeBaseModel2 extends EsBase {
 	private double holderNum;// 股东人数变化
 	@Field(type = FieldType.Long)
 	private long lastNum;// 最新股东人数
-	@Field(type = FieldType.Double)
-	private double holderZb;// 控股股东占比
 	@Field(type = FieldType.Long)
 	private long avgNum;// 除开5%股东的人均流通持股
 	@Field(type = FieldType.Integer)

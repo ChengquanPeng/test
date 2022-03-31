@@ -209,8 +209,6 @@ public class CodeModelService {
 				if (mkv > 0 && s.getCircZb() > 0) {
 					newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (s.getCircZb() / 100))));
 				}
-				newOne.setHolderZb(s.getHolderZb());
-
 //				newOne.setShooting3(0);
 				// 人工审核是否时间到期-重置
 				if (newOne.getPlst() < tradeDate) {

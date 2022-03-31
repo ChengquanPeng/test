@@ -89,8 +89,6 @@ public class StockBaseInfo extends EsBase {
 	private double circZb;// 持股5%以上的股东占比-流通
 	@Field(type = FieldType.Text)
 	private String holderName;// 控股股东
-	@Field(type = FieldType.Double)
-	private double holderZb;// 控股股东比例
 	@Field(type = FieldType.Integer)
 	private int dfcwCompnayType;// 公司类型：1券商，2保险,3银行，4企业
 

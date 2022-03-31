@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +30,7 @@ public class ThsCompanySpider {
 	private HtmlunitSpider htmlunitSpider;
 	@Autowired
 	private StockBasicService stockBasicService;
-	private String urlbase = "http://basic.10jqka.com.cn/%s/company.html?t=%s";
+	private String urlbase = "https://basic.10jqka.com.cn/mobile/%s/profilen.html#jumpaction=iframe?t=%s";
 	private String host = "http://basic.10jqka.com.cn/";
 	private Map<String, String> header;
 
@@ -58,11 +57,8 @@ public class ThsCompanySpider {
 		}
 	}
 
-	private String f1 = "国有资产";
-	private String f2 = "教育部";
-	private String f3 = "财政局";
-	private String f4 = "财政厅";
-	private String f5 = "财政部";
+	private String f1 = "国有";
+	private String f2 = "中央";
 
 	private synchronized void dofetchInner2() {
 		if (header == null) {
@@ -77,18 +73,13 @@ public class ThsCompanySpider {
 				// 控股股东
 				String h = fr.getHolder();
 				s.setHolderName(h);
-				if (StringUtils.isNotBlank(h)) {
-					try {
-						s.setHolderZb(Double.valueOf(h.split("比例：")[1].split("%")[0]));
-					} catch (Exception e) {
-					}
-				} else {
-					s.setHolderZb(0.0);
-				}
 				// 最终控制人
+				String r1 = fr.getFindHolder();
+				s.setFinalControl(r1.trim());
+				// 企业性质
 				String r = fr.getFindHolder();
 				s.setFinalControl(r.trim());
-				if (r.contains(f1) || r.contains(f2) || r.contains(f3) || r.contains(f4) || r.contains(f5)) {
+				if (r.contains(f1) || r.contains(f2)) {
 					s.setCompnayType(1);
 				} else {
 					s.setCompnayType(0);
@@ -106,6 +97,7 @@ public class ThsCompanySpider {
 	class FetchRes {
 		String holder = "";
 		String findHolder = "无控制人";
+		String comType = "";
 
 		public String getHolder() {
 			return holder;
@@ -122,6 +114,14 @@ public class ThsCompanySpider {
 		public void setFindHolder(String findHolder) {
 			this.findHolder = findHolder;
 		}
+
+		public String getComType() {
+			return comType;
+		}
+
+		public void setComType(String comType) {
+			this.comType = comType;
+		}
 	}
 
 	private FetchRes dofetchInner3(String code) {
@@ -137,57 +137,49 @@ public class ThsCompanySpider {
 				HtmlPage page = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url, header);
 				HtmlElement body = page.getBody();
 				// System.err.println(body.asText());
-				HtmlElement table = body.getElementsByAttribute("table", "class", "m_table ggintro managelist").get(0);
+				HtmlElement divt = body.getElementsByAttribute("div", "id", "detailData").get(0);
+				HtmlElement table = divt.getElementsByAttribute("table", "class", "leveldatail-tab").get(0);
 				DomElement tbody = table.getFirstElementChild();
 				Iterator<DomElement> it0 = tbody.getChildElements().iterator();
+				it0.next();// 公司名称
+				it0.next();// 曾用名
+				it0.next();// 注册地址
+				it0.next();// 董事长
+				it0.next();// 董秘
 				it0.next();// 主营业务
-				it0.next();// 产品名称
+				DomElement cot = it0.next();// 经营性质
+				try {
+					DomElement td = cot.getLastElementChild();
+					fr.setComType(td.asText().trim());
+				} catch (Exception e3) {
+					e3.printStackTrace();
+				}
 				DomElement holder = it0.next();// 控股股东
-
-				DomElement finalHolder = it0.next();// 实际控制人
+				DomElement realHolder = it0.next();// 实际控制人
+				DomElement finalHolder = it0.next();// 最终控制人
+				if (finalHolder.getAttribute("id").contains("mng")) {// 实际是:实际控制人的的持股一览表
+					finalHolder = it0.next();// 最终控制人
+				}
 
 				try {
 					try {
-						String s = holder.asText();
-						String holderstr = s.trim().substring(5).trim();
-						// System.err.println(holderstr);
-						fr.setHolder(holderstr);
+						DomElement td1 = holder.getLastElementChild();
+						fr.setHolder(td1.asText().trim());
 					} catch (Exception e) {
-
+						e.printStackTrace();
 					}
-					DomElement finaletr = it0.next();// 最终控制人
-					DomElement td = finaletr.getFirstElementChild();
-					DomElement div = td.getFirstElementChild();
-					Iterator<DomElement> it1 = div.getChildElements().iterator();
-					it1.next();
-					it1.next();
-					it1.next();
-					DomElement finale = it1.next();
-					String res = finale.asText();
-//				System.err.println(res);
-					fr.setFindHolder(res.trim());
+					DomElement td2 = finalHolder.getLastElementChild();
+					fr.setFindHolder(td2.asText().trim());
 					return fr;
 				} catch (Exception e) {
-
+					e.printStackTrace();
 					try {
-						DomElement td = finalHolder.getFirstElementChild();
-						DomElement div = td.getFirstElementChild();
-						Iterator<DomElement> it1 = div.getChildElements().iterator();
-						it1.next();
-						fr.setFindHolder(it1.next().asText());
+						DomElement td = realHolder.getLastElementChild();
+						fr.setFindHolder(td.asText().trim());
 						return fr;
 					} catch (Exception e2) {
-
-						try {
-							DomElement td = holder.getFirstElementChild();
-							DomElement div = td.getFirstElementChild();
-							Iterator<DomElement> it1 = div.getChildElements().iterator();
-							it1.next();
-							fr.setFindHolder(it1.next().asText());
-							return fr;
-						} catch (Exception e3) {
-							return fr;
-						}
+						e2.printStackTrace();
+						return fr;
 					}
 				}
 			} catch (Exception e2) {
@@ -210,9 +202,9 @@ public class ThsCompanySpider {
 		ThsCompanySpider ts = new ThsCompanySpider();
 		ts.htmlunitSpider = new HtmlunitSpider();
 		ts.header = new HashMap<String, String>();
-		FetchRes fr = ts.dofetchInner3("002752");
+		FetchRes fr = ts.dofetchInner3("601318");
+		System.err.println(fr.getComType());
 		System.err.println(fr.getHolder());
-		System.err.println(Double.valueOf(fr.getHolder().split("比例：")[1].split("%")[0]));
 		System.err.println(fr.getFindHolder());
 
 	}

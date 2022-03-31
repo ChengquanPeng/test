@@ -192,7 +192,6 @@ public class StockBasicService {
 			base.setTotalShare(old.getTotalShare());
 			base.setCircZb(old.getCircZb());
 			base.setHolderName(old.getHolderName());
-			base.setHolderZb(old.getHolderZb());
 			base.setDfcwCompnayType(old.getDfcwCompnayType());
 		}
 		if (fromNotTushare) {// 非tushare需要更新，tushare 统一更新
