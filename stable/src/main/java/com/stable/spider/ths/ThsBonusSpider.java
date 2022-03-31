@@ -13,12 +13,14 @@ import org.springframework.stereotype.Component;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.BonusHistDao;
 import com.stable.es.dao.base.FenHongDao;
 import com.stable.es.dao.base.ZengFaDao;
 import com.stable.es.dao.base.ZengFaDetailDao;
 import com.stable.es.dao.base.ZengFaSummaryDao;
+import com.stable.service.ChipsZfService;
 import com.stable.service.StockBasicService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -63,6 +65,8 @@ public class ThsBonusSpider {
 	private ZengFaSummaryDao zengFaSummaryDao;
 	@Autowired
 	private BonusHistDao bonusHistDao;
+	@Autowired
+	private ChipsZfService chipsZfService;
 	private final long highMoney = 4000000000l;// 40亿
 
 //1、先由董事会作出决议：方案
@@ -81,6 +85,22 @@ public class ThsBonusSpider {
 
 	public void byJob() {
 		dofetchInner();
+	}
+
+	public void deleteInvalidData() {
+		new Thread(new Runnable() {
+			public void run() {
+				ThreadsUtil.sleepRandomSecBetween15And30();
+				int updateDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -40));
+				List<ZengFa> list = chipsZfService.getInvalidZengFaList(updateDate, EsQueryPageUtil.queryPage500);
+				if (list != null && list.size() > 0) {
+					log.info(list.size() + "条无效增发记录");
+					zengFaDao.deleteAll(list);
+				} else {
+					log.info("0条无效增发记录");
+				}
+			}
+		}).start();
 	}
 
 	public void byWeb() {

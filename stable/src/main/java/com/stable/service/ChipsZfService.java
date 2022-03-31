@@ -370,4 +370,19 @@ public class ChipsZfService {
 		return null;
 	}
 
+	public List<ZengFa> getInvalidZengFaList(int updateDate, EsQueryPageReq querypage) {
+		int pageNum = querypage.getPageNum();
+		int size = querypage.getPageSize();
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.rangeQuery("update").lte(updateDate));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+		Page<ZengFa> page = zengFaDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		return null;
+	}
+
 }
