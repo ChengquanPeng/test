@@ -34,7 +34,7 @@
 			</div>
 			<div>
 				<div class="input-group">
-					流通市值小&lt;=<input type="text" id="mkv" width="10" />亿&nbsp;&nbsp;
+					<input type="text" id="mkv2" width="10" />&gt;=流通市值&lt;=<input type="text" id="mkv" width="10" />亿&nbsp;&nbsp;
 					前3大股东持股&gt;=<input type="text" id="holderNumT3" width="30" />%&nbsp;&nbsp;
 					市盈率ttm&lt;=<input type="text" id="pettm" width="20" />&nbsp;&nbsp;
 					国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp;
@@ -83,6 +83,7 @@
 						<option value="4">底部股东人数大幅减少</option>
 						<option value="5">短线1:确定极速拉升,带小平台新高？</option>
 						<option value="3">短线2:底部融资融券飙升,散户没买入空间？</option>
+						<option value="6">短线3:3-5天情绪,见好就收</option>
 					</select>&nbsp;&nbsp; 标签:<select id="tagIndex">
 						<option value="-1" selected="selected">无限制</option>
 						<option value="1">拉升吸筹?</option>
@@ -188,6 +189,7 @@
 
 									param.monitor = $('#monitor').val();
 									param.mkv = $('#mkv').val();
+									param.mkv2 = $('#mkv2').val();
 									param.pls = $('#pls').val();
 
 									param.sort7 = 0;

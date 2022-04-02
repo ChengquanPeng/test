@@ -23,6 +23,7 @@ public class ModelReq {
 	int zfself;
 	String zfYjAmt;
 	String mkv;
+	String mkv2;
 	int pls;
 	int tagIndex;
 	int shooting;

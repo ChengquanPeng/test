@@ -25,6 +25,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int shooting4 = 0;// 行情指标4：股东人数底部大幅减少
 	@Field(type = FieldType.Integer)
 	private int shooting5 = 0;// 行情指标5：短线拉升小平台。
+	@Field(type = FieldType.Integer)
+	private int shooting6 = 0;// 行情指标6：3-5天情绪
 
 	// Step.1.市值大小，股价K线形态是否横盘多年，且常年分红
 	@Field(type = FieldType.Double)

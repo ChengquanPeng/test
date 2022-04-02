@@ -54,7 +54,7 @@ public class ErrorLogFileUitl {
 		}));
 	}
 
-	public static void writeError(Exception e, String p1, String p2, String p3) {
+	public static void writeError(Exception e, Object p1, Object p2, Object p3) {
 		try {
 			StringBuffer s = new StringBuffer();
 			s.append(DateUtil.getTodayYYYYMMDDHHMMSS() + "===>");

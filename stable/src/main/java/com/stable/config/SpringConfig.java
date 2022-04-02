@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
+import com.stable.utils.OSystemUtil;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -45,4 +47,5 @@ public class SpringConfig {
 	@Value("${program.html.folder}")
 	private String pubFloder;
 
+	public final static boolean isWindows = OSystemUtil.isWindows();
 }

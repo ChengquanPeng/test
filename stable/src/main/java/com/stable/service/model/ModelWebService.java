@@ -153,6 +153,9 @@ public class ModelWebService {
 			if (dh.getShooting5() > 0) {
 				sb5.append("短线1:确定极速拉升带小平台新高?").append(Constant.HTML_LINE);
 			}
+			if (dh.getShooting6() > 0) {
+				sb5.append("短线1:3-5天情绪,见好就收").append(Constant.HTML_LINE);
+			}
 			sb5.append("</font>");
 		}
 		// 基本面-筹码
@@ -421,6 +424,12 @@ public class ModelWebService {
 			double mkv = Double.valueOf(mr.getMkv());
 			if (mkv > 0) {
 				bqb.must(QueryBuilders.rangeQuery("mkv").lte(mkv));
+			}
+		}
+		if (StringUtils.isNotBlank(mr.getMkv2())) {
+			double mkv2 = Double.valueOf(mr.getMkv2());
+			if (mkv2 > 0) {
+				bqb.must(QueryBuilders.rangeQuery("mkv").gte(mkv2));
 			}
 		}
 		if (mr.getTagIndex() > 0) {
