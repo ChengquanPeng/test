@@ -4,8 +4,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +27,7 @@ public class Sort2Feeling35DayModeService {
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 
 	private final double mkvcheckLine = 100.0;// 市值
+	private double chkrateline = -7;// 3-5天跌幅
 	private final double upchkLine = 65.0;// 一年涨幅超过
 
 	public void sort2ModeChk(CodeBaseModel2 cbm, double mkv, int date, StringBuffer shootNotice6) {
@@ -36,9 +35,7 @@ public class Sort2Feeling35DayModeService {
 			cbm.setShooting6(0);
 			if (mkv >= mkvcheckLine) {// 100亿
 				String code = cbm.getCode();
-				if (isPriceVolOk(code, date)
-				// && isKline(code, date, upchkLine)
-				) {
+				if (isPriceVolOk(code, date) && isKline(code, date)) {
 					cbm.setShooting6(1);
 				}
 			}
@@ -50,7 +47,7 @@ public class Sort2Feeling35DayModeService {
 	/**
 	 * 一年涨了65%?
 	 */
-	private boolean isKline(String code, int date, double checkLine) {
+	private boolean isKline(String code, int date) {
 		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
 				EsQueryPageUtil.queryPage250, SortOrder.DESC);
 
@@ -62,16 +59,14 @@ public class Sort2Feeling35DayModeService {
 				.get();
 		double minPrice = lowDate.getLow();
 		// d1.getDate() < d2.getDate():是上涨趋势。
-		if (lowDate.getDate() < topDate.getDate() && CurrencyUitl.cutProfit(minPrice, maxPrice) >= checkLine) {
-//			log.info("AAABBB{},tradedate={},topDate={},{} topDate={},{} ", code, date, topDate.getDate(), maxPrice,
-//					lowDate.getDate(), minPrice);
+		if (lowDate.getDate() < topDate.getDate() && CurrencyUitl.cutProfit(minPrice, maxPrice) >= upchkLine) {
 			return true;
 		}
 		return false;
 	}
 
-	@PostConstruct
-	private void test() {
+//	@javax.annotation.PostConstruct
+	public void test() {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -102,23 +97,24 @@ public class Sort2Feeling35DayModeService {
 		}).start();
 	}
 
-	private double chkrateline = -7;
-
-	// 1.短期是否大幅下跌缩量
+	// 1.短期大幅下跌且缩量
 	private boolean isPriceVolOk(String code, int date) {
 		boolean isOk = false;
 		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
 				EsQueryPageUtil.queryPage5, SortOrder.DESC);
 		TradeHistInfoDaliyNofq today = l2.get(0);
 		TradeHistInfoDaliyNofq preday = l2.get(1);
-		// 第一种情况：连续两天大幅放量下跌炒过-8,量缩减
+
+		// 1.放巨量在水上？？
+
+		// 第一种情况：连续两天大幅放量下跌超过-8,量缩减
 		if (today.getTodayChangeRate() <= 0.0 && preday.getTodayChangeRate() <= 0.0
 				&& (chkrateline > (today.getTodayChangeRate() + preday.getTodayChangeRate()))) {
 			if (preday.getVolume() > (today.getVolume() * 2)) {
 				return true;
 			}
 		}
-		// 第二种情况：连续3天下跌炒过-8,量缩减
+		// 第二种情况：连续3天下跌超过-8,量缩减
 		if (today.getTodayChangeRate() <= 0.0 && preday.getTodayChangeRate() <= 0.0
 				&& l2.get(2).getTodayChangeRate() <= 0.0 && (chkrateline > (today.getTodayChangeRate()
 						+ preday.getTodayChangeRate() + l2.get(2).getTodayChangeRate()))) {
@@ -133,7 +129,7 @@ public class Sort2Feeling35DayModeService {
 
 	public static void main(String[] args) {
 		double k = 100000;// 10万本金
-		for (int i = 0; i < 250; i++) {// 一年250天
+		for (int i = 0; i < 22; i++) {// 一年250天
 			k = k * 1.005;
 		}
 		System.err.println(k);

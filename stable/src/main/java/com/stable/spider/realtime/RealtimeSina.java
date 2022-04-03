@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.stable.utils.HttpUtil;
 
-public class RealtimeSina {
+public class RealtimeSina implements RealtimeProxy {
 
 	private static final String URL_FORMAT = "http://hq.sinajs.cn/list=%s";
 
@@ -22,7 +22,7 @@ public class RealtimeSina {
 		}
 	}
 
-	public static RealTime get(String code) {
+	public RealTime get(String code) {
 //		0：”大秦铁路”，股票名字；
 //		1：”27.55″，今日开盘价；
 //		2：”27.25″，昨日收盘价；
@@ -70,6 +70,6 @@ public class RealtimeSina {
 	}
 
 	public static void main(String[] args) {
-		System.err.println(get("601288"));
+		System.err.println(new RealtimeSina().get("601288"));
 	}
 }

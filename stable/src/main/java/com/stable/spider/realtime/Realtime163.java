@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.utils.HttpUtil;
 
-public class Realtime163 {
+public class Realtime163 implements RealtimeProxy {
 
 	private static final String START_PRIX = "_ntes_quote_callback(";
 	private static final String URL_FORMAT = "https://api.money.126.net/data/feed/%s,money.api";
@@ -17,7 +17,7 @@ public class Realtime163 {
 		}
 	}
 
-	public static RealTime get(String code) {
+	public RealTime get(String code) {
 
 		try {
 			String key = getUrl(code);
@@ -43,6 +43,6 @@ public class Realtime163 {
 	}
 
 	public static void main(String[] args) {
-		System.err.println(get("601288"));
+		System.err.println(new Realtime163().get("601288"));
 	}
 }
