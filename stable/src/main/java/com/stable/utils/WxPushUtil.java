@@ -22,7 +22,7 @@ public class WxPushUtil {
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 		appToken = efc.getAppToken().trim();
 		myUid = efc.getMyUid().trim();
-		env = " from " + efc.getEnv().trim() + " ";
+		env = " from " + (SpringConfig.isWindows ? "windows" : "linux") + " ";
 		log.info("appToken={},myUid={}", appToken, myUid);
 	}
 

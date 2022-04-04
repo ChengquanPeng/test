@@ -38,9 +38,6 @@ public class DaliyBasicHistroyService {
 	@Autowired
 	private StockBasicService stockBasicService;
 
-	@Value("${tick.data.start.date}")
-	public String startDate;
-
 	public List<DaliyBasicInfoResp> queryListByCodeByWebPage(String code, EsQueryPageReq queryPage) {
 		List<DaliyBasicInfoResp> res = new LinkedList<DaliyBasicInfoResp>();
 		Page<DaliyBasicInfo2> page = this.queryListByCode(code, null, queryPage);
