@@ -191,10 +191,6 @@ public class DaliyTradeHistroyService {
 			}
 			if (daliybasicList.size() > 0) {
 				esDaliyBasicInfoDao.saveAll(daliybasicList);
-				if (isJob) {
-					tickService.genTickEveryDay(daliybasicList);
-					xqDailyBaseSpider.fetchAll(daliybasicList);
-				}
 			}
 			if (listNofq.size() > 0) {
 				esTradeHistInfoDaliyNofqDao.saveAll(listNofq);
@@ -202,10 +198,16 @@ public class DaliyTradeHistroyService {
 			if (list.size() > 0) {
 				esTradeHistInfoDaliyDao.saveAll(list);
 			}
-			// 离线价格监听
+			// 定时任务
+			ThreadsUtil.sleepRandomSecBetween15And30();
 			if (isJob) {
-				ThreadsUtil.sleepRandomSecBetween15And30();
-				priceChk(listNofq, Integer.valueOf(today));
+				int dddd = Integer.valueOf(today);
+				if (daliybasicList.size() > 0) {
+					tickService.genTickEveryDay(daliybasicList, dddd);
+					xqDailyBaseSpider.fetchAll(daliybasicList);
+				}
+				// 离线价格监听
+				priceChk(listNofq, dddd);
 				monitorPoolService.jobBuyLowVolWarning();
 			}
 			return list.size();

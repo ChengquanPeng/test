@@ -1,22 +1,25 @@
 package com.stable.service;
 
 import java.io.File;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.Constant;
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.spider.tick.TencentTick;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.StockBaseInfo;
+import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -31,8 +34,10 @@ public class TickService {
 	private TradeCalService tradeCalService;
 	@Value("${tick.folder}")
 	private String tickFolder;
+	@Autowired
+	private DaliyTradeHistroyService daliyTradeHistroyService;
 
-	public void genTickEveryDay(List<DaliyBasicInfo2> daliybasicList) {
+	public void genTickEveryDay(List<DaliyBasicInfo2> daliybasicList, int date) {
 		new java.lang.Thread(new Runnable() {
 			public void run() {
 				try {
@@ -46,12 +51,18 @@ public class TickService {
 							TencentTick.genTick(code, tickFolder + code + File.separator + d.getDate());
 						}
 					}
+					ThreadsUtil.sleepRandomSecBetween15And30();
+					// 删除文件
+					if (date > 0) {
+						cleanFiles(date);
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 					WxPushUtil.pushSystem1("每日Tick 数据文件生成异常");
 				}
 			}
 		}).start();
+
 	}
 
 	public void regen(int today) {
@@ -70,22 +81,43 @@ public class TickService {
 			DaliyBasicInfo2 dalyb = new DaliyBasicInfo2(array.getJSONArray(i));
 			daliybasicList.add(dalyb);
 		}
-		genTickEveryDay(daliybasicList);
+		genTickEveryDay(daliybasicList, 0);
 	}
 
-	@PostConstruct
-	private void test() {
+//	@PostConstruct
+	public void test() {
 		regen(20220401);
 	}
 
-	public void cleanFiles() {
+	public void cleanFiles(int date) {
 		List<StockBaseInfo> list = stockBasicService.getAllList();
 		for (StockBaseInfo s : list) {
-			if (Constant.CODE_ON_STATUS.equals(s.getList_status())) {
-				// 删除小于
-			} else {
-				// 删除全部
+			String code = s.getCode();
+			File cf = new File(tickFolder + code);
+			File[] ff = cf.listFiles();
+			if (ff != null && ff.length > 0) {
+				if (Constant.CODE_ON_STATUS.equals(s.getList_status())) {
+					// 删除小于天以前的
+					List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0,
+							date, EsQueryPageUtil.queryPage10, SortOrder.DESC);
+					int minDate = l2.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getDate)).get()
+							.getDate();
+					for (File f : ff) {
+						if (Integer.valueOf(f.getName()) < minDate) {// 最小日期删除
+							f.delete();
+							log.info("delete:" + f.getAbsolutePath());
+						}
+					}
+				} else {
+					// 删除全部
+					for (File f : ff) {
+						f.delete();
+					}
+					cf.delete();
+					log.info(code + " delete all");
+				}
 			}
 		}
+		log.info("delete tick file done");
 	}
 }

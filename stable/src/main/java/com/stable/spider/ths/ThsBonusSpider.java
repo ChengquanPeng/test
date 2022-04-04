@@ -85,6 +85,7 @@ public class ThsBonusSpider {
 
 	public void byJob() {
 		dofetchInner();
+		deleteInvalidData();
 	}
 
 	public void deleteInvalidData() {
