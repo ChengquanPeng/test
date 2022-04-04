@@ -91,6 +91,8 @@ public class DaliyTradeHistroyService {
 	private MonitorPoolService monitorPoolService;
 	@Autowired
 	private ShotPointCheck shotPointCheck;
+	@Autowired
+	private TickService tickService;
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -190,6 +192,7 @@ public class DaliyTradeHistroyService {
 			if (daliybasicList.size() > 0) {
 				esDaliyBasicInfoDao.saveAll(daliybasicList);
 				if (isJob) {
+					tickService.genTickEveryDay(daliybasicList);
 					xqDailyBaseSpider.fetchAll(daliybasicList);
 				}
 			}

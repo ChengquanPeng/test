@@ -62,7 +62,7 @@ public class TencentTick {
 		return list;
 	}
 
-	public static Tick getTick(String line) {
+	private static Tick getTick(String line) {
 		Tick tick = new Tick();
 		String[] fs = line.split("/");
 		tick.setId(fs[0]);

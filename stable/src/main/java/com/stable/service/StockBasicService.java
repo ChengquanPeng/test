@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.stable.constant.Constant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsStockBaseInfoDao;
@@ -226,6 +227,19 @@ public class StockBasicService {
 		return getAllOnStatusListWithSort(true);
 	}
 
+	public synchronized List<StockBaseInfo> getAllList() {
+		List<StockBaseInfo> listt = new LinkedList<StockBaseInfo>();
+		Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
+		while (it.hasNext()) {
+			StockBaseInfo e = it.next();
+			if (isHuShenCode(e.getCode())) {// 排除4,8开头的
+				// list.add(e);
+				listt.add(e);
+			}
+		}
+		return listt;
+	}
+
 	private synchronized List<StockBaseInfo> getAllOnStatusListWithSort(boolean issort) {
 		if (LOCAL_ALL_ONLINE_LIST.isEmpty()) {
 			Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
@@ -233,7 +247,7 @@ public class StockBasicService {
 			while (it.hasNext()) {
 				StockBaseInfo e = it.next();
 				// list_status='L'
-				if ("L".equals(e.getList_status()) && isHuShenCode(e.getCode())) {// 排除4,8开头的
+				if (Constant.CODE_ON_STATUS.equals(e.getList_status()) && isHuShenCode(e.getCode())) {// 排除4,8开头的
 					// list.add(e);
 					LOCAL_ALL_ONLINE_LIST.add(e);
 				}
