@@ -140,9 +140,12 @@ public class EmDzjySpider {
 //	@PostConstruct
 	public void byWeb() {
 		new Thread(new Runnable() {
-			@Override
 			public void run() {
-				dofetchInnerByAll();
+				try {
+					dofetchInnerByAll();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}).start();
 	}

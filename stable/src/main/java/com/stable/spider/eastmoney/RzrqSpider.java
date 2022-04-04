@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -170,20 +169,6 @@ public class RzrqSpider {
 		} while (trytime <= 10);
 		WxPushUtil.pushSystem1("东方财富-融资融券(每日)-抓包出错,date=" + d);
 		return pages;
-	}
-
-	public void byWeb(Callable<Boolean> back) {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				dofetchInnerByAll();
-				try {
-					back.call();// 顺序执行
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
 	}
 
 	public void byWeb() {

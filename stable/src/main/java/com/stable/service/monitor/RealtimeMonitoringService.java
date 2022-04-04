@@ -15,6 +15,7 @@ import com.stable.service.model.ModelWebService;
 import com.stable.service.model.ShotPointCheck;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPool;
 
 import lombok.extern.log4j.Log4j2;
@@ -49,14 +50,16 @@ public class RealtimeMonitoringService {
 		long now = new Date().getTime();
 		long starttime = DateUtil.parseTodayYYYYMMDDHHMMSS(date + " 09:15:00").getTime();
 		long endtime = DateUtil.parseTodayYYYYMMDDHHMMSS(date + " 15:03:00").getTime();
-		if (now < starttime || now > endtime) {// 已经超时
+		if (now < starttime || now > endtime) {// 已超时
 			log.info("now > isAlivingMillis,已超时");
 			return;
 		}
 
 		try {
-			// 获取监听列表
+			// 获取监听列表-常规
 			List<MonitorPool> allCode = monitorPoolService.getPoolListForMonitor(1, 0);
+			// 产品1：三五天
+			List<CodeBaseModel2> p1list = modelWebService.getShootingList();
 
 			List<RealtimeDetailsAnalyzer> list = new LinkedList<RealtimeDetailsAnalyzer>();
 			RealtimeDetailsResulter resulter = new RealtimeDetailsResulter();
