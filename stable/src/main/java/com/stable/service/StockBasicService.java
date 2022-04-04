@@ -233,7 +233,7 @@ public class StockBasicService {
 			while (it.hasNext()) {
 				StockBaseInfo e = it.next();
 				// list_status='L'
-				if ("L".equals(e.getList_status()) && (!e.getCode().startsWith("4") && !e.getCode().startsWith("8"))) {// 排除4,8开头的
+				if ("L".equals(e.getList_status()) && isHuShenCode(e.getCode())) {// 排除4,8开头的
 					// list.add(e);
 					LOCAL_ALL_ONLINE_LIST.add(e);
 				}
@@ -246,6 +246,11 @@ public class StockBasicService {
 		}
 		return copy;
 		// return dbStockBaseInfoDao.getListWithOnStauts();
+	}
+
+	// 沪深股票，0，6，3开头的
+	public boolean isHuShenCode(String code) {
+		return !code.startsWith("4") && !code.startsWith("8");
 	}
 
 	private Comparator<StockBaseInfo> sort = new Comparator<StockBaseInfo>() {

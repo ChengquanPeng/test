@@ -5,9 +5,7 @@ import lombok.Data;
 @Data
 public class Tick {
 
-	// 0/09:25:03/5.40/0.00/55340/29883600/S
-
-	private int id;
+	private String id;
 	private String time;
 	private double price;
 	private double change;// 涨跌额
@@ -15,20 +13,37 @@ public class Tick {
 	private double amt;// 额
 	private int bs;// 买卖：buy=1,sold=0
 
-	public Tick(String line) {
-		String[] fs = line.split("/");
-		id = Integer.valueOf(fs[0]);
-		time = fs[1];
-		price = Double.valueOf(fs[2]);
-		change = Double.valueOf(fs[3]);
-		vol = Long.valueOf(fs[4]);
-		amt = Double.valueOf(fs[5]);
+	private int fen;
+
+	public String getStandardLine() {
+		return id + "," + time + "," + price + "," + change + "," + vol + "," + amt + "," + bs + "," + fen;
+	}
+
+	public void setTime(String time) {
+		this.time = time;
+		String[] s = time.split(":");
+
+		fen = Integer.valueOf(s[0] + s[1]);
+	}
+
+	public void setValByStdLine(String line) {
+		// 4445,15:00:01,5.47,0.0,21953,1.2008291E7,1,
+		String[] fs = line.split(",");
+		this.setId(fs[0]);
+		this.setTime(fs[1]);
+		this.setPrice(Double.valueOf(fs[2]));
+		this.setChange(Double.valueOf(fs[3]));
+		this.setVol(Long.valueOf(fs[4]));
+		this.setAmt(Double.valueOf(fs[5]));
 		if ("S".equals(fs[6])) {
-			bs = 1;
+			this.setBs(1);
 		}
 	}
 
 	public static void main(String[] args) {
-		System.err.println(new Tick("0/09:25:03/5.40/0.00/55340/29883600/S"));
+		Tick t = new Tick();
+		t.setValByStdLine("4445,15:00:01,5.47,0.0,21953,1.2008291E7,1,");
+		System.err.println(t);
+		System.err.println(t.getAmt() / 10000);
 	}
 }
