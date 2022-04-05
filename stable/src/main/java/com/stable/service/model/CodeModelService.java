@@ -207,7 +207,8 @@ public class CodeModelService {
 				newOne.setMkv(mkv);
 				newOne.setActMkv(0);
 				if (mkv > 0 && s.getCircZb() > 0) {
-					newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (s.getCircZb() / 100))));
+					//5%以下的流通股份
+					newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (100 - s.getCircZb()) / 100)));
 				}
 //				newOne.setShooting3(0);
 				// 人工审核是否时间到期-重置
@@ -1218,5 +1219,4 @@ public class CodeModelService {
 			}
 		}
 	}
-
 }
