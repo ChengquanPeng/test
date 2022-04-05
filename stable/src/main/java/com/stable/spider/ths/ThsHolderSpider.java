@@ -292,7 +292,7 @@ public class ThsHolderSpider {
 							} catch (Exception e) {
 								log.info(key);
 								if (fher_x != null) {
-									//log.info(fher_x.asXml());
+									// log.info(fher_x.asXml());
 								}
 								e.printStackTrace();
 							}
@@ -391,7 +391,7 @@ public class ThsHolderSpider {
 			it4.next();// 持股变化(股)
 			String zb = it4.next().asText();// 占流通股比例
 			double zbd = Double.valueOf(zb.replace("%", ""));
-			if (hp5.getList_a().contains(name)) {
+			if (hp5.getList_a().contains(name)) {// 涉及到股权转让，则按名字来判断不准。应该按总股本减去/持股比例
 				hp5.getList_l().add(zbd);
 			}
 			p10Zb += zbd;
@@ -405,7 +405,7 @@ public class ThsHolderSpider {
 		ts.header = new HashMap<String, String>();
 		List<HolderPercent> hps = new LinkedList<HolderPercent>();
 		List<HolderNum> hns = new LinkedList<HolderNum>();
-		ts.dofetchHolderInner(DateUtil.getTodayIntYYYYMMDD(), "600820", hns, hps);
+		ts.dofetchHolderInner(DateUtil.getTodayIntYYYYMMDD(), "600106", hns, hps);
 		for (HolderNum h : hns) {
 			System.err.println(h);
 		}
