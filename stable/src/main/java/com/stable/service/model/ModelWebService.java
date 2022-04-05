@@ -160,7 +160,7 @@ public class ModelWebService {
 		}
 		// 基本面-筹码
 		sb5.append("流通:").append(dh.getMkv()).append("亿,");
-		sb5.append("5%以下:").append(dh.getActMkv()).append("亿,");
+		sb5.append("除5%活筹:").append(dh.getActMkv()).append("亿,");
 		sb5.append("前3大股东:").append(dh.getHolderNumT3()).append("%");
 		sb5.append(",股东人数(少):").append(CurrencyUitl.covertToString(dh.getLastNum()));
 		sb5.append(",人均持股(高):").append(CurrencyUitl.covertToString(dh.getAvgNum()));
