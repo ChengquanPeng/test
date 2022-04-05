@@ -30,6 +30,8 @@ public class RealTesting {
 	private double soldPrice;// 卖出价格
 	@Field(type = FieldType.Double)
 	private double profit;// 收益
+	@Field(type = FieldType.Integer)
+	private int sta = 1;// 状态：1买入，2卖出
 
 	public void setId() {
 		id = code + "|" + date + "|" + type;
