@@ -75,7 +75,7 @@ public class DzjyService {
 			if (s.getFloatShare() > 0) {
 				double unP5liutonggf = s.getFloatShare() * 100;
 				if (s.getCircZb() > 0) {// 除去5%以上的占比
-					unP5liutonggf = (100 - s.getCircZb()) * unP5liutonggf;
+					unP5liutonggf = ((100 - s.getCircZb()) * unP5liutonggf) / 100;
 				}
 				t.setP365d(CurrencyUitl.roundHalfUp((num / unP5liutonggf)));// 万股/亿股,百分比
 			}
@@ -102,7 +102,7 @@ public class DzjyService {
 			if (s.getFloatShare() > 0) {
 				double unP5liutonggf = s.getFloatShare() * 100;
 				if (s.getCircZb() > 0) {// 除去5%以上的占比
-					unP5liutonggf = (100 - s.getCircZb()) * unP5liutonggf;
+					unP5liutonggf = ((100 - s.getCircZb()) * unP5liutonggf) / 100;
 				}
 				t.setP60d(CurrencyUitl.roundHalfUp(num / unP5liutonggf));// 万股/亿股,百分比
 			}
