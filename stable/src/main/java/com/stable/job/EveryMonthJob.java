@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.service.TradeCalService;
-import com.stable.spider.eastmoney.EmDzjySpider;
+import com.stable.spider.eastmoney.DzjySpider;
 import com.stable.spider.ths.ThsJiejinSpider;
 import com.stable.spider.ths.ThsPlateSpider;
 import com.stable.utils.WxPushUtil;
@@ -19,7 +19,7 @@ public class EveryMonthJob extends MySimpleJob {
 	@Autowired
 	private TradeCalService tradeCalService;
 	@Autowired
-	private EmDzjySpider emDzjySpider;
+	private DzjySpider emDzjySpider;
 	@Autowired
 	private ThsJiejinSpider thsJiejinSpider;
 	@Autowired

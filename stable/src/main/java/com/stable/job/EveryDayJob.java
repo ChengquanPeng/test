@@ -14,7 +14,7 @@ import com.stable.service.ZhiYaService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
-import com.stable.spider.eastmoney.EmDzjySpider;
+import com.stable.spider.eastmoney.DzjySpider;
 import com.stable.spider.official.JysSpider;
 import com.stable.spider.ths.ThsSpider;
 import com.stable.utils.DateUtil;
@@ -40,7 +40,7 @@ public class EveryDayJob extends MySimpleJob {
 	@Autowired
 	private ChipsZfService chipsZfService;
 	@Autowired
-	private EmDzjySpider emDzjySpider;
+	private DzjySpider emDzjySpider;
 	@Autowired
 	private ThsSpider thsSpider;
 	@Autowired

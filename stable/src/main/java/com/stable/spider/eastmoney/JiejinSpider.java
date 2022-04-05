@@ -23,7 +23,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Component
 @Log4j2
-public class EmJiejinSpider {
+public class JiejinSpider {
 
 	// http://data.eastmoney.com/dxf/q/601989.html
 
@@ -106,7 +106,7 @@ public class EmJiejinSpider {
 	}
 
 	public static void main(String[] args) {
-		EmJiejinSpider tp = new EmJiejinSpider();
+		JiejinSpider tp = new JiejinSpider();
 		String[] as = { "601989", "603385", "300676", "002405", "601369", "600789", "002612" };
 		for (int i = 0; i < as.length; i++) {
 			tp.dofetch(as[i], new ArrayList<Jiejin>());

@@ -1,6 +1,7 @@
 package com.stable.service.monitor;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -58,15 +59,13 @@ public class RealtimeMonitoringService {
 		try {
 			// 获取监听列表-常规
 			List<MonitorPool> allCode = monitorPoolService.getPoolListForMonitor(1, 0);
-			// 产品1：三五天
-			List<CodeBaseModel2> p1list = modelWebService.getShootingList();
 
 			List<RealtimeDetailsAnalyzer> list = new LinkedList<RealtimeDetailsAnalyzer>();
 			RealtimeDetailsResulter resulter = new RealtimeDetailsResulter();
 
 			int failtt = 0;
 			if (allCode.size() > 0) {
-				// 启动监听线程
+				// ====启动监听线程====
 				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
 				for (MonitorPool cp : allCode) {
 					String code = cp.getCode();
@@ -92,7 +91,17 @@ public class RealtimeMonitoringService {
 						}
 					}
 				}
-				// 启动结果线程
+
+				// ====产品1：三五天 => 买点 ===
+				List<CodeBaseModel2> p1list = modelWebService.getShootingList();
+				if (p1list != null && p1list.size() > 0) {
+					for (CodeBaseModel2 c : p1list) {
+
+					}
+				}
+				// ====产品1：三五天 => 卖点 ====
+
+				// ====启动结果线程====
 				if (list.size() > 0) {
 					new Thread(resulter).start();
 				}

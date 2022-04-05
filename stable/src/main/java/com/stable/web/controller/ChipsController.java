@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stable.service.ChipsDzjyService;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
-import com.stable.spider.eastmoney.EmJiejinSpider;
+import com.stable.spider.eastmoney.JiejinSpider;
 import com.stable.spider.igoodstock.IgoodstockSpider;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.spider.ths.ThsJiejinSpider;
@@ -28,7 +28,7 @@ public class ChipsController {
 	@Autowired
 	private ChipsZfService chipsZfService;
 	@Autowired
-	private EmJiejinSpider emJiejinSpider;
+	private JiejinSpider emJiejinSpider;
 	@Autowired
 	private ThsJiejinSpider thsJiejinSpider;
 	@Autowired

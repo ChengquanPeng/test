@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +31,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Component
 @Log4j2
-public class EmDzjySpider {
+public class DzjySpider {
 
 	// http://data.eastmoney.com/dxf/q/601989.html
 
@@ -137,7 +139,7 @@ public class EmDzjySpider {
 
 	}
 
-//	@PostConstruct
+	@PostConstruct
 	public void byWeb() {
 		new Thread(new Runnable() {
 			public void run() {
@@ -255,7 +257,7 @@ public class EmDzjySpider {
 
 	public static void main(String[] args) {
 
-		EmDzjySpider es = new EmDzjySpider();
+		DzjySpider es = new DzjySpider();
 		es.byDaily("2021-12-24");
 
 //		List<Dzjy> list = new LinkedList<Dzjy>();
