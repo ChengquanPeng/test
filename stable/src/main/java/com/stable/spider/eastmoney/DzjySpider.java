@@ -6,8 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -139,7 +137,6 @@ public class DzjySpider {
 
 	}
 
-	@PostConstruct
 	public void byWeb() {
 		new Thread(new Runnable() {
 			public void run() {
