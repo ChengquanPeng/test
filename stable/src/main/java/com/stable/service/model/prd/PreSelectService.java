@@ -1,45 +1,84 @@
-package com.stable.service.model;
+package com.stable.service.model.prd;
 
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
-import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.ErrorLogFileUitl;
-import com.stable.vo.bus.CodeBaseModel2;
-import com.stable.vo.bus.DaliyBasicInfo2;
+import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.Prd1;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 
-@Service
-public class Sort2Feeling35DayModeService {
-	@Autowired
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
+public class PreSelectService {// Sort2Feeling35Day
 	private DaliyTradeHistroyService daliyTradeHistroyService;
-	@Autowired
-	private ModelWebService modelWebService;
-	@Autowired
-	private DaliyBasicHistroyService daliyBasicHistroyService;
+
+	public PreSelectService(DaliyTradeHistroyService a) {
+		this.daliyTradeHistroyService = a;
+	}
+
+	// 计数器：开始
+	public AtomicInteger cntDone = new AtomicInteger();
 
 	private final double mkvcheckLine = 100.0;// 市值
 	private double chkrateline = -7;// 3-5天跌幅
 	private final double upchkLine = 65.0;// 一年涨幅超过
 
+	List<Prd1> newList = Collections.synchronizedList(new LinkedList<Prd1>());
+
+	public void done() {
+		// 等待所有code执行完成
+		int last = 0;
+		int times = 0;
+		int cur = 0;
+		while (true) {
+			cur = cntDone.get();
+			if (cur == 0) {
+				break;
+			} else {
+				log.info("PRD PreSelectCode waiting cnt ====>" + cur);
+				try {
+					TimeUnit.SECONDS.sleep(60);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				if (last == cur) {
+					times++;
+				} else {
+					times = 0;
+					last = cur;
+				}
+				if (times >= 5) {
+					WxPushUtil.pushSystem1("错误:连续5分钟未成功执行任务PRD PreSelectCode PrdModeService.java");
+					break;
+				}
+			}
+		}
+		log.info("PRD PreSelectCode ALL Done!");
+	}
+
 	public boolean sort2ModeChk(String code, double mkv, int date) {
 		try {
 			if (mkv >= mkvcheckLine) {// 100亿
-				if (isPriceVolOk(code, date) && isKline(code, date)) {
-
-					return true;//
+				Prd1 p1 = new Prd1();
+				if (isPriceVolOk(code, date, p1) && isKline(code, date, p1)) {
+					newList.add(p1);
 				}
 			}
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, code, date, mkv);
+		} finally {
+			cntDone.incrementAndGet();
 		}
 		return false;
 	}
@@ -47,7 +86,7 @@ public class Sort2Feeling35DayModeService {
 	/**
 	 * 一年涨了65%?
 	 */
-	private boolean isKline(String code, int date) {
+	private boolean isKline(String code, int date, Prd1 p1) {
 		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
 				EsQueryPageUtil.queryPage250, SortOrder.DESC);
 
@@ -65,40 +104,8 @@ public class Sort2Feeling35DayModeService {
 		return false;
 	}
 
-//	@javax.annotation.PostConstruct
-	public void test() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				System.err.println("========= start =========");
-				int date = 20220401;
-				StringBuffer shootNotice6 = new StringBuffer();
-				Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
-				int i = 0;
-				for (CodeBaseModel2 cbm : histMap.values()) {
-					DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(cbm.getCode(), 0, 0);
-					System.err.println("code:" + cbm.getCode());
-					if (d == null) {
-						System.err.println("====> null:" + cbm.getCode());
-						continue;
-					}
-					sort2ModeChk(d.getCode(), d.getCircMarketVal(), date);
-					if (cbm.getShooting6() == 1) {
-						i++;
-						shootNotice6.append(cbm.getCode()).append("\n");
-					}
-					if (i >= 10) {
-						break;
-					}
-				}
-				System.err.println("========= done =========");
-				System.err.println(shootNotice6.toString());
-			}
-		}).start();
-	}
-
 	// 1.短期大幅下跌且缩量
-	private boolean isPriceVolOk(String code, int date) {
+	private boolean isPriceVolOk(String code, int date, Prd1 p1) {
 		boolean isOk = false;
 		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
 				EsQueryPageUtil.queryPage5, SortOrder.DESC);

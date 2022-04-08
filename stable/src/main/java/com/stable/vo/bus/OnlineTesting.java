@@ -27,7 +27,7 @@ public class OnlineTesting {
 	private int prdsub;// 产品细分类
 
 	@Field(type = FieldType.Integer)
-	private int buying;// 状态：是否已买入
+	private int stat;// 状态：是否已买入
 	@Field(type = FieldType.Double)
 	private double costPrice;// 成本价(多次买入后的成本价)
 	@Field(type = FieldType.Integer)
@@ -38,7 +38,7 @@ public class OnlineTesting {
 	private double profitAmt;// 收益(绝对值)
 
 	@Field(type = FieldType.Integer)
-	private int buytimes = 0;// 买入次数
+	private int times = 0;// 买入次数
 	@Field(type = FieldType.Double)
 	private double vol1st;// 第一次买入量：用于计算盈利百分比
 	@Field(type = FieldType.Text)

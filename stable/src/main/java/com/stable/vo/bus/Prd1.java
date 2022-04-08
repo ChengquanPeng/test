@@ -21,6 +21,4 @@ public class Prd1 {
 	private int prd;// 是否产品
 	@Field(type = FieldType.Integer)
 	private int prdsub;// 产品分类
-	@Field(type = FieldType.Integer)
-	private int buying;// 状态：是否已买入
 }

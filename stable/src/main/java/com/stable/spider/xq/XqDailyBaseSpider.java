@@ -11,11 +11,15 @@ import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
+import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.DataChangeService;
 import com.stable.service.StockBasicService;
+import com.stable.service.model.prd.PreSelectService;
+import com.stable.service.model.prd.PreSelectTask;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
+import com.stable.utils.TasksWorkerPrd1;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
@@ -35,6 +39,8 @@ public class XqDailyBaseSpider {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private DataChangeService dataChangeService;
+	@Autowired
+	private DaliyTradeHistroyService daliyTradeHistroyService;
 
 	private String F1 = "市盈率(静)";
 	private String F2 = "市盈率(动)";
@@ -71,32 +77,40 @@ public class XqDailyBaseSpider {
 
 	private synchronized void dofetchEntry(List<DaliyBasicInfo2> list) {
 		try {
-			
+			PreSelectService pd1 = new PreSelectService(daliyTradeHistroyService);
 			String today = DateUtil.getTodayYYYYMMDD();
 			List<DaliyBasicInfo2> upd = new LinkedList<DaliyBasicInfo2>();
+			int date = DateUtil.getTodayIntYYYYMMDD();
 			for (DaliyBasicInfo2 b : list) {
-				try {
-					if (dofetch(b, today)) {
-						upd.add(b);
-
-						// TODO
+				if (stockBasicService.isHuShenCode(b.getCode())) {
+					try {
+						if (dofetch(b, today)) {
+							upd.add(b);
+							// 产品1：选股程序
+							TasksWorkerPrd1.add(new PreSelectTask(pd1, b.getCode(), b.getCircMarketVal(), date));
+						}
+						// 流通股份
+						if (b.getFloatShare() > 0 && b.getTotalShare() > 0) {
+							StockBaseInfo base = stockBasicService.getCode(b.getCode());
+							base.setFloatShare(b.getFloatShare());
+							base.setTotalShare(b.getTotalShare());
+							stockBasicService.synBaseStockInfo(base, true);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+						WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包出错,code=" + b.getCode());
 					}
-					// 流通股份
-					if (b.getFloatShare() > 0 && b.getTotalShare() > 0) {
-						StockBaseInfo base = stockBasicService.getCode(b.getCode());
-						base.setFloatShare(b.getFloatShare());
-						base.setTotalShare(b.getTotalShare());
-						stockBasicService.synBaseStockInfo(base, true);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包出错,code=" + b.getCode());
 				}
 			}
 			if (upd.size() > 0) {
 				esDaliyBasicInfoDao.saveAll(list);
 				dataChangeService.putPeTtmData(upd);
 			}
+			new Thread(new Runnable() {
+				public void run() {
+					pd1.done();
+				}
+			}).start();
 			log.info("雪球=>每日指标-市盈率完成,期望数:{" + list.size() + "},实际成功数:" + upd.size());
 			if (upd.size() != list.size()) {
 				WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + list.size() + "},实际成功数:" + upd.size());
