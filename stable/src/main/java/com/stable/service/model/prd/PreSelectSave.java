@@ -38,6 +38,16 @@ public class PreSelectSave {
 
 	private String htmlname = "prd1.html";
 
+	private String getPrdSub(int sub) {
+		if (sub == 1) {
+			return "1=2天下跌";
+		}
+		if (sub == 2) {
+			return "2=3天以上下跌";
+		}
+		return sub + "=未知";
+	}
+
 	public void save(List<Prd1> newList) {
 		// 保存到数据库
 		Map<String, Prd1> hash = new HashMap<String, Prd1>();
@@ -82,14 +92,14 @@ public class PreSelectSave {
 				sb.append("<tr><td>").append(i + 1).append("</td>");// 序号
 				sb.append("<td class='sn'>").append(code).append("</td>");// 代码
 				sb.append("<td>").append(stockBasicService.getCodeName(code)).append("</td>");// 简称
-				sb.append("<td>").append(p1.getPrdsub()).append("</td>");// 细分类
+				sb.append("<td>").append(getPrdSub(p1.getPrdsub())).append("</td>");// 细分类
 				CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code);
 				String bk = stockBasicService.getCode(code).getThsIndustry();// 同花顺板块
 				String gn = conceptService.getCodeConceptStr(code);// 同花顺概念
-				sb.append("<td>").append(cbm.getMkv()).append("</td>");// 流通市值
+				sb.append("<td>").append(cbm.getMkv()).append("亿<br/>活筹").append(cbm.getActMkv()).append("亿</td>");// 流通市值
 				sb.append("<td>").append(bk + gn).append("</td>");// 概念
 				sb.append("<td>").append(cbm.getZfjjInfo()).append("</td>");// 备注
-				sb.append("<td>").append(cbm.getBaseInfo()).append("</td>");// 基本面
+				sb.append("<td>").append(cbm.getBaseRedDesc()).append("</td>");// 基本面
 				sb.append("</tr>");
 
 			}
@@ -97,7 +107,7 @@ public class PreSelectSave {
 			sb.append("<tr><td>无数据</td></tr>");
 		}
 		// end
-		sb.append("</table><script type='text/javascript' src='/html/static/addrlurl.js'></script>");
+		sb.append("</table><script type='text/javascript' src='/html/static/addsinaurl.js'></script>");
 		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlname, true);
 		fw.writeLine(sb.toString());
 		fw.close();

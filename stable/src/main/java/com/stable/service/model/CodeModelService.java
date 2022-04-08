@@ -197,6 +197,7 @@ public class CodeModelService {
 				ZhiYa zy = zhiYaService.getZhiYa(code);
 				double mkv = d.getCircMarketVal();
 				CodeBaseModel2 oldOne = histMap.get(s.getCode());
+				// 财报分析排雷
 				CodeBaseModel2 newOne = getBaseAnalyse(s, tradeDate, oldOne, d, zy, fourYearAgo);
 				listLast.add(newOne);
 				// 市盈率ttm
@@ -207,7 +208,7 @@ public class CodeModelService {
 				newOne.setMkv(mkv);
 				newOne.setActMkv(0);
 				if (mkv > 0 && s.getCircZb() > 0) {
-					//5%以下的流通股份
+					// 5%以下的流通股份
 					newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (100 - s.getCircZb()) / 100)));
 				}
 //				newOne.setShooting3(0);

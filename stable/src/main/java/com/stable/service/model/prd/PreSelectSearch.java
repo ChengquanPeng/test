@@ -66,11 +66,11 @@ public class PreSelectSearch {// Sort2Feeling35Day
 				}
 			}
 		}
-		log.info("PRD PreSelectCode ALL Done!");
+		log.info("PRD PreSelectCode ALL Done! 筛选到记录:{}", newList.size());
 		this.preSelectSave.save(newList);
 	}
 
-	public boolean sort2ModeChk(String code, double mkv, int date) {
+	public void sort2ModeChk(String code, double mkv, int date) {
 		try {
 			if (mkv >= mkvcheckLine) {// 100亿
 				Prd1 p1 = new Prd1();
@@ -83,9 +83,8 @@ public class PreSelectSearch {// Sort2Feeling35Day
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, code, date, mkv);
 		} finally {
-			cntDone.incrementAndGet();
+			cntDone.decrementAndGet();
 		}
-		return false;
 	}
 
 	/**
@@ -123,6 +122,7 @@ public class PreSelectSearch {// Sort2Feeling35Day
 		if (today.getTodayChangeRate() <= 0.0 && preday.getTodayChangeRate() <= 0.0
 				&& (chkrateline > (today.getTodayChangeRate() + preday.getTodayChangeRate()))) {
 			if (preday.getVolume() > (today.getVolume() * 2)) {
+				p1.setPrdsub(1);
 				return true;
 			}
 		}
@@ -132,6 +132,7 @@ public class PreSelectSearch {// Sort2Feeling35Day
 						+ preday.getTodayChangeRate() + l2.get(2).getTodayChangeRate()))) {
 			if (today.getVolume() < preday.getVolume() && preday.getVolume() < l2.get(2).getVolume()) {
 				if (l2.get(2).getVolume() > (today.getVolume() * 2)) {
+					p1.setPrdsub(2);
 					return true;
 				}
 			}

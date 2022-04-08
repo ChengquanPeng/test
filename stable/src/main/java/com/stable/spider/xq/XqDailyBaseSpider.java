@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -132,26 +134,6 @@ public class XqDailyBaseSpider {
 		}
 	}
 
-	public void rerun() throws Exception {
-		PreSelectSearch pd1 = new PreSelectSearch(daliyTradeHistroyService, preSelectSave);
-		int date = DateUtil.getTodayIntYYYYMMDD();
-		if (!tradeCalService.isOpen(date)) {
-			date = tradeCalService.getPretradeDate(date);
-		}
-		List<DaliyBasicInfo2> list = daliyBasicHistroyService
-				.queryListByCode("", date, EsQueryPageUtil.queryPage9999, SortOrder.ASC).getContent();
-		for (DaliyBasicInfo2 b : list) {
-			if (stockBasicService.isHuShenCode(b.getCode())) {
-				TasksWorkerPrd1.add(new PreSelectTask(pd1, b.getCode(), b.getCircMarketVal(), date));
-			}
-		}
-		new Thread(new Runnable() {
-			public void run() {
-				pd1.done();
-			}
-		}).start();
-	}
-
 	private boolean dofetch(DaliyBasicInfo2 b, String today) {
 		b.setPe(-1);
 		b.setPed(-1);
@@ -264,6 +246,40 @@ public class XqDailyBaseSpider {
 		} while (!fetched);
 		return false;
 
+	}
+
+	public void rerun() throws Exception {
+		PreSelectSearch pd1 = new PreSelectSearch(daliyTradeHistroyService, preSelectSave);
+		int date = DateUtil.getTodayIntYYYYMMDD();
+		if (!tradeCalService.isOpen(date)) {
+			date = tradeCalService.getPretradeDate(date);
+		}
+		List<DaliyBasicInfo2> list = daliyBasicHistroyService
+				.queryListByCode("", date, EsQueryPageUtil.queryPage9999, SortOrder.ASC).getContent();
+		log.info("PRD1 {} 获取到数据:{}条", date, list.size());
+		for (DaliyBasicInfo2 b : list) {
+			if (stockBasicService.isHuShenCode(b.getCode())) {
+				TasksWorkerPrd1.add(new PreSelectTask(pd1, b.getCode(), b.getCircMarketVal(), date));
+			}
+		}
+		new Thread(new Runnable() {
+			public void run() {
+				pd1.done();
+			}
+		}).start();
+	}
+
+	@PostConstruct
+	public void test() throws Exception {
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					rerun();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 	}
 
 	public static void main(String[] args) {

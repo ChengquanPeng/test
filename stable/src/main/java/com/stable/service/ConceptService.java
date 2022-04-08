@@ -95,8 +95,14 @@ public class ConceptService {
 		List<CodeConcept> l = getCodeConcept(code);
 		String str = " ";
 		if (l != null) {
+			int i = 0;
 			for (CodeConcept cc : l) {
+				i++;
 				str += cc.getConceptName() + " ";
+				if (i == 3) {
+					str += "<br/>";
+					i = 0;
+				}
 			}
 		}
 		return str;
