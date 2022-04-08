@@ -256,14 +256,6 @@ public class ModelWebService {
 			sb5.append("人工: 已排除");
 		}
 		resp.setZfjjInfo(sb5.toString());
-//		resp.setIncomeShow(dh.getCurrIncomeTbzz() + "%");
-//		if (dh.getForestallIncomeTbzz() > 0) {
-//			resp.setIncomeShow(resp.getIncomeShow() + "(" + dh.getForestallIncomeTbzz() + "%)");
-//		}
-//		resp.setProfitShow(dh.getCurrProfitTbzz() + "%");
-//		if (dh.getForestallIncomeTbzz() > 0) {
-//			resp.setProfitShow(resp.getProfitShow() + "(" + dh.getForestallProfitTbzz() + "%)");
-//		}
 		return resp;
 	}
 

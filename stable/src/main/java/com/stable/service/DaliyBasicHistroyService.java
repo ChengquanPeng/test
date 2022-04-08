@@ -39,7 +39,7 @@ public class DaliyBasicHistroyService {
 
 	public List<DaliyBasicInfoResp> queryListByCodeByWebPage(String code, EsQueryPageReq queryPage) {
 		List<DaliyBasicInfoResp> res = new LinkedList<DaliyBasicInfoResp>();
-		Page<DaliyBasicInfo2> page = this.queryListByCode(code, null, queryPage);
+		Page<DaliyBasicInfo2> page = this.queryListByCode(code, 0, queryPage);
 		if (page != null && !page.isEmpty()) {
 			for (DaliyBasicInfo2 dh : page.getContent()) {
 				DaliyBasicInfoResp resp = new DaliyBasicInfoResp();
@@ -51,8 +51,7 @@ public class DaliyBasicHistroyService {
 		return res;
 	}
 
-	public Page<DaliyBasicInfo2> queryListByCode(String code, String date, EsQueryPageReq queryPage, SortOrder order) {
-
+	public Page<DaliyBasicInfo2> queryListByCode(String code, int date, EsQueryPageReq queryPage, SortOrder order) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
 		log.info("queryPage code={},date={},pageNum={},size={}", code, date, pageNum, size);
@@ -61,8 +60,8 @@ public class DaliyBasicHistroyService {
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		}
-		if (StringUtils.isNotBlank(date)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("date", Integer.valueOf(date)));
+		if (date > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("date", date));
 		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(order);
 
@@ -71,7 +70,7 @@ public class DaliyBasicHistroyService {
 		return esDaliyBasicInfoDao.search(sq);
 	}
 
-	public Page<DaliyBasicInfo2> queryListByCode(String code, String date, EsQueryPageReq queryPage) {
+	public Page<DaliyBasicInfo2> queryListByCode(String code, int date, EsQueryPageReq queryPage) {
 		return this.queryListByCode(code, date, queryPage, SortOrder.DESC);
 	}
 

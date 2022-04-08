@@ -91,6 +91,17 @@ public class ConceptService {
 		return getCodeConcept(code, 0);
 	}
 
+	public String getCodeConceptStr(String code) {
+		List<CodeConcept> l = getCodeConcept(code);
+		String str = " ";
+		if (l != null) {
+			for (CodeConcept cc : l) {
+				str += cc.getConceptName() + " ";
+			}
+		}
+		return str;
+	}
+
 	private List<ConceptDaily> getTopConcepts(int date) {
 		EsQueryPageReq queryPage = EsQueryPageUtil.queryPage10;
 		int pageNum = queryPage.getPageNum();

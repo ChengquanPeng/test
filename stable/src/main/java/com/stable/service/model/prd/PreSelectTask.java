@@ -2,12 +2,12 @@ package com.stable.service.model.prd;
 
 public class PreSelectTask implements Runnable {
 
-	private PreSelectService dayModeService;
+	private PreSelectSearch dayModeService;
 	private String code;
 	private double mkv;
 	private int date;
 
-	public PreSelectTask(PreSelectService sdm, String code, double mkv, int date) {
+	public PreSelectTask(PreSelectSearch sdm, String code, double mkv, int date) {
 		this.dayModeService = sdm;
 		this.code = code;
 		this.mkv = mkv;

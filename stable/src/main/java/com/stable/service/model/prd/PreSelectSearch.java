@@ -20,11 +20,13 @@ import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class PreSelectService {// Sort2Feeling35Day
+public class PreSelectSearch {// Sort2Feeling35Day
 	private DaliyTradeHistroyService daliyTradeHistroyService;
+	private PreSelectSave preSelectSave;
 
-	public PreSelectService(DaliyTradeHistroyService a) {
+	public PreSelectSearch(DaliyTradeHistroyService a, PreSelectSave preSelectSave) {
 		this.daliyTradeHistroyService = a;
+		this.preSelectSave = preSelectSave;
 	}
 
 	// 计数器：开始
@@ -65,6 +67,7 @@ public class PreSelectService {// Sort2Feeling35Day
 			}
 		}
 		log.info("PRD PreSelectCode ALL Done!");
+		this.preSelectSave.save(newList);
 	}
 
 	public boolean sort2ModeChk(String code, double mkv, int date) {
@@ -72,6 +75,8 @@ public class PreSelectService {// Sort2Feeling35Day
 			if (mkv >= mkvcheckLine) {// 100亿
 				Prd1 p1 = new Prd1();
 				if (isPriceVolOk(code, date, p1) && isKline(code, date, p1)) {
+					p1.setCode(code);
+					p1.setPrd(1);
 					newList.add(p1);
 				}
 			}

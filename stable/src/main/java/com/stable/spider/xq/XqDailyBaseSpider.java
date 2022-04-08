@@ -4,17 +4,22 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
+import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.DataChangeService;
 import com.stable.service.StockBasicService;
-import com.stable.service.model.prd.PreSelectService;
+import com.stable.service.TradeCalService;
+import com.stable.service.model.prd.PreSelectSave;
+import com.stable.service.model.prd.PreSelectSearch;
 import com.stable.service.model.prd.PreSelectTask;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -41,6 +46,12 @@ public class XqDailyBaseSpider {
 	private DataChangeService dataChangeService;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
+	@Autowired
+	private PreSelectSave preSelectSave;
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
+	@Autowired
+	private TradeCalService tradeCalService;
 
 	private String F1 = "市盈率(静)";
 	private String F2 = "市盈率(动)";
@@ -77,7 +88,7 @@ public class XqDailyBaseSpider {
 
 	private synchronized void dofetchEntry(List<DaliyBasicInfo2> list) {
 		try {
-			PreSelectService pd1 = new PreSelectService(daliyTradeHistroyService);
+			PreSelectSearch pd1 = new PreSelectSearch(daliyTradeHistroyService, preSelectSave);
 			String today = DateUtil.getTodayYYYYMMDD();
 			List<DaliyBasicInfo2> upd = new LinkedList<DaliyBasicInfo2>();
 			int date = DateUtil.getTodayIntYYYYMMDD();
@@ -119,7 +130,26 @@ public class XqDailyBaseSpider {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包出错");
 		}
+	}
 
+	public void rerun() throws Exception {
+		PreSelectSearch pd1 = new PreSelectSearch(daliyTradeHistroyService, preSelectSave);
+		int date = DateUtil.getTodayIntYYYYMMDD();
+		if (!tradeCalService.isOpen(date)) {
+			date = tradeCalService.getPretradeDate(date);
+		}
+		List<DaliyBasicInfo2> list = daliyBasicHistroyService
+				.queryListByCode("", date, EsQueryPageUtil.queryPage9999, SortOrder.ASC).getContent();
+		for (DaliyBasicInfo2 b : list) {
+			if (stockBasicService.isHuShenCode(b.getCode())) {
+				TasksWorkerPrd1.add(new PreSelectTask(pd1, b.getCode(), b.getCircMarketVal(), date));
+			}
+		}
+		new Thread(new Runnable() {
+			public void run() {
+				pd1.done();
+			}
+		}).start();
 	}
 
 	private boolean dofetch(DaliyBasicInfo2 b, String today) {
