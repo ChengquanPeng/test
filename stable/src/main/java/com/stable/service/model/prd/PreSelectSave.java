@@ -83,7 +83,7 @@ public class PreSelectSave {
 		sb.append("<table border='1' cellspacing='0' cellpadding='0'>");
 		// head
 		sb.append(
-				"<tr><th>序号</th><th>代码</th><th>简称</th><th>细分类</th><th>流通市值</th><th>概念</th><th>备注</th><th>基本面</th></tr>");
+				"<tr><th>序号</th><th>代码</th><th>简称</th><th>细分类</th><th>流通市值</th><th>概念</th><th>基本面</th><th>备注</th></tr>");
 		// data
 		if (newList != null && newList.size() > 0) {
 			for (int i = 0; i < newList.size(); i++) {
@@ -98,8 +98,8 @@ public class PreSelectSave {
 				String gn = conceptService.getCodeConceptStr(code);// 同花顺概念
 				sb.append("<td>").append(cbm.getMkv()).append("亿<br/>活筹").append(cbm.getActMkv()).append("亿</td>");// 流通市值
 				sb.append("<td>").append(bk + gn).append("</td>");// 概念
-				sb.append("<td>").append(cbm.getZfjjInfo()).append("</td>");// 备注
 				sb.append("<td>").append(cbm.getBaseRedDesc()).append("</td>");// 基本面
+				sb.append("<td>").append(cbm.getBuyRea()).append("<br/>").append(cbm.getZfjjInfo()).append("</td>");// 备注
 				sb.append("</tr>");
 
 			}
