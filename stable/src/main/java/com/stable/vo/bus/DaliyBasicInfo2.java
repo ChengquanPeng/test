@@ -70,8 +70,6 @@ public class DaliyBasicInfo2 extends EsBase {
 	private double totalMarketVal;// float 总市值 （万元）
 	@Field(type = FieldType.Double)
 	private double circMarketVal;// float 流通市值（万元）
-	@Field(type = FieldType.Double)
-	private double szl;// float 市赚率 市盈率/净资产收益率（PE/ROE）
 
 	public DaliyBasicInfo2() {
 

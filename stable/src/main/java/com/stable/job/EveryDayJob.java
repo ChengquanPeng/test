@@ -13,9 +13,8 @@ import com.stable.service.TradeCalService;
 import com.stable.service.ZhiYaService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
-import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.eastmoney.DzjySpider;
-import com.stable.spider.official.JysSpider;
+import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.ths.ThsSpider;
 import com.stable.utils.DateUtil;
 
@@ -33,8 +32,6 @@ public class EveryDayJob extends MySimpleJob {
 	private BuyBackService buyBackService;
 	@Autowired
 	private CodeModelService codeModelService;
-	@Autowired
-	private JysSpider jysSpider;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
 	@Autowired
@@ -64,7 +61,7 @@ public class EveryDayJob extends MySimpleJob {
 		log.info("无效概念清除");
 		thsSpider.deleteInvaildCodeConcept();
 		log.info("交易所公告");
-		jysSpider.byJob();
+//		jysSpider.byJob();
 //		log.info("过期文件的删除");
 //		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 //		FileDeleteUitl.deletePastDateFile(efc.getModelImageFloder());

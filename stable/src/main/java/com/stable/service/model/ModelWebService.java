@@ -253,7 +253,7 @@ public class ModelWebService {
 		} else if (dh.getPls() == 1) {
 			sb5.append("人工: 已确定");
 		} else if (dh.getPls() == 2) {
-			sb5.append("人工: 排除");
+			sb5.append("人工: 已排除");
 		}
 		resp.setZfjjInfo(sb5.toString());
 //		resp.setIncomeShow(dh.getCurrIncomeTbzz() + "%");
@@ -401,7 +401,11 @@ public class ModelWebService {
 			}
 		}
 		if (mr.getPls() != -1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("pls", Integer.valueOf(mr.getPls())));
+			if (mr.getPls() == 3) {
+				bqb.mustNot(QueryBuilders.matchPhraseQuery("pls", 2));// 包含1和2
+			} else {
+				bqb.must(QueryBuilders.matchPhraseQuery("pls", Integer.valueOf(mr.getPls())));// 1或者2
+			}
 		}
 		if (StringUtils.isNotBlank(mr.getBred())) {
 			bqb.must(QueryBuilders.matchPhraseQuery("baseRed", Integer.valueOf(mr.getBred())));

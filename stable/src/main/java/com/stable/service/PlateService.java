@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.Concept;
-import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.http.resp.PlateResp;
 
@@ -29,8 +28,6 @@ public class PlateService {
 	private ConceptService conceptService;
 	@Autowired
 	private StockBasicService stockBasicService;
-	@Autowired
-	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private FinanceService financeService;
 
@@ -50,8 +47,6 @@ public class PlateService {
 			list = conceptService.listCodesByAliasCode(aliasCode, EsQueryPageUtil.queryPage9999);
 		}
 		if (list != null) {
-			double t1 = 0.0;// 市赚率
-			int c1 = 1;
 			double t2 = 0.0;// 收益率ttm
 			int c2 = 1;
 			double t3 = 0.0;// 毛利率
@@ -66,13 +61,6 @@ public class PlateService {
 				PlateResp r = new PlateResp();
 				List<FinanceBaseInfo> l2 = financeService.getLastFinaceReport4Quarter(code);
 				FinanceBaseInfo fbi = l2.get(0);
-				DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code);
-				if (d != null && d.getSzl() > 0) {// 排除负数
-					log.info("{},szl:{}", d.getCode(), d.getSzl());
-					r.setT1(d.getSzl());
-					t1 += d.getSzl();
-					c1++;
-				}
 				if (fbi != null) {
 //					log.info(fbi);
 					r.setT2(getSylTtm(l2));
@@ -95,9 +83,6 @@ public class PlateService {
 				r.setCodeName(stockBasicService.getCodeName(code));
 				rl.add(r);
 			}
-			if (c1 > 1) {
-				c1--;
-			}
 			if (c2 > 1) {
 				c2--;
 			}
@@ -107,12 +92,11 @@ public class PlateService {
 			if (c4 > 1) {
 				c4--;
 			}
-			double avgt1 = CurrencyUitl.roundHalfUp(t1 / (double) c1);
 			double avgt2 = CurrencyUitl.roundHalfUp(t2 / (double) c2);
 			double avgt3 = CurrencyUitl.roundHalfUp(t3 / (double) c3);
 			double avgt4 = CurrencyUitl.roundHalfUp(t4 / (double) c4);
 			for (PlateResp r : rl) {
-				r.setAvgt1(avgt1);
+				r.setAvgt1(0);
 				r.setAvgt2(avgt2);
 				r.setAvgt3(avgt3);
 				r.setAvgt4(avgt4);

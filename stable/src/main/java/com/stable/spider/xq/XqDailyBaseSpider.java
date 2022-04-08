@@ -12,7 +12,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.service.DataChangeService;
-import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -20,7 +19,6 @@ import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
-import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -33,8 +31,6 @@ public class XqDailyBaseSpider {
 	private HtmlunitSpider htmlunitSpider;// = new HtmlunitSpider();
 	@Autowired
 	private EsDaliyBasicInfoDao esDaliyBasicInfoDao;
-	@Autowired
-	private FinanceService financeService;
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -75,12 +71,15 @@ public class XqDailyBaseSpider {
 
 	private synchronized void dofetchEntry(List<DaliyBasicInfo2> list) {
 		try {
+			
 			String today = DateUtil.getTodayYYYYMMDD();
 			List<DaliyBasicInfo2> upd = new LinkedList<DaliyBasicInfo2>();
 			for (DaliyBasicInfo2 b : list) {
 				try {
 					if (dofetch(b, today)) {
 						upd.add(b);
+
+						// TODO
 					}
 					// 流通股份
 					if (b.getFloatShare() > 0 && b.getTotalShare() > 0) {
@@ -88,20 +87,6 @@ public class XqDailyBaseSpider {
 						base.setFloatShare(b.getFloatShare());
 						base.setTotalShare(b.getTotalShare());
 						stockBasicService.synBaseStockInfo(base, true);
-					}
-					// 市赚率
-					// 市盈率/净资产收益率（PE/ROE）
-					b.setSzl(0);
-					FinanceBaseInfo fbi = financeService.getLastFinaceReport(b.getCode());
-					if (fbi != null && fbi.getJqjzcsyl() != 0.0 && b.getPeTtm() > 0) {
-						if (fbi.getSyldjd() != 0) {
-							b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / fbi.getSyldjd()));
-						} else {
-							double syldjd = CurrencyUitl.roundHalfUp(fbi.getJqjzcsyl() / (double) fbi.getQuarter());
-							if (syldjd != 0) {
-								b.setSzl(CurrencyUitl.roundHalfUp(b.getPeTtm() / syldjd));
-							}
-						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();

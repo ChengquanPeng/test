@@ -30,18 +30,18 @@ public class Sort2Feeling35DayModeService {
 	private double chkrateline = -7;// 3-5天跌幅
 	private final double upchkLine = 65.0;// 一年涨幅超过
 
-	public void sort2ModeChk(CodeBaseModel2 cbm, double mkv, int date, StringBuffer shootNotice6) {
+	public boolean sort2ModeChk(String code, double mkv, int date) {
 		try {
-			cbm.setShooting6(0);
 			if (mkv >= mkvcheckLine) {// 100亿
-				String code = cbm.getCode();
 				if (isPriceVolOk(code, date) && isKline(code, date)) {
-					cbm.setShooting6(1);
+
+					return true;//
 				}
 			}
 		} catch (Exception e) {
-			ErrorLogFileUitl.writeError(e, cbm.getCode(), date, mkv);
+			ErrorLogFileUitl.writeError(e, code, date, mkv);
 		}
+		return false;
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class Sort2Feeling35DayModeService {
 						System.err.println("====> null:" + cbm.getCode());
 						continue;
 					}
-					sort2ModeChk(cbm, d.getCircMarketVal(), date, shootNotice6);
+					sort2ModeChk(d.getCode(), d.getCircMarketVal(), date);
 					if (cbm.getShooting6() == 1) {
 						i++;
 						shootNotice6.append(cbm.getCode()).append("\n");
