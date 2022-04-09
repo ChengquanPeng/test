@@ -269,7 +269,6 @@ public class XqDailyBaseSpider {
 		}).start();
 	}
 
-	@PostConstruct
 	public void test() throws Exception {
 		new Thread(new Runnable() {
 			public void run() {
