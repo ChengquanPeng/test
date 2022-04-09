@@ -17,8 +17,8 @@ public class TencentHistTick {
 	private static int start_len = start.length();
 
 	public static void genTick(String code, String filepath) {
-		List<Tick> ticks = new LinkedList<Tick>();
-		String url = String.format(url_base, getCode(code));
+		List<TickFb> ticks = new LinkedList<TickFb>();
+		String url = String.format(url_base, TencentTick.getCode(code));
 		int p = 0;
 		while (true) {
 			String s = HttpUtil.doGet2(url + p);
@@ -38,7 +38,7 @@ public class TencentHistTick {
 		}
 		if (StringUtils.isNotBlank(filepath)) {
 			FileWriteUitl fu = new FileWriteUitl(filepath, true);
-			for (Tick t : ticks) {
+			for (TickFb t : ticks) {
 				fu.writeLine(t.getStandardLine());
 			}
 			fu.close();
@@ -48,13 +48,13 @@ public class TencentHistTick {
 //		}
 	}
 
-	public static List<Tick> readFromFile(String filepath) {
+	public static List<TickFb> readFromFile(String filepath) {
 		FileReaderUitl reader = new FileReaderUitl(filepath);
-		List<Tick> list = new LinkedList<Tick>();
+		List<TickFb> list = new LinkedList<TickFb>();
 		reader.readLineAndClosed(new FileReaderLineWorker() {
 			@Override
 			public void doworker(String line) {
-				Tick t = new Tick();
+				TickFb t = new TickFb();
 				t.setValByStdLine(line);
 				list.add(t);
 			}
@@ -62,8 +62,8 @@ public class TencentHistTick {
 		return list;
 	}
 
-	private static Tick getTick(String line) {
-		Tick tick = new Tick();
+	private static TickFb getTick(String line) {
+		TickFb tick = new TickFb();
 		String[] fs = line.split("/");
 		tick.setId(fs[0]);
 		tick.setTencentTime(fs[1]);
@@ -82,17 +82,11 @@ public class TencentHistTick {
 		// 生成
 		genTick("000001", filepath);
 		// 读取
-		List<Tick> list = readFromFile(filepath);
-		for (Tick t : list) {
+		List<TickFb> list = readFromFile(filepath);
+		for (TickFb t : list) {
 			System.err.println(t);
 		}
 		System.err.println("==done===");
 	}
 
-	public static String getCode(String code) {
-		if (code.startsWith("6")) {
-			return "sh" + code;
-		}
-		return "sz" + code;
-	}
 }

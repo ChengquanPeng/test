@@ -20,9 +20,8 @@ public class TencentRealTick {
 	private static int tradeDate = DateUtil.getTodayIntYYYYMMDD();// 实时调用 TODO
 
 	public static void fetchRealTrades(String code) {
-		List<Tick> ticks = new LinkedList<Tick>();
-		String url = String.format(url_base, TencentHistTick.getCode(code), limit, tradeDate,
-				System.currentTimeMillis());
+		List<TickFb> ticks = new LinkedList<TickFb>();
+		String url = String.format(url_base, TencentTick.getCode(code), limit, tradeDate, System.currentTimeMillis());
 		String s = HttpUtil.doGet2(url);
 //		System.err.println(s);
 		if (s != null && s.length() > start_len) {
@@ -40,13 +39,13 @@ public class TencentRealTick {
 		}
 	}
 
-	public static List<Tick> readFromFile(String filepath) {
+	public static List<TickFb> readFromFile(String filepath) {
 		FileReaderUitl reader = new FileReaderUitl(filepath);
-		List<Tick> list = new LinkedList<Tick>();
+		List<TickFb> list = new LinkedList<TickFb>();
 		reader.readLineAndClosed(new FileReaderLineWorker() {
 			@Override
 			public void doworker(String line) {
-				Tick t = new Tick();
+				TickFb t = new TickFb();
 				t.setValByStdLine(line);
 				list.add(t);
 			}
@@ -54,8 +53,8 @@ public class TencentRealTick {
 		return list;
 	}
 
-	private static Tick getTick(String line) {
-		Tick tick = new Tick();
+	private static TickFb getTick(String line) {
+		TickFb tick = new TickFb();
 		String[] fs = line.split("/");
 		tick.setId(fs[0]);
 		tick.setTencentTime(fs[1]);

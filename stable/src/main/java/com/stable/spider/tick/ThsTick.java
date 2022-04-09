@@ -24,7 +24,7 @@ public class ThsTick {
 	private static int start_len = start.length();
 
 	public static void genTick(String code, String filepath) {
-		List<Tick> ticks = new LinkedList<Tick>();
+		List<TickFb> ticks = new LinkedList<TickFb>();
 		String key = "hs_" + code;
 		String url = String.format(url_base, key);
 		System.err.println(url);
@@ -56,25 +56,25 @@ public class ThsTick {
 
 		if (StringUtils.isNotBlank(filepath)) {
 			FileWriteUitl fu = new FileWriteUitl(filepath, true);
-			for (Tick t : ticks) {
+			for (TickFb t : ticks) {
 				fu.writeLine(t.getStandardLine());
 			}
 			fu.close();
 		}
 
-		for (Tick t : ticks) {
+		for (TickFb t : ticks) {
 			System.err.println(t.getStandardLine());
 		}
 
 	}
 
-	public static List<Tick> readFromFile(String filepath) {
+	public static List<TickFb> readFromFile(String filepath) {
 		FileReaderUitl reader = new FileReaderUitl(filepath);
-		List<Tick> list = new LinkedList<Tick>();
+		List<TickFb> list = new LinkedList<TickFb>();
 		reader.readLineAndClosed(new FileReaderLineWorker() {
 			@Override
 			public void doworker(String line) {
-				Tick t = new Tick();
+				TickFb t = new TickFb();
 				t.setValByStdLine(line);
 				list.add(t);
 			}
@@ -83,8 +83,8 @@ public class ThsTick {
 	}
 
 	// 1500,16.40,22856700,16.321,1393700
-	public static Tick getTick(String line) {
-		Tick tick = new Tick();
+	public static TickFb getTick(String line) {
+		TickFb tick = new TickFb();
 		String[] fs = line.split(",");
 		tick.setId(fs[0]);
 		tick.setTime(fs[0]);
@@ -101,8 +101,8 @@ public class ThsTick {
 		// 生成
 		genTick("000001", filepath);
 		// 读取
-		List<Tick> list = readFromFile(filepath);
-		for (Tick t : list) {
+		List<TickFb> list = readFromFile(filepath);
+		for (TickFb t : list) {
 			System.err.println(t);
 		}
 		System.err.println("==done===");

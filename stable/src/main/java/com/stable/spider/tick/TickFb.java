@@ -3,7 +3,7 @@ package com.stable.spider.tick;
 import lombok.Data;
 
 @Data
-public class Tick {
+public class TickFb {
 
 	private String id;
 	private String time;
@@ -42,7 +42,7 @@ public class Tick {
 	}
 
 	public static void main(String[] args) {
-		Tick t = new Tick();
+		TickFb t = new TickFb();
 		t.setValByStdLine("4445,15:00:01,5.47,0.0,21953,1.2008291E7,1,");
 		System.err.println(t);
 		System.err.println(t.getAmt() / 10000);
