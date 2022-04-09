@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
-import com.stable.spider.tick.TencentTick;
+import com.stable.spider.tick.TencentHistTick;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
@@ -48,7 +48,7 @@ public class TickService {
 							if (!cf.exists()) {
 								cf.mkdir();
 							}
-							TencentTick.genTick(code, tickFolder + code + File.separator + d.getDate());
+							TencentHistTick.genTick(code, tickFolder + code + File.separator + d.getDate());
 						}
 					}
 					ThreadsUtil.sleepRandomSecBetween15And30();

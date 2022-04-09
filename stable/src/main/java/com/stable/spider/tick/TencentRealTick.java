@@ -11,7 +11,7 @@ import com.stable.utils.FileReaderLineWorker;
 import com.stable.utils.FileReaderUitl;
 import com.stable.utils.HttpUtil;
 
-public class TencentTick {
+public class TencentRealTick {
 
 	private static String url_base = "https://proxy.finance.qq.com/ifzqgtimg/appstock/app/dealinfo/getMingxiV2?code=%s&limit=%s&direction=1&_callback=jQuery%s&_=%s";
 	private static String start = "jQuery20220409(";

@@ -19,10 +19,10 @@ public class Tick {
 		return id + "," + time + "," + price + "," + change + "," + vol + "," + amt + "," + bs + "," + fen;
 	}
 
-	public void setTime(String time) {
+	// 腾讯时间
+	public void setTencentTime(String time) {
 		this.time = time;
 		String[] s = time.split(":");
-
 		fen = Integer.valueOf(s[0] + s[1]);
 	}
 
@@ -38,6 +38,7 @@ public class Tick {
 		if ("S".equals(fs[6])) {
 			this.setBs(1);
 		}
+		this.setFen(Integer.valueOf(fs[7]));
 	}
 
 	public static void main(String[] args) {
