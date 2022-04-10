@@ -29,6 +29,14 @@ public class Prd1Service {
 	@Autowired
 	private OnlineTestingDao onlineTestingDao;
 
+	public void saveTesting(OnlineTesting p1) {
+		onlineTestingDao.save(p1);
+	}
+
+	public void saveTesting(List<OnlineTesting> list) {
+		onlineTestingDao.saveAll(list);
+	}
+
 	public List<Prd1Monitor> getMonitorList() {
 		List<Prd1Monitor> la = new LinkedList<Prd1Monitor>();
 		Map<String, Prd1Monitor> map = new HashMap<String, Prd1Monitor>();
@@ -37,7 +45,7 @@ public class Prd1Service {
 		for (Prd1 p1 : l1) {
 			Prd1Monitor pm = new Prd1Monitor();
 			pm.setCode(p1.getCode());
-			pm.setBuy(true);
+			pm.setBuy(p1);
 			map.put(pm.getCode(), pm);
 		}
 		for (OnlineTesting p1 : l2) {

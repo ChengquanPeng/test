@@ -15,10 +15,12 @@ import com.stable.service.model.ModelWebService;
 import com.stable.service.model.ShotPointCheck;
 import com.stable.service.model.prd.Prd1RealtimeMonitor;
 import com.stable.service.model.prd.Prd1Service;
+import com.stable.service.model.prd.TickService;
 import com.stable.spider.tick.TencentTickReal;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.OnlineTesting;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -39,6 +41,8 @@ public class RealtimeMonitoringService {
 	private ShotPointCheck shotPointCheck;
 	@Autowired
 	private Prd1Service prd1Service;
+	@Autowired
+	private TickService tickService;
 
 	public synchronized void startObservable() {
 		String date = DateUtil.getTodayYYYYMMDD();
@@ -102,7 +106,7 @@ public class RealtimeMonitoringService {
 
 			// ====产品1：三五天 => 买点 === 卖点 ====
 			TencentTickReal.tradeDate = idate;
-			Prd1RealtimeMonitor prd1m = new Prd1RealtimeMonitor(prd1Service.getMonitorList());
+			Prd1RealtimeMonitor prd1m = new Prd1RealtimeMonitor(prd1Service.getMonitorList(), tickService, prd1Service);
 			new Thread(prd1m).start();
 
 			long from3 = new Date().getTime();
@@ -127,16 +131,26 @@ public class RealtimeMonitoringService {
 					monitorPoolService.saveOrUpdate(mpt);
 				}
 			}
+			// 停止线程
 			prd1m.stop();
-			//TODO
-			// OnlineTesting -> 转换持仓量和可卖，今日买归0
-			
+			// OnlineTesting -> 转换持仓量:可卖=vol，今日买归0
+			Map<String, OnlineTesting> testinglist = prd1m.getTestinglist();
+			for (String code : testinglist.keySet()) {
+				OnlineTesting p1 = testinglist.get(code);
+				if (p1.getVol() > 0) {// 未卖完
+					p1.setCanSold(p1.getVol());
+					p1.setBuyToday(0);
+					prd1Service.saveTesting(p1);
+				}
+			}
+
 //			WxPushUtil.pushSystem2Html("交易日结束监听!");
 			// sendEndMessaget(buyedList, selledList);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			map = null;
+			System.gc();
 		}
 	}
 

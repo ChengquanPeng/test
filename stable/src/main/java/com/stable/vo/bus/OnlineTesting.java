@@ -31,27 +31,24 @@ public class OnlineTesting {
 	@Field(type = FieldType.Double)
 	private double costPrice;// 成本价(多次买入后的成本价)
 	@Field(type = FieldType.Integer)
-	private int vol = 0;// 持仓量
+	private int vol = 0;// 最新持仓量
+	@Field(type = FieldType.Integer)
+	private int canSold = 0;// 可卖数量
+	@Field(type = FieldType.Integer)
+	private int buyToday = 0;// 今天已买入
 	@Field(type = FieldType.Double)
 	private double profitPct;// 收益(百分比)
 	@Field(type = FieldType.Double)
 	private double profitAmt;// 收益(绝对值)
 
 	@Field(type = FieldType.Integer)
-	private int cansvol = 0;// 今可卖量
-	@Field(type = FieldType.Integer)
-	private int buytvol = 0;// 今天买入
-
-	@Field(type = FieldType.Integer)
 	private int times = 0;// 买入次数
 	@Field(type = FieldType.Double)
-	private double vol1st;// 第一次买入量：用于计算盈利百分比
+	private double cost1st;// 第一次买入量：用于计算盈利百分比
 	@Field(type = FieldType.Text)
-	private String buyhist;// 买入历史
-	@Field(type = FieldType.Text)
-	private String soldhist;// 卖出历史
+	private String hist;// 买入历史
 
-	public void setId() {
+	public void setIdkey() {
 		id = code + "|" + date + "|" + prd;
 	}
 }

@@ -41,13 +41,13 @@ public class Covert {
 							Map<Integer, TickFz> map = TencentTick.getTickFzMap(fbs, yp);
 							List<TickFz> fzs = TencentTick.getTickFz(map);
 							for (TickFz t : fzs) {
-								f1.writeLine(TencentTick.genTickfzToStr(t));
+								f1.writeLine(TencentTick.tickfzToStr(t));
 							}
 							f1.close();
 
 							FileWriteUitl f2 = new FileWriteUitl(
 									cf.getAbsolutePath() + File.separator + date + TickService.tickDaliy, true);
-							f2.writeLine(TencentTick.TD_vo_to_str(TencentTick.getTickTickDay(map)));
+							f2.writeLine(TencentTick.tickDayToStr(TencentTick.getTickTickDay(map)));
 							f2.close();
 						}
 						System.err.println(code + ":" + date + ":done");

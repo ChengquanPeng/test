@@ -23,7 +23,9 @@ import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.StockBaseInfo;
+import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -41,6 +43,17 @@ public class TickService {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	public static String tickDaliy = ".td";
+
+	public List<String> getLastFile(String code, int size) {
+		EsQueryPageReq queryPage = new EsQueryPageReq(size);
+		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, 0, queryPage,
+				SortOrder.DESC);
+		List<String> rl = new LinkedList<String>();
+		for (int i = 0; i < list.size(); i++) {
+			rl.add(tickFolder + code + File.separator + list.get(i).getDate() + tickDaliy);
+		}
+		return rl;
+	}
 
 	public void genTickEveryDay(List<DaliyBasicInfo2> daliybasicList, int date) {
 		new java.lang.Thread(new Runnable() {

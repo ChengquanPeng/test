@@ -17,7 +17,7 @@ public class TencentTickHist {
 	private static String start = "v_detail_data_sh601857=";
 	private static int start_len = start.length();
 
-	public static void genTick(String code, String filepath, double yersterdayPrice, String tickDaliy) {
+	public static List<TickFb> genTick(String code) {
 		List<TickFb> ticks = new LinkedList<TickFb>();
 		String url = String.format(url_base, TencentTick.getCode(code));
 		int p = 0;
@@ -37,19 +37,21 @@ public class TencentTickHist {
 			}
 			p++;
 		}
+		return ticks;
+	}
 
+	public static void genTick(String code, String filepath, double yersterdayPrice, String tickDaliy) {
+		List<TickFb> ticks = genTick(code);
 		// 写入文件
-		if (StringUtils.isNotBlank(filepath)) {
+		if (StringUtils.isNotBlank(filepath) && ticks.size() > 0) {
 			FileWriteUitl f1 = new FileWriteUitl(filepath, true);
 			FileWriteUitl f2 = new FileWriteUitl(filepath + tickDaliy, true);
-			if (ticks.size() > 0) {
-				Map<Integer, TickFz> map = TencentTick.getTickFzMap(ticks, yersterdayPrice);
-				List<TickFz> tt = TencentTick.getTickFz(map);
-				for (TickFz t : tt) {
-					f1.writeLine(TencentTick.genTickfzToStr(t));
-				}
-				f2.writeLine(TencentTick.TD_vo_to_str(TencentTick.getTickTickDay(map)));
+			Map<Integer, TickFz> map = TencentTick.getTickFzMap(ticks, yersterdayPrice);
+			List<TickFz> tt = TencentTick.getTickFz(map);
+			for (TickFz t : tt) {
+				f1.writeLine(TencentTick.tickfzToStr(t));
 			}
+			f2.writeLine(TencentTick.tickDayToStr(TencentTick.getTickTickDay(map)));
 			f1.close();
 			f2.close();
 		}
@@ -58,7 +60,7 @@ public class TencentTickHist {
 //		}
 	}
 
-	public static List<TickFz> readFromFile(String filepath) {
+	public static List<TickFz> readTickFzFromFile(String filepath) {
 		FileReaderUitl reader = new FileReaderUitl(filepath);
 		List<TickFz> list = new LinkedList<TickFz>();
 		reader.readLineAndClosed(new FileReaderLineWorker() {
@@ -72,12 +74,26 @@ public class TencentTickHist {
 		return list;
 	}
 
+	public static TickDay readTickDayFromFile(String filepath) {
+		FileReaderUitl reader = new FileReaderUitl(filepath);
+		List<TickDay> list = new LinkedList<TickDay>();
+		reader.readLineAndClosed(new FileReaderLineWorker() {
+			@Override
+			public void doworker(String line) {
+				if (StringUtils.isNotBlank(line)) {
+					list.add(TencentTick.strToTickDay(line));
+				}
+			}
+		});
+		return list.get(0);
+	}
+
 	public static void main(String[] args) {
 		String filepath = "E:/ticks/t1.tick";
 		// 生成
 		genTick("000039", filepath, 13.54, ".td");
 		// 读取
-		List<TickFz> list = readFromFile(filepath);
+		List<TickFz> list = readTickFzFromFile(filepath);
 		for (TickFz t : list) {
 			System.err.println(t);
 		}

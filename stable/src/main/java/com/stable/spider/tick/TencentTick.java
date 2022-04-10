@@ -20,8 +20,13 @@ public class TencentTick {
 		return map.values().stream().sorted(Comparator.comparing(TickFz::getFen)).collect(Collectors.toList());
 	}
 
-	//
+	// 获取tickday: 离线的
 	public static TickDay getTickTickDay(Map<Integer, TickFz> map) {
+		return getTickTickDay(map, false);
+	}
+
+	// 获取tickday: 是否在线计算
+	public static TickDay getTickTickDay(Map<Integer, TickFz> map, boolean online) {
 		map.remove(T_925);
 		map.remove(T_930);
 		map.remove(T_1500);
@@ -42,7 +47,14 @@ public class TencentTick {
 			}
 			bi = CurrencyUitl.addDecimal(bi, fz.getVol());
 		}
-		td.setAvg(CurrencyUitl.divideDecimal(bi, fens).longValue());
+		if (!online) {
+			td.setAvg(CurrencyUitl.divideDecimal(bi, fens).longValue());
+		} else {
+			// 实时的
+			if (bi.longValue() > 0 && map.keySet().size() > 0) {
+				td.setAvg(CurrencyUitl.divideDecimal(bi, map.keySet().size()).longValue());
+			}
+		}
 		return td;
 	}
 
@@ -88,12 +100,22 @@ public class TencentTick {
 	}
 
 	// 分钟级别:vo to str
-	public static String genTickfzToStr(TickFz fz) {
+	public static String tickfzToStr(TickFz fz) {
 		return fz.getFen() + "," + fz.getSx() + "," + fz.getVol() + "," + fz.getHprice() + "," + fz.getLprice();
 	}
 
-	public static String TD_vo_to_str(TickDay td) {
+	public static String tickDayToStr(TickDay td) {
 		return td.getTop() + "," + td.getUpVol() + "," + td.getDownVol() + "," + td.getAvg();
+	}
+
+	public static TickDay strToTickDay(String line) {
+		String[] ss = line.split(",");
+		TickDay td = new TickDay();
+		td.setTop(Long.valueOf(ss[0]));
+		td.setUpVol(Long.valueOf(ss[1]));
+		td.setDownVol(Long.valueOf(ss[2]));
+		td.setAvg(Long.valueOf(ss[3]));
+		return td;
 	}
 
 	// 分笔交易-腾讯
