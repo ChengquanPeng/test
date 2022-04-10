@@ -16,7 +16,7 @@ public class TencentHistTick {
 	private static String start = "v_detail_data_sh601857=";
 	private static int start_len = start.length();
 
-	public static void genTick(String code, String filepath) {
+	public static void genTick(String code, String filepath, double yersterdayPrice) {
 		List<TickFb> ticks = new LinkedList<TickFb>();
 		String url = String.format(url_base, TencentTick.getCode(code));
 		int p = 0;
@@ -28,7 +28,7 @@ public class TencentHistTick {
 				String[] ls = json.split("\\|");
 				for (String line : ls) {
 					if (StringUtils.isNotBlank(line)) {
-						ticks.add(getTick(line));
+						ticks.add(TencentTick.getTick(line));
 					}
 				}
 			} else {
@@ -36,10 +36,15 @@ public class TencentHistTick {
 			}
 			p++;
 		}
+
+		// 写入文件
 		if (StringUtils.isNotBlank(filepath)) {
 			FileWriteUitl fu = new FileWriteUitl(filepath, true);
-			for (TickFb t : ticks) {
-				fu.writeLine(t.getStandardLine());
+			if (ticks.size() > 0) {
+				List<TickFz> tt = TencentTick.getTickFz(TencentTick.getTickFzMap(ticks, yersterdayPrice));
+				for (TickFz t : tt) {
+					fu.writeLine(TencentTick.genTickfzToStr(t));
+				}
 			}
 			fu.close();
 		}
@@ -48,42 +53,27 @@ public class TencentHistTick {
 //		}
 	}
 
-	public static List<TickFb> readFromFile(String filepath) {
+	public static List<TickFz> readFromFile(String filepath) {
 		FileReaderUitl reader = new FileReaderUitl(filepath);
-		List<TickFb> list = new LinkedList<TickFb>();
+		List<TickFz> list = new LinkedList<TickFz>();
 		reader.readLineAndClosed(new FileReaderLineWorker() {
 			@Override
 			public void doworker(String line) {
-				TickFb t = new TickFb();
-				t.setValByStdLine(line);
-				list.add(t);
+				if (StringUtils.isNotBlank(line)) {
+					list.add(TencentTick.strToTickfz(line));
+				}
 			}
 		});
 		return list;
 	}
 
-	private static TickFb getTick(String line) {
-		TickFb tick = new TickFb();
-		String[] fs = line.split("/");
-		tick.setId(fs[0]);
-		tick.setTencentTime(fs[1]);
-		tick.setPrice(Double.valueOf(fs[2]));
-		tick.setChange(Double.valueOf(fs[3]));
-		tick.setVol(Long.valueOf(fs[4]));
-		tick.setAmt(Double.valueOf(fs[5]));
-		if ("S".equals(fs[6])) {
-			tick.setBs(1);
-		}
-		return tick;
-	}
-
 	public static void main(String[] args) {
 		String filepath = "E:/t1.tick";
 		// 生成
-		genTick("000001", filepath);
+		genTick("000039", filepath, 13.54);
 		// 读取
-		List<TickFb> list = readFromFile(filepath);
-		for (TickFb t : list) {
+		List<TickFz> list = readFromFile(filepath);
+		for (TickFz t : list) {
 			System.err.println(t);
 		}
 		System.err.println("==done===");

@@ -48,7 +48,8 @@ public class TickService {
 							if (!cf.exists()) {
 								cf.mkdir();
 							}
-							TencentHistTick.genTick(code, tickFolder + code + File.separator + d.getDate());
+							TencentHistTick.genTick(code, tickFolder + code + File.separator + d.getDate(),
+									d.getYesterdayPrice());
 						}
 					}
 					ThreadsUtil.sleepRandomSecBetween15And30();

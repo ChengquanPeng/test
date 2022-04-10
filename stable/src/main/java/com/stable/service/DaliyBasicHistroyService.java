@@ -18,6 +18,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.http.resp.DaliyBasicInfoResp;
@@ -72,6 +73,10 @@ public class DaliyBasicHistroyService {
 
 	public Page<DaliyBasicInfo2> queryListByCode(String code, int date, EsQueryPageReq queryPage) {
 		return this.queryListByCode(code, date, queryPage, SortOrder.DESC);
+	}
+
+	public DaliyBasicInfo2 queryByCodeAndDate(String code, int date) {
+		return queryListByCode(code, date, EsQueryPageUtil.queryPage1).getContent().get(0);
 	}
 
 	public DaliyBasicInfo2 queryLastest(String code, int date) {
