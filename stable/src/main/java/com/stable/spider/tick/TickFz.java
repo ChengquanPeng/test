@@ -10,5 +10,5 @@ public class TickFz {
 	public long vol;// 手
 	public double hprice;// 一分钟最高
 	public double lprice;// 一分钟最低
-	public int sx;// 水上水下
+	public int sx;// 1:水上,-1:水下
 }

@@ -207,6 +207,34 @@ public class CurrencyUitl {
 		return new BigDecimal(new Double(per).toString()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
 
+	// 加法
+	public static final BigDecimal addDecimal(double a, double b) {
+		return new BigDecimal(a).add(new BigDecimal(b));
+	}
+
+	public static final BigDecimal addDecimal(BigDecimal a, long b) {
+		return a.add(new BigDecimal(b));
+	}
+
+	// 减法
+	public static final BigDecimal subtractDecimal(double big, double small) {
+		return new BigDecimal(big).subtract(new BigDecimal(small));
+	}
+
+	// 乘法
+	public static final BigDecimal multiplyDecimal(double big, double small) {
+		return new BigDecimal(big).multiply(new BigDecimal(small));
+	}
+
+	// 除法
+	public static final BigDecimal divideDecimal(double big, double small) {
+		return new BigDecimal(big).divide(new BigDecimal(small), 2, BigDecimal.ROUND_HALF_UP);
+	}
+
+	public static final BigDecimal divideDecimal(BigDecimal a, int b) {
+		return a.divide(new BigDecimal(b), 2, BigDecimal.ROUND_HALF_UP);
+	}
+
 	public static void main(String[] args) {
 		// System.err.println(CurrencyUitl.covertToLong("-10亿"));
 		// System.err.println(CurrencyUitl.covertToLong("10亿"));

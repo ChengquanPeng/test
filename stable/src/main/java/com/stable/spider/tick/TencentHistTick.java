@@ -2,6 +2,7 @@ package com.stable.spider.tick;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,7 +17,7 @@ public class TencentHistTick {
 	private static String start = "v_detail_data_sh601857=";
 	private static int start_len = start.length();
 
-	public static void genTick(String code, String filepath, double yersterdayPrice) {
+	public static void genTick(String code, String filepath, double yersterdayPrice, String tickDaliy) {
 		List<TickFb> ticks = new LinkedList<TickFb>();
 		String url = String.format(url_base, TencentTick.getCode(code));
 		int p = 0;
@@ -39,14 +40,18 @@ public class TencentHistTick {
 
 		// 写入文件
 		if (StringUtils.isNotBlank(filepath)) {
-			FileWriteUitl fu = new FileWriteUitl(filepath, true);
+			FileWriteUitl f1 = new FileWriteUitl(filepath, true);
+			FileWriteUitl f2 = new FileWriteUitl(filepath + tickDaliy, true);
 			if (ticks.size() > 0) {
-				List<TickFz> tt = TencentTick.getTickFz(TencentTick.getTickFzMap(ticks, yersterdayPrice));
+				Map<Integer, TickFz> map = TencentTick.getTickFzMap(ticks, yersterdayPrice);
+				List<TickFz> tt = TencentTick.getTickFz(map);
 				for (TickFz t : tt) {
-					fu.writeLine(TencentTick.genTickfzToStr(t));
+					f1.writeLine(TencentTick.genTickfzToStr(t));
 				}
+				f2.writeLine(TencentTick.TD_vo_to_str(TencentTick.getTickTickDay(map)));
 			}
-			fu.close();
+			f1.close();
+			f2.close();
 		}
 //		for (Tick t : ticks) {
 //			System.err.println(t.getStandardLine());
@@ -68,9 +73,9 @@ public class TencentHistTick {
 	}
 
 	public static void main(String[] args) {
-		String filepath = "E:/t1.tick";
+		String filepath = "E:/ticks/t1.tick";
 		// 生成
-		genTick("000039", filepath, 13.54);
+		genTick("000039", filepath, 13.54, ".td");
 		// 读取
 		List<TickFz> list = readFromFile(filepath);
 		for (TickFz t : list) {

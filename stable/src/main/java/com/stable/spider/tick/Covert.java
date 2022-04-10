@@ -3,14 +3,14 @@ package com.stable.spider.tick;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.annotation.PostConstruct;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stable.service.DaliyBasicHistroyService;
+import com.stable.service.TickService;
 import com.stable.utils.FileReaderLineWorker;
 import com.stable.utils.FileReaderUitl;
 import com.stable.utils.FileWriteUitl;
@@ -35,14 +35,20 @@ public class Covert {
 					if (isCodeOrDate(date)) {
 						List<TickFb> fbs = readFromFile(cf.getAbsolutePath() + File.separator + date);
 						if (fbs.size() > 0) {
-							FileWriteUitl fu = new FileWriteUitl(cf.getAbsolutePath() + File.separator + date, true);
+							FileWriteUitl f1 = new FileWriteUitl(cf.getAbsolutePath() + File.separator + date, true);
 							double yp = daliyBasicHistroyService.queryByCodeAndDate(code, Integer.valueOf(date))
 									.getYesterdayPrice();
-							List<TickFz> fzs = TencentTick.getTickFz(TencentTick.getTickFzMap(fbs, yp));
+							Map<Integer, TickFz> map = TencentTick.getTickFzMap(fbs, yp);
+							List<TickFz> fzs = TencentTick.getTickFz(map);
 							for (TickFz t : fzs) {
-								fu.writeLine(TencentTick.genTickfzToStr(t));
+								f1.writeLine(TencentTick.genTickfzToStr(t));
 							}
-							fu.close();
+							f1.close();
+
+							FileWriteUitl f2 = new FileWriteUitl(
+									cf.getAbsolutePath() + File.separator + date + TickService.tickDaliy, true);
+							f2.writeLine(TencentTick.TD_vo_to_str(TencentTick.getTickTickDay(map)));
+							f2.close();
 						}
 						System.err.println(code + ":" + date + ":done");
 					}
@@ -68,6 +74,7 @@ public class Covert {
 			@Override
 			public void run() {
 				ThreadsUtil.sleepRandomSecBetween5And15();
+//				tickFolder = "E:/ticks/";
 				startCovert();
 			}
 		}).start();

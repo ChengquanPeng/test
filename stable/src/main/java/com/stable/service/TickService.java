@@ -1,6 +1,7 @@
 package com.stable.service;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,6 +37,7 @@ public class TickService {
 	private String tickFolder;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
+	public static String tickDaliy = ".td";
 
 	public void genTickEveryDay(List<DaliyBasicInfo2> daliybasicList, int date) {
 		new java.lang.Thread(new Runnable() {
@@ -49,7 +51,7 @@ public class TickService {
 								cf.mkdir();
 							}
 							TencentHistTick.genTick(code, tickFolder + code + File.separator + d.getDate(),
-									d.getYesterdayPrice());
+									d.getYesterdayPrice(), tickDaliy);
 						}
 					}
 					ThreadsUtil.sleepRandomSecBetween15And30();
@@ -59,7 +61,7 @@ public class TickService {
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					WxPushUtil.pushSystem1("每日Tick 数据文件生成异常");
+					WxPushUtil.pushSystem1("每日Tick 数据文件生成异常或删除异常");
 				}
 			}
 		}).start();
@@ -95,7 +97,11 @@ public class TickService {
 		for (StockBaseInfo s : list) {
 			String code = s.getCode();
 			File cf = new File(tickFolder + code);
-			File[] ff = cf.listFiles();
+			File[] ff = cf.listFiles(new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					return !name.endsWith(tickDaliy);
+				}
+			});
 			if (ff != null && ff.length > 0) {
 				if (Constant.CODE_ON_STATUS.equals(s.getList_status())) {
 					// 删除小于天以前的
@@ -106,6 +112,8 @@ public class TickService {
 					for (File f : ff) {
 						if (Integer.valueOf(f.getName()) < minDate) {// 最小日期删除
 							f.delete();
+							File f2 = new File(f.getAbsoluteFile() + tickDaliy);// 删除td文件
+							f2.delete();
 							log.info("delete:" + f.getAbsolutePath());
 						}
 					}
@@ -113,6 +121,8 @@ public class TickService {
 					// 删除全部
 					for (File f : ff) {
 						f.delete();
+						File f2 = new File(f.getAbsoluteFile() + tickDaliy);
+						f2.delete();
 					}
 					cf.delete();
 					log.info(code + " delete all");
@@ -120,5 +130,24 @@ public class TickService {
 			}
 		}
 		log.info("delete tick file done");
+	}
+
+	public static void main(String[] args) {
+		String tickFolder = "E:/ticks/000002";
+		File cf = new File(tickFolder);
+		File[] ff = cf.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return !name.endsWith(tickDaliy);
+			}
+		});
+		int minDate = 20220507;
+		for (File f : ff) {
+			if (Integer.valueOf(f.getName()) < minDate) {// 最小日期删除
+				f.delete();
+				File f2 = new File(f.getAbsoluteFile() + tickDaliy);// 删除td文件
+				f2.delete();
+				log.info("delete:" + f.getAbsolutePath());
+			}
+		}
 	}
 }

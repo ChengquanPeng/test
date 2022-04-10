@@ -1,16 +1,49 @@
 package com.stable.spider.tick;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.stable.utils.CurrencyUitl;
+
 public class TencentTick {
+	private static int T_925 = 925;
+	private static int T_930 = 930;
+	private static int T_1500 = 1500;
+	private static int fens = 239;// 09:25-09:30->15:00, 4个小时，4*60=240分钟，+ 09:25=241,
 
 	// 写文件的时候，最好排序
 	public static List<TickFz> getTickFz(Map<Integer, TickFz> map) {
 		return map.values().stream().sorted(Comparator.comparing(TickFz::getFen)).collect(Collectors.toList());
+	}
+
+	//
+	public static TickDay getTickTickDay(Map<Integer, TickFz> map) {
+		map.remove(T_925);
+		map.remove(T_930);
+		map.remove(T_1500);
+		BigDecimal bi = new BigDecimal(0);
+		TickDay td = new TickDay();
+		for (TickFz fz : map.values()) {
+			if (fz.sx == 1) {
+				if (fz.getVol() > td.getUpVol()) {
+					td.setUpVol(fz.getVol());
+				}
+			} else if (fz.sx == -1) {
+				if (fz.getVol() > td.getDownVol()) {
+					td.setDownVol(fz.getVol());
+				}
+			}
+			if (fz.getVol() > td.getTop()) {
+				td.setTop(fz.getVol());
+			}
+			bi = CurrencyUitl.addDecimal(bi, fz.getVol());
+		}
+		td.setAvg(CurrencyUitl.divideDecimal(bi, fens).longValue());
+		return td;
 	}
 
 	public static Map<Integer, TickFz> getTickFzMap(List<TickFb> list, double yersterdayPrice) {
@@ -57,6 +90,10 @@ public class TencentTick {
 	// 分钟级别:vo to str
 	public static String genTickfzToStr(TickFz fz) {
 		return fz.getFen() + "," + fz.getSx() + "," + fz.getVol() + "," + fz.getHprice() + "," + fz.getLprice();
+	}
+
+	public static String TD_vo_to_str(TickDay td) {
+		return td.getTop() + "," + td.getUpVol() + "," + td.getDownVol() + "," + td.getAvg();
 	}
 
 	// 分笔交易-腾讯
