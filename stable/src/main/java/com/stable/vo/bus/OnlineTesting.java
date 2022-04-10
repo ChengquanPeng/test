@@ -38,6 +38,11 @@ public class OnlineTesting {
 	private double profitAmt;// 收益(绝对值)
 
 	@Field(type = FieldType.Integer)
+	private int cansvol = 0;// 今可卖量
+	@Field(type = FieldType.Integer)
+	private int buytvol = 0;// 今天买入
+
+	@Field(type = FieldType.Integer)
 	private int times = 0;// 买入次数
 	@Field(type = FieldType.Double)
 	private double vol1st;// 第一次买入量：用于计算盈利百分比

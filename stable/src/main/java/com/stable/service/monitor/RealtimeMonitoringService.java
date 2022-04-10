@@ -13,9 +13,11 @@ import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.ModelWebService;
 import com.stable.service.model.ShotPointCheck;
+import com.stable.service.model.prd.Prd1RealtimeMonitor;
+import com.stable.service.model.prd.Prd1Service;
+import com.stable.spider.tick.TencentTickReal;
 import com.stable.utils.DateUtil;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPool;
 
 import lombok.extern.log4j.Log4j2;
@@ -35,11 +37,10 @@ public class RealtimeMonitoringService {
 	private ModelWebService modelWebService;
 	@Autowired
 	private ShotPointCheck shotPointCheck;
+	@Autowired
+	private Prd1Service prd1Service;
 
 	public synchronized void startObservable() {
-//		if (System.currentTimeMillis() > 0) {
-//			return;
-//		}
 		String date = DateUtil.getTodayYYYYMMDD();
 		int idate = Integer.valueOf(date);
 		if (!tradeCalService.isOpen(idate)) {
@@ -91,23 +92,18 @@ public class RealtimeMonitoringService {
 					}
 				}
 
-				// ====产品1：三五天 => 买点 ===
-				List<CodeBaseModel2> p1list = modelWebService.getShootingList();
-				if (p1list != null && p1list.size() > 0) {
-					for (CodeBaseModel2 c : p1list) {
-
-					}
-				}
-				// ====产品1：三五天 => 卖点 ====
-
 				// ====启动结果线程====
 				if (list.size() > 0) {
 					new Thread(resulter).start();
 				}
 			}
-
 			WxPushUtil.pushSystem1(
 					"交易日监听实时交易，监听总数:[" + allCode.size() + "],实际总数[" + list.size() + "],监听失败[" + failtt + "]");
+
+			// ====产品1：三五天 => 买点 === 卖点 ====
+			TencentTickReal.tradeDate = idate;
+			Prd1RealtimeMonitor prd1m = new Prd1RealtimeMonitor(prd1Service.getMonitorList());
+			new Thread(prd1m).start();
 
 			long from3 = new Date().getTime();
 			int millis = (int) ((endtime - from3));
@@ -131,6 +127,10 @@ public class RealtimeMonitoringService {
 					monitorPoolService.saveOrUpdate(mpt);
 				}
 			}
+			prd1m.stop();
+			//TODO
+			// OnlineTesting -> 转换持仓量和可卖，今日买归0
+			
 //			WxPushUtil.pushSystem2Html("交易日结束监听!");
 			// sendEndMessaget(buyedList, selledList);
 		} catch (Exception e) {

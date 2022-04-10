@@ -9,16 +9,16 @@ import com.alibaba.fastjson.JSONObject;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
 
-public class TencentRealTick {
+public class TencentTickReal {
 
 	private static String url_base = "https://proxy.finance.qq.com/ifzqgtimg/appstock/app/dealinfo/getMingxiV2?code=%s&limit=%s&direction=1&_callback=jQuery%s&_=%s";
 	private static String start = "jQuery20220409(";
 	private static int start_len = start.length();
 	public static int limit = 60;// 60条
-	public static int tradeDate = DateUtil.getTodayIntYYYYMMDD();// 实时调用 TODO
+	public static int tradeDate = DateUtil.getTodayIntYYYYMMDD();// 实时调用
 
 	// 获取最新交易-腾讯
-	public static void fetchRealTradesLast60(String code) {
+	public static List<TickFb> fetchRealTradesLast60(String code) {
 		List<TickFb> ticks = new LinkedList<TickFb>();
 		String url = String.format(url_base, TencentTick.getCode(code), limit, tradeDate, System.currentTimeMillis());
 		String s = HttpUtil.doGet2(url);
@@ -36,16 +36,17 @@ public class TencentRealTick {
 
 			}
 		}
+		return ticks;
 	}
 
 	public static void main(String[] args) {
 		// 生成
-		fetchRealTradesLast60("301058");
+		List<TickFb> l = fetchRealTradesLast60("000039");
 		// 读取
 //		List<Tick> list = readFromFile(filepath);
 //		for (Tick t : list) {
 //			System.err.println(t);
 //		}
-		System.err.println("==done===");
+		System.err.println("==done===:" + l.size());
 	}
 }

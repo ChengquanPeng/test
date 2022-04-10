@@ -584,26 +584,6 @@ public class ModelWebService {
 		return null;
 	}
 
-	public List<CodeBaseModel2> getShootingList() {
-		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("shooting6", 1));
-
-//		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);
-
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		NativeSearchQueryBuilder builder = queryBuilder.withQuery(bqb);
-		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
-		builder.withPageable(pageable);// .withSort(sort)
-		SearchQuery sq = builder.build();
-		Page<CodeBaseModel2> page = codeBaseModel2Dao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent();
-		}
-		log.info("no records CodeBaseModels");
-		return null;
-	}
-
 	public Map<String, CodeBaseModel2> getALLForMap() {
 		List<CodeBaseModel2> list = getALLForList();
 		Map<String, CodeBaseModel2> map = new HashMap<String, CodeBaseModel2>();

@@ -11,7 +11,7 @@ import com.stable.utils.FileReaderUitl;
 import com.stable.utils.FileWriteUitl;
 import com.stable.utils.HttpUtil;
 
-public class TencentHistTick {
+public class TencentTickHist {
 
 	private static String url_base = "https://stock.gtimg.cn/data/index.php?appn=detail&action=data&c=%s&p=";
 	private static String start = "v_detail_data_sh601857=";
