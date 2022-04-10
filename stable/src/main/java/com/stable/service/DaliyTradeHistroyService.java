@@ -36,6 +36,7 @@ import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.ShotPointCheck;
+import com.stable.service.model.prd.TickService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;

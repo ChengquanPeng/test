@@ -1,4 +1,4 @@
-package com.stable.service;
+package com.stable.service.model.prd;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.service.DaliyTradeHistroyService;
+import com.stable.service.StockBasicService;
+import com.stable.service.TradeCalService;
 import com.stable.spider.tick.TencentTickHist;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.ThreadsUtil;

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stable.service.DaliyBasicHistroyService;
-import com.stable.service.TickService;
+import com.stable.service.model.prd.TickService;
 import com.stable.utils.FileReaderLineWorker;
 import com.stable.utils.FileReaderUitl;
 import com.stable.utils.FileWriteUitl;
