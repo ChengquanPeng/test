@@ -50,7 +50,7 @@ public class Prd1RealtimeMonitor implements Runnable {
 				DateUtil.parseDate(today + "145500", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 
 		// 等待时间
-		long starttime = DateUtil.parseTodayYYYYMMDDHHMMSS(date + " 09:30:05").getTime();
+		long starttime = DateUtil.parseTodayYYYYMMDDHHMMSS(today + " 09:30:05").getTime();
 		long from1 = new Date().getTime();
 		int millis1 = (int) ((starttime - from1));
 		if (millis1 > 0) {
