@@ -1,9 +1,12 @@
 package com.stable.service.model.prd;
 
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.stable.constant.Constant;
 import com.stable.spider.realtime.RealTime;
@@ -51,10 +54,7 @@ public class Prd1MoniWorker implements Runnable {
 		prd1Service = ps;
 	}
 
-	public void run() {
-		if (isException) {
-			return;
-		}
+	private synchronized void running() {
 		try {
 			// 1.初始化
 			if (yersterdayPrice == 0) {
@@ -77,8 +77,8 @@ public class Prd1MoniWorker implements Runnable {
 				int size = 3;
 				List<String> files = tickService.getLastFile(code, size);
 				tds.add(TencentTickHist.readTickDayFromFile(files.get(0)));
-				tds.add(TencentTickHist.readTickDayFromFile(files.get(1)));
-				tds.add(TencentTickHist.readTickDayFromFile(files.get(2)));
+//				tds.add(TencentTickHist.readTickDayFromFile(files.get(1)));
+//				tds.add(TencentTickHist.readTickDayFromFile(files.get(2)));
 
 				if (stpchk > 0) {// 前面的可能没有获取到完整数据
 					List<TickFb> fbs = TencentTickHist.genTick(code);
@@ -95,18 +95,19 @@ public class Prd1MoniWorker implements Runnable {
 			for (Integer key : t.keySet()) {
 				map.put(key, t.get(key));
 			}
-			TickDay today = TencentTick.getTickTickDay(map, true);
+			last = fbs.get(0);
+			today = TencentTick.getTickTickDay(map, true);
 			boolean needBuy = false;
 
 			// 3.根据仓位进行动态决策：买入还是卖出
 
-			if (ot != null) {// 是否已经买入？
-				if (help == soldPoint()) {
-					buyPoint();// 需要补仓
-				}
-			} else {
-				buyPoint();// 纯买入监听
-			}
+//			if (ot != null) {// 是否已经买入？
+//				if (help == soldPoint()) {
+//					buyPoint();// 需要补仓
+//				}
+//			} else {
+//				buyPoint();// 纯买入监听
+//			}
 		} catch (Exception e) {
 			isException = true;
 			e.printStackTrace();
@@ -114,18 +115,49 @@ public class Prd1MoniWorker implements Runnable {
 		}
 	}
 
+	private TickFb last = null;
+	private TickDay today = null;
+
+	public void run() {
+		if (isException) {
+			return;
+		}
+		running();
+	}
+
 	private boolean isBuy2nd = false;// 是否已经2次买入
 	// 卖点:
 	// 9:已套牢，需要补偿，
 
-	private int soldPoint() {
+	// 总成本
+	private double totCostPrice;
+	private double tcostprice;
 
-		return help;
+	// 是否获取到卖点
+	private boolean soldPoint() {
+		if (yersterdayPrice < last.getPrice()) {// 水上
+			if (CurrencyUitl.cutProfit(totCostPrice, last.getPrice()) > 0.5) {// 至少盈利0.5%
+				if (today.getAvg() > 0 && today.getUpVol() > today.getAvg() * 1.8) {// 下量超过今天的均量的2倍
+					if (today.getUpVol() > (tds.get(0).getTop() * 0.9)) {// 量超过昨天最高的量的9折
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	// 是否获取到买点
 	private boolean buyPoint() {
-
+		if (yersterdayPrice > last.getPrice()) {// 水下
+			if (CurrencyUitl.cutProfit(yersterdayPrice, last.getPrice()) < -1.5) {// 至少下跌-1.5%
+				if (today.getAvg() > 0 && today.getDownVol() > today.getAvg() * 1.8) {// 下跌量超过今天的均量的2倍
+					if (today.getDownVol() > (tds.get(0).getTop() * 0.8)) {// 量超过昨天最高的量的8折
+						return true;
+					}
+				}
+			}
+		}
 		return false;
 	}
 
@@ -149,7 +181,7 @@ public class Prd1MoniWorker implements Runnable {
 				ott.setProfitPct(0);
 				ott.setTimes(0);
 				ott.setCost1st(CurrencyUitl.multiplyDecimal(ott.getCostPrice(), ott.getVol()).doubleValue());
-				String hist = date + "+" + ott.getCostPrice() + "x" + ott.getVol();
+				String hist = getTime() + "+" + ott.getCostPrice() + "x" + ott.getVol();
 				ott.setHist(hist);
 				this.ot = ott;
 				prd1Service.saveTesting(ott);
@@ -158,13 +190,17 @@ public class Prd1MoniWorker implements Runnable {
 		}
 	}
 
+	private String getTime() {
+		return DateUtil.formatDate(new Date(), DateUtil.YYYY_MM_DD3_HHMMSS);
+	}
+
 	private void soldAction() {
 		int date = DateUtil.getTodayIntYYYYMMDD();
 		RealTime srt = RealtimeCall.get(code);
 		if (srt.getBuy1() > 0) {
 			if (ot != null && ot.getCanSold() > 0) {
 				ot.setCostPrice(srt.getBuy1());
-				String hist = ot.getHist() + "|" + date + "-" + srt.getBuy1() + "x" + ot.getCanSold();
+				String hist = ot.getHist() + "|" + getTime() + "-" + srt.getBuy1() + "x" + ot.getCanSold();
 				ot.setHist(hist);
 
 				if (ot.getVol() == ot.getCanSold()) {// 已买完

@@ -114,6 +114,11 @@ public class DateUtil {
 		}
 	}
 
+	public static String formatDate(Date date, String formatter) {
+		SimpleDateFormat format = new SimpleDateFormat(formatter);
+		return format.format(date);
+	}
+
 	public static String getTodayYYYYMMDDHHMMSS() {
 		SimpleDateFormat format = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
 		return format.format(new Date());

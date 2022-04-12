@@ -51,7 +51,11 @@ public class Sort1ModeService {
 			// 一直OK，则更新价格
 			if (MonitorType.SORT1.getCode() == mp.getMonitor()) {
 				double maxPrice = this.daIs30DayTodayPriceOk(cbm.getCode(), date, sort1checkLine);
-				mp.setUpPrice(maxPrice);
+				if (maxPrice > 0) {
+					mp.setUpPrice(maxPrice);
+				} else {
+					reset(cbm, mp);
+				}
 			}
 		}
 	}

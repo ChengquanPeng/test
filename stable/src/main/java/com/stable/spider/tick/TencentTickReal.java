@@ -44,9 +44,9 @@ public class TencentTickReal {
 		List<TickFb> l = fetchRealTradesLast60("000039");
 		// 读取
 //		List<Tick> list = readFromFile(filepath);
-//		for (Tick t : list) {
-//			System.err.println(t);
-//		}
+		for (TickFb t : l) {
+			System.err.println(t);
+		}
 		System.err.println("==done===:" + l.size());
 	}
 }

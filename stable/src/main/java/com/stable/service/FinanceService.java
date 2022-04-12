@@ -151,7 +151,7 @@ public class FinanceService {
 									find = true;
 								}
 								if (find) {
-									mp.setYkb(yjkb.getAnnDate());
+									mp.setYkb(yjyg.getAnnDate());
 									sb.append("业绩同比:").append(yjyg.getJlrtbzz()).append("%");
 								}
 							}

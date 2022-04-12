@@ -4,8 +4,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -94,6 +92,7 @@ public class XqDailyBaseSpider {
 			String today = DateUtil.getTodayYYYYMMDD();
 			List<DaliyBasicInfo2> upd = new LinkedList<DaliyBasicInfo2>();
 			int date = DateUtil.getTodayIntYYYYMMDD();
+			int s = list.size();
 			for (DaliyBasicInfo2 b : list) {
 				if (stockBasicService.isHuShenCode(b.getCode())) {
 					try {
@@ -113,6 +112,8 @@ public class XqDailyBaseSpider {
 						e.printStackTrace();
 						WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包出错,code=" + b.getCode());
 					}
+				} else {
+					s--;
 				}
 			}
 			if (upd.size() > 0) {
@@ -124,9 +125,9 @@ public class XqDailyBaseSpider {
 					pd1.done();
 				}
 			}).start();
-			log.info("雪球=>每日指标-市盈率完成,期望数:{" + list.size() + "},实际成功数:" + upd.size());
+			log.info("雪球=>每日指标-市盈率完成,期望数:{" + s + "},实际成功数:" + upd.size());
 			if (upd.size() != list.size()) {
-				WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + list.size() + "},实际成功数:" + upd.size());
+				WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + s + "},实际成功数:" + upd.size());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

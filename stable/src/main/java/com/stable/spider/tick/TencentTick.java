@@ -36,14 +36,17 @@ public class TencentTick {
 			if (fz.sx == 1) {
 				if (fz.getVol() > td.getUpVol()) {
 					td.setUpVol(fz.getVol());
+					td.setUp(fz.getHprice());
 				}
 			} else if (fz.sx == -1) {
 				if (fz.getVol() > td.getDownVol()) {
 					td.setDownVol(fz.getVol());
+					td.setDp(fz.lprice);
 				}
 			}
 			if (fz.getVol() > td.getTop()) {
 				td.setTop(fz.getVol());
+				td.setTp(fz.getLprice());
 			}
 			bi = CurrencyUitl.addDecimal(bi, fz.getVol());
 		}
