@@ -213,6 +213,7 @@ public class DaliyTradeHistroyService {
 			}
 			return list.size();
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.error(e.getMessage(), e);
 			WxPushUtil.pushSystem1("前复权qfq获取异常，获取日期:" + today);
 		}

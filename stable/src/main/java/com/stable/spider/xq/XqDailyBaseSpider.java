@@ -126,7 +126,7 @@ public class XqDailyBaseSpider {
 				}
 			}).start();
 			log.info("雪球=>每日指标-市盈率完成,期望数:{" + s + "},实际成功数:" + upd.size());
-			if (upd.size() != list.size()) {
+			if (upd.size() != s) {
 				WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + s + "},实际成功数:" + upd.size());
 			}
 		} catch (Exception e) {
