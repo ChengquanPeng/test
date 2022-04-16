@@ -1,9 +1,7 @@
 package com.stable.service;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -21,12 +19,10 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeConceptDao;
-import com.stable.es.dao.base.EsConceptDailyDao;
 import com.stable.es.dao.base.EsConceptDao;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.CodeConcept;
 import com.stable.vo.bus.Concept;
-import com.stable.vo.bus.ConceptDaily;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.Getter;
@@ -43,8 +39,6 @@ public class ConceptService {
 	private EsConceptDao esConceptDao;
 	@Autowired
 	private EsCodeConceptDao esCodeConceptDao;
-	@Autowired
-	private EsConceptDailyDao esConceptDailyDao;
 
 	@Getter
 	@Setter
@@ -108,51 +102,6 @@ public class ConceptService {
 		return str;
 	}
 
-	private List<ConceptDaily> getTopConcepts(int date) {
-		EsQueryPageReq queryPage = EsQueryPageUtil.queryPage10;
-		int pageNum = queryPage.getPageNum();
-		int size = queryPage.getPageSize();
-		Pageable pageable = PageRequest.of(pageNum, size);
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("date", date));
-		bqb.must(QueryBuilders.rangeQuery("todayChange").gt(0.0));
-		FieldSortBuilder sort = SortBuilders.fieldSort("ranking").order(SortOrder.ASC);
-
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
-		return esConceptDailyDao.search(sq).getContent();
-	}
-
-	public Map<String, List<ConceptInfo>> getDailyMap(int date) {
-		Map<String, List<ConceptInfo>> m = new HashMap<String, List<ConceptInfo>>();
-		List<ConceptDaily> list = this.getTopConcepts(date);
-		log.info("获取概念数量：" + list.size());
-		if (list != null && list.size() > 0) {
-			list.forEach(daily -> {
-				String conceptId = daily.getConceptId();
-				List<CodeConcept> codes = this.getCodes(conceptId);
-				if (codes.size() > 0) {
-					ConceptInfo ci = new ConceptInfo();
-					ci.setName(codes.get(0).getConceptName());
-					ci.setRanking(daily.getRanking());
-					ci.setTodayChange(daily.getTodayChange());
-					log.info(ci.getName());
-
-					codes.forEach(c -> {
-						List<ConceptInfo> l = m.get(c.getCode());
-						if (l == null) {
-							l = new LinkedList<ConceptInfo>();
-						}
-						l.add(ci);
-						m.put(c.getCode(), l);
-					});
-				}
-			});
-		}
-		log.info("代码数量：" + m.keySet().size());
-		return m;
-	}
-
 	public List<CodeConcept> getCodes(String conceptId) {
 		EsQueryPageReq queryPage = EsQueryPageUtil.queryPage9999;
 		int pageNum = queryPage.getPageNum();
@@ -203,7 +152,7 @@ public class ConceptService {
 		} else {
 			return null;
 		}
-		//TODO -后面可以直接查询整个，不需要转换
+		// TODO -后面可以直接查询整个，不需要转换
 //		bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", aliasCode));
 		FieldSortBuilder sort = SortBuilders.fieldSort("code").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();

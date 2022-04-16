@@ -12,13 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.es.dao.base.EsCodeConceptDao;
-import com.stable.es.dao.base.EsConceptDailyDao;
 import com.stable.es.dao.base.EsConceptDao;
 import com.stable.vo.bus.Concept;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.http.resp.CodeConceptAddReq;
 import com.stable.vo.http.resp.ConceptAddReq;
-import com.stable.vo.http.resp.ConceptDaliyAddReq;
 
 @RequestMapping("/concept")
 @RestController
@@ -28,8 +26,6 @@ public class ConceptController {
 	private EsConceptDao esConceptDao;
 	@Autowired
 	private EsCodeConceptDao esCodeConceptDao;
-	@Autowired
-	private EsConceptDailyDao esConceptDailyDao;
 
 	@PostMapping(value = "/allConcepts")
 	public ResponseEntity<JsonResult> allConcepts() {
@@ -73,22 +69,6 @@ public class ConceptController {
 		try {
 			if (req.getList() != null && req.getList().size() > 0) {
 				esCodeConceptDao.saveAll(req.getList());
-			}
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
-
-	@PostMapping(value = "/addConceptDaily")
-	public ResponseEntity<JsonResult> addConceptDaily(@RequestBody ConceptDaliyAddReq req) {
-		JsonResult r = new JsonResult();
-		try {
-			if (req.getList() != null && req.getList().size() > 0) {
-				esConceptDailyDao.saveAll(req.getList());
 			}
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
