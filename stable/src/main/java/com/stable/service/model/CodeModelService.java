@@ -15,7 +15,6 @@ import com.stable.enums.MonitorType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.MonitorPoolDao;
-import com.stable.service.AnnouncementService;
 import com.stable.service.BonusService;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
@@ -39,9 +38,7 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.AnnMentParamUtil;
 import com.stable.vo.HolderAnalyse;
-import com.stable.vo.bus.AnnouncementHist;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.DzjyYiTime;
@@ -65,8 +62,6 @@ import lombok.extern.log4j.Log4j2;
 public class CodeModelService {
 	private static final long ZF_50YI = 50 * 100000000l;
 
-	@Autowired
-	private AnnouncementService announcementService;
 	@Autowired
 	private TradeCalService tradeCalService;
 	@Autowired
@@ -134,7 +129,6 @@ public class CodeModelService {
 		threeYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -1000));
 		int fourYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -1460));
 		oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -370));
-		halfYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, -180));
 		log.info("CodeModel processing request date={}", tradeDate);
 		if (!tradeCalService.isOpen(tradeDate)) {
 			tradeDate = tradeCalService.getPretradeDate(tradeDate);
@@ -1029,13 +1023,6 @@ public class CodeModelService {
 			}
 		}
 		// 股东增持(一年)
-		AnnouncementHist zengchi = announcementService.getLastRecordType(code, AnnMentParamUtil.zhengchi.getType(),
-				oneYearAgo);
-		if (zengchi != null) {
-			newOne.setBaseYellow(1);
-			sb2.append(yellow++).append(".股东/高管增持:" + (zengchi.getRptDate())).append(Constant.HTML_LINE);
-
-		}
 
 		if (zy.getHasRisk() == 1) {//
 			newOne.setBaseYellow(1);
@@ -1095,20 +1082,6 @@ public class CodeModelService {
 			sb3.append("增发进度" + (s.getCompnayType() == 1 ? "(国资)" : "") + ":" + newOne.getZfStatusDesc());
 			sb3.append("</font>");
 			sb3.append(Constant.HTML_LINE);
-		}
-		// 股东减持(一年)
-		AnnouncementHist jianchi = announcementService.getLastRecordType(code, AnnMentParamUtil.jianchi.getType(),
-				oneYearAgo);
-		if (jianchi != null) {
-			newOne.setBaseBlue(1);
-			sb3.append(".股东/高管减持:" + (jianchi.getRptDate())).append(Constant.HTML_LINE);
-		}
-		// 回购(半年内)
-		AnnouncementHist huigou = announcementService.getLastRecordType(code, AnnMentParamUtil.huigou.getType(),
-				halfYearAgo);
-		if (huigou != null) {
-			newOne.setBaseBlue(1);
-			sb3.append(".回购:" + (huigou.getRptDate())).append(Constant.HTML_LINE);
 		}
 		// 快预报
 		String ykb = financeService.getyjkb(fbi.getCode(), fbi.getYear(), fbi.getQuarter());
@@ -1201,7 +1174,6 @@ public class CodeModelService {
 
 	private int threeYearAgo = 0;// 三年以前
 	private int oneYearAgo = 0;// 一年以前
-	private int halfYearAgo = 0;// 半年以前
 
 	private void evaluateStep1(CodeBaseModel2 newOne, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
 		FinanceBaseInfo currJidu = fa.getCurrJidu();

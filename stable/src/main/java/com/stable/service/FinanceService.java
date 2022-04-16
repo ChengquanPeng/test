@@ -35,7 +35,6 @@ import com.stable.service.model.CodeModelService;
 import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
-import com.stable.spider.official.JysSpider;
 import com.stable.spider.ths.ThsHolderSpider;
 import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
@@ -84,8 +83,6 @@ public class FinanceService {
 	private ThsHolderSpider thsHolderSpider;
 	@Autowired
 	private ConceptService conceptService;
-	@Autowired
-	private JysSpider jysSpider;
 	@Autowired
 	private MonitorPoolDao monitorPoolDao;
 	@Autowired
@@ -607,13 +604,6 @@ public class FinanceService {
 
 	public synchronized void byJob() {
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				log.info("交易所公告");
-				jysSpider.byJob();
-			}
-		}).start();
 		log.info("模型开始之前运行执行：1.质押，2.股东人数");
 		WeekendFinFetchRtl rtl = new WeekendFinFetchRtl();
 		new Thread(new Runnable() {
