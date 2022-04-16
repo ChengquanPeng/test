@@ -614,6 +614,7 @@ public class ThsSpider {
 					cc.setConceptName(cp.getName());
 					cc.setType(type);
 					cc.setId(cp.getId() + cc.getCode());
+					cc.setAliasCode(cp.getAliasCode2());
 					codelist.add(cc);
 					log.info(cc);
 					stcnt++;

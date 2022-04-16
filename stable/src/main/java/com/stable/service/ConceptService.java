@@ -203,6 +203,8 @@ public class ConceptService {
 		} else {
 			return null;
 		}
+		//TODO -后面可以直接查询整个，不需要转换
+//		bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", aliasCode));
 		FieldSortBuilder sort = SortBuilders.fieldSort("code").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
@@ -217,7 +219,7 @@ public class ConceptService {
 			}
 			return codes;
 		}
-		log.info("no records listCodeByCodeConceptId:{}", conceptId);
+		log.info("no records listCodeBy aliasCode:{}", aliasCode);
 		return null;
 	}
 }

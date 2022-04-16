@@ -30,4 +30,6 @@ public class CodeConcept extends EsBase {
 	private int type;
 	@Field(type = FieldType.Integer)
 	private int updateTime;
+	@Field(type = FieldType.Keyword)
+	private String aliasCode;
 }
