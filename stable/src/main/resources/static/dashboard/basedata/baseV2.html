@@ -34,8 +34,9 @@
 			</div>
 			<div>
 				<div class="input-group">
-					<input type="text" id="mkv2" width="10" />&gt;=流通市值&lt;=<input type="text" id="mkv" width="10" />亿&nbsp;&nbsp;
-					前3大股东持股&gt;=<input type="text" id="holderNumT3" width="30" />%&nbsp;&nbsp;
+					<input type="text" id="mkv2" width="10" />&gt;=流通市值&lt;=<input
+						type="text" id="mkv" width="10" />亿&nbsp;&nbsp; 前3大股东持股&gt;=<input
+						type="text" id="holderNumT3" width="30" />%&nbsp;&nbsp;
 					市盈率ttm&lt;=<input type="text" id="pettm" width="20" />&nbsp;&nbsp;
 					国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp;
 				</div>
@@ -70,8 +71,9 @@
 			</div>
 			<div>
 				<div class="input-group">
-					大宗:1年交易金额&gt;=<input type="text" width="10" width="30" id="totalAmt">&nbsp;&nbsp; 
-						2月交易金额&gt;=<input type="text" width="10" width="30" id="totalAmt60d">
+					大宗:1年交易金额&gt;=<input type="text" width="10" width="30"
+						id="totalAmt">&nbsp;&nbsp; 2月交易金额&gt;=<input type="text"
+						width="10" width="30" id="totalAmt60d">
 				</div>
 			</div>
 			<div>
@@ -225,7 +227,7 @@
 									if (document.getElementById("compnayType").checked) {
 										param.compnayType = 1;
 									}
-									
+
 									if (document.getElementById("zfself").checked) {
 										param.zfself = 1;
 									}
@@ -262,7 +264,12 @@
 										},
 										{
 											field : 'baseInfo',
-											title : '基本面-避雷区'
+											title : '基本面-避雷区',
+											formatter : function(value, row,
+													index) {
+												return value
+														+ "<br/><a target='_blank' href='https://basic.10jqka.com.cn/mobile/"+row.code+"/reminddetailn.html#jumpaction=iframe'>大事提醒(增减持/回购)==></a>";
+											}
 										},
 										{
 											field : 'tagInfo',
