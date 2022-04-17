@@ -90,7 +90,7 @@ public class EastmoneySpider {
 	static final int FETCH_CNT = 5;// 所以默认返回5条
 
 	// companyType:1券商，2保险,3银行，4企业
-	public List<FinanceBaseInfoPage> getNewFinanceAnalysis(String code, int companyType) {
+	public List<FinanceBaseInfoPage> getNewFinanceAnalysis(String code, int companyType, int beforeChkDate) {
 		if (companyType == 0) {
 			companyType = getcompanyType(code);
 			if (companyType == 0) {
@@ -98,6 +98,12 @@ public class EastmoneySpider {
 				return null;
 			}
 		}
+
+		if (!stockBasicService.onlinePreYearChk(code, beforeChkDate)) {
+			log.warn("未抓取到Finane记录,未满半年,code={}", code);
+			return null;
+		}
+
 		int trytime = 0;
 		do {
 			trytime++;

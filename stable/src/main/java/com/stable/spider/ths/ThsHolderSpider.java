@@ -111,6 +111,7 @@ public class ThsHolderSpider {
 		// -30));
 		List<HolderPercent> hps = new LinkedList<HolderPercent>();
 		List<HolderNum> hns = new LinkedList<HolderNum>();
+		int pre2Year = DateUtil.getPreYear(sysdate, 2);
 		int c = 0;
 		for (String code : codesw) {
 			c++;
@@ -118,7 +119,7 @@ public class ThsHolderSpider {
 				log.info("current index:{},{}", c, code);
 				// 周末全量，redisUtil.get(RedisConstant.RDS_HOLDER_CODE_ + code, 0) <= chkdate
 				// 预警，每天
-				if (stockBasicService.online2YearChk(code, sysdate)) {
+				if (stockBasicService.onlinePreYearChk(code, pre2Year)) {
 					dofetchHolderInner(sysdate, code, hns, hps);
 					if (hns.size() > 1000) {
 						esHolderNumDao.saveAll(hns);

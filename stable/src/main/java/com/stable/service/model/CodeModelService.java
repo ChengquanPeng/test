@@ -136,6 +136,8 @@ public class CodeModelService {
 		if (!tradeCalService.isOpen(tradeDate)) {
 			tradeDate = tradeCalService.getPretradeDate(tradeDate);
 		}
+		int pre1Year = DateUtil.getPreYear(tradeDate);
+		int pre4Year = DateUtil.getPreYear(tradeDate, 4);
 		log.info("Actually processing request date={}", tradeDate);
 		// 基本面
 		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
@@ -161,7 +163,7 @@ public class CodeModelService {
 				}
 				poolList.add(pool);
 
-				boolean onlineYear = stockBasicService.online1YearChk(code, tradeDate);
+				boolean onlineYear = stockBasicService.onlinePreYearChk(code, pre1Year);
 				if (!onlineYear) {// 不买卖新股
 					CodeBaseModel2 tone = new CodeBaseModel2();
 					tone.setId(code);
@@ -170,7 +172,7 @@ public class CodeModelService {
 					listLast.add(tone);
 					continue;
 				}
-				boolean online4Year = stockBasicService.online4YearChk(code, tradeDate);
+				boolean online4Year = stockBasicService.onlinePreYearChk(code, pre4Year);
 				DaliyBasicInfo2 d = daliyBasicHistroyService.queryLastest(code, 0, 0);
 				if (d == null) {
 					d = new DaliyBasicInfo2();

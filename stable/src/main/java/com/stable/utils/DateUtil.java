@@ -286,22 +286,26 @@ public class DateUtil {
 		return 0;
 	}
 
-//去年
-	public static int getPreYear(int yyyyMMdd) {
-//		Date date = new Date();//获取当前时间    
+	// N年前
+	public static int getPreYear(int yyyyMMdd, int n) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(parseDate(yyyyMMdd));
-		calendar.add(Calendar.YEAR, -1);// 当前时间减去一年，即一年前的时间    
+		calendar.add(Calendar.YEAR, -n);// 当前时间减去一年，即一年前的时间    
 		Date py = calendar.getTime();// 获取一年前的时间，或者一个月前的时间  
 		return Integer.valueOf(formatYYYYMMDD(py));
 	}
 
-	// 去2年
-	public static int getPre2Year(int yyyyMMdd) {
-//		Date date = new Date();//获取当前时间    
+	// 1年前
+	public static int getPreYear(int yyyyMMdd) {
+		return getPreYear(yyyyMMdd, 1);
+	}
+
+	// 半年前
+	public static int getPre6MONTH(int yyyyMMdd) {
+//			Date date = new Date();//获取当前时间    
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(parseDate(yyyyMMdd));
-		calendar.add(Calendar.YEAR, -2);// 当前时间减去一年，即一年前的时间    
+		calendar.add(Calendar.MONTH, -6);// 当前时间减去一年，即一年前的时间    
 		Date py = calendar.getTime();// 获取一年前的时间，或者一个月前的时间  
 		return Integer.valueOf(formatYYYYMMDD(py));
 	}
@@ -337,8 +341,9 @@ public class DateUtil {
 	}
 
 	public static void main(String[] args) {
-		System.err.println(getNext2Year(20200501));
-		System.err.println(getPre2Year(20200421));
-		System.err.println(getCurrJiduEndDate(20201121));
+//		System.err.println(getNext2Year(20200501));
+//		System.err.println(getPre2Year(20200421));
+//		System.err.println(getCurrJiduEndDate(20201121));
+		System.err.println(getPreYear(20220417, 3));
 	}
 }

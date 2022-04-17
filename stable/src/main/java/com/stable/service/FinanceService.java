@@ -198,9 +198,10 @@ public class FinanceService {
 		return false;
 	}
 
-	private boolean spiderFinaceHistoryInfo(String code, List<FinanceBaseInfo> list, int companyType) {
+	private boolean spiderFinaceHistoryInfo(String code, List<FinanceBaseInfo> list, int companyType,
+			int beforeChkDate) {
 		try {
-			List<FinanceBaseInfoPage> datas = eastmoneySpider.getNewFinanceAnalysis(code, companyType);// 0按报告期、1=年报
+			List<FinanceBaseInfoPage> datas = eastmoneySpider.getNewFinanceAnalysis(code, companyType, beforeChkDate);// 0按报告期、1=年报
 			if (datas == null || datas.size() <= 0) {
 				log.warn("未从东方财富抓取到Finane记录,code={}", code);
 				WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录,code=" + code);
@@ -827,6 +828,8 @@ public class FinanceService {
 
 	public void fetchFinances() {
 		int tradeDate = DateUtil.getTodayIntYYYYMMDD();
+		int pre6month = DateUtil.getPre6MONTH(tradeDate);
+		int pre1Year = DateUtil.getPreYear(tradeDate);
 		log.info("同步财务报告报告[started]");
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
 		int total = list.size();
@@ -834,7 +837,7 @@ public class FinanceService {
 		List<FinanceBaseInfo> rl = new LinkedList<FinanceBaseInfo>();
 		int cnt = 0;
 		for (StockBaseInfo s : list) {
-			if (spiderFinaceHistoryInfo(s.getCode(), rl, s.getDfcwCompnayType())) {
+			if (spiderFinaceHistoryInfo(s.getCode(), rl, s.getDfcwCompnayType(), pre6month)) {
 				cnt++;
 			}
 			if (rl.size() > 1000) {
@@ -850,7 +853,7 @@ public class FinanceService {
 		for (StockBaseInfo s : list) {
 			List<FinanceBaseInfo> fbis = getFinacesReportByLteDate(s.getCode(), tradeDate,
 					EsQueryPageUtil.queryPage9999);
-			boolean onlineYear = stockBasicService.online1YearChk(s.getCode(), tradeDate);
+			boolean onlineYear = stockBasicService.onlinePreYearChk(s.getCode(), pre1Year);
 			if (fbis == null) {
 				if (onlineYear) {
 					ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), s.getCode(), tradeDate + "",

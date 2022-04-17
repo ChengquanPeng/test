@@ -265,7 +265,12 @@
 										},
 										{
 											field : 'baseInfo',
-											title : '基本面-避雷区'
+											title : '基本面-避雷区',
+											formatter : function(value, row,
+													index) {
+												return value
+														+ "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+row.code+"/event.html#stockpage'>大事提醒(增减持/回购)==></a>";
+											}
 										},
 										{
 											field : 'tagInfo',
