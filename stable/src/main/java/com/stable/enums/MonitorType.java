@@ -6,7 +6,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum MonitorType {
-	NO(0, "无"), MANUAL(3, "人工"), ZengFaAuto(6, "增发-系统自动"), SORT1(11, "短线1:确定极速拉升带小平台新高？"), DZJY(41, "底部-大额大宗");
+	NO(0, "无"), MANUAL(3, "人工"), ZengFaAuto(6, "底部小票-增发已完成-3y+未涨"), PreZengFa(7, "底部大票-增发已核准"),
+	SORT1(11, "短线2:确定极速拉升带小平台新高？"), DZJY(41, "底部小票-大宗");
 
 	private int code;
 	private String desc;

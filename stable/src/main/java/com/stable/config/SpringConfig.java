@@ -29,5 +29,8 @@ public class SpringConfig {
 	@Value("${worker2.num}")
 	private int worker2Num = 10;
 
+	@Value("${small.stock.limit}")
+	private double smallStocklimit;
+
 	public final static boolean isWindows = OSystemUtil.isWindows();
 }

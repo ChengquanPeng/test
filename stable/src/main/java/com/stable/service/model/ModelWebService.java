@@ -83,6 +83,35 @@ public class ModelWebService {
 		return getModelResp(getLastOneByCode2(code));
 	}
 
+	public String getSystemPoint(CodeBaseModel2 dh, String splitor) {
+		String s = "";
+		// --中长--
+		if (dh.getShooting1() > 0) {
+			s = "底部小票-大宗-超5%,董监高机构代减持?" + splitor;
+		}
+		if (dh.getShooting8() > 0) {
+			s += "底部小票-增发已完成-3y+未涨,底部定增" + splitor;
+		}
+		if (dh.getShooting2() > 0) {
+			s += "底部大票-增发已核准：超50亿(越大越好),股东集中,底部拿筹涨停?" + splitor;
+		}
+		if (dh.getShooting4() > 0) {
+			s += "底部股东人数：大幅减少(3年减少40%)" + splitor;
+		}
+		// --短线--
+		if (dh.getShooting3() > 0) {
+			s += "短线1:底部融资余额飙升,散户没买入空间" + splitor;
+		}
+		if (dh.getShooting5() > 0) {
+			s += "短线2:确定极速拉升,带小平台新高？" + splitor;
+		}
+		if (dh.getShooting6() > 0) {
+			s += "短线3:3/5天情绪,见好就收" + splitor;
+		}
+
+		return s;
+	}
+
 	private CodeBaseModelResp getModelResp(CodeBaseModel2 dh) {
 		CodeBaseModelResp resp = new CodeBaseModelResp();
 		BeanUtils.copyProperties(dh, resp);
@@ -134,30 +163,9 @@ public class ModelWebService {
 
 		// 博弈-行情指标
 		StringBuffer sb5 = new StringBuffer();
-		if (dh.getShooting1() > 0 || dh.getShooting2() > 0 || dh.getShooting3() > 0 || dh.getShooting4() > 0
-				|| dh.getShooting5() > 0) {
-			sb5.append("<font color='red'>");
-			if (dh.getShooting1() > 0) {
-				sb5.append("底部小票大宗超5千万,机构代持,非董监高减持?").append(Constant.HTML_LINE);
-			}
-			if (dh.getShooting2() > 0) {
-				sb5.append("底部大票增发超过50亿(越大越好),股东集中,证监会核准-底部拿筹涨停?").append(Constant.HTML_LINE);
-			}
-			if (dh.getShooting3() > 0) {
-				sb5.append("<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/" + dh.getCode()
-						+ ".html'>底部融资融券飙升,散户没买入空间？</a>").append(Constant.HTML_LINE);
-			}
-			if (dh.getShooting4() > 0) {
-				sb5.append("底部股东人数大幅减少(3年减少40%)").append(Constant.HTML_LINE);
-			}
-			if (dh.getShooting5() > 0) {
-				sb5.append("短线1:确定极速拉升带小平台新高?").append(Constant.HTML_LINE);
-			}
-			if (dh.getShooting6() > 0) {
-				sb5.append("短线1:3-5天情绪,见好就收").append(Constant.HTML_LINE);
-			}
-			sb5.append("</font>");
-		}
+		sb5.append("<font color='red'>");
+		sb5.append(this.getSystemPoint(dh, Constant.HTML_LINE));
+		sb5.append("</font>");
 		// 基本面-筹码
 		sb5.append("流通:").append(dh.getMkv()).append("亿,");
 		sb5.append("除5%活筹:").append(dh.getActMkv()).append("亿,");
@@ -449,7 +457,11 @@ public class ModelWebService {
 			} else if (mr.getShooting() == 4) {
 				bqb.must(QueryBuilders.matchPhraseQuery("shooting4", 1));
 			} else if (mr.getShooting() == 5) {
-				bqb.must(QueryBuilders.rangeQuery("shooting5").gte(1));
+				bqb.must(QueryBuilders.rangeQuery("shooting5").gte(1));// 这是一个时间值
+			} else if (mr.getShooting() == 6) {
+				bqb.must(QueryBuilders.matchPhraseQuery("shooting6", 1));
+			} else if (mr.getShooting() == 5) {
+				bqb.must(QueryBuilders.matchPhraseQuery("shooting8", 1));
 			}
 		}
 		if (StringUtils.isNotBlank(mr.getTotalAmt())) {

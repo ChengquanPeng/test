@@ -91,8 +91,10 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		RealtimeMsg rm = new RealtimeMsg();
 		rm.setCode(code);
 		rm.setCodeName(codeName);
-		rm.setModeName(msg);
+		rm.setMsg(msg);
+		String smsg = null;
 		while (isRunning) {
+			smsg = null;
 			try {
 				long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
 				if (d1130 <= now && now <= d1300) {
@@ -110,12 +112,19 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					rm.tiggerMessage();
 					resulter.addBuyMessage(code, rm);
 					if (waitSend) {
-						WxPushUtil.pushSystem1(code + " " + codeName + " " + rm.getModeName());
+						smsg = rm.getMsg();
+						// WxPushUtil.pushSystem1(code + " " + codeName + " " + rm.getMsg());
 						waitSend = false;
 					}
 				}
 				if (cp.getYearHigh1() > 0 && rt.getHigh() > cp.getYearHigh1() && !highPriceGot) {
-					WxPushUtil.pushSystem1(codeName + "(" + code + ") 一年新高! 备注:" + cp.getRemark());
+					// WxPushUtil.pushSystem1(codeName + "(" + code + ") 一年新高! 备注:" +
+					// cp.getRemark());
+					if (smsg == null) {
+						smsg = " 一年新高! 备注:" + cp.getRemark();
+					} else {
+						smsg += "一年新高! " + smsg;
+					}
 					highPriceGot = true;
 				}
 				if (now > d1450) {
@@ -124,9 +133,13 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						burstPointCheck = true;
 						ShotPoint sp = shotPointCheck.check(code, 0, rt);
 						if (sp.getResult()) {
-							WxPushUtil.pushSystem1(codeName + "(" + code + ") 疑似起爆:" + sp.getMsg());
+							// WxPushUtil.pushSystem1(codeName + "(" + code + ") 疑似起爆:" + sp.getMsg());
+							smsg += "疑似起爆:" + sp.getMsg() + smsg;
 						}
 					}
+				}
+				if (smsg != null) {
+					WxPushUtil.pushSystem1(codeName + "(" + code + ") " + smsg);
 				}
 				Thread.sleep(WAIT_MIN);
 			} catch (Exception e) {

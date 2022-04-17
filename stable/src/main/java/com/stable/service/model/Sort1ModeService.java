@@ -27,7 +27,7 @@ public class Sort1ModeService {
 
 	private final double sort1checkLine = 80.0;
 
-	public void sort1ModeChk(CodeBaseModel2 cbm, MonitorPool mp, int date, StringBuffer shootNotice5) {
+	public void sort1ModeChk(CodeBaseModel2 cbm, MonitorPool mp, int date) {
 		if (cbm.getShooting5() <= 0 || date > cbm.getShooting5()) {// 需要验证是否OK //或者已过期
 			double maxPrice = this.daIs30DayTodayPriceOk(cbm.getCode(), date, sort1checkLine);
 			if (maxPrice > 0.0) {// OK
@@ -39,7 +39,6 @@ public class Sort1ModeService {
 						mp.setMonitor(MonitorType.SORT1.getCode());
 						mp.setRealtime(1);
 					}
-					shootNotice5.append(stockBasicService.getCodeName2(cbm.getCode())).append(",");
 				} else {// NotOK
 					reset(cbm, mp);
 					cbm.setShooting5(DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), 180)));// 180天

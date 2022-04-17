@@ -16,7 +16,7 @@ import lombok.Setter;
 public class CodeBaseModel2 extends EsBase {
 	private static final long serialVersionUID = 1L;
 	@Field(type = FieldType.Integer)
-	private int shooting1 = 0;// 行情指标1：小票，底部大宗超5千万（机构代持？非董监高减持大宗）
+	private int shooting1 = 0;// 行情指标1：小票，底部大宗大额定增超流动5%
 	@Field(type = FieldType.Integer)
 	private int shooting2 = 0;// 行情指标2：大票，底部增发超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停。
 	@Field(type = FieldType.Integer)
@@ -26,7 +26,9 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int shooting5 = 0;// 行情指标5：短线拉升小平台。
 	@Field(type = FieldType.Integer)
-	private int shooting6 = 0;// 
+	private int shooting6 = 0;//
+	@Field(type = FieldType.Integer)
+	private int shooting8 = 0;// 行情指标8：底部横盘3-4年以上的增发-小票
 
 	// Step.1.市值大小，股价K线形态是否横盘多年，且常年分红
 	@Field(type = FieldType.Double)
@@ -87,7 +89,7 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int gsz = 0;// 三年高送转
 	@Field(type = FieldType.Integer)
-	private int zfObjType = 0;// 增发类型:1：6个月，2：混合，3大股东
+	private int zfObjType = 0;// 增发类型:1:6个月; 2:混合;3:大股东,4:其他
 	@Field(type = FieldType.Integer)
 	private int zfPriceLow = 0; // 低于增发价
 	// 增发解禁
