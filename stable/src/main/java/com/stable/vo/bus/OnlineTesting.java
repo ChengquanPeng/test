@@ -13,7 +13,11 @@ import lombok.ToString;
 @Getter
 @ToString
 @Document(indexName = "online_testing")
-public class OnlineTesting {
+public class OnlineTesting extends EsBase {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	@Id
 	private String id;
 	@Field(type = FieldType.Keyword)

@@ -13,7 +13,8 @@ import lombok.ToString;
 @Getter
 @ToString
 @Document(indexName = "monitor_pool")
-public class MonitorPool {
+public class MonitorPool extends EsBase {
+	private static final long serialVersionUID = -1111366231674941738L;
 	@Id
 	private String code;
 	@Field(type = FieldType.Integer)

@@ -5,11 +5,16 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
+@Setter
+@Getter
+@ToString
 @Document(indexName = "rztj")
-@Data
-public class Rztj {
+public class Rztj extends EsBase {
+	private static final long serialVersionUID = 1L;
 	@Id
 	@Field(type = FieldType.Keyword)
 	private String code;

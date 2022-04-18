@@ -13,7 +13,8 @@ import lombok.ToString;
 @Getter
 @ToString
 @Document(indexName = "rzrq_daliy")
-public class RzrqDaliy {
+public class RzrqDaliy extends EsBase {
+	private static final long serialVersionUID = 1L;
 	@Id
 	private String id;
 	// 日期date

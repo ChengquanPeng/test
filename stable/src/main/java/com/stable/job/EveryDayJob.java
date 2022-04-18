@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
-import com.stable.service.BuyBackService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.TradeCalService;
 import com.stable.service.ZhiYaService;
@@ -28,8 +27,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class EveryDayJob extends MySimpleJob {
 
-	@Autowired
-	private BuyBackService buyBackService;
 	@Autowired
 	private CodeModelService codeModelService;
 	@Autowired
@@ -52,8 +49,6 @@ public class EveryDayJob extends MySimpleJob {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-		log.info("回购公告");
-		buyBackService.jobFetchHistEveryDay();
 		log.info("定增完成预警公告");
 		monitorPoolService.jobZfDoneWarning();
 		log.info("定增扩展属性");

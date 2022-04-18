@@ -12,13 +12,23 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-@Document(indexName = "prd1")
-public class Prd1 extends EsBase {
+@Document(indexName = "reducing_holding_shares")
+public class ReducingHoldingShares extends EsBase {
 	private static final long serialVersionUID = 1L;
+
 	@Id
-	private String code;
+	private String id;// code+date
+
 	@Field(type = FieldType.Integer)
-	private int prd;// 是否产品
+	private int date = 0;// 日期date
+
 	@Field(type = FieldType.Integer)
-	private int prdsub;// 产品分类
+	private int type;// 1.股东减持,2.增减持计划,3.高管减持,4.其他
+
+	@Field(type = FieldType.Integer)
+	private double zb;
+
+	@Field(type = FieldType.Text)
+	private String desc;
+
 }
