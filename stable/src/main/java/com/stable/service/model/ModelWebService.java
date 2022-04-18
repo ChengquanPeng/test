@@ -460,7 +460,7 @@ public class ModelWebService {
 				bqb.must(QueryBuilders.rangeQuery("shooting5").gte(1));// 这是一个时间值
 			} else if (mr.getShooting() == 6) {
 				bqb.must(QueryBuilders.matchPhraseQuery("shooting6", 1));
-			} else if (mr.getShooting() == 5) {
+			} else if (mr.getShooting() == 8) {
 				bqb.must(QueryBuilders.matchPhraseQuery("shooting8", 1));
 			}
 		}

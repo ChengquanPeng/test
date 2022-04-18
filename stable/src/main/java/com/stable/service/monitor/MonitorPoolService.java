@@ -416,6 +416,7 @@ public class MonitorPoolService {
 	public void jobBuyLowVolWarning() {
 		List<MonitorPool> list = getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 1, 0);
 		if (list != null) {
+			StringBuffer sb = new StringBuffer();
 			Integer today = DateUtil.getTodayIntYYYYMMDD();
 			for (MonitorPool mp : list) {
 				EsQueryPageReq req = new EsQueryPageReq(mp.getBuyLowVol());
@@ -426,10 +427,12 @@ public class MonitorPoolService {
 						.getVolume();
 				double factor = CurrencyUitl.topPriceN(l, 1.03);
 				if (tday.getVolume() <= factor) {
-					WxPushUtil.pushSystem1(
-							stockBasicService.getCodeName2(mp.getCode()) + " 差不多已经地量(" + mp.getBuyLowVol() + "交易日),日期从"
-									+ l2.get(l2.size() - 1).getDate() + " " + tday.getDate() + ",备注:" + mp.getRemark());
+					sb.append(stockBasicService.getCodeName2(mp.getCode())).append("->").append(mp.getBuyLowVol())
+							.append("天").append(Constant.DOU_HAO);
 				}
+			}
+			if (sb.length() > 0) {
+				WxPushUtil.pushSystem1("流动性地量:" + sb.toString());
 			}
 		}
 	}

@@ -257,6 +257,17 @@ public class DaliyTradeHistroyService {
 						}
 					}
 				}
+				String ends = "";
+				// 起爆点
+				StringBuffer s1 = new StringBuffer();
+				for (String a : bao) {
+					s1.append(a).append(Constant.HTML_LINE);
+				}
+				if (s1.length() > 0) {
+					ends = "起爆点:" + Constant.HTML_LINE + s1.toString() + Constant.HTML_LINE;
+
+				}
+				// 价格
 				StringBuffer s = new StringBuffer();
 				for (String a : Other) {
 					s.append(a).append(Constant.HTML_LINE);
@@ -264,18 +275,12 @@ public class DaliyTradeHistroyService {
 				for (String a : ZengFaAuto) {
 					s.append(a).append(Constant.HTML_LINE);
 				}
-
 				if (s.length() > 0) {
-					WxPushUtil.pushSystem2Html(s.toString());
+					ends += "离线价格监听:" + s.toString();
 				}
-				// 起爆点
-				StringBuffer s1 = new StringBuffer();
-				for (String a : bao) {
-					s1.append(a).append(Constant.HTML_LINE);
-				}
-				if (s1.length() > 0) {
-					WxPushUtil.pushSystem2Html("75亿以内的=> 1>底部增发,2>4年没涨&(5年分红|5年不亏),3>大额大宗 ==> 疑似起爆点:"
-							+ Constant.HTML_LINE + s1.toString());
+				// WxPush
+				if (StringUtils.isNotBlank(ends)) {
+					WxPushUtil.pushSystem2Html(ends);
 				}
 			}
 		}
@@ -601,9 +606,9 @@ public class DaliyTradeHistroyService {
 		}
 
 		if (needFetch) {
-			log.info("Nofq code={},startDate={},endDate={},queryPage={},SortOrder={}", code, startDate, endDate,
-					queryPage.getPageSize(), s.toString());
-			new Exception().printStackTrace();
+			log.info("needFetch Nofq code={},startDate={},endDate={},queryPage={},SortOrder={}", code, startDate,
+					endDate, queryPage.getPageSize(), s.toString());
+//			new Exception().printStackTrace();
 			if (spiderDaliyTradeHistoryInfoFromIPOCenterNofq(code, 0)) {
 				return queryListByCodeNofq(code, startDate, endDate, queryPage, s);
 			}

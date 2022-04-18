@@ -22,6 +22,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
@@ -106,6 +107,7 @@ public class FinanceService {
 	private void kybMonitor() {
 		List<MonitorPool> list = monitorPoolService.getList("", 0, 0, 1, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0);
 		if (list != null) {
+			StringBuffer sssb = new StringBuffer();
 			for (MonitorPool mp : list) {
 				if (mp.getYkb() > 0) {
 					try {
@@ -134,7 +136,7 @@ public class FinanceService {
 						if (!find) {
 							FinYjyg yjyg = getLastFinaceYgByReportDate(code, fbi.getYear(), fbi.getQuarter());
 							if (yjyg != null && yjyg.getAnnDate() > mp.getYkb()) {
-								sb.append(stockBasicService.getCodeName(code));
+								sb.append(stockBasicService.getCodeName2(code));
 								if (mp.getYkb() > 1) {
 									sb.append(",期望不亏");
 								} else {
@@ -172,12 +174,16 @@ public class FinanceService {
 						}
 						if (find) {
 							monitorPoolDao.save(mp);
-							WxPushUtil.pushSystem1(sb.toString());
+							sssb.append(sb.toString()).append(Constant.HTML_LINE);
 						}
 					} catch (Exception e) {
 						ErrorLogFileUitl.writeError(e, "快预报预警", "", "");
 					}
 				}
+			}
+
+			if (sssb.length() > 0) {
+				WxPushUtil.pushSystem2Html("快预报预警:" + sssb.toString());
 			}
 		}
 
