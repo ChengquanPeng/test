@@ -395,6 +395,7 @@ public class MonitorPoolService {
 		log.info("股东人数预警");
 		List<MonitorPool> list = getHolderWarningList();
 		if (list != null) {
+			StringBuffer sb = new StringBuffer();
 			// 预警
 			for (MonitorPool mp : list) {
 				List<HolderNum> hml = chipsService.getHolderNumList45(mp.getCode());
@@ -402,12 +403,15 @@ public class MonitorPoolService {
 					HolderNum hn0 = hml.get(0);
 					if (hn0.getDate() >= mp.getHolderNum()) {
 						boolean islow = hml.get(1).getNum() > hn0.getNum();
-						WxPushUtil.pushSystem1(stockBasicService.getCodeName2(mp.getCode()) + " 股东人数:"
-								+ (islow ? "下降" : "上涨") + ",备注:" + mp.getRemark());
+						sb.append(stockBasicService.getCodeName2(mp.getCode()) + (islow ? ":下降" : ":上涨"))
+								.append(Constant.DOU_HAO).append(Constant.HTML_LINE);
 						mp.setHolderNum(DateUtil.getTodayIntYYYYMMDD());
 						monitorPoolDao.save(mp);
 					}
 				}
+			}
+			if (sb.length() > 0) {
+				WxPushUtil.pushSystem2Html("股东人数:" + sb.toString());
 			}
 		}
 	}
@@ -428,11 +432,11 @@ public class MonitorPoolService {
 				double factor = CurrencyUitl.topPriceN(l, 1.03);
 				if (tday.getVolume() <= factor) {
 					sb.append(stockBasicService.getCodeName2(mp.getCode())).append("->").append(mp.getBuyLowVol())
-							.append("天").append(Constant.DOU_HAO);
+							.append("天").append(Constant.HTML_LINE);
 				}
 			}
 			if (sb.length() > 0) {
-				WxPushUtil.pushSystem1("流动性地量:" + sb.toString());
+				WxPushUtil.pushSystem2Html("流动性地量:" + sb.toString());
 			}
 		}
 	}
