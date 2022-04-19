@@ -241,6 +241,7 @@ public class StockBasicService {
 
 	private synchronized List<StockBaseInfo> getAllOnStatusListWithSort(boolean issort) {
 		if (LOCAL_ALL_ONLINE_LIST.isEmpty()) {
+			log.info("LOCAL_ALL_ONLINE_LIST.isEmpty()");
 			Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
 			// List<StockBaseInfo> list = new LinkedList<StockBaseInfo>();
 			while (it.hasNext()) {
@@ -251,6 +252,7 @@ public class StockBasicService {
 					LOCAL_ALL_ONLINE_LIST.add(e);
 				}
 			}
+			log.info("LOCAL_ALL_ONLINE_LIST.size():" + LOCAL_ALL_ONLINE_LIST.size());
 		}
 		List<StockBaseInfo> copy = new LinkedList<StockBaseInfo>();
 		copy.addAll(LOCAL_ALL_ONLINE_LIST);
@@ -263,7 +265,7 @@ public class StockBasicService {
 
 	// 沪深股票，0，6，3开头的
 	public boolean isHuShenCode(String code) {
-		return code.startsWith("0") && code.startsWith("3") && code.startsWith("6");
+		return code.startsWith("0") || code.startsWith("3") || code.startsWith("6");
 	}
 
 	private Comparator<StockBaseInfo> sort = new Comparator<StockBaseInfo>() {

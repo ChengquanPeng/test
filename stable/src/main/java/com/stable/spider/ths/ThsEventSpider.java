@@ -82,6 +82,7 @@ public class ThsEventSpider {
 		List<BuyBackInfo> list2 = new LinkedList<BuyBackInfo>();
 
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
+		log.info("codelist.size:" + codelist.size());
 		int c = 0;
 		for (StockBaseInfo s : codelist) {
 			if (stockBasicService.isHuShenCode(s.getCode())) {
@@ -91,7 +92,7 @@ public class ThsEventSpider {
 					ErrorLogFileUitl.writeError(e, "", "", "");
 				}
 				c++;
-				log.info("current index:{}", c);
+				log.info("ThsEventSpider current index:{}", c);
 				if (list0.size() > 200) {
 					reducingHoldingSharesDao.saveAll(list0);
 					list0 = new LinkedList<ReducingHoldingShares>();
@@ -139,7 +140,7 @@ public class ThsEventSpider {
 //					System.err.println(key4);
 
 					if (key4.contains(JC_0)) {// 减持：股东减持，高管减持， 增减持计划
-						if (key4.contains(ZC_0)) {
+						if (desc.contains(ZC_0)) {
 							buyback(code, td1.asText(), desc, list2, 1);// 增持
 						} else {
 							reduce(code, td1.asText(), desc, list0);// 减持
