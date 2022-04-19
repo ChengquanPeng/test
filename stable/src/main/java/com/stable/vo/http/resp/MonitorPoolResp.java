@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class MonitorPoolResp extends MonitorPool {
-
+	private static final long serialVersionUID = 1;
 	private String codeName;
 	private String monitorDesc;
 	private String ykbDesc;
