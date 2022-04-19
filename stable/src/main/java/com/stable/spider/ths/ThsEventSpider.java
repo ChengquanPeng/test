@@ -81,15 +81,20 @@ public class ThsEventSpider {
 		if (header == null) {
 			header = new HashMap<String, String>();
 		}
+		int pre3Year = DateUtil.getPreYear(DateUtil.getTodayIntYYYYMMDD(), 3);
 		List<ReducingHoldingShares> list0 = new LinkedList<ReducingHoldingShares>();
 		List<BuyBackInfo> list2 = new LinkedList<BuyBackInfo>();
 
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
 		log.info("codelist.size:" + codelist.size());
 		int c = 0;
-		for (StockBaseInfo s : codelist) {
+		for (StockBaseInfo s1 : codelist) {
 			try {
-				dofetchInner3(s.getCode(), list0, list2);
+				String code = s1.getCode();
+				boolean online3Year = stockBasicService.onlinePreYearChk(code, pre3Year);
+				if (online3Year) {
+					dofetchInner3(code, list0, list2);
+				}
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
 			}
