@@ -1,5 +1,10 @@
 package com.stable.web.controller;
 
+import java.io.PrintWriter;
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,10 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stable.service.ChipsDzjyService;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
+import com.stable.service.ReducingHoldingSharesService;
 import com.stable.spider.eastmoney.JiejinSpider;
 import com.stable.spider.igoodstock.IgoodstockSpider;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.spider.ths.ThsJiejinSpider;
+import com.stable.vo.bus.ReducingHoldingShares;
 import com.stable.vo.bus.ZengFaDetail;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -35,6 +42,30 @@ public class ChipsController {
 	private IgoodstockSpider igoodstockSpider;
 	@Autowired
 	private ChipsDzjyService chipsDzjyService;
+	@Autowired
+	private ReducingHoldingSharesService reducingHoldingSharesService;
+
+	@RequestMapping(value = "/reduce/list", method = RequestMethod.GET)
+	public void holdernumlist(String code, HttpServletResponse response) {
+		response.setContentType("text/html");
+		try {
+			PrintWriter w = response.getWriter();
+			List<ReducingHoldingShares> list = reducingHoldingSharesService.getLastStat(code);
+			if (list != null && list.size() > 0) {
+				w.write(code + "<table><tr><td>日期</td><td>股数(万股)</td><td>描述</td><tr/>");
+				for (ReducingHoldingShares row : list) {
+					w.write("<tr><td>" + row.getDate() + "</td><td>" + row.getWg() + "</td><td>" + row.getDesc()
+							+ "</td><tr/>");
+				}
+				w.write("</table>");
+			} else {
+				w.write(code + "无数据");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
 
 	/**
 	 * 根据code查询股东人数

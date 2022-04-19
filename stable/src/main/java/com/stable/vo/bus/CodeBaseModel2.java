@@ -30,6 +30,9 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int shooting8 = 0;// 行情指标8：底部横盘3-4年以上的增发-小票
 
+	@Field(type = FieldType.Double)
+	private double reducZb;// 减持占比
+
 	// Step.1.市值大小，股价K线形态是否横盘多年，且常年分红
 	@Field(type = FieldType.Double)
 	private double mkv;// 流通市值

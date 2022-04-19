@@ -30,11 +30,13 @@ import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.service.ConceptService;
+import com.stable.service.ReducingHoldingSharesService;
 import com.stable.service.StockBasicService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
+import com.stable.vo.ReducingHoldingSharesStat;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
 import com.stable.vo.bus.MonitorPool;
@@ -61,6 +63,9 @@ public class ModelWebService {
 	private MonitorPoolService monitorPoolService;
 	@Autowired
 	private MonitorPoolDao monitorPoolDao;
+	@Autowired
+	private ReducingHoldingSharesService reducingHoldingSharesService;
+
 	private long WAN = CurrencyUitl.WAN_N.longValue();
 
 	public CodeBaseModel2 getLastOneByCode2(String code) {
@@ -254,7 +259,14 @@ public class ModelWebService {
 						.append(dh.getDzjyp60d()).append("%)");
 			}
 		}
-		sb5.append(Constant.HTML_LINE);
+		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
+		// 减持
+		ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLastStat(dh.getCode(), 0);
+		if (dh.getReducZb() > 0 || rhss.getYg() > 0) {
+			sb5.append("减持次数:").append(rhss.getT()).append(",股数:").append(rhss.getYg()).append("亿股,占比:")
+					.append(dh.getReducZb());
+		}
+		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 		// 是否确定
 		if (dh.getPls() == 0) {
 			sb5.append("人工: 未确定");
@@ -579,6 +591,8 @@ public class ModelWebService {
 		} else if (orderBy == 13) {
 			field = "holderNum";
 			order = SortOrder.ASC;
+		} else if (orderBy == 14) {
+			field = "reducZb";
 		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);

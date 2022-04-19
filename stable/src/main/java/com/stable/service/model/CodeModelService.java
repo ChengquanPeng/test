@@ -26,6 +26,7 @@ import com.stable.service.DzjyService;
 import com.stable.service.FinanceService;
 import com.stable.service.PlateService;
 import com.stable.service.PriceLifeService;
+import com.stable.service.ReducingHoldingSharesService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.ZhiYaService;
@@ -107,6 +108,8 @@ public class CodeModelService {
 	private DataChangeService dataChangeService;
 	@Autowired
 	private Sort1ModeService sort1ModeService;
+	@Autowired
+	private ReducingHoldingSharesService reducingHoldingSharesService;
 
 	public synchronized void runJobv2(int date, boolean isweekend) {
 		try {
@@ -313,6 +316,9 @@ public class CodeModelService {
 				if (d.getClosed() < zy.getWarningLine()) {
 					newOne.setTagHighZyChance(1);
 				}
+
+				// 减持占比
+				newOne.setReducZb(reducingHoldingSharesService.getLastStat(code, pre1Year).getZb());
 
 				// 以下是系统指标，没有4年直接退出
 				if (!online4Year) {// 4年以上，退出

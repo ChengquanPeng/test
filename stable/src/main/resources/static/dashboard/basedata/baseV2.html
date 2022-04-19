@@ -117,6 +117,7 @@
 						<option value="11">大宗1年</option>
 						<option value="12" selected="selected">大宗占比</option>
 						<option value="13">持股人数变化</option>
+						<option value="14">减持占比</option>
 					</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 倒序排序:<input type="checkbox"
 						id="asc" name="asc" checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
@@ -272,6 +273,9 @@
 													index) {
 												var v = value
 														+ "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+row.code+"/event.html#stockpage'>大事提醒(增减持/回购)==></a>";
+												v += "<br/><a target='_blank' href='/web/chips/reduce/list?code="
+														+ row.code
+														+ "'>减持历史</a>"
 												if (row.shooting3 == 1) {
 													v += "<br/><a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资融券==></a>";
 												}

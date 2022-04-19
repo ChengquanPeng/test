@@ -14,6 +14,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsBuyBackInfoDao;
 import com.stable.es.dao.base.EsReducingHoldingSharesDao;
+import com.stable.service.ReducingHoldingSharesService;
 import com.stable.service.StockBasicService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -50,6 +51,8 @@ public class ThsEventSpider {
 	private EsBuyBackInfoDao buyBackInfoDao;
 	@Autowired
 	private EsReducingHoldingSharesDao reducingHoldingSharesDao;
+	@Autowired
+	private ReducingHoldingSharesService reducingHoldingSharesService;
 
 	private String urlbase = "https://basic.10jqka.com.cn/%s/event.html#stockpage?t=%s";
 	private String host = "http://basic.10jqka.com.cn/";
@@ -85,22 +88,20 @@ public class ThsEventSpider {
 		log.info("codelist.size:" + codelist.size());
 		int c = 0;
 		for (StockBaseInfo s : codelist) {
-			if (stockBasicService.isHuShenCode(s.getCode())) {
-				try {
-					dofetchInner3(s.getCode(), list0, list2);
-				} catch (Exception e) {
-					ErrorLogFileUitl.writeError(e, "", "", "");
-				}
-				c++;
-				log.info("ThsEventSpider current index:{}", c);
-				if (list0.size() > 200) {
-					reducingHoldingSharesDao.saveAll(list0);
-					list0 = new LinkedList<ReducingHoldingShares>();
-				}
-				if (list2.size() > 200) {
-					buyBackInfoDao.saveAll(list2);
-					list2 = new LinkedList<BuyBackInfo>();
-				}
+			try {
+				dofetchInner3(s.getCode(), list0, list2);
+			} catch (Exception e) {
+				ErrorLogFileUitl.writeError(e, "", "", "");
+			}
+			c++;
+			log.info("ThsEventSpider current index:{}", c);
+			if (list0.size() > 200) {
+				reducingHoldingSharesDao.saveAll(list0);
+				list0 = new LinkedList<ReducingHoldingShares>();
+			}
+			if (list2.size() > 200) {
+				buyBackInfoDao.saveAll(list2);
+				list2 = new LinkedList<BuyBackInfo>();
 			}
 		}
 		if (list0.size() > 0) {
@@ -109,6 +110,7 @@ public class ThsEventSpider {
 		if (list2.size() > 0) {
 			buyBackInfoDao.saveAll(list2);
 		}
+		reducingHoldingSharesService.init();
 		log.info("同花顺-近期重要事件-done");
 	}
 
