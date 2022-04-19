@@ -14,6 +14,7 @@ import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.DzjySpider;
 import com.stable.spider.eastmoney.EastmoneySpider;
+import com.stable.spider.ths.ThsEventSpider;
 import com.stable.spider.ths.ThsSpider;
 import com.stable.utils.DateUtil;
 
@@ -43,6 +44,8 @@ public class EveryDayJob extends MySimpleJob {
 	private EastmoneySpider eastmoneySpider;
 	@Autowired
 	private TradeCalService tradeCalService;
+	@Autowired
+	private ThsEventSpider thsEventSpider;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
@@ -63,7 +66,8 @@ public class EveryDayJob extends MySimpleJob {
 //		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloder());
 //		FileDeleteUitl.deletePastDateFile(efc.getModelV1SortFloderDesc());
 		log.info("周五晚上，质押");
-		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+		int calweek = cal.get(Calendar.DAY_OF_WEEK);
+		if (calweek == Calendar.FRIDAY) {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -76,6 +80,9 @@ public class EveryDayJob extends MySimpleJob {
 				}
 			}).start();
 		}
+		if (calweek == Calendar.WEDNESDAY) {// 每周3
+			thsEventSpider.byWeb();
+		}
 		if (!tradeCalService.isOpen(date)) {
 			return;
 		}
@@ -86,8 +93,7 @@ public class EveryDayJob extends MySimpleJob {
 		log.info("大宗交易-预警");
 		monitorPoolService.jobDzjyWarning();
 		// 周一周4执行，每周末抓完财报后运行
-		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY
-				&& cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
+		if (calweek != Calendar.SUNDAY && calweek != Calendar.SATURDAY && calweek != Calendar.FRIDAY) {
 			codeModelService.runJobv2(date, false);
 			// WxPushUtil.pushSystem1("周五，周六，周日每晚23点不在运行定时运行 code model,周日下午在继续运行！");
 		}

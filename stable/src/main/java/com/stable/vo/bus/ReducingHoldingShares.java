@@ -19,6 +19,9 @@ public class ReducingHoldingShares extends EsBase {
 	@Id
 	private String id;// code+date
 
+	@Field(type = FieldType.Keyword)
+	private String code;// 日期date
+
 	@Field(type = FieldType.Integer)
 	private int date = 0;// 日期date
 
@@ -26,7 +29,7 @@ public class ReducingHoldingShares extends EsBase {
 	private int type;// 1.股东减持,2.增减持计划,3.高管减持,4.其他
 
 	@Field(type = FieldType.Integer)
-	private double zb;
+	private double wg;// 万股
 
 	@Field(type = FieldType.Text)
 	private String desc;

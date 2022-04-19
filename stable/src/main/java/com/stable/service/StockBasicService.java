@@ -263,7 +263,7 @@ public class StockBasicService {
 
 	// 沪深股票，0，6，3开头的
 	public boolean isHuShenCode(String code) {
-		return !code.startsWith("4") && !code.startsWith("8");
+		return code.startsWith("0") && code.startsWith("3") && code.startsWith("6");
 	}
 
 	private Comparator<StockBaseInfo> sort = new Comparator<StockBaseInfo>() {

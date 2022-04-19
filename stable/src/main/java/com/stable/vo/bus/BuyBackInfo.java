@@ -7,10 +7,12 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
-@Document(indexName = "buy_back")
+@ToString
+@Document(indexName = "buy_back2")
 public class BuyBackInfo extends EsBase {
 
 	/**
@@ -28,9 +30,6 @@ public class BuyBackInfo extends EsBase {
 
 	@Field(type = FieldType.Integer)
 	private int date;
-
-	@Field(type = FieldType.Integer)
-	private int status;
 
 	@Field(type = FieldType.Integer)
 	private int type;// 1.增持，2.回购

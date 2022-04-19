@@ -1,6 +1,5 @@
 package com.stable.service;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -9,7 +8,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import com.stable.es.dao.base.EsBuyBackInfoDao;
 import com.stable.vo.bus.BuyBackInfo;
-import com.stable.vo.http.resp.BuyBackInfoResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
@@ -39,20 +36,6 @@ public class BuyBackService {
 	private EsBuyBackInfoDao buyBackInfoDao;
 	@Autowired
 	private StockBasicService stockBasicService;
-
-	public List<BuyBackInfoResp> getListByCodeForWebPage(String code, int dtype, int asc, EsQueryPageReq querypage) {
-		List<BuyBackInfoResp> res = new LinkedList<BuyBackInfoResp>();
-		List<BuyBackInfo> list = this.getBuyBackInfo(code, dtype, asc, querypage);
-		if (list != null) {
-			for (BuyBackInfo dh : list) {
-				BuyBackInfoResp resp = new BuyBackInfoResp();
-				BeanUtils.copyProperties(dh, resp);
-				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
-				res.add(resp);
-			}
-		}
-		return res;
-	}
 
 	public BuyBackInfo getLastRecordByLteDate(String code, int start, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
