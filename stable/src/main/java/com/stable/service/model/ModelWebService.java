@@ -212,7 +212,9 @@ public class ModelWebService {
 						sb5.append(",预增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
 					}
 				} else {
-					if (dh.getZfYjAmt() > 0) {
+					if (StringUtils.isNotBlank(dh.getZfAmt())) {
+						sb5.append(",实增发金额:").append(dh.getZfAmt());
+					} else if (dh.getZfYjAmt() > 0) {
 						sb5.append(",增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
 					}
 					sb5.append(",增发价格:").append(dh.getZfPrice());

@@ -65,9 +65,10 @@ public class ReducingHoldingSharesService {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.rangeQuery("date").gte(pre1year));
-
+		int pageNum = EsQueryPageUtil.queryPage500.getPageNum();
+		int size = EsQueryPageUtil.queryPage500.getPageSize();
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(PageRequest.of(pageNum, size)).build();
 
 		List<ReducingHoldingShares> page = dao.search(sq).getContent();
 		if (page != null && !page.isEmpty()) {

@@ -473,6 +473,7 @@ public class CodeModelService {
 		newOne.setZfStatus(ZfStatus.NO.getCode());
 		newOne.setZfStatusDesc("");
 		newOne.setZfYjAmt(0);
+		newOne.setZfAmt("");
 		newOne.setZfPrice(0.0);
 		ZengFa last = chipsZfService.getLastZengFa(newOne.getCode());
 		// start 一年以前
@@ -481,6 +482,7 @@ public class CodeModelService {
 			newOne.setZfStatusDesc(last.getStatusDesc());
 			newOne.setZfYjAmt(last.getYjamt());
 			newOne.setZfPrice(last.getPrice());
+			newOne.setZfAmt(last.getAmt());
 		}
 	}
 

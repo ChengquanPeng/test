@@ -78,10 +78,12 @@ public class CodeBaseModel2 extends EsBase {
 	// 增发(最近的增发，包含正在增发）
 	@Field(type = FieldType.Integer)
 	private int zfStatus;// 增发状态（近1年）: 0无增发，1增发中，2增发完成，3，增发终止
-	@Field(type = FieldType.Long)
-	private long zfYjAmt = 0;// 增发预计金额
 	@Field(type = FieldType.Double)
 	private double zfPrice = 0; // 增发价格
+	@Field(type = FieldType.Long)
+	private long zfYjAmt = 0;// 增发预计金额
+	@Field(type = FieldType.Text)
+	private String zfAmt;// 实际募资净额：3.31亿元
 	@Field(type = FieldType.Text)
 	private String zfStatusDesc;// 增发进度
 	// 已完成的增发
