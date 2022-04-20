@@ -43,7 +43,8 @@ public class ReducingHoldingSharesService {
 			if (pre1year <= 0) {
 				pre1year = DateUtil.getPreYear(DateUtil.getTodayIntYYYYMMDD());
 			}
-			datacash.put(code, getLast(code, pre1year));
+			r = getLast(code, pre1year);
+			datacash.put(code, r);
 		}
 		return r;
 	}

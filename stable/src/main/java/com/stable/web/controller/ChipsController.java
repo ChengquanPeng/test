@@ -47,7 +47,8 @@ public class ChipsController {
 
 	@RequestMapping(value = "/reduce/list", method = RequestMethod.GET)
 	public void holdernumlist(String code, HttpServletResponse response) {
-		response.setContentType("text/html");
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html;charset=utf-8");
 		try {
 			PrintWriter w = response.getWriter();
 			List<ReducingHoldingShares> list = reducingHoldingSharesService.getLastStat(code);
@@ -64,7 +65,17 @@ public class ChipsController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
 
+	@RequestMapping(value = "/reduce/list2", method = RequestMethod.GET)
+	public void holdernumlist2(String code, HttpServletResponse response) {
+
+		try {
+			PrintWriter w = response.getWriter();
+			w.write(code + "无数据");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
