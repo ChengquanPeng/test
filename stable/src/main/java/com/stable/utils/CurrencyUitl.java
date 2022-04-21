@@ -32,7 +32,7 @@ public class CurrencyUitl {
 			return 0l;
 		}
 		// System.err.println("STR:" + str);
-		str = str.trim().replaceAll(" ", "").replace(YUAN, Constant.EMPTY_STRING);
+		str = str.trim().replaceAll(" ", "").replaceAll(YUAN, Constant.EMPTY_STRING);
 		BigDecimal s = new BigDecimal(1);
 		if (str.contains(YI)) {
 			str = str.split(YI)[0];
@@ -252,6 +252,7 @@ public class CurrencyUitl {
 //		System.err.println(CurrencyUitl.covertToString(997));
 //		System.err.println(CurrencyUitl.covertToString(-9978890000.0f));
 //		System.err.println(CurrencyUitl.covertToString(-9970000.0f));
-		System.err.println(CurrencyUitl.cutProfit(100, 120));
+		System.err.println(CurrencyUitl.covertToLong("10.59亿元"));
+		System.err.println(CurrencyUitl.covertToLong("10.59万元"));
 	}
 }

@@ -482,7 +482,10 @@ public class CodeModelService {
 			newOne.setZfStatusDesc(last.getStatusDesc());
 			newOne.setZfYjAmt(last.getYjamt());
 			newOne.setZfPrice(last.getPrice());
-			newOne.setZfAmt(last.getAmt());
+			if (StringUtils.isNotBlank(last.getAmt()) && !"--".equals(last.getAmt().trim())) {
+				newOne.setZfAmt(last.getAmt());
+				newOne.setZfYjAmt(CurrencyUitl.covertToLong(last.getAmt()));
+			}
 		}
 	}
 
