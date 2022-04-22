@@ -17,6 +17,7 @@ import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.MonitorPoolDao;
 import com.stable.service.BonusService;
+import com.stable.service.BuyBackService;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.DaliyBasicHistroyService;
@@ -108,6 +109,8 @@ public class CodeModelService {
 	private DataChangeService dataChangeService;
 	@Autowired
 	private Sort1ModeService sort1ModeService;
+	@Autowired
+	private BuyBackService buyBackService;
 	@Autowired
 	private ReducingHoldingSharesService reducingHoldingSharesService;
 
@@ -337,16 +340,16 @@ public class CodeModelService {
 					if (newOne.getZfjjupStable() >= 2 || newOne.getZfjjup() >= 2) {// 2.底部没涨
 						if (mkv <= smallStocklimit) {// 市值
 							if (newOne.getHolderNumT3() > 45.0) {// 三大股东持股比例
+								// 行情指标1：底部小票大宗：超活筹5%,董监高机构代减持?
+								if (newOne.getDzjyp365d() >= 4.5) {// 大宗超过4.5%
+									isOk1 = true;
+									log.info("{} 小票，底部大宗超5千万", code);
+								}
 								// 行情指标8：底部小票增发：横盘3-4年以上==>1.基本面没问题，2.没涨，3:底部自己人增发，4排除大股东 (已完成的底部自己人增发)
-								if (newOne.getZfStatus() == ZfStatus.DONE.getCode() && newOne.getZfself() == 1
+								if (!isOk1 && newOne.getZfStatus() == ZfStatus.DONE.getCode() && newOne.getZfself() == 1
 										&& newOne.getZfjjup() >= 3 && newOne.getZfObjType() != 3) {
 									isOk8 = true;
 									log.info("{} 小票，底部横盘定增", code);
-								}
-								// 行情指标1：底部小票大宗：超活筹5%,董监高机构代减持?
-								if (!isOk8 && newOne.getDzjyp365d() >= 4.5) {// 大宗超过4.5%
-									isOk1 = true;
-									log.info("{} 小票，底部大宗超5千万", code);
 								}
 							}
 						} else {
@@ -423,7 +426,9 @@ public class CodeModelService {
 		log.info("Code Model  processing for code:{}", code);
 		// 基本面池
 		CodeBaseModel2 newOne = new CodeBaseModel2();
-		copyProperty(newOne, oldOne);// copy原有属性
+		if (oldOne != null) {// copy原有属性
+			BeanCopy.copy(oldOne, newOne);
+		}
 		newOne.setId(code);
 		newOne.setCode(code);
 		newOne.setDate(tradeDate);
@@ -589,8 +594,8 @@ public class CodeModelService {
 	}
 
 	private void susWhiteHorses(String code, CodeBaseModel2 newOne) {
-		// 是否中线(60日线),TODO,加上市值
-		if (priceLifeService.getLastIndex(code) >= 80
+		// 是否中线(60日线),市值300亿以上
+		if (newOne.getMkv() > 200 && priceLifeService.getLastIndex(code) >= 80
 				&& LineAvgPrice.isWhiteHorseForMidV2(avgService, code, newOne.getDate())) {
 			newOne.setSusWhiteHors(1);
 		} else {
@@ -1002,8 +1007,7 @@ public class CodeModelService {
 				}
 			}
 		}
-		// 股东增持(一年)
-
+		// 高质押
 		if (zy.getHasRisk() == 1) {//
 			newOne.setBaseYellow(1);
 			sb2.append(yellow++).append(".高质押风险:" + zy.getDetail()).append(Constant.HTML_LINE);
@@ -1050,6 +1054,18 @@ public class CodeModelService {
 			newOne.setBaseGreen(1);
 			sb4.append("资产收益率年超20%").append(Constant.HTML_LINE);
 		}
+		// 增持
+		String zc = buyBackService.getLastRecordZc(code);
+		if (StringUtils.isNotBlank(zc)) {
+			newOne.setBaseBlue(1);
+			sb3.append(zc).append(Constant.HTML_LINE);
+		}
+		// 回购
+		String bb = buyBackService.getLastRecordBuyBack(code);
+		if (StringUtils.isNotBlank(bb)) {
+			newOne.setBaseBlue(1);
+			sb3.append(bb).append(Constant.HTML_LINE);
+		}
 		// 正在增发中
 		chkLastOneYearZf(newOne);
 		if (newOne.getZfStatus() == 1 || newOne.getZfStatus() == 2) {
@@ -1084,22 +1100,8 @@ public class CodeModelService {
 		}
 	}
 
-	private void copyProperty(CodeBaseModel2 newOne, CodeBaseModel2 oldOne) {
-		if (oldOne != null) {
-			BeanCopy.copy(oldOne, newOne);
-			// 复制一些属性
-//			newOne.setMonitor(oldOne.getMonitor());
-//			newOne.setZfjjup(oldOne.getZfjjup());
-//			newOne.setPls(oldOne.getPls());
-//			newOne.setPlst(oldOne.getPlst());
-			// 筹码博弈
-
-		}
-	}
-
 	private void findBigBoss2(String code, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis) {
 		log.info("findBigBoss code:{}", code);
-
 		// 业绩连续
 		int continueJidu1 = 0;
 		int continueJidu2 = 0;

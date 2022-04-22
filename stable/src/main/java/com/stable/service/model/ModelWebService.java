@@ -265,8 +265,8 @@ public class ModelWebService {
 		// 减持
 		ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLastStat(dh.getCode(), 0);
 		if (dh.getReducZb() > 0 || rhss.getYg() > 0) {
-			sb5.append("减持次数:").append(rhss.getT()).append(",股数:").append(rhss.getYg()).append("亿股,占比:")
-					.append(dh.getReducZb());
+			sb5.append("1年减持:").append(rhss.getT()).append("次,").append(rhss.getYg()).append("亿股,流通占比:")
+					.append(dh.getReducZb()).append("%)");
 		}
 		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 		// 是否确定

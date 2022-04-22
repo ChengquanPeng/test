@@ -53,7 +53,7 @@ public class ChipsController {
 			PrintWriter w = response.getWriter();
 			List<ReducingHoldingShares> list = reducingHoldingSharesService.getLastStat(code);
 			if (list != null && list.size() > 0) {
-				w.write(code + "<table><tr><td>日期</td><td>股数(万股)</td><td>描述</td><tr/>");
+				w.write(code + "<table><tr><td width='6%'>日期</td><td width='6%'>股数(万股)</td><td>描述</td><tr/>");
 				for (ReducingHoldingShares row : list) {
 					w.write("<tr><td>" + row.getDate() + "</td><td>" + row.getWg() + "</td><td>" + row.getDesc()
 							+ "</td><tr/>");
