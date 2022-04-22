@@ -216,10 +216,8 @@ public class CodeModelService {
 				}
 
 				// 增发自动监听-重置
-				if (newOne.getPls() == 0 && (pool.getMonitor() == MonitorType.ZengFaAuto.getCode()// 增发
-						|| pool.getMonitor() == MonitorType.NO.getCode()
-						|| pool.getMonitor() == MonitorType.PreZengFa.getCode()
-						|| pool.getMonitor() == MonitorType.DZJY.getCode())) {// 自动监听归0
+				if (newOne.getPls() == 0 && (pool.getMonitor() == MonitorType.NO.getCode()
+						|| pool.getMonitor() > MonitorType.MANUAL.getCode())) {// 自动监听归0
 					pool.setMonitor(MonitorType.NO.getCode());
 					pool.setRealtime(0);
 					pool.setOffline(0);
@@ -331,10 +329,12 @@ public class CodeModelService {
 				boolean isOk1 = false;
 				boolean isOk2 = false;
 				boolean isOk8 = false;
+				boolean isOk9 = false;
 				newOne.setShooting1(0);
 				newOne.setShooting2(0);
 				newOne.setShooting4(0);
 				newOne.setShooting8(0);
+				newOne.setShooting9(0);
 				// 系统指标：自动监听
 				if ((newOne.getBousOK() == 1 || newOne.getFinOK() == 1)) {// 1.基本面没有什么大问题
 					if (newOne.getZfjjupStable() >= 2 || newOne.getZfjjup() >= 2) {// 2.底部没涨
@@ -347,10 +347,18 @@ public class CodeModelService {
 								}
 								// 行情指标8：底部小票增发：横盘3-4年以上==>1.基本面没问题，2.没涨，3:底部自己人增发，4排除大股东 (已完成的底部自己人增发)
 								if (!isOk1 && newOne.getZfStatus() == ZfStatus.DONE.getCode() && newOne.getZfself() == 1
-										&& newOne.getZfjjup() >= 3 && newOne.getZfObjType() != 3) {
+										&& (newOne.getZfjjup() >= 3 || newOne.getZfjjupStable() >= 3)
+										&& newOne.getZfObjType() != 3) {
 									isOk8 = true;
 									log.info("{} 小票，底部横盘定增", code);
 								}
+							}
+
+							if (!isOk1 && !isOk8 && newOne.getZfStatus() == ZfStatus.DONE.getCode()
+									&& newOne.getZfself() == 1 && newOne.getZfjjup() >= 2
+									&& newOne.getZfjjupStable() >= 2 && newOne.getZfObjType() != 3) {
+								isOk9 = true;
+								log.info("{} 小票，底部横盘定增2年", code);
 							}
 						} else {
 							// 行情指标2：底部大票增发：超过50亿(越大越好),股东集中,证监会核准-之前有明显底部拿筹痕迹-涨停？
@@ -369,7 +377,7 @@ public class CodeModelService {
 				}
 
 				// 系统指标：自动化监听
-				if (isOk1 || isOk2 || isOk8) {
+				if (isOk1 || isOk2 || isOk8 || isOk9) {
 					int motp = 0;
 					if (isOk8) {
 						motp = MonitorType.ZengFaAuto.getCode();
@@ -383,6 +391,10 @@ public class CodeModelService {
 					if (isOk2) {
 						motp = MonitorType.PreZengFa.getCode();
 						newOne.setShooting2(1);
+					}
+					if (isOk9) {
+						motp = MonitorType.ZengFaAuto2.getCode();
+						newOne.setShooting9(1);
 					}
 
 					// 自动监听

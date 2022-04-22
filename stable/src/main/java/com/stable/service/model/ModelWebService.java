@@ -95,7 +95,7 @@ public class ModelWebService {
 			s = "底部小票-大宗-超5%,董监高机构代减持?" + splitor;
 		}
 		if (dh.getShooting8() > 0) {
-			s += "底部小票-增发已完成-3y+未涨,底部定增" + splitor;
+			s += "底部小票-增发已完成-3y+,底部定增" + splitor;
 		}
 		if (dh.getShooting2() > 0) {
 			s += "底部大票-增发已核准：超50亿(越大越好),股东集中,底部拿筹涨停?" + splitor;
@@ -112,6 +112,9 @@ public class ModelWebService {
 		}
 		if (dh.getShooting6() > 0) {
 			s += "短线3:3/5天情绪,见好就收" + splitor;
+		}
+		if (dh.getShooting9() > 0) {
+			s += "底部小票-增发已完成-2y,底部定增" + splitor;
 		}
 
 		return s;
