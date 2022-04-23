@@ -175,6 +175,14 @@ public class DateUtil {
 		}
 	}
 
+	public static int addDate(int yyyyMMdd, int days) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(parseDate(yyyyMMdd));
+		calendar.add(Calendar.DATE, days);
+		Date py = calendar.getTime();
+		return Integer.valueOf(formatYYYYMMDD(py));
+	}
+
 	public static Date addDate(Date date, int days) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
@@ -298,6 +306,15 @@ public class DateUtil {
 	// 1年前
 	public static int getPreYear(int yyyyMMdd) {
 		return getPreYear(yyyyMMdd, 1);
+	}
+
+	// 按月添加
+	public static int addMonth(int yyyyMMdd, int addMonth) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(parseDate(yyyyMMdd));
+		calendar.add(Calendar.MONTH, addMonth);// 当前时间减去一年，即一年前的时间    
+		Date py = calendar.getTime();// 获取一年前的时间，或者一个月前的时间  
+		return Integer.valueOf(formatYYYYMMDD(py));
 	}
 
 	// 半年前

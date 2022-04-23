@@ -1,5 +1,6 @@
 package com.stable.web.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -7,28 +8,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.stable.vo.UserVo;
+import com.stable.service.UserService;
+import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.JsonResult;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
-@RestController
+@RestController("/manager")
 public class UserController {
 
+	@Autowired
+	private UserService userService;
 
 	/**
 	 * 根据ID查询用户
-	 * 
-	 * @param id
-	 * @return
 	 */
-	@RequestMapping(value = "user/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/user/{id}", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> getUserById(@PathVariable(value = "id") Integer id) {
 		JsonResult r = new JsonResult();
 		try {
-
-			r.setStatus("ok");
+			r.setResult(userService.getListById(id));
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus("error");
+			r.setStatus(JsonResult.ERROR);
 			e.printStackTrace();
 		}
 		return ResponseEntity.ok(r);
@@ -36,17 +38,16 @@ public class UserController {
 
 	/**
 	 * 查询用户列表
-	 * 
-	 * @return
 	 */
-	@RequestMapping(value = "users", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> getUserList() {
+	@RequestMapping(value = "/user/list", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> getUserList(UserInfo user, EsQueryPageReq page) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setStatus("ok");
+			r.setResult(userService.getList(user, page));
+			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus("error");
+			r.setStatus(JsonResult.ERROR);
 			e.printStackTrace();
 		}
 		return ResponseEntity.ok(r);
@@ -54,79 +55,47 @@ public class UserController {
 
 	/**
 	 * 添加用户
-	 * 
-	 * @param user
-	 * @return
-	 * 
-	 * @requestBody注解常用来处理content-type不是默认的application/x-www-form-urlcoded编码的内容，
-	 * 
-	 *                                                                           比如说：application/json或者是application/xml等。一般情况下来说常用其来处理application/json类型。
-	 * 
-	 *                                                                           就是从json中提取数据
-	 *                                                                           参见：https://www.cnblogs.com/qiankun-site/p/5774300.html
 	 */
-	@RequestMapping(value = "user", method = RequestMethod.POST)
-	public ResponseEntity<JsonResult> add(@RequestBody UserVo user) {
+	@RequestMapping(value = "/user/add", method = RequestMethod.POST)
+	public ResponseEntity<JsonResult> add(@RequestBody UserInfo user) {
 		JsonResult r = new JsonResult();
 		try {
+			userService.add(user);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus("error");
-
+			r.setStatus(JsonResult.ERROR);
 			e.printStackTrace();
 		}
 		return ResponseEntity.ok(r);
 	}
 
 	/**
-	 * 根据id删除用户
-	 * 
-	 * @param id
-	 * @return
+	 * 用户充值
 	 */
-	@RequestMapping(value = "user/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<JsonResult> delete(@PathVariable(value = "id") Integer id) {
+	@RequestMapping(value = "/user/amt")
+	public ResponseEntity<JsonResult> update(@PathVariable("id") int id, double amt, int stype, int month) {
 		JsonResult r = new JsonResult();
 		try {
-			int ret = 0;
-			if (ret < 0) {
-				r.setResult(ret);
-				r.setStatus("fail");
-			} else {
-				r.setResult(ret);
-				r.setStatus("ok");
-			}
+			userService.update(id, amt, stype, month);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus("error");
-
+			r.setStatus(JsonResult.ERROR);
 			e.printStackTrace();
 		}
 		return ResponseEntity.ok(r);
 	}
 
 	/**
-	 * 根据id修改用户信息
-	 * 
-	 * @param user
-	 * @return
+	 * 用户充值
 	 */
-	@RequestMapping(value = "user/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<JsonResult> update(@PathVariable("id") Integer id, @RequestBody UserVo user) {
+	@RequestMapping(value = "/user/manul/updateamt")
+	public ResponseEntity<JsonResult> update(@PathVariable("id") int id, int stype, int days) {
 		JsonResult r = new JsonResult();
 		try {
-			int ret = 0;
-			if (ret < 0) {
-				r.setResult(ret);
-				r.setStatus("fail");
-			} else {
-				r.setResult(ret);
-				r.setStatus("ok");
-			}
+			userService.manulUpdate(id, stype, days);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus("error");
-
+			r.setStatus(JsonResult.ERROR);
 			e.printStackTrace();
 		}
 		return ResponseEntity.ok(r);
