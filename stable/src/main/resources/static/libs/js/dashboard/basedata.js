@@ -1,5 +1,30 @@
-$("#menu").load("/web/dashboard/basedata/menu.html")
-addActiveHeaderMen("base_data");
+var ustr = "";
+if (ustr == "") {
+	var urls = window.location.href;
+	var l = urls.indexOf("/web/");
+	ustr = urls.substring(l + 5, l + 5 + 5);
+	if (ustr == "comon") {
+		ustr = getQueryVariable("ustr");
+	}
+}
+$("#header").load("/web/" + ustr + "/dashboard/header.html");
+// $("#menu").load("/web/dashboard/menu.html")
+
+function SetCookie(name, value) {
+	var Days = 30 * 12; // cookie 将被保存一年
+	var exp = new Date(); // 获得当前时间
+	exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000); // 换成毫秒
+	document.cookie = name + "=" + escape(value);
+}
+function getCookie(name) {
+	var arr = document.cookie
+			.match(new RegExp("(^| )" + name + "=([^;]*)(;|$)"));
+	if (arr != null) {
+		return unescape(arr[2]);
+	} else {
+		return null;
+	}
+}
 
 Date.prototype.format = function(formatStr) {
 	var str = formatStr;

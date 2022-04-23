@@ -63,9 +63,7 @@ body {
 <body>
 	<div id="header"></div>
 	<div class="container-fluid">
-		<div class="row">
-			<div id="menu"></div>
-			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
+		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div class="col-lg-9">
 				<div class="input-group">
 					代码：<input type="text" class="form-control" id="code">&nbsp;
@@ -123,7 +121,7 @@ body {
 					经营现金流净额转正：<input type="checkbox" id="xjl" name="xjl" />
 				</div>
 				<div class="input-group">
-					买点-地量：<input type="text" class="form-control" id="buyLowVol">&nbsp;(多少天交易日?流动性地量)
+					流动性地量：<input type="text" class="form-control" id="buyLowVol">&nbsp;(多少天交易日?流动性地量)
 				</div>
 				<div class="input-group">
 					大宗交易：<input type="checkbox" id="dzjy" name="dzjy" />&nbsp;&nbsp;&nbsp;<span
@@ -148,7 +146,6 @@ body {
 				<table class="table table-hover" id="cusTable">
 				</table>
 			</div>
-			</main>
 		</div>
 	</div>
 
@@ -168,7 +165,6 @@ body {
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
 	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
-		$("#header").load("/web/header.html")
 		addActive("m_monitor_pool");
 		$('#cusTable').bootstrapTable('destroy');
 	</script>

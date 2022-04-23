@@ -28,13 +28,11 @@ public class MonitorPoolController {
 	 * 根据code
 	 */
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> list(String code, String aliasCode, String monitor, String monitoreq,
-			EsQueryPageReq querypage) {
+	public ResponseEntity<JsonResult> list(String code, String aliasCode, String monitoreq, EsQueryPageReq querypage) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(monitorPoolService.getListForWeb(code,
-					StringUtils.isNotBlank(monitor) ? Integer.valueOf(monitor) : 0,
-					StringUtils.isNotBlank(monitoreq) ? Integer.valueOf(monitoreq) : 0, querypage, aliasCode));
+			int mq = StringUtils.isNotBlank(monitoreq) ? Integer.valueOf(monitoreq) : 0;
+			r.setResult(monitorPoolService.getListForWeb(code, mq == 99 ? 1 : 0, mq, querypage, aliasCode));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

@@ -20,18 +20,16 @@
 <body>
 	<div id="header"></div>
 	<div class="container-fluid">
-		<div class="row">
-			<div id="menu"></div>
-			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
+		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div>
 				<div class="input-group">
 					股票代码：<input type="text" class="form-control" id="queryCode">&nbsp;&nbsp;
 					2月交易金额&gt;=<input type="text" class="form-control" id="day60">&nbsp;&nbsp;
 					1年交易金额&gt;=<input type="text" class="form-control" id="day360">&nbsp;&nbsp;
-					最新日期&gt;=<input type="text" class="form-control" id="date">&nbsp;&nbsp;
-					<span class="input-group-btn">
+					最新日期&gt;=<input type="text" class="form-control" id="date">
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
 						<button class="btn btn-default" type="button" id="queryAction">
-							Go!</button>
+							查询</button>
 					</span>
 				</div>
 			</div>
@@ -40,7 +38,6 @@
 				<table class="table table-hover" id="cusTable">
 				</table>
 			</div>
-			</main>
 		</div>
 	</div>
 
@@ -60,7 +57,6 @@
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
 	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
-		$("#header").load("/web/header.html")
 		addActive("m_dzjy");
 		$('#cusTable').bootstrapTable('destroy');
 		function loadData() {
@@ -111,11 +107,11 @@
 										},
 										{
 											field : 'totalAmt60ds',
-											title : '2个月'
+											title : '2个月交易额'
 										},
 										{
 											field : 'totalAmts',
-											title : '一年'
+											title : '1年交易额'
 										},
 										{
 											field : 'avgPrcie',
@@ -123,7 +119,7 @@
 										},
 										{
 											field : 'date',
-											title : '最近日期'
+											title : '最新大宗日期'
 										},
 										{
 											field : 'update',

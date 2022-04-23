@@ -67,17 +67,6 @@ public class ChipsController {
 		}
 	}
 
-	@RequestMapping(value = "/reduce/list2", method = RequestMethod.GET)
-	public void holdernumlist2(String code, HttpServletResponse response) {
-
-		try {
-			PrintWriter w = response.getWriter();
-			w.write(code + "无数据");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	/**
 	 * 根据code查询股东人数
 	 */

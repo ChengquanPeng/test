@@ -224,7 +224,7 @@ public class DaliyTradeHistroyService {
 	// 离线价格监听
 	private void priceChk(List<TradeHistInfoDaliyNofq> listNofq, int tradeDate) {
 		if (listNofq != null && listNofq.size() > 0) {
-			List<MonitorPool> list = monitorPoolService.getPoolListForMonitor(0, 1);
+			List<MonitorPool> list = monitorPoolService.getPoolListForMonitor(0, 1, true);
 			if (list != null) {
 				List<String> ZengFaAuto = new LinkedList<String>();
 				List<String> Other = new LinkedList<String>();

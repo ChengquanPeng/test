@@ -7,7 +7,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 
-<title>holder num</title>
+<title>trade Basic Daliy</title>
 
 <!-- Bootstrap core CSS -->
 <link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
@@ -20,15 +20,13 @@
 <body>
 	<div id="header"></div>
 	<div class="container-fluid">
-		<div class="row">
-			<div id="menu"></div>
-			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
+		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div>
 				<div class="input-group">
-					股票代码：<input type="text" class="form-control" id="queryCode">
+					股票代码：<input type="text" class="form-control" id="queryCode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					<span class="input-group-btn">
 						<button class="btn btn-default" type="button" id="queryAction">
-							Go!</button>
+							查询</button>
 					</span>
 				</div>
 			</div>
@@ -37,7 +35,6 @@
 				<table class="table table-hover" id="cusTable">
 				</table>
 			</div>
-			</main>
 		</div>
 	</div>
 
@@ -57,14 +54,13 @@
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
 	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
-		$("#header").load("/web/header.html")
-		addActive("m_holderNum");
+		addActive("m_tradeBasicDaliy");
 		$('#cusTable').bootstrapTable('destroy');
 		function loadData() {
 			$('#cusTable').bootstrapTable('destroy');
 			$("#cusTable").bootstrapTable({
 				method : "get", //使用get请求到服务器获取数据  
-				url : "/web/chips/holdernum/list", //获取数据的Servlet地址  
+				url : "/web/trade/hist/dailybasic/list", //获取数据的Servlet地址  
 				striped : true, //表格显示条纹  
 				pagination : true, //启动分页
 				cache : false,
@@ -91,17 +87,32 @@
 					field : 'code',
 					title : '代码'
 				}, {
+					field : 'codeName',
+					title : '名称'
+				}, {
 					field : 'date',
-					title : '更新日期'
+					title : '交易日期'
 				}, {
-					field : 'num',
-					title : '数量'
+					field : 'yesterdayPrice',
+					title : '昨收'
 				}, {
-					field : 'avgPrice',
-					title : '均价'
+					field : 'closed',
+					title : '收盘价'
 				}, {
-					field : 'sysdate',
-					title : '系统更新日期'
+					field : 'todayChangeRate',
+					title : '涨幅'
+				}, {
+					field : 'peTtm',
+					title : '市盈率ttm'
+				}, {
+					field : 'pb',
+					title : '市净率'
+				}, {
+					field : 'totalMarketVal',
+					title : '总市值'
+				}, {
+					field : 'circMarketVal',
+					title : '流通值'
 				} ],
 				responseHandler : function responseHandler(res) {
 
@@ -123,11 +134,7 @@
 			//alert("abc");
 			loadData()
 		});
-		var qc = getQueryVariable("code");
-		if (qc) {
-			$('#queryCode').val(qc);
-			loadData();
-		}
+		loadData();
 	</script>
 </body>
 </html>

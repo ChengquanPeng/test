@@ -250,7 +250,7 @@ public class MonitorPoolService {
 	/**
 	 * 监听列表-实时
 	 */
-	public List<MonitorPool> getPoolListForMonitor(int realtime, int offline) {
+	public List<MonitorPool> getPoolListForMonitor(int realtime, int offline, boolean sort1) {
 		int pageNum = EsQueryPageUtil.queryPage9999.getPageNum();
 		int size = EsQueryPageUtil.queryPage9999.getPageSize();
 		log.info("queryPage pageNum={},size={}", pageNum, size);
@@ -263,6 +263,9 @@ public class MonitorPoolService {
 		}
 		if (offline > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("offline", 1));
+		}
+		if (sort1) {// 熊市开关
+			bqb.mustNot(QueryBuilders.matchPhraseQuery("monitor", MonitorType.SORT1.getCode()));
 		}
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();

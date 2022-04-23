@@ -7,7 +7,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 
-<title>板块分析</title>
+<title>monitor pool</title>
 
 <!-- Bootstrap core CSS -->
 <link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
@@ -60,33 +60,32 @@ body {
 <body>
 	<div id="header"></div>
 	<div class="container-fluid">
-		<div class="row">
-			<div id="menu"></div>
-			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
+		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div>
 				<div class="input-group">
+					股票代码：<input type="text" class="form-control" id="queryCode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					板块/概念(aliasCode)：<input type="text" class="form-control"
-						id="aliasCode"> &nbsp;排序:<select id="sort1">
-						<option value="2">资产收益率(季报)</option>
-						<option value="3">毛利率(季报)</option>
-						<option value="4">应收账款占比(季报)</option>
-					</select>
-				</div>
-				<div class="input-group">
-					股票代码组：<input type="text" class="form-control" id="codes">
+						id="aliasCode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 监听类型:<select
+						id="monitoreq">
+						<option value="0">无</option>
+						<option value="3">人工</option>
+						<option value="41">底部小票-大宗</option>
+						<option value="7">底部大票-增发已核准</option>
+						<option value="8">底部小票-增发已完成-3y+</option>
+						<option value="9">底部小票-增发已完成-2y</option>
+						<option value="11">短线1急速拉升</option>
+						<option value="99">所有监听</option>
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="input-group-btn">
+						<button class="btn btn-default" type="button" id="queryAction">
+							查询</button>
+					</span>
 				</div>
 			</div>
-			<div class="input-group">
-				<span class="input-group-btn">
-					<button class="btn btn-default" type="button" id="queryAction">
-						Go!</button>
-				</span>
-			</div>
+
 			<div id="rptList" style="width: 100%; hight: 100%; float: left；">
 				<table class="table table-hover" id="cusTable">
 				</table>
 			</div>
-			</main>
 		</div>
 	</div>
 
@@ -106,8 +105,7 @@ body {
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
 	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
-		$("#header").load("/web/header.html")
-		addActive("m_pool_plate");
+		addActiveHeaderMen("header_monitor_pool")
 		$('#cusTable').bootstrapTable('destroy');
 		function loadData() {
 			$('#cusTable').bootstrapTable('destroy');
@@ -115,7 +113,7 @@ body {
 					.bootstrapTable(
 							{
 								method : "get", //使用get请求到服务器获取数据  
-								url : "/web/plate/list", //获取数据的Servlet地址  
+								url : "/web/monitorPool/list", //获取数据的Servlet地址  
 								striped : true, //表格显示条纹  
 								pagination : true, //启动分页
 								cache : false,
@@ -130,16 +128,15 @@ body {
 								//设置为limit可以获取limit, offset, search, sort, order  
 								queryParamsType : "undefined",
 								queryParams : function queryParams(params) { //设置查询参数  
-									//var gsort = $('#gsort').val();
-
+									var code = $('#queryCode').val();
 									var param = {
 										pageNum : params.pageNumber,
 										pageSize : params.pageSize,
 									};
+									param.code = code;
+									//param.orderBy = gsort;
 									param.aliasCode = $('#aliasCode').val();
-									param.codes = $('#codes').val();
-									param.sort = $('#sort1').val();
-
+									param.monitoreq = $('#monitoreq').val();
 									return param;
 								},
 								columns : [
@@ -152,51 +149,87 @@ body {
 												actions
 														.push('<a target="_blank" href="/web/code/' + value + '">'
 																+ value
-																+ '</a>');
+																+ '</a><br/>'
+																+ row.codeName);
 												return actions.join('');
 											}
 										},
 										{
-											field : 'codeName',
-											title : '名称'
+											field : 'monitorDesc',
+											title : '监听类型'
 										},
 										{
-											field : 'inmid',
-											title : '资产收益率<br/>TTM(4季度平均)',
+											field : 'remark',
+											title : '监听说明',
+											width : 25
+										},
+										{
+											field : 'offline',
+											title : '在/离线',
 											formatter : function(value, row,
 													index) {
-												return row.t2 + " avg:"
-														+ row.avgt2 + " rank:"
-														+ row.ranking2;
+												return row.realtime + "/"
+														+ row.offline;
 											}
 										},
 										{
-											field : 'inmid',
-											title : '资产收益率<br/>本年季度平均',
+											field : 'upPrice',
+											title : '价格H/L',
 											formatter : function(value, row,
 													index) {
-												return row.t2s;
+												return row.upPrice + "/"
+														+ row.downPrice;
 											}
 										},
 										{
-											field : 'yjlx',
-											title : '毛利率',
+											field : 'upTodayChange',
+											title : '涨幅H/L',
 											formatter : function(value, row,
 													index) {
-												return row.t3 + " avg:"
-														+ row.avgt3 + " rank:"
-														+ row.ranking3;
+												return row.upTodayChange + "/"
+														+ row.downTodayChange;
 											}
 										},
 										{
-											field : 'yjlx',
-											title : '应收账款占比<br/>报告期',
+											field : 'yearHigh1',
+											title : '新高'
+										},
+										{
+											field : 'ykb',
+											title : '业绩'
+										},
+										{
+											field : 'zfdone',
+											title : '定增'
+										},
+										{
+											field : 'holderNum',
+											title : '股东'
+										},
+										{
+											field : 'shotPointCheck',
+											title : '起爆点'
+										},
+										{
+											field : 'buyLowVol',
+											title : '流动性-地量'
+										},
+										{
+											field : 'xjl',
+											title : '现金流'
+										},
+										{
+											field : 'monitor',
+											title : '操作',
 											formatter : function(value, row,
 													index) {
-												return row.t4 + "(" + row.t4e
-														+ ") avg:" + row.avgt4
-														+ " rank:"
-														+ row.ranking4;
+												return "<a target='_blank' href='/web/dashboard/basedata/addMonitor.html?code="
+														+ row.code
+														+ "'>更改监听</a>"
+														+ "&nbsp;&nbsp;<a href='#' onclick='dianwo3(\""
+														+ row.code
+														+ "\",\""
+														+ "\")'>移除</a>";
 											}
 										} ],
 								responseHandler : function responseHandler(res) {
@@ -219,6 +252,28 @@ body {
 			//alert("abc");
 			loadData()
 		});
+		loadData();
+	</script>
+	<script type="text/javascript">
+		function dianwo3(code, remark) {
+			var remark = prompt(code + " 移除监听", "");
+			$.ajax({
+				url : "/web/monitorPool/delMonit", //访问地址--action地址
+				type : "post", //提交方式
+				data : {
+					code : code,
+					remark : remark
+				}, //提交给服务器的数据
+				success : function(reData) { //回调函数的处理方式
+					if ("OK" == reData.status) {
+						alert("已移除");
+						window.close();
+					} else {
+						alert("失败:" + reData.result);
+					}
+				}
+			});
+		}
 	</script>
 </body>
 </html>

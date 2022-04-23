@@ -18,6 +18,7 @@ import com.stable.service.model.prd.Prd1Service;
 import com.stable.service.model.prd.TickService;
 import com.stable.spider.tick.TencentTickReal;
 import com.stable.utils.DateUtil;
+import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.MonitorPool;
 import com.stable.vo.bus.OnlineTesting;
@@ -43,6 +44,8 @@ public class RealtimeMonitoringService {
 	private Prd1Service prd1Service;
 	@Autowired
 	private TickService tickService;
+	@Autowired
+	private RedisUtil redisUtil;
 
 	public synchronized void startObservable() {
 		String date = DateUtil.getTodayYYYYMMDD();
@@ -62,7 +65,7 @@ public class RealtimeMonitoringService {
 
 		try {
 			// 获取监听列表-常规
-			List<MonitorPool> allCode = monitorPoolService.getPoolListForMonitor(1, 0);
+			List<MonitorPool> allCode = monitorPoolService.getPoolListForMonitor(1, 0, getMonisort1());
 
 			List<RealtimeDetailsAnalyzer> list = new LinkedList<RealtimeDetailsAnalyzer>();
 			RealtimeDetailsResulter resulter = new RealtimeDetailsResulter();
@@ -101,8 +104,8 @@ public class RealtimeMonitoringService {
 					new Thread(resulter).start();
 				}
 			}
-			WxPushUtil.pushSystem1(
-					"交易日监听实时交易，监听总数:[" + allCode.size() + "],实际总数[" + list.size() + "],监听失败[" + failtt + "]");
+			WxPushUtil.pushSystem1("实时监听，监听总数:[" + allCode.size() + "],牛熊环境开启:[" + getMonisort1() + "],短线实际总数["
+					+ list.size() + "],监听失败[" + failtt + "]");
 
 			// ====产品1：三五天 => 买点 === 卖点 ====
 			TencentTickReal.tradeDate = idate;
@@ -160,5 +163,9 @@ public class RealtimeMonitoringService {
 				map.get(code).stop();
 			}
 		}
+	}
+
+	private boolean getMonisort1() {
+		return redisUtil.get("moni.sort1", 1) == 1;
 	}
 }

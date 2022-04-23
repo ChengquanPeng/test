@@ -30,7 +30,6 @@ import com.stable.spider.ths.ThsAnnSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
-import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.PriceLife;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
@@ -151,7 +150,7 @@ public class ChipsZfService {
 							r.setBuy("-");
 						}
 						if (ext.getSelfzf() == 1) {
-							r.setSelfzf("自己人");
+							r.setSelfzf("底部增发");
 						} else if (ext.getSelfzf() == 2) {
 							r.setSelfzf("正常增发");
 						} else {
@@ -188,7 +187,7 @@ public class ChipsZfService {
 
 	public synchronized void jobZengFaExt(boolean isJob, int date) {
 		int endDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), date)); // 全部
-		StringBuffer sb = new StringBuffer();
+		// StringBuffer sb = new StringBuffer();
 		List<ZengFa> l = getZengFaList("", ZfStatus.DONE.getCode() + "", endDate, EsQueryPageUtil.queryPage9999);
 		List<ZengFaExt> zfxl = new LinkedList<ZengFaExt>();
 		if (l != null) {
@@ -209,7 +208,7 @@ public class ChipsZfService {
 						if (StringUtils.isNotBlank(s)) {
 							zfe.setBuy(1);
 							zfe.setTitle(s);
-							sb.append(zfe.getCode()).append(",");
+							// sb.append(zfe.getCode()).append(",");
 						}
 						zfe.setSelfzf(0);
 						isLowZengfa(zfe, zf.getEndDate(), zf.getPrice());
@@ -229,9 +228,9 @@ public class ChipsZfService {
 			zengFaExtDao.saveAll(zfxl);
 		}
 		log.info("List<ZengFa> done");
-		if (sb.length() > 0) {
-			WxPushUtil.pushSystem1("增发完成且是购买资产：" + sb.toString());
-		}
+//		if (sb.length() > 0) {
+//			WxPushUtil.pushSystem1("增发完成且是购买资产：" + sb.toString());
+//		}
 
 //		ThreadsUtil.sleep(3, TimeUnit.MINUTES);
 //		// 以下代码一个月后去掉，2020-01-28

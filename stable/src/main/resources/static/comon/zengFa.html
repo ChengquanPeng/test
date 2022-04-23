@@ -20,9 +20,7 @@
 <body>
 	<div id="header"></div>
 	<div class="container-fluid">
-		<div class="row">
-			<div id="menu"></div>
-			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
+		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div>
 				<div class="input-group">
 					股票代码：<input type="text" class="form-control" id="queryCode">&nbsp;&nbsp;
@@ -32,9 +30,9 @@
 						<option value="">无限制</option>
 						<option value="1">未实施</option>
 						<option value="2">已实施</option>
-					</select> <span class="input-group-btn">
+					</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
 						<button class="btn btn-default" type="button" id="queryAction">
-							Go!</button>
+							查询</button>
 					</span>
 				</div>
 			</div>
@@ -43,7 +41,6 @@
 				<table class="table table-hover" id="cusTable">
 				</table>
 			</div>
-			</main>
 		</div>
 	</div>
 
@@ -63,7 +60,6 @@
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
 	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
-		$("#header").load("/web/header.html")
 		addActive("m_zengfa");
 		$('#cusTable').bootstrapTable('destroy');
 		function loadData() {
@@ -126,11 +122,11 @@
 										},
 										{
 											field : 'yujiVal',
-											title : '金额-预'
+											title : '预案金额'
 										},
 										{
 											field : 'amt',
-											title : '金额-实'
+											title : '实际增发金额'
 										},
 										{
 											field : 'zjhDate',
@@ -150,11 +146,11 @@
 										},
 										{
 											field : 'selfzf',
-											title : '自己人'
+											title : '底部增发'
 										},
 										{
 											field : 'compType',
-											title : '企业'
+											title : '是否国企'
 										},
 										{
 											field : 'update',

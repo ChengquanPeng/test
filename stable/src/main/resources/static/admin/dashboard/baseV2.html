@@ -6,33 +6,27 @@
 	content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="">
 <meta name="author" content="">
-
 <title>base</title>
-
-<!-- Bootstrap core CSS -->
 <link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
 	rel="stylesheet">
-
-<!-- Custom styles for this template -->
 <link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
+<style type="text/css">
+.mg {
+	margin: 1px;
+}
+</style>
 </head>
 
 <body>
 	<div id="header"></div>
 	<div class="container-fluid">
-		<div class="row">
-			<div id="menu"></div>
-			<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
-			<div>
-				股票代码：<input type="text" id="queryCode" width="30">
+		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
+			<div class="mg">
+				股票代码：<input type="text" id="queryCode" width="30">&nbsp;&nbsp;&nbsp;
+				概念id：<input type="text" id="conceptId" width="30">&nbsp;&nbsp;&nbsp;
+				板块名称搜索：<input type="text" id="conceptName" width="30">&nbsp;&nbsp;&nbsp;
 			</div>
-			<div>
-				板块名称：<input type="text" id="conceptName" width="30">
-			</div>
-			<div>
-				概念id：<input type="text" id="conceptId" width="30">
-			</div>
-			<div>
+			<div class="mg">
 				<div class="input-group">
 					<input type="text" id="mkv2" width="10" />&gt;=流通市值&lt;=<input
 						type="text" id="mkv" width="10" />亿&nbsp;&nbsp; 前3大股东持股&gt;=<input
@@ -41,13 +35,13 @@
 					国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp;
 				</div>
 			</div>
-			<div>
+			<div class="mg">
 				业绩OK(近5年不亏):<input type="checkbox" id="finOK" title="近5年不亏" />&nbsp;&nbsp;&nbsp;
 				分红OK(近5年分红):<input type="checkbox" id="bousOK" />&nbsp;&nbsp;&nbsp;
 				几年未涨&gt;=<input type="text" id="zfjjup" />&nbsp;&nbsp;&nbsp;
 				几年未涨stable&gt;=<input type="text" id="zfjjupStable" />&nbsp;&nbsp;&nbsp;
 			</div>
-			<div>
+			<div class="mg">
 				<div class="input-group">
 					底部增发:<input type="checkbox" id="zfself" />&nbsp;&nbsp; 增发状态：<select
 						id="zfStatus">
@@ -69,14 +63,14 @@
 						id="zfPriceLow" width="30" />%&nbsp;&nbsp;
 				</div>
 			</div>
-			<div>
+			<div class="mg">
 				<div class="input-group">
 					大宗:1年交易金额&gt;=<input type="text" width="10" width="30"
 						id="totalAmt">&nbsp;&nbsp; 2月交易金额&gt;=<input type="text"
 						width="10" width="30" id="totalAmt60d">
 				</div>
 			</div>
-			<div>
+			<div class="mg">
 				<div class="input-group">
 					系统指标:<select id="shooting">
 						<option value="0" selected="selected">无限制</option>
@@ -106,7 +100,7 @@
 					</select>
 				</div>
 			</div>
-			<div>
+			<div class="mg">
 				<div class="input-group">
 					排序：<select id="gsort">
 						<option value="9">人均持股</option>
@@ -123,17 +117,14 @@
 						id="asc" name="asc" checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
 						<button class="btn btn-default" type="button" id="queryAction">
-							Go!</button>
+							查询</button>
 					</span>
 				</div>
 			</div>
-
-
 			<div id="rptList" style="width: 100%; hight: 100%; float: left；">
 				<table class="table table-hover" id="cusTable">
 				</table>
 			</div>
-			</main>
 		</div>
 	</div>
 
@@ -153,8 +144,7 @@
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
 	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
-		$("#header").load("/web/header.html")
-		addActive("m_base_v2");
+		addActiveHeaderMen("base_data");
 		$('#cusTable').bootstrapTable('destroy');
 		function loadData() {
 			$('#cusTable').bootstrapTable('destroy');
@@ -292,10 +282,14 @@
 											title : '人工',
 											formatter : function(value, row,
 													index) {
-												return "<a target='_blank' href='/web/dashboard/basedata/manual.html?code="
+												return "<a target='_blank' href='/web/"
+														+ ustr
+														+ "/dashboard/manual.html?code="
 														+ row.code
 														+ "'>人工-小票</a><br/>"
-														+ "<a target='_blank' href='/web/dashboard/basedata/addMonitor.html?code="
+														+ "<a target='_blank' href='/web/"
+														+ ustr
+														+ "/dashboard/addMonitor.html?code="
 														+ row.code
 														+ "'>更改监听</a>";
 											}
