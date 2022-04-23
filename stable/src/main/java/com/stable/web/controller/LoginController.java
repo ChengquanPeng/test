@@ -18,28 +18,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class LoginController {
 
-	@RequestMapping(value = "/closelogin", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> closelogin(HttpServletRequest req) {
-		JsonResult r = new JsonResult();
-		Constant.NEED_LOGIN = false;
-		String logmsg = "alllogin 打开，时间：" + (new Date());
-		r.setStatus("ok");
-		r.setResult(logmsg);
-		log.info(logmsg);
-		return ResponseEntity.ok(r);
-	}
-
-	@RequestMapping(value = "/openlogin", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> openlogin(HttpServletRequest req) {
-		JsonResult r = new JsonResult();
-		Constant.NEED_LOGIN = true;
-		String logmsg = "alllogin 打开，时间：" + (new Date());
-		r.setStatus("ok");
-		r.setResult(logmsg);
-		log.info(logmsg);
-		return ResponseEntity.ok(r);
-	}
-
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> mylogin(HttpServletRequest req) {
 		JsonResult r = new JsonResult();
