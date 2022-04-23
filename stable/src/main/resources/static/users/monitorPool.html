@@ -64,9 +64,7 @@ body {
 			<div>
 				<div class="input-group">
 					股票代码：<input type="text" class="form-control" id="queryCode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					板块/概念(aliasCode)：<input type="text" class="form-control"
-						id="aliasCode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 监听类型:<select
-						id="monitoreq">
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 监听类型:<select id="monitoreq">
 						<option value="0">无</option>
 						<option value="99">所有监听</option>
 					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="input-group-btn">
@@ -128,8 +126,6 @@ body {
 										pageSize : params.pageSize,
 									};
 									param.code = code;
-									//param.orderBy = gsort;
-									param.aliasCode = $('#aliasCode').val();
 									param.monitoreq = $('#monitoreq').val();
 									return param;
 								},
@@ -215,7 +211,7 @@ body {
 													index) {
 												return "<a target='_blank' href='/web/"
 														+ ustr
-														+ "/dashboard/addMonitor.html?ustr="
+														+ "/addMonitor.html?ustr="
 														+ ustr
 														+ "&code="
 														+ row.code

@@ -64,9 +64,7 @@ body {
 			<div>
 				<div class="input-group">
 					股票代码：<input type="text" class="form-control" id="queryCode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					板块/概念(aliasCode)：<input type="text" class="form-control"
-						id="aliasCode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 监听类型:<select
-						id="monitoreq">
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 监听类型:<select id="monitoreq">
 						<option value="0">无</option>
 						<option value="3">人工</option>
 						<option value="41">底部小票-大宗</option>
@@ -134,8 +132,6 @@ body {
 										pageSize : params.pageSize,
 									};
 									param.code = code;
-									//param.orderBy = gsort;
-									param.aliasCode = $('#aliasCode').val();
 									param.monitoreq = $('#monitoreq').val();
 									return param;
 								},
@@ -222,7 +218,7 @@ body {
 											title : '操作',
 											formatter : function(value, row,
 													index) {
-												return "<a target='_blank' href='/web/dashboard/basedata/addMonitor.html?code="
+												return "<a target='_blank' href='/web/admin/addMonitor.html?code="
 														+ row.code
 														+ "'>更改监听</a>"
 														+ "&nbsp;&nbsp;<a href='#' onclick='dianwo3(\""

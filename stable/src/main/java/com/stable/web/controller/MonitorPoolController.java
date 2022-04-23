@@ -32,7 +32,9 @@ public class MonitorPoolController {
 		JsonResult r = new JsonResult();
 		try {
 			int mq = StringUtils.isNotBlank(monitoreq) ? Integer.valueOf(monitoreq) : 0;
-			r.setResult(monitorPoolService.getListForWeb(code, mq == 99 ? 1 : 0, mq, querypage, aliasCode));
+			int q1 = (mq == 99 ? 1 : 0);
+			int q2 = (mq == 99 ? 0 : mq);
+			r.setResult(monitorPoolService.getListForWeb(code, q1, q2, querypage, aliasCode));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

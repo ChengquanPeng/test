@@ -72,6 +72,7 @@ public class LoginController {
 		if (code.equals("xxxxTODO-redis-expir")) {
 			UserInfo ui = new UserInfo();
 			ui.setType(2);
+			ui.setId(Long.valueOf(phone));
 			req.getSession().setAttribute(Constant.SESSION_USER, ui);
 			r.setStatus(JsonResult.OK);
 		} else {
@@ -89,6 +90,16 @@ public class LoginController {
 		r.setStatus(JsonResult.OK);
 		r.setResult(logmsg);
 		log.info(logmsg);
+		return ResponseEntity.ok(r);
+	}
+
+	@RequestMapping(value = "/myinfo", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> myinfo(HttpServletRequest req) {
+		UserInfo l = (UserInfo) req.getSession().getAttribute(Constant.SESSION_USER);
+		UserInfo ui = userService.getListById(l.getId());
+		JsonResult r = new JsonResult();
+		r.setStatus(JsonResult.OK);
+		r.setResult(ui);
 		return ResponseEntity.ok(r);
 	}
 

@@ -22,59 +22,87 @@
 	<div class="container-fluid">
 		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div class="mg">
-				股票代码：<input type="text" id="queryCode" width="30">&nbsp;&nbsp;
-				概念id：<input type="text" id="conceptId" width="30">&nbsp;&nbsp;
-				板块名称搜索：<input type="text" id="conceptName" width="30">&nbsp;&nbsp;
-			</div>
-			<div class="mg">
-				<input type="text" id="mkv2" width="10" />&gt;=流通市值&lt;=<input
-					type="text" id="mkv" width="10" />亿&nbsp;&nbsp; 前3大股东持股&gt;=<input
-					type="text" id="holderNumT3" width="30" />%&nbsp;&nbsp;
-				市盈率ttm&lt;=<input type="text" id="pettm" width="20" />&nbsp;&nbsp;
-			</div>
-			<div class="mg">
-				国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp;
-				业绩OK(近5年不亏):<input type="checkbox" id="finOK" title="近5年不亏" />&nbsp;&nbsp;
-				分红OK(近5年分红):<input type="checkbox" id="bousOK" />&nbsp;&nbsp;
-				几年未涨&gt;=<input type="text" id="zfjjup" />&nbsp;&nbsp;
-				几年未涨stable&gt;=<input type="text" id="zfjjupStable"
-					placeholder="算法偏严" />&nbsp;&nbsp;
-			</div>
-			<div class="mg">
-				底部增发:<input type="checkbox" id="zfself" />&nbsp;&nbsp; 增发状态：<select
-					id="zfStatus">
-					<option value="" selected="selected">不限制</option>
-					<option value="1">增发中</option>
-					<option value="6">证监会核准</option>
-					<option value="2">增发完成</option>
-					<option value="8">增发中和完成</option>
-					<option value="3">增发终止</option>
-					<option value="0">无增发</option>
-				</select>&nbsp;&nbsp; 增发对象：<select id="zfObjType">
-					<option value="0" selected="selected">不限制</option>
-					<option value="1">6个月</option>
-					<option value="2">混合</option>
-					<option value="3">大股东</option>
-					<option value="4">其他</option>
-				</select>&nbsp;&nbsp; 增发金额&lt;=<input type="text" id="zfYjAmt" width="10"
-					width="30">&nbsp;&nbsp; 低于增发价&gt;=<input type="text"
-					id="zfPriceLow" width="30" />%&nbsp;&nbsp;
-			</div>
-			<div class="mg">
-				大宗:1年交易额&gt;=<input type="text" width="10" width="30" id="totalAmt">&nbsp;&nbsp;
-				2月交易额&gt;=<input type="text" width="10" width="30" id="totalAmt60d">
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				股票代码：<input type="text" id="queryCode" width="30">&nbsp;&nbsp;&nbsp;
+				概念id：<input type="text" id="conceptId" width="30">&nbsp;&nbsp;&nbsp;
+				板块名称搜索：<input type="text" id="conceptName" width="30">&nbsp;&nbsp;&nbsp;
 			</div>
 			<div class="mg">
 				<div class="input-group">
-					标签:<select id="tagIndex">
+					<input type="text" id="mkv2" width="10" />&gt;=流通市值&lt;=<input
+						type="text" id="mkv" width="10" />亿&nbsp;&nbsp; 前3大股东持股&gt;=<input
+						type="text" id="holderNumT3" width="30" />%&nbsp;&nbsp;
+					市盈率ttm&lt;=<input type="text" id="pettm" width="20" />&nbsp;&nbsp;
+					国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp;
+				</div>
+			</div>
+			<div class="mg">
+				业绩OK(近5年不亏):<input type="checkbox" id="finOK" title="近5年不亏" />&nbsp;&nbsp;&nbsp;
+				分红OK(近5年分红):<input type="checkbox" id="bousOK" />&nbsp;&nbsp;&nbsp;
+				几年未涨&gt;=<input type="text" id="zfjjup" />&nbsp;&nbsp;&nbsp;
+				几年未涨stable&gt;=<input type="text" id="zfjjupStable" />&nbsp;&nbsp;&nbsp;
+			</div>
+			<div class="mg">
+				<div class="input-group">
+					底部增发:<input type="checkbox" id="zfself" />&nbsp;&nbsp; 增发状态：<select
+						id="zfStatus">
+						<option value="" selected="selected">不限制</option>
+						<option value="1">增发中</option>
+						<option value="6">证监会核准</option>
+						<option value="2">增发完成</option>
+						<option value="8">增发中和完成</option>
+						<option value="3">增发终止</option>
+						<option value="0">无增发</option>
+					</select>&nbsp;&nbsp; 增发对象：<select id="zfObjType">
+						<option value="0" selected="selected">不限制</option>
+						<option value="1">6个月</option>
+						<option value="2">混合</option>
+						<option value="3">大股东</option>
+						<option value="4">其他</option>
+					</select>&nbsp;&nbsp; 增发金额&lt;=<input type="text" id="zfYjAmt" width="10"
+						width="30">&nbsp;&nbsp; 低于增发价&gt;=<input type="text"
+						id="zfPriceLow" width="30" />%&nbsp;&nbsp;
+				</div>
+			</div>
+			<div class="mg">
+				<div class="input-group">
+					大宗:1年交易金额&gt;=<input type="text" width="10" width="30"
+						id="totalAmt">&nbsp;&nbsp; 2月交易金额&gt;=<input type="text"
+						width="10" width="30" id="totalAmt60d">
+				</div>
+			</div>
+			<div class="mg">
+				<div class="input-group">
+					系统指标:<select id="shooting">
+						<option value="0" selected="selected">无限制</option>
+						<option value="8">底部小票-增发已完成-3y+</option>
+						<option value="1">底部小票-大宗-超5%</option>
+						<option value="2">底部大票-增发已核准-超50亿</option>
+						<option value="4">底部股东人数大幅减少</option>
+						<option value="9">底部小票-增发已完成-2y</option>
+						<option value="7">底部大额减持(未做)</option>
+						<option value="10">底部小票1年左右的区间放量(未做)</option>
+						<option value="3">短线1:底部融资余额飙升,散户没买入空间?</option>
+						<option value="5">短线2:确定极速拉升,带小平台新高?</option>
+						<option value="6">短线3:散户3/5天情绪,见好就收</option>
+					</select>&nbsp;&nbsp; 标签:<select id="tagIndex">
 						<option value="-1" selected="selected">无限制</option>
 						<option value="1">拉升吸筹?</option>
 						<option value="2">业绩较牛</option>
 						<option value="3">白马走势?</option>
 						<option value="5">小而美</option>
 						<option value="4">高质押机会</option>
-					</select>&nbsp;&nbsp; 排序：<select id="gsort">
+					</select>&nbsp;&nbsp;人工状态:<select id="pls">
+						<option value="-1" selected="selected">无限制</option>
+						<option value="0">未确定</option>
+						<option value="1">已确定</option>
+						<option value="2">已排除</option>
+						<option value="3">确定+未</option>
+					</select>
+				</div>
+			</div>
+			<div class="mg">
+				<div class="input-group">
+					排序：<select id="gsort">
 						<option value="9">人均持股</option>
 						<option value="3">资产收益率ttm</option>
 						<option value="6">大股东持股</option>
@@ -85,9 +113,9 @@
 						<option value="12" selected="selected">大宗占比</option>
 						<option value="13">持股人数变化</option>
 						<option value="14">减持占比</option>
-					</select> &nbsp;&nbsp;&nbsp;&nbsp;倒序排序:<input type="checkbox" id="asc"
-						name="asc" checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp; <span
-						class="input-group-btn">
+					</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 倒序排序:<input type="checkbox"
+						id="asc" name="asc" checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
 						<button class="btn btn-default" type="button" id="queryAction">
 							查询</button>
 					</span>
@@ -235,7 +263,7 @@
 											formatter : function(value, row,
 													index) {
 												var v = value
-														+ "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+row.code+"/event.html#stockpage'>大事提醒(增减持/回购)=></a>";
+														+ "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+row.code+"/event.html#stockpage'>大事提醒=></a>";
 												v += "<br/><a target='_blank' href='/web/chips/reduce/list?code="
 														+ row.code
 														+ "'>减持历史=></a>"
@@ -256,12 +284,12 @@
 													index) {
 												return "<a target='_blank' href='/web/"
 														+ ustr
-														+ "/dashboard/manual.html?code="
+														+ "/manual.html?code="
 														+ row.code
 														+ "'>人工-小票</a><br/>"
 														+ "<a target='_blank' href='/web/"
 														+ ustr
-														+ "/dashboard/addMonitor.html?code="
+														+ "/addMonitor.html?code="
 														+ row.code
 														+ "'>更改监听</a>";
 											}

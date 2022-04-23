@@ -17,79 +17,30 @@
 <link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
 <style type="text/css">
 body {
-	margin: 0px;
-}
-
-.zhezhao {
-	position: fixed;
-	left: 0px;
-	top: 0px;
-	background: #000;
-	width: 100%;
-	height: 100%;
-	opacity: 0.5;
-}
-
-.tankuang {
-	position: relative;
-	background: #fff;
-	width: 30%;
-	height: 30%;
-	border-radius: 5px;
-	margin: 5% auto;
-}
-
-#header {
-	height: 40px;
-}
-
-#header-right {
-	position: absolute;
-	width: 25px;
-	height: 25px;
-	border-radius: 5px;
-	background: red;
-	color: #fff;
-	right: 5px;
-	top: 5px;
-	text-align: center;
-}
-
-.input-group {
-	margin-left: 120px;
+	margin-left: 450px;
 }
 </style>
 </head>
 <body>
 	<div class="container-fluid">
-		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
-			<div class="col-lg-9">
+		<div class="row offset-sm-3 col-md-4 offset-md-0 pt-3">
+			<div>
 				<div class="input-group">
 					手机号：<input type="text" class="form-control" id="phone">&nbsp;
 				</div>
-				<div class="input-group">
+				<div class="input-group" style="margin-top: 10px;">
 					动态码：<input type="text" class="form-control" id="code">&nbsp;
 					<button class="btn btn-default" type="button" id="queryAction"
 						onclick="sendkey();">发送动态码</button>
 				</div>
 			</div>
-			<div class="input-group">
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				<button class="btn btn-default" type="button" id="queryAction"
-					onclick="dianwo()">登录</button>
+			<div class="input-group" style="margin-top: 10px;">
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<button class="btn btn-default" type="button" onclick="dianwo()">登录</button>
 			</div>
 		</div>
 	</div>
 
-	<!-- Bootstrap core JavaScript
-    ================================================== -->
-	<!-- Placed at the end of the document so the pages load faster -->
-	<script src="/web/libs/js/jquery-3.1.1.slim.min.js"
-		integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
-		crossorigin="anonymous"></script>
-	<script src="/web/libs/js/tether.min.js"
-		integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
-		crossorigin="anonymous"></script>
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap.min.js"></script>
 	<script src="/web/libs/js/common.js"></script>
 	<script src="/web/libs/js/jquery.js"></script>
@@ -129,6 +80,14 @@ body {
 			});
 		}
 		function dianwo() {
+			if ($('#phone').val() == "") {
+				alert("请输入手机号码");
+				return;
+			}
+			if ($('#code').val() == "") {
+				alert("请输入动态码");
+				return;
+			}
 			$.ajax({
 				url : "/web/login", //访问地址--action地址
 				type : "get", //提交方式
@@ -139,7 +98,7 @@ body {
 				success : function(reData) { //回调函数的处理方式
 					if ("OK" == reData.status) {
 						alert("成功");
-						window.location = '/web/users/dashboard/index.html';
+						window.location = '/web/users/index.html';
 					} else {
 						alert("失败:" + reData.result);
 					}

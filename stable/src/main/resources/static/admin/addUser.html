@@ -7,7 +7,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 
-<title>修改用户</title>
+<title>新增用户</title>
 
 <!-- Bootstrap core CSS -->
 <link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
@@ -66,8 +66,7 @@ body {
 		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div class="col-lg-9">
 				<div class="input-group">
-					手机号：<input type="text" class="form-control" id="code"
-						disabled="disabled">&nbsp;
+					手机号：<input type="text" class="form-control" id="code">&nbsp;
 				</div>
 				<div class="input-group">
 					称呼：<input type="text" class="form-control" id="name">&nbsp;
@@ -107,13 +106,21 @@ body {
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
 	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
-		addActive("header_users");
+	addActiveHeaderMen("header_users");
 		$('#cusTable').bootstrapTable('destroy');
 	</script>
 	<script type="text/javascript">
 		function dianwo() {
+			if ($('#code').val() == "") {
+				alert("请输入手机号");
+				return;
+			}
+			if ($('#name').val() == "") {
+				alert("请输入名称");
+				return;
+			}
 			$.ajax({
-				url : "/web/manager/user/updateinfo", //访问地址--action地址
+				url : "/web/manager/user/add", //访问地址--action地址
 				type : "get", //提交方式
 				data : {
 					id : $('#code').val(),
@@ -131,20 +138,6 @@ body {
 				}
 			});
 		}
-
-		var qc = getQueryVariable("code");
-		$.ajax({
-			url : "/web/manager/user/" + qc, //访问地址--action地址
-			//url : "http://127.0.0.1:8081/web/monitorPool/byCode", //访问地址--action地址
-			type : "get", //提交方式
-			data : {}, //提交给服务器的数据
-			success : function(reData) { //回调函数的处理方式
-				$('#code').val(reData.result.id);
-				$('#name').val(reData.result.name);
-				$('#remark').val(reData.result.remark);
-				$('#wxpush').val(reData.result.wxpush);
-			}
-		});
 	</script>
 </body>
 </html>

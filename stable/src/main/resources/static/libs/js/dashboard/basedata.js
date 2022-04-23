@@ -7,8 +7,7 @@ if (ustr == "") {
 		ustr = getQueryVariable("ustr");
 	}
 }
-$("#header").load("/web/" + ustr + "/dashboard/header.html");
-// $("#menu").load("/web/dashboard/menu.html")
+$("#header").load("/web/" + ustr + "/header.html");
 
 function SetCookie(name, value) {
 	var Days = 30 * 12; // cookie 将被保存一年

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>我的信息</title>
+
+<!-- Bootstrap core CSS -->
+<link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
+<style type="text/css">
+body {
+	margin: 0px;
+}
+
+.zhezhao {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	background: #000;
+	width: 100%;
+	height: 100%;
+	opacity: 0.5;
+}
+
+.tankuang {
+	position: relative;
+	background: #fff;
+	width: 30%;
+	height: 30%;
+	border-radius: 5px;
+	margin: 5% auto;
+}
+
+#header {
+	height: 40px;
+}
+
+#header-right {
+	position: absolute;
+	width: 25px;
+	height: 25px;
+	border-radius: 5px;
+	background: red;
+	color: #fff;
+	right: 5px;
+	top: 5px;
+	text-align: center;
+}
+
+.input-group {
+	margin-left: 120px;
+}
+</style>
+</head>
+<body>
+	<div id="header"></div>
+	<div class="container-fluid">
+		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
+			<div class="col-lg-9">
+				<div class="input-group">
+					手机号：<input type="text" class="form-control" id="code"
+						disabled="disabled">&nbsp;
+				</div>
+				<div class="input-group">
+					称呼：<input type="text" class="form-control" id="name"
+						disabled="disabled">&nbsp;
+				</div>
+				<div class="input-group">
+					微信推送id：<input type="text" class="form-control" id="wxpush"
+						disabled="disabled">&nbsp;
+				</div>
+				<div class="input-group">
+					备注：<input type="text" class="form-control" id="remark"
+						disabled="disabled">&nbsp;
+				</div>
+				<div class="input-group">
+					服务1到期日：<input type="text" class="form-control" id="s1"
+						disabled="disabled">&nbsp;
+				</div>
+				<div class="input-group">
+					服务2到期日：<input type="text" class="form-control" id="s2"
+						disabled="disabled">&nbsp;
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="/web/libs/js/jquery-3.1.1.slim.min.js"
+		integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/js/tether.min.js"
+		integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap.min.js"></script>
+	<script src="/web/libs/js/common.js"></script>
+	<script src="/web/libs/js/jquery.js"></script>
+	<script src="/web/libs/js/dashboard/index.js"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
+	<script src="/web/libs/js/dashboard/basedata.js"></script>
+	<script type="text/javascript">
+		addActiveHeaderMen("header_myservice");
+		$('#cusTable').bootstrapTable('destroy');
+	</script>
+	<script type="text/javascript">
+		$.ajax({
+			url : "/web/myinfo", //访问地址--action地址
+			type : "get", //提交方式
+			data : {}, //提交给服务器的数据
+			success : function(reData) { //回调函数的处理方式
+				$('#code').val(reData.result.id);
+				$('#name').val(reData.result.name);
+				$('#remark').val(reData.result.remark);
+				$('#s1').val(reData.result.s1);
+				$('#s2').val(reData.result.s2);
+				$('#wxpush').val(reData.result.wxpush);
+			}
+		});
+	</script>
+</body>
+</html>

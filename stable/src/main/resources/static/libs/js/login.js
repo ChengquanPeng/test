@@ -21,7 +21,7 @@ function login() {
 		dataType : 'json', // 返回的数据格式：json/xml/html/script/jsonp/text
 		success : function(data, textStatus, jqXHR) {
 			if("00000000"==data.rtnCode){
-				window.location = "/dashboard/index.html";
+				window.location = "/index.html";
 			}else{
 				if("biz_error_20001"==data.rtnCode){
 					$("#divMsg").show();

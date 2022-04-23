@@ -7,7 +7,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 
-<title>新增用户</title>
+<title>用户充值</title>
 
 <!-- Bootstrap core CSS -->
 <link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
@@ -66,28 +66,57 @@ body {
 		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div class="col-lg-9">
 				<div class="input-group">
-					手机号：<input type="text" class="form-control" id="code">&nbsp;
+					手机号：<input type="text" class="form-control" id="code"
+						disabled="disabled">&nbsp;
 				</div>
 				<div class="input-group">
-					称呼：<input type="text" class="form-control" id="name">&nbsp;
+					称呼：<input type="text" class="form-control" id="name"
+						disabled="disabled">&nbsp;
 				</div>
 				<div class="input-group">
-					微信推送id：<input type="text" class="form-control" id="wxpush">&nbsp;
+					备注：<input type="text" class="form-control" id="remark"
+						disabled="disabled">&nbsp;
 				</div>
 				<div class="input-group">
-					备注：<input type="text" class="form-control" id="remark">&nbsp;
+					服务1到期日：<input type="text" class="form-control" id="s1"
+						disabled="disabled">&nbsp;
 				</div>
 				<div class="input-group">
-					<span class="input-group-btn">
-						<button class="btn btn-default" type="button" id="queryAction"
-							onclick="dianwo()">提交</button>
-					</span> &nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
-						<button class="btn btn-default" type="button" id="queryAction"
-							onclick="window.close();">关闭页面</button>
-					</span>
+					服务2到期日：<input type="text" class="form-control" id="s2"
+						disabled="disabled">&nbsp;
+				</div>
+				<div class="input-group">
+					充值服务类型：<select id="stype">
+						<option value="-1" selected="selected">-</option>
+						<option value="1">服务1</option>
+						<option value="2">服务2</option>
+					</select>&nbsp;
+				</div>
+				<div class="input-group">
+					服务期限：<select id="month">
+						<option value="-1" selected="selected">-</option>
+						<option value="1">1月</option>
+						<option value="2">2月</option>
+						<option value="3">3月</option>
+						<option value="6">6月</option>
+						<option value="12">1年</option>
+					</select>&nbsp;
+				</div>
+				<div class="input-group">
+					充值金额：<input type="text" class="form-control" id="amt">&nbsp;
 				</div>
 			</div>
+			<div class="input-group">
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button" id="queryAction"
+						onclick="dianwo()">充值</button>
+				</span> &nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
+					<button class="btn btn-default" type="button" id="queryAction"
+						onclick="window.close();">关闭页面</button>
+				</span>
+			</div>
 		</div>
+	</div>
 	</div>
 
 	<!-- Bootstrap core JavaScript
@@ -106,27 +135,19 @@ body {
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
 	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
-		addActive("header_users");
+	addActiveHeaderMen("header_users");
 		$('#cusTable').bootstrapTable('destroy');
 	</script>
 	<script type="text/javascript">
 		function dianwo() {
-			if ($('#code').val() == "") {
-				alert("请输入手机号");
-				return;
-			}
-			if ($('#name').val() == "") {
-				alert("请输入名称");
-				return;
-			}
 			$.ajax({
-				url : "/web/manager/user/add", //访问地址--action地址
+				url : "/web/manager/user/amt", //访问地址--action地址
 				type : "get", //提交方式
 				data : {
 					id : $('#code').val(),
-					remark : $('#remark').val(),
-					name : $('#name').val(),
-					wxpush : $('#wxpush').val()
+					amt : $('#amt').val(),
+					stype : $('#stype').val(),
+					month : $('#month').val()
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
 					if ("OK" == reData.status) {
@@ -138,6 +159,21 @@ body {
 				}
 			});
 		}
+
+		var qc = getQueryVariable("code");
+		$.ajax({
+			url : "/web/manager/user/" + qc, //访问地址--action地址
+			//url : "http://127.0.0.1:8081/web/monitorPool/byCode", //访问地址--action地址
+			type : "get", //提交方式
+			data : {}, //提交给服务器的数据
+			success : function(reData) { //回调函数的处理方式
+				$('#code').val(reData.result.id);
+				$('#name').val(reData.result.name);
+				$('#remark').val(reData.result.remark);
+				$('#s1').val(reData.result.s1);
+				$('#s2').val(reData.result.s2);
+			}
+		});
 	</script>
 </body>
 </html>
