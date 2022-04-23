@@ -37,4 +37,10 @@ public class UserInfo extends EsBase {
 
 	@Field(type = FieldType.Text)
 	private String remark;// 备注
+
+	@Field(type = FieldType.Integer)
+	private int createDate;// 加入日期
+
+	@Field(type = FieldType.Integer)
+	private int memDate;// 会员日期
 }

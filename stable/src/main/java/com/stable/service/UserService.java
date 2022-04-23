@@ -73,10 +73,24 @@ public class UserService {
 		return null;
 	}
 
+	// 修改信息
+	public synchronized void updateinfo(UserInfo user) {
+		UserInfo exs = getListById(user.getId());
+		if (exs == null) {
+			throw new RuntimeException("用户不存在user=" + user.getId());
+		} else {
+			exs.setName(user.getName());
+			exs.setRemark(user.getRemark());
+			exs.setWxpush(user.getWxpush());
+			userDao.save(exs);
+		}
+	}
+
 	// 新增
 	public synchronized void add(UserInfo user) {
 		UserInfo exs = getListById(user.getId());
 		if (exs == null) {
+			user.setCreateDate(DateUtil.getTodayIntYYYYMMDD());
 			userDao.save(user);
 			log.info("save user req={}", user);
 		} else {
@@ -100,21 +114,26 @@ public class UserService {
 		} else {
 			int today = DateUtil.getTodayIntYYYYMMDD();
 			UserAmtLog amtlog = new UserAmtLog();
+			amtlog.setUid(userid);
 			amtlog.setDate(today);
 			amtlog.setLogId(userid + "|" + amtlog.getDate() + "|" + System.currentTimeMillis());
 
 			if (stype == Stype.webQuery.getCode()) {
 				amtlog.setStype(stype);
-				int expiredDate = getExpiredDate(exs.getS1(), month);
+				int sd = exs.getS1();
+				amtlog.setExeStartDate(sd);
+				int expiredDate = getExpiredDate(sd, month);
 				exs.setS1(expiredDate);
 				amtlog.setExpiredDate(expiredDate);
-				exs.setRemark(today + "充值 add S1 " + month + "月,过期=" + expiredDate);
+				exs.setRemark(today + "-s1充值" + amt + "元," + month + "月,计算日=" + sd + ",过期=" + expiredDate);
 			} else if (stype == Stype.sysChance.getCode()) {
 				amtlog.setStype(stype);
-				int expiredDate = getExpiredDate(exs.getS2(), month);
+				int sd = exs.getS2();
+				amtlog.setExeStartDate(sd);
+				int expiredDate = getExpiredDate(sd, month);
 				exs.setS2(expiredDate);
 				amtlog.setExpiredDate(expiredDate);
-				exs.setRemark(today + "充值 add S2 " + month + "月,过期=" + expiredDate);
+				exs.setRemark(today + "-s2充值" + amt + "元," + month + "月,计算日=" + sd + ",过期=" + expiredDate);
 			} else {
 				throw new RuntimeException("stype=" + userid);
 			}
@@ -122,32 +141,37 @@ public class UserService {
 			userAmtLogDao.save(amtlog);
 			// ===
 			log.info("old info:{}", exs);
+			if (exs.getMemDate() == 0) {
+				exs.setMemDate(today);
+			}
 			userDao.save(exs);
 			log.info("save user new info={}", exs);
 		}
 	}
 
 	// 人工修改
-	public synchronized void manulUpdate(int userid, int stype, int days) {
-		if (days <= 0) {
-			throw new RuntimeException("days=" + days);
+	public synchronized void manulUpdate(int id, int stype, int days) {
+		if (days == 0) {
+			throw new RuntimeException("days=0");
 		}
-		UserInfo exs = getListById(userid);
+		UserInfo exs = getListById(id);
 		if (exs == null) {
-			log.warn("用户不存在 req={}", userid);
-			throw new RuntimeException("用户不存在 req=" + userid);
+			log.warn("用户不存在 req={}", id);
+			throw new RuntimeException("用户不存在 req=" + id);
 		} else {
 			int today = DateUtil.getTodayIntYYYYMMDD();
 			if (stype == Stype.webQuery.getCode()) {
+				int sd = exs.getS1();
 				int expiredDate = getExpiredDateByDays(exs.getS1(), days);
 				exs.setS1(expiredDate);
-				exs.setRemark(today + "人工 add S1 " + days + "天,过期=" + expiredDate);
+				exs.setRemark(today + "-s1人工增加" + days + "天,计算日=" + sd + ",过期=" + expiredDate);
 			} else if (stype == Stype.sysChance.getCode()) {
+				int sd = exs.getS2();
 				int expiredDate = getExpiredDateByDays(exs.getS2(), days);
 				exs.setS2(expiredDate);
-				exs.setRemark(today + "人工 add S2 " + days + "天,过期=" + expiredDate);
+				exs.setRemark(today + "-s2人工增加" + days + "天,计算日=" + sd + ",过期=" + expiredDate);
 			} else {
-				throw new RuntimeException("stype=" + userid);
+				throw new RuntimeException("stype=" + id);
 			}
 			log.info("old info:{}", exs);
 			userDao.save(exs);

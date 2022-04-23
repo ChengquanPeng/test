@@ -6,7 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum Stype {
-	webQuery(1, "系统查询"), sysChance(3, "系统推荐机会");
+	webQuery(1, "系统查询"), sysChance(2, "系统推荐机会");
 
 	private int code;
 	private String desc;

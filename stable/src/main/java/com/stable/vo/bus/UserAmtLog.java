@@ -26,5 +26,7 @@ public class UserAmtLog extends EsBase {
 	@Field(type = FieldType.Double)
 	private double amt;// 充值金额
 	@Field(type = FieldType.Integer)
+	private int exeStartDate;// 开始计算日
+	@Field(type = FieldType.Integer)
 	private int expiredDate;// 产品类型过期日期
 }

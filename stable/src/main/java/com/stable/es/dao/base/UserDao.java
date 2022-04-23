@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.stable.vo.bus.UserInfo;
 
 @Repository
-public interface UserDao extends ElasticsearchRepository<UserInfo, String> {
+public interface UserDao extends ElasticsearchRepository<UserInfo, Integer> {
 
 }

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>用户充值</title>
+
+<!-- Bootstrap core CSS -->
+<link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
+<style type="text/css">
+body {
+	margin: 0px;
+}
+
+.zhezhao {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	background: #000;
+	width: 100%;
+	height: 100%;
+	opacity: 0.5;
+}
+
+.tankuang {
+	position: relative;
+	background: #fff;
+	width: 30%;
+	height: 30%;
+	border-radius: 5px;
+	margin: 5% auto;
+}
+
+#header {
+	height: 40px;
+}
+
+#header-right {
+	position: absolute;
+	width: 25px;
+	height: 25px;
+	border-radius: 5px;
+	background: red;
+	color: #fff;
+	right: 5px;
+	top: 5px;
+	text-align: center;
+}
+</style>
+</head>
+
+<body>
+	<div id="header"></div>
+	<div class="container-fluid">
+		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
+			<div>
+				<div class="input-group">
+					手机号：<input type="text" class="form-control" id="queryCode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="input-group-btn">
+						<button class="btn btn-default" type="button" id="queryAction">
+							查询</button>
+					</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank"
+						href="/web/admin/dashboard/addUser.html">新增用户</a>&nbsp;&nbsp;
+				</div>
+			</div>
+
+			<div id="rptList" style="width: 100%; hight: 100%; float: left；">
+				<table class="table table-hover" id="cusTable">
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="/web/libs/js/jquery-3.1.1.slim.min.js"
+		integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/js/tether.min.js"
+		integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap.min.js"></script>
+	<script src="/web/libs/js/common.js"></script>
+	<script src="/web/libs/js/jquery.js"></script>
+	<script src="/web/libs/js/dashboard/index.js"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
+	<script src="/web/libs/js/dashboard/basedata.js"></script>
+	<script type="text/javascript">
+		todaynow = formatDate(new Date(), 'yyyyMMdd');
+		addActiveHeaderMen("header_users")
+		$('#cusTable').bootstrapTable('destroy');
+		function loadData() {
+			$('#cusTable').bootstrapTable('destroy');
+			$("#cusTable")
+					.bootstrapTable(
+							{
+								method : "get", //使用get请求到服务器获取数据  
+								url : "/web/manager/user/list", //获取数据的Servlet地址  
+								striped : true, //表格显示条纹  
+								pagination : true, //启动分页
+								cache : false,
+								pageSize : 20, //每页显示的记录数  
+								//pageNumber:1, //当前第几页  
+								pageList : [ 10, 15, 20, 50 ], //记录数可选列表  
+								search : false, //是否启用查询  
+								//showColumns: true,  //显示下拉框勾选要显示的列  
+								//showRefresh: true,  //显示刷新按钮  
+								sidePagination : "server", //表示服务端请求
+								//设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder  
+								//设置为limit可以获取limit, offset, search, sort, order  
+								queryParamsType : "undefined",
+								queryParams : function queryParams(params) { //设置查询参数  
+									var code = $('#queryCode').val();
+									var param = {
+										pageNum : params.pageNumber,
+										pageSize : params.pageSize,
+									};
+									param.id = code;
+									return param;
+								},
+								columns : [
+										{
+											field : 'id',
+											title : '手机号'
+										},
+										{
+											field : 'name',
+											title : '称呼'
+										},
+										{
+											field : 'wxpush',
+											title : '微信推送id'
+										},
+										{
+											field : 'type',
+											title : '身份',
+											formatter : function(value, row,
+													index) {
+												if (row.type == 1) {
+													return "管理员"
+												}
+												if (row.type == 2) {
+													return "普通"
+												}
+												return row.type
+											}
+										},
+										{
+											field : 's1',
+											title : '服务1',
+											formatter : function(value, row,
+													index) {
+
+												if (todaynow > row.s1) {
+													return "<font color='red'>"
+															+ row.s1
+															+ "</font>";
+												} else {
+													return row.s1;
+												}
+											}
+										},
+										{
+											field : 's2',
+											title : '服务2',
+											formatter : function(value, row,
+													index) {
+												if (todaynow > row.s2) {
+													return "<font color='red'>"
+															+ row.s2
+															+ "</font>";
+												} else {
+													return row.s2;
+												}
+											}
+										},
+										{
+											field : 'memDate',
+											title : '加入会员日'
+										},
+										{
+											field : 'createDate',
+											title : '账户创建日'
+										},
+										{
+											field : 'remark',
+											title : '备注'
+										},
+										{
+											field : 'a',
+											title : '操作',
+											formatter : function(value, row,
+													index) {
+												return "<a target='_blank' href='/web/admin/dashboard/addDays.html?code="
+														+ row.id
+														+ "'>手动</a>&nbsp;&nbsp;&nbsp;"
+														+ "<a target='_blank' href='/web/admin/dashboard/updUser.html?code="
+														+ row.id
+														+ "'>修改</a>&nbsp;&nbsp;&nbsp;"
+														+ "<a target='_blank' href='/web/admin/dashboard/addAmt.html?code="
+														+ row.id + "'>充值</a>";
+											}
+										} ],
+								responseHandler : function responseHandler(res) {
+
+									var s1 = JSON.stringify(res.result);
+									var s2 = '{"total":9999,"rows":' + s1 + '}';
+									//alert(s2);
+									return eval('(' + s2 + ')')
+								},
+								onLoadSuccess : function() { //加载成功时执行
+									$("#rptList").show();
+								},
+								onLoadError : function() { //加载失败时执行  
+									alert("加载数据失败");
+								}
+							});
+		}
+
+		$("#queryAction").click(function() {
+			//alert("abc");
+			loadData()
+		});
+		loadData();
+	</script>
+	<script type="text/javascript">
+		function dianwo3(code, remark) {
+			var remark = prompt(code + " 移除监听", "");
+			$.ajax({
+				url : "/web/monitorPool/delMonit", //访问地址--action地址
+				type : "post", //提交方式
+				data : {
+					code : code,
+					remark : remark
+				}, //提交给服务器的数据
+				success : function(reData) { //回调函数的处理方式
+					if ("OK" == reData.status) {
+						alert("已移除");
+						window.close();
+					} else {
+						alert("失败:" + reData.result);
+					}
+				}
+			});
+		}
+	</script>
+</body>
+</html>
