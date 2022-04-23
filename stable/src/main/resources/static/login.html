@@ -7,7 +7,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 
-<title>用户充值</title>
+<title>登录</title>
 
 <!-- Bootstrap core CSS -->
 <link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
@@ -61,53 +61,24 @@ body {
 </style>
 </head>
 <body>
-	<div id="header"></div>
 	<div class="container-fluid">
 		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div class="col-lg-9">
 				<div class="input-group">
-					手机号：<input type="text" class="form-control" id="code"
-						disabled="disabled">&nbsp;
+					手机号：<input type="text" class="form-control" id="phone">&nbsp;
 				</div>
 				<div class="input-group">
-					称呼：<input type="text" class="form-control" id="name"
-						disabled="disabled">&nbsp;
-				</div>
-				<div class="input-group">
-					备注：<input type="text" class="form-control" id="remark"
-						disabled="disabled">&nbsp;
-				</div>
-				<div class="input-group">
-					服务1到期日：<input type="text" class="form-control" id="s1"
-						disabled="disabled">&nbsp;
-				</div>
-				<div class="input-group">
-					服务2到期日：<input type="text" class="form-control" id="s2"
-						disabled="disabled">&nbsp;
-				</div>
-				<div class="input-group">
-					充值服务类型：<select id="stype">
-						<option value="-1" selected="selected">-</option>
-						<option value="1">服务1</option>
-						<option value="2">服务2</option>
-					</select>&nbsp;
-				</div>
-
-				<div class="input-group">
-					添加删除天数：<input type="text" class="form-control" id="days">&nbsp;
+					动态码：<input type="text" class="form-control" id="code">&nbsp;
+					<button class="btn btn-default" type="button" id="queryAction"
+						onclick="sendkey();">发送动态码</button>
 				</div>
 			</div>
 			<div class="input-group">
-				<span class="input-group-btn">
-					<button class="btn btn-default" type="button" id="queryAction"
-						onclick="dianwo()">提交</button>
-				</span> &nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
-					<button class="btn btn-default" type="button" id="queryAction"
-						onclick="window.close();">关闭页面</button>
-				</span>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<button class="btn btn-default" type="button" id="queryAction"
+					onclick="dianwo()">登录</button>
 			</div>
 		</div>
-	</div>
 	</div>
 
 	<!-- Bootstrap core JavaScript
@@ -126,44 +97,65 @@ body {
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
 	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
-		addActive("header_users");
-		$('#cusTable').bootstrapTable('destroy');
-	</script>
-	<script type="text/javascript">
-		function dianwo() {
+		var issend = false;
+		function sendkey() {
+			if ($('#phone').val() == "") {
+				alert("请输入手机号码");
+				return;
+			}
+			if (issend) {
+				return;
+			}
+			issend = true;
 			$.ajax({
-				url : "/web/manager/user/manul/updateamt", //访问地址--action地址
+				url : "/web/sendkey", //访问地址--action地址
 				type : "get", //提交方式
 				data : {
-					id : $('#code').val(),
-					days : $('#days').val(),
-					stype : $('#stype').val(),
+					phone : $('#phone').val()
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
 					if ("OK" == reData.status) {
 						alert("成功");
-						window.close();
+						issend = false;
 					} else {
 						alert("失败:" + reData.result);
+						issend = false;
 					}
+				},
+				error : function(reData) { //回调函数的处理方式
+					issend = false;
+					alert("登录-发送动态码后台错误");
 				}
 			});
 		}
-
-		var qc = getQueryVariable("code");
-		$.ajax({
-			url : "/web/manager/user/" + qc, //访问地址--action地址
-			//url : "http://127.0.0.1:8081/web/monitorPool/byCode", //访问地址--action地址
-			type : "get", //提交方式
-			data : {}, //提交给服务器的数据
-			success : function(reData) { //回调函数的处理方式
-				$('#code').val(reData.result.id);
-				$('#name').val(reData.result.name);
-				$('#remark').val(reData.result.remark);
-				$('#s1').val(reData.result.s1);
-				$('#s2').val(reData.result.s2);
+		function dianwo() {
+			$.ajax({
+				url : "/web/login", //访问地址--action地址
+				type : "get", //提交方式
+				data : {
+					code : $('#code').val(),
+					phone : $('#phone').val(),
+				}, //提交给服务器的数据
+				success : function(reData) { //回调函数的处理方式
+					if ("OK" == reData.status) {
+						alert("成功");
+						window.location = '/web/users/dashboard/index.html';
+					} else {
+						alert("失败:" + reData.result);
+					}
+				},
+				error : function(reData) { //回调函数的处理方式
+					issend = false;
+					alert("登录错误");
+				}
+			});
+		}
+		var qc = getQueryVariable("showtip");
+		if (qc) {
+			if (qc == 1) {
+				alert("请登录！");
 			}
-		});
+		}
 	</script>
 </body>
 </html>

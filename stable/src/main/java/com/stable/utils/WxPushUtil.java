@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.stable.config.SpringConfig;
 import com.zjiecode.wxpusher.client.WxPusher;
 import com.zjiecode.wxpusher.client.bean.Message;
@@ -22,19 +24,24 @@ public class WxPushUtil {
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 		appToken = efc.getAppToken().trim();
 		myUid = efc.getMyUid().trim();
-		env = " from " + (SpringConfig.isWindows ? "windows" : "linux") + " ";
+		env = (SpringConfig.isWindows ? " windows" : "") + " ";
 		log.info("appToken={},myUid={}", appToken, myUid);
 	}
 
 	public final static void pushSystem1(String content) {
-		WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, true, null);
+		WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, true, null, null);
+	}
+
+	public final static void pushSystem1(String uid, String content) {
+		WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, false, uid, null);
 	}
 
 	public final static void pushSystem2Html(String content) {
-		WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, true, null);
+		WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, true, null, null);
 	}
 
-	private final static void pushMsg(int contentType, String content, boolean isMyId, Set<String> uids) {
+	private final static void pushMsg(int contentType, String content, boolean isMyId, String singleId,
+			Set<String> uids) {
 		try {
 			Message message = new Message();
 			message.setAppToken(appToken);
@@ -43,7 +50,11 @@ public class WxPushUtil {
 			if (isMyId) {
 				message.setUid(myUid);
 			} else {
-				message.setUids(uids);
+				if (StringUtils.isNotBlank(singleId)) {
+					message.setUid(singleId);
+				} else {
+					message.setUids(uids);
+				}
 			}
 			message.setUrl(null);
 			Result<List<MessageResult>> result = WxPusher.send(message);

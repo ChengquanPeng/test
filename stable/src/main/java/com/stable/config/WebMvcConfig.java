@@ -2,6 +2,7 @@ package com.stable.config;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,30 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stable.interceptor.LoginInterceptor;
+import com.stable.interceptor.MangerInterceptor;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MyBeanSerializerModifier;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
+	static List<String> excludelist = new LinkedList<String>();
+	static List<String> mangerlist = new LinkedList<String>();
+	static {
+		excludelist.add("/login");
+		excludelist.add("/logout");
+		excludelist.add("/mylogin");
+		excludelist.add("/sendkey");
+		excludelist.add("/libs/**");
+		excludelist.add("/login.html");
+
+		mangerlist.add("/manager/**");
+		mangerlist.add("/admin/**");
+	}
 	@Autowired
 	private LoginInterceptor loginInterceptor;
+	@Autowired
+	private MangerInterceptor mangerInterceptor;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -34,11 +51,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		// registry.addInterceptor(loginInterceptor).addPathPatterns("/**").excludePathPatterns("/login",
-		// "/mylogin");
+		registry.addInterceptor(loginInterceptor).addPathPatterns("/**").excludePathPatterns(excludelist);
 		// 以下连接需要鉴权
-		registry.addInterceptor(loginInterceptor).addPathPatterns("/monitorPool/addMonitor", "/model/addManual",
-				"/monitorPool/delMonit");
+		registry.addInterceptor(mangerInterceptor).addPathPatterns(mangerlist);
 		WebMvcConfigurer.super.addInterceptors(registry);
 	}
 

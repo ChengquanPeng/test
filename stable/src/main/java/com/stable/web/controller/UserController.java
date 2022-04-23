@@ -23,7 +23,7 @@ public class UserController {
 	 * 根据ID查询用户
 	 */
 	@RequestMapping(value = "/user/{id}")
-	public ResponseEntity<JsonResult> getUserById(@PathVariable(value = "id") Integer id) {
+	public ResponseEntity<JsonResult> getUserById(@PathVariable(value = "id") long id) {
 		JsonResult r = new JsonResult();
 		try {
 			r.setResult(userService.getListById(id));
@@ -45,7 +45,7 @@ public class UserController {
 		try {
 			UserInfo user = new UserInfo();
 			if (StringUtils.isNotBlank(id)) {
-				user.setId(Integer.valueOf(id));
+				user.setId(Long.valueOf(id));
 			}
 			r.setResult(userService.getList(user, page));
 			r.setStatus(JsonResult.OK);
@@ -65,7 +65,7 @@ public class UserController {
 		JsonResult r = new JsonResult();
 		try {
 			UserInfo user = new UserInfo();
-			user.setId(Integer.valueOf(id));
+			user.setId(Long.valueOf(id));
 			user.setRemark(remark.trim());
 			user.setWxpush(wxpush.trim());
 			user.setName(name.trim());
@@ -88,7 +88,7 @@ public class UserController {
 		JsonResult r = new JsonResult();
 		try {
 			UserInfo user = new UserInfo();
-			user.setId(Integer.valueOf(id));
+			user.setId(Long.valueOf(id));
 			user.setRemark(remark.trim());
 			user.setWxpush(wxpush.trim());
 			user.setName(name.trim());
@@ -106,7 +106,7 @@ public class UserController {
 	 * 用户充值
 	 */
 	@RequestMapping(value = "/user/amt")
-	public ResponseEntity<JsonResult> amt(int id, double amt, int stype, int month) {
+	public ResponseEntity<JsonResult> amt(long id, double amt, int stype, int month) {
 		JsonResult r = new JsonResult();
 		try {
 			userService.update(id, amt, stype, month);
@@ -123,7 +123,7 @@ public class UserController {
 	 * 用户充值
 	 */
 	@RequestMapping(value = "/user/manul/updateamt")
-	public ResponseEntity<JsonResult> updateamt(int id, int stype, int days) {
+	public ResponseEntity<JsonResult> updateamt(long id, int stype, int days) {
 		JsonResult r = new JsonResult();
 		try {
 			userService.manulUpdate(id, stype, days);

@@ -17,8 +17,8 @@ public class UserInfo extends EsBase {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Field(type = FieldType.Integer)
-	private int id;// 手机号
+	@Field(type = FieldType.Long)
+	private long id;// 手机号
 
 	@Field(type = FieldType.Text)
 	private String name;// 名字

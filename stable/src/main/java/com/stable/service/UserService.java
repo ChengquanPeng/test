@@ -56,7 +56,7 @@ public class UserService {
 		return null;
 	}
 
-	public UserInfo getListById(int id) {
+	public UserInfo getListById(long id) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (id > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("id", id));
@@ -100,7 +100,7 @@ public class UserService {
 	}
 
 	// 正常充值
-	public synchronized void update(int userid, double amt, int stype, int month) {
+	public synchronized void update(long userid, double amt, int stype, int month) {
 		if (amt <= 0) {
 			throw new RuntimeException("充值金额=" + amt);
 		}
@@ -150,7 +150,7 @@ public class UserService {
 	}
 
 	// 人工修改
-	public synchronized void manulUpdate(int id, int stype, int days) {
+	public synchronized void manulUpdate(long id, int stype, int days) {
 		if (days == 0) {
 			throw new RuntimeException("days=0");
 		}

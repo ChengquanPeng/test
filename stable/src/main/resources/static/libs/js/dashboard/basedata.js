@@ -85,3 +85,22 @@ function formatDate(date, fmt) {
 function padLeftZero(str) {
 	return ('00' + str).substr(str.length);
 }
+
+function getlogout() {
+	$.ajax({
+		url : "/web/logout", // 访问地址--action地址
+		type : "get", // 提交方式
+		data : {},
+		success : function(reData) { // 回调函数的处理方式
+			if ("OK" == reData.status) {
+				window.location = '/web/login.html';
+			} else {
+				alert("失败:" + reData.result);
+			}
+		},
+		error : function(reData) { // 回调函数的处理方式
+			issend = false;
+			alert("登出错误");
+		}
+	});
+}

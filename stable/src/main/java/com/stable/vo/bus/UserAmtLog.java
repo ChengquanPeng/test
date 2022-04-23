@@ -17,8 +17,8 @@ public class UserAmtLog extends EsBase {
 	private static final long serialVersionUID = 1L;
 	@Id
 	private String logId;// 手机号
-	@Field(type = FieldType.Integer)
-	private int uid;// 用户id
+	@Field(type = FieldType.Long)
+	private long uid;// 用户id
 	@Field(type = FieldType.Integer)
 	private int date;// 日期
 	@Field(type = FieldType.Integer)
