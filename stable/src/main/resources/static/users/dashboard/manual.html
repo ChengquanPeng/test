@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>人工</title>
+
+<!-- Bootstrap core CSS -->
+<link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
+<style type="text/css">
+body {
+	margin: 0px;
+}
+
+.zhezhao {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	background: #000;
+	width: 100%;
+	height: 100%;
+	opacity: 0.5;
+}
+
+.tankuang {
+	position: relative;
+	background: #fff;
+	width: 30%;
+	height: 30%;
+	border-radius: 5px;
+	margin: 5% auto;
+}
+
+#header {
+	height: 40px;
+}
+
+#header-right {
+	position: absolute;
+	width: 25px;
+	height: 25px;
+	border-radius: 5px;
+	background: red;
+	color: #fff;
+	right: 5px;
+	top: 5px;
+	text-align: center;
+}
+
+.input-group {
+	margin-left: 120px;
+}
+
+table, table tr th, table tr td {
+	border: 1px solid #C0C0C0;
+}
+
+table {
+	min-height: 25px;
+	line-height: 25px;
+	text-align: left;
+	border-collapse: collapse;
+	padding: 1px;
+	font-size: 13px;
+}
+</style>
+</head>
+<body>
+	<div id="header"></div>
+	<div class="container-fluid">
+		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
+			<table>
+				<tr>
+					<td>状态</td>
+					<td>清单事项</td>
+					<td>结果</td>
+					<td>参考值</td>
+					<td>说明</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>代码</td>
+					<td><span id="code"></span>&nbsp;<span id="codeName"></span>&nbsp;</td>
+					<td>流通市值:<span id="mkv"></span>亿
+					</td>
+					<td><a id="base2" target="_blank">系统基本面</a>&nbsp;&nbsp;&nbsp;<a
+						id="base1" target="_blank">同花顺基本面</a>&nbsp;&nbsp;&nbsp;<a
+						id="tzzfd" target="_blank">投资者互动</a>&nbsp;&nbsp;&nbsp;<a id="jgdy"
+						target="_blank">机构调研</a>&nbsp;&nbsp;&nbsp;<a id="rzrq"
+						target="_blank">融资融券</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小市值，最好低于50Y，新股和st排除</td>
+				</tr>
+				<tr>
+					<td id="pre_recentPriceYear"></td>
+					<td>横盘情况(年)</td>
+					<td><select id="recentPriceYear">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td>至少2年未涨，且对应股东人数持续减少，未炒过（炒作的有套牢盘，套牢盘不割肉，涨的概率小），k线W形态，底部横盘越长越好,横：没法跌</td>
+				</tr>
+				<tr>
+					<td id="pre_dzz"></td>
+					<td>计划/正在定增</td>
+					<td><select id="dzz">
+							<option value="-1">-</option>
+							<option value="0">无</option>
+							<option value="2">无/已完成</option>
+							<option value="1">正在进行中</option>
+					</select></td>
+					<td></td>
+					<td><a id="dzzq" target="_blank">东方财富-公告</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+				</tr>
+				<tr>
+					<td id="pre_dzOK"></td>
+					<td>历史定增情况</td>
+					<td><select id="dzOK">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td><a id="dzOKq" target="_blank">系统查询</a>&nbsp;&nbsp;&nbsp;
+						定增较多：新定增股东容易在二级成为空方</td>
+				</tr>
+				<tr>
+					<td id="pre_dzjyOk"></td>
+					<td>大宗交易情况</td>
+					<td><select id="dzjyOk">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td><a id="dzjyOkq" target="_blank">东方财富</a>&nbsp;&nbsp;&nbsp;突然频繁大宗？筹码异动，价格在大宗交易价成本（公告价8折）以下最好</td>
+				</tr>
+				<tr>
+					<td id="pre_bonus"></td>
+					<td>历史分红情况</td>
+					<td><select id="bonus">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td><a id="bonusq" target="_blank">系统查询</a></td>
+				</tr>
+				<tr>
+					<td id="pre_mainChipOk"></td>
+					<td>主力筹码情况</td>
+					<td><select id="mainChipOk">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td>低于或者左右增发筹码价格</td>
+				</tr>
+				<tr>
+					<td id="pre_yj"></td>
+					<td>业绩类型</td>
+					<td><select id="yj">
+							<option value="-1">-</option>
+							<option value="1">1.持续增长-主营(扣非)</option>
+							<option value="2">2.持续增长(归属)</option>
+							<option value="3">3.波动不大，较平稳</option>
+							<option value="4">4.下降趋势，但是不亏</option>
+							<option value="5">5.扣非亏损，至少归属不亏</option>
+							<option value="6">6.业绩较差</option>
+					</select></td>
+					<td></td>
+					<td><a id="yjq2" target="_blank">系统查询</a>&nbsp;&nbsp;&nbsp;<a
+						id="yjq1" target="_blank">同花顺</a>&nbsp;&nbsp;&nbsp;现金流是否支持利润？是否主营业务亏损？业绩亏损是因为大环境原因而不是公司原因（如疫情下的航空，旅游）</td>
+				</tr>
+				<tr>
+					<td id="pre_jyxjlceOk"></td>
+					<td>现金流情况</td>
+					<td><select id="jyxjlceOk">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td>现金流是否支撑业绩</td>
+				</tr>
+				<tr>
+					<td id="pre_acRec"></td>
+					<td>应收账款情况</td>
+					<td><select id="acRec">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td><a id="yjq3" target="_blank">系统查询</a>&nbsp;&nbsp;&nbsp;欠钱的都是大爷，容易坏账计提</td>
+				</tr>
+				<tr>
+					<td id="pre_acPay"></td>
+					<td>应付账款情况</td>
+					<td><select id="acPay">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td>话语权强</td>
+				</tr>
+				<tr>
+					<td id="pre_hybk"></td>
+					<td>行业板块</td>
+					<td><select id="hybk">
+							<option value="-1">-</option>
+							<option value="1">1.熟悉的行业</option>
+							<option value="2">2.民生行业</option>
+							<option value="3">3.主流/热点行业</option>
+							<option value="4">4.主流行业产业链/上下游</option>
+							<option value="5">5.高大上科技行业</option>
+							<option value="6">6.其他</option>
+					</select></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td id="pre_mainBusi"></td>
+					<td>主营业务集中情况</td>
+					<td><select id="mainBusi">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td>主营业务构成/集中优先（拳头产品）</td>
+				</tr>
+				<tr>
+					<td id="pre_legalOk"></td>
+					<td>违法情况</td>
+					<td><select id="legalOk">
+							<option value="-1">-</option>
+							<option value="2">暂无风险</option>
+							<option value="1">一般风险</option>
+							<option value="0">较大风险</option>
+					</select></td>
+					<td></td>
+					<td><a target="_blank" id="legalOkq">同花顺</a></td>
+				</tr>
+				<tr>
+					<td id="pre_glprojeckOk"></td>
+					<td>项目情况（概念）</td>
+					<td><select id="glprojeckOk">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td><a target="_blank" id="glprojeckOk1">同花顺</a>
+						&nbsp;&nbsp;&nbsp; <a target="_blank" id="glprojeckOk2">东方财富</a></td>
+				</tr>
+				<tr>
+					<td id="pre_sylttm"></td>
+					<td>ROE</td>
+					<td><span id="sylttm"></span>(ttm)</td>
+					<td></td>
+					<td></td>
+				</tr>
+
+				<tr>
+					<td id="pre_goodWillOk"></td>
+					<td>商誉&坏账准备</td>
+					<td><select id="goodWillOk">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td><a id="base3" target="_blank">系统基本面</a>&nbsp;&nbsp;&nbsp;商誉减值，坏账准备：应收帐款/票据，固定资产折旧，无形资产（专利商标）减值，库存跌价，股债权投资等</td>
+				</tr>
+				<tr>
+					<td id="pre_zcfzl"></td>
+					<td>资产负债率</td>
+					<td><span id="zcfzl"></span>%</td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td id="pre_dgdjc"></td>
+					<td>大股东减持情况</td>
+					<td><select id="dgdjc">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="2">无/已完成</option>
+							<option value="1">进行中</option>
+					</select></td>
+					<td></td>
+					<td>1.有公告减持实际未减持？2.量不允许减持，要交给主力去减持？</td>
+				</tr>
+				<tr>
+					<td id="pre_qujz"></td>
+					<td>股权集中</td>
+					<td><select id="qujz">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td>至少在40%以上，如：家族企业（本身就是小盘，还持股低，可能无心经营）</td>
+				</tr>
+				<tr>
+					<td id="pre_gdrsOk"></td>
+					<td>股东人数情况</td>
+					<td><select id="gdrsOk">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td><a id="gdrsOkq2" target="_blank">系统查询</a>&nbsp;&nbsp;&nbsp;<a
+						id="gdrsOkq1" target="_blank">同花顺</a></td>
+				</tr>
+				<tr>
+					<td id="pre_jjOk"></td>
+					<td>解禁情况</td>
+					<td><select id="jjOk">
+							<option value="-1">-</option>
+							<option value="0">差</option>
+							<option value="1">一般</option>
+							<option value="2">好</option>
+					</select></td>
+					<td></td>
+					<td><a id="jjOkq" target="_blank">系统查询</a></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>买入理由</td>
+					<td></td>
+					<td></td>
+					<td>买入逻辑,</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>卖出逻辑</td>
+					<td></td>
+					<td></td>
+					<td>目标位：定增逻辑的价格和之前K线的放量位置。</td>
+				</tr>
+				<tr>
+					<td id="pre_profit"></td>
+					<td>利润空间</td>
+					<td><input type="text" id="profit"></td>
+					<td></td>
+					<td></td>
+				</tr>
+			</table>
+		</div>
+
+		<div id="rptList" style="width: 100%; hight: 100%; float: left；">
+			<table class="table table-hover" id="cusTable">
+			</table>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="/web/libs/js/jquery-3.1.1.slim.min.js"
+		integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/js/tether.min.js"
+		integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap.min.js"></script>
+	<script src="/web/libs/js/common.js"></script>
+	<script src="/web/libs/js/jquery.js"></script>
+	<script src="/web/libs/js/dashboard/index.js"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
+	<script src="/web/libs/js/dashboard/basedata.js"></script>
+	<script type="text/javascript">
+		addActiveHeaderMen("base_data");
+		$('#cusTable').bootstrapTable('destroy');
+		function ysw(id, type) {
+			if (type == 2) {
+				$('#' + id).html("<font color='#7FFF00'>√</font>");
+			} else if (type == 1) {
+				$('#' + id).html("<font color='#696969'>N</font>");
+			} else {
+				$('#' + id).html("<font color='#FF0000'>X</font>");
+			}
+		}
+	</script>
+	<script type="text/javascript">
+		var qc = getQueryVariable("code");
+		$
+				.ajax({
+					url : "/web/model/chips", //访问地址--action地址
+					//url : "http://127.0.0.1:8081/web/monitorPool/byCode", //访问地址--action地址
+					type : "get", //提交方式
+					data : {
+						code : qc
+					}, //提交给服务器的数据
+					success : function(reData) { //回调函数的处理方式
+						var code = reData.result.code;
+						var dfcode = getDfCode(code) + code;
+						$('#code').html(code);
+						$('#codeName').html(reData.result.codeName);
+						//基本面
+						$('#base1').attr("href",
+								"http://basic.10jqka.com.cn/" + code);
+						$('#base2').attr("href", "/web/code/" + code);
+						$('#base3').attr(
+								"href",
+								"/web/comon/income.html?ustr=" + ustr
+										+ "&code=" + code);
+						//股东人数
+						$('#gdrsOkq1').attr(
+								"href",
+								"http://basic.10jqka.com.cn/" + code
+										+ "/holder.html");
+						$('#gdrsOkq2').attr(
+								"href",
+								"/web/comon/holderNum.html?ustr=" + ustr
+										+ "&code=" + code);
+						//大宗交易
+						$('#dzjyOkq').attr(
+								"href",
+								"http://data.eastmoney.com/dzjy/detail/" + code
+										+ ".html");
+						//公告
+						$('#dzzq').attr(
+								"href",
+								"http://data.eastmoney.com/notices/stock/"
+										+ code + ".html");
+						//融资融券
+						$('#rzrq').attr(
+								"href",
+								"https://data.eastmoney.com/rzrq/detail/"
+										+ code + ".html");
+
+						//财务 yjq2
+						$('#yjq1').attr(
+								"href",
+								"http://basic.10jqka.com.cn/" + code
+										+ "/finance.html");
+						$('#yjq2').attr(
+								"href",
+								"/web/comon/income.html?ustr=" + ustr
+										+ "&code=" + code);
+						$('#yjq3').attr(
+								"href",
+								"/web/comon/income.html?ustr=" + ustr
+										+ "&code=" + code);
+
+						//定增记录
+						$('#dzOKq').attr(
+								"href",
+								"/web/comon/zengFa.html?ustr=" + ustr
+										+ "&code=" + code);
+						//项目进度
+						$('#glprojeckOk1').attr(
+								"href",
+								"http://basic.10jqka.com.cn/" + code
+										+ "/capital.html");
+						$('#glprojeckOk2').attr(
+								"href",
+								"http://f10.eastmoney.com/f10_v2/CapitalOperation.aspx?code="
+										+ dfcode + "#xmjd-0");
+						//违法
+						$('#legalOkq').attr(
+								"href",
+								"http://basic.10jqka.com.cn/" + code
+										+ "/event.html");
+						//机构调研
+						$('#jgdy').attr(
+								"href",
+								"http://basic.10jqka.com.cn/" + code
+										+ "/event.html#holder");
+						//分红
+						$('#bonusq').attr(
+								"href",
+								"/web/comon/dividend.html?ustr=" + ustr
+										+ "&code=" + code);
+						//解禁
+						$('#jjOkq').attr(
+								"href",
+								"/web/comon/Jiejin.html?ustr=" + ustr
+										+ "&code=" + code);
+						//投资者互动
+						$('#tzzfd').attr(
+								"href",
+								"http://basic.10jqka.com.cn/" + code
+										+ "/interactive.html#interactive");
+
+						//====系统值====
+						//ROE
+						var sylttm = reData.result.sylttm;
+						$('#sylttm').html(sylttm * 4);
+						if (sylttm > 0) {
+							if (sylttm > 3) {
+								ysw("pre_sylttm", 2);
+							} else {
+								ysw("pre_sylttm", 1);
+							}
+						} else {
+							ysw("pre_sylttm", 0);
+						}
+						//资产负债率
+						var zcfzl = reData.result.zcfzl;
+						$('#zcfzl').html(zcfzl);
+						if (zcfzl > 0) {
+							if (zcfzl < 40) {
+								ysw("pre_zcfzl", 2);
+							} else if (zcfzl < 76) {
+								ysw("pre_zcfzl", 1);
+							} else {
+								ysw("pre_zcfzl", 0);
+							}
+						} else {
+							ysw("pre_zcfzl", 0);
+						}
+					}
+				});
+	</script>
+</body>
+</html>

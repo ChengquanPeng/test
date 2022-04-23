@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+<title>选股&策略</title>
+<link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
+	rel="stylesheet">
+<link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
+<style type="text/css">
+.mg {
+	margin: 1px;
+}
+</style>
+</head>
+
+<body>
+	<div id="header"></div>
+	<div class="container-fluid">
+		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
+			<div class="mg">
+				股票代码：<input type="text" id="queryCode" width="30">&nbsp;&nbsp;&nbsp;
+				概念id：<input type="text" id="conceptId" width="30">&nbsp;&nbsp;&nbsp;
+				板块名称搜索：<input type="text" id="conceptName" width="30">&nbsp;&nbsp;&nbsp;
+			</div>
+			<div class="mg">
+				<div class="input-group">
+					<input type="text" id="mkv2" width="10" />&gt;=流通市值&lt;=<input
+						type="text" id="mkv" width="10" />亿&nbsp;&nbsp; 前3大股东持股&gt;=<input
+						type="text" id="holderNumT3" width="30" />%&nbsp;&nbsp;
+					市盈率ttm&lt;=<input type="text" id="pettm" width="20" />&nbsp;&nbsp;
+					国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp;
+				</div>
+			</div>
+			<div class="mg">
+				业绩OK(近5年不亏):<input type="checkbox" id="finOK" title="近5年不亏" />&nbsp;&nbsp;&nbsp;
+				分红OK(近5年分红):<input type="checkbox" id="bousOK" />&nbsp;&nbsp;&nbsp;
+				几年未涨&gt;=<input type="text" id="zfjjup" />&nbsp;&nbsp;&nbsp;
+				几年未涨stable&gt;=<input type="text" id="zfjjupStable" />&nbsp;&nbsp;&nbsp;
+			</div>
+			<div class="mg">
+				<div class="input-group">
+					底部增发:<input type="checkbox" id="zfself" />&nbsp;&nbsp; 增发状态：<select
+						id="zfStatus">
+						<option value="" selected="selected">不限制</option>
+						<option value="1">增发中</option>
+						<option value="6">证监会核准</option>
+						<option value="2">增发完成</option>
+						<option value="8">增发中和完成</option>
+						<option value="3">增发终止</option>
+						<option value="0">无增发</option>
+					</select>&nbsp;&nbsp; 增发对象：<select id="zfObjType">
+						<option value="0" selected="selected">不限制</option>
+						<option value="1">6个月</option>
+						<option value="2">混合</option>
+						<option value="3">大股东</option>
+						<option value="4">其他</option>
+					</select>&nbsp;&nbsp; 增发金额&lt;=<input type="text" id="zfYjAmt" width="10"
+						width="30">&nbsp;&nbsp; 低于增发价&gt;=<input type="text"
+						id="zfPriceLow" width="30" />%&nbsp;&nbsp;
+				</div>
+			</div>
+			<div class="mg">
+				<div class="input-group">
+					大宗:1年交易金额&gt;=<input type="text" width="10" width="30"
+						id="totalAmt">&nbsp;&nbsp; 2月交易金额&gt;=<input type="text"
+						width="10" width="30" id="totalAmt60d">
+				</div>
+			</div>
+			<div class="mg">
+				<div class="input-group">
+					系统指标:<select id="shooting">
+						<option value="0" selected="selected">无限制</option>
+						<option value="8">底部小票-增发已完成-3y+</option>
+						<option value="1">底部小票-大宗-超5%</option>
+						<option value="2">底部大票-增发已核准-超50亿</option>
+						<option value="4">底部股东人数大幅减少</option>
+						<option value="9">底部小票-增发已完成-2y</option>
+						<option value="7">底部大额减持(未做)</option>
+						<option value="10">底部小票1年左右的区间放量(未做)</option>
+						<option value="3">短线1:底部融资余额飙升,散户没买入空间?</option>
+						<option value="5">短线2:确定极速拉升,带小平台新高?</option>
+						<option value="6">短线3:散户3/5天情绪,见好就收</option>
+					</select>&nbsp;&nbsp; 标签:<select id="tagIndex">
+						<option value="-1" selected="selected">无限制</option>
+						<option value="1">拉升吸筹?</option>
+						<option value="2">业绩较牛</option>
+						<option value="3">白马走势?</option>
+						<option value="5">小而美</option>
+						<option value="4">高质押机会</option>
+					</select>&nbsp;&nbsp;人工状态:<select id="pls">
+						<option value="-1" selected="selected">无限制</option>
+						<option value="0">未确定</option>
+						<option value="1">已确定</option>
+						<option value="2">已排除</option>
+						<option value="3">确定+未</option>
+					</select>
+				</div>
+			</div>
+			<div class="mg">
+				<div class="input-group">
+					排序：<select id="gsort">
+						<option value="9">人均持股</option>
+						<option value="3">资产收益率ttm</option>
+						<option value="6">大股东持股</option>
+						<option value="7">小票未涨</option>
+						<option value="8">低于增发价</option>
+						<option value="10">大宗2月</option>
+						<option value="11">大宗1年</option>
+						<option value="12" selected="selected">大宗占比</option>
+						<option value="13">持股人数变化</option>
+						<option value="14">减持占比</option>
+					</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 倒序排序:<input type="checkbox"
+						id="asc" name="asc" checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
+						<button class="btn btn-default" type="button" id="queryAction">
+							查询</button>
+					</span>
+				</div>
+			</div>
+			<div id="rptList" style="width: 100%; hight: 100%; float: left；">
+				<table class="table table-hover" id="cusTable">
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="/web/libs/js/jquery-3.1.1.slim.min.js"
+		integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/js/tether.min.js"
+		integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap.min.js"></script>
+	<script src="/web/libs/js/common.js"></script>
+	<script src="/web/libs/js/jquery.js"></script>
+	<script src="/web/libs/js/dashboard/index.js"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
+	<script src="/web/libs/js/dashboard/basedata.js"></script>
+	<script type="text/javascript">
+		addActiveHeaderMen("base_data");
+		$('#cusTable').bootstrapTable('destroy');
+		function loadData() {
+			$('#cusTable').bootstrapTable('destroy');
+			$("#cusTable")
+					.bootstrapTable(
+							{
+								method : "get", //使用get请求到服务器获取数据  
+								url : "/web/model/list", //获取数据的Servlet地址  
+								striped : true, //表格显示条纹  
+								pagination : true, //启动分页
+								cache : false,
+								pageSize : 20, //每页显示的记录数  
+								//pageNumber:1, //当前第几页  
+								pageList : [ 10, 15, 20, 50 ], //记录数可选列表  
+								search : false, //是否启用查询  
+								//showColumns: true,  //显示下拉框勾选要显示的列  
+								//showRefresh: true,  //显示刷新按钮  
+								sidePagination : "server", //表示服务端请求
+								//设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder  
+								//设置为limit可以获取limit, offset, search, sort, order  
+								queryParamsType : "undefined",
+								queryParams : function queryParams(params) { //设置查询参数  
+									var code = $('#queryCode').val();
+									var gsort = $('#gsort').val();
+
+									var param = {
+										pageNum : params.pageNumber,
+										pageSize : params.pageSize,
+									};
+									param.code = code;
+									param.orderBy = gsort;
+									param.asc = 1;
+									param.conceptId = $('#conceptId').val();
+									param.conceptName = $('#conceptName').val();
+									param.zfStatus = $('#zfStatus').val();
+
+									param.bred = $('#bred').val();
+									param.byellow = $('#byellow').val();
+									param.bsyl = $('#bsyl').val();
+
+									param.monitor = $('#monitor').val();
+									param.mkv = $('#mkv').val();
+									param.mkv2 = $('#mkv2').val();
+									param.pls = $('#pls').val();
+
+									param.sort7 = 0;
+									param.sort6 = 0;
+									param.zfbuy = 0;
+									param.zfjj = 0;
+									param.zfYjAmt = $('#zfYjAmt').val();
+									param.holderNumT3 = $('#holderNumT3').val();
+									param.pettm = $('#pettm').val();
+
+									param.zfjjup = $('#zfjjup').val();
+									param.zfjjupStable = $('#zfjjupStable')
+											.val();
+									param.zfself = 0;
+									param.tagIndex = $('#tagIndex').val();
+									param.shooting = $('#shooting').val();
+									param.zfPriceLow = $('#zfPriceLow').val();
+									param.totalAmt = $('#totalAmt').val();
+									param.totalAmt60d = $('#totalAmt60d').val();
+
+									param.finOK = 0;
+									param.bousOK = 0;
+									param.compnayType = 0;
+									param.zfObjType = $('#zfObjType').val();
+
+									if (document.getElementById("finOK").checked) {
+										param.finOK = 1;
+									}
+									if (document.getElementById("bousOK").checked) {
+										param.bousOK = 1;
+									}
+									if (document.getElementById("compnayType").checked) {
+										param.compnayType = 1;
+									}
+
+									if (document.getElementById("zfself").checked) {
+										param.zfself = 1;
+									}
+
+									if (!document.getElementById("asc").checked) {
+										param.asc = 2;
+									}
+									return param;
+								},
+								columns : [
+										{
+											field : 'code',
+											title : '代码',
+											formatter : function(value, row,
+													index) {
+												var actions = [];
+												actions
+														.push('<a target="_blank" href="/web/code/' + value + '">'
+																+ value
+																+ '</a><br/>'
+																+ row.codeName
+																+ '<br/>'
+																+ row.bankuai);
+												return actions.join('');
+											}
+										},
+										{
+											field : 'zfjjInfo',
+											title : '筹码博弈'
+										},
+										{
+											field : 'buyRea',
+											title : '备注'
+										},
+										{
+											field : 'baseInfo',
+											title : '基本面-避雷区',
+											formatter : function(value, row,
+													index) {
+												var v = value
+														+ "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+row.code+"/event.html#stockpage'>大事提醒(增减持/回购)=></a>";
+												v += "<br/><a target='_blank' href='/web/chips/reduce/list?code="
+														+ row.code
+														+ "'>减持历史=></a>"
+												if (row.shooting3 == 1) {
+													v += "<br/><a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资融券=></a>";
+												}
+												return v;
+											}
+										},
+										{
+											field : 'tagInfo',
+											title : '标签'
+										},
+										{
+											field : 'a',
+											title : '人工',
+											formatter : function(value, row,
+													index) {
+												return "<a target='_blank' href='/web/"
+														+ ustr
+														+ "/dashboard/manual.html?code="
+														+ row.code
+														+ "'>人工-小票</a><br/>"
+														+ "<a target='_blank' href='/web/"
+														+ ustr
+														+ "/dashboard/addMonitor.html?code="
+														+ row.code
+														+ "'>更改监听</a>";
+											}
+
+										} ],
+								responseHandler : function responseHandler(res) {
+
+									var s1 = JSON.stringify(res.result);
+									var s2 = '{"total":9999,"rows":' + s1 + '}';
+									//alert(s2);
+									return eval('(' + s2 + ')')
+								},
+								onLoadSuccess : function() { //加载成功时执行
+									$("#rptList").show();
+								},
+								onLoadError : function() { //加载失败时执行  
+									alert("加载数据失败");
+								}
+							});
+		}
+
+		$("#queryAction").click(function() {
+			//alert("abc");
+			loadData()
+		});
+		var c = getQueryVariable("code");
+		if (c) {
+			$("#queryCode").val(c);
+		}
+
+		loadData();
+	</script>
+</body>
+</html>
