@@ -112,7 +112,6 @@ public class ThsHolderSpider {
 			c++;
 			try {
 				log.info("current index:{},{}", c, code);
-				// 周末全量，redisUtil.get(RedisConstant.RDS_HOLDER_CODE_ + code, 0) <= chkdate
 				// 预警，每天
 				if (stockBasicService.onlinePreYearChk(code, pre2Year)) {
 					dofetchHolderInner(sysdate, code, hns, hps);
@@ -234,9 +233,6 @@ public class ThsHolderSpider {
 							hnsl.add(hn);
 							hnsx.add(hn);
 							fetched = true;
-//							if (i == 0) {
-//								redisUtil.set(RedisConstant.RDS_HOLDER_CODE_ + code, hn.getDate());
-//							}
 						}
 					} catch (Exception e) {
 						log.info(res);

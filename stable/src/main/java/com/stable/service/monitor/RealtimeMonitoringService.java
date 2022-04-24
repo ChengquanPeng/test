@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.RedisConstant;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.UserService;
@@ -172,8 +173,7 @@ public class RealtimeMonitoringService {
 		}
 	}
 
-	// TODO
 	private boolean getMonisort1() {
-		return redisUtil.get("moni.sort1", 1) == 1;
+		return redisUtil.get(RedisConstant.MONI_SORT1, 1) == 1;
 	}
 }

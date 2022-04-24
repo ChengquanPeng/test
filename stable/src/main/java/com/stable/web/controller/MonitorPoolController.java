@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.constant.RedisConstant;
 import com.stable.service.StockBasicService;
 import com.stable.service.monitor.MonitorPoolService;
+import com.stable.utils.RedisUtil;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.JsonResult;
@@ -28,6 +30,8 @@ public class MonitorPoolController {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
+	@Autowired
+	private RedisUtil redisUtil;
 
 	private long getUserId(HttpServletRequest req) {
 		UserInfo l = (UserInfo) req.getSession().getAttribute(Constant.SESSION_USER);
@@ -131,6 +135,20 @@ public class MonitorPoolController {
 		} catch (Exception e) {
 			r.setStatus(JsonResult.FAIL);
 			r.setResult(e.getMessage());
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	@RequestMapping(value = "/monisort")
+	public ResponseEntity<JsonResult> monisort(String val) {
+		JsonResult r = new JsonResult();
+		try {
+			redisUtil.set(RedisConstant.MONI_SORT1, Integer.valueOf(val));
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
 		}
 		return ResponseEntity.ok(r);
 	}
