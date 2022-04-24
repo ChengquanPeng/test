@@ -27,7 +27,7 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.MonitorType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
-import com.stable.es.dao.base.MonitorPoolDao;
+import com.stable.es.dao.base.MonitorPoolUserDao;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
@@ -44,7 +44,7 @@ import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.Dzjy;
 import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.HolderNum;
-import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
@@ -61,7 +61,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MonitorPoolService {
 	@Autowired
-	private MonitorPoolDao monitorPoolDao;
+	private MonitorPoolUserDao monitorPoolDao;
 	@Autowired
 	private EsCodeBaseModel2Dao codeBaseModel2Dao;
 	@Autowired
@@ -79,10 +79,16 @@ public class MonitorPoolService {
 	@Autowired
 	private ChipsService chipsService;
 
+	private String getId(long userId, String code) {
+		if (userId < Constant.MY_ID) {
+			throw new RuntimeException("错误的userId");
+		}
+		return userId + code;
+	}
+
 	// 移除监听
-	public void delMonit(String code, String remark) {
-		MonitorPool c = getMonitorPool(code);
-		c.setUpdateDate(DateUtil.getTodayIntYYYYMMDD());
+	public void delMonit(long userId, String code, String remark) {
+		MonitorPoolTemp c = getMonitorPoolById(userId, code);
 		c.setMonitor(0);
 		c.setUpPrice(0);
 		c.setDownPrice(0);
@@ -97,39 +103,32 @@ public class MonitorPoolService {
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
 		} else {
-			c.setRemark(remark + c.getUpdateDate());
+			c.setRemark(remark);
 		}
 		monitorPoolDao.save(c);
-		updateBaseMoniStatus(code, c.getMonitor(), c.getRemark());
+		updateBaseMoniStatus(userId, code, c.getRemark());
 	}
 
-	public void saveOrUpdate(MonitorPool mp) {
+	public void saveOrUpdate(MonitorPoolTemp mp) {
 		monitorPoolDao.save(mp);
 	}
 
-	private void updateBaseMoniStatus(String code, int monitor, String buyRea) {
-		CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(code);
-//		cbm.setMonitor(monitor);
-		cbm.setBuyRea(buyRea);// 同步-备注
-		codeBaseModel2Dao.save(cbm);
+	private void updateBaseMoniStatus(long userId, String code, String buyRea) {
+		if (userId == Constant.MY_ID) {
+			CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(code);
+			cbm.setBuyRea(buyRea);// 同步-备注
+			codeBaseModel2Dao.save(cbm);
+		}
 	}
 
 	// 加入监听
-	public void addMonitor(String code, int monitor, int realtime, int offline, double upPrice, double downPrice,
-			double upTodayChange, double downTodayChange, String remark, int ykb, int zfdone, int holderNum,
-			int buyLowVol, int xjl, int dzjy, int listenerGg, int shotPointCheck) {
+	public void addMonitor(long userId, String code, int monitor, int realtime, int offline, double upPrice,
+			double downPrice, double upTodayChange, double downTodayChange, String remark, int ykb, int zfdone,
+			int holderNum, int buyLowVol, int xjl, int dzjy, int listenerGg, int shotPointCheck) {
 		if (monitor <= 0) {
 			throw new RuntimeException("monitor<=0 ?");
 		}
-//		if (realtime == 0 && offline == 0) {
-//			throw new RuntimeException("realtime == 0 && offline == 0 ?");
-//		}
-//		if (upPrice == 0 && upTodayChange == 0 && downPrice == 0 && downTodayChange == 0) {
-//			throw new RuntimeException(
-//					"upPrice == 0 && upTodayChange == 0 && downPrice == 0 && downTodayChange == 0 ?");
-//		}
-		MonitorPool c = getMonitorPool(code);
-		c.setUpdateDate(DateUtil.getTodayIntYYYYMMDD());
+		MonitorPoolTemp c = getMonitorPoolById(userId, code);
 		c.setMonitor(monitor);
 		c.setRealtime(realtime);
 		c.setOffline(offline);
@@ -145,7 +144,7 @@ public class MonitorPoolService {
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
 		} else {
-			c.setRemark(remark + " " + c.getUpdateDate());
+			c.setRemark(remark);
 		}
 		int dt = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
 		if (ykb > 0) {
@@ -164,50 +163,54 @@ public class MonitorPoolService {
 			c.setDzjy(0);
 		}
 		monitorPoolDao.save(c);
-		updateBaseMoniStatus(code, c.getMonitor(), c.getRemark());
+		updateBaseMoniStatus(userId, code, c.getRemark());
 	}
 
-	public MonitorPool getMonitorPool(String code) {
+	public MonitorPoolTemp getMonitorPoolById(long userId, String code) {
+		String id = getId(userId, code);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.matchPhraseQuery("id", id));
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		queryBuilder = queryBuilder.withQuery(bqb);
 		SearchQuery sq = queryBuilder.build();
-		Page<MonitorPool> page = monitorPoolDao.search(sq);
+		Page<MonitorPoolTemp> page = monitorPoolDao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			return page.getContent().get(0);
 		}
-		MonitorPool cp = new MonitorPool();
+		MonitorPoolTemp cp = new MonitorPoolTemp();
 		cp.setCode(code);
+		cp.setId(id);
+		cp.setUserId(userId);
 		return cp;
 	}
 
+//	@PostConstruct
 	public void init() {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				List<MonitorPool> l = getMonitorPool();
-				List<MonitorPool> u = new LinkedList<MonitorPool>();
-				for (MonitorPool mp : l) {
-					if (mp.getMonitor() == MonitorType.MANUAL.getCode()
-							|| mp.getMonitor() == MonitorType.ZengFaAuto.getCode()) {
-						mp.setShotPointCheck(1);
-						u.add(mp);
-					}
-				}
-				if (u.size() > 0) {
-					monitorPoolDao.saveAll(u);
-				}
+//				List<MonitorPoolTemp> tl = new LinkedList<MonitorPoolTemp>();
+//				List<MonitorPool> list = getMonitorPool();
+//				for (MonitorPool m : list) {
+//					MonitorPoolTemp t = new MonitorPoolTemp();
+//					BeanCopy.copy(m, t);
+//					t.setCode(m.getCode());
+//					t.setId(t.getUserId() + t.getCode());
+//					tl.add(t);
+//				}
+//				monitorPoolDao.saveAll(list);
+//				monitorPoolUserDao.saveAll(tl);
 				log.info("done.init");
 			}
 		}).start();
 	}
 
 	// 所有监听池
-	public List<MonitorPool> getMonitorPool() {
+	public List<MonitorPoolTemp> getMonitorPool(long userId) {
 		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+		bqb.must(QueryBuilders.matchPhraseQuery("userId", userId));
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		queryBuilder = queryBuilder.withQuery(bqb);
@@ -216,21 +219,21 @@ public class MonitorPoolService {
 		}
 		SearchQuery sq = queryBuilder.build();
 
-		Page<MonitorPool> page = monitorPoolDao.search(sq);
+		Page<MonitorPoolTemp> page = monitorPoolDao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			return page.getContent();
 		}
 		return null;
 	}
 
-	public Map<String, MonitorPool> getMonitorPoolMap() {
-		return getPoolMap(this.getMonitorPool());
+	public Map<String, MonitorPoolTemp> getMonitorPoolMap() {
+		return getPoolMap(this.getMonitorPool(Constant.MY_ID));
 	}
 
-	public Map<String, MonitorPool> getPoolMap(List<MonitorPool> list) {
-		Map<String, MonitorPool> map = new HashMap<String, MonitorPool>();
+	public Map<String, MonitorPoolTemp> getPoolMap(List<MonitorPoolTemp> list) {
+		Map<String, MonitorPoolTemp> map = new HashMap<String, MonitorPoolTemp>();
 		if (list != null) {
-			for (MonitorPool c : list) {
+			for (MonitorPoolTemp c : list) {
 				map.put(c.getCode(), c);
 			}
 		}
@@ -250,7 +253,8 @@ public class MonitorPoolService {
 	/**
 	 * 监听列表-实时
 	 */
-	public List<MonitorPool> getPoolListForMonitor(int realtime, int offline, boolean sort1) {
+	// TODO
+	public List<MonitorPoolTemp> getPoolListForMonitor(int realtime, int offline, boolean sort1) {
 		int pageNum = EsQueryPageUtil.queryPage9999.getPageNum();
 		int size = EsQueryPageUtil.queryPage9999.getPageSize();
 		log.info("queryPage pageNum={},size={}", pageNum, size);
@@ -270,22 +274,21 @@ public class MonitorPoolService {
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
 
-		Page<MonitorPool> page = monitorPoolDao.search(sq);
+		Page<MonitorPoolTemp> page = monitorPoolDao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			return page.getContent();
 		}
 		return null;
 	}
 
-	public List<MonitorPoolResp> getListForWeb(String code, int monitor, int monitoreq, EsQueryPageReq querypage,
-			String aliasCode) {
+	public List<MonitorPoolResp> getListForWeb(long userId, String code, int monitor, int monitoreq,
+			EsQueryPageReq querypage, String aliasCode) {
 		log.info("CodeBaseModel getListForWeb code={},num={},size={},aliasCode={},monitor={},monitoreq={}", code,
 				querypage.getPageNum(), querypage.getPageSize(), aliasCode, monitor, monitoreq);
-
-		List<MonitorPool> list = getList(code, monitor, monitoreq, 0, 0, querypage, aliasCode, 0, 0, 0);
+		List<MonitorPoolTemp> list = getList(userId, code, monitor, monitoreq, 0, 0, querypage, aliasCode, 0, 0, 0);
 		List<MonitorPoolResp> res = new LinkedList<MonitorPoolResp>();
 		if (list != null) {
-			for (MonitorPool dh : list) {
+			for (MonitorPoolTemp dh : list) {
 				MonitorPoolResp resp = new MonitorPoolResp();
 				BeanUtils.copyProperties(dh, resp);
 				resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
@@ -296,14 +299,19 @@ public class MonitorPoolService {
 		return res;
 	}
 
-	public List<MonitorPool> getList(String code, int monitor, int monitoreq, int ykb, int zfdone,
+	public List<MonitorPoolTemp> getList(long userId, String code, int monitor, int monitoreq, int ykb, int zfdone,
 			EsQueryPageReq querypage, String aliasCode, int holderNum, int buyLowVol, int xjl) {
-		return getList(code, monitor, monitoreq, ykb, zfdone, querypage, aliasCode, holderNum, buyLowVol, xjl, 0);
+		return getList(userId, code, monitor, monitoreq, ykb, zfdone, querypage, aliasCode, holderNum, buyLowVol, xjl,
+				0);
 	}
 
-	public List<MonitorPool> getList(String code, int monitor, int monitoreq, int ykb, int zfdone,
+	public List<MonitorPoolTemp> getList(long userId, String code, int monitor, int monitoreq, int ykb, int zfdone,
 			EsQueryPageReq querypage, String aliasCode, int holderNum, int buyLowVol, int xjl, int dzjy) {
+		if (userId < Constant.MY_ID) {
+			throw new RuntimeException("错误的userId");
+		}
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("userId", userId));
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		} else if (StringUtils.isNotBlank(aliasCode)) {
@@ -343,7 +351,7 @@ public class MonitorPoolService {
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
 		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).withSort(sort).build();
 
-		Page<MonitorPool> page = monitorPoolDao.search(sq);
+		Page<MonitorPoolTemp> page = monitorPoolDao.search(sq);
 		if (page != null && !page.isEmpty()) {
 			return page.getContent();
 		}
@@ -353,7 +361,7 @@ public class MonitorPoolService {
 
 	// 完成定增预警
 	public void jobZfDoneWarning() {
-		List<MonitorPool> list = getList("", 0, 0, 0, 1, EsQueryPageUtil.queryPage9999, "", 0, 0, 0);
+		List<MonitorPoolTemp> list = getList(Constant.MY_ID, "", 0, 0, 0, 1, EsQueryPageUtil.queryPage9999, "", 0, 0, 0);
 		if (list != null) {
 			int oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));
 			int sysdate = DateUtil.getTodayIntYYYYMMDD();
@@ -363,12 +371,12 @@ public class MonitorPoolService {
 			List<BonusHist> bhl = new LinkedList<BonusHist>();
 			List<ZengFa> zfl = new LinkedList<ZengFa>();
 			// 抓包
-			for (MonitorPool mp : list) {
+			for (MonitorPoolTemp mp : list) {
 				thsBonusSpider.dofetchBonusInner(sysdate, mp.getCode(), zfdl, zfsl, fhl, bhl, zfl, 0);
 			}
 			thsBonusSpider.saveAll(zfdl, zfsl, fhl, bhl);
 			// 预警
-			for (MonitorPool mp : list) {
+			for (MonitorPoolTemp mp : list) {
 				ZengFa zf = chipsZfService.getLastZengFa(mp.getCode(), ZfStatus.ING.getCode());
 				if (!chipsZfService.isZfDateOk(zf, oneYearAgo)) {
 					mp.setZfdone(0);
@@ -390,17 +398,17 @@ public class MonitorPoolService {
 	}
 
 	// 股东人数预警
-	public List<MonitorPool> getHolderWarningList() {
-		return getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 1, 0, 0);
+	public List<MonitorPoolTemp> getHolderWarningList() {
+		return getList(Constant.MY_ID, "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 1, 0, 0);
 	}
 
 	public void jobHolderWarning() {
 		log.info("股东人数预警");
-		List<MonitorPool> list = getHolderWarningList();
+		List<MonitorPoolTemp> list = getHolderWarningList();
 		if (list != null) {
 			StringBuffer sb = new StringBuffer();
 			// 预警
-			for (MonitorPool mp : list) {
+			for (MonitorPoolTemp mp : list) {
 				List<HolderNum> hml = chipsService.getHolderNumList45(mp.getCode());
 				if (hml != null && hml.size() > 1) {
 					HolderNum hn0 = hml.get(0);
@@ -421,11 +429,11 @@ public class MonitorPoolService {
 
 	// 买点:地量
 	public void jobBuyLowVolWarning() {
-		List<MonitorPool> list = getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 1, 0);
+		List<MonitorPoolTemp> list = getList(Constant.MY_ID, "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 1, 0);
 		if (list != null) {
 			StringBuffer sb = new StringBuffer();
 			Integer today = DateUtil.getTodayIntYYYYMMDD();
-			for (MonitorPool mp : list) {
+			for (MonitorPoolTemp mp : list) {
 				EsQueryPageReq req = new EsQueryPageReq(mp.getBuyLowVol());
 				List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(mp.getCode(), 0,
 						today, req, SortOrder.DESC);
@@ -447,11 +455,11 @@ public class MonitorPoolService {
 	// 大宗交易
 	public void jobDzjyWarning() {
 		ThreadsUtil.sleepRandomSecBetween15And30();
-		List<MonitorPool> list = getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0, 1);
+		List<MonitorPoolTemp> list = getList(Constant.MY_ID, "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0, 1);
 		List<String> l = new LinkedList<String>();
 		if (list != null) {
 			Integer today = DateUtil.getTodayIntYYYYMMDD();
-			for (MonitorPool mp : list) {
+			for (MonitorPoolTemp mp : list) {
 				Dzjy dzjy = chipsService.getLastDzjy(mp.getCode());
 				if (dzjy.getDate() > mp.getDzjy()) {
 					l.add(mp.getCode());

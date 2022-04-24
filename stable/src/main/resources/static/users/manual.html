@@ -410,10 +410,8 @@ table {
 	</script>
 	<script type="text/javascript">
 		var qc = getQueryVariable("code");
-		$
-				.ajax({
+		$.ajax({
 					url : "/web/model/chips", //访问地址--action地址
-					//url : "http://127.0.0.1:8081/web/monitorPool/byCode", //访问地址--action地址
 					type : "get", //提交方式
 					data : {
 						code : qc

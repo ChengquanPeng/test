@@ -9,7 +9,7 @@ import com.stable.spider.realtime.RealtimeCall;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MonitoringUitl;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.ShotPoint;
 import com.stable.vo.http.resp.CodeBaseModelResp;
 
@@ -26,7 +26,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean isRunning = true;
 	private String today = DateUtil.getTodayYYYYMMDD();
 	private RealtimeDetailsResulter resulter;
-	private MonitorPool cp;
+	public MonitorPoolTemp cp;
 	private boolean waitSend = true;
 	private boolean chkCodeClosed = false;
 	private CodeBaseModelResp cbm;
@@ -38,7 +38,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		isRunning = false;
 	}
 
-	public int init(String code, MonitorPool cp, RealtimeDetailsResulter resulter, String codeName,
+	public int init(String code, MonitorPoolTemp cp, RealtimeDetailsResulter resulter, String codeName,
 			CodeBaseModelResp cbm, ShotPointCheck shotPointCheck) {
 		this.code = code;
 		this.codeName = codeName;

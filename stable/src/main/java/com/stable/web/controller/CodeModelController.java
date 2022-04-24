@@ -1,15 +1,19 @@
 package com.stable.web.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.stable.constant.Constant;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.model.ModelWebService;
 import com.stable.utils.DateUtil;
+import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.http.req.ModelManulReq;
 import com.stable.vo.http.req.ModelReq;
@@ -26,11 +30,20 @@ public class CodeModelController {
 	@Autowired
 	private TradeCalService tradeCalService;
 
+	private boolean showMore(HttpServletRequest req) {
+		UserInfo l = (UserInfo) req.getSession().getAttribute(Constant.SESSION_USER);
+		boolean showMore = false;
+		if (l != null && l.getType() == 1) {
+			showMore = true;
+		}
+		return showMore;
+	}
+
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> codemodellist(ModelReq mr, EsQueryPageReq querypage) {
+	public ResponseEntity<JsonResult> codemodellist(ModelReq mr, EsQueryPageReq querypage, HttpServletRequest req) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(modelWebService.getListForWeb(mr, querypage));
+			r.setResult(modelWebService.getListForWeb(mr, querypage, showMore(req)));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -64,11 +77,17 @@ public class CodeModelController {
 	 * 人工
 	 */
 	@RequestMapping(value = "/addManual")
-	public ResponseEntity<JsonResult> addManual(ModelManulReq req) {
+	public ResponseEntity<JsonResult> addManual(ModelManulReq r1, HttpServletRequest req) {
 		JsonResult r = new JsonResult();
 		try {
-			modelWebService.addPlsManual(req);
-			r.setStatus(JsonResult.OK);
+			r.setStatus(JsonResult.FAIL);
+			if (showMore(req)) {
+				UserInfo l = (UserInfo) req.getSession().getAttribute(Constant.SESSION_USER);
+				if (l.getId() == Constant.MY_ID) {
+					modelWebService.addPlsManual(Constant.MY_ID, r1);
+					r.setStatus(JsonResult.OK);
+				}
+			}
 		} catch (Exception e) {
 			r.setStatus(JsonResult.FAIL);
 			r.setResult(e.getMessage());
@@ -80,10 +99,10 @@ public class CodeModelController {
 	 * chips
 	 */
 	@RequestMapping(value = "/chips")
-	public ResponseEntity<JsonResult> chips(String code) {
+	public ResponseEntity<JsonResult> chips(String code, HttpServletRequest req) {
 		JsonResult r = new JsonResult();
 		try {
-			CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code);
+			CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code, showMore(req));
 			r.setResult(cbm);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {

@@ -12,14 +12,17 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-@Document(indexName = "monitor_pool")
-public class MonitorPool extends EsBase {
+@Document(indexName = "monitor_pool_user")
+public class MonitorPoolTemp extends EsBase {
 	private static final long serialVersionUID = -1111366231674941738L;
 	@Id
-	private String code;
-	@Field(type = FieldType.Integer)
-	private int updateDate = 0;
+	private String id;
 
+	@Field(type = FieldType.Keyword)
+	private String code;
+
+	@Field(type = FieldType.Long)
+	private long userId = 0;
 	// 监听-公告
 	@Field(type = FieldType.Double)
 	private int listenerGg; // 监听-公告
@@ -61,10 +64,6 @@ public class MonitorPool extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int shotPointCheck = 0;// 起爆点
 	// 增发
-
-	// 短线
-
-	//
 
 	public String getMsg() {
 		StringBuffer sb = new StringBuffer();

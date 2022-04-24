@@ -21,4 +21,10 @@ public class RedisConstant {
 	// CHIPS_SORT：最后检查成功日期
 	public static final String RDS_CHIPS_SORT_OK_DT_ = "RDS_CHIPS_SORT_OK_DT_";
 
+	// 登录key
+	public static final String RDS_LOGIN_KEY_ = "RDS_LOGIN_KEY_";
+	// 登录失败次数
+	public static final String RDS_LOGIN_ERROR_TIME_ = "RDS_LOGIN_ERROR_TIME_";
+	// 登录IP
+//	public static final String RDS_LOGIN_IPS_ = "RDS_LOGIN_IPS_";
 }

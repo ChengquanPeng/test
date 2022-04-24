@@ -63,7 +63,7 @@ body {
 <body>
 	<div id="header"></div>
 	<div class="container-fluid">
-		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
+		<div class="row col-sm-9 offset-sm-3 col-md-6 offset-md-0 pt-3">
 			<div class="col-lg-9">
 				<div class="input-group">
 					代码：<input type="text" class="form-control" id="code">&nbsp;
@@ -73,23 +73,15 @@ body {
 				</div>
 				<div class="input-group">
 					监听类型：<select id="monitor">
-						<option value="0">无</option>
-						<option value="3">人工</option>
-						<option value="6">增发-系统自动</option>
-						<option value="11">短线1急速拉升</option>
-						<option value="41">底部-大额大宗</option>
+						<option value="3" selected="selected">人工</option>
 					</select>
 				</div>
-				<div class="input-group">
-					监听说明：
-					<textarea rows="5" cols="30" id="remark" name="remark"></textarea>
-				</div>
-				<br />
 				<div class="input-group">
 					在线监听：<input type="checkbox" id="realtime" name="realtime" />
 				</div>
 				<div class="input-group">
-					离线监听：<input type="checkbox" id="offline" name="offline" />
+					离线监听：<input type="checkbox" id="offline" name="offline"
+						checked="checked" />
 				</div>
 				<div class="input-group">
 					高于某涨幅：<input type="text" class="form-control" id="upTodayChange">&nbsp;
@@ -127,7 +119,10 @@ body {
 					大宗交易监听：<input type="checkbox" id="dzjy" name="dzjy" />&nbsp;&nbsp;&nbsp;<span
 						id="dzjyDate"></span>
 				</div>
-				<br />
+				<div class="input-group">
+					备注：
+					<textarea rows="5" cols="30" id="remark" name="remark"></textarea>
+				</div>
 				<div class="input-group">
 					<span class="input-group-btn">
 						<button class="btn btn-default" type="button" id="queryAction"
@@ -159,7 +154,7 @@ body {
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
 	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
-	addActiveHeaderMen("m_monitor_pool");
+		addActiveHeaderMen("m_monitor_pool");
 		$('#cusTable').bootstrapTable('destroy');
 	</script>
 	<script type="text/javascript">
@@ -234,6 +229,8 @@ body {
 				$('#remark').val(reData.result.remark);
 				if (reData.result.realtime == 1) {
 					$('#realtime').attr("checked", 'checked');
+				} else {
+					$('#realtime').attr("checked", false);
 				}
 				if (reData.result.offline == 1) {
 					$('#offline').attr("checked", 'checked');
@@ -253,7 +250,6 @@ body {
 				$('#downPrice').val(reData.result.downPrice);
 				$('#upTodayChange').val(reData.result.upTodayChange);
 				$('#downTodayChange').val(reData.result.downTodayChange);
-				$('#monitor').val(reData.result.monitor);
 				if (reData.result.ykb > 0) {
 					$('#ykb').attr("checked", 'checked');
 					$('#ykbDate').html(reData.result.ykb);

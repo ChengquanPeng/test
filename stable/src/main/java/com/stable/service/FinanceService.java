@@ -30,7 +30,7 @@ import com.stable.es.dao.base.EsFinYjkbDao;
 import com.stable.es.dao.base.EsFinYjygDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
-import com.stable.es.dao.base.MonitorPoolDao;
+import com.stable.es.dao.base.MonitorPoolUserDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.model.data.FinanceAnalyzer;
@@ -51,7 +51,7 @@ import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
 import com.stable.vo.bus.FinanceBaseInfoPage;
-import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.resp.FinanceBaseInfoResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -85,15 +85,16 @@ public class FinanceService {
 	@Autowired
 	private ConceptService conceptService;
 	@Autowired
-	private MonitorPoolDao monitorPoolDao;
+	private MonitorPoolUserDao monitorPoolDao;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
 
 	// 经营现金流转正监听
 	public void jobXjlWarning() {
-		List<MonitorPool> list = monitorPoolService.getList("", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 1);
+		List<MonitorPoolTemp> list = monitorPoolService.getList(Constant.MY_ID, "", 0, 0, 0, 0,
+				EsQueryPageUtil.queryPage9999, "", 0, 0, 1);
 		if (list != null) {
-			for (MonitorPool mp : list) {
+			for (MonitorPoolTemp mp : list) {
 				FinanceBaseInfo fbi = this.getLastFinaceReport(mp.getCode());
 				if (fbi.getJyxjlce() > 0 || fbi.getMgjyxjl() > 0) {
 					WxPushUtil.pushSystem1(
@@ -105,10 +106,11 @@ public class FinanceService {
 
 	// 快预报监听
 	private void kybMonitor() {
-		List<MonitorPool> list = monitorPoolService.getList("", 0, 0, 1, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0);
+		List<MonitorPoolTemp> list = monitorPoolService.getList(Constant.MY_ID, "", 0, 0, 1, 0,
+				EsQueryPageUtil.queryPage9999, "", 0, 0, 0);
 		if (list != null) {
 			StringBuffer sssb = new StringBuffer();
-			for (MonitorPool mp : list) {
+			for (MonitorPoolTemp mp : list) {
 				if (mp.getYkb() > 0) {
 					try {
 						String code = mp.getCode();

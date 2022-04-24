@@ -15,7 +15,7 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.MonitorType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
-import com.stable.es.dao.base.MonitorPoolDao;
+import com.stable.es.dao.base.MonitorPoolUserDao;
 import com.stable.service.BonusService;
 import com.stable.service.BuyBackService;
 import com.stable.service.ChipsService;
@@ -50,7 +50,7 @@ import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
 import com.stable.vo.bus.HolderPercent;
 import com.stable.vo.bus.Jiejin;
-import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.ZengFa;
@@ -94,7 +94,7 @@ public class CodeModelService {
 	@Autowired
 	private SortV6Service sortV6Service;
 	@Autowired
-	private MonitorPoolDao monitorPoolDao;
+	private MonitorPoolUserDao monitorPoolDao;
 	@Autowired
 	private ChipsZfService chipsZfService;
 	@Autowired
@@ -149,8 +149,8 @@ public class CodeModelService {
 		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
 		// 大牛
-		Map<String, MonitorPool> poolMap = monitorPoolService.getMonitorPoolMap();
-		List<MonitorPool> poolList = new LinkedList<MonitorPool>();
+		Map<String, MonitorPoolTemp> poolMap = monitorPoolService.getMonitorPoolMap();
+		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();
 //		int tdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 365));
 		// 到期提醒
 		StringBuffer sbc = new StringBuffer();
@@ -162,9 +162,9 @@ public class CodeModelService {
 			try {
 				String code = s.getCode();
 				// 监听池
-				MonitorPool pool = poolMap.get(code);
+				MonitorPoolTemp pool = poolMap.get(code);
 				if (pool == null) {
-					pool = new MonitorPool();
+					pool = new MonitorPoolTemp();
 					pool.setCode(code);
 				}
 				poolList.add(pool);

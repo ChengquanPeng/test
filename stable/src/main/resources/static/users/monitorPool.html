@@ -65,8 +65,8 @@ body {
 				<div class="input-group">
 					股票代码：<input type="text" class="form-control" id="queryCode">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 监听类型:<select id="monitoreq">
-						<option value="0">无</option>
-						<option value="99">所有监听</option>
+						<option value="0">全部数据</option>
+						<option value="99">已监听</option>
 					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="input-group-btn">
 						<button class="btn btn-default" type="button" id="queryAction">
 							查询</button>
@@ -150,8 +150,7 @@ body {
 										},
 										{
 											field : 'remark',
-											title : '人工备注',
-											width : 25
+											title : '备注'
 										},
 										{
 											field : 'offline',
@@ -257,7 +256,7 @@ body {
 				success : function(reData) { //回调函数的处理方式
 					if ("OK" == reData.status) {
 						alert("已移除");
-						window.close();
+						//window.close();
 					} else {
 						alert("失败:" + reData.result);
 					}

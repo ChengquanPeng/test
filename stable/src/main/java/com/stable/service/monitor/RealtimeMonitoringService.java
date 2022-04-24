@@ -20,7 +20,7 @@ import com.stable.spider.tick.TencentTickReal;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.OnlineTesting;
 
 import lombok.extern.log4j.Log4j2;
@@ -65,7 +65,7 @@ public class RealtimeMonitoringService {
 
 		try {
 			// 获取监听列表-常规
-			List<MonitorPool> allCode = monitorPoolService.getPoolListForMonitor(1, 0, getMonisort1());
+			List<MonitorPoolTemp> allCode = monitorPoolService.getPoolListForMonitor(1, 0, getMonisort1());
 
 			List<RealtimeDetailsAnalyzer> list = new LinkedList<RealtimeDetailsAnalyzer>();
 			RealtimeDetailsResulter resulter = new RealtimeDetailsResulter();
@@ -74,7 +74,7 @@ public class RealtimeMonitoringService {
 			if (allCode.size() > 0) {
 				// ====启动监听线程====
 				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
-				for (MonitorPool cp : allCode) {
+				for (MonitorPoolTemp cp : allCode) {
 					String code = cp.getCode();
 //					if (cp.getMonitor() == MonitorType.ZengFaAuto.getCode()) {
 //						log.info(code + " ZengFaAuto continue");
@@ -87,7 +87,7 @@ public class RealtimeMonitoringService {
 					log.info(code);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
 					int r = task.init(code, cp, resulter, stockBasicService.getCodeName2(code),
-							modelWebService.getLastOneByCodeResp(code), shotPointCheck);
+							modelWebService.getLastOneByCodeResp(code, true), shotPointCheck);
 					if (r == 1) {
 						new Thread(task).start();
 						list.add(task);
@@ -129,7 +129,7 @@ public class RealtimeMonitoringService {
 //					selledList.add(t.getSelled());
 //				}
 				if (t.highPriceGot) {
-					MonitorPool mpt = monitorPoolService.getMonitorPool(t.code);
+					MonitorPoolTemp mpt = monitorPoolService.getMonitorPoolById(t.cp.getUserId(), t.code);
 					mpt.setYearHigh1(0.0);
 					monitorPoolService.saveOrUpdate(mpt);
 				}

@@ -15,7 +15,7 @@ import com.stable.service.StockBasicService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.vo.bus.CodeBaseModel2;
-import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 
 @Service
@@ -27,7 +27,7 @@ public class Sort1ModeService {
 
 	private final double sort1checkLine = 80.0;
 
-	public void sort1ModeChk(CodeBaseModel2 cbm, MonitorPool mp, int date) {
+	public void sort1ModeChk(CodeBaseModel2 cbm, MonitorPoolTemp mp, int date) {
 		if (cbm.getShooting5() <= 0 || date > cbm.getShooting5()) {// 需要验证是否OK //或者已过期
 			double maxPrice = this.daIs30DayTodayPriceOk(cbm.getCode(), date, sort1checkLine);
 			if (maxPrice > 0.0) {// OK
@@ -59,7 +59,7 @@ public class Sort1ModeService {
 		}
 	}
 
-	private void reset(CodeBaseModel2 cbm, MonitorPool mp) {
+	private void reset(CodeBaseModel2 cbm, MonitorPoolTemp mp) {
 		cbm.setShooting5(0);
 		if (mp.getMonitor() == MonitorType.SORT1.getCode()) {
 			mp.setMonitor(MonitorType.NO.getCode());

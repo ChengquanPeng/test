@@ -51,7 +51,7 @@ import com.stable.utils.TasksWorker2ndRunnable;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
-import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.ShotPoint;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
@@ -224,14 +224,14 @@ public class DaliyTradeHistroyService {
 	// 离线价格监听
 	private void priceChk(List<TradeHistInfoDaliyNofq> listNofq, int tradeDate) {
 		if (listNofq != null && listNofq.size() > 0) {
-			List<MonitorPool> list = monitorPoolService.getPoolListForMonitor(0, 1, true);
+			List<MonitorPoolTemp> list = monitorPoolService.getPoolListForMonitor(0, 1, true);
 			if (list != null) {
 				List<String> ZengFaAuto = new LinkedList<String>();
 				List<String> Other = new LinkedList<String>();
 				List<String> bao = new LinkedList<String>();
 
 				Map<String, TradeHistInfoDaliyNofq> map = monitorPoolService.getPoolMap2(listNofq);
-				for (MonitorPool cp : list) {
+				for (MonitorPoolTemp cp : list) {
 					if (cp.getDownPrice() <= 0 && cp.getDownTodayChange() <= 0 && cp.getUpPrice() <= 0
 							&& cp.getUpTodayChange() <= 0) {
 						log.info("{} 没有离线价格监听", cp.getCode());

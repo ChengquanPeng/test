@@ -29,7 +29,7 @@ import com.stable.utils.WxPushUtil;
 import com.stable.vo.HolderPercent5;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.HolderPercent;
-import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -68,9 +68,9 @@ public class ThsHolderSpider {
 					}
 				}
 			} else {
-				List<MonitorPool> wlist = monitorPoolService.getHolderWarningList();
+				List<MonitorPoolTemp> wlist = monitorPoolService.getHolderWarningList();
 				if (wlist != null) {
-					for (MonitorPool mp : wlist) {
+					for (MonitorPoolTemp mp : wlist) {
 						codesw.add(mp.getCode());
 					}
 				}

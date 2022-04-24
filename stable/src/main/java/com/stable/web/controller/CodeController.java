@@ -45,7 +45,7 @@ public class CodeController {
 	@RequestMapping(value = "/code/{code}", method = RequestMethod.GET)
 	public String detail(@PathVariable(value = "code") String code, Model model) {
 		try {
-			CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code);
+			CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code, true);
 			model.addAttribute("codedetail", cbm);
 			prepare(model, code);
 		} catch (Exception e) {

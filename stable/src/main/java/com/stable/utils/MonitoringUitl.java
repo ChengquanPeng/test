@@ -1,17 +1,17 @@
 package com.stable.utils;
 
 import com.stable.spider.realtime.RealTime;
-import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.MonitorPoolTemp;
 
 //@Log4j2
 public class MonitoringUitl {
 
 	// 实时
-	public static final boolean isOkForRt(MonitorPool cp, RealTime srt) {
+	public static final boolean isOkForRt(MonitorPoolTemp cp, RealTime srt) {
 		return isOk(cp, CurrencyUitl.cutProfit(srt.getYesterday(), srt.getNow()), srt.getHigh(), srt.getLow());
 	}
 
-	public static final boolean isOk(MonitorPool cp, double todayChange, double high, double low) {
+	public static final boolean isOk(MonitorPoolTemp cp, double todayChange, double high, double low) {
 //		log.info("cp={},todayChange={},high={},low={}", cp, todayChange, high, low);
 		if (cp.getUpTodayChange() > 0 || cp.getDownTodayChange() > 0) {
 			if (cp.getUpTodayChange() > 0) {// 涨幅

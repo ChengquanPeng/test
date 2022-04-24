@@ -93,7 +93,7 @@ public class PreSelectSave {
 				sb.append("<td class='sn'>").append(code).append("</td>");// 代码
 				sb.append("<td>").append(stockBasicService.getCodeName(code)).append("</td>");// 简称
 				sb.append("<td>").append(getPrdSub(p1.getPrdsub())).append("</td>");// 细分类
-				CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code);
+				CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code, true);
 				String bk = stockBasicService.getCode(code).getThsIndustry();// 同花顺板块
 				String gn = conceptService.getCodeConceptStr(code);// 同花顺概念
 				sb.append("<td>").append(cbm.getMkv()).append("亿<br/>活筹").append(cbm.getActMkv()).append("亿</td>");// 流通市值

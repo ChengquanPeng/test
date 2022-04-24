@@ -28,7 +28,7 @@ import com.stable.enums.SylType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
-import com.stable.es.dao.base.MonitorPoolDao;
+import com.stable.es.dao.base.MonitorPoolUserDao;
 import com.stable.service.ConceptService;
 import com.stable.service.ReducingHoldingSharesService;
 import com.stable.service.StockBasicService;
@@ -39,7 +39,7 @@ import com.stable.utils.DateUtil;
 import com.stable.vo.ReducingHoldingSharesStat;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
-import com.stable.vo.bus.MonitorPool;
+import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.req.ModelManulReq;
 import com.stable.vo.http.req.ModelReq;
@@ -62,7 +62,7 @@ public class ModelWebService {
 	@Autowired
 	private MonitorPoolService monitorPoolService;
 	@Autowired
-	private MonitorPoolDao monitorPoolDao;
+	private MonitorPoolUserDao monitorPoolDao;
 	@Autowired
 	private ReducingHoldingSharesService reducingHoldingSharesService;
 
@@ -84,8 +84,8 @@ public class ModelWebService {
 		return cbm;
 	}
 
-	public CodeBaseModelResp getLastOneByCodeResp(String code) {
-		return getModelResp(getLastOneByCode2(code));
+	public CodeBaseModelResp getLastOneByCodeResp(String code, boolean showMore) {
+		return getModelResp(getLastOneByCode2(code), showMore);
 	}
 
 	public String getSystemPoint(CodeBaseModel2 dh, String splitor) {
@@ -120,7 +120,7 @@ public class ModelWebService {
 		return s;
 	}
 
-	private CodeBaseModelResp getModelResp(CodeBaseModel2 dh) {
+	private CodeBaseModelResp getModelResp(CodeBaseModel2 dh, boolean showMore) {
 		CodeBaseModelResp resp = new CodeBaseModelResp();
 		BeanUtils.copyProperties(dh, resp);
 		resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
@@ -171,9 +171,11 @@ public class ModelWebService {
 
 		// 博弈-行情指标
 		StringBuffer sb5 = new StringBuffer();
-		sb5.append("<font color='red'>");
-		sb5.append(this.getSystemPoint(dh, Constant.HTML_LINE));
-		sb5.append("</font>");
+		if (showMore) {
+			sb5.append("<font color='red'>");
+			sb5.append(this.getSystemPoint(dh, Constant.HTML_LINE));
+			sb5.append("</font>");
+		}
 		// 基本面-筹码
 		sb5.append("流通:").append(dh.getMkv()).append("亿,");
 		sb5.append("除5%活筹:").append(dh.getActMkv()).append("亿,");
@@ -266,32 +268,38 @@ public class ModelWebService {
 		}
 		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 		// 减持
-		ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLastStat(dh.getCode(), 0);
-		if (dh.getReducZb() > 0 || rhss.getYg() > 0) {
-			sb5.append("1年减持:").append(rhss.getT()).append("次,").append(rhss.getYg()).append("亿股,流通占比:")
-					.append(dh.getReducZb()).append("%)");
-		}
-		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
-		// 是否确定
-		if (dh.getPls() == 0) {
-			sb5.append("人工: 未确定");
-		} else if (dh.getPls() == 1) {
-			sb5.append("人工: 已确定");
-		} else if (dh.getPls() == 2) {
-			sb5.append("人工: 已排除");
+		if (showMore) {
+			ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLastStat(dh.getCode(), 0);
+			if (dh.getReducZb() > 0 || rhss.getYg() > 0) {
+				sb5.append("1年减持:").append(rhss.getT()).append("次,").append(rhss.getYg()).append("亿股,流通占比:")
+						.append(dh.getReducZb()).append("%)");
+			}
+			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
+
+			// 是否确定
+			if (dh.getPls() == 0) {
+				sb5.append("人工: 未确定");
+			} else if (dh.getPls() == 1) {
+				sb5.append("人工: 已确定");
+			} else if (dh.getPls() == 2) {
+				sb5.append("人工: 已排除");
+			}
 		}
 		resp.setZfjjInfo(sb5.toString());
+		// 备注
+		if (!showMore) {
+			resp.setBuyRea("");// TODO
+		}
 		return resp;
 	}
 
-	public List<CodeBaseModelResp> getListForWeb(ModelReq mr, EsQueryPageReq querypage) {
+	public List<CodeBaseModelResp> getListForWeb(ModelReq mr, EsQueryPageReq querypage, boolean showMore) {
 		log.info("CodeBaseModel getListForWeb mr={}", mr);
-
 		List<CodeBaseModel2> list = getList(mr, querypage);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {
 			for (CodeBaseModel2 dh : list) {
-				res.add(getModelResp(dh));
+				res.add(getModelResp(dh, showMore));
 			}
 		}
 		return res;
@@ -309,7 +317,7 @@ public class ModelWebService {
 		return codes;
 	}
 
-	public void addPlsManual(ModelManulReq req) {
+	public void addPlsManual(long userId, ModelManulReq req) {
 		String code = req.getCode();
 		int pls = req.getPls();
 		int timemonth = req.getTimemonth();
@@ -343,7 +351,7 @@ public class ModelWebService {
 			String remark = (req.getBuyRea() + " " + req.getSoldRea()).trim();
 			CodeBaseModel2 c = getLastOneByCode2(code);
 
-			MonitorPool pool = monitorPoolService.getMonitorPool(code);
+			MonitorPoolTemp pool = monitorPoolService.getMonitorPoolById(userId, code);
 			if (pls == 2) {// 2不在池子
 				pool.setMonitor(MonitorType.NO.getCode());
 				pool.setUpTodayChange(0);
@@ -383,7 +391,6 @@ public class ModelWebService {
 	}
 
 	public List<CodeBaseModel2> getList(ModelReq mr, EsQueryPageReq querypage) {
-//		boolean pageYes = true;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(mr.getCode())) {
 			String[] cc = mr.getCode().split(",");

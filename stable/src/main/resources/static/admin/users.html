@@ -148,7 +148,21 @@ body {
 										},
 										{
 											field : 'wxpush',
-											title : '微信推送id'
+											title : '微信推送id',
+											formatter : function(value, row,
+													index) {
+												if (row.wxpush) {
+													if (row.wxpush.length() > 12) {
+														return row.wxpush
+																.substring(0,
+																		12)
+																+ "...";
+													} else {
+														return row.wxpush;
+													}
+												}
+												return "无";
+											}
 										},
 										{
 											field : 'type',

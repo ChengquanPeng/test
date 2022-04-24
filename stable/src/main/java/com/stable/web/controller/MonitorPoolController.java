@@ -2,6 +2,8 @@ package com.stable.web.controller;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,9 +11,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.StockBasicService;
 import com.stable.service.monitor.MonitorPoolService;
+import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.http.resp.MonitorPoolResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -24,17 +28,26 @@ public class MonitorPoolController {
 	@Autowired
 	private MonitorPoolService monitorPoolService;
 
+	private long getUserId(HttpServletRequest req) {
+		UserInfo l = (UserInfo) req.getSession().getAttribute(Constant.SESSION_USER);
+		if (l != null && l.getId() >= Constant.MY_ID) {
+			return l.getId();
+		}
+		throw new RuntimeException("无法获取userId");
+	}
+
 	/**
 	 * 根据code
 	 */
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> list(String code, String aliasCode, String monitoreq, EsQueryPageReq querypage) {
+	public ResponseEntity<JsonResult> list(String code, String aliasCode, String monitoreq, EsQueryPageReq querypage,
+			HttpServletRequest req) {
 		JsonResult r = new JsonResult();
 		try {
 			int mq = StringUtils.isNotBlank(monitoreq) ? Integer.valueOf(monitoreq) : 0;
 			int q1 = (mq == 99 ? 1 : 0);
 			int q2 = (mq == 99 ? 0 : mq);
-			r.setResult(monitorPoolService.getListForWeb(code, q1, q2, querypage, aliasCode));
+			r.setResult(monitorPoolService.getListForWeb(getUserId(req), code, q1, q2, querypage, aliasCode));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -45,10 +58,11 @@ public class MonitorPoolController {
 	}
 
 	@RequestMapping(value = "/byCode", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> byCode(String code) {
+	public ResponseEntity<JsonResult> byCode(String code, HttpServletRequest req) {
 		JsonResult r = new JsonResult();
 		try {
-			List<MonitorPoolResp> l = monitorPoolService.getListForWeb(code, 0, 0, EsQueryPageUtil.queryPage1, "");
+			List<MonitorPoolResp> l = monitorPoolService.getListForWeb(getUserId(req), code, 0, 0,
+					EsQueryPageUtil.queryPage1, "");
 			if (l != null && l.size() > 0) {
 				r.setResult(l.get(0));
 			} else {
@@ -68,18 +82,28 @@ public class MonitorPoolController {
 	}
 
 	@RequestMapping(value = "/delMonit")
-	public void delMonit(String code, String remark) {
-		monitorPoolService.delMonit(code, remark);
+	public ResponseEntity<JsonResult> delMonit(String code, String remark, HttpServletRequest req) {
+		JsonResult r = new JsonResult();
+		try {
+			monitorPoolService.delMonit(getUserId(req), code, remark);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
 	}
 
 	@RequestMapping(value = "/addMonitor")
 	public ResponseEntity<JsonResult> addMonitor(String code, String monitor, String realtime, String offline,
 			String upPrice, String downPrice, String upTodayChange, String downTodayChange, String remark, String ykb,
 			String zfdone, String holderNum, String buyLowVol, String xjl, String dzjy, String listenerGg,
-			String shotPointCheck) {
+			String shotPointCheck, HttpServletRequest req) {
 		JsonResult r = new JsonResult();
 		try {
-			monitorPoolService.addMonitor(code, StringUtils.isNotBlank(monitor) ? Integer.valueOf(monitor) : 0,
+			monitorPoolService.addMonitor(getUserId(req), code,
+					StringUtils.isNotBlank(monitor) ? Integer.valueOf(monitor) : 0,
 					StringUtils.isNotBlank(realtime) ? Integer.valueOf(realtime) : 0,
 					StringUtils.isNotBlank(offline) ? Integer.valueOf(offline) : 0,
 					StringUtils.isNotBlank(upPrice) ? Double.valueOf(upPrice) : 0,

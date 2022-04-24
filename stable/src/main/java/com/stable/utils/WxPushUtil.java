@@ -32,15 +32,15 @@ public class WxPushUtil {
 		WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, true, null, null);
 	}
 
-	public final static void pushSystem1(String uid, String content) {
-		WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, false, uid, null);
+	public final static boolean pushSystem1(String uid, String content) {
+		return WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, false, uid, null);
 	}
 
 	public final static void pushSystem2Html(String content) {
 		WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, true, null, null);
 	}
 
-	private final static void pushMsg(int contentType, String content, boolean isMyId, String singleId,
+	private final static boolean pushMsg(int contentType, String content, boolean isMyId, String singleId,
 			Set<String> uids) {
 		try {
 			Message message = new Message();
@@ -62,10 +62,12 @@ public class WxPushUtil {
 			// log.info("result:{}", lresult);
 			MessageResult mr = lresult.get(0);
 			log.info("微信推送内容:{},状态:{}", content, mr.getStatus());
+			return true;
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, "微信推送内容异常", content, "");
 			e.printStackTrace();
 		}
+		return false;
 	}
 
 	public static void main(String[] args) {
