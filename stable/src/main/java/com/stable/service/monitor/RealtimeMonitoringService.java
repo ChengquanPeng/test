@@ -96,8 +96,6 @@ public class RealtimeMonitoringService {
 			}
 
 			List<RealtimeDetailsAnalyzer> list = new LinkedList<RealtimeDetailsAnalyzer>();
-			RealtimeDetailsResulter resulter = new RealtimeDetailsResulter();
-
 			int failtt = 0;
 			if (allmap.size() > 0) {
 				// ====启动监听线程====
@@ -115,11 +113,6 @@ public class RealtimeMonitoringService {
 							failtt++;
 						}
 					}
-				}
-
-				// ====启动结果线程====
-				if (list.size() > 0) {
-					new Thread(resulter).start();
 				}
 			}
 			WxPushUtil.pushSystem1("实时监听，监听总数:[" + allmap.size() + "],牛熊环境开启:[" + getMonisort1() + "],短线实际总数["
