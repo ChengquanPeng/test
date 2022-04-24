@@ -33,6 +33,7 @@ import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
+import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.service.UserService;
 import com.stable.service.model.ModelWebService;
@@ -40,6 +41,7 @@ import com.stable.service.model.ShotPointCheck;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
+import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.MonitoringUitl;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
@@ -47,6 +49,9 @@ import com.stable.vo.bus.BonusHist;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.Dzjy;
 import com.stable.vo.bus.FenHong;
+import com.stable.vo.bus.FinYjkb;
+import com.stable.vo.bus.FinYjyg;
+import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.ShotPoint;
@@ -88,6 +93,8 @@ public class MonitorPoolService {
 	private UserService userService;
 	@Autowired
 	private ShotPointCheck shotPointCheck;
+	@Autowired
+	private FinanceService financeService;
 
 	private String getId(long userId, String code) {
 		if (userId < Constant.MY_ID) {
@@ -587,6 +594,115 @@ public class MonitorPoolService {
 					if (StringUtils.isNotBlank(ends)) {
 						WxPushUtil.pushSystem2Html(u.getWxpush(), ends);
 					}
+				}
+			}
+		}
+	}
+
+	// 经营现金流转正监听
+	public void jobXjlWarning() {
+		List<UserInfo> ulist = userService.getUserListForMonitor();
+		for (UserInfo u : ulist) {
+			List<MonitorPoolTemp> list = this.getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0,
+					0, 1);
+			if (list != null) {
+				for (MonitorPoolTemp mp : list) {
+					FinanceBaseInfo fbi = financeService.getLastFinaceReport(mp.getCode());
+					if (fbi.getJyxjlce() > 0 || fbi.getMgjyxjl() > 0) {
+						WxPushUtil.pushSystem1(u.getWxpush(),
+								mp.getCode() + " 经营现金流净额已转正(" + fbi.getYear() + "年" + fbi.getQuarter() + "季度)");
+					}
+				}
+			}
+		}
+	}
+
+	// 快预报监听
+	public void kybMonitor() {
+		List<UserInfo> ulist = userService.getUserListForMonitor();
+		for (UserInfo u : ulist) {
+			List<MonitorPoolTemp> list = this.getList(u.getId(), "", 0, 0, 1, 0, EsQueryPageUtil.queryPage9999, "", 0,
+					0, 0);
+			if (list != null) {
+				StringBuffer sssb = new StringBuffer();
+				for (MonitorPoolTemp mp : list) {
+					if (mp.getYkb() > 0) {
+						try {
+							String code = mp.getCode();
+							FinanceBaseInfo fbi = financeService.getLastFinaceReport(code);
+							FinYjkb yjkb = financeService.getLastFinaceKbByReportDate(code, fbi.getYear(),
+									fbi.getQuarter());
+							boolean find = false;
+							StringBuffer sb = new StringBuffer();
+
+							// 业绩快报(准确的)
+							if (yjkb != null && yjkb.getAnnDate() > mp.getYkb()) {
+								sb.append(stockBasicService.getCodeName2(code));
+								if (yjkb.getJlr() > 0) {
+									find = true;
+								} else if (yjkb.getJlr() < 0) {
+									sb.append(",快报[亏损]:");
+									find = true;
+								}
+								if (find) {
+									mp.setYkb(yjkb.getAnnDate());
+									sb.append("业绩同比:").append(yjkb.getJlrtbzz()).append("%");
+									sb.append(",营收同比:").append(yjkb.getYyzsrtbzz()).append("%");
+								}
+							}
+							// 业绩预告(类似天气预报,可能不准)
+							if (!find) {
+								FinYjyg yjyg = financeService.getLastFinaceYgByReportDate(code, fbi.getYear(),
+										fbi.getQuarter());
+								if (yjyg != null && yjyg.getAnnDate() > mp.getYkb()) {
+									sb.append(stockBasicService.getCodeName2(code));
+									if (mp.getYkb() > 1) {
+										sb.append(",期望不亏");
+									} else {
+										sb.append(",期望亏损");
+									}
+									if (yjyg.getJlr() > 0) {
+										sb.append(",业绩预告不亏:");
+										find = true;
+									} else if (yjyg.getJlr() < 0) {
+										sb.append(",业绩预告亏损:");
+										find = true;
+									}
+									if (find) {
+										mp.setYkb(yjyg.getAnnDate());
+										sb.append("业绩同比:").append(yjyg.getJlrtbzz()).append("%");
+									}
+								}
+							}
+							if (!find) {
+								if (fbi.getAnnDate() > mp.getYkb()) {
+									sb.append(stockBasicService.getCodeName(code));
+									if (fbi.getGsjlr() > 0) {
+										sb.append(",业绩不亏:");
+										find = true;
+									} else if (fbi.getGsjlr() < 0) {
+										sb.append(",业绩亏损:");
+										find = true;
+									}
+									if (find) {
+										mp.setYkb(fbi.getAnnDate());
+										sb.append("业绩同比:").append(fbi.getGsjlrtbzz()).append("%");
+										sb.append(",营收同比:").append(fbi.getYyzsrtbzz()).append("%");
+									}
+								}
+							}
+							if (find) {
+								monitorPoolDao.save(mp);
+								sssb.append(sb.toString()).append(Constant.HTML_LINE);
+							}
+						} catch (Exception e) {
+							ErrorLogFileUitl.writeError(e, "快预报预警", "", "");
+						}
+					}
+				}
+
+				if (sssb.length() > 0) {
+					WxPushUtil.pushSystem2Html(u.getWxpush(), "快预报预警:" + sssb.toString());
 				}
 			}
 		}
