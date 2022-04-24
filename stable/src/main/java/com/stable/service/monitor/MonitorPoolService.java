@@ -141,6 +141,7 @@ public class MonitorPoolService {
 		c.setXjl(xjl);
 		c.setShotPointCheck(shotPointCheck);
 		c.setListenerGg(listenerGg);
+
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
 		} else {
@@ -161,6 +162,11 @@ public class MonitorPoolService {
 			c.setDzjy(dt);
 		} else {
 			c.setDzjy(0);
+		}
+
+		if (userId != Constant.MY_ID) {// 默认不监听
+			c.setShotPointCheck(0);
+			c.setListenerGg(0);
 		}
 		monitorPoolDao.save(c);
 		updateBaseMoniStatus(userId, code, c.getRemark());
@@ -206,11 +212,14 @@ public class MonitorPoolService {
 	}
 
 	// 所有监听池
-	public List<MonitorPoolTemp> getMonitorPool(long userId) {
+	public List<MonitorPoolTemp> getMonitorPool(long userId, boolean allListing) {
 		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
 		bqb.must(QueryBuilders.matchPhraseQuery("userId", userId));
+		if (allListing) {
+			bqb.must(QueryBuilders.rangeQuery("monitor").gt(0));
+		}
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		queryBuilder = queryBuilder.withQuery(bqb);
@@ -227,7 +236,7 @@ public class MonitorPoolService {
 	}
 
 	public Map<String, MonitorPoolTemp> getMonitorPoolMap() {
-		return getPoolMap(this.getMonitorPool(Constant.MY_ID));
+		return getPoolMap(this.getMonitorPool(Constant.MY_ID, false));
 	}
 
 	public Map<String, MonitorPoolTemp> getPoolMap(List<MonitorPoolTemp> list) {
@@ -361,7 +370,8 @@ public class MonitorPoolService {
 
 	// 完成定增预警
 	public void jobZfDoneWarning() {
-		List<MonitorPoolTemp> list = getList(Constant.MY_ID, "", 0, 0, 0, 1, EsQueryPageUtil.queryPage9999, "", 0, 0, 0);
+		List<MonitorPoolTemp> list = getList(Constant.MY_ID, "", 0, 0, 0, 1, EsQueryPageUtil.queryPage9999, "", 0, 0,
+				0);
 		if (list != null) {
 			int oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));
 			int sysdate = DateUtil.getTodayIntYYYYMMDD();
@@ -429,7 +439,8 @@ public class MonitorPoolService {
 
 	// 买点:地量
 	public void jobBuyLowVolWarning() {
-		List<MonitorPoolTemp> list = getList(Constant.MY_ID, "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 1, 0);
+		List<MonitorPoolTemp> list = getList(Constant.MY_ID, "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 1,
+				0);
 		if (list != null) {
 			StringBuffer sb = new StringBuffer();
 			Integer today = DateUtil.getTodayIntYYYYMMDD();
@@ -455,7 +466,8 @@ public class MonitorPoolService {
 	// 大宗交易
 	public void jobDzjyWarning() {
 		ThreadsUtil.sleepRandomSecBetween15And30();
-		List<MonitorPoolTemp> list = getList(Constant.MY_ID, "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0, 1);
+		List<MonitorPoolTemp> list = getList(Constant.MY_ID, "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0,
+				1);
 		List<String> l = new LinkedList<String>();
 		if (list != null) {
 			Integer today = DateUtil.getTodayIntYYYYMMDD();

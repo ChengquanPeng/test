@@ -15,6 +15,7 @@ import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.StockBasicService;
 import com.stable.service.monitor.MonitorPoolService;
+import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.http.resp.MonitorPoolResp;
@@ -102,8 +103,16 @@ public class MonitorPoolController {
 			String shotPointCheck, HttpServletRequest req) {
 		JsonResult r = new JsonResult();
 		try {
-			monitorPoolService.addMonitor(getUserId(req), code,
-					StringUtils.isNotBlank(monitor) ? Integer.valueOf(monitor) : 0,
+			long userId = getUserId(req);
+			if (Integer.valueOf(monitor) > 0 && userId != Constant.MY_ID) {
+				List<MonitorPoolTemp> tl = monitorPoolService.getMonitorPool(userId, true);
+				if (tl != null && tl.size() > 20) {
+					r.setStatus(JsonResult.FAIL);
+					r.setResult("目前只支持20只股票的监听，后续扩容");
+					return ResponseEntity.ok(r);
+				}
+			}
+			monitorPoolService.addMonitor(userId, code, StringUtils.isNotBlank(monitor) ? Integer.valueOf(monitor) : 0,
 					StringUtils.isNotBlank(realtime) ? Integer.valueOf(realtime) : 0,
 					StringUtils.isNotBlank(offline) ? Integer.valueOf(offline) : 0,
 					StringUtils.isNotBlank(upPrice) ? Double.valueOf(upPrice) : 0,

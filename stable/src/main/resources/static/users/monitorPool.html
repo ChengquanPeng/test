@@ -146,7 +146,14 @@ body {
 										},
 										{
 											field : 'monitorDesc',
-											title : '监听类型'
+											title : '监听类型',
+											formatter : function(value, row,
+													index) {
+												if (row.monitor > 0) {
+													return "已监听";
+												}
+												return "未监听";
+											}
 										},
 										{
 											field : 'remark',
@@ -178,6 +185,10 @@ body {
 												return row.upTodayChange + "/"
 														+ row.downTodayChange;
 											}
+										},
+										{
+											field : 'shotPointCheck',
+											title : '股价起爆点'
 										},
 										{
 											field : 'yearHigh1',
