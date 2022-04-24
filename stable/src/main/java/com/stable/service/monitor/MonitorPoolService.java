@@ -230,7 +230,6 @@ public class MonitorPoolService {
 		if (allListing) {
 			bqb.must(QueryBuilders.rangeQuery("monitor").gt(0));
 		}
-
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		queryBuilder = queryBuilder.withQuery(bqb);
 		if (pageable != null) {

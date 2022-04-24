@@ -151,7 +151,6 @@ public class CodeModelService {
 		// 大牛
 		Map<String, MonitorPoolTemp> poolMap = monitorPoolService.getMonitorPoolMap();
 		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();
-//		int tdate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, 365));
 		// 到期提醒
 		StringBuffer sbc = new StringBuffer();
 		// 公告提醒

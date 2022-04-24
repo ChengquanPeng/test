@@ -62,83 +62,84 @@ body {
 </head>
 <body>
 	<div id="header"></div>
-	<div class="container-fluid">
-		<div class="row col-sm-9 offset-sm-3 col-md-6 offset-md-0 pt-3">
-			<div class="col-lg-9">
-				<div class="input-group">
-					代码：<input type="text" class="form-control" id="code">&nbsp;
-				</div>
-				<div class="input-group">
-					代码名称：<input type="text" class="form-control" id="codeName">&nbsp;
-				</div>
-				<div class="input-group">
-					监听类型：<select id="monitor">
-						<option value="3" selected="selected">人工</option>
-					</select>
-				</div>
-				<div class="input-group">
-					在线监听：<input type="checkbox" id="realtime" name="realtime" />
-				</div>
-				<div class="input-group">
-					离线监听：<input type="checkbox" id="offline" name="offline"
-						checked="checked" />
-				</div>
-				<div class="input-group">
-					股价起爆点：<input type="checkbox" id="shotPointCheck"
-						name="shotPointCheck" />
-				</div>
-				<div class="input-group">
-					高于某涨幅：<input type="text" class="form-control" id="upTodayChange">&nbsp;
-				</div>
-				<div class="input-group">
-					高于某价格：<input type="text" class="form-control" id="upPrice">&nbsp;
-				</div>
-				<div class="input-group">
-					低于某价格：<input type="text" class="form-control" id="downPrice">&nbsp;
-				</div>
-				<div class="input-group">
-					低于某涨幅：<input type="text" class="form-control" id="downTodayChange">&nbsp;
-				</div>
-				<div class="input-group">
-					业绩快报预报：<input type="checkbox" id="ykb" name="ykb" />&nbsp;&nbsp;&nbsp;<span
-						id="ykbDate"></span>
-				</div>
-				<div class="input-group">
-					定增完成：<select id="zfdone">
-						<option value="0">不预警</option>
-						<option value="1">预警</option>
-					</select>
-				</div>
-				<div class="input-group">
-					股东人数变化：<input type="checkbox" id="holderNum" name="holderNum" />&nbsp;&nbsp;&nbsp;<span
-						id="holderNumDate"></span>
-				</div>
-				<div class="input-group">
-					经营现金流净额转正：<input type="checkbox" id="xjl" name="xjl" />
-				</div>
-				<div class="input-group">
-					流动性地量：<input type="text" class="form-control" id="buyLowVol">&nbsp;(多少天交易日?流动性地量)
-				</div>
-				<div class="input-group">
-					大宗交易监听：<input type="checkbox" id="dzjy" name="dzjy" />&nbsp;&nbsp;&nbsp;<span
-						id="dzjyDate"></span>
-				</div>
-				<div class="input-group">
-					备注：
-					<textarea rows="4" cols="50" id="remark" name="remark"></textarea>
-				</div>
-				<div class="input-group">
-					<span class="input-group-btn">
-						<button class="btn btn-default" type="button" id="queryAction"
-							onclick="dianwo()">提交</button>
-					</span>
-				</div>
+	<div class="row col-sm-5 offset-sm-3 col-md-5 offset-md-0 pt-3">
+		<div class="col-lg-9">
+			<div class="input-group">
+				代码：<input type="text" class="form-control" id="code">&nbsp;
+			</div>
+			<div class="input-group">
+				代码名称：<input type="text" class="form-control" id="codeName">&nbsp;
+			</div>
+			<div class="input-group">
+				监听类型：<select id="monitor">
+					<option value="3" selected="selected">人工</option>
+				</select>
+			</div>
+			<div class="input-group">
+				在线监听：<input type="checkbox" id="realtime" name="realtime" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+					style="font-size: 12px; color: gray;">(交易时间9:30-15:30进行监听，满足条件就及时推送)</span>
+			</div>
+			<div class="input-group">
+				离线监听：<input type="checkbox" id="offline" name="offline"
+					checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+					style="font-size: 12px; color: gray;">(当天18:00后，满足条件就推送)</span>
+			</div>
+			<div class="input-group">
+				股价起爆点：<input type="checkbox" id="shotPointCheck"
+					name="shotPointCheck" />
+			</div>
+			<div class="input-group">
+				高于某涨幅：<input type="text" class="form-control" id="upTodayChange">%&nbsp;
+			</div>
+			<div class="input-group">
+				高于某价格：<input type="text" class="form-control" id="upPrice">&nbsp;
+			</div>
+			<div class="input-group">
+				低于某价格：<input type="text" class="form-control" id="downPrice">&nbsp;
+			</div>
+			<div class="input-group">
+				低于某涨幅：<input type="text" class="form-control" id="downTodayChange">%&nbsp;
 			</div>
 
-			<div id="rptList" style="width: 100%; hight: 100%; float: left；">
-				<table class="table table-hover" id="cusTable">
-				</table>
+			<div class="input-group">
+				大宗交易监听：<input type="checkbox" id="dzjy" name="dzjy" />&nbsp;&nbsp;&nbsp;<span
+					id="dzjyDate"></span>
 			</div>
+			<div class="input-group">
+				定增完成：<select id="zfdone">
+					<option value="0">不预警</option>
+					<option value="1">预警</option>
+				</select>
+			</div>
+			<div class="input-group">
+				业绩快报预报：<input type="checkbox" id="ykb" name="ykb" />&nbsp;&nbsp;&nbsp;<span
+					id="ykbDate"></span>
+			</div>
+			<div class="input-group">
+				股东人数变化：<input type="checkbox" id="holderNum" name="holderNum" />&nbsp;&nbsp;&nbsp;<span
+					id="holderNumDate"></span>
+			</div>
+			<div class="input-group">
+				经营现金流净额转正：<input type="checkbox" id="xjl" name="xjl" />
+			</div>
+			<div class="input-group">
+				流动性地量：<input type="text" class="form-control" id="buyLowVol">&nbsp;(多少天交易日缩量?)
+			</div>
+			<div class="input-group">
+				备注：
+				<textarea rows="4" cols="50" id="remark" name="remark"></textarea>
+			</div>
+			<div class="input-group">
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button" id="queryAction"
+						onclick="dianwo()">提交</button>
+				</span>
+			</div>
+		</div>
+
+		<div id="rptList" style="width: 100%; hight: 100%; float: left；">
+			<table class="table table-hover" id="cusTable">
+			</table>
 		</div>
 	</div>
 
