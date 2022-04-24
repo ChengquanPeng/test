@@ -30,20 +30,18 @@ public class CodeModelController {
 	@Autowired
 	private TradeCalService tradeCalService;
 
-	private boolean showMore(HttpServletRequest req) {
-		UserInfo l = (UserInfo) req.getSession().getAttribute(Constant.SESSION_USER);
-		boolean showMore = false;
-		if (l != null && l.getType() == 1) {
-			showMore = true;
-		}
-		return showMore;
-	}
-
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> codemodellist(ModelReq mr, EsQueryPageReq querypage, HttpServletRequest req) {
 		JsonResult r = new JsonResult();
 		try {
-			r.setResult(modelWebService.getListForWeb(mr, querypage, showMore(req)));
+			UserInfo l = (UserInfo) req.getSession().getAttribute(Constant.SESSION_USER);
+			boolean showMore = false;
+			if (l != null && l.getType() == 1) {
+				showMore = true;
+			} else {
+				mr.setPls(-1);
+			}
+			r.setResult(modelWebService.getListForWeb(mr, querypage, showMore, l.getId()));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -81,12 +79,10 @@ public class CodeModelController {
 		JsonResult r = new JsonResult();
 		try {
 			r.setStatus(JsonResult.FAIL);
-			if (showMore(req)) {
-				UserInfo l = (UserInfo) req.getSession().getAttribute(Constant.SESSION_USER);
-				if (l.getId() == Constant.MY_ID) {
-					modelWebService.addPlsManual(Constant.MY_ID, r1);
-					r.setStatus(JsonResult.OK);
-				}
+			UserInfo l = (UserInfo) req.getSession().getAttribute(Constant.SESSION_USER);
+			if (l != null && l.getId() == Constant.MY_ID) {
+				modelWebService.addPlsManual(Constant.MY_ID, r1);
+				r.setStatus(JsonResult.OK);
 			}
 		} catch (Exception e) {
 			r.setStatus(JsonResult.FAIL);
@@ -102,7 +98,12 @@ public class CodeModelController {
 	public ResponseEntity<JsonResult> chips(String code, HttpServletRequest req) {
 		JsonResult r = new JsonResult();
 		try {
-			CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code, showMore(req));
+			UserInfo l = (UserInfo) req.getSession().getAttribute(Constant.SESSION_USER);
+			boolean showMore = false;
+			if (l != null && l.getType() == 1) {
+				showMore = true;
+			}
+			CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code, showMore);
 			r.setResult(cbm);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {

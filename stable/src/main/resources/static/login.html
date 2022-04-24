@@ -66,10 +66,10 @@ body {
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
 					if ("OK" == reData.status) {
-						alert("成功");
+						alert(reData.result);
 						issend = false;
 					} else {
-						alert("失败:" + reData.result);
+						alert(reData.result);
 						issend = false;
 					}
 				},

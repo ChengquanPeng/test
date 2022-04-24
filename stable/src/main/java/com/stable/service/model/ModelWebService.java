@@ -286,20 +286,21 @@ public class ModelWebService {
 			}
 		}
 		resp.setZfjjInfo(sb5.toString());
-		// 备注
-		if (!showMore) {
-			resp.setBuyRea("");// TODO
-		}
 		return resp;
 	}
 
-	public List<CodeBaseModelResp> getListForWeb(ModelReq mr, EsQueryPageReq querypage, boolean showMore) {
+	public List<CodeBaseModelResp> getListForWeb(ModelReq mr, EsQueryPageReq querypage, boolean showMore, long userId) {
 		log.info("CodeBaseModel getListForWeb mr={}", mr);
 		List<CodeBaseModel2> list = getList(mr, querypage);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {
 			for (CodeBaseModel2 dh : list) {
-				res.add(getModelResp(dh, showMore));
+				CodeBaseModelResp resp = getModelResp(dh, showMore);
+				res.add(resp);
+				// 备注
+				if (!showMore) {
+					resp.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, resp.getCode()).getRemark());
+				}
 			}
 		}
 		return res;

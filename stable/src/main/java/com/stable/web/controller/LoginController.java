@@ -65,7 +65,7 @@ public class LoginController {
 				redisUtil.expire(RedisConstant.RDS_LOGIN_ERROR_TIME_ + phone, 1, TimeUnit.HOURS);// 1小时过期
 
 				if (WxPushUtil.pushSystem1(ui.getWxpush(), str + " 动态码")) {
-					r.setResult("动态码已发送，有效期10分钟");
+					r.setResult("动态码已发送，请查看微信消息，有效期10分钟");
 					r.setStatus(JsonResult.OK);
 				} else {
 					r.setResult("动态码发送失败，微信推送id=" + ui.getWxpush());
@@ -110,9 +110,9 @@ public class LoginController {
 			ui.setType(2);
 			ui.setId(Long.valueOf(phone));
 			req.getSession().setAttribute(Constant.SESSION_USER, ui);
-			r.setStatus(JsonResult.OK);
 			redisUtil.del(RedisConstant.RDS_LOGIN_KEY_ + phone);
 			redisUtil.del(RedisConstant.RDS_LOGIN_ERROR_TIME_ + phone);
+			r.setStatus(JsonResult.OK);
 		} else {
 			r.setStatus(JsonResult.FAIL);
 			r.setResult("动态码错误");
