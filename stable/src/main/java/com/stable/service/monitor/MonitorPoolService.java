@@ -3,6 +3,7 @@ package com.stable.service.monitor;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,10 +34,13 @@ import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
+import com.stable.service.UserService;
 import com.stable.service.model.ModelWebService;
+import com.stable.service.model.ShotPointCheck;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
+import com.stable.utils.MonitoringUitl;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.BonusHist;
@@ -45,7 +49,9 @@ import com.stable.vo.bus.Dzjy;
 import com.stable.vo.bus.FenHong;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.MonitorPoolTemp;
+import com.stable.vo.bus.ShotPoint;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
+import com.stable.vo.bus.UserInfo;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
 import com.stable.vo.bus.ZengFaSummary;
@@ -78,6 +84,10 @@ public class MonitorPoolService {
 	private ChipsZfService chipsZfService;
 	@Autowired
 	private ChipsService chipsService;
+	@Autowired
+	private UserService userService;
+	@Autowired
+	private ShotPointCheck shotPointCheck;
 
 	private String getId(long userId, String code) {
 		if (userId < Constant.MY_ID) {
@@ -262,8 +272,7 @@ public class MonitorPoolService {
 	/**
 	 * 监听列表-实时
 	 */
-	// TODO
-	public List<MonitorPoolTemp> getPoolListForMonitor(int realtime, int offline, boolean sort1) {
+	public List<MonitorPoolTemp> getPoolListForMonitor(long userId, int realtime, int offline, boolean sort1) {
 		int pageNum = EsQueryPageUtil.queryPage9999.getPageNum();
 		int size = EsQueryPageUtil.queryPage9999.getPageSize();
 		log.info("queryPage pageNum={},size={}", pageNum, size);
@@ -276,6 +285,9 @@ public class MonitorPoolService {
 		}
 		if (offline > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("offline", 1));
+		}
+		if (userId > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("userId", userId));
 		}
 		if (sort1) {// 熊市开关
 			bqb.mustNot(QueryBuilders.matchPhraseQuery("monitor", MonitorType.SORT1.getCode()));
@@ -370,37 +382,39 @@ public class MonitorPoolService {
 
 	// 完成定增预警
 	public void jobZfDoneWarning() {
-		List<MonitorPoolTemp> list = getList(Constant.MY_ID, "", 0, 0, 0, 1, EsQueryPageUtil.queryPage9999, "", 0, 0,
-				0);
-		if (list != null) {
-			int oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));
-			int sysdate = DateUtil.getTodayIntYYYYMMDD();
-			List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
-			List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
-			List<FenHong> fhl = new LinkedList<FenHong>();
-			List<BonusHist> bhl = new LinkedList<BonusHist>();
-			List<ZengFa> zfl = new LinkedList<ZengFa>();
-			// 抓包
-			for (MonitorPoolTemp mp : list) {
-				thsBonusSpider.dofetchBonusInner(sysdate, mp.getCode(), zfdl, zfsl, fhl, bhl, zfl, 0);
-			}
-			thsBonusSpider.saveAll(zfdl, zfsl, fhl, bhl);
-			// 预警
-			for (MonitorPoolTemp mp : list) {
-				ZengFa zf = chipsZfService.getLastZengFa(mp.getCode(), ZfStatus.ING.getCode());
-				if (!chipsZfService.isZfDateOk(zf, oneYearAgo)) {
-					mp.setZfdone(0);
-					mp.setZfdoneZjh(0);
-					monitorPoolDao.save(mp);
-					WxPushUtil
-							.pushSystem1(stockBasicService.getCodeName2(mp.getCode()) + " 已完成增发,备注:" + mp.getRemark());
-				} else {
-					if (mp.getZfdoneZjh() == 0 && zf != null
-							&& ZfStatus.ZF_ZJHHZ.getDesc().equals(zf.getStatusDesc())) {
-						mp.setZfdoneZjh(1);
+		List<UserInfo> ulist = userService.getUserListForMonitor();
+		for (UserInfo u : ulist) {
+			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 1, EsQueryPageUtil.queryPage9999, "", 0, 0, 0);
+			if (list != null) {
+				int oneYearAgo = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));
+				int sysdate = DateUtil.getTodayIntYYYYMMDD();
+				List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
+				List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
+				List<FenHong> fhl = new LinkedList<FenHong>();
+				List<BonusHist> bhl = new LinkedList<BonusHist>();
+				List<ZengFa> zfl = new LinkedList<ZengFa>();
+				// 抓包
+				for (MonitorPoolTemp mp : list) {
+					thsBonusSpider.dofetchBonusInner(sysdate, mp.getCode(), zfdl, zfsl, fhl, bhl, zfl, 0);
+				}
+				thsBonusSpider.saveAll(zfdl, zfsl, fhl, bhl);
+				// 预警
+				for (MonitorPoolTemp mp : list) {
+					ZengFa zf = chipsZfService.getLastZengFa(mp.getCode(), ZfStatus.ING.getCode());
+					if (!chipsZfService.isZfDateOk(zf, oneYearAgo)) {
+						mp.setZfdone(0);
+						mp.setZfdoneZjh(0);
 						monitorPoolDao.save(mp);
-						WxPushUtil.pushSystem1(
-								stockBasicService.getCodeName2(mp.getCode()) + " 增发已通过证监会核准！ 备注:" + mp.getRemark());
+						WxPushUtil.pushSystem1(u.getWxpush(),
+								stockBasicService.getCodeName2(mp.getCode()) + " 已完成增发,备注:" + mp.getRemark());
+					} else {
+						if (mp.getZfdoneZjh() == 0 && zf != null
+								&& ZfStatus.ZF_ZJHHZ.getDesc().equals(zf.getStatusDesc())) {
+							mp.setZfdoneZjh(1);
+							monitorPoolDao.save(mp);
+							WxPushUtil.pushSystem1(u.getWxpush(),
+									stockBasicService.getCodeName2(mp.getCode()) + " 增发已通过证监会核准！ 备注:" + mp.getRemark());
+						}
 					}
 				}
 			}
@@ -408,86 +422,175 @@ public class MonitorPoolService {
 	}
 
 	// 股东人数预警
-	public List<MonitorPoolTemp> getHolderWarningList() {
-		return getList(Constant.MY_ID, "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 1, 0, 0);
+	public HashSet<String> getListForFetchHolder() {
+		HashSet<String> allf = new HashSet<String>();
+		List<UserInfo> ulist = userService.getUserListForMonitor();
+		for (UserInfo u : ulist) {
+			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 1, 0, 0);
+			if (list != null) {
+				for (MonitorPoolTemp mp : list) {
+					allf.add(mp.getCode());
+				}
+			}
+		}
+		return allf;
 	}
 
 	public void jobHolderWarning() {
 		log.info("股东人数预警");
-		List<MonitorPoolTemp> list = getHolderWarningList();
-		if (list != null) {
-			StringBuffer sb = new StringBuffer();
-			// 预警
-			for (MonitorPoolTemp mp : list) {
-				List<HolderNum> hml = chipsService.getHolderNumList45(mp.getCode());
-				if (hml != null && hml.size() > 1) {
-					HolderNum hn0 = hml.get(0);
-					if (hn0.getDate() >= mp.getHolderNum()) {
-						boolean islow = hml.get(1).getNum() > hn0.getNum();
-						sb.append(stockBasicService.getCodeName2(mp.getCode()) + (islow ? ":下降" : ":上涨"))
-								.append(Constant.DOU_HAO).append(Constant.HTML_LINE);
-						mp.setHolderNum(DateUtil.getTodayIntYYYYMMDD());
-						monitorPoolDao.save(mp);
+		List<UserInfo> ulist = userService.getUserListForMonitor();
+		for (UserInfo u : ulist) {
+			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 1, 0, 0);
+			if (list != null) {
+				StringBuffer sb = new StringBuffer();
+				// 预警
+				for (MonitorPoolTemp mp : list) {
+					List<HolderNum> hml = chipsService.getHolderNumList45(mp.getCode());
+					if (hml != null && hml.size() > 1) {
+						HolderNum hn0 = hml.get(0);
+						if (hn0.getDate() >= mp.getHolderNum()) {
+							boolean islow = hml.get(1).getNum() > hn0.getNum();
+							sb.append(stockBasicService.getCodeName2(mp.getCode()) + (islow ? ":下降" : ":上涨"))
+									.append(Constant.DOU_HAO).append(Constant.HTML_LINE);
+							mp.setHolderNum(DateUtil.getTodayIntYYYYMMDD());
+							monitorPoolDao.save(mp);
+						}
 					}
 				}
-			}
-			if (sb.length() > 0) {
-				WxPushUtil.pushSystem2Html("股东人数:" + sb.toString());
+				if (sb.length() > 0) {
+					WxPushUtil.pushSystem2Html(u.getWxpush(), "股东人数:" + sb.toString());
+				}
 			}
 		}
 	}
 
 	// 买点:地量
 	public void jobBuyLowVolWarning() {
-		List<MonitorPoolTemp> list = getList(Constant.MY_ID, "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 1,
-				0);
-		if (list != null) {
-			StringBuffer sb = new StringBuffer();
-			Integer today = DateUtil.getTodayIntYYYYMMDD();
-			for (MonitorPoolTemp mp : list) {
-				EsQueryPageReq req = new EsQueryPageReq(mp.getBuyLowVol());
-				List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(mp.getCode(), 0,
-						today, req, SortOrder.DESC);
-				TradeHistInfoDaliyNofq tday = l2.get(0);
-				double l = l2.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getVolume)).get()
-						.getVolume();
-				double factor = CurrencyUitl.topPriceN(l, 1.03);
-				if (tday.getVolume() <= factor) {
-					sb.append(stockBasicService.getCodeName2(mp.getCode())).append("->").append(mp.getBuyLowVol())
-							.append("天").append(Constant.HTML_LINE);
+		List<UserInfo> ulist = userService.getUserListForMonitor();
+		for (UserInfo u : ulist) {
+			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 1, 0);
+			if (list != null) {
+				StringBuffer sb = new StringBuffer();
+				Integer today = DateUtil.getTodayIntYYYYMMDD();
+				for (MonitorPoolTemp mp : list) {
+					EsQueryPageReq req = new EsQueryPageReq(mp.getBuyLowVol());
+					List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(mp.getCode(),
+							0, today, req, SortOrder.DESC);
+					TradeHistInfoDaliyNofq tday = l2.get(0);
+					double l = l2.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getVolume)).get()
+							.getVolume();
+					double factor = CurrencyUitl.topPriceN(l, 1.03);
+					if (tday.getVolume() <= factor) {
+						sb.append(stockBasicService.getCodeName2(mp.getCode())).append("->").append(mp.getBuyLowVol())
+								.append("天").append(Constant.HTML_LINE);
+					}
 				}
-			}
-			if (sb.length() > 0) {
-				WxPushUtil.pushSystem2Html("流动性地量:" + sb.toString());
+				if (sb.length() > 0) {
+					WxPushUtil.pushSystem2Html(u.getWxpush(), "流动性地量:" + sb.toString());
+				}
 			}
 		}
 	}
 
 	// 大宗交易
 	public void jobDzjyWarning() {
-		ThreadsUtil.sleepRandomSecBetween15And30();
-		List<MonitorPoolTemp> list = getList(Constant.MY_ID, "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0,
-				1);
-		List<String> l = new LinkedList<String>();
-		if (list != null) {
-			Integer today = DateUtil.getTodayIntYYYYMMDD();
-			for (MonitorPoolTemp mp : list) {
-				Dzjy dzjy = chipsService.getLastDzjy(mp.getCode());
-				if (dzjy.getDate() > mp.getDzjy()) {
-					l.add(mp.getCode());
-					mp.setDzjy(today);
-					monitorPoolDao.save(mp);
+		List<UserInfo> ulist = userService.getUserListForMonitor();
+		for (UserInfo u : ulist) {
+			ThreadsUtil.sleepRandomSecBetween15And30();
+			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0,
+					1);
+			List<String> l = new LinkedList<String>();
+			if (list != null) {
+				Integer today = DateUtil.getTodayIntYYYYMMDD();
+				for (MonitorPoolTemp mp : list) {
+					Dzjy dzjy = chipsService.getLastDzjy(mp.getCode());
+					if (dzjy.getDate() > mp.getDzjy()) {
+						l.add(mp.getCode());
+						mp.setDzjy(today);
+						monitorPoolDao.save(mp);
+					}
 				}
-			}
-			if (l.size() > 0) {
-				StringBuffer sb = new StringBuffer();
-				for (String s : l) {
-					sb.append(stockBasicService.getCodeName2(s)).append(Constant.DOU_HAO);
+				if (l.size() > 0) {
+					StringBuffer sb = new StringBuffer();
+					for (String s : l) {
+						sb.append(stockBasicService.getCodeName2(s)).append(Constant.DOU_HAO);
+					}
+					WxPushUtil.pushSystem1(u.getWxpush(), "关注票的大宗交易:" + sb.toString());
 				}
-				WxPushUtil.pushSystem1("关注票的大宗交易:" + sb.toString());
 			}
 		}
+	}
 
+	// 离线价格监听
+	public void priceChk(List<TradeHistInfoDaliyNofq> listNofq, int tradeDate) {
+		if (listNofq != null && listNofq.size() > 0) {
+			Map<String, TradeHistInfoDaliyNofq> map = this.getPoolMap2(listNofq);
+			List<UserInfo> ulist = userService.getUserListForMonitor();
+			for (UserInfo u : ulist) {
+				List<MonitorPoolTemp> list = this.getPoolListForMonitor(u.getId(), 0, 1, false);
+				if (list != null) {
+					List<String> ZengFaAuto = new LinkedList<String>();
+					List<String> Other = new LinkedList<String>();
+					List<String> bao = new LinkedList<String>();
+
+					for (MonitorPoolTemp cp : list) {
+						if (cp.getDownPrice() <= 0 && cp.getDownTodayChange() <= 0 && cp.getUpPrice() <= 0
+								&& cp.getUpTodayChange() <= 0) {
+							log.info("{} 没有离线价格监听", cp.getCode());
+							continue;
+						}
+						TradeHistInfoDaliyNofq d = map.get(cp.getCode());
+						if (d != null) {
+							if (MonitoringUitl.isOk(cp, d.getTodayChangeRate(), d.getHigh(), d.getLow())) {
+								String s = stockBasicService.getCodeName2(cp.getCode()) + " "
+										+ MonitorType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
+								if (u.getId() == Constant.MY_ID) {// 管理员
+									if (cp.getMonitor() == MonitorType.ZengFaAuto.getCode()) {
+										ZengFaAuto.add(s);
+									} else {
+										Other.add(s);
+									}
+								} else {// 普通用户
+									Other.add(s);
+								}
+							}
+							if (u.getId() == Constant.MY_ID && cp.getShotPointCheck() == 1) {
+								ShotPoint sp = shotPointCheck.check(cp.getCode(), tradeDate, null);
+								if (sp.getResult()) {
+									bao.add(stockBasicService.getCodeName2(cp.getCode()) + " "
+											+ MonitorType.getCode(cp.getMonitor()) + " 疑似点:" + sp.getMsg());
+								}
+							}
+						}
+					}
+					String ends = "";
+					// 起爆点
+					StringBuffer s1 = new StringBuffer();
+					for (String a : bao) {
+						s1.append(a).append(Constant.HTML_LINE);
+					}
+					if (s1.length() > 0) {
+						ends = "起爆点:" + Constant.HTML_LINE + s1.toString() + Constant.HTML_LINE;
+
+					}
+					// 价格
+					StringBuffer s = new StringBuffer();
+					for (String a : Other) {
+						s.append(a).append(Constant.HTML_LINE);
+					}
+					for (String a : ZengFaAuto) {
+						s.append(a).append(Constant.HTML_LINE);
+					}
+					if (s.length() > 0) {
+						ends += "离线价格监听:" + s.toString();
+					}
+					// WxPush
+					if (StringUtils.isNotBlank(ends)) {
+						WxPushUtil.pushSystem2Html(u.getWxpush(), ends);
+					}
+				}
+			}
+		}
 	}
 
 //	/**

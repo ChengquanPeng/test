@@ -1,5 +1,6 @@
 package com.stable.spider.ths;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,7 +30,6 @@ import com.stable.utils.WxPushUtil;
 import com.stable.vo.HolderPercent5;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.HolderPercent;
-import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -59,7 +59,7 @@ public class ThsHolderSpider {
 
 	public synchronized void dofetchHolder(boolean isWeekEnd) {
 		try {
-			List<String> codesw = new LinkedList<String>();
+			Collection<String> codesw = new LinkedList<String>();
 			if (isWeekEnd) {
 				List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 				if (codelist != null) {
@@ -68,12 +68,7 @@ public class ThsHolderSpider {
 					}
 				}
 			} else {
-				List<MonitorPoolTemp> wlist = monitorPoolService.getHolderWarningList();
-				if (wlist != null) {
-					for (MonitorPoolTemp mp : wlist) {
-						codesw.add(mp.getCode());
-					}
-				}
+				codesw = monitorPoolService.getListForFetchHolder();
 			}
 			log.info("codesw size={},isWeekEnd={}", codesw.size(), isWeekEnd);
 			int sysdate = DateUtil.getTodayIntYYYYMMDD();
@@ -100,7 +95,7 @@ public class ThsHolderSpider {
 		log.info(code + " 股东人数/股东研究抓包同花顺已完成");
 	}
 
-	private void dofetchHolderInner(int sysdate, List<String> codesw) {
+	private void dofetchHolderInner(int sysdate, Collection<String> codesw) {
 		if (codesw.size() <= 0) {
 			return;
 		}

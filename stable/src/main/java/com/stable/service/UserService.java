@@ -1,7 +1,9 @@
 package com.stable.service;
 
+import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -15,10 +17,13 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.Constant;
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.Stype;
 import com.stable.es.dao.base.UserAmtLogDao;
 import com.stable.es.dao.base.UserDao;
 import com.stable.utils.DateUtil;
+import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.UserAmtLog;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -36,11 +41,37 @@ public class UserService {
 	@Autowired
 	private UserAmtLogDao userAmtLogDao;
 
+	public List<UserInfo> getUserListForMonitor() {
+		List<UserInfo> r = new LinkedList<UserInfo>();
+		int today = DateUtil.getTodayIntYYYYMMDD();
+		UserInfo q = new UserInfo();
+		q.setS1(today);
+		List<UserInfo> l = this.getList(q, EsQueryPageUtil.queryPage9999);
+		if (l != null) {
+			for (UserInfo u : l) {
+				if (StringUtils.isNotBlank(u.getWxpush())) {
+					r.add(u);
+				}
+			}
+		}
+		UserInfo myid = new UserInfo();
+		myid.setId(Constant.MY_ID);
+		myid.setWxpush(WxPushUtil.myUid);
+		r.add(myid);
+		return r;
+	}
+
 	// 查询
 	public List<UserInfo> getList(UserInfo user, EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (user.getId() > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("id", user.getId()));
+		}
+		if (user.getS1() > 0) {
+			bqb.must(QueryBuilders.rangeQuery("s1").gte(user.getS1()));
+		}
+		if (user.getS2() > 0) {
+			bqb.must(QueryBuilders.rangeQuery("s2").gte(user.getS2()));
 		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("rptDate").unmappedType("integer").order(SortOrder.DESC);
 

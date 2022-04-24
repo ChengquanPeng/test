@@ -18,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
 public class WxPushUtil {
 
 	private static String appToken;
-	private static String myUid;
+	public static String myUid;
 	private static String env;
 	static {
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
@@ -34,6 +34,10 @@ public class WxPushUtil {
 
 	public final static boolean pushSystem1(String uid, String content) {
 		return WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, false, uid, null);
+	}
+
+	public final static void pushSystem2Html(String uid, String content) {
+		WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, true, uid, null);
 	}
 
 	public final static void pushSystem2Html(String content) {

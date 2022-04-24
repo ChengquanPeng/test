@@ -3,7 +3,6 @@ package com.stable.service;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -25,24 +24,20 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.constant.RedisConstant;
-import com.stable.enums.MonitorType;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
 import com.stable.job.MyCallable;
-import com.stable.service.model.ShotPointCheck;
 import com.stable.service.model.prd.TickService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.spider.xq.XqDailyBaseSpider;
 import com.stable.utils.DateUtil;
-import com.stable.utils.MonitoringUitl;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
@@ -51,8 +46,6 @@ import com.stable.utils.TasksWorker2ndRunnable;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
-import com.stable.vo.bus.MonitorPoolTemp;
-import com.stable.vo.bus.ShotPoint;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
@@ -90,8 +83,6 @@ public class DaliyTradeHistroyService {
 	private XqDailyBaseSpider xqDailyBaseSpider;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
-	@Autowired
-	private ShotPointCheck shotPointCheck;
 	@Autowired
 	private TickService tickService;
 
@@ -208,7 +199,7 @@ public class DaliyTradeHistroyService {
 					xqDailyBaseSpider.fetchAll(daliybasicList);
 				}
 				// 离线价格监听
-				priceChk(listNofq, dddd);
+				monitorPoolService.priceChk(listNofq, dddd);
 				monitorPoolService.jobBuyLowVolWarning();
 			}
 			return list.size();
@@ -219,71 +210,6 @@ public class DaliyTradeHistroyService {
 		}
 		return 0;
 
-	}
-
-	// 离线价格监听
-	private void priceChk(List<TradeHistInfoDaliyNofq> listNofq, int tradeDate) {
-		if (listNofq != null && listNofq.size() > 0) {
-			List<MonitorPoolTemp> list = monitorPoolService.getPoolListForMonitor(0, 1, true);
-			if (list != null) {
-				List<String> ZengFaAuto = new LinkedList<String>();
-				List<String> Other = new LinkedList<String>();
-				List<String> bao = new LinkedList<String>();
-
-				Map<String, TradeHistInfoDaliyNofq> map = monitorPoolService.getPoolMap2(listNofq);
-				for (MonitorPoolTemp cp : list) {
-					if (cp.getDownPrice() <= 0 && cp.getDownTodayChange() <= 0 && cp.getUpPrice() <= 0
-							&& cp.getUpTodayChange() <= 0) {
-						log.info("{} 没有离线价格监听", cp.getCode());
-						continue;
-					}
-					TradeHistInfoDaliyNofq d = map.get(cp.getCode());
-					if (d != null) {
-						if (MonitoringUitl.isOk(cp, d.getTodayChangeRate(), d.getHigh(), d.getLow())) {
-							String s = stockBasicService.getCodeName2(cp.getCode()) + " "
-									+ MonitorType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
-							if (cp.getMonitor() == MonitorType.ZengFaAuto.getCode()) {
-								ZengFaAuto.add(s);
-							} else {
-								Other.add(s);
-							}
-						}
-						if (cp.getShotPointCheck() == 1) {
-							ShotPoint sp = shotPointCheck.check(cp.getCode(), tradeDate, null);
-							if (sp.getResult()) {
-								bao.add(stockBasicService.getCodeName2(cp.getCode()) + " "
-										+ MonitorType.getCode(cp.getMonitor()) + " 疑似点:" + sp.getMsg());
-							}
-						}
-					}
-				}
-				String ends = "";
-				// 起爆点
-				StringBuffer s1 = new StringBuffer();
-				for (String a : bao) {
-					s1.append(a).append(Constant.HTML_LINE);
-				}
-				if (s1.length() > 0) {
-					ends = "起爆点:" + Constant.HTML_LINE + s1.toString() + Constant.HTML_LINE;
-
-				}
-				// 价格
-				StringBuffer s = new StringBuffer();
-				for (String a : Other) {
-					s.append(a).append(Constant.HTML_LINE);
-				}
-				for (String a : ZengFaAuto) {
-					s.append(a).append(Constant.HTML_LINE);
-				}
-				if (s.length() > 0) {
-					ends += "离线价格监听:" + s.toString();
-				}
-				// WxPush
-				if (StringUtils.isNotBlank(ends)) {
-					WxPushUtil.pushSystem2Html(ends);
-				}
-			}
-		}
 	}
 
 	// 路由，优先eastmoney

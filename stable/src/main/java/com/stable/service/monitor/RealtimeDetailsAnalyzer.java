@@ -1,17 +1,16 @@
 package com.stable.service.monitor;
 
 import java.util.Date;
+import java.util.List;
 
-import com.stable.enums.MonitorType;
+import com.stable.constant.Constant;
 import com.stable.service.model.ShotPointCheck;
 import com.stable.spider.realtime.RealTime;
 import com.stable.spider.realtime.RealtimeCall;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MonitoringUitl;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.ShotPoint;
-import com.stable.vo.http.resp.CodeBaseModelResp;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -25,49 +24,35 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private String codeName;
 	private boolean isRunning = true;
 	private String today = DateUtil.getTodayYYYYMMDD();
-	private RealtimeDetailsResulter resulter;
-	public MonitorPoolTemp cp;
-	private boolean waitSend = true;
+	public List<RtmVo> cps;
 	private boolean chkCodeClosed = false;
-	private CodeBaseModelResp cbm;
-	public boolean highPriceGot = false;
 	private boolean burstPointCheck = false;// 起爆点
 	private ShotPointCheck shotPointCheck;
+	private RtmVo my;
 
 	public void stop() {
 		isRunning = false;
 	}
 
-	public int init(String code, MonitorPoolTemp cp, RealtimeDetailsResulter resulter, String codeName,
-			CodeBaseModelResp cbm, ShotPointCheck shotPointCheck) {
+	public int init(String code, List<RtmVo> t, String codeName, ShotPointCheck shotPointCheck) {
 		this.code = code;
 		this.codeName = codeName;
-		this.resulter = resulter;
-		this.cp = cp;
-		if (cp.getDownPrice() <= 0 && cp.getDownTodayChange() <= 0 && cp.getUpPrice() <= 0
-				&& cp.getUpTodayChange() <= 0) {
-			log.info("{} {} 没有在线价格监听", code, codeName);
-			return 0;
-		}
+		this.shotPointCheck = shotPointCheck;
+		this.cps = t;
 		RealTime srt = RealtimeCall.get(code);
 		if (srt.getOpen() == 0.0 && srt.getBuy1() == 0.0 && srt.getSell1() == 0.0) {
 			log.info("{} {} SINA 今日疑似停牌或者可能没有集合竞价", code, codeName);
-			// WxPushUtil.pushSystem1(code + " " + codeName + "今日疑似停牌或者可能没有集合竞价");
 			chkCodeClosed = true;
 		}
-		this.cbm = cbm;
-		this.shotPointCheck = shotPointCheck;
 		return 1;
 	}
 
 	public void run() {
-		String msg = "";
-		msg += MonitorType.getCodeName(cp.getMonitor()) + "!" + cp.getRemark();
-		if (cbm.getPls() == 1) {
-			msg += " " + cbm.getZfjjInfo();
+		for (RtmVo rv : cps) {
+			if (rv.getOrig().getUserId() == Constant.MY_ID) {
+				my = rv;
+			}
 		}
-		msg += " " + cp.getMsg();
-
 		if (chkCodeClosed) {// 重新检测停牌
 			try {
 				Thread.sleep(TEN_MIN);
@@ -76,8 +61,10 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			}
 			RealTime srt = RealtimeCall.get(code);
 			if (srt.getOpen() == 0.0) {
-				log.info("{} {} SINA 今日停牌,{}", code, codeName, msg);
-				WxPushUtil.pushSystem1(code + " " + codeName + "今日停牌:" + msg);
+				log.info("{} {} SINA 今日停牌,{}", code, codeName);
+				for (RtmVo rv : cps) {
+					WxPushUtil.pushSystem1(rv.getWxpush(), codeName + "今日停牌:" + rv.getMsg());
+				}
 				return;
 			}
 		}
@@ -88,13 +75,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		long d1450 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
 				DateUtil.parseDate(today + "145000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 
-		RealtimeMsg rm = new RealtimeMsg();
-		rm.setCode(code);
-		rm.setCodeName(codeName);
-		rm.setMsg(msg);
 		String smsg = null;
 		while (isRunning) {
-			smsg = null;
 			try {
 				long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
 				if (d1130 <= now && now <= d1300) {
@@ -107,40 +89,43 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				}
 
 				RealTime rt = RealtimeCall.get(code);
-				boolean isOk = MonitoringUitl.isOkForRt(cp, rt);
-				if (isOk) {
-					rm.tiggerMessage();
-					resulter.addBuyMessage(code, rm);
-					if (waitSend) {
-						smsg = rm.getMsg();
-						// WxPushUtil.pushSystem1(code + " " + codeName + " " + rm.getMsg());
-						waitSend = false;
-					}
-				}
-				if (cp.getYearHigh1() > 0 && rt.getHigh() > cp.getYearHigh1() && !highPriceGot) {
-					// WxPushUtil.pushSystem1(codeName + "(" + code + ") 一年新高! 备注:" +
-					// cp.getRemark());
-					if (smsg == null) {
-						smsg = " 一年新高! 备注:" + cp.getRemark();
-					} else {
-						smsg += "一年新高! " + smsg;
-					}
-					highPriceGot = true;
-				}
-				if (now > d1450) {
-					WAIT_MIN = ONE_MIN;
-					if (!burstPointCheck && cp.getShotPointCheck() == 1) {
-						burstPointCheck = true;
-						ShotPoint sp = shotPointCheck.check(code, 0, rt);
-						if (sp.getResult()) {
-							// WxPushUtil.pushSystem1(codeName + "(" + code + ") 疑似起爆:" + sp.getMsg());
-							smsg += "疑似起爆:" + sp.getMsg() + smsg;
+				for (RtmVo rv : cps) {
+					smsg = "";
+					// 正常价格监听
+					boolean isOk = MonitoringUitl.isOkForRt(rv.getOrig(), rt);
+					if (isOk) {
+						if (rv.waitSend) {
+							smsg = rv.getMsg();
+							rv.waitSend = false;
 						}
 					}
+					// 一年新高
+					if (rv.getOrig().getYearHigh1() > 0 && rt.getHigh() > rv.getOrig().getYearHigh1()
+							&& !rv.highPriceGot) {
+						if (smsg == null) {
+							smsg = " 一年新高! 备注:" + rv.getOrig().getRemark();
+						} else {
+							smsg += "一年新高! " + smsg;
+						}
+						rv.highPriceGot = true;
+					}
+					// 起爆点
+					if (my != null && now > d1450) {
+						WAIT_MIN = ONE_MIN;
+						if (!burstPointCheck && my.getOrig().getShotPointCheck() == 1) {
+							burstPointCheck = true;
+							ShotPoint sp = shotPointCheck.check(code, 0, rt);
+							if (sp.getResult()) {
+								smsg += "疑似起爆:" + sp.getMsg() + smsg;
+							}
+						}
+					}
+					// 发送
+					if (!smsg.equals("")) {
+						WxPushUtil.pushSystem1(codeName + "(" + code + ") " + smsg);
+					}
 				}
-				if (smsg != null) {
-					WxPushUtil.pushSystem1(codeName + "(" + code + ") " + smsg);
-				}
+
 				Thread.sleep(WAIT_MIN);
 			} catch (Exception e) {
 				if (!isPushedException) {
@@ -155,13 +140,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				}
 			}
 		}
-		// 监听完成，修改监听信息：
-		// 1.监听买入:监听状态
-		// 2.已买入-卖出:持有天数等待，是否完成卖出
-//		long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
-//		if ((now > d1450)) {
-//			finTodayMoni();
-//		}
 	}
 
 	private boolean isPushedException = false;

@@ -1,6 +1,7 @@
 package com.stable.service.monitor;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
+import com.stable.service.UserService;
 import com.stable.service.model.ModelWebService;
 import com.stable.service.model.ShotPointCheck;
 import com.stable.service.model.prd.Prd1RealtimeMonitor;
@@ -22,6 +24,7 @@ import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.OnlineTesting;
+import com.stable.vo.bus.UserInfo;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -46,6 +49,8 @@ public class RealtimeMonitoringService {
 	private TickService tickService;
 	@Autowired
 	private RedisUtil redisUtil;
+	@Autowired
+	private UserService userService;
 
 	public synchronized void startObservable() {
 		String date = DateUtil.getTodayYYYYMMDD();
@@ -65,29 +70,42 @@ public class RealtimeMonitoringService {
 
 		try {
 			// 获取监听列表-常规
-			List<MonitorPoolTemp> allCode = monitorPoolService.getPoolListForMonitor(1, 0, getMonisort1());
+			List<RtmVo> listall = new LinkedList<RtmVo>();
+			List<UserInfo> ulist = userService.getUserListForMonitor();
+			HashMap<String, List<RtmVo>> allmap = new HashMap<String, List<RtmVo>>();
+			for (UserInfo u : ulist) {
+				List<MonitorPoolTemp> tl = monitorPoolService.getPoolListForMonitor(u.getId(), 1, 0, getMonisort1());
+				if (tl != null) {
+					for (MonitorPoolTemp t : tl) {
+						if (t.getDownPrice() <= 0 && t.getDownTodayChange() <= 0 && t.getUpPrice() <= 0
+								&& t.getUpTodayChange() <= 0) {
+							log.info("{} {} 没有在线价格监听", t.getUserId(), t.getCode());
+							continue;
+						}
+						List<RtmVo> ml = allmap.get(t.getCode());
+						if (ml == null) {
+							ml = new LinkedList<RtmVo>();
+						}
+						RtmVo rv = new RtmVo(t, modelWebService.getLastOneByCodeResp(t.getCode(), true));
+						rv.setWxpush(u.getWxpush());
+						ml.add(rv);
+						allmap.put(t.getCode(), ml);
+						listall.add(rv);
+					}
+				}
+			}
 
 			List<RealtimeDetailsAnalyzer> list = new LinkedList<RealtimeDetailsAnalyzer>();
 			RealtimeDetailsResulter resulter = new RealtimeDetailsResulter();
 
 			int failtt = 0;
-			if (allCode.size() > 0) {
+			if (allmap.size() > 0) {
 				// ====启动监听线程====
 				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
-				for (MonitorPoolTemp cp : allCode) {
-					String code = cp.getCode();
-//					if (cp.getMonitor() == MonitorType.ZengFaAuto.getCode()) {
-//						log.info(code + " ZengFaAuto continue");
-//						continue;
-//					}
-//					if (cp.getMonitor() != MonitorType.MANUAL.getCode()) {
-//						log.info(code + " not -MANUAL continue");
-//						continue;
-//					}
+				for (String code : allmap.keySet()) {
 					log.info(code);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
-					int r = task.init(code, cp, resulter, stockBasicService.getCodeName2(code),
-							modelWebService.getLastOneByCodeResp(code, true), shotPointCheck);
+					int r = task.init(code, allmap.get(code), stockBasicService.getCodeName2(code), shotPointCheck);
 					if (r == 1) {
 						new Thread(task).start();
 						list.add(task);
@@ -104,7 +122,7 @@ public class RealtimeMonitoringService {
 					new Thread(resulter).start();
 				}
 			}
-			WxPushUtil.pushSystem1("实时监听，监听总数:[" + allCode.size() + "],牛熊环境开启:[" + getMonisort1() + "],短线实际总数["
+			WxPushUtil.pushSystem1("实时监听，监听总数:[" + allmap.size() + "],牛熊环境开启:[" + getMonisort1() + "],短线实际总数["
 					+ list.size() + "],监听失败[" + failtt + "]");
 
 			// ====产品1：三五天 => 买点 === 卖点 ====
@@ -122,18 +140,17 @@ public class RealtimeMonitoringService {
 			// 到点停止所有线程
 			for (RealtimeDetailsAnalyzer t : list) {
 				t.stop();
-//				if (t.getBuyed() != null) {
-//					buyedList.add(t.getBuyed());
-//				}
-//				if (t.getSelled() != null) {
-//					selledList.add(t.getSelled());
-//				}
-				if (t.highPriceGot) {
-					MonitorPoolTemp mpt = monitorPoolService.getMonitorPoolById(t.cp.getUserId(), t.code);
+			}
+			// 充值新高
+			for (RtmVo rv : listall) {
+				if (rv.highPriceGot) {
+					MonitorPoolTemp mpt = monitorPoolService.getMonitorPoolById(rv.getOrig().getUserId(),
+							rv.getOrig().getCode());
 					mpt.setYearHigh1(0.0);
 					monitorPoolService.saveOrUpdate(mpt);
 				}
 			}
+
 			// 停止线程
 			prd1m.stop();
 			// OnlineTesting -> 转换持仓量:可卖=vol，今日买归0
@@ -146,9 +163,6 @@ public class RealtimeMonitoringService {
 					prd1Service.saveTesting(p1);
 				}
 			}
-
-//			WxPushUtil.pushSystem2Html("交易日结束监听!");
-			// sendEndMessaget(buyedList, selledList);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -165,6 +179,7 @@ public class RealtimeMonitoringService {
 		}
 	}
 
+	// TODO
 	private boolean getMonisort1() {
 		return redisUtil.get("moni.sort1", 1) == 1;
 	}
