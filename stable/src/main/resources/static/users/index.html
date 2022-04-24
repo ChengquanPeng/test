@@ -238,9 +238,6 @@
 												v += "<br/><a target='_blank' href='/web/chips/reduce/list?code="
 														+ row.code
 														+ "'>减持历史=></a>"
-												if (row.shooting3 == 1) {
-													v += "<br/><a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资融券=></a>";
-												}
 												return v;
 											}
 										},
@@ -250,7 +247,7 @@
 										},
 										{
 											field : 'a',
-											title : '人工',
+											title : '操作',
 											formatter : function(value, row,
 													index) {
 												return "<a target='_blank' href='/web/"

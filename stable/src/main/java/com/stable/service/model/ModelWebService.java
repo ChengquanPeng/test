@@ -300,6 +300,15 @@ public class ModelWebService {
 				// 备注
 				if (!showMore) {
 					resp.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, resp.getCode()).getRemark());
+					resp.setShooting1(0);
+					resp.setShooting2(0);
+					resp.setShooting3(0);
+					resp.setShooting4(0);
+					resp.setShooting5(0);
+					resp.setShooting6(0);
+					resp.setShooting8(0);
+					resp.setShooting9(0);
+					resp.setReducZb(0);
 				}
 			}
 		}
