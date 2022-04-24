@@ -54,7 +54,7 @@ public class LoginController {
 		UserInfo ui = userService.getListById(Long.valueOf(phone));
 		if (ui == null || ui.getS1() < DateUtil.getTodayIntYYYYMMDD()) {
 			r.setStatus(JsonResult.FAIL);
-			r.setResult("请联系管理员进行服务续约,抖音id=xxx");
+			r.setResult("请联系管理员进行服务续约,抖音号：wudao_shunfeng 悟个p道，微信号：chengquan0755");
 		} else {
 			if (StringUtils.isNotBlank(ui.getWxpush())) {
 				String str = MathUtil.getRandomLengthStr4();
@@ -73,7 +73,7 @@ public class LoginController {
 				}
 
 			} else {
-				r.setResult("请联系管理员设置微信推送id");
+				r.setResult("请联系管理员设置微信推送id,(抖音号：wudao_shunfeng 悟个p道，微信号：chengquan0755)");
 				r.setStatus(JsonResult.FAIL);
 			}
 		}
