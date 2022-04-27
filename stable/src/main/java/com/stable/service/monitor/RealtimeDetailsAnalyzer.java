@@ -122,7 +122,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					}
 					// 发送
 					if (!smsg.equals("")) {
-						WxPushUtil.pushSystem1(codeName + "(" + code + ") " + smsg);
+						WxPushUtil.pushSystem1(rv.getWxpush(), codeName + "(" + code + ") " + smsg);
 					}
 				}
 

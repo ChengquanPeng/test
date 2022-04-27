@@ -29,36 +29,35 @@ public class WxPushUtil {
 	}
 
 	public final static void pushSystem1(String content) {
-		WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, true, null, null);
+		WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, myUid);
 	}
 
 	public final static boolean pushSystem1(String uid, String content) {
-		return WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, false, uid, null);
+		return WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, uid);
 	}
 
-	public final static void pushSystem2Html(String uid, String content) {
-		WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, true, uid, null);
+	public final static boolean pushSystem2Html(String uid, String content) {
+		return WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, uid);
 	}
 
 	public final static void pushSystem2Html(String content) {
-		WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, true, null, null);
+		WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, myUid);
 	}
 
-	private final static boolean pushMsg(int contentType, String content, boolean isMyId, String singleId,
-			Set<String> uids) {
+	private final static boolean pushMsg(int contentType, String content, String singleId) {
+		return pushMsg(contentType, content, singleId, null);
+	}
+
+	private final static boolean pushMsg(int contentType, String content, String singleId, Set<String> uids) {
 		try {
 			Message message = new Message();
 			message.setAppToken(appToken);
 			message.setContentType(contentType);
 			message.setContent(content + env + DateUtil.getTodayYYYYMMDDHHMMSS());
-			if (isMyId) {
-				message.setUid(myUid);
+			if (StringUtils.isNotBlank(singleId)) {
+				message.setUid(singleId);
 			} else {
-				if (StringUtils.isNotBlank(singleId)) {
-					message.setUid(singleId);
-				} else {
-					message.setUids(uids);
-				}
+				message.setUids(uids);
 			}
 			message.setUrl(null);
 			Result<List<MessageResult>> result = WxPusher.send(message);
