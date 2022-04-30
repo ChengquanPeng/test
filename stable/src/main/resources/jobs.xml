@@ -20,58 +20,62 @@
 	<job:simple id="SysStatusJob"
 		class="com.stable.job.SysStatusJob" registry-center-ref="regCenter"
 		cron="0 0/30 * * * ?" sharding-item-parameters="0=a"
-		description="系统状态检查和重启" sharding-total-count="1" overwrite="true" />
+		description="每30分钟(系统状态检查和重启)" sharding-total-count="1"
+		overwrite="true" />
 
 	<!-- 每天表达式cron="0 15 4 * * ?" -->
 	<job:simple id="RealtimeJob"
 		class="com.stable.job.RealtimeJob" registry-center-ref="regCenter"
 		cron="0 26 9 ? * 2,3,4,5,6 *" sharding-item-parameters="0=a"
-		description="每日9点26执行任务(实时)" sharding-total-count="1" overwrite="true" />
+		description="每周一到周五9点26(实时价格监听)" sharding-total-count="1"
+		overwrite="true" />
 
 	<job:simple id="EveryWorkingDayJobThsGn"
 		class="com.stable.job.EveryWorkingDayJobThsGn"
 		registry-center-ref="regCenter" cron="0 05 16 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日16点05执行任务(同花顺概念)"
+		sharding-item-parameters="0=a" description="每周一到周五16点05(同花顺概念)"
 		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryWorkingDayJob"
 		class="com.stable.job.EveryWorkingDayJob"
 		registry-center-ref="regCenter" cron="0 01 18 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每日晚上18点01执行任务-每日指标-模型"
-		sharding-total-count="1" overwrite="true" />
-
-	<job:simple id="RzrqJob" class="com.stable.job.RzrqJob"
-		registry-center-ref="regCenter" cron="0 05 9 ? * * *"
-		sharding-item-parameters="0=a" description="每日晚上09点05执行任务(融资融券T+1更新)"
+		sharding-item-parameters="0=a" description="每周一到周五18点01(股票列表-日K-分时)"
 		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryDayJob"
 		class="com.stable.job.EveryDayJob" registry-center-ref="regCenter"
 		cron="0 05 23 ? * * *" sharding-item-parameters="0=a"
-		description="每日晚上23点05执行任务(回购公告、分红除权公告)" sharding-total-count="1"
-		overwrite="true" />
+		description="每日晚上23点05执行任务(快预报,定增完成,质押,国企,公告,大宗,模型)"
+		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryDayMorningJob"
 		class="com.stable.job.EveryDayMorningJob"
 		registry-center-ref="regCenter" cron="0 05 1 ? * * *"
-		sharding-item-parameters="0=a" description="每日凌晨01点05执行每日任务"
+		sharding-item-parameters="0=a"
+		description="每日凌晨01点05(分红,股东人数,公司资料,外资持股,增发,分紅,主营)"
+		sharding-total-count="1" overwrite="true" />
+
+	<job:simple id="RzrqJob" class="com.stable.job.RzrqJob"
+		registry-center-ref="regCenter" cron="0 05 9 ? * * *"
+		sharding-item-parameters="0=a" description="次日09点05(融资融券T+1)"
 		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryWeekMonJob"
 		class="com.stable.job.EveryWeekMonJob" registry-center-ref="regCenter"
 		cron="0 15 13 ? * SUN" sharding-item-parameters="0=a"
-		description="周日下午13点15执行任务（质押-回购-业绩-模型）" sharding-total-count="1"
+		description="周日下午13点15执行任务(质押-回购-业绩-模型)" sharding-total-count="1"
 		overwrite="true" />
 
 	<job:simple id="EveryMonthJob"
 		class="com.stable.job.EveryMonthJob" registry-center-ref="regCenter"
 		cron="1 5 7 1 * ?" sharding-item-parameters="0=a"
-		description="每月1日7时执行（日历同步）" sharding-total-count="1" overwrite="true" />
+		description="每月1日7时(日历同步-每月)" sharding-total-count="1"
+		overwrite="true" />
 
 	<job:simple id="EveryMonthJobOtherTime"
 		class="com.stable.job.EveryMonthJobOtherTime"
 		registry-center-ref="regCenter" cron="1 5 10 1 * ?"
-		sharding-item-parameters="0=a" description="每月1日10时执行（融资融券）"
+		sharding-item-parameters="0=a" description="每月1日10时(融资融券-每月)"
 		sharding-total-count="1" overwrite="true" />
 
 

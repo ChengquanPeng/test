@@ -38,40 +38,44 @@ public class ThsPlateSpider {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				try {
-					List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
-					int needUpd = 0;
-					int upded = 0;
-					int c = 0;
-					for (StockBaseInfo b : list) {
-						boolean updateCache = false;
-						if (updateAll || StringUtils.isBlank(b.getThsLightspot())
-								|| StringUtils.isBlank(b.getThsMainBiz())) {
-							needUpd++;
-							if (dofetch(b)) {
-								updateCache = true;
-							}
-						}
-						if (updateAll) {
-							eastmoneyCompanySpider.getCompanyInfo(b);
-						}
-						if (updateAll || updateCache) {
-							stockBasicService.synBaseStockInfo(b, true);
-							upded++;
-						}
-						c++;
-						log.info("current index:{}", c);
-					}
-					if (needUpd > 0 && needUpd != upded) {
-						WxPushUtil.pushSystem1("同花顺-亮点，主营-抓包不完整，需要更新数={" + needUpd + "},实际更新数={" + upded + "}");
-					}
-					log.info("同花顺-亮点，主营,东方财富曾用名，网站完成");
-				} catch (Exception e) {
-					e.printStackTrace();
-					WxPushUtil.pushSystem1("同花顺-亮点，主营-抓包出错");
-				}
+				processing(updateAll);
 			}
 		}).start();
+	}
+
+	private synchronized void processing(boolean updateAll) {
+		try {
+			List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
+			int needUpd = 0;
+			int upded = 0;
+			int c = 0;
+			for (StockBaseInfo b : list) {
+				boolean updateCache = false;
+				if (updateAll || StringUtils.isBlank(b.getThsLightspot()) || StringUtils.isBlank(b.getThsMainBiz())) {
+					needUpd++;
+					if (dofetch(b)) {
+						updateCache = true;
+					}
+				}
+				if (updateAll) {
+					eastmoneyCompanySpider.getCompanyInfo(b);
+				}
+				if (updateAll || updateCache) {
+					stockBasicService.synBaseStockInfo(b, true);
+					upded++;
+				}
+				c++;
+				log.info("current index:{}", c);
+			}
+			if (needUpd > 0 && needUpd != upded) {
+				WxPushUtil.pushSystem1("同花顺-亮点，主营-抓包不完整，需要更新数={" + needUpd + "},实际更新数={" + upded + "}");
+			}
+			log.info("同花顺-亮点，主营,东方财富曾用名，网站完成");
+		} catch (Exception e) {
+			e.printStackTrace();
+			WxPushUtil.pushSystem1("同花顺-亮点，主营-抓包出错");
+		}
+
 	}
 
 	private boolean dofetch(StockBaseInfo b) {

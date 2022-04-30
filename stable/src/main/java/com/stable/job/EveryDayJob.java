@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.service.ChipsZfService;
+import com.stable.service.FinanceService;
 import com.stable.service.TradeCalService;
 import com.stable.service.ZhiYaService;
 import com.stable.service.model.CodeModelService;
@@ -46,20 +47,22 @@ public class EveryDayJob extends MySimpleJob {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private ThsEventSpider thsEventSpider;
+	@Autowired
+	private FinanceService financeService;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
+		log.info("2.快预报");
+		financeService.jobSpiderKuaiYuBao();
 		log.info("定增完成预警公告");
 		monitorPoolService.jobZfDoneWarning();
 		log.info("定增扩展属性");
 		chipsZfService.jobZengFaExt(true);
 		log.info("无效概念清除");
 		thsSpider.deleteInvaildCodeConcept();
-		log.info("交易所公告");
-//		jysSpider.byJob();
 //		log.info("过期文件的删除");
 //		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 //		FileDeleteUitl.deletePastDateFile(efc.getModelImageFloder());
