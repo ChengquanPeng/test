@@ -126,6 +126,9 @@ body {
 				流动性地量：<input type="text" class="form-control" id="buyLowVol">&nbsp;(多少天交易日缩量?)
 			</div>
 			<div class="input-group">
+				监听公告：<input type="checkbox" id="listenerGg" name="listenerGg" />
+			</div>
+			<div class="input-group">
 				备注：
 				<textarea rows="4" cols="50" id="remark" name="remark"></textarea>
 			</div>
@@ -188,6 +191,11 @@ body {
 			if (document.getElementById("ykb").checked) {
 				ykb = 1;
 			}
+			var listenerGg = 0
+			if (document.getElementById("listenerGg").checked) {
+				listenerGg = 1;
+			}
+
 			var shotPointCheck = 0
 			if (document.getElementById("shotPointCheck").checked) {
 				shotPointCheck = 1;
@@ -208,6 +216,7 @@ body {
 					upTodayChange : $('#upTodayChange').val(),
 					ykb : ykb,
 					xjl : xjl,
+					listenerGg : listenerGg,
 					holderNum : holderNum,
 					dzjy : dzjy,
 					buyLowVol : $('#buyLowVol').val(),
@@ -244,6 +253,9 @@ body {
 				}
 				if (reData.result.offline == 1) {
 					$('#offline').attr("checked", 'checked');
+				}
+				if (reData.result.listenerGg == 1) {
+					$('#listenerGg').attr("checked", 'checked');
 				}
 				if (reData.result.xjl == 1) {
 					$('#xjl').attr("checked", 'checked');
