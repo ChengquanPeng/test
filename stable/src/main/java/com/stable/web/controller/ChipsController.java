@@ -16,6 +16,7 @@ import com.stable.service.ChipsDzjyService;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.ReducingHoldingSharesService;
+import com.stable.service.StockBasicService;
 import com.stable.spider.eastmoney.JiejinSpider;
 import com.stable.spider.igoodstock.IgoodstockSpider;
 import com.stable.spider.ths.ThsBonusSpider;
@@ -44,6 +45,8 @@ public class ChipsController {
 	private ChipsDzjyService chipsDzjyService;
 	@Autowired
 	private ReducingHoldingSharesService reducingHoldingSharesService;
+	@Autowired
+	private StockBasicService stockBasicService;
 
 	@RequestMapping(value = "/reduce/list", method = RequestMethod.GET)
 	public void holdernumlist(String code, HttpServletResponse response) {
@@ -53,7 +56,8 @@ public class ChipsController {
 			PrintWriter w = response.getWriter();
 			List<ReducingHoldingShares> list = reducingHoldingSharesService.getLastStat(code);
 			if (list != null && list.size() > 0) {
-				w.write(code + "<table><tr><td width='6%'>日期</td><td width='6%'>股数(万股)</td><td>描述</td><tr/>");
+				w.write(stockBasicService.getCodeName2(code)
+						+ "<br/><table><tr><td width='6%'>日期</td><td width='6%'>股数(万股)</td><td>描述</td><tr/>");
 				for (ReducingHoldingShares row : list) {
 					w.write("<tr><td>" + row.getDate() + "</td><td>" + row.getWg() + "</td><td>" + row.getDesc()
 							+ "</td><tr/>");

@@ -41,7 +41,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		this.cps = t;
 		RealTime srt = RealtimeCall.get(code);
 		if (srt.getOpen() == 0.0 && srt.getBuy1() == 0.0 && srt.getSell1() == 0.0) {
-			log.info("{} {} SINA 今日疑似停牌或者可能没有集合竞价", code, codeName);
+			log.info("{}  SINA 今日疑似停牌或者可能没有集合竞价", codeName);
 			chkCodeClosed = true;
 		}
 		return 1;
@@ -61,7 +61,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			}
 			RealTime srt = RealtimeCall.get(code);
 			if (srt.getOpen() == 0.0) {
-				log.info("{} {} SINA 今日停牌,{}", code, codeName);
+				log.info("SINA 今日停牌,{}", codeName);
 				for (RtmVo rv : cps) {
 					WxPushUtil.pushSystem1(rv.getWxpush(), codeName + "今日停牌:" + rv.getMsg());
 				}
@@ -122,7 +122,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					}
 					// 发送
 					if (!smsg.equals("")) {
-						WxPushUtil.pushSystem1(rv.getWxpush(), codeName + "(" + code + ") " + smsg);
+						WxPushUtil.pushSystem1(rv.getWxpush(), codeName + " " + smsg);
 					}
 				}
 
