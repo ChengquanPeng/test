@@ -83,6 +83,8 @@ public class EveryDayJob extends MySimpleJob {
 		if (calweek == Calendar.WEDNESDAY) {// 每周3
 			thsEventSpider.byWeb();
 		}
+		log.info("最新公告");
+		monitorPoolService.listenerGg(date);
 		if (!tradeCalService.isOpen(date)) {
 			return;
 		}

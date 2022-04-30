@@ -38,6 +38,7 @@ import com.stable.service.StockBasicService;
 import com.stable.service.UserService;
 import com.stable.service.model.ModelWebService;
 import com.stable.service.model.ShotPointCheck;
+import com.stable.spider.ths.ThsAnnSpider;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -329,11 +330,12 @@ public class MonitorPoolService {
 	public List<MonitorPoolTemp> getList(long userId, String code, int monitor, int monitoreq, int ykb, int zfdone,
 			EsQueryPageReq querypage, String aliasCode, int holderNum, int buyLowVol, int xjl) {
 		return getList(userId, code, monitor, monitoreq, ykb, zfdone, querypage, aliasCode, holderNum, buyLowVol, xjl,
-				0);
+				0, 0);
 	}
 
 	public List<MonitorPoolTemp> getList(long userId, String code, int monitor, int monitoreq, int ykb, int zfdone,
-			EsQueryPageReq querypage, String aliasCode, int holderNum, int buyLowVol, int xjl, int dzjy) {
+			EsQueryPageReq querypage, String aliasCode, int holderNum, int buyLowVol, int xjl, int dzjy,
+			int listenerGg) {
 		if (userId < Constant.MY_ID) {
 			throw new RuntimeException("错误的userId");
 		}
@@ -370,6 +372,9 @@ public class MonitorPoolService {
 		}
 		if (dzjy > 0) {
 			bqb.must(QueryBuilders.rangeQuery("dzjy").gt(0));
+		}
+		if (listenerGg > 0) {
+			bqb.must(QueryBuilders.rangeQuery("listenerGg").gt(0));
 		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort("updateDate").unmappedType("integer").order(SortOrder.DESC);
@@ -425,6 +430,29 @@ public class MonitorPoolService {
 				}
 			}
 		}
+	}
+
+	// 公告监听
+	public HashSet<String> listenerGg(int tradeDate) {
+		HashSet<String> allf = new HashSet<String>();
+		List<UserInfo> ulist = userService.getUserListForMonitor();
+		for (UserInfo u : ulist) {
+			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0,
+					0, 1);
+			if (list != null) {
+				// 公告提醒
+				StringBuffer annc = new StringBuffer();
+				for (MonitorPoolTemp mp : list) {
+					if (ThsAnnSpider.getLastAnn(mp.getCode()) > tradeDate) {
+						annc.append(stockBasicService.getCodeName2(mp.getCode())).append(",");
+					}
+				}
+				if (annc.length() > 0) {
+					WxPushUtil.pushSystem1("最新公告:" + annc.toString());
+				}
+			}
+		}
+		return allf;
 	}
 
 	// 股东人数预警
@@ -504,7 +532,7 @@ public class MonitorPoolService {
 		for (UserInfo u : ulist) {
 			ThreadsUtil.sleepRandomSecBetween15And30();
 			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0,
-					1);
+					1, 0);
 			List<String> l = new LinkedList<String>();
 			if (list != null) {
 				Integer today = DateUtil.getTodayIntYYYYMMDD();
