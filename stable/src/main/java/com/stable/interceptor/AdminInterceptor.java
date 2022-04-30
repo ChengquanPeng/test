@@ -13,7 +13,7 @@ import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.JsonResult;
 
 @Component
-public class MangerInterceptor implements HandlerInterceptor {
+public class AdminInterceptor implements HandlerInterceptor {
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -36,7 +36,7 @@ public class MangerInterceptor implements HandlerInterceptor {
 		} else {
 			try {
 				UserInfo ui = (UserInfo) user;
-				if (ui.getId() == Constant.MY_ID) {// 本人ID
+				if (ui.getType() == 1) {// 管理员
 					return true;
 				}
 			} catch (Exception e) {

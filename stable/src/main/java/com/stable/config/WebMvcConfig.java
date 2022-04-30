@@ -18,6 +18,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stable.interceptor.AdminInterceptor;
 import com.stable.interceptor.LoginInterceptor;
 import com.stable.interceptor.MangerInterceptor;
 import com.stable.utils.DateUtil;
@@ -27,7 +28,6 @@ import com.stable.utils.MyBeanSerializerModifier;
 public class WebMvcConfig implements WebMvcConfigurer {
 
 	static List<String> excludelist = new LinkedList<String>();
-	static List<String> mangerlist = new LinkedList<String>();
 	static {
 		excludelist.add("/login");
 		excludelist.add("/logout");
@@ -35,14 +35,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		excludelist.add("/sendkey");
 		excludelist.add("/libs/**");
 		excludelist.add("/login.html");
-
-		mangerlist.add("/manager/**");
-		mangerlist.add("/admin/**");
 	}
 	@Autowired
 	private LoginInterceptor loginInterceptor;
 	@Autowired
 	private MangerInterceptor mangerInterceptor;
+	@Autowired
+	private AdminInterceptor adminInterceptor;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -53,7 +52,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(loginInterceptor).addPathPatterns("/**").excludePathPatterns(excludelist);
 		// 以下连接需要鉴权
-		registry.addInterceptor(mangerInterceptor).addPathPatterns(mangerlist);
+		registry.addInterceptor(mangerInterceptor).addPathPatterns("/manager/**");
+		registry.addInterceptor(adminInterceptor).addPathPatterns("/admin/**");
 		WebMvcConfigurer.super.addInterceptors(registry);
 	}
 
