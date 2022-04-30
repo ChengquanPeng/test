@@ -31,7 +31,6 @@ import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.CodeModelService;
-import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.ths.ThsHolderSpider;
@@ -753,10 +752,9 @@ public class FinanceService {
 		ThreadsUtil.sleep(10, TimeUnit.MINUTES);
 		rl = new LinkedList<FinanceBaseInfo>();
 		for (StockBaseInfo s : list) {
-			List<FinanceBaseInfo> fbis = getFinacesReportByLteDate(s.getCode(), tradeDate,
-					EsQueryPageUtil.queryPage9999);
-			boolean onlineYear = stockBasicService.onlinePreYearChk(s.getCode(), pre1Year);
+			List<FinanceBaseInfo> fbis = getFinacesReportByLteDate(s.getCode(), tradeDate, EsQueryPageUtil.queryPage1);
 			if (fbis == null) {
+				boolean onlineYear = stockBasicService.onlinePreYearChk(s.getCode(), pre1Year);
 				if (onlineYear) {
 					ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), s.getCode(), tradeDate + "",
 							"Finance Service 错误");
@@ -766,15 +764,10 @@ public class FinanceService {
 				continue;
 			}
 			// 商誉净利润占比
-			FinanceAnalyzer fa = new FinanceAnalyzer();
-			for (FinanceBaseInfo fbi : fbis) {
-				fa.putJidu1(fbi);
-			}
-			FinanceBaseInfo fbi = fa.getCurrJidu();
+			FinanceBaseInfo fbi = fbis.get(0);
 			if (fbi.getGoodWill() > 0) {
-				FinanceBaseInfo year = fa.getCurrYear();
-				if (year != null && year.getGsjlr() > 0) {
-					fbi.setGoodWillRatioGsjlr(CurrencyUitl.roundHalfUp(fbi.getGoodWill() / year.getGsjlr()));
+				if (fbi.getGsjlr() > 0) {
+					fbi.setGoodWillRatioGsjlr(CurrencyUitl.roundHalfUp(fbi.getGoodWill() / fbi.getGsjlr()));
 				} else {
 					fbi.setGoodWillRatioGsjlr(9999);
 				}

@@ -445,7 +445,7 @@ public class CodeModelService {
 		newOne.setDate(tradeDate);
 		// 财务
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(code, tradeDate,
-				EsQueryPageUtil.queryPage9999);
+				EsQueryPageUtil.queryPage8);
 
 		if (fbis == null) {
 			ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, tradeDate + "", "Code Model错误");
@@ -653,13 +653,13 @@ public class CodeModelService {
 			sb2.append(yellow++).append(".年报亏损").append(Constant.HTML_LINE);
 		}
 		// 营收低于1亿
-		if (fa.getCurrYear().getYyzsr() < CurrencyUitl.YI_N.longValue()) {
-			if (fa.getCurrYear().getKfjlr() < 0) {
+		if (fa.getCurrJidu().getYyzsr() < CurrencyUitl.YI_N.longValue()) {
+			if (fa.getCurrJidu().getKfjlr() < 0) {
 				newOne.setBaseRed(1);
-				sb1.append(red++).append(".退市风险:年度扣非净利润为负且营收低于1亿元").append(Constant.HTML_LINE);
+				sb1.append(red++).append(".st风险或退市风险:扣非净利润为负且营收低于1亿元").append(Constant.HTML_LINE);
 			} else {
 				newOne.setBaseYellow(1);
-				sb2.append(yellow++).append(".年度营收低于1亿元").append(Constant.HTML_LINE);
+				sb2.append(yellow++).append(".营收低于1亿元").append(Constant.HTML_LINE);
 			}
 		}
 
