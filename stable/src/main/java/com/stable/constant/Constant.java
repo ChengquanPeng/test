@@ -29,4 +29,7 @@ public class Constant {
 	public static final double WAN_10 = 10 * 10000;// 10万
 
 	public static final long MY_ID = 10000;// 我的ID
+
+	public static final String LOGINED_URL_USERS = "users";
+	public static final String LOGINED_URL_ADMIN = "admin";
 }

