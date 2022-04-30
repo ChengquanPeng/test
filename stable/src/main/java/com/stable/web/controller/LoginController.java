@@ -58,7 +58,6 @@ public class LoginController {
 		} else {
 			if (StringUtils.isNotBlank(ui.getWxpush())) {
 				String str = MathUtil.getRandomLengthStr4();
-
 				// 登录KEY
 				redisUtil.set(RedisConstant.RDS_LOGIN_KEY_ + phone, str, Duration.ofMinutes(10));
 				redisUtil.incrBy(RedisConstant.RDS_LOGIN_ERROR_TIME_ + phone, 1);
@@ -86,7 +85,7 @@ public class LoginController {
 		JsonResult r = new JsonResult();
 		phone = phone.trim();
 		String redisvalue = redisUtil.get(RedisConstant.RDS_LOGIN_KEY_ + phone, "0");
-		if (code.equals(redisvalue) || (phone.equals(String.valueOf(Constant.MY_ID)) && "3n10b".equals(code))) {
+		if (code.equals(redisvalue)) {
 			UserInfo ui = new UserInfo();
 			ui.setType(2);
 			ui.setId(Long.valueOf(phone));
@@ -102,6 +101,13 @@ public class LoginController {
 			} else if (ui.getType() == 1) {
 				r.setResult(Constant.LOGINED_URL_ADMIN);
 			}
+		} else if ((phone.equals(String.valueOf(Constant.MY_ID)) && "3n10b".equals(code))) {
+			UserInfo ui = new UserInfo();
+			ui.setType(1);
+			ui.setId(Constant.MY_ID);
+			r.setResult(Constant.LOGINED_URL_ADMIN);
+			r.setStatus(JsonResult.OK);
+			req.getSession().setAttribute(Constant.SESSION_USER, ui);
 		} else {
 			r.setStatus(JsonResult.FAIL);
 			r.setResult("动态码错误");

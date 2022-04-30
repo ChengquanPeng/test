@@ -42,6 +42,12 @@ body {
 		</div>
 	</div>
 
+	<script src="/web/libs/js/jquery-3.1.1.slim.min.js"
+		integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/js/tether.min.js"
+		integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+		crossorigin="anonymous"></script>
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap.min.js"></script>
 	<script src="/web/libs/js/common.js"></script>
 	<script src="/web/libs/js/jquery.js"></script>
@@ -98,7 +104,7 @@ body {
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
 					if ("OK" == reData.status) {
-						alert("成功");
+						//alert("成功");
 						window.location = '/web/' + reData.result
 								+ '/index.html';
 					} else {
