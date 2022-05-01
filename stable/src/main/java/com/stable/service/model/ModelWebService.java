@@ -171,9 +171,15 @@ public class ModelWebService {
 
 		// 博弈-行情指标
 		StringBuffer sb5 = new StringBuffer();
+		
 		if (showMore) {
 			sb5.append("<font color='red'>");
 			sb5.append(this.getSystemPoint(dh, Constant.HTML_LINE));
+			sb5.append("</font>");
+		}
+		if(dh.getCompnayType() == 1) {
+			sb5.append("<font color='green'>");
+			sb5.append("国资");
 			sb5.append("</font>");
 		}
 		// 基本面-筹码
@@ -209,7 +215,7 @@ public class ModelWebService {
 				} else {
 					sb5.append("<font color='green'>");
 				}
-				sb5.append("增发进度" + (dh.getCompnayType() == 1 ? "(国资)" : "") + ":" + dh.getZfStatusDesc());
+				sb5.append("增发进度" + ":" + dh.getZfStatusDesc());
 				sb5.append("</font>");
 
 				if (dh.getZfStatus() == 1) {

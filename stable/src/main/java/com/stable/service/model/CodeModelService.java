@@ -1074,7 +1074,7 @@ public class CodeModelService {
 			} else {
 				sb3.append("<font color='green'>");
 			}
-			sb3.append("增发进度" + (s.getCompnayType() == 1 ? "(国资)" : "") + ":" + newOne.getZfStatusDesc());
+			sb3.append("增发进度" + ":" + newOne.getZfStatusDesc());
 			sb3.append("</font>");
 			sb3.append(Constant.HTML_LINE);
 		}
