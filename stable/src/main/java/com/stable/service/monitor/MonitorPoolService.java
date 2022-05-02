@@ -666,16 +666,18 @@ public class MonitorPoolService {
 							// 业绩快报(准确的)
 							if (yjkb != null && yjkb.getAnnDate() > mp.getYkb()) {
 								sb.append(stockBasicService.getCodeName2(code));
+								sb.append(",业绩快报");
 								if (yjkb.getJlr() > 0) {
 									find = true;
 								} else if (yjkb.getJlr() < 0) {
-									sb.append(",快报[亏损]:");
+									sb.append(",<font color='red'>[亏损]</font>");
 									find = true;
 								}
 								if (find) {
 									mp.setYkb(yjkb.getAnnDate());
-									sb.append("业绩同比:").append(yjkb.getJlrtbzz()).append("%");
-									sb.append(",营收同比:").append(yjkb.getYyzsrtbzz()).append("%");
+									sb.append(",业绩同比:").append(CurrencyUitl.roundHalfUp(yjkb.getJlrtbzz())).append("%");
+									sb.append(",营收同比:").append(CurrencyUitl.roundHalfUp(yjkb.getYyzsrtbzz()))
+											.append("%");
 								}
 							}
 							// 业绩预告(类似天气预报,可能不准)
@@ -684,38 +686,35 @@ public class MonitorPoolService {
 										fbi.getQuarter());
 								if (yjyg != null && yjyg.getAnnDate() > mp.getYkb()) {
 									sb.append(stockBasicService.getCodeName2(code));
-									if (mp.getYkb() > 1) {
-										sb.append(",期望不亏");
-									} else {
-										sb.append(",期望亏损");
-									}
+									sb.append(",业绩预告");
 									if (yjyg.getJlr() > 0) {
-										sb.append(",业绩预告不亏:");
 										find = true;
 									} else if (yjyg.getJlr() < 0) {
-										sb.append(",业绩预告亏损:");
+										sb.append(",<font color='red'>[亏损]</font>");
 										find = true;
 									}
 									if (find) {
 										mp.setYkb(yjyg.getAnnDate());
-										sb.append("业绩同比:").append(yjyg.getJlrtbzz()).append("%");
+										sb.append(",业绩同比:").append(CurrencyUitl.roundHalfUp(yjyg.getJlrtbzz()))
+												.append("%");
 									}
 								}
 							}
 							if (!find) {
 								if (fbi.getAnnDate() > mp.getYkb()) {
 									sb.append(stockBasicService.getCodeName(code));
+									sb.append(",业绩报告");
 									if (fbi.getGsjlr() > 0) {
-										sb.append(",业绩不亏:");
 										find = true;
 									} else if (fbi.getGsjlr() < 0) {
-										sb.append(",业绩亏损:");
+										sb.append(",<font color='red'>[亏损]</font>");
 										find = true;
 									}
 									if (find) {
 										mp.setYkb(fbi.getAnnDate());
-										sb.append("业绩同比:").append(fbi.getGsjlrtbzz()).append("%");
-										sb.append(",营收同比:").append(fbi.getYyzsrtbzz()).append("%");
+										sb.append(",业绩同比:").append(CurrencyUitl.roundHalfUp(fbi.getGsjlrtbzz()))
+												.append("%,营收同比:").append(CurrencyUitl.roundHalfUp(fbi.getYyzsrtbzz()))
+												.append("%");
 									}
 								}
 							}
@@ -730,7 +729,7 @@ public class MonitorPoolService {
 				}
 
 				if (sssb.length() > 0) {
-					WxPushUtil.pushSystem2Html(u.getWxpush(), "快预报预警:" + sssb.toString());
+					WxPushUtil.pushSystem2Html(u.getWxpush(), "业绩快预报预警:" + sssb.toString());
 				}
 			}
 		}
