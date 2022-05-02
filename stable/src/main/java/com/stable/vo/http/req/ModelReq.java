@@ -40,4 +40,6 @@ public class ModelReq {
 
 	String totalAmt;
 	String totalAmt60d;
+	
+	int channel = 0;
 }

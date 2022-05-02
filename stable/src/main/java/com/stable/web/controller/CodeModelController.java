@@ -38,6 +38,9 @@ public class CodeModelController {
 			boolean showMore = false;
 			if (l != null && l.getType() == 1) {
 				showMore = true;
+				if (mr.getChannel() == 1) {
+					mr.setPls(-1);
+				}
 			} else {
 				mr.setPls(-1);
 			}
