@@ -668,6 +668,7 @@ public class MonitorPoolService {
 								sb.append(stockBasicService.getCodeName2(code));
 								sb.append(",业绩快报");
 								if (yjkb.getJlr() > 0) {
+									sb.append(",盈利");
 									find = true;
 								} else if (yjkb.getJlr() < 0) {
 									sb.append(",<font color='red'>[亏损]</font>");
@@ -688,6 +689,7 @@ public class MonitorPoolService {
 									sb.append(stockBasicService.getCodeName2(code));
 									sb.append(",业绩预告");
 									if (yjyg.getJlr() > 0) {
+										sb.append(",盈利");
 										find = true;
 									} else if (yjyg.getJlr() < 0) {
 										sb.append(",<font color='red'>[亏损]</font>");
@@ -702,9 +704,10 @@ public class MonitorPoolService {
 							}
 							if (!find) {
 								if (fbi.getAnnDate() > mp.getYkb()) {
-									sb.append(stockBasicService.getCodeName(code));
+									sb.append(stockBasicService.getCodeName2(code));
 									sb.append(",业绩报告");
 									if (fbi.getGsjlr() > 0) {
+										sb.append(",盈利");
 										find = true;
 									} else if (fbi.getGsjlr() < 0) {
 										sb.append(",<font color='red'>[亏损]</font>");
