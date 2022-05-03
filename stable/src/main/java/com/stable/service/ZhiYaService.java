@@ -72,6 +72,8 @@ public class ZhiYaService {
 			try {
 				ZhiYa zy = new ZhiYa();
 				zy.setCode(code);
+				zy.setUpdate(update);
+				zy.setHasRisk(0);
 				boolean r1 = false;
 				StringBuffer sb = new StringBuffer("");
 				List<ZhiYaDetail> l = eastmoneyZytjSpider.getZy(code);
@@ -105,17 +107,13 @@ public class ZhiYaService {
 					zy.setDetail(sb.toString());
 					zy.setHighRatio(CurrencyUitl.roundHalfUp(highRatio));
 					zy.setTotalRatio(CurrencyUitl.roundHalfUp(tzy.getBi()));
-					zy.setUpdate(update);
-					zy.setHasRisk(0);
 					zy.setOpenLine(openLine);
 					zy.setWarningLine(warningLine);
-					if (r1 && tzy.getBi() >= 10.0) {// 股东自身超过80%的质押，总股本超过10%
+					if (r1 && tzy.getTbi() >= 10.0) {// 股东自身超过80%的质押，总股本超过10%
 						zy.setHasRisk(1);
 					}
-					// 高质押机会
-
-					rl.add(zy);
 				}
+				rl.add(zy);
 			} catch (Exception e) {
 				WxPushUtil.pushSystem1("质押抓包异常:" + code);
 				ErrorLogFileUitl.writeError(e, "质押", "", "");
