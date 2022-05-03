@@ -84,29 +84,29 @@ public class ZhiYaService {
 					double warningLine = 0.0;
 					double openLine = 0.0;
 					for (String key : m.keySet()) {
-						Zya z = m.get(key);
+						Zya gd = m.get(key);
 //					System.err.println(key + "-> 次数:" + z.getC() + " 比例:" + z.getBi() + "%");
 						sb.append(key).append("->").append(Constant.HTML_LINE);
-						sb.append(" 次数:" + z.getC() + " 比例:" + CurrencyUitl.roundHalfUp(z.getBi()) + "%")
+						sb.append(" 次数:" + gd.getC() + " 比例:" + CurrencyUitl.roundHalfUp(gd.getBi()) + "%")
 								.append(Constant.HTML_LINE);
-						if (z.getBi() >= 80.0) {
+						if (gd.getBi() >= 80.0) {// 股东高质押
 							r1 = true;
 						}
-						if (z.getBi() > highRatio) {
-							highRatio = z.getBi();
+						if (gd.getBi() > highRatio) {
+							highRatio = gd.getBi();
 						}
 						if (tzy.getTbi() > 10.0) {
-							if (z.getBi() >= 80.0 && z.getTbi() >= 10.0) {// 高质押机会
-								if (z.getTopWarningLine() > warningLine) {// 按质押分组中早最高的预警线（超过质押比例）
-									warningLine = z.getTopWarningLine();
-									openLine = z.getTopOpenLine();
+							if (gd.getBi() >= 80.0 && gd.getTbi() >= 10.0) {// 高质押机会
+								if (gd.getTopWarningLine() > warningLine) {// 按质押分组中早最高的预警线（超过质押比例）
+									warningLine = gd.getTopWarningLine();
+									openLine = gd.getTopOpenLine();
 								}
 							}
 						}
 					}
 					zy.setDetail(sb.toString());
 					zy.setHighRatio(CurrencyUitl.roundHalfUp(highRatio));
-					zy.setTotalRatio(CurrencyUitl.roundHalfUp(tzy.getBi()));
+					zy.setTotalRatio(CurrencyUitl.roundHalfUp(tzy.getTbi()));
 					zy.setOpenLine(openLine);
 					zy.setWarningLine(warningLine);
 					if (r1 && tzy.getTbi() >= 10.0) {// 股东自身超过80%的质押，总股本超过10%
@@ -130,29 +130,30 @@ public class ZhiYaService {
 			this.zhiYaDetailDao.saveAll(l);
 
 			Map<String, Zya> m = new HashMap<String, Zya>();
-			Zya z = new Zya();
-			z.setC(0);
-			z.setBi(0.0);
-			m.put(EastmoneyZytjSpider.TOTAL_BI, z);
+			Zya tot = new Zya();
+			tot.setC(0);
+			tot.setBi(0.0);
+			m.put(EastmoneyZytjSpider.TOTAL_BI, tot);
 
-			for (ZhiYaDetail d : l) {// --同一个股东多次质押
-				if (d.getState() != 1) {// 不含-已解押的
+			for (ZhiYaDetail detail : l) {// --同一个股东多次质押
+				if (detail.getState() != 1) {// 不含-已解押的
 
-					Zya tmp = m.get(d.getHolderName());
+					Zya tmp = m.get(detail.getHolderName());
 					if (tmp == null) {
 						tmp = new Zya();
-						m.put(d.getHolderName(), tmp);
+						m.put(detail.getHolderName(), tmp);
 					}
 					tmp.setC(tmp.getC() + 1);
-					tmp.setBi(tmp.getBi() + d.getSelfRatio());// 自己所持
-					tmp.setTbi(tmp.getTbi() + d.getTotalRatio());// 总股本
-					if (d.getWarningLine() > tmp.getTopWarningLine()) {// 按质押分组中早最高的预警线（可能质押比例不够）
-						tmp.setTopWarningLine(d.getWarningLine());
-						tmp.setTopOpenLine(d.getOpenline());
+					tmp.setBi(tmp.getBi() + detail.getSelfRatio());// 自己所持
+					tmp.setTbi(tmp.getTbi() + detail.getTotalRatio());// 总股本
+					if (detail.getWarningLine() > tmp.getTopWarningLine()) {// 按质押分组中早最高的预警线（可能质押比例不够）
+						tmp.setTopWarningLine(detail.getWarningLine());
+						tmp.setTopOpenLine(detail.getOpenline());
 					}
 
-					z.setC(z.getC() + 1);
-					z.setTbi(z.getTbi() + d.getTotalRatio());// 总股本
+					// 总体
+					tot.setC(tot.getC() + 1);
+					tot.setTbi(tot.getTbi() + detail.getTotalRatio());// 总股本
 				}
 			}
 			return m;
