@@ -216,6 +216,7 @@ public class EastmoneySpider {
 							page.setTradeFinassetNotfvtpl(zcfzb.getTradeFinassetNotfvtpl());
 							page.setStborrow(zcfzb.getStborrow());
 							page.setLtborrow(zcfzb.getLtborrow());
+							page.setTaxPayable(zcfzb.getTaxPayable());
 
 							// 分析数据
 							if (page.getNetAsset() > 0) {
@@ -677,7 +678,8 @@ public class EastmoneySpider {
 	public static void main(String[] args) {
 		EastmoneySpider es = new EastmoneySpider();
 		es.htmlunitSpider = new HtmlunitSpider();
-		String code = "603176";
+		String code = "000498";
+		int beforeChkDate = 99999999;
 //		List<FinanceBaseInfoPage> l = es.getNewFinanceAnalysis(code, 4);
 //		for (FinanceBaseInfoPage f : l) {
 //			System.err.println(f);
@@ -686,11 +688,11 @@ public class EastmoneySpider {
 //		EastmoneySpider es = new EastmoneySpider();
 //		es.getFinYjkb();
 
-//		List<FinanceBaseInfoPage> l = es.getNewFinanceAnalysis(code, 4);
-//		for (FinanceBaseInfoPage r : l) {
-//			System.err.println(r);
-//		}
-		System.err.println(es.getcompanyType(code));
+		List<FinanceBaseInfoPage> l = es.getNewFinanceAnalysis(code, 1, beforeChkDate);
+		for (FinanceBaseInfoPage r : l) {
+			System.err.println(r);
+		}
+//		System.err.println(es.getcompanyType(code));
 		// System.err.println(YearQuarter(2021, 1));
 	}
 }

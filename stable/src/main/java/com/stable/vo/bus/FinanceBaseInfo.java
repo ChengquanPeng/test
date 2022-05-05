@@ -105,6 +105,8 @@ public class FinanceBaseInfo extends EsBase {
 	private int fundNotOk3 = 0;// 疑似财务三高
 	@Field(type = FieldType.Double)
 	private int bustUpRisks = 1;// 是否有破产风险：应付账款:欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算
+	@Field(type = FieldType.Double)
+	private double taxPayable;// 应交税费
 
 //	货币资金：在会计科目上，主要指库存现金、银行存款和其他货币资金三者。
 //		库存现金：指存放于企业财会部门、由出纳人员经管的货币。

@@ -173,6 +173,11 @@ public class EastmoneyZcfzbSpider {
 						fzb.setLtborrow(Double.valueOf(data.getString("LONG_LOAN")));// 长期借款-LTBORROW
 					} catch (Exception e) {
 					}
+					try {
+						fzb.setTaxPayable(Double.valueOf(data.getString("TAX_PAYABLE")));// 应交税费
+					} catch (Exception e) {
+					}
+
 //					System.err.println(fzb + " " + CurrencyUitl.covertToString(fzb.getSumAsset()) + " "
 //							+ CurrencyUitl.covertToString(fzb.getSumDebt()) + " "
 //							+ CurrencyUitl.covertToString(fzb.getNetAsset()));
@@ -195,7 +200,7 @@ public class EastmoneyZcfzbSpider {
 
 	public static void main(String[] args) {
 		String code = "600446";
-		int companyType = 3;
+		int companyType = 4;
 		Map<String, FinanceZcfzb> m = EastmoneyZcfzbSpider.getZcfzb(code, companyType,
 				EastmoneyZcfzbSpider.getDates(code, companyType, 5));
 		for (String key : m.keySet()) {

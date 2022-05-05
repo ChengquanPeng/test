@@ -29,4 +29,6 @@ public class FinanceZcfzb {
 	private double stborrow;// 短期借款
 	private double ltborrow;// 长期借款
 	private double intangibleAsset; // 无形资产
+
+	private double taxPayable;// 应交税费
 }

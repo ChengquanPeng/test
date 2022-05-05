@@ -75,8 +75,14 @@ public class EastmoneyZytjSpider2 {
 					zyd.setHolderName(getStr(data.getString("HOLDER_NAME")));// 质押股东
 					zyd.setPurpose(getStr(data.getString("PF_PURPOSE")));// 质押目的
 					zyd.setNum(data.getLong("PF_NUM"));// 质押股份数量
-					zyd.setSelfRatio(data.getDouble("PF_HOLD_RATIO"));// 占所持比例
-					zyd.setTotalRatio(data.getDouble("PF_TSR"));// 占总股本比例
+					try {
+						zyd.setSelfRatio(data.getDouble("PF_HOLD_RATIO"));// 占所持比例
+					} catch (Exception e) {
+					}
+					try {
+						zyd.setTotalRatio(data.getDouble("PF_TSR"));// 占总股本比例
+					} catch (Exception e) {
+					}
 					zyd.setClosePrice(data.getDouble("CLOSE_FORWARD_ADJPRICE"));// 质押日收盘价(元)
 					try {
 						zyd.setOpenline(data.getDouble("OPENLINE"));// 预估平仓线
