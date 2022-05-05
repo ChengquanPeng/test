@@ -85,16 +85,14 @@ public class BonusService {
 		return null;
 	}
 
-	public boolean isBousOk(String code, int startYear) {
-//		int c = 0;
+	public boolean isBonusOk(String code, int bonusCheckYear) {
 		List<BonusHist> l = this.getListByCode(code, null, null, null, EsQueryPageUtil.queryPage10);
 		Set<Integer> set = new HashSet<Integer>();
 		if (l != null) {
 			for (BonusHist bh : l) {
 				int y = getYear(bh);
-				if (y >= startYear) {
+				if (y >= bonusCheckYear) {
 					if (bh.getDetail().contains("元")) {
-//						c++;
 						set.add(y);
 					}
 				}
