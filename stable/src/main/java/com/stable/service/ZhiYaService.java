@@ -154,6 +154,7 @@ public class ZhiYaService {
 					// 总体
 					tot.setC(tot.getC() + 1);
 					tot.setTbi(tot.getTbi() + detail.getTotalRatio());// 总股本
+					tot.setBi(tot.getBi());
 				}
 			}
 			return m;

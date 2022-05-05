@@ -119,9 +119,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int susBigBoss; // // 交易面疑似大牛
 	@Field(type = FieldType.Integer)
 	private int susWhiteHors; // // 交易面疑似白马
-
-//	@Field(type = FieldType.Integer)
-//	private int monitor;// 是否监听
+	@Field(type = FieldType.Integer)
+	private int sortMode7 = 0;// 突破箱体震荡
 
 	@Id
 	private String id;
@@ -161,10 +160,6 @@ public class CodeBaseModel2 extends EsBase {
 	private double sylttm;// 加权净资产收益率+单季度百分比
 	@Field(type = FieldType.Integer)
 	private int sylType;// 收益率类型:1:自身收益率增长,2: 年收益率超过5.0%*4=20%,4:同时包含12
-
-	// 短线
-	@Field(type = FieldType.Integer)
-	private int sortMode7 = 0;// 突破箱体震荡
 	// 人工确定
 
 	// ==== 筹码博弈 ====

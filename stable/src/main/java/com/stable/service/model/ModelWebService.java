@@ -171,13 +171,13 @@ public class ModelWebService {
 
 		// 博弈-行情指标
 		StringBuffer sb5 = new StringBuffer();
-		
+
 		if (showMore) {
 			sb5.append("<font color='red'>");
 			sb5.append(this.getSystemPoint(dh, Constant.HTML_LINE));
 			sb5.append("</font>");
 		}
-		if(dh.getCompnayType() == 1) {
+		if (dh.getCompnayType() == 1) {
 			sb5.append("<font color='green'>");
 			sb5.append("国资,");
 			sb5.append("</font>");
@@ -485,7 +485,10 @@ public class ModelWebService {
 				bqb.must(QueryBuilders.matchPhraseQuery("tagSmallAndBeatf", 1));// 小而美
 			} else if (mr.getTagIndex() == 4) {
 				bqb.must(QueryBuilders.matchPhraseQuery("tagHighZyChance", 1));// 高质押机会
+			} else if (mr.getTagIndex() == 7) {
+				bqb.must(QueryBuilders.matchPhraseQuery("sortMode7", 1));// 高质押机会
 			}
+
 		}
 		if (mr.getShooting() > 0) {
 			if (mr.getShooting() == 1) {

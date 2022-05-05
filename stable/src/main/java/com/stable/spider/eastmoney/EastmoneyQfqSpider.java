@@ -65,7 +65,7 @@ public class EastmoneyQfqSpider {
 					list.add(td);
 				}
 			}
-			log.info("{} ->从东方财富获取日交易数据(不复权)记录条数:{}", code, list.size());
+			log.info("{} ->从df获取日交易数据(不复权)记录条数:{}", code, list.size());
 			return list;
 		} finally {
 			ThreadsUtil.sleepRandomSecBetween1And5();
@@ -99,7 +99,7 @@ public class EastmoneyQfqSpider {
 					list.add(td);
 				}
 			}
-			log.info("{} ->从东方财富获取日交易数据(前复权)数据记录条数:{}", code, list.size());
+			log.info("{} ->从df获取日交易数据(前复权)数据记录条数:{}", code, list.size());
 			return list;
 		} finally {
 			ThreadsUtil.sleepRandomSecBetween1And5();
