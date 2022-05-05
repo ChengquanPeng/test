@@ -650,6 +650,21 @@ public class CodeModelService {
 				sb2.append(yellow++).append(".营收低于1亿元").append(Constant.HTML_LINE);
 			}
 		}
+		// 应缴税费
+		if (fbis.size() >= 5) {
+			FinanceBaseInfo f0 = fbis.get(0);
+			FinanceBaseInfo f1 = fbis.get(1);
+			FinanceBaseInfo f2 = fbis.get(2);
+			FinanceBaseInfo f3 = fbis.get(3);
+			FinanceBaseInfo f4 = fbis.get(4);
+
+			if (f0.getTaxPayable() >= f1.getTaxPayable() && f1.getTaxPayable() >= f2.getTaxPayable()
+					&& f2.getTaxPayable() >= f3.getTaxPayable() && f3.getTaxPayable() >= f4.getTaxPayable()
+					&& f0.getTaxPayable() > 0) {
+				newOne.setBaseRed(1);
+				sb1.append(red++).append(".暴雷风险:应交税费连续增长").append(Constant.HTML_LINE);
+			}
+		}
 
 		// 负债超高-净资产低于应付账款
 		if (fbi.getBustUpRisks() == 1) {
