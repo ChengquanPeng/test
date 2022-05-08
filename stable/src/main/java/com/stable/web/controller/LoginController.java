@@ -40,9 +40,12 @@ public class LoginController {
 		JsonResult r = new JsonResult();
 		// 是否已登录
 		if (req.getSession().getAttribute(Constant.SESSION_USER) != null) {
-			r.setStatus(JsonResult.OK);
+			r.setStatus("index");
+			r.setResult("已登录!");
 			return ResponseEntity.ok(r);
 		}
+		redisUtil.incrBy(RedisConstant.RDS_LOGIN_ERROR_TIME_ + phone, 1);
+		redisUtil.expire(RedisConstant.RDS_LOGIN_ERROR_TIME_ + phone, 1, TimeUnit.HOURS);// 1小时过期
 		// 是否满足1小时登录次数
 		int error = redisUtil.get(RedisConstant.RDS_LOGIN_ERROR_TIME_ + phone, 0);
 		if (error >= 3) {// 三次
@@ -60,8 +63,6 @@ public class LoginController {
 				String str = MathUtil.getRandomLengthStr4();
 				// 登录KEY
 				redisUtil.set(RedisConstant.RDS_LOGIN_KEY_ + phone, str, Duration.ofMinutes(10));
-				redisUtil.incrBy(RedisConstant.RDS_LOGIN_ERROR_TIME_ + phone, 1);
-				redisUtil.expire(RedisConstant.RDS_LOGIN_ERROR_TIME_ + phone, 1, TimeUnit.HOURS);// 1小时过期
 
 				if (WxPushUtil.pushSystem1(ui.getWxpush(), str + " 动态码")) {
 					r.setResult("动态码已发送，请查看微信消息，有效期10分钟");

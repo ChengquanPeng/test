@@ -75,6 +75,13 @@ body {
 					if ("OK" == reData.status) {
 						alert(reData.result);
 						issend = false;
+					} else if ("FAIL" == reData.status) {
+						alert(reData.result);
+						issend = false;
+					} else if ("index" == reData.status) {
+						alert(reData.result);
+						issend = false;
+						window.location = '/web/users/index.html';
 					} else {
 						alert(reData.result);
 						issend = false;
