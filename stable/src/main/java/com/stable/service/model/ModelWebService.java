@@ -304,7 +304,11 @@ public class ModelWebService {
 				CodeBaseModelResp resp = getModelResp(dh, showMore);
 				res.add(resp);
 				// 备注
-				if (!showMore) {
+				if (showMore) {
+					if (userId != Constant.MY_ID) {
+						resp.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, resp.getCode()).getRemark());
+					}
+				} else {
 					resp.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, resp.getCode()).getRemark());
 					resp.setShooting1(0);
 					resp.setShooting2(0);

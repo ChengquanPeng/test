@@ -145,7 +145,7 @@
 										pageNum : params.pageNumber,
 										pageSize : params.pageSize,
 									};
-									
+
 									param.channel = 1;
 									param.code = code;
 									param.orderBy = gsort;
@@ -240,6 +240,9 @@
 												v += "<br/><a target='_blank' href='/web/chips/reduce/list?code="
 														+ row.code
 														+ "'>减持历史=></a>"
+												if (row.tagHighZyChance == 1) {
+													v += "<br/><a target='_blank' href='https://data.eastmoney.com/gpzy/detail/"+row.code+".html'>股票质押=></a>";
+												}
 												return v;
 											}
 										},
