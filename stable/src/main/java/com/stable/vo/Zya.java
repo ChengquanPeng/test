@@ -9,4 +9,5 @@ public class Zya {
 	double tbi = 0.0;// 占总股本比例
 	double topWarningLine = 0.0;
 	double topOpenLine = 0.0;
+	String name;
 }

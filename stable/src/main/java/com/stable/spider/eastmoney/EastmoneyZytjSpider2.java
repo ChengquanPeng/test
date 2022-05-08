@@ -12,12 +12,16 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.ZhiYa;
 import com.stable.vo.bus.ZhiYaDetail;
 
 import lombok.extern.log4j.Log4j2;
 
 /*
  * 质押-东方财富
+ * 
+ * https://data.eastmoney.com/gpzy/detail/600617.html
+ * 
  */
 
 @Component
@@ -35,8 +39,6 @@ public class EastmoneyZytjSpider2 {
 		do {
 			try {
 				ThreadsUtil.sleepRandomSecBetween1And2();
-//				log.info(url);
-//				System.err.println(url);
 				String result = HttpUtil.doGet2(url);
 				log.info(result);
 				result = result.substring(FIXIED.length() + 1, result.length() - 2);
@@ -99,26 +101,12 @@ public class EastmoneyZytjSpider2 {
 								DateUtil.getDateStrToIntYYYYMMDDHHMMSS(data.getString("ACTUAL_UNFREEZE_DATE")));// 结束日期
 					} catch (Exception e) {
 					}
-
 					zyd.setPfOrg(getStr(data.getString("PF_ORG")));
-
-					String id = code + "_" + zyd.getStartDate() + "_" + zyd.getHolderName().hashCode() + "_"
-							+ zyd.getPfOrg().hashCode();
+					String id = code + "_" + zyd.getStartDate() + "_" + zyd.getNum() + "_"
+							+ zyd.getHolderName().hashCode() + "_" + zyd.getPfOrg().hashCode();
 					zyd.setId(id);
 					l.add(zyd);
-//					System.err.println(zyd.toString());
-//					System.err.println("====================");
 				}
-
-//				JSONArray FontMapping = object.getJSONObject("font").getJSONArray("FontMapping");
-//				Map<String, String> hashMap = new HashMap<String, String>();
-//				for (int k = 0; k < FontMapping.size(); k++) {
-//					JSONObject data = FontMapping.getJSONObject(k);
-//					hashMap.put(data.getString("code"), data.getString("value"));
-//				}
-//				for (String key : hashMap.keySet()) {
-//					System.err.println(key + " " + hashMap.get(key));
-//				}
 				return l;
 			} catch (Exception e2) {
 				e2.printStackTrace();
@@ -145,8 +133,60 @@ public class EastmoneyZytjSpider2 {
 
 	public static void main(String[] args) {
 		EastmoneyZytjSpider2 ts = new EastmoneyZytjSpider2();
-//		ts.zhiYaDetailDao = 
-		ts.getZy("002752");
-
+		System.err.println(ts.getZyT("603206"));
 	}
+
+	private String FIXIED_T = "jQuery1123015124691219584796_1651937007370";
+	private String START_T = "https://datacenter-web.eastmoney.com/api/data/v1/get?callback=jQuery1123015124691219584796_1651937007370&sortColumns=TRADE_DATE&sortTypes=-1&pageSize=5&pageNumber=1&reportName=RPT_CSDC_LIST&columns=ALL&quoteColumns=&source=WEB&client=WEB&filter=(SECURITY_CODE%3D%22";
+	private String END_T = "%22)";
+
+	public synchronized ZhiYa getZyT(String code) {
+		int trytime = 0;
+		boolean fetched = false;
+		String url = START_T + code + END_T;
+		do {
+			try {
+				ThreadsUtil.sleepRandomSecBetween1And2();
+//				log.info(url);
+//				System.err.println(url);
+				String result = HttpUtil.doGet2(url);
+//				log.info(result);
+				result = result.substring(FIXIED_T.length() + 1, result.length() - 2);
+//				log.info(result);
+				JSONObject object = JSON.parseObject(result);
+				if (object == null || !object.getBooleanValue("success")) {
+					// 未ok、
+					log.info("no data2 =" + code);
+					return new ZhiYa();
+				}
+				JSONArray objects = object.getJSONObject("result").getJSONArray("data");
+				if (objects == null || objects.size() <= 0) {
+					// 未ok、
+					log.info("Not OK2 =" + code);
+					return new ZhiYa();
+				}
+				fetched = true;
+
+				ZhiYa zy = new ZhiYa();
+				if (objects.size() > 0) {
+					JSONObject data = objects.getJSONObject(0);
+					zy.setTotalRatio(data.getDouble("PLEDGE_RATIO"));
+					return zy;
+				}
+			} catch (Exception e2) {
+				e2.printStackTrace();
+				trytime++;
+				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
+				if (trytime >= 10) {
+					fetched = true;
+					e2.printStackTrace();
+					WxPushUtil.pushSystem1("东方财富-股东质押T获取出错,url=" + url);
+				}
+			} finally {
+
+			}
+		} while (!fetched);
+		return new ZhiYa();
+	}
+
 }

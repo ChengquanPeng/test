@@ -1,5 +1,8 @@
 package com.stable.service;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,8 +18,6 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
 import com.stable.es.dao.base.ZhiYaDao;
-import com.stable.es.dao.base.ZhiYaDetailDao;
-import com.stable.spider.eastmoney.EastmoneyZytjSpider;
 import com.stable.spider.eastmoney.EastmoneyZytjSpider2;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -41,8 +42,6 @@ public class ZhiYaService {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private EastmoneyZytjSpider2 eastmoneyZytjSpider;
-	@Autowired
-	private ZhiYaDetailDao zhiYaDetailDao;
 
 //	@PostConstruct
 //	private void start() {
@@ -60,9 +59,8 @@ public class ZhiYaService {
 //	}
 
 	public synchronized void fetchBySun() {
-		EastmoneyZytjSpider.errorcnt = new LinkedList<String>();
 		int update = DateUtil.getTodayIntYYYYMMDD();
-//		int endDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), (-365 * 5)));
+		int pre2Year = DateUtil.getPreYear(update, 2);
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
 		int total = list.size();
 		log.info("总数：" + total);
@@ -70,32 +68,40 @@ public class ZhiYaService {
 		for (StockBaseInfo s : list) {
 			String code = s.getCode();
 			try {
-				ZhiYa zy = new ZhiYa();
-				zy.setCode(code);
+				if (!stockBasicService.onlinePreYearChk(code, pre2Year)) {
+					continue;
+				}
+
+				ZhiYa zy = eastmoneyZytjSpider.getZyT(code);// 中登数据
+				if (zy == null) {
+					zy = new ZhiYa();
+				}
 				zy.setUpdate(update);
-				zy.setHasRisk(0);
-				boolean r1 = false;
-				StringBuffer sb = new StringBuffer("");
+				zy.setCode(code);
+				if (zy.getTotalRatio() >= 10.0) {// 高质押风险
+					zy.setHasRisk(1);
+				}
+				rl.add(zy);
+				if (zy.getTotalRatio() <= 1.0) {// 小于跳过，不抓明细，明细来自公告，可能不准
+					continue;
+				}
+				// 明细
+				StringBuffer sb = new StringBuffer("中登数据->总质押比例:");
+				sb.append(zy.getTotalRatio()).append("%").append(Constant.HTML_LINE);
 				List<ZhiYaDetail> l = eastmoneyZytjSpider.getZy(code);
-				Map<String, Zya> m = this.split(l);
+				List<Zya> m = this.split(l);
 				if (m != null) {
-					Zya tzy = m.get(EastmoneyZytjSpider.TOTAL_BI);
-					double highRatio = 0.0;
 					double warningLine = 0.0;
 					double openLine = 0.0;
-					for (String key : m.keySet()) {
-						Zya gd = m.get(key);
-//					System.err.println(key + "-> 次数:" + z.getC() + " 比例:" + z.getBi() + "%");
-						sb.append(key).append("->").append(Constant.HTML_LINE);
+					for (int i = 0; i < m.size(); i++) {
+						if (i >= 5) {// 最多5个
+							continue;
+						}
+						Zya gd = m.get(i);
+						sb.append(gd.getName()).append("->").append(Constant.HTML_LINE);
 						sb.append(" 次数:" + gd.getC() + " 比例:" + CurrencyUitl.roundHalfUp(gd.getBi()) + "%")
 								.append(Constant.HTML_LINE);
-						if (gd.getBi() >= 80.0) {// 股东高质押
-							r1 = true;
-						}
-						if (gd.getBi() > highRatio) {
-							highRatio = gd.getBi();
-						}
-						if (tzy.getTbi() > 10.0) {
+						if (zy.getTotalRatio() > 10.0) {
 							if (gd.getBi() >= 80.0 && gd.getTbi() >= 10.0) {// 高质押机会
 								if (gd.getTopWarningLine() > warningLine) {// 按质押分组中早最高的预警线（超过质押比例）
 									warningLine = gd.getTopWarningLine();
@@ -105,15 +111,10 @@ public class ZhiYaService {
 						}
 					}
 					zy.setDetail(sb.toString());
-					zy.setHighRatio(CurrencyUitl.roundHalfUp(highRatio));
-					zy.setTotalRatio(CurrencyUitl.roundHalfUp(tzy.getTbi()));
 					zy.setOpenLine(openLine);
 					zy.setWarningLine(warningLine);
-					if (r1 && tzy.getTbi() >= 10.0) {// 股东自身超过80%的质押，总股本超过10%
-						zy.setHasRisk(1);
-					}
 				}
-				rl.add(zy);
+
 			} catch (Exception e) {
 				WxPushUtil.pushSystem1("质押抓包异常:" + code);
 				ErrorLogFileUitl.writeError(e, "质押", "", "");
@@ -125,22 +126,15 @@ public class ZhiYaService {
 		log.info("质押抓包完成");
 	}
 
-	private Map<String, Zya> split(List<ZhiYaDetail> l) {
+	private List<Zya> split(List<ZhiYaDetail> l) {
 		if (l != null && l.size() > 0) {
-			this.zhiYaDetailDao.saveAll(l);
-
 			Map<String, Zya> m = new HashMap<String, Zya>();
-			Zya tot = new Zya();
-			tot.setC(0);
-			tot.setBi(0.0);
-			m.put(EastmoneyZytjSpider.TOTAL_BI, tot);
-
 			for (ZhiYaDetail detail : l) {// --同一个股东多次质押
 				if (detail.getState() != 1) {// 不含-已解押的
-
 					Zya tmp = m.get(detail.getHolderName());
 					if (tmp == null) {
 						tmp = new Zya();
+						tmp.setName(detail.getHolderName());
 						m.put(detail.getHolderName(), tmp);
 					}
 					tmp.setC(tmp.getC() + 1);
@@ -150,14 +144,23 @@ public class ZhiYaService {
 						tmp.setTopWarningLine(detail.getWarningLine());
 						tmp.setTopOpenLine(detail.getOpenline());
 					}
-
-					// 总体
-					tot.setC(tot.getC() + 1);
-					tot.setTbi(tot.getTbi() + detail.getTotalRatio());// 总股本
-					tot.setBi(tot.getBi());
 				}
 			}
-			return m;
+			Collection<Zya> list = m.values();
+			List<Zya> rl = new LinkedList<Zya>();
+			for (Zya z : list) {
+				rl.add(z);
+			}
+			Collections.sort(rl, new Comparator<Zya>() {
+				@Override
+				public int compare(Zya o1, Zya o2) {
+					if (o1.getTbi() == o2.getTbi()) {
+						return 0;
+					}
+					return o2.getTbi() - o1.getTbi() > 0 ? 1 : -1;
+				}
+			});
+			return rl;
 		}
 		return null;
 	}

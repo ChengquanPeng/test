@@ -24,8 +24,6 @@ public class ZhiYa extends EsBase {
 	private int hasRisk;// 是否有风险(0-1)
 	@Field(type = FieldType.Double)
 	private double totalRatio;// 总质押比例
-	@Field(type = FieldType.Double)
-	private double highRatio;// 最高质押比例
 	@Field(type = FieldType.Text)
 	private String detail;// 质押明细
 
