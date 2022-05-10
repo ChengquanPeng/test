@@ -72,7 +72,7 @@ public class RealtimeMonitoringService {
 		try {
 			// 获取监听列表-常规
 			List<RtmVo> listall = new LinkedList<RtmVo>();
-			List<UserInfo> ulist = userService.getUserListForMonitor();
+			List<UserInfo> ulist = userService.getUserListForMonitorS1();
 			HashMap<String, List<RtmVo>> allmap = new HashMap<String, List<RtmVo>>();
 			for (UserInfo u : ulist) {
 				List<MonitorPoolTemp> tl = monitorPoolService.getPoolListForMonitor(u.getId(), 1, 0, getMonisort1());

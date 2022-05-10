@@ -393,7 +393,7 @@ public class MonitorPoolService {
 
 	// 完成定增预警
 	public void jobZfDoneWarning() {
-		List<UserInfo> ulist = userService.getUserListForMonitor();
+		List<UserInfo> ulist = userService.getUserListForMonitorS1();
 		for (UserInfo u : ulist) {
 			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 1, EsQueryPageUtil.queryPage9999, "", 0, 0, 0);
 			if (list != null) {
@@ -435,7 +435,7 @@ public class MonitorPoolService {
 	// 公告监听
 	public HashSet<String> listenerGg(int tradeDate) {
 		HashSet<String> allf = new HashSet<String>();
-		List<UserInfo> ulist = userService.getUserListForMonitor();
+		List<UserInfo> ulist = userService.getUserListForMonitorS1();
 		for (UserInfo u : ulist) {
 			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0,
 					0, 1);
@@ -455,10 +455,29 @@ public class MonitorPoolService {
 		return allf;
 	}
 
+	// 用户服务到期
+	public void userExpired() {
+		int today = DateUtil.getTodayIntYYYYMMDD();
+		int end = DateUtil.addDate(today, 3);
+		List<UserInfo> ulist = userService.getListForServiceEnd(1, today, end, EsQueryPageUtil.queryPage9999);
+		if (ulist != null) {
+			for (UserInfo u : ulist) {
+				WxPushUtil.pushSystem1(u.getWxpush(), "您的<系统登录>服务于" + u.getS1() + "到期,如有需要,请联系管理员及时续约！");
+			}
+		}
+
+		List<UserInfo> ulist2 = userService.getListForServiceEnd(2, today, end, EsQueryPageUtil.queryPage9999);
+		if (ulist2 != null) {
+			for (UserInfo u : ulist2) {
+				WxPushUtil.pushSystem1(u.getWxpush(), "您的<推荐>服务于" + u.getS2() + "到期,如有需要,请联系管理员及时续约！");
+			}
+		}
+	}
+
 	// 股东人数预警
 	public HashSet<String> getListForFetchHolder() {
 		HashSet<String> allf = new HashSet<String>();
-		List<UserInfo> ulist = userService.getUserListForMonitor();
+		List<UserInfo> ulist = userService.getUserListForMonitorS1();
 		for (UserInfo u : ulist) {
 			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 1, 0, 0);
 			if (list != null) {
@@ -472,7 +491,7 @@ public class MonitorPoolService {
 
 	public void jobHolderWarning() {
 		log.info("股东人数预警");
-		List<UserInfo> ulist = userService.getUserListForMonitor();
+		List<UserInfo> ulist = userService.getUserListForMonitorS1();
 		for (UserInfo u : ulist) {
 			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 1, 0, 0);
 			if (list != null) {
@@ -500,7 +519,7 @@ public class MonitorPoolService {
 
 	// 买点:地量
 	public void jobBuyLowVolWarning() {
-		List<UserInfo> ulist = userService.getUserListForMonitor();
+		List<UserInfo> ulist = userService.getUserListForMonitorS1();
 		for (UserInfo u : ulist) {
 			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 1, 0);
 			if (list != null) {
@@ -528,7 +547,7 @@ public class MonitorPoolService {
 
 	// 大宗交易
 	public void jobDzjyWarning() {
-		List<UserInfo> ulist = userService.getUserListForMonitor();
+		List<UserInfo> ulist = userService.getUserListForMonitorS1();
 		for (UserInfo u : ulist) {
 			ThreadsUtil.sleepRandomSecBetween15And30();
 			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 0, 0,
@@ -559,7 +578,7 @@ public class MonitorPoolService {
 	public void priceChk(List<TradeHistInfoDaliyNofq> listNofq, int tradeDate) {
 		if (listNofq != null && listNofq.size() > 0) {
 			Map<String, TradeHistInfoDaliyNofq> map = this.getPoolMap2(listNofq);
-			List<UserInfo> ulist = userService.getUserListForMonitor();
+			List<UserInfo> ulist = userService.getUserListForMonitorS1();
 			for (UserInfo u : ulist) {
 				List<MonitorPoolTemp> list = this.getPoolListForMonitor(u.getId(), 0, 1, false);
 				if (list != null) {
@@ -629,7 +648,7 @@ public class MonitorPoolService {
 
 	// 经营现金流转正监听
 	public void jobXjlWarning() {
-		List<UserInfo> ulist = userService.getUserListForMonitor();
+		List<UserInfo> ulist = userService.getUserListForMonitorS1();
 		for (UserInfo u : ulist) {
 			List<MonitorPoolTemp> list = this.getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0,
 					0, 1);
@@ -647,7 +666,7 @@ public class MonitorPoolService {
 
 	// 快预报监听
 	public void kybMonitor() {
-		List<UserInfo> ulist = userService.getUserListForMonitor();
+		List<UserInfo> ulist = userService.getUserListForMonitorS1();
 		for (UserInfo u : ulist) {
 			List<MonitorPoolTemp> list = this.getList(u.getId(), "", 0, 0, 1, 0, EsQueryPageUtil.queryPage9999, "", 0,
 					0, 0);

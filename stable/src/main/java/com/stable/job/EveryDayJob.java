@@ -52,6 +52,8 @@ public class EveryDayJob extends MySimpleJob {
 
 	@Override
 	public void myexecute(ShardingContext sc) {
+		log.info("1.服务到期");
+		monitorPoolService.userExpired();
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
 		int date = Integer.valueOf(DateUtil.getTodayYYYYMMDD());

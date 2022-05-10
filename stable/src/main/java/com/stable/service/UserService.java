@@ -41,7 +41,7 @@ public class UserService {
 	@Autowired
 	private UserAmtLogDao userAmtLogDao;
 
-	public List<UserInfo> getUserListForMonitor() {
+	public List<UserInfo> getUserListForMonitorS1() {
 		List<UserInfo> r = new LinkedList<UserInfo>();
 		int today = DateUtil.getTodayIntYYYYMMDD();
 		UserInfo q = new UserInfo();
@@ -73,7 +73,7 @@ public class UserService {
 		if (user.getS2() > 0) {
 			bqb.must(QueryBuilders.rangeQuery("s2").gte(user.getS2()));
 		}
-		FieldSortBuilder sort = SortBuilders.fieldSort("rptDate").unmappedType("integer").order(SortOrder.DESC);
+		FieldSortBuilder sort = SortBuilders.fieldSort("createDate").unmappedType("integer").order(SortOrder.ASC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
@@ -84,6 +84,27 @@ public class UserService {
 			return page.getContent();
 		}
 		log.info("no UserInfo for req={}", user);
+		return null;
+	}
+
+	public List<UserInfo> getListForServiceEnd(int stype, int start, int end, EsQueryPageReq querypage) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		if (stype == 1) {
+			bqb.must(QueryBuilders.rangeQuery("s1").gte(start).lte(end));
+		}
+		if (stype == 2) {
+			bqb.must(QueryBuilders.rangeQuery("s2").gte(start).lte(end));
+		}
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+
+		Page<UserInfo> page = userDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		log.info("no UserInfo for getListForWarning");
 		return null;
 	}
 
