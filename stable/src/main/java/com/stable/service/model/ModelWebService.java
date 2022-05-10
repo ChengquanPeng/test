@@ -341,8 +341,8 @@ public class ModelWebService {
 		String code = req.getCode();
 		int pls = req.getPls();
 		int timemonth = req.getTimemonth();
-		if (pls != 1 && pls != 2) {
-			throw new RuntimeException("i != 1 && i != 2 ? ");
+		if (pls != 0 && pls != 1 && pls != 2) {
+			throw new RuntimeException("i != 0 && i != 1 && i != 2 ? ");
 		}
 
 		int date = -1;
@@ -367,10 +367,10 @@ public class ModelWebService {
 				date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, days));
 			}
 		}
-		if (date != 1) {
-			String remark = (req.getBuyRea() + " " + req.getSoldRea()).trim();
-			CodeBaseModel2 c = getLastOneByCode2(code);
 
+		CodeBaseModel2 model = getLastOneByCode2(code);
+		String remark = (req.getBuyRea() + " " + req.getSoldRea()).trim();
+		if (date != 1) {
 			MonitorPoolTemp pool = monitorPoolService.getMonitorPoolById(userId, code);
 			if (pls == 2) {// 2不在池子
 				pool.setMonitor(MonitorType.NO.getCode());
@@ -386,7 +386,7 @@ public class ModelWebService {
 				pool.setBuyLowVol(0);
 				pool.setYearHigh1(0.0);
 				pool.setShotPointCheck(0);
-			} else if (pls == 1 && c.getPls() != 1) {// 1不在池子，且原来不等于1
+			} else if (pls == 1 && model.getPls() != 1) {// 1不在池子，且原来不等于1
 				pool.setMonitor(MonitorType.MANUAL.getCode());
 				pool.setUpTodayChange(3);
 				pool.setRealtime(1);
@@ -401,13 +401,12 @@ public class ModelWebService {
 			pool.setRemark(remark);
 			monitorPoolDao.save(pool);
 
-			BeanCopy.copy(req, c);
-			c.setPls(pls);
-			c.setPlst(date);
-			c.setLstmt(DateUtil.getTodayIntYYYYMMDD());
-			c.setBuyRea(remark);
-			codeBaseModel2Dao.save(c);
+			BeanCopy.copy(req, model);
 		}
+		model.setPls(pls);
+		model.setPlst(date);
+		model.setBuyRea(remark);
+		codeBaseModel2Dao.save(model);
 	}
 
 	public List<CodeBaseModel2> getList(ModelReq mr, EsQueryPageReq querypage) {

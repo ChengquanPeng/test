@@ -9,7 +9,6 @@ public class ModelManulReq {
 	int timemonth;
 
 	private int recentPriceYear;
-	private int lstmt = 0;// 上次更新日期
 	private String buyRea; // 买入理由
 	private String soldRea;// 卖出理由
 	private int profit = 0;// 利润空间
