@@ -49,7 +49,11 @@ public class EveryWorkingDayJob extends MySimpleJob {
 		}
 		try {
 			// 日交易
-			next1TradeHistroyJob(today, true);
+			log.info("获取日交易(分红除权)");
+			int result = tradeHistroyService.spiderTodayDaliyTrade(true, today);
+			if (result == 0) {
+				WxPushUtil.pushSystem1("异常执行Seq1=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:0,以后的链条不会被执行");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -57,23 +61,6 @@ public class EveryWorkingDayJob extends MySimpleJob {
 			// next2SortMode6(today);
 		}
 		log.info("流水任务 [end]");
-	}
-
-	private boolean next1TradeHistroyJob(String today, boolean retry) {
-		log.info("获取日交易(分红除权)");
-		int result = tradeHistroyService.spiderTodayDaliyTrade(true, today);
-		if (result != 0) {
-			// WxPushUtil.pushSystem1("Seq1=>正常执行=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:" +
-			// result);
-			return true;
-		} else {
-			if (retry) {
-				return next1TradeHistroyJob(today, false);// 重试
-			} else {
-				WxPushUtil.pushSystem1("异常执行Seq1=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:0,以后的链条不会被执行");
-				return false;
-			}
-		}
 	}
 
 	@Override

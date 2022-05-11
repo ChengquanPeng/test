@@ -111,6 +111,20 @@ public class DaliyTradeHistroyService {
 	}
 
 	public synchronized int spiderTodayDaliyTrade(boolean isJob, String today) {
+		log.info("获取日交易(分红除权)");
+		boolean warning = true;
+		int result = spiderTodayDaliyTrade(true, today, warning);
+		if (result != 0) {
+			return result;
+		} else {
+			warning = false;
+			result = spiderTodayDaliyTrade(true, today, warning);
+			return result;
+		}
+
+	}
+
+	private synchronized int spiderTodayDaliyTrade(boolean isJob, String today, boolean warning) {
 		try {
 			JSONArray array = tushareSpider.getStockDaliyTrade(null, today, null, null);
 			if (array == null || array.size() <= 0) {
@@ -206,7 +220,9 @@ public class DaliyTradeHistroyService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error(e.getMessage(), e);
-			WxPushUtil.pushSystem1("前复权qfq获取异常，获取日期:" + today);
+			if (warning) {
+				WxPushUtil.pushSystem1("前复权qfq获取异常，获取日期:" + today);
+			}
 		}
 		return 0;
 
