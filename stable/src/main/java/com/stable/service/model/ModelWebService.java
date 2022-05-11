@@ -281,16 +281,20 @@ public class ModelWebService {
 						.append(dh.getDzjyp60d()).append("%)");
 			}
 		}
-		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
+
 		// 减持
 		if (showMore) {
+			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 			ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLastStat(dh.getCode(), 0);
 			if (dh.getReducZb() > 0 || rhss.getYg() > 0) {
 				sb5.append("1年减持:").append(rhss.getT()).append("次,").append(rhss.getYg()).append("亿股,流通占比:")
 						.append(dh.getReducZb()).append("%)");
 			}
+			if (dh.getShootingw() == 1) {
+				sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
+				sb5.append("<font color='red'>K线攻击形态</font>");
+			}
 			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
-
 			// 是否确定
 			if (dh.getPls() == 0) {
 				sb5.append("人工: 未确定");
@@ -300,6 +304,7 @@ public class ModelWebService {
 				sb5.append("人工: 已排除");
 			}
 		}
+
 		resp.setZfjjInfo(sb5.toString());
 		return resp;
 	}
@@ -334,28 +339,30 @@ public class ModelWebService {
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {
 			for (CodeBaseModel2 dh : list) {
-				if (!showMore && isPvlist(dh.getCode())) {
-					continue;
-				}
-				CodeBaseModelResp resp = getModelResp(dh, showMore);
-				res.add(resp);
 				// 备注
 				if (showMore) {
 					if (userId != Constant.MY_ID) {
-						resp.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, resp.getCode()).getRemark());
+						dh.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, dh.getCode()).getRemark());
 					}
 				} else {
-					resp.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, resp.getCode()).getRemark());
-					resp.setShooting1(0);
-					resp.setShooting2(0);
-					resp.setShooting3(0);
-					resp.setShooting4(0);
-					resp.setShooting5(0);
-					resp.setShooting6(0);
-					resp.setShooting8(0);
-					resp.setShooting9(0);
-					resp.setReducZb(0);
+					if (isPvlist(dh.getCode())) {// 私有列表
+						continue;
+					}
+					dh.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, dh.getCode()).getRemark());
+					dh.setShooting1(0);
+					dh.setShooting2(0);
+					dh.setShooting3(0);
+					dh.setShooting4(0);
+					dh.setShooting5(0);
+					dh.setShooting6(0);
+					dh.setShooting8(0);
+					dh.setShooting9(0);
+					dh.setShootingw(0);
+					dh.setReducZb(0);
 				}
+				CodeBaseModelResp resp = getModelResp(dh, showMore);
+				res.add(resp);
+
 			}
 		}
 		return res;
@@ -513,6 +520,7 @@ public class ModelWebService {
 				bqb.must(QueryBuilders.rangeQuery("mkv").gte(mkv2));
 			}
 		}
+
 		if (mr.getTagIndex() > 0) {
 			if (mr.getTagIndex() == 1) {
 				bqb.must(QueryBuilders.matchPhraseQuery("sortChips", 1));// 吸筹-收集筹码短线
@@ -547,6 +555,9 @@ public class ModelWebService {
 			} else if (mr.getShooting() == 9) {
 				bqb.must(QueryBuilders.matchPhraseQuery("shooting9", 1));
 			}
+		}
+		if ("1".equals(mr.getKline())) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shootingw", 1));
 		}
 		if (StringUtils.isNotBlank(mr.getTotalAmt())) {
 			bqb.must(QueryBuilders.rangeQuery("dzjy365d").gte(Double.valueOf(mr.getTotalAmt()) * WAN));
