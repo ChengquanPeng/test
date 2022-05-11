@@ -90,7 +90,7 @@ public class CodeModelService {
 	@Autowired
 	private AvgService avgService;
 	@Autowired
-	private SortV6Service sortV6Service;
+	private Sort6Service sortV6Service;
 	@Autowired
 	private MonitorPoolUserDao monitorPoolDao;
 	@Autowired
