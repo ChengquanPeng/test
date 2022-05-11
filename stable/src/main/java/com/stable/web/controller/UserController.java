@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.UserService;
+import com.stable.service.model.ModelWebService;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -18,6 +19,8 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private ModelWebService modelWebService;
 
 	/**
 	 * 根据ID查询用户
@@ -120,13 +123,66 @@ public class UserController {
 	}
 
 	/**
-	 * 用户充值
+	 * 更新
 	 */
 	@RequestMapping(value = "/user/manul/updateamt")
 	public ResponseEntity<JsonResult> updateamt(long id, int stype, int days) {
 		JsonResult r = new JsonResult();
 		try {
 			userService.manulUpdate(id, stype, days);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * pvlist-私有列表
+	 */
+	@RequestMapping(value = "/my/pvlist")
+	public ResponseEntity<JsonResult> pvlist() {
+		JsonResult r = new JsonResult();
+		try {
+			r.setResult(this.modelWebService.pvlist);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * pvlist-私有列表
+	 */
+	@RequestMapping(value = "/my/addpvlist")
+	public ResponseEntity<JsonResult> addpvlist(String pvlist) {
+		JsonResult r = new JsonResult();
+		try {
+			modelWebService.addPvList(pvlist == null ? "" : pvlist.trim());
+			r.setResult(this.modelWebService.pvlist);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * pvlist-私有列表
+	 */
+	@RequestMapping(value = "/sendmsg")
+	public ResponseEntity<JsonResult> sendmsg(int type, String msg) {
+		JsonResult r = new JsonResult();
+		try {
+			
+			r.setResult(this.modelWebService.pvlist);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

@@ -249,5 +249,18 @@ public class UserService {
 		return DateUtil.addDate(startdate, days);
 	}
 
-	// 定时任务-通知和终止
+	/*
+	 * type:服务类型, msg:服务,
+	 */
+	public synchronized void sendMsg(int type, String msg) {
+		if (type == 1) {// 所有在线服务1
+
+		}
+		if (type == 2) {// 所有在线服务2
+
+		}
+		if (type == 9) {// 所有服务
+
+		}
+	}
 }

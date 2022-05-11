@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.constant.RedisConstant;
 import com.stable.enums.MonitorType;
 import com.stable.enums.SylType;
 import com.stable.enums.ZfStatus;
@@ -36,6 +39,9 @@ import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
+import com.stable.utils.ErrorLogFileUitl;
+import com.stable.utils.RedisUtil;
+import com.stable.utils.ThreadsUtil;
 import com.stable.vo.ReducingHoldingSharesStat;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
@@ -65,6 +71,9 @@ public class ModelWebService {
 	private MonitorPoolUserDao monitorPoolDao;
 	@Autowired
 	private ReducingHoldingSharesService reducingHoldingSharesService;
+	@Autowired
+	private RedisUtil redisUtil;
+	public String pvlist = "";
 
 	private long WAN = CurrencyUitl.WAN_N.longValue();
 
@@ -295,12 +304,39 @@ public class ModelWebService {
 		return resp;
 	}
 
+	@PostConstruct
+	public void initpvlist() {
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					ThreadsUtil.sleepRandomSecBetween5And15();
+					pvlist = redisUtil.get(RedisConstant.RDS_PV_STOCK_LIST, "");
+				} catch (Exception e) {
+					ErrorLogFileUitl.writeError(e, "错误的pvlist init", "", "");
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	}
+
+	public void addPvList(String list) {
+		redisUtil.set(RedisConstant.RDS_PV_STOCK_LIST, list);
+		pvlist = list;
+	}
+
+	private boolean isPvlist(String code) {
+		return pvlist.contains(code);
+	}
+
 	public List<CodeBaseModelResp> getListForWeb(ModelReq mr, EsQueryPageReq querypage, boolean showMore, long userId) {
 		log.info("CodeBaseModel getListForWeb mr={}", mr);
 		List<CodeBaseModel2> list = getList(mr, querypage);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		if (list != null) {
 			for (CodeBaseModel2 dh : list) {
+				if (!showMore && isPvlist(dh.getCode())) {
+					continue;
+				}
 				CodeBaseModelResp resp = getModelResp(dh, showMore);
 				res.add(resp);
 				// 备注

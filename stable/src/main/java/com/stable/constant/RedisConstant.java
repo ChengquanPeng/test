@@ -24,6 +24,8 @@ public class RedisConstant {
 	public static final String RDS_LOGIN_KEY_ = "RDS_LOGIN_KEY_";
 	// 登录失败次数
 	public static final String RDS_LOGIN_ERROR_TIME_ = "RDS_LOGIN_ERROR_TIME_";
+	// RDS_PV_STOCK_LIST
+	public static final String RDS_PV_STOCK_LIST = "RDS_PV_STOCK_LIST";
 	// 登录IP
 //	public static final String RDS_LOGIN_IPS_ = "RDS_LOGIN_IPS_";
 }
