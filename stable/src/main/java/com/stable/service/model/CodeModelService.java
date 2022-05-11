@@ -90,8 +90,6 @@ public class CodeModelService {
 	@Autowired
 	private AvgService avgService;
 	@Autowired
-	private Sort6Service sortV6Service;
-	@Autowired
 	private MonitorPoolUserDao monitorPoolDao;
 	@Autowired
 	private ChipsZfService chipsZfService;
@@ -111,6 +109,10 @@ public class CodeModelService {
 	private BuyBackService buyBackService;
 	@Autowired
 	private ReducingHoldingSharesService reducingHoldingSharesService;
+	@Autowired
+	private Sort0Service sort0Service;
+	@Autowired
+	private Sort6Service sort6Service;
 
 	public synchronized void runJobv2(int date, boolean isweekend) {
 		try {
@@ -321,6 +323,7 @@ public class CodeModelService {
 		}
 
 		// 系统指标：自动化监听
+		newOne.setShootingw(0);
 		if (isOk1 || isOk2 || isOk8 || isOk9) {
 			int motp = 0;
 			if (isOk8) {
@@ -350,6 +353,7 @@ public class CodeModelService {
 				pool.setShotPointCheck(1);
 				pool.setRemark(Constant.AUTO_MONITOR + this.modelWebService.getSystemPoint(newOne, Constant.FEN_HAO));
 			}
+			sort0Service.attackAndW(code, tradeDate, newOne);
 		}
 		// ==============技术面-量价==============
 		// 一年新高
@@ -476,7 +480,7 @@ public class CodeModelService {
 		int tradeDate = newOne.getDate();
 		newOne.setSortMode7(0);
 		// 短线模型7(箱体震荡新高，是否有波浪走势)
-		if (sortV6Service.isWhiteHorseForSortV7(code, tradeDate)) {
+		if (sort6Service.isWhiteHorseForSortV7(code, tradeDate)) {
 			newOne.setSortMode7(1);
 		}
 	}

@@ -410,7 +410,7 @@ public class DaliyTradeHistroyService {
 
 	public List<DaliyTradeHistResp> queryListByCodeByWebPage(String code, EsQueryPageReq queryPage) {
 		List<DaliyTradeHistResp> res = new LinkedList<DaliyTradeHistResp>();
-		List<TradeHistInfoDaliy> list = this.queryListByCode(code, 0, 0, queryPage, SortOrder.DESC);
+		List<TradeHistInfoDaliy> list = this.queryListByCodeQfq(code, 0, 0, queryPage, SortOrder.DESC);
 		if (list != null) {
 			for (TradeHistInfoDaliy dh : list) {
 				DaliyTradeHistResp resp = new DaliyTradeHistResp();
@@ -425,7 +425,7 @@ public class DaliyTradeHistroyService {
 	public List<TradeHistInfoDaliy> queryListByCodeWithLastQfq(String code, int startDate, int endDate,
 			EsQueryPageReq queryPage, SortOrder s) {
 		int qfqDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
-		List<TradeHistInfoDaliy> db = queryListByCode(code, startDate, endDate, queryPage, s);
+		List<TradeHistInfoDaliy> db = queryListByCodeQfq(code, startDate, endDate, queryPage, s);
 		boolean needFetch = false;
 //		log.info("{},qfqDate={}", code, qfqDate);
 //		log.info("db is null =" + (db == null));
@@ -475,14 +475,14 @@ public class DaliyTradeHistroyService {
 //			new Exception().printStackTrace();
 			String today = DateUtil.getTodayYYYYMMDD();
 			if (spiderDaliyTradeHistoryInfoFromIPOCenter(code, today, 0)) {
-				return queryListByCode(code, startDate, endDate, queryPage, s);
+				return queryListByCodeQfq(code, startDate, endDate, queryPage, s);
 			}
 			return null;
 		}
 		return db;
 	}
 
-	private List<TradeHistInfoDaliy> queryListByCode(String code, int startDate, int endDate, EsQueryPageReq queryPage,
+	public List<TradeHistInfoDaliy> queryListByCodeQfq(String code, int startDate, int endDate, EsQueryPageReq queryPage,
 			SortOrder s) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
