@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +28,9 @@ public class SortV6Service {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	// 符合短线 //短线模型6(前期3-50%吸筹，深度回踩突然涨停后再2-5个交易日回踩拉起,涨停日不放量，超过涨停价格后买入，买入2内未大幅拉升放弃
-	//sortV6Service.isWhiteHorseForSortV6(sortV6Service.is15DayTodayPriceOk(code, tradeDate))
-	
+	// sortV6Service.isWhiteHorseForSortV6(sortV6Service.is15DayTodayPriceOk(code,
+	// tradeDate))
+
 	/**
 	 * 1.15个交易日内有9.5%的涨幅,且涨停日有回调
 	 */
@@ -168,28 +168,29 @@ public class SortV6Service {
 	 * 箱体新高
 	 */
 	public boolean isWhiteHorseForSortV7(String code, int date) {
-		List<TradeHistInfoDaliy> l1 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
+		List<TradeHistInfoDaliy> l5 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
 				EsQueryPageUtil.queryPage5, SortOrder.DESC);
-		TradeHistInfoDaliy maxDate = l1.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed)).get();
+		TradeHistInfoDaliy maxDate5 = l5.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed)).get();
 
-		List<TradeHistInfoDaliy> l2 = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0,
-				l1.get(l1.size() - 1).getDate(), EsQueryPageUtil.queryPage120, SortOrder.DESC);// 用5个交易日的最后一个
+		List<TradeHistInfoDaliy> l120t = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0,
+				l5.get(l5.size() - 1).getDate(), EsQueryPageUtil.queryPage120, SortOrder.DESC);// 用5个交易日的最后一个
 
-		List<TradeHistInfoDaliy> l3 = new LinkedList<TradeHistInfoDaliy>();
-		for (TradeHistInfoDaliy r : l2) {
-			l3.add(r);
+		List<TradeHistInfoDaliy> l120 = new LinkedList<TradeHistInfoDaliy>();
+		for (TradeHistInfoDaliy r : l120t) {
+			l120.add(r);
 		}
-		l3.remove(0);// 移除当天
-		TradeHistInfoDaliy maxDate2 = l3.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+		l120.remove(0);// 移除当天
+		TradeHistInfoDaliy maxDate120 = l120.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh))
+				.get();
 		// 是否半年收盘新高
-		if (maxDate.getDate() != maxDate2.getDate() && maxDate.getClosed() > maxDate2.getHigh()) {
-			double maxPrice = maxDate2.getHigh();
-			TradeHistInfoDaliy td = l3.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
+		if (maxDate5.getDate() != maxDate120.getDate() && maxDate5.getClosed() > maxDate120.getHigh()) {
+			double maxPrice = maxDate120.getHigh();
+			TradeHistInfoDaliy td = l120.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
 			double minPrice = td.getLow();
 
 			double persent3 = CurrencyUitl.cutProfit(minPrice, maxPrice);
-			log.info("{} {},min:{}->{} max:{}->{} 半年整幅{}%", code, date, td.getDate(), td.getLow(), maxDate2.getDate(),
-					maxDate2.getHigh(), persent3);
+			log.info("{} {},min:{}->{} max:{}->{} 半年整幅{}%", code, date, td.getDate(), td.getLow(), maxDate120.getDate(),
+					maxDate120.getHigh(), persent3);
 			if (persent3 <= 40.0) {
 				return true;
 			}
@@ -197,10 +198,6 @@ public class SortV6Service {
 		log.info("{} {} 最近5个交易日收盘不是半年新高", code, date);
 		return false;
 	}
-
-	public static final Semaphore sempAll = new Semaphore(1);
-
-	EsQueryPageReq req00 = EsQueryPageUtil.queryPage6;
 
 	/**
 	 * 5.前面交易-交易量
@@ -231,21 +228,5 @@ public class SortV6Service {
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * 1.15个交易日内有9.5%的涨幅,且涨停日有回调
-	 */
-	public TradeHistInfoDaliyNofq is10DayTodayPriceOk(String code, int date) {
-		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
-				EsQueryPageUtil.queryPage10, SortOrder.DESC);
-
-		double maxPrice = l2.stream().max(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getHigh)).get().getHigh();
-		double minPrice = l2.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getLow)).get().getLow();
-		double persent3 = CurrencyUitl.cutProfit(minPrice, maxPrice);
-		if (persent3 <= 30.0 && isTradeOkBefor5ForVol(code, 00)) {
-			// ?
-		}
-		return null;
 	}
 }
