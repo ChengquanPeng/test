@@ -35,6 +35,9 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int shootingw = 0;// 行情指标w:横盘w
 
+	@Field(type = FieldType.Integer)
+	private int moni = 0;// 是否监听
+
 	@Field(type = FieldType.Double)
 	private double reducZb;// 减持占比
 

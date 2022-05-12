@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stable.constant.Constant;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.CodeModelService;
-import com.stable.service.model.ModelWebService;
+import com.stable.service.model.WebModelService;
 import com.stable.utils.DateUtil;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.JsonResult;
@@ -24,7 +24,7 @@ import com.stable.vo.spi.req.EsQueryPageReq;
 @RestController
 public class CodeModelController {
 	@Autowired
-	private ModelWebService modelWebService;
+	private WebModelService modelWebService;
 	@Autowired
 	private CodeModelService codeModelService;
 	@Autowired

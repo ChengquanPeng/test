@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
-import com.stable.service.model.ModelWebService;
+import com.stable.service.model.WebModelService;
 import com.stable.utils.OSystemUtil;
 import com.stable.utils.WxPushUtil;
 
@@ -19,7 +19,7 @@ import com.stable.utils.WxPushUtil;
 public class SysStatusJob implements SimpleJob {
 
 	@Autowired
-	private ModelWebService modelWebService;
+	private WebModelService modelWebService;
 
 	@Override
 	public void execute(ShardingContext sc) {

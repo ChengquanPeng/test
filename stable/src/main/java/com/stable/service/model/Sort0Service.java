@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.KlineAttack;
@@ -48,6 +49,16 @@ public class Sort0Service {
 		}
 		List<TradeHistInfoDaliy> l120 = daliyTradeHistroyService.queryListByCodeQfq(code, startDate, 0,
 				EsQueryPageUtil.queryPage500, SortOrder.DESC);
+
+		double maxPrice = l120.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed)).get()
+				.getClosed();
+		double minPrice = l120.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getClosed)).get()
+				.getClosed();
+		double profit = CurrencyUitl.cutProfit(minPrice, maxPrice);
+		if (profit >= 65) {// 半年之间整幅超过65%中间去掉(收盘价)
+			return false;
+		}
+
 		Map<Integer, KlineAttack> map = new HashMap<Integer, KlineAttack>();
 		// 按月区分最高最低
 		for (TradeHistInfoDaliy r : l120) {
@@ -77,6 +88,7 @@ public class Sort0Service {
 				return o2.getMonth() - o1.getMonth() > 0 ? 1 : -1;
 			}
 		});
+
 //		System.err.println("=======================");
 //		for (KlineAttack ka : rl) {
 //			System.err.println(ka);
@@ -94,6 +106,16 @@ public class Sort0Service {
 			// 除开当前月，上月的最高和最低都高于
 			return true;
 		}
+
+		// 条件2:下移不多。
+		if (curr.getHigh() > last.getHigh() && curr.getLow() <= last.getLow()) {
+			double p2 = CurrencyUitl.cutProfit(last.getLow(), curr.getLow());
+			if (p2 <= 5) {// 5个点左右。
+				return true;
+			}
+
+		}
+
 		return false;
 	}
 }

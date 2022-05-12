@@ -17,7 +17,7 @@ import com.stable.es.dao.base.RzrqDaliyDao;
 import com.stable.es.dao.base.RztjDao;
 import com.stable.service.DzjyService;
 import com.stable.service.StockBasicService;
-import com.stable.service.model.ModelWebService;
+import com.stable.service.model.WebModelService;
 import com.stable.service.model.Sort1ModeService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -51,7 +51,7 @@ public class RzrqSpider {
 	@Autowired
 	private DzjyService dzjyService;
 	@Autowired
-	private ModelWebService modelWebService;
+	private WebModelService modelWebService;
 	@Autowired
 	private RzrqDaliyDao rzrqDaliyDao;
 	@Autowired

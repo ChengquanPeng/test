@@ -36,7 +36,7 @@ import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.service.UserService;
-import com.stable.service.model.ModelWebService;
+import com.stable.service.model.WebModelService;
 import com.stable.service.model.ShotPointCheck;
 import com.stable.spider.ths.ThsAnnSpider;
 import com.stable.spider.ths.ThsBonusSpider;
@@ -77,7 +77,7 @@ public class MonitorPoolService {
 	@Autowired
 	private EsCodeBaseModel2Dao codeBaseModel2Dao;
 	@Autowired
-	private ModelWebService modelWebService;
+	private WebModelService modelWebService;
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired

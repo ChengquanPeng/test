@@ -15,7 +15,7 @@ import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
-import com.stable.service.model.ModelWebService;
+import com.stable.service.model.WebModelService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.FinanceBaseInfo;
@@ -27,7 +27,7 @@ import com.stable.vo.http.resp.CodeBaseModelResp;
 @Controller
 public class CodeController {
 	@Autowired
-	private ModelWebService modelWebService;
+	private WebModelService modelWebService;
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired

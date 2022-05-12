@@ -14,7 +14,7 @@ import com.stable.constant.RedisConstant;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.UserService;
-import com.stable.service.model.ModelWebService;
+import com.stable.service.model.WebModelService;
 import com.stable.service.model.ShotPointCheck;
 import com.stable.service.model.prd.Prd1RealtimeMonitor;
 import com.stable.service.model.prd.Prd1Service;
@@ -41,7 +41,7 @@ public class RealtimeMonitoringService {
 	private StockBasicService stockBasicService;
 	private Map<String, RealtimeDetailsAnalyzer> map = null;
 	@Autowired
-	private ModelWebService modelWebService;
+	private WebModelService modelWebService;
 	@Autowired
 	private ShotPointCheck shotPointCheck;
 	@Autowired

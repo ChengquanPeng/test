@@ -72,7 +72,8 @@
 			</div>
 			<div class="mg">
 				<div class="input-group">
-					系统指标:<select id="shooting">
+					所有监听:<input type="checkbox" id="monitor" />&nbsp;&nbsp; 系统指标:<select
+						id="shooting">
 						<option value="0" selected="selected">无限制</option>
 						<option value="2">底部大票-增发已核准-超50亿</option>
 						<option value="1">底部小票-大宗-超5%</option>
@@ -185,7 +186,6 @@
 									param.byellow = $('#byellow').val();
 									param.bsyl = $('#bsyl').val();
 
-									param.monitor = $('#monitor').val();
 									param.mkv = $('#mkv').val();
 									param.mkv2 = $('#mkv2').val();
 									param.pls = $('#pls').val();
@@ -212,6 +212,7 @@
 									param.bousOK = 0;
 									param.compnayType = 0;
 									param.kline = 0;
+									param.monitor = 0;
 									param.zfObjType = $('#zfObjType').val();
 
 									if (document.getElementById("finOK").checked) {
@@ -228,6 +229,9 @@
 									}
 									if (document.getElementById("zfself").checked) {
 										param.zfself = 1;
+									}
+									if (document.getElementById("monitor").checked) {
+										param.monitor = 1;
 									}
 
 									if (!document.getElementById("asc").checked) {

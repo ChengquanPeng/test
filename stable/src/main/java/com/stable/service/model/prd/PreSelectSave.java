@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.stable.es.dao.base.Prd1Dao;
 import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
-import com.stable.service.model.ModelWebService;
+import com.stable.service.model.WebModelService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.FileWriteUitl;
 import com.stable.vo.bus.Prd1;
@@ -32,7 +32,7 @@ public class PreSelectSave {
 	@Value("${html.folder}")
 	private String htmlFolder;
 	@Autowired
-	private ModelWebService modelWebService;
+	private WebModelService modelWebService;
 	@Autowired
 	private ConceptService conceptService;
 

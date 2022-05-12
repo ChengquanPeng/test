@@ -56,7 +56,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
-public class ModelWebService {
+public class WebModelService {
 	@Autowired
 	private EsFinanceBaseInfoHyDao esFinanceBaseInfoHyDao;
 	@Autowired
@@ -303,6 +303,9 @@ public class ModelWebService {
 			} else if (dh.getPls() == 2) {
 				sb5.append("人工: 已排除");
 			}
+			if (dh.getMoni() > 0) {
+				sb5.append("        ,已监听:").append(MonitorType.getCodeName(dh.getMoni()));
+			}
 		}
 
 		resp.setZfjjInfo(sb5.toString());
@@ -478,13 +481,8 @@ public class ModelWebService {
 			}
 		}
 
-		if (StringUtils.isNotBlank(mr.getMonitor())) {
-			int m = Integer.valueOf(mr.getMonitor());
-			if (m == 9999) {
-				bqb.must(QueryBuilders.rangeQuery("monitor").gte(1));
-			} else {
-				bqb.must(QueryBuilders.matchPhraseQuery("monitor", m));
-			}
+		if ("1".equals(mr.getMonitor())) {// 所有监听
+			bqb.must(QueryBuilders.rangeQuery("moni").gte(1));
 		}
 		if (mr.getPls() != -1) {
 			if (mr.getPls() == 3) {

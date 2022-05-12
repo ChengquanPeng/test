@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.UserService;
-import com.stable.service.model.ModelWebService;
+import com.stable.service.model.WebModelService;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
@@ -20,7 +20,7 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 	@Autowired
-	private ModelWebService modelWebService;
+	private WebModelService modelWebService;
 
 	/**
 	 * 根据ID查询用户

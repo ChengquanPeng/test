@@ -72,7 +72,7 @@ public class CodeModelService {
 	@Autowired
 	private EsCodeBaseModel2Dao codeBaseModel2Dao;
 	@Autowired
-	private ModelWebService modelWebService;
+	private WebModelService modelWebService;
 	@Autowired
 	private FinanceService financeService;
 	@Autowired
@@ -375,6 +375,13 @@ public class CodeModelService {
 		susWhiteHorses(code, newOne);
 		// 短线模型
 		sortModel(newOne);
+
+		// 同步监听
+		if (pool.getMonitor() > MonitorType.NO.getCode()) {
+			newOne.setMoni(pool.getMonitor());
+		} else {
+			newOne.setMoni(0);
+		}
 	}
 
 	// 周末计算-至少N年未大涨?
