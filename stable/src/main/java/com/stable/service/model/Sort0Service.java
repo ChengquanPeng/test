@@ -88,7 +88,6 @@ public class Sort0Service {
 				return o2.getMonth() - o1.getMonth() > 0 ? 1 : -1;
 			}
 		});
-
 //		System.err.println("=======================");
 //		for (KlineAttack ka : rl) {
 //			System.err.println(ka);
@@ -115,7 +114,17 @@ public class Sort0Service {
 			}
 
 		}
-
 		return false;
 	}
+
+//	@javax.annotation.PostConstruct
+//	private void a() {
+//		new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				System.err.println("result=" + attackAndW("601019", 20220512));
+//
+//			}
+//		}).start();
+//	}
 }
