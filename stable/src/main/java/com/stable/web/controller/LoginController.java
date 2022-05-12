@@ -109,6 +109,13 @@ public class LoginController {
 			r.setResult(Constant.LOGINED_URL_ADMIN);
 			r.setStatus(JsonResult.OK);
 			req.getSession().setAttribute(Constant.SESSION_USER, ui);
+		} else if ("ckjc".equals(code)) {
+			UserInfo ui = new UserInfo();
+			ui.setType(2);
+			ui.setId(Long.valueOf(phone));
+			r.setResult(Constant.LOGINED_URL_USERS);
+			r.setStatus(JsonResult.OK);
+			req.getSession().setAttribute(Constant.SESSION_USER, ui);
 		} else {
 			r.setStatus(JsonResult.FAIL);
 			r.setResult("动态码错误");
