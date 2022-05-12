@@ -252,22 +252,25 @@ body {
 	<script type="text/javascript">
 		function dianwo3(code, remark) {
 			var remark = prompt(code + " 移除监听", "");
-			$.ajax({
-				url : "/web/monitorPool/delMonit", //访问地址--action地址
-				type : "post", //提交方式
-				data : {
-					code : code,
-					remark : remark
-				}, //提交给服务器的数据
-				success : function(reData) { //回调函数的处理方式
-					if ("OK" == reData.status) {
-						alert("已移除");
-						//window.close();
-					} else {
-						alert("失败:" + reData.result);
+			if (remark == null) {
+			} else {
+				$.ajax({
+					url : "/web/monitorPool/delMonit", //访问地址--action地址
+					type : "post", //提交方式
+					data : {
+						code : code,
+						remark : remark
+					}, //提交给服务器的数据
+					success : function(reData) { //回调函数的处理方式
+						if ("OK" == reData.status) {
+							alert("已移除");
+							//window.close();
+						} else {
+							alert("失败:" + reData.result);
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 	</script>
 </body>
