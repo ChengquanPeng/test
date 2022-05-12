@@ -282,10 +282,11 @@ public class CodeModelService {
 		newOne.setShooting4(0);
 		newOne.setShooting8(0);
 		newOne.setShooting9(0);
+		newOne.setShootingw(0);
 		// 系统指标：自动监听
 		if ((newOne.getBousOK() == 1 || newOne.getFinOK() == 1)) {// 1.基本面没有什么大问题
-			if (newOne.getZfjjupStable() >= 2 || newOne.getZfjjup() >= 2) {// 2.底部没涨
-				if (mkv <= smallStocklimit) {// 市值
+			if (mkv <= smallStocklimit) {// 市值
+				if (newOne.getZfjjupStable() >= 2 || newOne.getZfjjup() >= 2) {// 2.底部没涨
 					if (newOne.getHolderNumT3() > 45.0) {// 三大股东持股比例
 						// 行情指标1：底部小票大宗：超活筹5%,董监高机构代减持?
 						if (newOne.getDzjyp365d() >= 4.5) {// 大宗超过4.5%
@@ -306,7 +307,11 @@ public class CodeModelService {
 						isOk9 = true;
 						log.info("{} 小票，底部横盘定增2年", code);
 					}
-				} else {
+				}
+				// 小市值
+				sort0Service.attackAndW(code, tradeDate, newOne);
+			} else {
+				if (newOne.getZfjjupStable() >= 2 || newOne.getZfjjup() >= 2) {// 2.底部没涨
 					// 行情指标2：底部大票增发：超过50亿(越大越好),股东集中,证监会核准-之前有明显底部拿筹痕迹-涨停？
 					if (newOne.getZfYjAmt() >= ZF_50YI
 							&& ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
@@ -323,7 +328,6 @@ public class CodeModelService {
 		}
 
 		// 系统指标：自动化监听
-		newOne.setShootingw(0);
 		if (isOk1 || isOk2 || isOk8 || isOk9) {
 			int motp = 0;
 			if (isOk8) {
@@ -353,7 +357,6 @@ public class CodeModelService {
 				pool.setShotPointCheck(1);
 				pool.setRemark(Constant.AUTO_MONITOR + this.modelWebService.getSystemPoint(newOne, Constant.FEN_HAO));
 			}
-			sort0Service.attackAndW(code, tradeDate, newOne);
 		}
 		// ==============技术面-量价==============
 		// 一年新高
@@ -367,6 +370,7 @@ public class CodeModelService {
 		}
 		// 短线：妖股形态，短线拉的急，说明货多。一倍了，说明资金已经投入。新高:说明出货失败或者有更多的想法，要继续拉。
 		sort1ModeService.sort1ModeChk(newOne, pool, tradeDate);
+
 		// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
 		susWhiteHorses(code, newOne);
 		// 短线模型
