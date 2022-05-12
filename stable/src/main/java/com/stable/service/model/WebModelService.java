@@ -340,6 +340,7 @@ public class WebModelService {
 		log.info("CodeBaseModel getListForWeb mr={}", mr);
 		List<CodeBaseModel2> list = getList(mr, querypage);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
+		boolean isFilter = StringUtils.isBlank(mr.getCode());
 		if (list != null) {
 			for (CodeBaseModel2 dh : list) {
 				// 备注
@@ -348,7 +349,7 @@ public class WebModelService {
 						dh.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, dh.getCode()).getRemark());
 					}
 				} else {
-					if (isPvlist(dh.getCode())) {// 私有列表
+					if (isFilter && isPvlist(dh.getCode())) {// 私有列表：除非指定code查询，否则过滤
 						continue;
 					}
 					dh.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, dh.getCode()).getRemark());

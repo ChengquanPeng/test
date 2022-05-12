@@ -71,6 +71,9 @@ public class Sort0Service {
 			}
 			ka.addHigh(r.getHigh());
 			ka.addLow(r.getLow());
+			if (CurrencyUitl.cutProfit(r.getLow(), r.getHigh()) > 50) {// 当月整幅超过50%,放弃？
+				return false;
+			}
 		}
 		// 每月振幅
 		List<KlineAttack> rl = new LinkedList<KlineAttack>();
@@ -106,15 +109,16 @@ public class Sort0Service {
 			return true;
 		}
 
-		// 条件2:下移不多。
-		if (curr.getHigh() > last.getHigh() && curr.getLow() <= last.getLow()) {
-			double p2 = CurrencyUitl.cutProfit(last.getLow(), curr.getLow());
-			if (p2 <= 5) {// 5个点左右。
-				return true;
+		// 条件2:近3个月月底部上移
+		double cl = curr.getLow();
+		boolean isOk = true;
+		for (int i = 1; i < 4; i++) {
+			if (cl < rl.get(i).getLow()) {
+				isOk = false;
 			}
-
+			cl = rl.get(i).getLow();
 		}
-		return false;
+		return isOk;
 	}
 
 //	@javax.annotation.PostConstruct
