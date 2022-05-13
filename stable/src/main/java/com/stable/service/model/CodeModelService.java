@@ -319,6 +319,10 @@ public class CodeModelService {
 						log.info("{} 大票，底部增发超过50亿", code);
 					}
 				}
+
+				if (newOne.getActMkv() <= smallStocklimit && newOne.getHolderNumT3() >= 50.0) {
+					sort0Service.attackAndW(code, tradeDate, newOne);
+				}
 			}
 			// 行情指标4：底部股东人数：大幅减少(3年减少40%)
 			if (newOne.getZfjjup() >= 2 && newOne.getHolderNum() < -40.0) {// 股价3年没大涨，人数少了接近一半人
