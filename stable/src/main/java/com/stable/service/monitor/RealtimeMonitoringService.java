@@ -104,7 +104,8 @@ public class RealtimeMonitoringService {
 				for (String code : allmap.keySet()) {
 					log.info(code);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
-					int r = task.init(code, allmap.get(code), stockBasicService.getCodeName2(code), shotPointCheck);
+					int r = task.init(code, allmap.get(code), stockBasicService.getCodeName2(code), shotPointCheck,
+							redisUtil.get(RedisConstant.YEAR_PRICE_ + code, 0.0));
 					if (r == 1) {
 						new Thread(task).start();
 						list.add(task);
@@ -134,15 +135,6 @@ public class RealtimeMonitoringService {
 			// 到点停止所有线程
 			for (RealtimeDetailsAnalyzer t : list) {
 				t.stop();
-			}
-			// 充值新高
-			for (RtmVo rv : listall) {
-				if (rv.highPriceGot) {
-					MonitorPoolTemp mpt = monitorPoolService.getMonitorPoolById(rv.getOrig().getUserId(),
-							rv.getOrig().getCode());
-					mpt.setYearHigh1(0.0);
-					monitorPoolService.saveOrUpdate(mpt);
-				}
 			}
 
 			// 停止线程

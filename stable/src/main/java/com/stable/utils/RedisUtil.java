@@ -219,6 +219,14 @@ public class RedisUtil {
 		return Integer.valueOf(value);
 	}
 
+	public double get(String key, double def) {
+		String value = redisTemplate.opsForValue().get(key);
+		if (StringUtils.isBlank(value)) {
+			return def;
+		}
+		return Double.valueOf(value);
+	}
+
 	/**
 	 * 返回 key 中字符串值的子字符
 	 * 

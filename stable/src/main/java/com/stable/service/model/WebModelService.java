@@ -431,7 +431,6 @@ public class WebModelService {
 				pool.setZfdoneZjh(0);
 				pool.setListenerGg(0);
 				pool.setBuyLowVol(0);
-				pool.setYearHigh1(0.0);
 				pool.setShotPointCheck(0);
 			} else if (pls == 1 && model.getPls() != 1) {// 1不在池子，且原来不等于1
 				pool.setMonitor(MonitorType.MANUAL.getCode());

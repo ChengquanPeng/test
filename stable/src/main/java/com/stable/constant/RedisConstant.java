@@ -28,4 +28,7 @@ public class RedisConstant {
 	public static final String RDS_PV_STOCK_LIST = "RDS_PV_STOCK_LIST";
 	// 登录IP
 //	public static final String RDS_LOGIN_IPS_ = "RDS_LOGIN_IPS_";
+
+	// 一年新高
+	public static final String YEAR_PRICE_ = "YEAR_PRICE_";
 }

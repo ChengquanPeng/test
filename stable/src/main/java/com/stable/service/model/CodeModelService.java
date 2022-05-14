@@ -20,7 +20,6 @@ import com.stable.service.BuyBackService;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.DaliyBasicHistroyService;
-import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.DataChangeService;
 import com.stable.service.DzjyService;
 import com.stable.service.FinanceService;
@@ -38,6 +37,7 @@ import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
+import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.HolderAnalyse;
 import com.stable.vo.bus.CodeBaseModel2;
@@ -50,7 +50,6 @@ import com.stable.vo.bus.HolderPercent;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.StockBaseInfo;
-import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
 import com.stable.vo.bus.ZengFaExt;
@@ -84,8 +83,6 @@ public class CodeModelService {
 	@Autowired
 	private MonitorPoolService monitorPoolService;
 	@Autowired
-	private DaliyTradeHistroyService daliyTradeHistroyService;
-	@Autowired
 	private PriceLifeService priceLifeService;
 	@Autowired
 	private AvgService avgService;
@@ -114,7 +111,7 @@ public class CodeModelService {
 	@Autowired
 	private Sort6Service sort6Service;
 
-	public synchronized void runJobv2(int date, boolean isweekend) {
+	public synchronized void runModel(int date, boolean isweekend) {
 		try {
 			log.info("param date:{}", date);
 			if (!tradeCalService.isOpen(date)) {
@@ -122,6 +119,16 @@ public class CodeModelService {
 			}
 			log.info("final date:{}", date);
 			runByJobv2(date, isweekend);
+
+			// 一年新高
+			try {
+				ThreadsUtil.sleepRandomSecBetween15And30();
+				sort0Service.getYear1High(date);
+			} catch (Exception e) {
+				e.printStackTrace();
+				ErrorLogFileUitl.writeError(e, "一年新高异常", "", "");
+				WxPushUtil.pushSystem1("一年新高异常..");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "CodeModel模型运行异常", "", "");
@@ -363,15 +370,6 @@ public class CodeModelService {
 			}
 		}
 		// ==============技术面-量价==============
-		// 一年新高
-		if (newOne.getPls() == 1) {
-			if (pool.getYearHigh1() <= 0.0) {
-				TradeHistInfoDaliy high = daliyTradeHistroyService.queryHighRecord(code, tradeDate);
-				pool.setYearHigh1(high.getHigh());// 一年新高的价格（前复权）
-			}
-		} else {
-			pool.setYearHigh1(0);
-		}
 		// 短线：妖股形态，短线拉的急，说明货多。一倍了，说明资金已经投入。新高:说明出货失败或者有更多的想法，要继续拉。
 		sort1ModeService.sort1ModeChk(newOne, pool, tradeDate);
 

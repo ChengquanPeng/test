@@ -708,7 +708,7 @@ public class DaliyTradeHistroyService {
 	}
 
 	// 一年新高的价格（前复权）
-	public TradeHistInfoDaliy queryHighRecord(String code, int date) {
+	public TradeHistInfoDaliy queryYear1HighRecord(String code, int date) {
 		List<TradeHistInfoDaliy> list = queryListByCodeWithLastQfq(code, 0, date, EsQueryPageUtil.queryPage250,
 				SortOrder.DESC);
 		if (list != null && list.size() > 0) {

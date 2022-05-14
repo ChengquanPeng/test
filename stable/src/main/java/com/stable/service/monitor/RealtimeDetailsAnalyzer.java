@@ -29,12 +29,13 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean burstPointCheck = false;// 起爆点
 	private ShotPointCheck shotPointCheck;
 	private RtmVo my;
+	private double yearHigh1;
 
 	public void stop() {
 		isRunning = false;
 	}
 
-	public int init(String code, List<RtmVo> t, String codeName, ShotPointCheck shotPointCheck) {
+	public int init(String code, List<RtmVo> t, String codeName, ShotPointCheck shotPointCheck, double yh) {
 		this.code = code;
 		this.codeName = codeName;
 		this.shotPointCheck = shotPointCheck;
@@ -44,6 +45,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			log.info("{}  SINA 今日疑似停牌或者可能没有集合竞价", codeName);
 			chkCodeClosed = true;
 		}
+		this.yearHigh1 = yh;
 		return 1;
 	}
 
@@ -100,8 +102,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						}
 					}
 					// 一年新高
-					if (rv.getOrig().getYearHigh1() > 0 && rt.getHigh() > rv.getOrig().getYearHigh1()
-							&& !rv.highPriceGot) {
+					if (rt.getHigh() > yearHigh1 && !rv.highPriceGot && yearHigh1 > 0) {
 						if (smsg == null) {
 							smsg = " 一年新高! 备注:" + rv.getOrig().getRemark();
 						} else {

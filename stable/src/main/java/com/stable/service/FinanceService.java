@@ -529,7 +529,7 @@ public class FinanceService {
 		}
 		log.info("已完成所有事项");
 		// 运行完财务和行业对比后,重新运行
-		codeModelService.runJobv2(date, true);
+		codeModelService.runModel(date, true);
 	}
 
 	private List<FinanceBaseInfoHangye> executeHangye(int date) {
