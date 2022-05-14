@@ -12,15 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
-import com.stable.constant.RedisConstant;
 import com.stable.service.DaliyTradeHistroyService;
-import com.stable.service.StockBasicService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
-import com.stable.utils.RedisUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.KlineAttack;
-import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 
 /**
@@ -30,19 +26,6 @@ import com.stable.vo.bus.TradeHistInfoDaliy;
 public class Sort0Service {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
-	@Autowired
-	private RedisUtil redisUtil;
-	@Autowired
-	private StockBasicService stockBasicService;
-
-	public void getYear1High(int tradeDate) {
-		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
-		for (StockBaseInfo s : list) {
-			String code = s.getCode();
-			TradeHistInfoDaliy high = daliyTradeHistroyService.queryYear1HighRecord(code, tradeDate);
-			redisUtil.set(RedisConstant.YEAR_PRICE_ + code, high.getHigh());
-		}
-	}
 
 	public void attackAndW(String code, int date, CodeBaseModel2 newOne) {
 		if (attackAndW(code, date)) {

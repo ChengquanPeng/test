@@ -100,6 +100,9 @@ public class WebModelService {
 	public String getSystemPoint(CodeBaseModel2 dh, String splitor) {
 		String s = "";
 		// --中长--
+		if (dh.getShooting10() > 0) {
+			s += "PRE一年新高" + splitor;
+		}
 		if (dh.getShooting1() > 0) {
 			s = "底部小票-大宗-超5%,董监高机构代减持?" + splitor;
 		}
@@ -361,6 +364,7 @@ public class WebModelService {
 					dh.setShooting6(0);
 					dh.setShooting8(0);
 					dh.setShooting9(0);
+					dh.setShooting10(0);
 					dh.setShootingw(0);
 					dh.setReducZb(0);
 				}
@@ -553,6 +557,9 @@ public class WebModelService {
 			} else if (mr.getShooting() == 9) {
 				bqb.must(QueryBuilders.matchPhraseQuery("shooting9", 1));
 			}
+		}
+		if ("1".equals(mr.getPre1Year())) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting10", 1));
 		}
 		if ("1".equals(mr.getKline())) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shootingw", 1));

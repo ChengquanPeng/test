@@ -33,7 +33,6 @@ public class ModelReq {
 	int bousOK;
 	int finOK;
 	int compnayType;
-	String kline;
 
 	int zfObjType;
 	String holderNumT3;
@@ -41,6 +40,8 @@ public class ModelReq {
 
 	String totalAmt;
 	String totalAmt60d;
+	String kline;
+	String pre1Year;
 
 	int channel = 0;
 }
