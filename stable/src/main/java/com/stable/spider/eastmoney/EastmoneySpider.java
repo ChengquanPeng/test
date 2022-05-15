@@ -651,7 +651,7 @@ public class EastmoneySpider {
 	private int getcompanyType(String code) {
 		String url = String.format(urlbase, formatCode2(code));
 		try {
-			log.info("{} 东方财富 company type", code);
+			log.info("{} df company type", code);
 			String s = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url).getElementById("hidctype").getAttribute("value");
 			int r = Integer.valueOf(s);
 			if (r > 0) {
