@@ -327,7 +327,7 @@ public class ThsSpider {
 			ThreadsUtil.sleepRandomSecBetween15And30();
 
 			String url = String.format(urlbase, index, cp.getCode());
-			log.info(url);
+//			log.info(url);
 			DomElement table = null;
 			HtmlPage page = null;
 			try {

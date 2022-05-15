@@ -32,7 +32,7 @@ public class ThsAnnSpider {
 			boolean fetched = false;
 			do {
 				try {
-					log.info(url);
+//					log.info(url);
 					ThreadsUtil.sleepSleep1Seconds();
 					org = HttpUtil.doGet2(url);
 //					UnicodeToCN = UnicodeUtil.UnicodeToCN(org); 整个json有双引号的情况，所以要下面title分开。

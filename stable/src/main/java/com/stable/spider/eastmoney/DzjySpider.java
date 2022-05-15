@@ -114,7 +114,7 @@ public class DzjySpider {
 			trytime++;
 			try {
 				String url = URL_S1 + page + URL_S2 + d + URL_E;
-				log.info(url);
+//				log.info(url);
 				String result = HttpUtil.doGet2(url);
 				result = result.substring(J_QUERY112306735504837667934_1610722345186.length(), result.length() - 2);
 				JSONObject object = JSON.parseObject(result).getJSONObject("result");
@@ -216,7 +216,7 @@ public class DzjySpider {
 				trytime++;
 				try {
 					String url = URL_CODE_S1 + runPage + URL_CODE_S2 + code + URL_CODE_S3;
-					log.info(url);
+//					log.info(url);
 					String result = HttpUtil.doGet2(url);
 					result = result.substring(jQuery112303025386501906322_1640499199509.length(), result.length() - 2);
 					JSONObject object = JSON.parseObject(result);

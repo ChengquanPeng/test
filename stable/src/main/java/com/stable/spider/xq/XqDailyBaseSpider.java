@@ -150,7 +150,7 @@ public class XqDailyBaseSpider {
 			HtmlPage page = null;
 			HtmlElement body = null;
 			try {
-				log.info(url);
+//				log.info(url);
 				page = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url);
 				body = page.getBody();
 				HtmlElement table = body.getElementsByAttribute("table", "class", "quote-info").get(0);// table

@@ -69,7 +69,7 @@ public class JiejinSpider {
 			trytime++;
 			try {
 				String url = URL_S + code + URL_E;
-				log.info(url);
+//				log.info(url);
 				String result = HttpUtil.doGet2(url);
 				result = result.substring(J_QUERY112306735504837667934_1610722345186.length(), result.length() - 1);
 				JSONObject object = JSON.parseObject(result);

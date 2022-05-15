@@ -208,7 +208,7 @@ public class ThsHolderSpider {
 		ThreadsUtil.sleepRandomSecBetween5And15Ths();
 		do {
 			try {
-				log.info(url);
+				//log.info(url);
 				header.put("Referer", host + code + "/");
 				HtmlPage page = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url, header);
 				HtmlElement body = page.getBody();

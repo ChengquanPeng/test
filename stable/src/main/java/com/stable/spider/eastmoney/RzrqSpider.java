@@ -148,7 +148,7 @@ public class RzrqSpider {
 			trytime++;
 			try {
 				String url = String.format(URL_S1, d, page, page, page, page, System.currentTimeMillis());
-				log.info(url);
+//				log.info(url);
 				String result = HttpUtil.doGet2(url);
 				result = result.substring(datatable577190.length(), result.length() - 2);
 				JSONObject object = JSON.parseObject(result).getJSONObject("result");
@@ -256,7 +256,7 @@ public class RzrqSpider {
 				try {
 					String url = URL_CODE_S1 + code + URL_CODE_S2 + String.format(URL_CODE_S3, runPage, runPage,
 							runPage, runPage, System.currentTimeMillis());
-					log.info(url);
+//					log.info(url);
 					String result = HttpUtil.doGet2(url);
 					result = result.substring(datatable577190.length(), result.length() - 2);
 					JSONObject object = JSON.parseObject(result);

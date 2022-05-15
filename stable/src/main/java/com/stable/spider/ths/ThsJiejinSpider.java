@@ -95,7 +95,7 @@ public class ThsJiejinSpider {
 		ThreadsUtil.sleepRandomSecBetween5And15Ths();
 		do {
 			try {
-				log.info(url);
+//				log.info(url);
 //				HtmlPage page = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url, header);
 				HtmlPage page = htmlunitSpider.getHtmlPageFromUrl(url, header);
 				HtmlElement body = page.getBody();

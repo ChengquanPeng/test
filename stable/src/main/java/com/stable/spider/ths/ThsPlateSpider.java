@@ -88,7 +88,7 @@ public class ThsPlateSpider {
 			HtmlPage page = null;
 			HtmlElement body = null;
 			try {
-				log.info(url);
+//				log.info(url);
 				page = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url);
 				body = page.getBody();
 				HtmlElement profile = body.getElementsByAttribute("div", "id", "profile").get(0);// profile
