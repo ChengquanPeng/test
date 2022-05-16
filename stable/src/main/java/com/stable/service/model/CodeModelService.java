@@ -936,7 +936,7 @@ public class CodeModelService {
 			int fort = 0;// 最近2年
 			if (fbis.size() > 2) {
 				for (FinanceBaseInfo ft : fbis) {
-					if (ft.getKfjlr() > 0 && (ft.getJyxjlce() < 0 || ft.getMgjyxjl() < 0)) {
+					if (ft.getKfjlr() > 0 && (ft.getJyxjlce() <= 0 && ft.getMgjyxjl() <= 0)) {
 						c++;
 					}
 					fort++;
@@ -950,22 +950,26 @@ public class CodeModelService {
 				newOne.setBaseRed(1);
 				sb1.append(red++).append(".暴雷风险:连续4季度经营现金流连续为负却有扣非净利,靠融资在运转?").append(Constant.HTML_LINE);
 			} else {// 最近2年
-				// 连续季度
-				c = 0;
-				fort = 0;// 最近2年
-				for (FinanceBaseInfo ft : fbis) {
-					fort++;
-					if (fort > 8) {
-						break;
+
+				// 最新年报数据现金流
+				if (fa.getCurrYear().getJyxjlce() <= 0 && fa.getCurrYear().getMgjyxjl() <= 0) {
+					// 连续季度
+					c = 0;
+					fort = 0;// 最近2年
+					for (FinanceBaseInfo ft : fbis) {
+						fort++;
+						if (fort > 8) {
+							break;
+						}
+						if (ft.getKfjlr() > 0 && (ft.getJyxjlce() < 0 || ft.getMgjyxjl() < 0)) {
+							c++;
+						}
 					}
-					if (ft.getKfjlr() > 0 && (ft.getJyxjlce() < 0 || ft.getMgjyxjl() < 0)) {
-						c++;
+					if (c >= (fbis.size() / 2)) {
+						newOne.setBaseRed(1);
+						sb1.append(red++).append(".暴雷风险:最近").append(c).append("季度经常现金流为负却有扣非净利")
+								.append(Constant.HTML_LINE).append("靠融资在运转?").append(Constant.HTML_LINE);
 					}
-				}
-				if (c >= (fbis.size() / 2)) {
-					newOne.setBaseRed(1);
-					sb1.append(red++).append(".暴雷风险:最近").append(c).append("季度经常现金流为负却有扣非净利").append(Constant.HTML_LINE)
-							.append("靠融资在运转?").append(Constant.HTML_LINE);
 				}
 			}
 		}
@@ -1094,13 +1098,13 @@ public class CodeModelService {
 			sb3.append("资产收益率下降").append(Constant.HTML_LINE);
 		}
 		// 增持
-		String zc = buyBackService.getLastRecordZc(code);
+		String zc = buyBackService.getLastRecordZc(code, pre1Year);
 		if (StringUtils.isNotBlank(zc)) {
 			newOne.setBaseBlue(1);
 			sb3.append(zc).append(Constant.HTML_LINE);
 		}
 		// 回购
-		String bb = buyBackService.getLastRecordBuyBack(code);
+		String bb = buyBackService.getLastRecordBuyBack(code, pre1Year);
 		if (StringUtils.isNotBlank(bb)) {
 			newOne.setBaseBlue(1);
 			sb3.append(bb).append(Constant.HTML_LINE);

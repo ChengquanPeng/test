@@ -78,6 +78,8 @@ public class StockBaseInfo extends EsBase {
 	@Field(type = FieldType.Text)
 	private String webSite;// 网站
 	@Field(type = FieldType.Text)
+	private String holderName;// 控股股东
+	@Field(type = FieldType.Text)
 	private String finalControl;// 最终控制人
 	@Field(type = FieldType.Text)
 	private int compnayType;// 公司性质：0普通，1国企
@@ -87,8 +89,7 @@ public class StockBaseInfo extends EsBase {
 	private double floatShare;// float 流通股本 （亿股）
 	@Field(type = FieldType.Double)
 	private double circZb;// 持股5%以上的股东占比-流通
-	@Field(type = FieldType.Text)
-	private String holderName;// 控股股东
+
 	@Field(type = FieldType.Integer)
 	private int dfcwCompnayType;// 公司类型：1券商，2保险,3银行，4企业
 

@@ -25,16 +25,16 @@ public class BuyBackService {
 	@Autowired
 	private EsBuyBackInfoDao buyBackInfoDao;
 
-	public String getLastRecordBuyBack(String code) {
-		BuyBackInfo bb = getLastRecord(code, 2);// 1.增持，2.回购
+	public String getLastRecordBuyBack(String code, int date) {
+		BuyBackInfo bb = getLastRecord(code, 2, date);// 1.增持，2.回购
 		if (bb != null) {
 			return bb.getDate() + " " + bb.getDesc().split("；")[0];
 		}
 		return "";
 	}
 
-	public String getLastRecordZc(String code) {
-		BuyBackInfo bb = getLastRecord(code, 1);// 1.增持，2.回购
+	public String getLastRecordZc(String code, int date) {
+		BuyBackInfo bb = getLastRecord(code, 1, date);// 1.增持，2.回购
 		if (bb != null) {
 			try {
 				return bb.getDate() + " " + bb.getDesc().substring(0, 4);
@@ -45,10 +45,12 @@ public class BuyBackService {
 		return "";
 	}
 
-	private BuyBackInfo getLastRecord(String code, int type) {
+	private BuyBackInfo getLastRecord(String code, int type, int date) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.matchPhraseQuery("type", type));
+		bqb.must(QueryBuilders.rangeQuery("date").gte(date));
+
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();

@@ -68,17 +68,15 @@ public class ThsCompanySpider {
 		int c = 0;
 		for (StockBaseInfo s : codelist) {
 			try {
-				FetchRes fr = dofetchInner3(s.getCode());
-
+				FetchRes resl = dofetchInner3(s.getCode());
 				// 控股股东
-				String h = fr.getHolder();
+				String h = resl.getHolder();
 				s.setHolderName(h);
 				// 最终控制人
-				String r1 = fr.getFindHolder();
+				String r1 = resl.getFindHolder();
 				s.setFinalControl(r1.trim());
 				// 企业性质
-				String r = fr.getFindHolder();
-				s.setFinalControl(r.trim());
+				String r = resl.getComType();
 				if (r.contains(f1) || r.contains(f2)) {
 					s.setCompnayType(1);
 				} else {
@@ -202,10 +200,10 @@ public class ThsCompanySpider {
 		ThsCompanySpider ts = new ThsCompanySpider();
 		ts.htmlunitSpider = new HtmlunitSpider();
 		ts.header = new HashMap<String, String>();
-		FetchRes fr = ts.dofetchInner3("601318");
-		System.err.println(fr.getComType());
-		System.err.println(fr.getHolder());
-		System.err.println(fr.getFindHolder());
+		FetchRes fr = ts.dofetchInner3("601518");
+		System.err.println("getComType:" + fr.getComType());
+		System.err.println("getHolder:" + fr.getHolder());
+		System.err.println("getFindHolder:" + fr.getFindHolder());
 
 	}
 }
