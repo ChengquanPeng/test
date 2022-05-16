@@ -19,7 +19,7 @@ public class FileWriteUitl {
 
 	public FileWriteUitl(String filepath, boolean isNewFile) {
 		try {
-			log.info(" File Path:{}", filepath);
+			log.info("File Path:{}", filepath);
 			file = new File(filepath);
 			if (isNewFile && file.exists()) {
 				file.delete();
