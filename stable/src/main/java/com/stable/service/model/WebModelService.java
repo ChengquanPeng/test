@@ -183,7 +183,7 @@ public class WebModelService {
 
 		sb5.append("<font color='red'>");
 		if (dh.getShooting10() > 0) {
-			sb5.append("PRE一年新高" + Constant.HTML_LINE);
+			sb5.append("接近1年新高" + Constant.HTML_LINE);
 		}
 		if (showMore) {
 			sb5.append(this.getSystemPoint(dh, Constant.HTML_LINE));
