@@ -103,8 +103,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					}
 					// 一年新高
 					if (rt.getHigh() > yearHigh1 && !rv.highPriceGot && yearHigh1 > 0) {
-						if (smsg == null) {
-							smsg = " 一年新高! 备注:" + rv.getOrig().getRemark();
+						if ("".equals(smsg)) {
+							smsg = " 一年新高! 备注:" + rv.getMsg();
 						} else {
 							smsg += "一年新高! " + smsg;
 						}
@@ -117,7 +117,12 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 							burstPointCheck = true;
 							ShotPoint sp = shotPointCheck.check(code, 0, rt);
 							if (sp.getResult()) {
-								smsg += "疑似起爆:" + sp.getMsg() + smsg;
+								if ("".equals(smsg)) {
+									smsg += "疑似起爆:" + sp.getMsg() + "！ 备注:" + rv.getMsg();
+
+								} else {
+									smsg = "疑似起爆:" + sp.getMsg() + smsg;
+								}
 							}
 						}
 					}

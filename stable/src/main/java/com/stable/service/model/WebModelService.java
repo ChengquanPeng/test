@@ -365,8 +365,8 @@ public class WebModelService {
 					dh.setShooting6(0);
 					dh.setShooting8(0);
 					dh.setShooting9(0);
-					dh.setShooting10(0);
-					dh.setShootingw(0);
+//					dh.setShooting10(0);
+//					dh.setShootingw(0);
 					dh.setReducZb(0);
 				}
 				CodeBaseModelResp resp = getModelResp(dh, showMore);
