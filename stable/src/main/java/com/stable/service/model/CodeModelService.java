@@ -925,10 +925,10 @@ public class CodeModelService {
 		if (fbi.getJyxjlce() <= 0 && fbi.getMgjyxjl() <= 0) {
 			if (fbi.getKfjlr() > 0) {
 				newOne.setBaseYellow(1);
-				sb2.append(yellow++).append(".经营现金流入不敷出,净利存疑").append(Constant.HTML_LINE);
+				sb2.append(yellow++).append(".经营现金流为负,净利存疑,详查财报").append(Constant.HTML_LINE);
 			} else {
 				newOne.setBaseYellow(1);
-				sb2.append(yellow++).append(".经营现金流入不敷出").append(Constant.HTML_LINE);
+				sb2.append(yellow++).append(".经营现金流为负").append(Constant.HTML_LINE);
 			}
 		}
 		if (fbi.getKfjlr() > 0 && (fbi.getJyxjlce() < 0 || fbi.getMgjyxjl() < 0)) {
