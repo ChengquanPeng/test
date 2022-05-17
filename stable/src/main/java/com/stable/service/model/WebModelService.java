@@ -100,9 +100,6 @@ public class WebModelService {
 	public String getSystemPoint(CodeBaseModel2 dh, String splitor) {
 		String s = "";
 		// --中长--
-		if (dh.getShooting10() > 0) {
-			s += "PRE一年新高" + splitor;
-		}
 		if (dh.getShooting1() > 0) {
 			s = "底部小票-大宗-超5%,董监高机构代减持?" + splitor;
 		}
@@ -184,11 +181,15 @@ public class WebModelService {
 		// 博弈-行情指标
 		StringBuffer sb5 = new StringBuffer();
 
-		if (showMore) {
-			sb5.append("<font color='red'>");
-			sb5.append(this.getSystemPoint(dh, Constant.HTML_LINE));
-			sb5.append("</font>");
+		sb5.append("<font color='red'>");
+		if (dh.getShooting10() > 0) {
+			sb5.append("PRE一年新高" + Constant.HTML_LINE);
 		}
+		if (showMore) {
+			sb5.append(this.getSystemPoint(dh, Constant.HTML_LINE));
+		}
+		sb5.append("</font>");
+
 		if (dh.getCompnayType() == 1) {
 			sb5.append("<font color='green'>");
 			sb5.append("国资,");
@@ -293,10 +294,6 @@ public class WebModelService {
 				sb5.append("1年减持:").append(rhss.getT()).append("次,").append(rhss.getYg()).append("亿股,流通占比:")
 						.append(dh.getReducZb()).append("%)");
 			}
-			if (dh.getShootingw() == 1) {
-				sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
-				sb5.append("<font color='red'>K线攻击形态</font>");
-			}
 			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 			// 是否确定
 			if (dh.getPls() == 0) {
@@ -309,6 +306,10 @@ public class WebModelService {
 			if (dh.getMoni() > 0) {
 				sb5.append("        ,已监听:").append(MonitorType.getCodeName(dh.getMoni()));
 			}
+		}
+		if (dh.getShootingw() == 1) {
+			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
+			sb5.append("<font color='red'>K线攻击形态</font>");
 		}
 
 		resp.setZfjjInfo(sb5.toString());
