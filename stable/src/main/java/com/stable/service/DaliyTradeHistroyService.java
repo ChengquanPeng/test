@@ -112,16 +112,13 @@ public class DaliyTradeHistroyService {
 
 	public synchronized int spiderTodayDaliyTrade(boolean isJob, String today) {
 		log.info("获取日交易(分红除权)");
-		boolean warning = true;
-		int result = spiderTodayDaliyTrade(true, today, warning);
-		if (result != 0) {
+		int result = spiderTodayDaliyTrade(isJob, today, false);
+		if (result == 0) {
+			result = spiderTodayDaliyTrade(isJob, today, true);
 			return result;
 		} else {
-			warning = false;
-			result = spiderTodayDaliyTrade(true, today, warning);
 			return result;
 		}
-
 	}
 
 	private synchronized int spiderTodayDaliyTrade(boolean isJob, String today, boolean warning) {
@@ -482,8 +479,8 @@ public class DaliyTradeHistroyService {
 		return db;
 	}
 
-	public List<TradeHistInfoDaliy> queryListByCodeQfq(String code, int startDate, int endDate, EsQueryPageReq queryPage,
-			SortOrder s) {
+	public List<TradeHistInfoDaliy> queryListByCodeQfq(String code, int startDate, int endDate,
+			EsQueryPageReq queryPage, SortOrder s) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();
 //		log.info("queryPage code={},pageNum={},size={}", code, pageNum, size);
