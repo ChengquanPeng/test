@@ -106,8 +106,7 @@ public class RzrqSpider {
 				CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(code);
 				cbm.setShooting3(0);
 				// 1：2年没涨，200亿以下
-				if (cbm.getZfjjupStable() >= 2 && cbm.getPls() != 2 && cbm.getZfjjupStable() >= 2
-						&& cbm.getMkv() <= 200.0) {
+				if (cbm.getZfjjupStable() >= 2 && cbm.getZfjjupStable() >= 2 && cbm.getMkv() <= 200.0) {
 					// 2：融资满足条件
 					if (rztj.getValid() > 0) {
 						// 3:涨幅在65%以下
