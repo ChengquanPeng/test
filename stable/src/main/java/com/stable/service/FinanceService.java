@@ -197,7 +197,7 @@ public class FinanceService {
 
 	private String getRedHtml(long v) {
 		String s = CurrencyUitl.covertToString(v);
-		if (v <= 0) {
+		if (v < 0) {
 			s = "<font color='red'>" + s + "</font>";
 		}
 		return s;
