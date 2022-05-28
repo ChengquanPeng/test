@@ -134,14 +134,14 @@ public class ThsBonusSpider {
 				log.info("current index:{}", c);
 			}
 			saveAll(zfdl, zfsl, fhl, bhl);
-			if (zfl.size() > 0) {
-				StringBuffer sb = new StringBuffer();
-				sb.append("本周超过40亿的增发预案:");
-				for (ZengFa zf : zfl) {
-					sb.append(stockBasicService.getCodeName2(zf.getCode())).append(",");
-				}
-				WxPushUtil.pushSystem1(sb.toString());
-			}
+//			if (zfl.size() > 0) {
+//				StringBuffer sb = new StringBuffer();
+//				sb.append("本周超过40亿的增发预案:");
+//				for (ZengFa zf : zfl) {
+//					sb.append(stockBasicService.getCodeName2(zf.getCode())).append(",");
+//				}
+//				WxPushUtil.pushSystem1(sb.toString());
+//			}
 			log.info("分红&增发抓包同花顺已完成");
 //			WxPushUtil.pushSystem1(date + " 分红&增发抓包同花顺已完成");
 		} catch (Exception e) {
