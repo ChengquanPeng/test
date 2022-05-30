@@ -653,6 +653,13 @@ public class WebModelService {
 				bqb.must(QueryBuilders.rangeQuery("zfYjAmt").lte(zfYjAmt * 100000000l));
 			}
 		}
+		// 大于等于
+		if (StringUtils.isNotBlank(mr.getZfYjAmt2())) {
+			Long zfYjAmt = Long.valueOf(mr.getZfYjAmt2());
+			if (zfYjAmt > 0) {
+				bqb.must(QueryBuilders.rangeQuery("zfYjAmt").gte(zfYjAmt * 100000000l));
+			}
+		}
 
 		SortOrder order = SortOrder.DESC;
 		if (mr.getAsc() == 2) {

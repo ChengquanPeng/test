@@ -22,6 +22,7 @@ public class ModelReq {
 	String zfjjupStable;
 	int zfself;
 	String zfYjAmt;
+	String zfYjAmt2;
 	String mkv;
 	String mkv2;
 	int pls;
