@@ -97,7 +97,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					boolean isOk = MonitoringUitl.isOkForRt(rv.getOrig(), rt);
 					if (isOk) {
 						if (rv.waitSend) {
-							smsg = rv.getMsg();
+							String st = MonitoringUitl.okMsg(rv.getOrig(), rt);
+							smsg = st + "," + rv.getMsg();
 							rv.waitSend = false;
 						}
 					}

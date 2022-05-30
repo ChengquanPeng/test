@@ -102,9 +102,14 @@ public class FinanceService {
 			int index) {
 		try {
 			List<FinanceBaseInfoPage> datas = eastmoneySpider.getNewFinanceAnalysis(code, companyType, beforeChkDate);// 0按报告期、1=年报
-			if (datas == null || datas.size() <= 0) {
-				log.warn("{},未从df抓取到Finane记录,code={}", index, code);
+			if (datas == null) {
+				log.warn("{},上市未满1年，不需要从df抓取到Finane记录,code={}", index, code);
 				// WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录,code=" + code);
+				return true;
+			}
+			if (datas.size() <= 0) {
+				log.warn("{},未从df抓取到Finane记录,code={}", index, code);
+				WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录,code=" + code);
 				return false;
 			}
 			// 东方财富限制，目前最多抓取5条

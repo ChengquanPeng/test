@@ -22,7 +22,7 @@ public class RtmVo {
 		if (cp.getUserId() == Constant.MY_ID && cbm.getPls() == 1) {
 			msgt += " " + cbm.getZfjjInfo();
 		}
-		msgt += " " + cp.getMsg();
+//		msgt += " " + cp.getMsg();
 		msg = msgt;
 	}
 

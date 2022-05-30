@@ -1,6 +1,7 @@
 package com.stable.spider.eastmoney;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -290,8 +291,8 @@ public class EastmoneySpider {
 			}
 			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 		} while (trytime <= 10);
-		WxPushUtil.pushSystem1("东方财富-财务-抓包出错,code=" + code);
-		return null;
+//		WxPushUtil.pushSystem1("东方财富-财务-抓包出错,code=" + code);
+		return Collections.emptyList();
 	}
 
 	public static int YearQuarter(int year, int quarter) {
