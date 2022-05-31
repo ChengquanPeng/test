@@ -31,10 +31,16 @@ public class CodeBaseModel2 extends EsBase {
 	private int shooting8 = 0;// 行情指标8：底部横盘3-4年以上的增发-小票
 	@Field(type = FieldType.Integer)
 	private int shooting9 = 0;// 行情指标9：底部横盘2年
+
+	// 技术面
 	@Field(type = FieldType.Integer)
 	private int shooting10 = 0;// 行情指标10：PRE/一年新高
 	@Field(type = FieldType.Integer)
 	private int shootingw = 0;// 行情指标w:横盘w
+	@Field(type = FieldType.Integer)
+	private int shooting51 = 0;// 均线排列
+	@Field(type = FieldType.Integer)
+	private int shooting52 = 0;// 一阳穿N线
 
 	@Field(type = FieldType.Integer)
 	private int moni = 0;// 是否监听

@@ -153,7 +153,7 @@ public class Sort6Service {
 			String code = topDate.getCode();
 			EsQueryPageReq req = EsQueryPageUtil.queryPage30;
 			// 最近30条-倒序
-			List<StockAvgBase> clist30 = avgService.queryListByCodeForModelWithLast60(code, topDate.getDate(), req,
+			List<StockAvgBase> clist30 = avgService.queryListByCodeForModelWithLastN(code, topDate.getDate(), req, true,
 					true);
 			StockAvgBase sa = clist30.get(0);
 			if (sa.getAvgPriceIndex30() >= sa.getAvgPriceIndex60()) {

@@ -45,4 +45,6 @@ public class ModelReq {
 	String pre1Year;
 
 	int channel = 0;
+	int shooting51 = 0;
+	int shooting52 = 0;
 }

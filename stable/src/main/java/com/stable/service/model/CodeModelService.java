@@ -389,6 +389,8 @@ public class CodeModelService {
 		}
 		// 短线：妖股形态，短线拉的急，说明货多。一倍了，说明资金已经投入。新高:说明出货失败或者有更多的想法，要继续拉。
 		sort1ModeService.sort1ModeChk(newOne, pool, tradeDate);
+		// 均线排列，一阳穿N线
+		LineAvgPrice.avgLineUp(newOne, avgService, code, tradeDate);
 
 		// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
 		susWhiteHorses(code, newOne);

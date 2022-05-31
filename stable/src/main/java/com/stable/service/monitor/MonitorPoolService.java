@@ -457,21 +457,21 @@ public class MonitorPoolService {
 
 	// 用户服务到期
 	public void userExpired() {
-		int today = DateUtil.getTodayIntYYYYMMDD();
-		int end = DateUtil.addDate(today, 3);
-		List<UserInfo> ulist = userService.getListForServiceEnd(1, today, end, EsQueryPageUtil.queryPage9999);
-		if (ulist != null) {
-			for (UserInfo u : ulist) {
-				WxPushUtil.pushSystem1(u.getWxpush(), "您的<系统登录>服务于" + u.getS1() + "到期,如有需要,请联系管理员及时续约！");
-			}
-		}
-
-		List<UserInfo> ulist2 = userService.getListForServiceEnd(2, today, end, EsQueryPageUtil.queryPage9999);
-		if (ulist2 != null) {
-			for (UserInfo u : ulist2) {
-				WxPushUtil.pushSystem1(u.getWxpush(), "您的<推荐>服务于" + u.getS2() + "到期,如有需要,请联系管理员及时续约！");
-			}
-		}
+//		int today = DateUtil.getTodayIntYYYYMMDD();
+//		int end = DateUtil.addDate(today, 3);
+//		List<UserInfo> ulist = userService.getListForServiceEnd(1, today, end, EsQueryPageUtil.queryPage9999);
+//		if (ulist != null) {
+//			for (UserInfo u : ulist) {
+//				WxPushUtil.pushSystem1(u.getWxpush(), "您的<系统登录>服务于" + u.getS1() + "到期,如有需要,请联系管理员及时续约！");
+//			}
+//		}
+//
+//		List<UserInfo> ulist2 = userService.getListForServiceEnd(2, today, end, EsQueryPageUtil.queryPage9999);
+//		if (ulist2 != null) {
+//			for (UserInfo u : ulist2) {
+//				WxPushUtil.pushSystem1(u.getWxpush(), "您的<推荐>服务于" + u.getS2() + "到期,如有需要,请联系管理员及时续约！");
+//			}
+//		}
 	}
 
 	// 股东人数预警

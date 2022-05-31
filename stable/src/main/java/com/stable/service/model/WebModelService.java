@@ -565,6 +565,12 @@ public class WebModelService {
 		if ("1".equals(mr.getKline())) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shootingw", 1));
 		}
+		if (1 == mr.getShooting51()) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting51", 1));
+		}
+		if (1 == mr.getShooting52()) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting52", 1));
+		}
 		if (StringUtils.isNotBlank(mr.getTotalAmt())) {
 			bqb.must(QueryBuilders.rangeQuery("dzjy365d").gte(Double.valueOf(mr.getTotalAmt()) * WAN));
 		}

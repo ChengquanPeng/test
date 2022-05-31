@@ -76,7 +76,6 @@ public class SMAUtil {
 		// 顺序的结果
 		double[] avg30 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_30);
 		if (avg30 != null) {
-			int dividendDate = DateUtil.getTodayIntYYYYMMDD();
 			double[] avg20 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_20);
 			double[] avg10 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_10);
 			double[] avg5 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_5);
@@ -88,8 +87,8 @@ public class SMAUtil {
 						StockAvg sa = new StockAvg();
 						sa.setCode(code);
 						sa.setDate(td.getDate());
-						sa.setLastDividendDate(dividendDate);
-						sa.setId();
+						sa.setClosePrice(td.getClosed());
+						sa.setUpdown(td.getTodayChangeRate());
 						rs.add(sa);
 					}
 				}
@@ -99,8 +98,8 @@ public class SMAUtil {
 						StockAvgNofq sa = new StockAvgNofq();
 						sa.setCode(code);
 						sa.setDate(td.getDate());
-						sa.setLastDividendDate(dividendDate);
-						sa.setId();
+						sa.setClosePrice(td.getClosed());
+						sa.setUpdown(td.getTodayChangeRate());
 						rs.add(sa);
 					}
 				}
@@ -197,7 +196,6 @@ public class SMAUtil {
 		// 顺序的结果
 		double[] avg60 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_60);
 		if (avg60 != null) {
-			int dividendDate = DateUtil.getTodayIntYYYYMMDD();
 			double[] avg30 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_30);
 			double[] avg20 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_20);
 			double[] avg10 = TaLabUtil.sma(closePrice, PERIODS_AVERAGE_10);
@@ -210,8 +208,8 @@ public class SMAUtil {
 						StockAvg sa = new StockAvg();
 						sa.setCode(code);
 						sa.setDate(td.getDate());
-						sa.setLastDividendDate(dividendDate);
-						sa.setId();
+						sa.setClosePrice(td.getClosed());
+						sa.setUpdown(td.getTodayChangeRate());
 						rs.add(sa);
 					}
 				}
@@ -221,8 +219,8 @@ public class SMAUtil {
 						StockAvgNofq sa = new StockAvgNofq();
 						sa.setCode(code);
 						sa.setDate(td.getDate());
-						sa.setLastDividendDate(dividendDate);
-						sa.setId();
+						sa.setClosePrice(td.getClosed());
+						sa.setUpdown(td.getTodayChangeRate());
 						rs.add(sa);
 					}
 				}
@@ -286,9 +284,9 @@ public class SMAUtil {
 //	@PostConstruct
 //	private void test() {
 //		System.err.println("前复权测试");
-//		List<StockAvgBase> out = getSMA5_60("000505", 20180926, 20201225, true);
+//		List<StockAvgBase> out = getSMA5_60("603797", 20220111, 20220530, true);
 //		for (StockAvgBase sa : out) {
-//			System.err.println(sa.getDate() + " " + sa.getAvgPriceIndex30() + " " + sa.getAvgPriceIndex60());
+//			System.err.println(sa);
 //		}
 //	}
 
