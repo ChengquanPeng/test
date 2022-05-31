@@ -287,7 +287,7 @@ public class WebModelService {
 		}
 		// 大宗
 		if (dh.getDzjy365d() > 0) {
-			sb5.append("大宗1年:").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WAN)).append("(占比:")
+			sb5.append("1年内大宗:").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WAN)).append("(占比:")
 					.append(dh.getDzjyp365d()).append("%,均价:").append(dh.getDzjyAvgPrice()).append(")");
 			if (dh.getTagDzPriceLow() > 0) {
 				sb5.append(",低于均价:").append(dh.getTagDzPriceLow()).append("%");
@@ -301,8 +301,8 @@ public class WebModelService {
 		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 		ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLastStat(dh.getCode(), 0);
 		if (dh.getReducZb() > 0 || rhss.getYg() > 0) {
-			sb5.append("1年减持:").append(rhss.getT()).append("次,").append(rhss.getYg()).append("亿股,流通占比:")
-					.append(dh.getReducZb()).append("%)");
+			sb5.append("1年内减持:").append(rhss.getT()).append("次,").append(rhss.getYg()).append("亿股,流通占比:")
+					.append(dh.getReducZb()).append("%");
 		}
 
 		// 个人人工
