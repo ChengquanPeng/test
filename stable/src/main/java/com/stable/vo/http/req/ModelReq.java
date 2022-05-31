@@ -46,5 +46,6 @@ public class ModelReq {
 
 	int shooting51 = 0;
 	int shooting52 = 0;
+	int shooting53 = 0;
 	int whiteHors = 0;
 }

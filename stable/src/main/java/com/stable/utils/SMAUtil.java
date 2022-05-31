@@ -89,6 +89,7 @@ public class SMAUtil {
 						sa.setDate(td.getDate());
 						sa.setClosePrice(td.getClosed());
 						sa.setUpdown(td.getTodayChangeRate());
+						sa.setVolume(td.getVolume());
 						rs.add(sa);
 					}
 				}
@@ -100,6 +101,7 @@ public class SMAUtil {
 						sa.setDate(td.getDate());
 						sa.setClosePrice(td.getClosed());
 						sa.setUpdown(td.getTodayChangeRate());
+						sa.setVolume(td.getVolume());
 						rs.add(sa);
 					}
 				}
@@ -210,6 +212,7 @@ public class SMAUtil {
 						sa.setDate(td.getDate());
 						sa.setClosePrice(td.getClosed());
 						sa.setUpdown(td.getTodayChangeRate());
+						sa.setVolume(td.getVolume());
 						rs.add(sa);
 					}
 				}
@@ -221,6 +224,7 @@ public class SMAUtil {
 						sa.setDate(td.getDate());
 						sa.setClosePrice(td.getClosed());
 						sa.setUpdown(td.getTodayChangeRate());
+						sa.setVolume(td.getVolume());
 						rs.add(sa);
 					}
 				}

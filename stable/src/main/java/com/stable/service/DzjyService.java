@@ -73,11 +73,11 @@ public class DzjyService {
 			t.setAvgPrcie(CurrencyUitl.roundHalfUp(t.getTotalAmt() / num));
 			t.setDate(page.getContent().get(0).getDate());
 			if (s.getFloatShare() > 0) {
-				double unP5liutonggf = s.getFloatShare() * 100;
+				double unP5liutonggf = s.getFloatShare();
 				if (s.getCircZb() > 0) {// 除去5%以上的占比
 					unP5liutonggf = ((100 - s.getCircZb()) * unP5liutonggf) / 100;
 				}
-				t.setP365d(CurrencyUitl.roundHalfUp((num / unP5liutonggf)));// 万股/亿股,百分比
+				t.setP365d(CurrencyUitl.roundHalfUp((num / 10000 / unP5liutonggf * 100)));// num=万股/unP5liutonggf=亿股,百分比
 			}
 			this.halfOver60d(code, s, startDate2, t);// 2个月
 		}
@@ -100,11 +100,11 @@ public class DzjyService {
 				t.setTotalAmt60d(CurrencyUitl.roundHalfUp(t.getTotalAmt60d() + d.getTval()));
 			}
 			if (s.getFloatShare() > 0) {
-				double unP5liutonggf = s.getFloatShare() * 100;
+				double unP5liutonggf = s.getFloatShare();
 				if (s.getCircZb() > 0) {// 除去5%以上的占比
 					unP5liutonggf = ((100 - s.getCircZb()) * unP5liutonggf) / 100;
 				}
-				t.setP60d(CurrencyUitl.roundHalfUp(num / unP5liutonggf));// 万股/亿股,百分比
+				t.setP60d(CurrencyUitl.roundHalfUp(num / 10000 / unP5liutonggf * 100));// num=万股/unP5liutonggf=亿股,百分比
 			}
 		}
 	}

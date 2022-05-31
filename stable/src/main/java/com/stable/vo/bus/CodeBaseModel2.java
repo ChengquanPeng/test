@@ -41,6 +41,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int shooting51 = 0;// 均线排列
 	@Field(type = FieldType.Integer)
 	private int shooting52 = 0;// 一阳穿N线
+	@Field(type = FieldType.Integer)
+	private int shooting53 = 0;// 交易量活跃
 
 	@Field(type = FieldType.Integer)
 	private int moni = 0;// 是否监听

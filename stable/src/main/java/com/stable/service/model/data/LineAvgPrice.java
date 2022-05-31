@@ -3,8 +3,10 @@ package com.stable.service.model.data;
 import java.util.List;
 
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.StockAvgBase;
+import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -39,7 +41,7 @@ public class LineAvgPrice {
 	/**
 	 * 均线排列
 	 */
-	public static void avgLineUp(CodeBaseModel2 cbm, AvgService avgService, String code, int date) {
+	public static void avgLineUp(StockBaseInfo s, CodeBaseModel2 cbm, AvgService avgService, String code, int date) {
 		try {
 			// 最近5条-倒序
 			List<StockAvgBase> clist5 = avgService.queryListByCodeForModelWithLastN(code, date,
@@ -48,6 +50,16 @@ public class LineAvgPrice {
 			if (clist5 != null && clist5.size() >= 5) {
 				cbm.setShooting51(1);
 				cbm.setShooting52(0);
+				cbm.setShooting53(1);
+
+				double unp5share = 0;// 总流通(万股)
+				if (s.getFloatShare() > 0) {
+					double unP5liutonggf = s.getFloatShare() * 10000;
+					if (s.getCircZb() > 0) {// 除去5%以上的占比
+						unP5liutonggf = ((100 - s.getCircZb()) * unP5liutonggf) / 100;
+					}
+					unp5share = unP5liutonggf;
+				}
 
 				for (int i = 0; i < clist5.size(); i++) {
 					// 是否均线排列(连续5天)
@@ -66,10 +78,23 @@ public class LineAvgPrice {
 							&& sa.getClosePrice() >= sa.getAvgPriceIndex5()) {
 						cbm.setShooting52(1);
 					}
+
+					// 交易活跃
+					if (unp5share > 0) {
+						double t = sa.getVolume() * 100 / 10000;// 交易(万股)=手x100/10000;
+						if (CurrencyUitl.roundHalfUp(t / unp5share) >= 4.5) {// 实际换手4.5%以上
+
+						} else {
+							cbm.setShooting53(0);
+						}
+					} else {
+						cbm.setShooting53(0);
+					}
 				}
 			} else {
 				cbm.setShooting51(0);
 				cbm.setShooting52(0);
+				cbm.setShooting53(0);
 			}
 		} catch (Exception e) {
 			log.info("code={}, date={} 计算出错.", code, date);

@@ -160,10 +160,10 @@ public class WebModelService {
 		StringBuffer tag = new StringBuffer("");
 		tag.append("<font color='red'>");
 		if (dh.getShooting51() == 1) {
-			tag.append("均线多头排列").append(Constant.HTML_LINE);
+			tag.append("5日均线多头排列").append(Constant.HTML_LINE);
 		}
 		if (dh.getShooting52() == 1) {
-			tag.append("一阳穿4线").append(Constant.HTML_LINE);
+			tag.append("5日内一阳穿4线").append(Constant.HTML_LINE);
 		}
 		if (dh.getShootingw() == 1) {
 			tag.append("K线攻击形态").append(Constant.HTML_LINE);
@@ -173,6 +173,9 @@ public class WebModelService {
 		}
 		if (dh.getSusWhiteHors() == 1) {
 			tag.append("白马走势?").append(Constant.HTML_LINE);
+		}
+		if (dh.getShooting53() == 1) {
+			tag.append("5日交易活跃").append(Constant.HTML_LINE);
 		}
 		tag.append("</font>");
 		if (dh.getTagSmallAndBeatf() > 0) {
@@ -562,6 +565,9 @@ public class WebModelService {
 		}
 		if (1 == mr.getShooting52()) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting52", 1));
+		}
+		if (1 == mr.getShooting53()) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting53", 1));
 		}
 		if (mr.getWhiteHors() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));// 交易面疑似白马

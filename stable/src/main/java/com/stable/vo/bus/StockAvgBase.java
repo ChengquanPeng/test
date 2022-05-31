@@ -17,4 +17,5 @@ public class StockAvgBase {
 	private double avgPriceIndex250;
 	private double closePrice;
 	private double updown;
+	private double volume;
 }

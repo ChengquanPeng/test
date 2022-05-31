@@ -76,12 +76,12 @@
 			</div>
 			<div class="mg">
 				技术面:&nbsp;&nbsp;&nbsp;&nbsp;5日均线多头排列:<input type="checkbox"
-					id="shooting51" />&nbsp;&nbsp;&nbsp; 5日内一阳穿4线:<input type="checkbox"
-					id="shooting52" />&nbsp;&nbsp;&nbsp; K线攻击形态:<input type="checkbox"
-					id="kline" />&nbsp;&nbsp;&nbsp; 接近1年新高:<input type="checkbox"
-					id="pre1Year" />&nbsp;&nbsp;&nbsp;白马走势:<input type="checkbox"
-					id="whiteHors" />&nbsp;&nbsp;&nbsp;
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					id="shooting51" />&nbsp;&nbsp;&nbsp; 5日内一阳穿4线:<input
+					type="checkbox" id="shooting52" />&nbsp;&nbsp;&nbsp; K线攻击形态:<input
+					type="checkbox" id="kline" />&nbsp;&nbsp;&nbsp; 接近1年新高:<input
+					type="checkbox" id="pre1Year" />&nbsp;&nbsp;&nbsp;白马走势:<input
+					type="checkbox" id="whiteHors" />&nbsp;&nbsp;&nbsp;5日交易活跃:<input
+					type="checkbox" id="shooting53" />&nbsp;&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			</div>
@@ -237,6 +237,7 @@
 									param.zfObjType = $('#zfObjType').val();
 									param.shooting51 = 0;
 									param.shooting52 = 0;
+									param.shooting53 = 0;
 									param.whiteHors = 0;
 
 									if (document.getElementById("whiteHors").checked) {
@@ -247,6 +248,9 @@
 									}
 									if (document.getElementById("shooting52").checked) {
 										param.shooting52 = 1;
+									}
+									if (document.getElementById("shooting53").checked) {
+										param.shooting53 = 1;
 									}
 
 									if (document.getElementById("pre1Year").checked) {

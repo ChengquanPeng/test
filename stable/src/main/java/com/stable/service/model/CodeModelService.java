@@ -232,9 +232,10 @@ public class CodeModelService {
 		newOne.setCompnayType(s.getCompnayType());
 		// 市值-死筹计算
 		newOne.setMkv(mkv);
-		newOne.setActMkv(0);
 		if (mkv > 0 && s.getCircZb() > 0) {// 5%以下的流通股份
 			newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (100 - s.getCircZb()) / 100)));
+		} else {
+			newOne.setActMkv(mkv);
 		}
 		// 人工审核是否时间到期-重置
 		if (newOne.getPlst() < tradeDate) {
@@ -390,7 +391,7 @@ public class CodeModelService {
 		// 短线：妖股形态，短线拉的急，说明货多。一倍了，说明资金已经投入。新高:说明出货失败或者有更多的想法，要继续拉。
 		sort1ModeService.sort1ModeChk(newOne, pool, tradeDate);
 		// 均线排列，一阳穿N线
-		LineAvgPrice.avgLineUp(newOne, avgService, code, tradeDate);
+		LineAvgPrice.avgLineUp(s, newOne, avgService, code, tradeDate);
 
 		// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
 		susWhiteHorses(code, newOne);
