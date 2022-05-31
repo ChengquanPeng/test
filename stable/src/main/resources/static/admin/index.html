@@ -32,14 +32,15 @@
 						type="text" id="mkv" width="10" />亿&nbsp;&nbsp; 前3大股东持股&gt;=<input
 						type="text" id="holderNumT3" width="30" />%&nbsp;&nbsp;
 					市盈率ttm&lt;=<input type="text" id="pettm" width="20" />&nbsp;&nbsp;
-					国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp;
 				</div>
 			</div>
 			<div class="mg">
-				业绩OK(近5年不亏):<input type="checkbox" id="finOK" title="近5年不亏" />&nbsp;&nbsp;&nbsp;
-				分红OK(近5年分红):<input type="checkbox" id="bousOK" />&nbsp;&nbsp;&nbsp;
-				几年未涨&gt;=<input type="text" id="zfjjup" />&nbsp;&nbsp;&nbsp;
-				几年未涨stable&gt;=<input type="text" id="zfjjupStable" />&nbsp;&nbsp;&nbsp;
+				国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp;
+				业绩OK(近5年不亏):<input type="checkbox" id="finOK" title="近5年不亏" />&nbsp;&nbsp;
+				分红OK(近5年分红):<input type="checkbox" id="bousOK" />&nbsp;&nbsp;
+				几年未涨&gt;=<input type="text" id="zfjjup" />&nbsp;&nbsp;
+				几年未涨stable&gt;=<input type="text" id="zfjjupStable"
+					placeholder="算法偏严" />&nbsp;&nbsp;
 			</div>
 			<div class="mg">
 				<div class="input-group">
@@ -78,8 +79,8 @@
 					id="shooting51" />&nbsp;&nbsp;&nbsp; 一阳穿4线:<input type="checkbox"
 					id="shooting52" />&nbsp;&nbsp;&nbsp; K线攻击形态:<input type="checkbox"
 					id="kline" />&nbsp;&nbsp;&nbsp; 接近1年新高:<input type="checkbox"
-					id="pre1Year" />&nbsp;&nbsp;&nbsp;
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					id="pre1Year" />&nbsp;&nbsp;&nbsp;白马走势:<input type="checkbox"
+					id="whiteHors" />&nbsp;&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -118,7 +119,6 @@
 						<option value="-1" selected="selected">无限制</option>
 						<option value="5">小而美</option>
 						<option value="2">业绩较牛</option>
-						<option value="3">白马走势?</option>
 						<option value="7">半年新高-突破箱体?</option>
 						<option value="1">拉升吸筹?</option>
 						<option value="4">高质押机会</option>
@@ -235,9 +235,13 @@
 									param.pre1Year = 0;
 									param.monitor = 0;
 									param.zfObjType = $('#zfObjType').val();
-
 									param.shooting51 = 0;
 									param.shooting52 = 0;
+									param.whiteHors = 0;
+
+									if (document.getElementById("whiteHors").checked) {
+										param.whiteHors = 1;
+									}
 									if (document.getElementById("shooting51").checked) {
 										param.shooting51 = 1;
 									}
@@ -294,6 +298,10 @@
 											title : '筹码博弈'
 										},
 										{
+											field : 'tagInfo',
+											title : '标签'
+										},
+										{
 											field : 'buyRea',
 											title : '备注'
 										},
@@ -315,10 +323,6 @@
 												}
 												return v;
 											}
-										},
-										{
-											field : 'tagInfo',
-											title : '标签'
 										},
 										{
 											field : 'a',

@@ -44,7 +44,7 @@ public class ModelReq {
 	String kline;
 	String pre1Year;
 
-	int channel = 0;
 	int shooting51 = 0;
 	int shooting52 = 0;
+	int whiteHors = 0;
 }

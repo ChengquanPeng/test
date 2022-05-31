@@ -93,8 +93,8 @@ public class WebModelService {
 		return cbm;
 	}
 
-	public CodeBaseModelResp getLastOneByCodeResp(String code, boolean showMore) {
-		return getModelResp(getLastOneByCode2(code), showMore);
+	public CodeBaseModelResp getLastOneByCodeResp(String code, boolean isMyid) {
+		return getModelResp(getLastOneByCode2(code), isMyid);
 	}
 
 	public String getSystemPoint(CodeBaseModel2 dh, String splitor) {
@@ -129,7 +129,7 @@ public class WebModelService {
 		return s;
 	}
 
-	private CodeBaseModelResp getModelResp(CodeBaseModel2 dh, boolean showMore) {
+	private CodeBaseModelResp getModelResp(CodeBaseModel2 dh, boolean isMyid) {
 		CodeBaseModelResp resp = new CodeBaseModelResp();
 		BeanUtils.copyProperties(dh, resp);
 		resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
@@ -158,6 +158,23 @@ public class WebModelService {
 
 		// 标签
 		StringBuffer tag = new StringBuffer("");
+		tag.append("<font color='red'>");
+		if (dh.getShooting51() == 1) {
+			tag.append("均线多头排列").append(Constant.HTML_LINE);
+		}
+		if (dh.getShooting52() == 1) {
+			tag.append("一阳穿4线").append(Constant.HTML_LINE);
+		}
+		if (dh.getShootingw() == 1) {
+			tag.append("K线攻击形态").append(Constant.HTML_LINE);
+		}
+		if (dh.getShooting10() > 0) {
+			tag.append("接近1年新高").append(Constant.HTML_LINE);
+		}
+		if (dh.getSusWhiteHors() == 1) {
+			tag.append("白马走势?").append(Constant.HTML_LINE);
+		}
+		tag.append("</font>");
 		if (dh.getTagSmallAndBeatf() > 0) {
 			tag.append("小而美").append(Constant.HTML_LINE);
 		}
@@ -166,9 +183,6 @@ public class WebModelService {
 		}
 		if (dh.getSusBigBoss() == 1) {
 			tag.append("业绩较牛?").append(Constant.HTML_LINE);
-		}
-		if (dh.getSusWhiteHors() == 1) {
-			tag.append("白马走势?").append(Constant.HTML_LINE);
 		}
 		if (dh.getSortChips() == 1) {
 			tag.append("拉升吸筹?").append(Constant.HTML_LINE);
@@ -182,12 +196,7 @@ public class WebModelService {
 		StringBuffer sb5 = new StringBuffer();
 
 		sb5.append("<font color='red'>");
-		if (dh.getShooting10() > 0) {
-			sb5.append("接近1年新高" + Constant.HTML_LINE);
-		}
-		if (showMore) {
-			sb5.append(this.getSystemPoint(dh, Constant.HTML_LINE));
-		}
+		sb5.append(this.getSystemPoint(dh, Constant.HTML_LINE));
 		sb5.append("</font>");
 
 		if (dh.getCompnayType() == 1) {
@@ -285,15 +294,16 @@ public class WebModelService {
 						.append(dh.getDzjyp60d()).append("%)");
 			}
 		}
-
 		// 减持
-		if (showMore) {
-			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
-			ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLastStat(dh.getCode(), 0);
-			if (dh.getReducZb() > 0 || rhss.getYg() > 0) {
-				sb5.append("1年减持:").append(rhss.getT()).append("次,").append(rhss.getYg()).append("亿股,流通占比:")
-						.append(dh.getReducZb()).append("%)");
-			}
+		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
+		ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLastStat(dh.getCode(), 0);
+		if (dh.getReducZb() > 0 || rhss.getYg() > 0) {
+			sb5.append("1年减持:").append(rhss.getT()).append("次,").append(rhss.getYg()).append("亿股,流通占比:")
+					.append(dh.getReducZb()).append("%)");
+		}
+
+		// 个人人工
+		if (isMyid) {
 			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 			// 是否确定
 			if (dh.getPls() == 0) {
@@ -307,11 +317,6 @@ public class WebModelService {
 				sb5.append("        ,已监听:").append(MonitorType.getCodeName(dh.getMoni()));
 			}
 		}
-		if (dh.getShootingw() == 1) {
-			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
-			sb5.append("<font color='red'>K线攻击形态</font>");
-		}
-
 		resp.setZfjjInfo(sb5.toString());
 		return resp;
 	}
@@ -340,38 +345,26 @@ public class WebModelService {
 		return pvlist.contains(code);
 	}
 
-	public List<CodeBaseModelResp> getListForWeb(ModelReq mr, EsQueryPageReq querypage, boolean showMore, long userId) {
+	public List<CodeBaseModelResp> getListForWeb(ModelReq mr, EsQueryPageReq querypage, long userId) {
 		log.info("CodeBaseModel getListForWeb mr={}", mr);
+		boolean isMyid = (userId == Constant.MY_ID);
+		if (!isMyid) {
+			mr.setPls(-1);// 重置非myid
+		}
 		List<CodeBaseModel2> list = getList(mr, querypage);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
 		boolean isFilter = StringUtils.isBlank(mr.getCode());
 		if (list != null) {
 			for (CodeBaseModel2 dh : list) {
 				// 备注
-				if (showMore) {
-					if (userId != Constant.MY_ID) {
-						dh.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, dh.getCode()).getRemark());
-					}
-				} else {
+				if (!isMyid) {
 					if (isFilter && isPvlist(dh.getCode())) {// 私有列表：除非指定code查询，否则过滤
 						continue;
 					}
 					dh.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, dh.getCode()).getRemark());
-					dh.setShooting1(0);
-					dh.setShooting2(0);
-					dh.setShooting3(0);
-					dh.setShooting4(0);
-					dh.setShooting5(0);
-					dh.setShooting6(0);
-					dh.setShooting8(0);
-					dh.setShooting9(0);
-//					dh.setShooting10(0);
-//					dh.setShootingw(0);
-					dh.setReducZb(0);
 				}
-				CodeBaseModelResp resp = getModelResp(dh, showMore);
+				CodeBaseModelResp resp = getModelResp(dh, isMyid);
 				res.add(resp);
-
 			}
 		}
 		return res;
@@ -528,9 +521,7 @@ public class WebModelService {
 			if (mr.getTagIndex() == 1) {
 				bqb.must(QueryBuilders.matchPhraseQuery("sortChips", 1));// 吸筹-收集筹码短线
 			} else if (mr.getTagIndex() == 2) {
-				bqb.must(QueryBuilders.matchPhraseQuery("susBigBoss", 1));// 交易面疑似大牛
-			} else if (mr.getTagIndex() == 3) {
-				bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));// 交易面疑似白马
+				bqb.must(QueryBuilders.matchPhraseQuery("susBigBoss", 1));// 基本面疑似大牛
 			} else if (mr.getTagIndex() == 5) {
 				bqb.must(QueryBuilders.matchPhraseQuery("tagSmallAndBeatf", 1));// 小而美
 			} else if (mr.getTagIndex() == 4) {
@@ -559,6 +550,7 @@ public class WebModelService {
 				bqb.must(QueryBuilders.matchPhraseQuery("shooting9", 1));
 			}
 		}
+		// 技术面
 		if ("1".equals(mr.getPre1Year())) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting10", 1));
 		}
@@ -571,6 +563,10 @@ public class WebModelService {
 		if (1 == mr.getShooting52()) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting52", 1));
 		}
+		if (mr.getWhiteHors() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));// 交易面疑似白马
+		}
+
 		if (StringUtils.isNotBlank(mr.getTotalAmt())) {
 			bqb.must(QueryBuilders.rangeQuery("dzjy365d").gte(Double.valueOf(mr.getTotalAmt()) * WAN));
 		}

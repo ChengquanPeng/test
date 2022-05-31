@@ -35,16 +35,7 @@ public class CodeModelController {
 		JsonResult r = new JsonResult();
 		try {
 			UserInfo l = (UserInfo) req.getSession().getAttribute(Constant.SESSION_USER);
-			boolean showMore = false;
-			if (l != null && l.getType() == 1) {
-				showMore = true;
-				if (mr.getChannel() == 1) {
-					mr.setPls(-1);
-				}
-			} else {
-				mr.setPls(-1);
-			}
-			r.setResult(modelWebService.getListForWeb(mr, querypage, showMore, l.getId()));
+			r.setResult(modelWebService.getListForWeb(mr, querypage, l.getId()));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -101,12 +92,7 @@ public class CodeModelController {
 	public ResponseEntity<JsonResult> chips(String code, HttpServletRequest req) {
 		JsonResult r = new JsonResult();
 		try {
-			UserInfo l = (UserInfo) req.getSession().getAttribute(Constant.SESSION_USER);
-			boolean showMore = false;
-			if (l != null && l.getType() == 1) {
-				showMore = true;
-			}
-			CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code, showMore);
+			CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code, true);
 			r.setResult(cbm);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {

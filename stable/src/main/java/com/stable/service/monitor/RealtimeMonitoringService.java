@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.Constant;
 import com.stable.constant.RedisConstant;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
@@ -87,7 +88,8 @@ public class RealtimeMonitoringService {
 						if (ml == null) {
 							ml = new LinkedList<RtmVo>();
 						}
-						RtmVo rv = new RtmVo(t, modelWebService.getLastOneByCodeResp(t.getCode(), true));
+						RtmVo rv = new RtmVo(t,
+								modelWebService.getLastOneByCodeResp(t.getCode(), t.getUserId() == Constant.MY_ID));
 						rv.setWxpush(u.getWxpush());
 						ml.add(rv);
 						allmap.put(t.getCode(), ml);

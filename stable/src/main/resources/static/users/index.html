@@ -22,15 +22,17 @@
 	<div class="container-fluid">
 		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div class="mg">
-				股票代码：<input type="text" id="queryCode" width="30">&nbsp;&nbsp;
-				概念id：<input type="text" id="conceptId" width="30">&nbsp;&nbsp;
-				板块名称搜索：<input type="text" id="conceptName" width="30">&nbsp;&nbsp;
+				股票代码：<input type="text" id="queryCode" width="30">&nbsp;&nbsp;&nbsp;
+				概念id：<input type="text" id="conceptId" width="30">&nbsp;&nbsp;&nbsp;
+				板块名称搜索：<input type="text" id="conceptName" width="30">&nbsp;&nbsp;&nbsp;
 			</div>
 			<div class="mg">
-				<input type="text" id="mkv2" width="10" />&gt;=流通市值&lt;=<input
-					type="text" id="mkv" width="10" />亿&nbsp;&nbsp; 前3大股东持股&gt;=<input
-					type="text" id="holderNumT3" width="30" />%&nbsp;&nbsp;
-				市盈率ttm&lt;=<input type="text" id="pettm" width="20" />&nbsp;&nbsp;
+				<div class="input-group">
+					<input type="text" id="mkv2" width="10" />&gt;=流通市值&lt;=<input
+						type="text" id="mkv" width="10" />亿&nbsp;&nbsp; 前3大股东持股&gt;=<input
+						type="text" id="holderNumT3" width="30" />%&nbsp;&nbsp;
+					市盈率ttm&lt;=<input type="text" id="pettm" width="20" />&nbsp;&nbsp;
+				</div>
 			</div>
 			<div class="mg">
 				国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp;
@@ -41,51 +43,64 @@
 					placeholder="算法偏严" />&nbsp;&nbsp;
 			</div>
 			<div class="mg">
-				增发:&nbsp;&nbsp;&nbsp;&nbsp;底部增发:<input type="checkbox" id="zfself" />&nbsp;&nbsp; 增发状态：<select
-					id="zfStatus">
-					<option value="" selected="selected">不限制</option>
-					<option value="1">增发中</option>
-					<option value="6">证监会核准</option>
-					<option value="2">增发完成</option>
-					<option value="8">增发中和完成</option>
-					<option value="0">无增发</option>
-				</select>&nbsp;&nbsp; 增发对象：<select id="zfObjType">
-					<option value="0" selected="selected">不限制</option>
-					<option value="1">6个月</option>
-					<option value="2">混合</option>
-					<option value="3">大股东</option>
-					<option value="4">其他</option>
-				</select>&nbsp;&nbsp; <input type="text" id="zfYjAmt2" width="10" />&gt;=增发金额&lt;=<input type="text" id="zfYjAmt" width="10"
-					width="30">&nbsp;&nbsp; 低于增发价&gt;=<input type="text"
-					id="zfPriceLow" width="30" />%&nbsp;&nbsp;
+				<div class="input-group">
+					增发:&nbsp;&nbsp;&nbsp;&nbsp;底部增发:<input type="checkbox" id="zfself" />&nbsp;&nbsp;
+					增发状态：<select id="zfStatus">
+						<option value="" selected="selected">不限制</option>
+						<option value="1">增发中</option>
+						<option value="6">证监会核准</option>
+						<option value="2">增发完成</option>
+						<option value="8">增发中和完成</option>
+						<option value="0">无增发</option>
+					</select>&nbsp;&nbsp; 增发对象：<select id="zfObjType">
+						<option value="0" selected="selected">不限制</option>
+						<option value="1">6个月</option>
+						<option value="2">混合</option>
+						<option value="3">大股东</option>
+						<option value="4">其他</option>
+					</select>&nbsp;&nbsp; <input type="text" id="zfYjAmt2" width="10" />&gt;=增发金额&lt;=<input
+						type="text" id="zfYjAmt" width="10" width="30">&nbsp;&nbsp;
+					低于增发价&gt;=<input type="text" id="zfPriceLow" width="30" />%&nbsp;&nbsp;
+				</div>
 			</div>
-			<div class="mg">
-				大宗:&nbsp;&nbsp;&nbsp;&nbsp;1年交易额&gt;=<input type="text" width="10" width="30" id="totalAmt">&nbsp;&nbsp;
-				2月交易额&gt;=<input type="text" width="10" width="30" id="totalAmt60d">
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			</div>
-			<div class="mg">
-				技术面:&nbsp;&nbsp;&nbsp;&nbsp;均线多头排列:<input type="checkbox" id="shooting51" />&nbsp;&nbsp;&nbsp;
-				一阳穿4线:<input type="checkbox" id="shooting52" />&nbsp;&nbsp;&nbsp;
-				K线攻击形态:<input type="checkbox" id="kline" />&nbsp;&nbsp;&nbsp;
-				接近1年新高:<input type="checkbox" id="pre1Year" />&nbsp;&nbsp;&nbsp;
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			</div>
-
 			<div class="mg">
 				<div class="input-group">
+					大宗:&nbsp;&nbsp;&nbsp;&nbsp;1年交易金额&gt;=<input type="text" width="10"
+						width="30" id="totalAmt">&nbsp;&nbsp; 2月交易金额&gt;=<input
+						type="text" width="10" width="30" id="totalAmt60d">
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				</div>
+			</div>
+			<div class="mg">
+				技术面:&nbsp;&nbsp;&nbsp;&nbsp;均线多头排列:<input type="checkbox"
+					id="shooting51" />&nbsp;&nbsp;&nbsp; 一阳穿4线:<input type="checkbox"
+					id="shooting52" />&nbsp;&nbsp;&nbsp; K线攻击形态:<input type="checkbox"
+					id="kline" />&nbsp;&nbsp;&nbsp; 接近1年新高:<input type="checkbox"
+					id="pre1Year" />&nbsp;&nbsp;&nbsp;白马走势:<input type="checkbox"
+					id="whiteHors" />&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			</div>
+			<div class="mg">
+				<div class="input-group">
+					系统指标:&nbsp;&nbsp;&nbsp;&nbsp;<select id="shooting">
+						<option value="0" selected="selected">无限制</option>
+						<option value="8">底部小票-增发已完成-3y+</option>
+						<option value="9">底部小票-增发已完成-2y</option>
+						<option value="1">底部小票-大宗-超5%</option>
+						<option value="2">底部大票-增发已核准-超50亿</option>
+						<option value="4">底部股东人数大幅减少</option>
+						<option value="3">短线1:底部融资余额飙升,散户没买入空间?</option>
+						<option value="5">短线2:确定极速拉升,带小平台新高?</option>
+					</select>&nbsp;&nbsp;
 					标签:<select id="tagIndex">
 						<option value="-1" selected="selected">无限制</option>
 						<option value="5">小而美</option>
 						<option value="2">业绩较牛</option>
-						<option value="3">白马走势?</option>
 						<option value="7">半年新高-突破箱体?</option>
 						<option value="1">拉升吸筹?</option>
 						<option value="4">高质押机会</option>
@@ -93,15 +108,16 @@
 						<option value="9">人均持股</option>
 						<option value="3">资产收益率ttm</option>
 						<option value="6">大股东持股</option>
-						<option value="7" selected="selected">小票未涨</option>
+						<option value="7">小票未涨</option>
 						<option value="8">低于增发价</option>
 						<option value="10">大宗2月</option>
 						<option value="11">大宗1年</option>
-						<option value="12">大宗占比</option>
+						<option value="12" selected="selected">大宗占比</option>
 						<option value="13">持股人数变化</option>
-					</select> &nbsp;&nbsp;&nbsp;&nbsp;倒序排序:<input type="checkbox" id="asc"
-						name="asc" checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp; <span
-						class="input-group-btn">
+						<option value="14">减持占比</option>
+					</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 倒序排序:<input type="checkbox"
+						id="asc" name="asc" checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
 						<button class="btn btn-default" type="button" id="queryAction">
 							查询</button>
 					</span>
@@ -160,8 +176,6 @@
 										pageNum : params.pageNumber,
 										pageSize : params.pageSize,
 									};
-
-									param.channel = 1;
 									param.code = code;
 									param.orderBy = gsort;
 									param.asc = 1;
@@ -175,7 +189,6 @@
 
 									param.mkv = $('#mkv').val();
 									param.mkv2 = $('#mkv2').val();
-									param.pls = $('#pls').val();
 
 									param.sort7 = 0;
 									param.sort6 = 0;
@@ -199,11 +212,17 @@
 									param.finOK = 0;
 									param.bousOK = 0;
 									param.compnayType = 0;
-									param.zfObjType = $('#zfObjType').val();
 									param.kline = 0;
 									param.pre1Year = 0;
+									param.monitor = 0;
+									param.zfObjType = $('#zfObjType').val();
 									param.shooting51 = 0;
 									param.shooting52 = 0;
+									param.whiteHors = 0;
+
+									if (document.getElementById("whiteHors").checked) {
+										param.whiteHors = 1;
+									}
 									if (document.getElementById("shooting51").checked) {
 										param.shooting51 = 1;
 									}
@@ -211,9 +230,6 @@
 										param.shooting52 = 1;
 									}
 
-									if (document.getElementById("kline").checked) {
-										param.kline = 1;
-									}
 									if (document.getElementById("pre1Year").checked) {
 										param.pre1Year = 1;
 									}
@@ -226,7 +242,9 @@
 									if (document.getElementById("compnayType").checked) {
 										param.compnayType = 1;
 									}
-
+									if (document.getElementById("kline").checked) {
+										param.kline = 1;
+									}
 									if (document.getElementById("zfself").checked) {
 										param.zfself = 1;
 									}
@@ -258,6 +276,10 @@
 											title : '筹码博弈'
 										},
 										{
+											field : 'tagInfo',
+											title : '标签'
+										},
+										{
 											field : 'buyRea',
 											title : '备注'
 										},
@@ -271,6 +293,9 @@
 												v += "<br/><a target='_blank' href='/web/chips/reduce/list?code="
 														+ row.code
 														+ "'>减持历史=></a>"
+												if (row.shooting3 == 1) {
+													v += "<br/><a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资融券=></a>";
+												}
 												if (row.tagHighZyChance == 1) {
 													v += "<br/><a target='_blank' href='https://data.eastmoney.com/gpzy/detail/"+row.code+".html'>股票质押=></a>";
 												}
@@ -278,12 +303,8 @@
 											}
 										},
 										{
-											field : 'tagInfo',
-											title : '标签'
-										},
-										{
 											field : 'a',
-											title : '操作',
+											title : '人工',
 											formatter : function(value, row,
 													index) {
 												return "<a target='_blank' href='/web/"
