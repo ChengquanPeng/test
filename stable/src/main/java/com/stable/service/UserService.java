@@ -138,6 +138,17 @@ public class UserService {
 		}
 	}
 
+	// 修改信息
+	public synchronized void lastLogin(long id) {
+		UserInfo exs = getListById(id);
+		if (exs == null) {
+			throw new RuntimeException("用户不存在user=" + id);
+		} else {
+			exs.setLastLogin(DateUtil.getTodayYYYYMMDDHHMMSS());
+			userDao.save(exs);
+		}
+	}
+
 	// 新增
 	public synchronized void add(UserInfo user) {
 		UserInfo exs = getListById(user.getId());

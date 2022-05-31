@@ -43,4 +43,7 @@ public class UserInfo extends EsBase {
 
 	@Field(type = FieldType.Integer)
 	private int memDate;// 会员日期
+
+	@Field(type = FieldType.Text)
+	private String lastLogin;// 最后登录
 }

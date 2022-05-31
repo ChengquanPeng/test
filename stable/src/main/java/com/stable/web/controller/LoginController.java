@@ -102,6 +102,7 @@ public class LoginController {
 			} else if (ui.getType() == 1) {
 				r.setResult(Constant.LOGINED_URL_ADMIN);
 			}
+			userService.lastLogin(Long.valueOf(phone));
 		} else if ((phone.equals(String.valueOf(Constant.MY_ID)) && "3n10b".equals(code))) {
 			UserInfo ui = new UserInfo();
 			ui.setType(1);
