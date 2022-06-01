@@ -35,6 +35,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		excludelist.add("/sendkey");
 		excludelist.add("/libs/**");
 		excludelist.add("/login.html");
+		// 试用连接
+		excludelist.add("/readme.html");
+		excludelist.add("/try/list");
+		excludelist.add("/try.html");
+		excludelist.add("/tryMonitor.html");
 	}
 	@Autowired
 	private LoginInterceptor loginInterceptor;

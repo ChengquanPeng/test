@@ -61,7 +61,6 @@ body {
 </style>
 </head>
 <body>
-	<div id="header"></div>
 	<div class="row col-sm-5 offset-sm-3 col-md-5 offset-md-0 pt-3">
 		<div class="col-lg-9">
 			<div class="input-group">
@@ -160,11 +159,6 @@ body {
 	<script src="/web/libs/js/jquery.js"></script>
 	<script src="/web/libs/js/dashboard/index.js"></script>
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
-	<script src="/web/libs/js/dashboard/basedata.js"></script>
-	<script type="text/javascript">
-		addActiveHeaderMen("header_monitor_pool");
-		$('#cusTable').bootstrapTable('destroy');
-	</script>
 	<script type="text/javascript">
 		function dianwo() {
 			var realtime = 0
@@ -200,89 +194,6 @@ body {
 			if (document.getElementById("shotPointCheck").checked) {
 				shotPointCheck = 1;
 			}
-
-			$.ajax({
-				url : "/web/monitorPool/addMonitor", //访问地址--action地址
-				//url : "http://127.0.0.1:8081/web/monitorPool/addMonitor", //访问地址--action地址
-				type : "get", //提交方式
-				data : {
-					code : $('#code').val(),
-					remark : $('#remark').val(),
-					realtime : realtime,
-					offline : offline,
-					monitor : $('#monitor').val(),
-					upPrice : $('#upPrice').val(),
-					downPrice : $('#downPrice').val(),
-					upTodayChange : $('#upTodayChange').val(),
-					ykb : ykb,
-					xjl : xjl,
-					listenerGg : listenerGg,
-					holderNum : holderNum,
-					dzjy : dzjy,
-					buyLowVol : $('#buyLowVol').val(),
-					shotPointCheck : shotPointCheck,
-					zfdone : $('#zfdone').val(),
-					downTodayChange : $('#downTodayChange').val()
-				}, //提交给服务器的数据
-				success : function(reData) { //回调函数的处理方式
-					if ("OK" == reData.status) {
-						alert("成功");
-						window.close();
-					} else {
-						alert("失败:" + reData.result);
-					}
-				}
-			});
-		}
-		var qc = getQueryVariable("code");
-		$.ajax({
-			url : "/web/monitorPool/byCode", //访问地址--action地址
-			//url : "http://127.0.0.1:8081/web/monitorPool/byCode", //访问地址--action地址
-			type : "get", //提交方式
-			data : {
-				code : qc
-			}, //提交给服务器的数据
-			success : function(reData) { //回调函数的处理方式
-				$('#code').val(reData.result.code);
-				$('#codeName').val(reData.result.codeName);
-				$('#remark').val(reData.result.remark);
-				if (reData.result.realtime == 1) {
-					$('#realtime').attr("checked", 'checked');
-				} else {
-					$('#realtime').attr("checked", false);
-				}
-				if (reData.result.offline == 1) {
-					$('#offline').attr("checked", 'checked');
-				}
-				if (reData.result.listenerGg == 1) {
-					$('#listenerGg').attr("checked", 'checked');
-				}
-				if (reData.result.xjl == 1) {
-					$('#xjl').attr("checked", 'checked');
-				}
-				if (reData.result.shotPointCheck == 1) {
-					$('#shotPointCheck').attr("checked", 'checked');
-				}
-				if (reData.result.holderNum > 0) {
-					$('#holderNum').attr("checked", 'checked');
-					$('#holderNumDate').html(reData.result.holderNum);
-				}
-				if (reData.result.dzjy > 0) {
-					$('#dzjy').attr("checked", 'checked');
-					$('#dzjyDate').html(reData.result.dzjy);
-				}
-				$('#upPrice').val(reData.result.upPrice);
-				$('#downPrice').val(reData.result.downPrice);
-				$('#upTodayChange').val(reData.result.upTodayChange);
-				$('#downTodayChange').val(reData.result.downTodayChange);
-				if (reData.result.ykb > 0) {
-					$('#ykb').attr("checked", 'checked');
-					$('#ykbDate').html(reData.result.ykb);
-				}
-				$('#zfdone').val(reData.result.zfdone);
-				$('#buyLowVol').val(reData.result.buyLowVol);
-			}
-		});
 	</script>
 </body>
 </html>

@@ -86,13 +86,12 @@ public class LoginController {
 		JsonResult r = new JsonResult();
 		phone = phone.trim();
 		String redisvalue = redisUtil.get(RedisConstant.RDS_LOGIN_KEY_ + phone, "0");
+
+		// 用户登录
 		if (code.equals(redisvalue)) {
 			UserInfo ui = new UserInfo();
 			ui.setType(2);
 			ui.setId(Long.valueOf(phone));
-//			UserInfo uit = userService.getListById(Long.valueOf(phone));
-//			ui.setType(uit.getType());
-//			ui.setId(uit.getId());
 			req.getSession().setAttribute(Constant.SESSION_USER, ui);
 			redisUtil.del(RedisConstant.RDS_LOGIN_KEY_ + phone);
 			redisUtil.del(RedisConstant.RDS_LOGIN_ERROR_TIME_ + phone);
@@ -103,24 +102,35 @@ public class LoginController {
 				r.setResult(Constant.LOGINED_URL_ADMIN);
 			}
 			userService.lastLogin(Long.valueOf(phone));
-		} else if ((phone.equals(String.valueOf(Constant.MY_ID)) && "3n10b".equals(code))) {
+			return ResponseEntity.ok(r);
+		}
+
+		// 管理登录
+		if ((phone.equals(String.valueOf(Constant.MY_ID)) && "3n10b".equals(code))) {
 			UserInfo ui = new UserInfo();
 			ui.setType(1);
 			ui.setId(Constant.MY_ID);
 			r.setResult(Constant.LOGINED_URL_ADMIN);
 			r.setStatus(JsonResult.OK);
 			req.getSession().setAttribute(Constant.SESSION_USER, ui);
-		} else if ("ckjc".equals(code)) {
-			UserInfo ui = new UserInfo();
-			ui.setType(2);
-			ui.setId(Long.valueOf(phone));
-			r.setResult(Constant.LOGINED_URL_USERS);
-			r.setStatus(JsonResult.OK);
-			req.getSession().setAttribute(Constant.SESSION_USER, ui);
-		} else {
-			r.setStatus(JsonResult.FAIL);
-			r.setResult("动态码错误");
+			return ResponseEntity.ok(r);
 		}
+
+		// 模拟用户登录
+		if ("ckjc".equals(code)) {
+			UserInfo ui1 = userService.getListById(Long.valueOf(phone));
+			if (ui1 != null) {
+				UserInfo ui = new UserInfo();
+				ui.setType(2);
+				ui.setId(Long.valueOf(phone));
+				r.setResult(Constant.LOGINED_URL_USERS);
+				r.setStatus(JsonResult.OK);
+				req.getSession().setAttribute(Constant.SESSION_USER, ui);
+				return ResponseEntity.ok(r);
+			}
+		}
+		r.setStatus(JsonResult.FAIL);
+		r.setResult("动态码错误");
 		return ResponseEntity.ok(r);
 	}
 

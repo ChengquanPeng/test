@@ -94,33 +94,33 @@ public class WebModelService {
 	}
 
 	public CodeBaseModelResp getLastOneByCodeResp(String code, boolean isMyid) {
-		return getModelResp(getLastOneByCode2(code), isMyid);
+		return getModelResp(false, getLastOneByCode2(code), isMyid);
 	}
 
 	public String getSystemPoint(CodeBaseModel2 dh, String splitor) {
 		String s = "";
 		// --中长--
 		if (dh.getShooting1() > 0) {
-			s = "底部小票-大宗-超5%" + splitor;
+			s = "小票-底部大宗-大宗交易量占流通筹码超5%" + splitor;
 		}
 		if (dh.getShooting8() > 0) {
-			s += "底部小票-增发已完成-3y+,底部定增" + splitor;
+			s += "小票-底部定增完成+至少3年未涨" + splitor;
 		}
 		if (dh.getShooting9() > 0) {
-			s += "底部小票-增发已完成-2y,底部定增" + splitor;
+			s += "小票-底部定增完成+2年未涨" + splitor;
 		}
 		if (dh.getShooting2() > 0) {
-			s += "底部大票-增发已核准：超50亿(越大越好),股东集中,底部拿筹涨停?" + splitor;
+			s += "大票-底部定增已核准-募集资金超50亿(越大越好),股东集中,底部拿筹涨停?" + splitor;
 		}
 		if (dh.getShooting4() > 0) {
-			s += "底部股东人数：大幅减少(3年减少40%)" + splitor;
+			s += "底部股东人数大幅减少(3年内减少40%)" + splitor;
 		}
 		// --短线--
 		if (dh.getShooting3() > 0) {
-			s += "短线1:底部融资余额飙升,散户没买入空间" + splitor;
+			s += "底部融资余额飙升-确认是主力在融资买入?(短线1)" + splitor;
 		}
 		if (dh.getShooting5() > 0) {
-			s += "短线2:确定极速拉升,带小平台新高？" + splitor;
+			s += "股价极速拉升:妖股?龙抬头?(短线2)" + splitor;
 		}
 		if (dh.getShooting6() > 0) {
 			s += "短线3:3/5天情绪,见好就收" + splitor;
@@ -129,7 +129,7 @@ public class WebModelService {
 		return s;
 	}
 
-	private CodeBaseModelResp getModelResp(CodeBaseModel2 dh, boolean isMyid) {
+	private CodeBaseModelResp getModelResp(boolean trymsg, CodeBaseModel2 dh, boolean isMyid) {
 		CodeBaseModelResp resp = new CodeBaseModelResp();
 		BeanUtils.copyProperties(dh, resp);
 		resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
@@ -245,21 +245,39 @@ public class WebModelService {
 
 				if (dh.getZfStatus() == 1) {
 					if (dh.getZfYjAmt() > 0) {
-						sb5.append(",预增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
+						if (trymsg) {
+							sb5.append(",预增发金额:xx亿");
+						} else {
+							sb5.append(",预增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
+						}
 					}
 				} else {
-					if (StringUtils.isNotBlank(dh.getZfAmt())) {
-						sb5.append(",实增发金额:").append(dh.getZfAmt());
-					} else if (dh.getZfYjAmt() > 0) {
-						sb5.append(",增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
+
+					if (trymsg) {
+						if (StringUtils.isNotBlank(dh.getZfAmt())) {
+							sb5.append(",实增发金额:xx亿");
+						} else if (dh.getZfYjAmt() > 0) {
+							sb5.append(",增发金额:xx亿");
+						}
+						sb5.append(",增发价格:xx元");
+					} else {
+						if (StringUtils.isNotBlank(dh.getZfAmt())) {
+							sb5.append(",实增发金额:").append(dh.getZfAmt());
+						} else if (dh.getZfYjAmt() > 0) {
+							sb5.append(",增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
+						}
+						sb5.append(",增发价格:").append(dh.getZfPrice());
 					}
-					sb5.append(",增发价格:").append(dh.getZfPrice());
 				}
 
 			}
 			// 最近一次增发
 			if (dh.getZflastOkDate() > 0) {
-				sb5.append(",实施日期:").append(dh.getZflastOkDate()).append(",");
+				if (trymsg) {
+					sb5.append(",实施日期:yyyy-mm-dd,");
+				} else {
+					sb5.append(",实施日期:").append(dh.getZflastOkDate()).append(",");
+				}
 				if (dh.getZfself() == 1) {
 					sb5.append("<font color='green'>底部增发</font>,");
 				}
@@ -281,7 +299,12 @@ public class WebModelService {
 			}
 			// 解禁
 			if (dh.getZfjj() == 1) {
-				sb5.append("增发解禁(" + dh.getZfjjDate() + ")");
+				if (trymsg) {
+					sb5.append("增发解禁(yyyy-mm-dd)");
+				} else {
+					sb5.append("增发解禁(" + dh.getZfjjDate() + ")");
+				}
+
 			}
 			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 		}
@@ -366,7 +389,7 @@ public class WebModelService {
 					}
 					dh.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, dh.getCode()).getRemark());
 				}
-				CodeBaseModelResp resp = getModelResp(dh, isMyid);
+				CodeBaseModelResp resp = getModelResp(mr.isTrymsg(), dh, isMyid);
 //				resp.setBuyRea(ToolsUtil.stringInsertByInterval(resp.getBuyRea(), Constant.HTML_LINE, 20));
 				res.add(resp);
 			}

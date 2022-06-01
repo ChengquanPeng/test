@@ -22,9 +22,11 @@
 	<div class="container-fluid">
 		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div class="mg">
-				股票代码：<input type="text" id="queryCode" width="30">&nbsp;&nbsp;&nbsp;
-				概念id：<input type="text" id="conceptId" width="30">&nbsp;&nbsp;&nbsp;
-				板块名称搜索：<input type="text" id="conceptName" width="30">&nbsp;&nbsp;&nbsp;
+				股票代码：<input type="text" id="queryCode" width="30"
+					placeholder="多个代码以英文逗号分割">&nbsp;&nbsp;&nbsp; 概念id：<input
+					type="text" id="conceptId" width="30" placeholder="同花顺板块、概念id">&nbsp;&nbsp;&nbsp;
+				板块名称搜索：<input type="text" id="conceptName" width="30"
+					placeholder="板块、概念关键字">&nbsp;&nbsp;&nbsp;
 			</div>
 			<div class="mg">
 				<div class="input-group">
@@ -76,12 +78,12 @@
 			</div>
 			<div class="mg">
 				技术面:&nbsp;&nbsp;&nbsp;&nbsp;5日内均线多头排列:<input type="checkbox"
-					id="shooting51" />&nbsp;&nbsp;&nbsp; 5日内一阳穿4线:<input type="checkbox"
-					id="shooting52" />&nbsp;&nbsp;&nbsp; K线攻击形态:<input type="checkbox"
-					id="kline" />&nbsp;&nbsp;&nbsp; 接近1年新高:<input type="checkbox"
-					id="pre1Year" />&nbsp;&nbsp;&nbsp;白马走势:<input type="checkbox"
-					id="whiteHors" />&nbsp;&nbsp;&nbsp;5日交易活跃:<input type="checkbox"
-					id="shooting53" />&nbsp;&nbsp;&nbsp;
+					id="shooting51" />&nbsp;&nbsp;&nbsp; 5日内一阳穿4线:<input
+					type="checkbox" id="shooting52" />&nbsp;&nbsp;&nbsp; K线攻击形态:<input
+					type="checkbox" id="kline" />&nbsp;&nbsp;&nbsp; 接近1年新高:<input
+					type="checkbox" id="pre1Year" />&nbsp;&nbsp;&nbsp;白马走势:<input
+					type="checkbox" id="whiteHors" />&nbsp;&nbsp;&nbsp;5日交易活跃:<input
+					type="checkbox" id="shooting53" />&nbsp;&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -90,13 +92,13 @@
 				<div class="input-group">
 					系统指标:&nbsp;&nbsp;&nbsp;&nbsp;<select id="shooting">
 						<option value="0" selected="selected">无限制</option>
-						<option value="8">底部小票-增发已完成-3y+</option>
-						<option value="9">底部小票-增发已完成-2y</option>
-						<option value="1">底部小票-大宗-超5%</option>
-						<option value="2">底部大票-增发已核准-超50亿</option>
+						<option value="8">小票-底部定增完成+至少3年未涨</option>
+						<option value="9">小票-底部定增完成+2年未涨</option>
+						<option value="1">小票-底部大宗-大宗交易量占流通筹码超5%</option>
+						<option value="2">大票-底部定增已核准-募集资金超50亿</option>
 						<option value="4">底部股东人数大幅减少</option>
-						<option value="3">短线1:底部融资余额飙升,散户没买入空间?</option>
-						<option value="5">短线2:确定极速拉升,带小平台新高?</option>
+						<option value="3">底部融资余额飙升-确认是主力在融资买入?(短线1)</option>
+						<option value="5">股价极速拉升:妖股?龙抬头?(短线2)</option>
 					</select>&nbsp;&nbsp; 标签:<select id="tagIndex">
 						<option value="-1" selected="selected">无限制</option>
 						<option value="5">小而美</option>
@@ -105,7 +107,7 @@
 						<option value="1">拉升吸筹?</option>
 						<option value="4">高质押机会</option>
 					</select>&nbsp;&nbsp; 排序：<select id="gsort">
-						<option value="9"  selected="selected">人均持股</option>
+						<option value="9" selected="selected">人均持股</option>
 						<option value="3">资产收益率ttm</option>
 						<option value="6">大股东持股</option>
 						<option value="7">小票未涨</option>
@@ -324,7 +326,7 @@
 														+ ustr
 														+ "/addMonitor.html?code="
 														+ row.code
-														+ "'>更改监听</a>";
+														+ "'>股票监听</a>";
 											}
 
 										} ],
