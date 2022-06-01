@@ -42,6 +42,7 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.ThreadsUtil;
+import com.stable.utils.ToolsUtil;
 import com.stable.vo.ReducingHoldingSharesStat;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
@@ -101,7 +102,7 @@ public class WebModelService {
 		String s = "";
 		// --中长--
 		if (dh.getShooting1() > 0) {
-			s = "底部小票-大宗-超5%,董监高机构代减持?" + splitor;
+			s = "底部小票-大宗-超5%" + splitor;
 		}
 		if (dh.getShooting8() > 0) {
 			s += "底部小票-增发已完成-3y+,底部定增" + splitor;
@@ -135,7 +136,8 @@ public class WebModelService {
 		resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
 		StockBaseInfo s = stockBasicService.getCode(dh.getCode());
 		resp.setCircZb(s.getCircZb());
-		resp.setBankuai(s.getThsIndustry() + "<br/> " + s.getThsLightspot());
+		resp.setBankuai(s.getThsIndustry() + "<br/> "
+				+ ToolsUtil.stringInsertByInterval(s.getThsLightspot(), Constant.HTML_LINE, 10));
 		StringBuffer sb1 = new StringBuffer("");
 		if (dh.getBaseRed() == 1) {
 			sb1.append("<font color='red'>红:</font>" + dh.getBaseRedDesc());
@@ -160,10 +162,10 @@ public class WebModelService {
 		StringBuffer tag = new StringBuffer("");
 		tag.append("<font color='red'>");
 		if (dh.getShooting51() == 1) {
-			tag.append("5日均线多头排列").append(Constant.HTML_LINE);
+			tag.append("均线多头排列").append(Constant.HTML_LINE);
 		}
 		if (dh.getShooting52() == 1) {
-			tag.append("5日内一阳穿4线").append(Constant.HTML_LINE);
+			tag.append("一阳穿4线").append(Constant.HTML_LINE);
 		}
 		if (dh.getShootingw() == 1) {
 			tag.append("K线攻击形态").append(Constant.HTML_LINE);
@@ -175,7 +177,7 @@ public class WebModelService {
 			tag.append("白马走势?").append(Constant.HTML_LINE);
 		}
 		if (dh.getShooting53() == 1) {
-			tag.append("5日交易活跃").append(Constant.HTML_LINE);
+			tag.append("交易活跃").append(Constant.HTML_LINE);
 		}
 		tag.append("</font>");
 		if (dh.getTagSmallAndBeatf() > 0) {

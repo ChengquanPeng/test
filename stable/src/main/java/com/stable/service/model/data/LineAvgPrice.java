@@ -82,7 +82,7 @@ public class LineAvgPrice {
 					// 交易活跃
 					if (unp5share > 0) {
 						double t = sa.getVolume() * 100 / 10000;// 交易(万股)=手x100/10000;
-						if (CurrencyUitl.roundHalfUp(t / unp5share) >= 4.5) {// 实际换手4.5%以上
+						if (CurrencyUitl.roundHalfUp(t / unp5share) >= 3.5) {// 实际换手3.5%以上
 
 						} else {
 							cbm.setShooting53(0);
