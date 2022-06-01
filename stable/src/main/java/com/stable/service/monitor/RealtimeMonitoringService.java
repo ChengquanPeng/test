@@ -63,7 +63,7 @@ public class RealtimeMonitoringService {
 			return;
 		}
 		long now = new Date().getTime();
-		long starttime = DateUtil.parseTodayYYYYMMDDHHMMSS(date + " 09:15:00").getTime();
+		long starttime = DateUtil.parseTodayYYYYMMDDHHMMSS(date + " 09:25:50").getTime();
 		long endtime = DateUtil.parseTodayYYYYMMDDHHMMSS(date + " 15:03:00").getTime();
 		if (now < starttime || now > endtime) {// 已超时
 			log.info("now > isAlivingMillis,已超时");

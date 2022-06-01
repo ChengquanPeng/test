@@ -369,6 +369,7 @@ public class WebModelService {
 					dh.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, dh.getCode()).getRemark());
 				}
 				CodeBaseModelResp resp = getModelResp(dh, isMyid);
+				resp.setBuyRea(ToolsUtil.stringInsertByInterval(resp.getBuyRea(), Constant.HTML_LINE, 20));
 				res.add(resp);
 			}
 		}
