@@ -42,7 +42,6 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.ThreadsUtil;
-import com.stable.utils.ToolsUtil;
 import com.stable.vo.ReducingHoldingSharesStat;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
@@ -136,8 +135,7 @@ public class WebModelService {
 		resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
 		StockBaseInfo s = stockBasicService.getCode(dh.getCode());
 		resp.setCircZb(s.getCircZb());
-		resp.setBankuai(s.getThsIndustry() + "<br/> "
-				+ ToolsUtil.stringInsertByInterval(s.getThsLightspot(), Constant.HTML_LINE, 10));
+		resp.setBankuai(s.getThsIndustry() + "<br/> " + s.getThsLightspot());
 		StringBuffer sb1 = new StringBuffer("");
 		if (dh.getBaseRed() == 1) {
 			sb1.append("<font color='red'>红:</font>" + dh.getBaseRedDesc());
@@ -369,7 +367,7 @@ public class WebModelService {
 					dh.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, dh.getCode()).getRemark());
 				}
 				CodeBaseModelResp resp = getModelResp(dh, isMyid);
-				resp.setBuyRea(ToolsUtil.stringInsertByInterval(resp.getBuyRea(), Constant.HTML_LINE, 20));
+//				resp.setBuyRea(ToolsUtil.stringInsertByInterval(resp.getBuyRea(), Constant.HTML_LINE, 20));
 				res.add(resp);
 			}
 		}
