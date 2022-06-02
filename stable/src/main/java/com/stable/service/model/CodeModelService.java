@@ -668,7 +668,7 @@ public class CodeModelService {
 		FinanceBaseInfo fbi = fa.getCurrJidu();
 		newOne.setCurrYear(fbi.getYear());
 		newOne.setCurrQuarter(fbi.getQuarter());
-		newOne.setZcfzl(fbi.getZcfzl());
+		newOne.setZcfzl(CurrencyUitl.roundHalfUp(fbi.getZcfzl()));
 		newOne.setGsjlr(fa.getCurrYear().getGsjlr());// 年报的
 		newOne.setGoodWill(fbi.getGoodWill());
 		newOne.setGoodWillRatioGsjlr(fbi.getGoodWillRatioGsjlr());
