@@ -49,4 +49,8 @@ public class ModelReq {
 	int shooting53 = 0;
 	int whiteHors = 0;
 	boolean trymsg;
+	
+	String gdrs;
+	String gdrsp;
+	
 }

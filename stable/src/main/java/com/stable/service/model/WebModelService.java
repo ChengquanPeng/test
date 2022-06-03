@@ -211,8 +211,8 @@ public class WebModelService {
 		sb5.append("流通:").append(dh.getMkv()).append("亿,");
 		sb5.append("除5%活筹:").append(dh.getActMkv()).append("亿,");
 		sb5.append("前3大股东:").append(dh.getHolderNumT3()).append("%");
-		sb5.append(",股东人数(少):").append(CurrencyUitl.covertToString(dh.getLastNum()));
-		sb5.append(",人均持股(高):").append(CurrencyUitl.covertToString(dh.getAvgNum()));
+		sb5.append(",股东人数:").append(CurrencyUitl.covertToString(dh.getLastNum()));
+		sb5.append(",人均持股:").append(CurrencyUitl.covertToString(dh.getAvgNum()));
 		sb5.append(",变化:").append(dh.getHolderNum()).append("%");
 		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 		// 行情-财务
@@ -690,6 +690,20 @@ public class WebModelService {
 			Long zfYjAmt = Long.valueOf(mr.getZfYjAmt2());
 			if (zfYjAmt > 0) {
 				bqb.must(QueryBuilders.rangeQuery("zfYjAmt").gte(zfYjAmt * 100000000l));
+			}
+		}
+		// 股东人数
+		if (StringUtils.isNotBlank(mr.getGdrs())) {
+			Long lastNum = Long.valueOf(mr.getGdrs());
+			if (lastNum > 0) {
+				bqb.must(QueryBuilders.rangeQuery("lastNum").gte(1).lte(lastNum));
+			}
+		}
+		// 股东人数变化-- 这里是负数
+		if (StringUtils.isNotBlank(mr.getGdrsp())) {
+			Double holderNum = Double.valueOf(mr.getGdrsp());
+			if (holderNum > 0) {
+				bqb.must(QueryBuilders.rangeQuery("holderNum").lte(-holderNum));
 			}
 		}
 

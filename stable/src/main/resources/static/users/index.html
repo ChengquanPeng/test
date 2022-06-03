@@ -71,20 +71,17 @@
 						width="30" id="totalAmt">&nbsp;&nbsp; 2月交易金额&gt;=<input
 						type="text" width="10" width="30" id="totalAmt60d">
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					股东人数&lt;=<input type="text" width="10"width="30" id="gdrs" placeholder="股东人数低于多少人" >人，减少幅度超过%:<input type="text" width="10"width="30" id="gdrsp" placeholder="3年减少百分比" />
 				</div>
 			</div>
 			<div class="mg">
-				技术面:&nbsp;&nbsp;&nbsp;&nbsp;5日内均线多头排列:<input type="checkbox"
+				技术面:&nbsp;&nbsp;&nbsp;&nbsp;5日均线多头排列:<input type="checkbox"
 					id="shooting51" />&nbsp;&nbsp;&nbsp; 5日内一阳穿4线:<input
 					type="checkbox" id="shooting52" />&nbsp;&nbsp;&nbsp; K线攻击形态:<input
 					type="checkbox" id="kline" />&nbsp;&nbsp;&nbsp; 接近1年新高:<input
-					type="checkbox" id="pre1Year" />&nbsp;&nbsp;&nbsp;白马走势:<input
-					type="checkbox" id="whiteHors" />&nbsp;&nbsp;&nbsp;5日交易活跃:<input
-					type="checkbox" id="shooting53" />&nbsp;&nbsp;&nbsp;
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					type="checkbox" id="pre1Year" />&nbsp;&nbsp;&nbsp;5日交易活跃:<input
+					type="checkbox" id="shooting53" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;大市值：&nbsp;白马走势:<input
+					type="checkbox" id="whiteHors" />
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			</div>
@@ -222,6 +219,8 @@
 									param.shooting52 = 0;
 									param.shooting53 = 0;
 									param.whiteHors = 0;
+									param.gdrs = $('#gdrs').val();
+									param.gdrsp = $('#gdrsp').val();
 
 									if (document.getElementById("whiteHors").checked) {
 										param.whiteHors = 1;

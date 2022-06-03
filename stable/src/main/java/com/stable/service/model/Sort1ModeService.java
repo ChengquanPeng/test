@@ -34,8 +34,8 @@ public class Sort1ModeService {
 				String name = stockBasicService.getCodeName2(cbm.getCode());
 				if (!name.contains("ST")) {
 					cbm.setShooting5(DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), 30)));// 30天,一定要尽快新高
-					mp.setUpPrice(maxPrice);
-					if (mp.getMonitor() == MonitorType.NO.getCode()) {
+					if (mp.getMonitor() == MonitorType.NO.getCode() && cbm.getPls() != 2) {
+						mp.setUpPrice(maxPrice);
 						mp.setMonitor(MonitorType.SORT1.getCode());
 						mp.setRealtime(1);
 					}

@@ -1,6 +1,5 @@
 package com.stable.utils;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -10,7 +9,9 @@ import com.stable.config.SpringConfig;
 import com.zjiecode.wxpusher.client.WxPusher;
 import com.zjiecode.wxpusher.client.bean.Message;
 import com.zjiecode.wxpusher.client.bean.MessageResult;
+import com.zjiecode.wxpusher.client.bean.Page;
 import com.zjiecode.wxpusher.client.bean.Result;
+import com.zjiecode.wxpusher.client.bean.WxUser;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -74,15 +75,22 @@ public class WxPushUtil {
 	}
 
 	public static void main(String[] args) {
-		Set<String> uids = new HashSet<String>();
-		// uids.add("");
-		// uids.add("");
-		Message message = new Message();
-		message.setAppToken("");
-		message.setContentType(Message.CONTENT_TYPE_TEXT);
-		message.setContent("不加限制的自由是很可怕的，因为很容易让任何人滑向深渊。-- " + DateUtil.getTodayYYYYMMDDHHMMSS());
-		message.setUids(uids);
-		message.setUrl(null);
-		System.err.println(WxPusher.send(message).getData().get(0).getStatus());
+//		Set<String> uids = new HashSet<String>();
+//		// uids.add("");
+//		// uids.add("");
+//		Message message = new Message();
+//		message.setAppToken("");
+//		message.setContentType(Message.CONTENT_TYPE_TEXT);
+//		message.setContent("不加限制的自由是很可怕的，因为很容易让任何人滑向深渊。-- " + DateUtil.getTodayYYYYMMDDHHMMSS());
+//		message.setUids(uids);
+//		message.setUrl(null);
+//		System.err.println(WxPusher.send(message).getData().get(0).getStatus());
+
+		Result<Page<WxUser>> users = WxPusher.queryWxUser("AT_X5jTnRko4rhQ4dmoS7ntwBN79BxATk3r", 1, 100);
+		List<WxUser> list = users.getData().getRecords();
+		for (int i = 0; i < list.size(); i++) {
+			WxUser wu = list.get(i);
+			System.err.println(wu.getUid() + "," + wu.getNickName() + ",");
+		}
 	}
 }
