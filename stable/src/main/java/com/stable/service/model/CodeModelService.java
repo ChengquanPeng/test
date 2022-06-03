@@ -331,10 +331,11 @@ public class CodeModelService {
 			if (mkv >= smallStocklimit) {
 				if (newOne.getZfjjupStable() >= 2 || newOne.getZfjjup() >= 2) {// 2.底部没涨
 					// 行情指标2：底部大票增发：超过50亿(越大越好),股东集中,证监会核准-之前有明显底部拿筹痕迹-涨停？
-					if (newOne.getZfYjAmt() >= ZF_50YI
-							&& ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
-						isOk2 = true;
-						log.info("{} 大票，底部增发超过50亿", code);
+					if (ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
+						if (newOne.getZfYjAmt() >= ZF_50YI) {
+							isOk2 = true;
+							log.info("{} 大票，底部增发超过50亿", code);
+						}
 					}
 				}
 			}
@@ -711,6 +712,19 @@ public class CodeModelService {
 					&& f0.getTaxPayable() > 0) {
 				newOne.setBaseRed(1);
 				sb1.append(red++).append(".暴雷风险:应交税费连续增长").append(Constant.HTML_LINE);
+			}
+
+			// 应收帐连续增长
+			if (f0.getAccountrec() >= f1.getAccountrec() && f1.getAccountrec() >= f2.getAccountrec()
+					&& f2.getAccountrec() >= f3.getAccountrec() && f3.getAccountrec() >= f4.getAccountrec()
+					&& f0.getAccountrec() > 0) {
+				if (f0.getJyxjlce() <= 0 && f0.getMgjyxjl() <= 0) {
+					newOne.setBaseRed(1);
+					sb1.append(red++).append(".暴雷风险:应收账款连续增长且现金流为负").append(Constant.HTML_LINE);
+				} else {
+					newOne.setBaseYellow(1);
+					sb2.append(yellow++).append(".应收账款连续增长").append(Constant.HTML_LINE);
+				}
 			}
 		}
 
