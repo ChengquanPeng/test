@@ -95,7 +95,8 @@ table {
 						id="base1" target="_blank">同花顺基本面</a>&nbsp;&nbsp;&nbsp;<a
 						id="tzzfd" target="_blank">投资者互动</a>&nbsp;&nbsp;&nbsp;<a id="jgdy"
 						target="_blank">机构调研</a>&nbsp;&nbsp;&nbsp;<a id="rzrq"
-						target="_blank">融资融券</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小市值，最好低于50Y，新股和st排除</td>
+						target="_blank">融资融券</a>&nbsp;&nbsp;&nbsp;<a id="gpzy"
+						target="_blank">股权质押</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小市值，最好低于50Y，新股和st排除</td>
 				</tr>
 				<tr>
 					<td id="pre_recentPriceYear"></td>
@@ -410,7 +411,8 @@ table {
 	</script>
 	<script type="text/javascript">
 		var qc = getQueryVariable("code");
-		$.ajax({
+		$
+				.ajax({
 					url : "/web/model/chips", //访问地址--action地址
 					type : "get", //提交方式
 					data : {
@@ -452,6 +454,11 @@ table {
 						$('#rzrq').attr(
 								"href",
 								"https://data.eastmoney.com/rzrq/detail/"
+										+ code + ".html");
+						//股权质押
+						$('#gpzy').attr(
+								"href",
+								"https://data.eastmoney.com/gpzy/detail/"
 										+ code + ".html");
 
 						//财务 yjq2
