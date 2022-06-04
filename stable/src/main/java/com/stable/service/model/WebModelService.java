@@ -123,7 +123,7 @@ public class WebModelService {
 			s += "股价极速拉升:妖股?龙抬头?(短线2)" + splitor;
 		}
 		if (dh.getShooting6() > 0) {
-			s += "短线3:3/5天情绪,见好就收" + splitor;
+			s += "小票-底部减持" + splitor;
 		}
 
 		return s;

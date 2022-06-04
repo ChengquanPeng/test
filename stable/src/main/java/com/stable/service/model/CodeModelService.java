@@ -64,6 +64,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class CodeModelService {
 	private static final long ZF_50YI = 50 * 100000000l;
+	private static final long ZF_20YI = 20 * 100000000l;
 	@Value("${small.stock.limit}")
 	private double smallStocklimit;
 	private double smallStocklimitAck = 50;// 50亿
@@ -291,11 +292,13 @@ public class CodeModelService {
 
 		boolean isOk1 = false;
 		boolean isOk2 = false;
+		boolean isOk6 = false;
 		boolean isOk8 = false;
 		boolean isOk9 = false;
 		newOne.setShooting1(0);
 		newOne.setShooting2(0);
 		newOne.setShooting4(0);
+		newOne.setShooting6(0);
 		newOne.setShooting8(0);
 		newOne.setShooting9(0);
 		newOne.setShooting10(0);
@@ -318,6 +321,11 @@ public class CodeModelService {
 							isOk8 = true;
 							log.info("{} 小票,底部横盘定增", code);
 						}
+
+						// 行情指标8：底部减持
+						if (newOne.getReducZb() >= 1) {
+							isOk6 = true;
+						}
 					}
 
 					if (!isOk1 && !isOk8 && newOne.getZfStatus() == ZfStatus.DONE.getCode() && newOne.getZfself() == 1
@@ -335,6 +343,12 @@ public class CodeModelService {
 						if (newOne.getZfYjAmt() >= ZF_50YI) {
 							isOk2 = true;
 							log.info("{} 大票，底部增发超过50亿", code);
+						} else if (newOne.getZfYjAmt() >= ZF_20YI) {// 定增超过20亿,活动筹码小于40亿
+							// 增发金额接近活动的筹码的1半
+							long ackm = CurrencyUitl.covertToLong(newOne.getActMkv() + CurrencyUitl.YI);
+							if ((ackm / newOne.getZfYjAmt()) <= 2.0) {
+								isOk2 = true;
+							}
 						}
 					}
 				}
@@ -351,7 +365,7 @@ public class CodeModelService {
 		}
 
 		// 系统指标：自动化监听
-		if (isOk1 || isOk2 || isOk8 || isOk9) {
+		if (isOk1 || isOk2 || isOk6 || isOk8 || isOk9) {
 			int motp = 0;
 			if (isOk8) {
 				motp = MonitorType.ZengFaAuto.getCode();
@@ -361,7 +375,10 @@ public class CodeModelService {
 				motp = MonitorType.DZJY.getCode();
 				newOne.setShooting1(1);
 			}
-
+			if (isOk6) {
+				motp = MonitorType.Reduce.getCode();
+				newOne.setShooting6(1);
+			}
 			if (isOk2) {
 				motp = MonitorType.PreZengFa.getCode();
 				newOne.setShooting2(1);
@@ -376,7 +393,7 @@ public class CodeModelService {
 				pool.setMonitor(motp);
 				pool.setRealtime(1);
 				pool.setOffline(1);
-				pool.setUpTodayChange(7.5);
+				pool.setUpTodayChange(3.5);
 				pool.setShotPointCheck(1);
 				pool.setRemark(Constant.AUTO_MONITOR + this.modelWebService.getSystemPoint(newOne, Constant.FEN_HAO));
 			}
