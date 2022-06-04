@@ -25,7 +25,7 @@
 		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div class="mg">
 				股票代码：<input type="text" id="queryCode" width="30"
-					placeholder="多个代码以英文逗号分割">&nbsp;&nbsp;&nbsp; 概念id：<input
+					placeholder="多个代码以英文逗号分开">&nbsp;&nbsp;&nbsp; 概念id：<input
 					type="text" id="conceptId" width="30" placeholder="同花顺板块、概念id">&nbsp;&nbsp;&nbsp;
 				板块名称搜索：<input type="text" id="conceptName" width="30"
 					placeholder="板块、概念关键字">&nbsp;&nbsp;&nbsp;
@@ -73,9 +73,7 @@
 						width="30" id="totalAmt">&nbsp;&nbsp; 2月交易金额&gt;=<input
 						type="text" width="10" width="30" id="totalAmt60d">
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					股东人数&lt;=<input type="text" width="10"width="30" id="gdrs" placeholder="股东人数低于多少人" >人，减少幅度超过%:<input type="text" width="10"width="30" id="gdrsp" placeholder="3年减少百分比" />
 				</div>
 			</div>
 			<div class="mg">
@@ -98,6 +96,7 @@
 						<option value="8">小票-底部定增完成+至少3年未涨</option>
 						<option value="9">小票-底部定增完成+2年未涨</option>
 						<option value="1">小票-底部大宗-大宗交易量占流通筹码超5%</option>
+						<option value="6">小票-底部减持</option>
 						<option value="2">大票-底部定增已核准-募集资金超50亿</option>
 						<option value="4">底部股东人数大幅减少</option>
 						<option value="3">底部融资余额飙升-确认是主力在融资买入?(短线1)</option>
@@ -219,6 +218,8 @@
 									param.zfPriceLow = $('#zfPriceLow').val();
 									param.totalAmt = $('#totalAmt').val();
 									param.totalAmt60d = $('#totalAmt60d').val();
+									param.gdrs = $('#gdrs').val();
+									param.gdrsp = $('#gdrsp').val();
 
 									param.finOK = 0;
 									param.bousOK = 0;
