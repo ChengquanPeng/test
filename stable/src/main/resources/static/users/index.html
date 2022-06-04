@@ -22,56 +22,62 @@
 	<div class="container-fluid">
 		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div class="mg">
-				股票代码：<input type="text" id="queryCode" width="30"
-					placeholder="多个代码以英文逗号分开">&nbsp;&nbsp;&nbsp; 概念id：<input
+				股票代码:<input type="text" id="queryCode" width="30"
+					placeholder="多个代码以英文逗号分开">&nbsp;&nbsp;&nbsp; 概念id:<input
 					type="text" id="conceptId" width="30" placeholder="同花顺板块、概念id">&nbsp;&nbsp;&nbsp;
-				板块名称搜索：<input type="text" id="conceptName" width="30"
+				板块名称搜索:<input type="text" id="conceptName" width="30"
 					placeholder="板块、概念关键字">&nbsp;&nbsp;&nbsp;
 			</div>
 			<div class="mg">
 				<div class="input-group">
 					<input type="text" id="mkv2" width="10" />&gt;=流通市值&lt;=<input
-						type="text" id="mkv" width="10" />亿&nbsp;&nbsp; 前3大股东持股&gt;=<input
-						type="text" id="holderNumT3" width="30" />%&nbsp;&nbsp;
-					市盈率ttm&lt;=<input type="text" id="pettm" width="20" />&nbsp;&nbsp;
+						type="text" id="mkv" width="10" placeholder="数字,单位亿,支持小数" />亿&nbsp;&nbsp;
+					前3大股东持股&gt;=<input type="text" id="holderNumT3" width="30"
+						placeholder="百分比" />%&nbsp;&nbsp; 市盈率ttm&lt;=<input type="text"
+						id="pettm" width="20" />&nbsp;&nbsp;
 				</div>
 			</div>
 			<div class="mg">
 				国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp;
 				业绩OK(近5年不亏):<input type="checkbox" id="finOK" title="近5年不亏" />&nbsp;&nbsp;
 				分红OK(近5年分红):<input type="checkbox" id="bousOK" />&nbsp;&nbsp;
-				几年未涨&gt;=<input type="text" id="zfjjup" />&nbsp;&nbsp;
+				几年未涨&gt;=<input type="text" id="zfjjup" placeholder="数字" />&nbsp;&nbsp;
 				几年未涨stable&gt;=<input type="text" id="zfjjupStable"
 					placeholder="算法偏严" />&nbsp;&nbsp;
 			</div>
 			<div class="mg">
 				<div class="input-group">
 					增发:&nbsp;&nbsp;&nbsp;&nbsp;底部增发:<input type="checkbox" id="zfself" />&nbsp;&nbsp;
-					增发状态：<select id="zfStatus">
+					增发状态:<select id="zfStatus">
 						<option value="" selected="selected">不限制</option>
 						<option value="1">增发中</option>
 						<option value="6">证监会核准</option>
 						<option value="2">增发完成</option>
 						<option value="8">增发中和完成</option>
 						<option value="0">无增发</option>
-					</select>&nbsp;&nbsp; 增发对象：<select id="zfObjType">
+					</select>&nbsp;&nbsp; &nbsp;&nbsp;<input type="text" id="zfYjAmt2"
+						width="10" placeholder="数字,单位亿"/>&gt;=增发金额&lt;=<input type="text" id="zfYjAmt"
+						width="10" width="30">&nbsp;&nbsp; 低于增发价&gt;=<input
+						type="text" id="zfPriceLow" width="30" placeholder="百分比" />%&nbsp;&nbsp;&nbsp;&nbsp;
+					增发对象:<select id="zfObjType">
 						<option value="0" selected="selected">不限制</option>
 						<option value="1">6个月</option>
 						<option value="2">混合</option>
 						<option value="3">大股东</option>
 						<option value="4">其他</option>
-					</select>&nbsp;&nbsp; <input type="text" id="zfYjAmt2" width="10" />&gt;=增发金额&lt;=<input
-						type="text" id="zfYjAmt" width="10" width="30">&nbsp;&nbsp;
-					低于增发价&gt;=<input type="text" id="zfPriceLow" width="30" />%&nbsp;&nbsp;
+					</select>
 				</div>
 			</div>
 			<div class="mg">
 				<div class="input-group">
 					大宗:&nbsp;&nbsp;&nbsp;&nbsp;1年交易金额&gt;=<input type="text" width="10"
-						width="30" id="totalAmt">&nbsp;&nbsp; 2月交易金额&gt;=<input
-						type="text" width="10" width="30" id="totalAmt60d">
+						width="30" id="totalAmt" placeholder="数字,单位亿,支持小数">&nbsp;&nbsp;
+					2月交易金额&gt;=<input type="text" width="10" width="30"
+						id="totalAmt60d" placeholder="数字,单位亿,支持小数">
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					股东人数&lt;=<input type="text" width="10"width="30" id="gdrs" placeholder="股东人数低于多少人" >人，减少幅度超过%:<input type="text" width="10"width="30" id="gdrsp" placeholder="3年减少百分比" />
+					股东人数&lt;=<input type="text" width="10" width="30" id="gdrs"
+						placeholder="股东人数低于多少人">人，减少幅度超过%:<input type="text"
+						width="10" width="30" id="gdrsp" placeholder="3年减少百分比" />
 				</div>
 			</div>
 			<div class="mg">
@@ -80,7 +86,7 @@
 					type="checkbox" id="shooting52" />&nbsp;&nbsp;&nbsp; K线攻击形态:<input
 					type="checkbox" id="kline" />&nbsp;&nbsp;&nbsp; 接近1年新高:<input
 					type="checkbox" id="pre1Year" />&nbsp;&nbsp;&nbsp;5日交易活跃:<input
-					type="checkbox" id="shooting53" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;大市值：&nbsp;白马走势:<input
+					type="checkbox" id="shooting53" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;大市值:&nbsp;白马走势:<input
 					type="checkbox" id="whiteHors" />
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -104,7 +110,7 @@
 						<option value="7">半年新高-突破箱体?</option>
 						<option value="1">拉升吸筹?</option>
 						<option value="4">高质押机会</option>
-					</select>&nbsp;&nbsp; 排序：<select id="gsort">
+					</select>&nbsp;&nbsp; 排序:<select id="gsort">
 						<option value="9" selected="selected">人均持股</option>
 						<option value="3">资产收益率ttm</option>
 						<option value="6">大股东持股</option>
