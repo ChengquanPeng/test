@@ -1,8 +1,12 @@
 package com.stable.service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -37,6 +41,8 @@ import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.spider.xq.XqDailyBaseSpider;
+import com.stable.utils.CandlesTickChart;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
@@ -716,6 +722,59 @@ public class DaliyTradeHistroyService {
 
 	public TradeHistInfoDaliy queryLastfq(String code) {
 		return queryLastfq(code, 0);
+	}
+
+	//@javax.annotation.PostConstruct
+	public void images() {
+		try {
+			String code = "600881";
+			int endDate = 20220610;
+			String filePath = "E:/" + code + ".jpg";
+			List<TradeHistInfoDaliy> t = this.queryListByCodeQfq(code, 0, endDate, EsQueryPageUtil.queryPage120,
+					SortOrder.DESC);
+
+			List<TradeHistInfoDaliy> bars = new LinkedList<TradeHistInfoDaliy>();
+			bars.addAll(t);
+
+			Set<Integer> map = new HashSet<Integer>();
+			for (TradeHistInfoDaliy bar : bars) {
+				map.add(bar.getDate());
+			}
+			// 所有非交易日
+			List<Date> allNonTradedays = new ArrayList<Date>();
+			Date tmp = DateUtil.parseDate(bars.get(bars.size() - 1).getDate());
+			int end = bars.get(0).getDate();
+			if (end > bars.get(bars.size() - 1).getDate()) {
+				while (true) {
+					int dt = DateUtil.formatYYYYMMDDReturnInt(tmp);
+					if (dt == end) {
+						break;
+					}
+					if (!map.contains(dt)) {
+						allNonTradedays.add(tmp);
+					}
+					tmp = DateUtil.addDate(tmp, 1);
+				}
+			}
+
+			for (int i = 0; i < 14; i++) {
+				TradeHistInfoDaliy la = bars.get(0);
+				TradeHistInfoDaliy id = new TradeHistInfoDaliy();
+
+				id.setDate(DateUtil.addDate(la.getDate(), 1));
+				id.setOpen(la.getClosed());
+				id.setClosed(CurrencyUitl.topPrice(la.getClosed(), false));
+				id.setHigh(id.getClosed());
+				id.setLow(la.getClosed());
+				id.setVolume(la.getVolume() * 1.25);
+				bars.add(0, id);
+				System.err.println(id);
+			}
+			CandlesTickChart.strt(filePath, stockBasicService.getCodeName2(code), bars, allNonTradedays);
+			// ImageUtil.generateImages(filePath, data);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 //	public void deleteData() {
