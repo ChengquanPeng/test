@@ -37,7 +37,6 @@ import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.service.UserService;
 import com.stable.service.model.WebModelService;
-import com.stable.service.model.ShotPointCheck;
 import com.stable.spider.ths.ThsAnnSpider;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.utils.CurrencyUitl;
@@ -55,7 +54,6 @@ import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.MonitorPoolTemp;
-import com.stable.vo.bus.ShotPoint;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.bus.ZengFa;
@@ -92,8 +90,8 @@ public class MonitorPoolService {
 	private ChipsService chipsService;
 	@Autowired
 	private UserService userService;
-	@Autowired
-	private ShotPointCheck shotPointCheck;
+//	@Autowired
+//	private ShotPointCheck shotPointCheck;
 	@Autowired
 	private FinanceService financeService;
 
@@ -157,7 +155,7 @@ public class MonitorPoolService {
 		c.setZfdone(zfdone);
 		c.setBuyLowVol(buyLowVol);
 		c.setXjl(xjl);
-		c.setShotPointCheck(shotPointCheck);
+//		c.setShotPointCheck(shotPointCheck);
 		c.setListenerGg(listenerGg);
 
 		if (StringUtils.isBlank(remark)) {
@@ -183,7 +181,7 @@ public class MonitorPoolService {
 		}
 
 		if (userId != Constant.MY_ID) {// 默认不监听
-			c.setShotPointCheck(0);
+//			c.setShotPointCheck(0);
 			c.setListenerGg(0);
 		}
 		monitorPoolDao.save(c);
@@ -274,6 +272,24 @@ public class MonitorPoolService {
 			}
 		}
 		return map;
+	}
+
+	// 查询My的起爆点
+	public List<MonitorPoolTemp> getMyQibao() {
+		int pageNum = EsQueryPageUtil.queryPage9999.getPageNum();
+		int size = EsQueryPageUtil.queryPage9999.getPageSize();
+		log.info("queryPage pageNum={},size={}", pageNum, size);
+		Pageable pageable = PageRequest.of(pageNum, size);
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("userId", Constant.MY_ID));
+		bqb.must(QueryBuilders.rangeQuery("shotPointPrice").gt(0));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+		Page<MonitorPoolTemp> page = monitorPoolDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		return null;
 	}
 
 	/**
@@ -584,8 +600,6 @@ public class MonitorPoolService {
 				if (list != null) {
 					List<String> ZengFaAuto = new LinkedList<String>();
 					List<String> Other = new LinkedList<String>();
-					List<String> bao = new LinkedList<String>();
-
 					for (MonitorPoolTemp cp : list) {
 						if (cp.getDownPrice() <= 0 && cp.getDownTodayChange() <= 0 && cp.getUpPrice() <= 0
 								&& cp.getUpTodayChange() <= 0) {
@@ -607,25 +621,9 @@ public class MonitorPoolService {
 									Other.add(s);
 								}
 							}
-							if (u.getId() == Constant.MY_ID && cp.getShotPointCheck() == 1) {
-								ShotPoint sp = shotPointCheck.check(cp.getCode(), tradeDate, null);
-								if (sp.getResult()) {
-									bao.add(stockBasicService.getCodeName2(cp.getCode()) + " "
-											+ MonitorType.getCode(cp.getMonitor()) + " 疑似点:" + sp.getMsg());
-								}
-							}
 						}
 					}
 					String ends = "";
-					// 起爆点
-					StringBuffer s1 = new StringBuffer();
-					for (String a : bao) {
-						s1.append(a).append(Constant.HTML_LINE);
-					}
-					if (s1.length() > 0) {
-						ends = "起爆点:" + Constant.HTML_LINE + s1.toString() + Constant.HTML_LINE;
-
-					}
 					// 价格
 					StringBuffer s = new StringBuffer();
 					for (String a : Other) {
@@ -641,6 +639,26 @@ public class MonitorPoolService {
 					if (StringUtils.isNotBlank(ends)) {
 						WxPushUtil.pushSystem2Html(u.getWxpush(), ends);
 					}
+				}
+			}
+
+			// 起爆点
+			List<MonitorPoolTemp> list = this.getMyQibao();
+			if (list != null) {
+				List<String> bao = new LinkedList<String>();
+				for (MonitorPoolTemp cp : list) {
+					TradeHistInfoDaliyNofq d = map.get(cp.getCode());
+					if (d.getHigh() >= cp.getShotPointPrice()) {
+						bao.add(stockBasicService.getCodeName2(cp.getCode()) + " "
+								+ MonitorType.getCode(cp.getMonitor()) + " 价格:" + cp.getShotPointPrice());
+					}
+				}
+				StringBuffer s1 = new StringBuffer();
+				for (String a : bao) {
+					s1.append(a).append(Constant.HTML_LINE);
+				}
+				if (s1.length() > 0) {
+					WxPushUtil.pushSystem2Html("起爆点:" + Constant.HTML_LINE + s1.toString() + Constant.HTML_LINE);
 				}
 			}
 		}

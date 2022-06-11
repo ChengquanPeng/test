@@ -16,7 +16,6 @@ import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.UserService;
 import com.stable.service.model.WebModelService;
-import com.stable.service.model.ShotPointCheck;
 import com.stable.service.model.prd.Prd1RealtimeMonitor;
 import com.stable.service.model.prd.Prd1Service;
 import com.stable.service.model.prd.TickService;
@@ -43,8 +42,8 @@ public class RealtimeMonitoringService {
 	private Map<String, RealtimeDetailsAnalyzer> map = null;
 	@Autowired
 	private WebModelService modelWebService;
-	@Autowired
-	private ShotPointCheck shotPointCheck;
+//	@Autowired
+//	private ShotPointCheck shotPointCheck;
 	@Autowired
 	private Prd1Service prd1Service;
 	@Autowired
@@ -106,7 +105,7 @@ public class RealtimeMonitoringService {
 				for (String code : allmap.keySet()) {
 					log.info(code);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
-					int r = task.init(code, allmap.get(code), stockBasicService.getCodeName2(code), shotPointCheck,
+					int r = task.init(code, allmap.get(code), stockBasicService.getCodeName2(code),
 							redisUtil.get(RedisConstant.YEAR_PRICE_ + code, 0.0));
 					if (r == 1) {
 						new Thread(task).start();

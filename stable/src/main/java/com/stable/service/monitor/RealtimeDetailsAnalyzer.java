@@ -4,13 +4,11 @@ import java.util.Date;
 import java.util.List;
 
 import com.stable.constant.Constant;
-import com.stable.service.model.ShotPointCheck;
 import com.stable.spider.realtime.RealTime;
 import com.stable.spider.realtime.RealtimeCall;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MonitoringUitl;
 import com.stable.utils.WxPushUtil;
-import com.stable.vo.bus.ShotPoint;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -27,7 +25,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	public List<RtmVo> cps;
 	private boolean chkCodeClosed = false;
 	private boolean burstPointCheck = false;// 起爆点
-	private ShotPointCheck shotPointCheck;
+//	private ShotPointCheck shotPointCheck;
 	private RtmVo my;
 	private double yearHigh1;
 
@@ -35,10 +33,9 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		isRunning = false;
 	}
 
-	public int init(String code, List<RtmVo> t, String codeName, ShotPointCheck shotPointCheck, double yh) {
+	public int init(String code, List<RtmVo> t, String codeName, double yh) {
 		this.code = code;
 		this.codeName = codeName;
-		this.shotPointCheck = shotPointCheck;
 		this.cps = t;
 		RealTime srt = RealtimeCall.get(code);
 		if (srt.getOpen() == 0.0 && srt.getBuy1() == 0.0 && srt.getSell1() == 0.0) {
@@ -51,7 +48,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 	public void run() {
 		for (RtmVo rv : cps) {
-			if (rv.getOrig().getUserId() == Constant.MY_ID) {
+			if (rv.getOrig().getUserId() == Constant.MY_ID && rv.getOrig().getShotPointPrice() > 0) {
 				my = rv;
 			}
 		}
@@ -74,8 +71,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				DateUtil.parseDate(today + "113000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 		Date date = DateUtil.parseDate(today + "130100", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT);
 		long d1300 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(date);
-		long d1450 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
-				DateUtil.parseDate(today + "145000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
+		// long d1450 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
+		// DateUtil.parseDate(today + "145000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 
 		String smsg = null;
 		while (isRunning) {
@@ -112,21 +109,27 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						rv.highPriceGot = true;
 					}
 					// 起爆点
-					if (my != null && now > d1450) {
-						WAIT_MIN = ONE_MIN;
-						if (!burstPointCheck && my.getOrig().getShotPointCheck() == 1) {
-							burstPointCheck = true;
-							ShotPoint sp = shotPointCheck.check(code, 0, rt);
-							if (sp.getResult()) {
-								if ("".equals(smsg)) {
-									smsg += "疑似起爆:" + sp.getMsg() + "！ 备注:" + rv.getMsg();
-
-								} else {
-									smsg = "疑似起爆:" + sp.getMsg() + smsg;
-								}
-							}
+					if (my != null && !burstPointCheck) {
+						if (rt.getHigh() >= my.getOrig().getShotPointPrice()) {
+							WxPushUtil.pushSystem1(rv.getWxpush(),
+									codeName + " 到达起爆买点:" + my.getOrig().getShotPointPrice());
 						}
 					}
+//					if (my != null && now > d1450) {
+//						WAIT_MIN = ONE_MIN;
+//						if (!burstPointCheck && my.getOrig().getShotPointCheck() == 1) {
+//							burstPointCheck = true;
+//							ShotPoint sp = shotPointCheck.check(code, 0, rt);
+//							if (sp.getResult()) {
+//								if ("".equals(smsg)) {
+//									smsg += "疑似起爆:" + sp.getMsg() + "！ 备注:" + rv.getMsg();
+//
+//								} else {
+//									smsg = "疑似起爆:" + sp.getMsg() + smsg;
+//								}
+//							}
+//						}
+//					}
 					// 发送
 					if (!smsg.equals("")) {
 						WxPushUtil.pushSystem1(rv.getWxpush(), codeName + " " + smsg);

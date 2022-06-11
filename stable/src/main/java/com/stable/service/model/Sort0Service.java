@@ -27,9 +27,12 @@ public class Sort0Service {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 
-	public void attackAndW(String code, int date, CodeBaseModel2 newOne) {
-		if (attackAndW(code, date)) {
+	public void attackAndW(CodeBaseModel2 newOne, int date) {
+
+		if (attackAndW(newOne.getCode(), date)) {
 			newOne.setShootingw(1);
+		} else {
+			newOne.setShootingw(0);
 		}
 	}
 

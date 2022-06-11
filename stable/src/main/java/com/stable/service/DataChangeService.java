@@ -21,12 +21,10 @@ public class DataChangeService {
 		}
 	}
 
-	public void getPeTtmData(String code, CodeBaseModel2 newOne, CodeBaseModel2 oldOne) {
+	public void getPeTtmData(String code, CodeBaseModel2 newOne) {
 		Double d = m1.get(code);
-		if (d != null) {
+		if (d != null && d != 0.0) {
 			newOne.setPettm(d);
-		} else if (oldOne.getPettm() != 0.0) {
-			newOne.setPettm(oldOne.getPettm());
 		}
 	}
 }

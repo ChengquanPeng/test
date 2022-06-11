@@ -130,9 +130,6 @@ body {
 				<div class="input-group">
 					监听公告：<input type="checkbox" id="listenerGg" name="listenerGg" />
 				</div>
-				<div class="input-group">
-					股价起爆点：<input type="checkbox" id="shotPointCheck" name="shotPointCheck" />
-				</div>
 				<br />
 				<div class="input-group">
 					<span class="input-group-btn">
@@ -165,7 +162,7 @@ body {
 	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
 	<script src="/web/libs/js/dashboard/basedata.js"></script>
 	<script type="text/javascript">
-	addActiveHeaderMen("m_monitor_pool");
+		addActiveHeaderMen("m_monitor_pool");
 		$('#cusTable').bootstrapTable('destroy');
 	</script>
 	<script type="text/javascript">
@@ -194,11 +191,6 @@ body {
 			if (document.getElementById("listenerGg").checked) {
 				listenerGg = 1;
 			}
-			var shotPointCheck = 0
-			if (document.getElementById("shotPointCheck").checked) {
-				shotPointCheck = 1;
-			}
-			
 			var ykb = 0
 			if (document.getElementById("ykb").checked) {
 				ykb = 1;
@@ -224,7 +216,6 @@ body {
 					buyLowVol : $('#buyLowVol').val(),
 					zfdone : $('#zfdone').val(),
 					listenerGg : listenerGg,
-					shotPointCheck : shotPointCheck,
 					downTodayChange : $('#downTodayChange').val()
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
@@ -254,9 +245,6 @@ body {
 				}
 				if (reData.result.listenerGg == 1) {
 					$('#listenerGg').attr("checked", 'checked');
-				}
-				if (reData.result.shotPointCheck == 1) {
-					$('#shotPointCheck').attr("checked", 'checked');
 				}
 				if (reData.result.offline == 1) {
 					$('#offline').attr("checked", 'checked');

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
-import com.stable.constant.RedisConstant;
 import com.stable.enums.MonitorType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
@@ -21,25 +20,19 @@ import com.stable.service.BuyBackService;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.DaliyBasicHistroyService;
-import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.DataChangeService;
 import com.stable.service.DzjyService;
 import com.stable.service.FinanceService;
 import com.stable.service.PlateService;
-import com.stable.service.PriceLifeService;
 import com.stable.service.ReducingHoldingSharesService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.ZhiYaService;
-import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.FinanceAnalyzer;
-import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.monitor.MonitorPoolService;
-import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
-import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.HolderAnalyse;
 import com.stable.vo.bus.CodeBaseModel2;
@@ -52,7 +45,6 @@ import com.stable.vo.bus.HolderPercent;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.StockBaseInfo;
-import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.ZengFa;
 import com.stable.vo.bus.ZengFaDetail;
 import com.stable.vo.bus.ZengFaExt;
@@ -88,10 +80,6 @@ public class CodeModelService {
 	@Autowired
 	private MonitorPoolService monitorPoolService;
 	@Autowired
-	private PriceLifeService priceLifeService;
-	@Autowired
-	private AvgService avgService;
-	@Autowired
 	private MonitorPoolUserDao monitorPoolDao;
 	@Autowired
 	private ChipsZfService chipsZfService;
@@ -106,27 +94,17 @@ public class CodeModelService {
 	@Autowired
 	private DataChangeService dataChangeService;
 	@Autowired
-	private Sort1ModeService sort1ModeService;
-	@Autowired
 	private BuyBackService buyBackService;
 	@Autowired
 	private ReducingHoldingSharesService reducingHoldingSharesService;
-	@Autowired
-	private Sort0Service sort0Service;
-	@Autowired
-	private Sort6Service sort6Service;
-	@Autowired
-	private RedisUtil redisUtil;
-	@Autowired
-	private DaliyTradeHistroyService daliyTradeHistroyService;
 
 	public synchronized void runModel(int date, boolean isweekend) {
 		try {
-			log.info("param date:{}", date);
+			log.info("CodeModel processing request date={}", date);
 			if (!tradeCalService.isOpen(date)) {
 				date = tradeCalService.getPretradeDate(date);
 			}
-			log.info("final date:{}", date);
+			log.info("Actually processing request date={}", date);
 			runByJobv2(date, isweekend);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -142,13 +120,7 @@ public class CodeModelService {
 	private int bonusCheckYear = 0;
 
 	private synchronized void runByJobv2(int t, boolean isweekend) {
-		log.info("CodeModel processing request date={}", t);
-		if (tradeCalService.isOpen(t)) {
-			tradeDate = t;
-		} else {
-			tradeDate = tradeCalService.getPretradeDate(t);
-		}
-		log.info("Actually processing request date={}", tradeDate);
+		tradeDate = t;
 		pre1Year = DateUtil.getPreYear(tradeDate);
 		pre3Year = DateUtil.getPreYear(tradeDate, 3);
 		pre4Year = DateUtil.getPreYear(tradeDate, 4);
@@ -156,7 +128,6 @@ public class CodeModelService {
 		// 基本面
 		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
-		// 大牛
 		Map<String, MonitorPoolTemp> poolMap = monitorPoolService.getMonitorPoolMap();
 		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();
 		// 到期提醒
@@ -192,6 +163,19 @@ public class CodeModelService {
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
 			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, boolean isweekend, StringBuffer sbc) {
 		String code = s.getCode();
+		// 股票池
+		CodeBaseModel2 newOne = histMap.get(s.getCode());
+		if (newOne == null) {
+			newOne = new CodeBaseModel2();
+			newOne.setId(code);
+			newOne.setCode(code);
+		}
+		newOne.setDate(tradeDate);
+		listLast.add(newOne);
+		boolean onlineYear = stockBasicService.onlinePreYearChk(code, pre1Year);
+		if (!onlineYear) {// 不买卖新股
+			return;
+		}
 		// 监听池
 		MonitorPoolTemp pool = poolMap.get(code);
 		if (pool == null) {
@@ -199,15 +183,6 @@ public class CodeModelService {
 			pool.setCode(code);
 		}
 		poolList.add(pool);
-		boolean onlineYear = stockBasicService.onlinePreYearChk(code, pre1Year);
-		if (!onlineYear) {// 不买卖新股
-			CodeBaseModel2 tone = new CodeBaseModel2();
-			tone.setId(code);
-			tone.setCode(code);
-			tone.setDate(tradeDate);
-			listLast.add(tone);
-			return;
-		}
 		// 最新收盘情况
 		DaliyBasicInfo2 lastTrade = daliyBasicHistroyService.queryLastest(code, 0, 0);
 		if (lastTrade == null) {
@@ -221,12 +196,11 @@ public class CodeModelService {
 				mkv = ltt.getCircMarketVal();
 			}
 		}
+
 		// 财报分析排雷
-		CodeBaseModel2 oldOne = histMap.get(s.getCode());
-		CodeBaseModel2 newOne = baseAnalyse(s, oldOne, lastTrade);
-		listLast.add(newOne);
+		baseAnalyse(s, newOne, lastTrade);
 		// 市盈率ttm
-		dataChangeService.getPeTtmData(code, newOne, oldOne);
+		dataChangeService.getPeTtmData(code, newOne);
 		// 资金筹码-博弈
 		game(newOne, lastTrade);
 		// 国企|民企
@@ -254,7 +228,7 @@ public class CodeModelService {
 			pool.setRealtime(0);
 			pool.setOffline(0);
 			pool.setUpTodayChange(0);
-			pool.setShotPointCheck(0);
+//			pool.setShotPointCheck(0);
 		}
 		boolean online4Year = stockBasicService.onlinePreYearChk(code, pre4Year);
 		// N年未大涨
@@ -301,8 +275,7 @@ public class CodeModelService {
 		newOne.setShooting6(0);
 		newOne.setShooting8(0);
 		newOne.setShooting9(0);
-		newOne.setShooting10(0);
-		newOne.setShootingw(0);
+		
 		// 系统指标：自动监听
 		if ((newOne.getBousOK() == 1 || newOne.getFinOK() == 1)) {// 1.基本面没有什么大问题
 			// 小票的增发&大宗
@@ -353,10 +326,7 @@ public class CodeModelService {
 					}
 				}
 			}
-			// 小市值-攻击形态-TODO
-			if (isSmallStock && newOne.getHolderNumT3() >= 45.0) {
-				sort0Service.attackAndW(code, tradeDate, newOne);
-			}
+
 			// 行情指标4：底部股东人数：大幅减少(3年减少40%)
 			if (newOne.getZfjjup() >= 2 && newOne.getHolderNum() < -40.0) {// 股价3年没大涨，人数少了接近一半人
 				log.info("{} 股东人数少了一半人", code);
@@ -394,28 +364,10 @@ public class CodeModelService {
 				pool.setRealtime(1);
 				pool.setOffline(1);
 				pool.setUpTodayChange(3.5);
-				pool.setShotPointCheck(1);
+//				pool.setShotPointCheck(1);
 				pool.setRemark(Constant.AUTO_MONITOR + this.modelWebService.getSystemPoint(newOne, Constant.FEN_HAO));
 			}
 		}
-		// ==============技术面-量价==============
-		// 一年新高
-		TradeHistInfoDaliy high = daliyTradeHistroyService.queryYear1HighRecord(code, tradeDate);
-		redisUtil.set(RedisConstant.YEAR_PRICE_ + code, high.getHigh());
-		if (lastTrade.getClosed() > 0 && high.getHigh() > lastTrade.getClosed()
-				&& CurrencyUitl.cutProfit(lastTrade.getClosed(), high.getHigh()) <= 15) {// 15%以内冲新高
-			newOne.setShooting10(1);
-		}
-		// 短线：妖股形态，短线拉的急，说明货多。一倍了，说明资金已经投入。新高:说明出货失败或者有更多的想法，要继续拉。
-		sort1ModeService.sort1ModeChk(newOne, pool, tradeDate);
-		// 均线排列，一阳穿N线
-		LineAvgPrice.avgLineUp(s, newOne, avgService, code, tradeDate);
-
-		// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
-		susWhiteHorses(code, newOne);
-		// 短线模型
-		sortModel(newOne);
-
 		// 同步监听
 		if (pool.getMonitor() > MonitorType.NO.getCode()) {
 			newOne.setMoni(pool.getMonitor());
@@ -429,19 +381,10 @@ public class CodeModelService {
 			String listdatestr) {
 		// 周末计算-至少N年未大涨?
 		if (isweekend) {
-			newOne.setZfjjup(0);
-			newOne.setZfjjupStable(0);
 			newOne.setFinOK(0);
 			newOne.setBousOK(0);
 
 			String code = newOne.getCode();
-			if (online4Year) {
-				int listdate = Integer.valueOf(listdatestr);
-				newOne.setZfjjup(priceLifeService.noupYear(code, listdate));
-				if (newOne.getZfjjup() >= 2) {
-					newOne.setZfjjupStable(priceLifeService.noupYearstable(code, listdate));
-				}
-			}
 			int c = 0;
 			List<FinanceBaseInfo> yearRpts = financeService.getFinacesReportByYearRpt(code, EsQueryPageUtil.queryPage5);
 			if (yearRpts != null) {
@@ -463,29 +406,21 @@ public class CodeModelService {
 		return null;
 	}
 
-	private CodeBaseModel2 baseAnalyse(StockBaseInfo s, CodeBaseModel2 oldOne, DaliyBasicInfo2 lastTrade) {
+	private void baseAnalyse(StockBaseInfo s, CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
 		// 基本面池
-		CodeBaseModel2 newOne = new CodeBaseModel2();
-		if (oldOne != null) {// copy原有属性
-			BeanCopy.copy(oldOne, newOne);
-		}
-		newOne.setId(code);
-		newOne.setCode(code);
-		newOne.setDate(tradeDate);
 		// 财务
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(code, tradeDate,
 				EsQueryPageUtil.queryPage8);
 		if (fbis == null) {
 			ErrorLogFileUitl.writeError(new RuntimeException("无最新财务数据"), code, tradeDate + "", "Code Model错误");
-			return newOne;
+			return;
 		}
 		// 基本面-红蓝绿
 		color(s, newOne, fbis, lastTrade);
 		// 基本面-疑似大牛
 		findBigBoss2(code, newOne, fbis);
-		return newOne;
 	}
 
 	// 资金博弈
@@ -524,16 +459,6 @@ public class CodeModelService {
 		HolderPercent hp = chipsService.getLastHolderPercent(newOne.getCode());
 		newOne.setHolderNumP5(hp.getPercent5());
 		newOne.setHolderNumT3(hp.getTopThree());
-	}
-
-	private void sortModel(CodeBaseModel2 newOne) {
-		String code = newOne.getCode();
-		int tradeDate = newOne.getDate();
-		newOne.setSortMode7(0);
-		// 短线模型7(箱体震荡新高，是否有波浪走势)
-		if (sort6Service.isWhiteHorseForSortV7(code, tradeDate)) {
-			newOne.setSortMode7(1);
-		}
 	}
 
 	// 增发
@@ -656,16 +581,6 @@ public class CodeModelService {
 		}
 		return false;
 //		System.err.println("count:" + count);
-	}
-
-	private void susWhiteHorses(String code, CodeBaseModel2 newOne) {
-		// 是否中线(60日线),市值300亿以上
-		if (newOne.getMkv() > 200 && priceLifeService.getLastIndex(code) >= 80
-				&& LineAvgPrice.isWhiteHorseForMidV2(avgService, code, newOne.getDate())) {
-			newOne.setSusWhiteHors(1);
-		} else {
-			newOne.setSusWhiteHors(0);
-		}
 	}
 
 	private void color(StockBaseInfo s, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis, DaliyBasicInfo2 lastTrade) {
