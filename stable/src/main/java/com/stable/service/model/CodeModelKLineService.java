@@ -58,7 +58,7 @@ public class CodeModelKLineService {
 	@Autowired
 	private QibaoService qibaoService;
 
-	public synchronized void runKLineModel(int date, boolean isweekend) {
+	public synchronized void runKLineModel(int date) {
 //		if (!tradeCalService.isOpen(date)) {
 //			date = tradeCalService.getPretradeDate(date);
 //		}

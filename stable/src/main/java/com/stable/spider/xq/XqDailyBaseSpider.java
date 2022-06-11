@@ -18,6 +18,7 @@ import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.DataChangeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
+import com.stable.service.model.CodeModelKLineService;
 import com.stable.service.model.prd.PreSelectSave;
 import com.stable.service.model.prd.PreSelectSearch;
 import com.stable.service.model.prd.PreSelectTask;
@@ -52,6 +53,8 @@ public class XqDailyBaseSpider {
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private TradeCalService tradeCalService;
+	@Autowired
+	private CodeModelKLineService codeModelKLineService;
 
 	private String F1 = "市盈率(静)";
 	private String F2 = "市盈率(动)";
@@ -129,6 +132,14 @@ public class XqDailyBaseSpider {
 			if (upd.size() != s) {
 				WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + s + "},实际成功数:" + upd.size());
 			}
+			ThreadsUtil.sleepRandomSecBetween15And30();
+			// K线模型
+			new Thread(new Runnable() {
+				public void run() {
+					codeModelKLineService.runKLineModel(date);
+				}
+			}).start();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包出错");
