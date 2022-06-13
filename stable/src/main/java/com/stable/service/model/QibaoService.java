@@ -121,7 +121,7 @@ public class QibaoService {
 		for (TradeHistInfoDaliy nf : list) {// 倒序循环
 			if (nf.getDate() > chk.getDate()) {
 				tmp.add(0, nf);// 改为正序循环
-				if (nf.getClosed() < chk.getLow()) {// 单阳不破:已经破掉
+				if (nf.getClosed() < chk.getYesterdayPrice()) {// 单阳不破:已经破掉
 					// System.err.println("=====>单阳不破:已经破掉");
 					return false;
 				}

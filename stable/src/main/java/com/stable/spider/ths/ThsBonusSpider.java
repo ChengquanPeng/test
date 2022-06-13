@@ -104,6 +104,7 @@ public class ThsBonusSpider {
 		}).start();
 	}
 
+	//@javax.annotation.PostConstruct
 	public void byWeb() {
 		new Thread(new Runnable() {
 			@Override
@@ -207,6 +208,12 @@ public class ThsBonusSpider {
 							BonusHist bh = new BonusHist();
 							bh.setCode(code);
 							bh.setRptYear(rptYear.trim());
+							if (bh.getRptYear().endsWith("年报")) {
+								bh.setYearEnd(1);
+							}
+							if (!detail.contains("不分配不转增")) {
+								bh.setBonusYes(1);
+							}
 							getYear(bh);
 							bh.setRptDate(DateUtil.convertDate2(rptDate.trim()));
 							bh.setDetail(detail.trim());
@@ -399,7 +406,7 @@ public class ThsBonusSpider {
 	}
 
 	public static void main(String[] args) {
-		ThsBonusSpider ts = new ThsBonusSpider();
+//		ThsBonusSpider ts = new ThsBonusSpider();
 //		ts.htmlunitSpider = new HtmlunitSpider();
 //		List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
 //		List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
@@ -408,7 +415,6 @@ public class ThsBonusSpider {
 //		ts.dofetchBonusInner(DateUtil.getTodayIntYYYYMMDD(), "002282", zfdl, zfsl, fhl, bhl);
 		BonusHist bh = new BonusHist();
 		bh.setRptYear("2020年报");
-		ts.getYear(bh);
-		System.err.println(bh);
+		System.err.println(bh.getRptYear().endsWith("年报"));
 	}
 }

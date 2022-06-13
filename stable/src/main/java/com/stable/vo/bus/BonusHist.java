@@ -26,6 +26,10 @@ public class BonusHist extends EsBase {
 	private int rptDate;// 董事会日期
 	@Field(type = FieldType.Text)
 	private String rptYear;// 报告期
+	@Field(type = FieldType.Integer)
+	private int yearEnd;// 是否年报
+	@Field(type = FieldType.Integer)
+	private int bonusYes;// 是否分红
 	@Field(type = FieldType.Keyword)
 	private String status;// 进度
 	@Field(type = FieldType.Text)
