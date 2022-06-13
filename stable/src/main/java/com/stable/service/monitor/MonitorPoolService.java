@@ -648,7 +648,7 @@ public class MonitorPoolService {
 				List<String> bao = new LinkedList<String>();
 				for (MonitorPoolTemp cp : list) {
 					TradeHistInfoDaliyNofq d = map.get(cp.getCode());
-					if (d.getHigh() >= cp.getShotPointPrice()) {
+					if (d != null && d.getHigh() >= cp.getShotPointPrice()) {
 						bao.add(stockBasicService.getCodeName2(cp.getCode()) + " "
 								+ MonitorType.getCode(cp.getMonitor()) + " 价格:" + cp.getShotPointPrice());
 					}

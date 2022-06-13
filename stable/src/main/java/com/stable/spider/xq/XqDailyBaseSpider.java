@@ -91,7 +91,7 @@ public class XqDailyBaseSpider {
 
 	private synchronized void dofetchEntry(List<DaliyBasicInfo2> list) {
 		try {
-			PreSelectSearch pd1 = new PreSelectSearch(daliyTradeHistroyService, preSelectSave);
+			//PreSelectSearch pd1 = new PreSelectSearch(daliyTradeHistroyService, preSelectSave);
 			String today = DateUtil.getTodayYYYYMMDD();
 			List<DaliyBasicInfo2> upd = new LinkedList<DaliyBasicInfo2>();
 			int date = DateUtil.getTodayIntYYYYMMDD();
@@ -102,7 +102,8 @@ public class XqDailyBaseSpider {
 						if (dofetch(b, today)) {
 							upd.add(b);
 							// 产品1：选股程序
-							TasksWorkerPrd1.add(new PreSelectTask(pd1, b.getCode(), b.getCircMarketVal(), date));
+							// TasksWorkerPrd1.add(new PreSelectTask(pd1, b.getCode(), b.getCircMarketVal(), date));
+							//分时分笔
 						}
 						// 流通股份
 						if (b.getFloatShare() > 0 && b.getTotalShare() > 0) {
@@ -123,11 +124,11 @@ public class XqDailyBaseSpider {
 				esDaliyBasicInfoDao.saveAll(list);
 				dataChangeService.putPeTtmData(upd);
 			}
-			new Thread(new Runnable() {
-				public void run() {
-					pd1.done();
-				}
-			}).start();
+//			new Thread(new Runnable() {
+//				public void run() {
+//					pd1.done();
+//				}
+//			}).start();
 			log.info("雪球=>每日指标-市盈率完成,期望数:{" + s + "},实际成功数:" + upd.size());
 			if (upd.size() != s) {
 				WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + s + "},实际成功数:" + upd.size());

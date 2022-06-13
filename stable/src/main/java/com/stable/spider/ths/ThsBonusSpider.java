@@ -104,7 +104,7 @@ public class ThsBonusSpider {
 		}).start();
 	}
 
-	//@javax.annotation.PostConstruct
+//	@javax.annotation.PostConstruct
 	public void byWeb() {
 		new Thread(new Runnable() {
 			@Override

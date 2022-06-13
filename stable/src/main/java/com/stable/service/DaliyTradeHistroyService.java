@@ -211,13 +211,13 @@ public class DaliyTradeHistroyService {
 			ThreadsUtil.sleepRandomSecBetween15And30();
 			if (isJob) {
 				int dddd = Integer.valueOf(today);
+				if (daliybasicList.size() > 0) {
+					//tickService.genTickEveryDay(daliybasicList, dddd);
+					xqDailyBaseSpider.fetchAll(daliybasicList);
+				}
 				// 离线价格监听
 				monitorPoolService.priceChk(listNofq, dddd);
 				monitorPoolService.jobBuyLowVolWarning();
-				if (daliybasicList.size() > 0) {
-					tickService.genTickEveryDay(daliybasicList, dddd);
-					xqDailyBaseSpider.fetchAll(daliybasicList);
-				}
 			}
 			return list.size();
 		} catch (Exception e) {

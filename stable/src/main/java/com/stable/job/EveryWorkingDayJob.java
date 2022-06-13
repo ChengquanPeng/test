@@ -30,7 +30,7 @@ public class EveryWorkingDayJob extends MySimpleJob {
 		log.info("EveryWorkingDayJob end");
 	}
 
-//	@PostConstruct
+//	@javax.annotation.PostConstruct
 //	private void a() {
 //		new Thread(new Runnable() {
 //			public void run() {

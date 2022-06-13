@@ -6,8 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -353,7 +351,7 @@ public class WebModelService {
 		return resp;
 	}
 
-	@PostConstruct
+	@javax.annotation.PostConstruct
 	public void initpvlist() {
 		new Thread(new Runnable() {
 			public void run() {
