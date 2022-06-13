@@ -159,6 +159,12 @@ public class WebModelService {
 		// 标签
 		StringBuffer tag = new StringBuffer("");
 		tag.append("<font color='red'>");
+		if (dh.getQixing() > 0) {
+			tag.append("旗形").append(dh.getQixing()).append(Constant.HTML_LINE);
+		}
+		if (dh.getZyxing() > 0) {
+			tag.append("中阳十字星").append(Constant.HTML_LINE);
+		}
 		if (dh.getShooting51() == 1) {
 			tag.append("均线多头排列").append(Constant.HTML_LINE);
 		}
@@ -633,7 +639,7 @@ public class WebModelService {
 			bqb.must(QueryBuilders.matchPhraseQuery("bousOK", 1));
 		}
 		if (mr.getQixing() == 1) {// 旗形
-			bqb.must(QueryBuilders.matchPhraseQuery("qixing", 1));
+			bqb.must(QueryBuilders.rangeQuery("qixing").gte(1));
 		}
 		if (mr.getZyxing() == 1) {// 中阳带星
 			bqb.must(QueryBuilders.matchPhraseQuery("zyxing", 1));

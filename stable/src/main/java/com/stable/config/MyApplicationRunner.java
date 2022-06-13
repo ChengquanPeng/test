@@ -45,7 +45,7 @@ public class MyApplicationRunner implements ApplicationRunner {
 			}
 		}).start();
 		if (OSystemUtil.isWindows()) {
-			printUrl();
+			// printUrl();
 			return;
 		}
 		WxPushUtil.pushSystem1("系统正常启动");
@@ -59,7 +59,7 @@ public class MyApplicationRunner implements ApplicationRunner {
 		}).start();
 	}
 
-	private void printUrl() {
+	public void printUrl() {
 		RequestMappingHandlerMapping bean = SpringUtil.getBean(RequestMappingHandlerMapping.class);
 		Map<RequestMappingInfo, HandlerMethod> handlerMethods = bean.getHandlerMethods();
 		handlerMethods.forEach((k, v) -> {

@@ -58,6 +58,17 @@ public class CodeModelKLineService {
 	@Autowired
 	private QibaoService qibaoService;
 
+//	@javax.annotation.PostConstruct
+//	private void aded() {
+//		// K线模型
+//		new Thread(new Runnable() {
+//			public void run() {
+//				int date = 20220610;
+//				runKLineModel(date);
+//			}
+//		}).start();
+//	}
+
 	public synchronized void runKLineModel(int date) {
 //		if (!tradeCalService.isOpen(date)) {
 //			date = tradeCalService.getPretradeDate(date);
@@ -117,6 +128,7 @@ public class CodeModelKLineService {
 			newOne.setId(code);
 			newOne.setCode(code);
 		}
+		listLast.add(newOne);
 		// 最新收盘情况
 		DaliyBasicInfo2 lastTrade = daliyBasicHistroyService.queryLastest(code, 0, 0);
 		if (lastTrade == null) {

@@ -111,6 +111,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					// 起爆点
 					if (my != null && !burstPointCheck) {
 						if (rt.getHigh() >= my.getOrig().getShotPointPrice()) {
+							burstPointCheck = true;
 							WxPushUtil.pushSystem1(rv.getWxpush(),
 									codeName + " 到达起爆买点:" + my.getOrig().getShotPointPrice());
 						}

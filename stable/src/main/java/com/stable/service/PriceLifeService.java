@@ -54,23 +54,16 @@ public class PriceLifeService {
 			saveToCache(pl);
 			return;
 		}
-		if (hist.getHigh() > pl.getHighest()) {
-			pl.setHighDate(hist.getDate());
-			pl.setHighest(hist.getHigh());
-			saveToCache(pl);
-		}
-		if (hist.getLow() < pl.getLowest()) {
-			pl.setLowDate(hist.getDate());
-			pl.setLowest(hist.getLow());
-			saveToCache(pl);
-		}
-//		if ("601001".equals(code)) {
-//			log.info("pl == null ? {}:{}", (pl == null), (pl != null ? pl : "null 对象"));
-//			log.info("hist.getHigh({}) > pl.getHighest({})", hist.getHigh(), pl.getHighest());
-//			log.info("hist.getLow({}) < pl.getLowest({})", hist.getLow(), pl.getLowest());
-//			WxPushUtil.pushSystem1("PriceLifeService.checkAndSetPrice 601001 日志断点");
-//		}
+		if (hist.getHigh() > pl.getHighest() || hist.getLow() < pl.getLowest()) {
+			TradeHistInfoDaliy t1 = getHighest(code, 0, 0);
+			pl.setHighest(t1.getHigh());
+			pl.setHighDate(t1.getDate());
 
+			TradeHistInfoDaliy t2 = getlowest(code, 0, 0);
+			pl.setLowDate(t2.getDate());
+			pl.setLowest(t2.getLow());
+			saveToCache(pl);
+		}
 		int index = priceIndex(pl, hist.getClosed());
 		redisUtil.set(RedisConstant.RDS_PRICE_LIFE_INDEX_ + code, index + "");
 	}
@@ -102,25 +95,27 @@ public class PriceLifeService {
 	 * 获取历史最高价格和最低价格
 	 */
 	public PriceLife getPriceLife(String code) {
-		if (localCash.containsKey(code)) {
-			return localCash.get(code);
+		PriceLife pl = localCash.get(code);
+		if (pl != null) {
+			return pl;
 		}
 
 		String json = redisUtil.get(RedisConstant.RDS_PRICE_LIFE + code);
 		if (StringUtils.isNotBlank(json)) {
 			return JSON.parseObject(json, PriceLife.class);
 		}
-		PriceLife pl = new PriceLife();
+		pl = new PriceLife();
 		pl.setCode(code);
-		TradeHistInfoDaliy ti = getHighest(code, 0, 0);
-		if (ti == null) {
+		TradeHistInfoDaliy t1 = getHighest(code, 0, 0);
+		if (t1 == null) {
 			return null;
 		}
-		pl.setHighest(ti.getHigh());
-		pl.setHighDate(ti.getDate());
+		pl.setHighest(t1.getHigh());
+		pl.setHighDate(t1.getDate());
+
 		TradeHistInfoDaliy t2 = getlowest(code, 0, 0);
-		pl.setLowDate(t2.getDate());
 		pl.setLowest(t2.getLow());
+		pl.setLowDate(t2.getDate());
 
 		saveToCache(pl);
 		return pl;
@@ -201,34 +196,42 @@ public class PriceLifeService {
 		return null;
 	}
 
-//	@PostConstruct
-	public void testnoupYear() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				String code = "601500";
-				int listdate = 20100101;
-				System.err.println("code=" + code + ",noupYear=" + (noupYear(code, listdate, 10)));
-			}
-		}).start();
-	}
+//	@javax.annotation.PostConstruct
+//	public void testnoupYear() {
+//		new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				ThreadsUtil.sleepSleepSeconds(5);
+//				int listdate = 20150101;
+//				String[] codes = { "300399", "002405", "002739", "600519", "002752", "600987", "600820", "600098",
+//						"300550" };
+//				System.err.println("start ==============");
+//				for (String c : codes) {
+//					System.err.println(c + ":noupYear=" + noupYear(c, 20150101) + ",noupYearstable="
+//							+ (noupYearstable(c, listdate)));
+//				}
+//				System.err.println("end ==============");
+//			}
+//		}).start();
+//	}
 
 	public int noupYear(String code, int listdate) {
-		return noupYear(code, listdate, 30);// 涨幅定义的波动程度，是否平稳
+		return noupYear(code, listdate, 30, false);// 涨幅定义的波动程度，是否平稳
 	}
 
 	public int noupYearstable(String code, int listdate) {
-		return noupYear(code, listdate, 15);// 涨幅定义的波动程度，是否平稳
+		return noupYear(code, listdate, 20, true);// 涨幅定义的波动程度，是否平稳
 	}
 
-	private int noupYear(String code, int listdate, int stable) {
+	private int noupYear(String code, int listdate, int rate, boolean stable) {
 		// 第一种情况:一路下跌
 		PriceLife pl = getPriceLife(code);
 		Date now = new Date();
 		int days = -365;
+		int days2 = 365;
 		int year = 0;
 		int end = DateUtil.formatYYYYMMDDReturnInt(now);
-
+		// System.err.println("year==>" + year);
 		for (int i = 1; i <= 5; i++) {
 			if (end < listdate) {
 				break;
@@ -238,10 +241,13 @@ public class PriceLifeService {
 			if (low != null) {// 停牌太久
 				TradeHistInfoDaliy high = getHighest(code, start, end);
 				pl.setLowest(low.getLow());// 设置当前年的最低水位
-//				pl.setLowDate(low.getDate());
-				int index = priceIndex(pl, high.getClosed());
-				if (index <= stable) {// 涨幅定义的严格程度
+				int index = priceIndex(pl, high.getClosed());// 历史最高-区间最低，看看最高的是水位
+				if (index <= rate) {// 涨幅定义的严格程度
+					if (stable && !stable(code, start, end, days, days2)) {
+						break;
+					}
 					year = i;
+					// System.err.println("year==>" + year);
 				} else {
 					break;
 				}
@@ -253,7 +259,14 @@ public class PriceLifeService {
 		if (year >= 2) {
 			return year;
 		}
-		// 第二种情况:横盘
+		if (stable && year == 1) {
+			return 1;
+		}
+		// 第二种情况:高位横盘
+		double rateup = 120;
+		if (stable) {
+			rateup = 75;
+		}
 		end = DateUtil.formatYYYYMMDDReturnInt(now);
 		int endt = Integer.MAX_VALUE;
 		for (int i = 1; i <= 5; i++) {
@@ -261,44 +274,56 @@ public class PriceLifeService {
 			if (endt < listdate) {
 				break;
 			}
-			TradeHistInfoDaliy low = getlowest(code, start, end);
-			if (low != null) {// 停牌太久
-				TradeHistInfoDaliy high = getHighest(code, start, end);
-				double profit = CurrencyUitl.cutProfit(low.getLow(), high.getHigh());
-				if (profit <= 120.0) {// 整幅120
-					year = i;
+			if (stable && !stable(code, start, endt, days, days2)) {
+				break;
+			} else {
+				TradeHistInfoDaliy low = getlowest(code, start, end);
+				if (low != null) {// 停牌太久
+					TradeHistInfoDaliy high = getHighest(code, start, end);
+					double profit = CurrencyUitl.cutProfit(low.getLow(), high.getHigh());
+					if (profit <= rateup) {// 整幅120
+					} else {
+						break;
+					}
 				} else {
 					break;
 				}
-			} else {
-				break;
 			}
+			year = i;
 			endt = start;
 		}
 		if (year >= 2) {
 			return year;
 		}
+		if (stable && year == 1) {
+			return 1;
+		}
 		return 0;
 	}
 
-//	@PostConstruct
-//	private void a() {
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				ThreadsUtil.sleepRandomSecBetween1And5();
-//				String today = DateUtil.getTodayYYYYMMDD();
-//				String[] code = { "300873" };
-//				String[] code = { "002405", "002739", "600519", "002752", "300027" };
-//				System.err.println("==============");
-//				for (String c : code) {
-//					// daliyTradeHistroyService.spiderDaliyTradeHistoryInfoFromIPOCenter(c, today,
-//					// 0);
-//					System.err.println(c + ":" + noupYear(c, 20150101));
-//				}
-//				System.err.println("==============");
-//			}
-//		}).start();
-//	}
+	private boolean stable(String code, int start, int end, int days, int days2) {
+		// 最高点整幅不超过75%
+		TradeHistInfoDaliy high1 = getHighest(code, start, end);
+		TradeHistInfoDaliy low1 = getlowest(code, start, end);
 
+		// 自然本年上涨趋势
+		if (high1.getDate() > low1.getDate() && CurrencyUitl.cutProfit(low1.getLow(), high1.getHigh()) >= 75) {
+			return false;
+		}
+		// 高点前的一年
+		TradeHistInfoDaliy l2 = getlowest(code,
+				DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(DateUtil.parseDate(high1.getDate()), days)),
+				high1.getDate());
+
+		if (CurrencyUitl.cutProfit(l2.getLow(), high1.getHigh()) >= 75) {
+			return false;
+		}
+		// 低点后的一年
+		TradeHistInfoDaliy h2 = getlowest(code, low1.getDate(),
+				DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(DateUtil.parseDate(low1.getDate()), days2)));
+		if (CurrencyUitl.cutProfit(low1.getLow(), h2.getHigh()) >= 75) {
+			return false;
+		}
+		return true;
+	}
 }

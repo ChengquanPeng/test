@@ -16,6 +16,14 @@ public class ThreadsUtil {
 		sleepRandomSecBetween5And15();
 	}
 
+	public static void sleepSleepSeconds(int sec) {
+		try {
+			TimeUnit.SECONDS.sleep(sec);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void sleepSleep1Seconds() {
 		try {
 			TimeUnit.SECONDS.sleep(1);

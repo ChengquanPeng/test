@@ -26,9 +26,15 @@ public class QibaoService {
 //		int date = 20210208 ,20210209, 20210223 20210315
 //		String code = "002612";
 //		int date = 20200526;
-//		String code = "603797";
-//		int date = 20220611;
+		String code = "002603";
+		int date = 20220613;
 		System.err.println("=====");
+		CodeBaseModel2 newOne = new CodeBaseModel2();
+		newOne.setCode(code);
+		MonitorPoolTemp pool = new MonitorPoolTemp();
+		qibao(date, newOne, pool);
+		System.err.println("Qixing:" + newOne.getQixing());
+		System.err.println("Zyxing:" + newOne.getZyxing());
 		System.err.println("=====");
 		System.exit(0);
 	}
@@ -47,7 +53,7 @@ public class QibaoService {
 		TradeHistInfoDaliy res = null;
 		for (TradeHistInfoDaliy nf : list) {
 			if (nf.getTodayChangeRate() >= 8.0) {
-				if (isQixing(first, nf, list)) {
+				if (isQixing(first, nf, list, pool)) {
 					res = nf;
 					break;
 				}
@@ -55,7 +61,6 @@ public class QibaoService {
 		}
 		if (res != null) {
 			newOne.setQixing(res.getDate());
-			pool.setShotPointPrice(res.getHigh());
 		} else {
 			newOne.setQixing(0);
 			pool.setShotPointPrice(0);
@@ -68,7 +73,7 @@ public class QibaoService {
 		if (first.getOpen() >= first.getClosed() || CurrencyUitl.cutProfit(first.getOpen(), first.getClosed()) <= 0.5) {
 			// 收影线或者10字星
 			TradeHistInfoDaliy nd2 = list.get(1);
-			if (3.0 <= nd2.getTodayChangeRate() && nd2.getTodayChangeRate() <= 8.0) {// 1. 3-6个点
+			if (3.0 <= nd2.getTodayChangeRate() && nd2.getTodayChangeRate() <= 7.0) {// 1. 3-6个点
 				if (isShizixing(newOne.getCode(), nd2.getDate())) {
 					newOne.setZyxing(1);
 					if (pool.getShotPointPrice() == 0) {
@@ -105,8 +110,10 @@ public class QibaoService {
 	/**
 	 * 旗形
 	 */
-	private boolean isQixing(TradeHistInfoDaliy first, TradeHistInfoDaliy chk, List<TradeHistInfoDaliy> list) {
+	private boolean isQixing(TradeHistInfoDaliy first, TradeHistInfoDaliy chk, List<TradeHistInfoDaliy> list,
+			MonitorPoolTemp pool) {
 		if (first.getDate() == chk.getDate()) {
+			// System.err.println("=====chk?:" + chk.getDate());
 			return false;
 		}
 		// System.err.println("=====chk:" + chk.getDate());
@@ -134,7 +141,10 @@ public class QibaoService {
 			}
 			// 收阴线
 			double high = (chk.getHigh() > d2t.getHigh()) ? chk.getHigh() : d2t.getHigh();
-			return isOk(high, tmp);
+			if (isOk(high, tmp)) {
+				pool.setShotPointPrice(high);
+				return true;
+			}
 		}
 		// System.err.println("=====>默认false");
 		return false;
