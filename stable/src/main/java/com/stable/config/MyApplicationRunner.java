@@ -26,9 +26,7 @@ public class MyApplicationRunner implements ApplicationRunner {
 	private RealtimeJob realtimeJob;
 	// @Autowired
 	// private FinanceService financeService;
-//	@Autowired
-//	private com.stable.service.model.CodeModelService codeModelService;
-
+	
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 //        System.out.println("通过实现ApplicationRunner接口，在spring boot项目启动后打印参数");
@@ -57,6 +55,9 @@ public class MyApplicationRunner implements ApplicationRunner {
 			}
 		}).start();
 	}
+//	@Autowired
+//	private com.stable.service.model.CodeModelService codeModelService;
+
 
 	public void printUrl() {
 		RequestMappingHandlerMapping bean = SpringUtil.getBean(RequestMappingHandlerMapping.class);

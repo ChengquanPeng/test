@@ -276,7 +276,7 @@ public class CodeModelService {
 		newOne.setShooting9(0);
 
 		// 系统指标：自动监听
-		if ((newOne.getBousOK() == 1 || newOne.getFinOK() == 1)) {// 1.基本面没有什么大问题
+		if ((newOne.getBousOK() > 0 || newOne.getFinOK() >= 3)) {// 1.基本面没有什么大问题
 			// 小票的增发&大宗
 			if (isSmallStock) {
 				if (newOne.getZfjjupStable() >= 2 || newOne.getZfjjup() >= 2) {// 2.底部没涨
