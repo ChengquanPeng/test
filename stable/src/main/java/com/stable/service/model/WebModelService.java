@@ -231,7 +231,7 @@ public class WebModelService {
 			if (dh.getBousOK() > 0) {
 				sb5.append("近" + dh.getBousOK() + "年分红,");
 			}
-			if (dh.getFinOK() == 1) {
+			if (dh.getFinOK() > 0) {
 				sb5.append("近" + dh.getFinOK() + "年业绩不亏,市盈率ttm:").append(dh.getPettm());
 			}
 			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
