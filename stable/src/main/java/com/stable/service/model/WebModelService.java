@@ -220,7 +220,7 @@ public class WebModelService {
 		sb5.append(",变化:").append(dh.getHolderNum()).append("%");
 		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 		// 行情-财务
-		if (dh.getZfjjup() > 0 || dh.getBousOK() == 1 || dh.getFinOK() == 1) {
+		if (dh.getZfjjup() > 0 || dh.getBousOK() > 0 || dh.getFinOK() > 0) {
 			if (dh.getZfjjup() > 0) {
 				sb5.append(dh.getZfjjup());
 				if (dh.getZfjjupStable() > 0) {
@@ -228,11 +228,11 @@ public class WebModelService {
 				}
 				sb5.append("年未大涨,");
 			}
-			if (dh.getBousOK() == 1) {
-				sb5.append("近5年分红,");
+			if (dh.getBousOK() > 0) {
+				sb5.append("近" + dh.getBousOK() + "年分红,");
 			}
 			if (dh.getFinOK() == 1) {
-				sb5.append("近5年业绩不亏,市盈率ttm:").append(dh.getPettm());
+				sb5.append("近" + dh.getFinOK() + "年业绩不亏,市盈率ttm:").append(dh.getPettm());
 			}
 			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 		}
@@ -630,11 +630,11 @@ public class WebModelService {
 		if (mr.getCompnayType() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("compnayType", 1));
 		}
-		if (mr.getFinOK() == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("finOK", 1));
+		if (mr.getFinOK() > 0) {
+			bqb.must(QueryBuilders.rangeQuery("finOK").gte(mr.getFinOK()));
 		}
-		if (mr.getBousOK() == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("bousOK", 1));
+		if (mr.getBousOK() > 0) {
+			bqb.must(QueryBuilders.rangeQuery("bousOK").gte(mr.getBousOK()));
 		}
 		if (mr.getQixing() == 1) {// 旗形
 			bqb.must(QueryBuilders.rangeQuery("qixing").gte(1));

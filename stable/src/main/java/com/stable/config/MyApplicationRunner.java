@@ -53,8 +53,7 @@ public class MyApplicationRunner implements ApplicationRunner {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-//				codeModelService.runJobv2(com.stable.utils.DateUtil
-//						.formatYYYYMMDDReturnInt(com.stable.utils.DateUtil.addDate(new java.util.Date(), -1)), true);
+//				codeModelService.runModel(20220613, true);
 			}
 		}).start();
 	}

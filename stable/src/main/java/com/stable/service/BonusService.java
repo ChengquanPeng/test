@@ -105,7 +105,7 @@ public class BonusService {
 				newOne.setBousOK(5);
 			} else {
 				int c = 0;
-				for (int s = start; s <= end; s++) {
+				for (int s = end; s >= start; s--) {
 					if (set.contains(s)) {
 						c++;
 					} else {

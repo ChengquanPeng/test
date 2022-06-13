@@ -1,8 +1,10 @@
 package com.stable.service.model;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -229,7 +231,7 @@ public class CodeModelService {
 		}
 		boolean online4Year = stockBasicService.onlinePreYearChk(code, pre4Year);
 		// N年未大涨
-		List<FinanceBaseInfo> yearRpts = noup(isweekend, online4Year, newOne, s.getList_date());
+		List<FinanceBaseInfo> yearRpts = finBonus(isweekend, online4Year, newOne);
 		boolean isSmallStock = isSmallStock(mkv, newOne.getActMkv());
 		// 小而美模型：未涨&&年报 && 大股东集中
 		if (newOne.getZfjjup() >= 2 && isSmallStock && newOne.getHolderNumP5() >= 50) {
@@ -374,36 +376,48 @@ public class CodeModelService {
 	}
 
 	// 周末计算-至少N年未大涨?
-	private List<FinanceBaseInfo> noup(boolean isweekend, boolean online4Year, CodeBaseModel2 newOne,
-			String listdatestr) {
+	private List<FinanceBaseInfo> finBonus(boolean isweekend, boolean online4Year, CodeBaseModel2 newOne) {
 		// 周末计算-至少N年未大涨?
 		if (isweekend) {
 			newOne.setFinOK(0);
 			newOne.setBousOK(0);
 
 			String code = newOne.getCode();
-			int c = 0;
 			List<FinanceBaseInfo> yearRpts = financeService.getFinacesReportByYearRpt(code, EsQueryPageUtil.queryPage5);
 			int start = Integer.MAX_VALUE;
 			int end = 0;
 			if (yearRpts != null) {
-				c = yearRpts.size();
+				Set<Integer> set = new HashSet<Integer>();
 				for (FinanceBaseInfo f : yearRpts) {
-					if (f.getGsjlr() < 0 || f.getKfjlr() < 0) {
-						c--;
-					}
+					if (f.getQuarter() == 4) {
+						if (f.getGsjlr() < 0) {// 归属净利润
+						} else {
+							set.add(f.getYear());// 获取不亏年份
+						}
 
-					// 结束年份
-					if (f.getQuarter() == 4 && f.getYear() > end) {
-						end = f.getYear();
-					}
-					// 开始年份
-					if (f.getQuarter() == 4 && f.getYear() < start) {
-						start = f.getYear();
+						// 结束年份
+						if (f.getYear() > end) {
+							end = f.getYear();
+						}
+						// 开始年份
+						if (f.getYear() < start) {
+							start = f.getYear();
+						}
 					}
 				}
-				if (c == yearRpts.size()) {
-					newOne.setFinOK(1);
+
+				if (set.size() >= 5) {
+					newOne.setFinOK(5);
+				} else {
+					int c = 0;
+					for (int s = end; s >= start; s--) {
+						if (set.contains(s)) {
+							c++;
+						} else {
+							break;
+						}
+					}
+					newOne.setFinOK(c);
 				}
 			}
 			if (start == Integer.MAX_VALUE) {
