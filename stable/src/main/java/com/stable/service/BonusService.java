@@ -30,6 +30,7 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.vo.bus.BonusHist;
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.http.resp.DividendHistoryResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -56,8 +57,8 @@ public class BonusService {
 	@Autowired
 	private RedisUtil redisUtil;
 
-	public List<BonusHist> getListByCode(String code, String zsg, String proc, String queryYear,
-			EsQueryPageReq querypage) {
+	public List<BonusHist> getListByCode(String code, String zsg, String proc, String queryYear, int startYear,
+			int endYear, EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(code)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -68,8 +69,14 @@ public class BonusService {
 		if (StringUtils.isNotBlank(zsg)) {
 			bqb.must(QueryBuilders.matchPhraseQuery("hasZhuanGu", 1));
 		}
+		if (startYear > 0) {
+			bqb.must(QueryBuilders.rangeQuery("bonusYear").gte(Integer.valueOf(startYear)));
+		}
+		if (endYear > 0) {
+			bqb.must(QueryBuilders.rangeQuery("bonusYear").lte(Integer.valueOf(endYear)));
+		}
 		if (StringUtils.isNotBlank(queryYear)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("rptYear", queryYear.trim() + "年报"));
+			bqb.must(QueryBuilders.matchPhraseQuery("bonusYear", Integer.valueOf(queryYear)));
 		}
 		FieldSortBuilder sort = SortBuilders.fieldSort("rptDate").unmappedType("integer").order(SortOrder.DESC);
 
@@ -85,29 +92,29 @@ public class BonusService {
 		return null;
 	}
 
-	public boolean isBonusOk(String code, int bonusCheckYear) {
-		List<BonusHist> l = this.getListByCode(code, null, null, null, EsQueryPageUtil.queryPage10);
-		Set<Integer> set = new HashSet<Integer>();
+	public void bonusYear(String code, int start, int end, CodeBaseModel2 newOne) {
+		List<BonusHist> l = this.getListByCode(code, null, null, null, start, end, EsQueryPageUtil.queryPage10);
 		if (l != null) {
+			Set<Integer> set = new HashSet<Integer>();
 			for (BonusHist bh : l) {
-				int y = getYear(bh);
-				if (y >= bonusCheckYear) {
-					if (bh.getDetail().contains("元")) {
-						set.add(y);
-					}
+				if (bh.getDetail().contains("元")) {
+					set.add(bh.getBonusYear());
 				}
 			}
+			if (set.size() >= 5) {
+				newOne.setBousOK(5);
+			} else {
+				int c = 0;
+				for (int s = start; s <= end; s++) {
+					if (set.contains(s)) {
+						c++;
+					} else {
+						break;
+					}
+				}
+				newOne.setBousOK(c);
+			}
 		}
-		return (set.size() >= 4);
-	}
-
-	private int getYear(BonusHist bh) {
-		try {
-			return Integer.valueOf(bh.getRptYear().substring(0, 4));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return 0;
 	}
 
 	public boolean isGsz(String code, int start) {
@@ -130,7 +137,7 @@ public class BonusService {
 	public List<DividendHistoryResp> getListByCodeForWebPage(String code, String zsg, String proc, String queryYear,
 			EsQueryPageReq querypage) {
 		List<DividendHistoryResp> res = new LinkedList<DividendHistoryResp>();
-		List<BonusHist> list = this.getListByCode(code, zsg, proc, queryYear, querypage);
+		List<BonusHist> list = this.getListByCode(code, zsg, proc, queryYear, 0, 0, querypage);
 		if (list != null) {
 			for (BonusHist dh : list) {
 				DividendHistoryResp resp = new DividendHistoryResp();

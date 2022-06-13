@@ -204,37 +204,37 @@ public class ThsBonusSpider {
 							String dividendDate = tds.next().asText();// A股除权除息日
 							String totalAmt = tds.next().asText();// 分红总额
 							String status = tds.next().asText();// 方案进度
-							// if (!detail.contains("不分配不转增")) {
-							BonusHist bh = new BonusHist();
-							bh.setCode(code);
-							bh.setRptYear(rptYear.trim());
-							if (bh.getRptYear().endsWith("年报")) {
-								bh.setYearEnd(1);
-							}
 							if (!detail.contains("不分配不转增")) {
-								bh.setBonusYes(1);
+								BonusHist bh = new BonusHist();
+								bh.setCode(code);
+								bh.setRptYear(rptYear.trim());
+								if (bh.getRptYear().endsWith("年报")) {
+									bh.setYearEnd(1);
+								}
+								if (!detail.contains("不分配不转增")) {
+									bh.setBonusYes(1);
+								}
+								getYear(bh);
+								bh.setRptDate(DateUtil.convertDate2(rptDate.trim()));
+								bh.setDetail(detail.trim());
+								bh.setId(code + bh.getRptDate());
+								try {
+									bh.setBookDate(DateUtil.convertDate2(bookDate.trim()));
+								} catch (Exception e) {
+								}
+								try {
+									bh.setDividendDate(DateUtil.convertDate2(dividendDate.trim()));
+								} catch (Exception e) {
+								}
+								bh.setAmt(totalAmt);
+								bh.setStatus(status);
+								if (detail.contains("股") && (detail.contains("转") || detail.contains("送"))) {
+									bh.setHasZhuanGu(1);// 转送股
+								}
+								bh.setUpdate(sysdate);
+								// System.err.println(bh.toString());
+								bhl.add(bh);
 							}
-							getYear(bh);
-							bh.setRptDate(DateUtil.convertDate2(rptDate.trim()));
-							bh.setDetail(detail.trim());
-							bh.setId(code + bh.getRptDate());
-							try {
-								bh.setBookDate(DateUtil.convertDate2(bookDate.trim()));
-							} catch (Exception e) {
-							}
-							try {
-								bh.setDividendDate(DateUtil.convertDate2(dividendDate.trim()));
-							} catch (Exception e) {
-							}
-							bh.setAmt(totalAmt);
-							bh.setStatus(status);
-							if (detail.contains("股") && (detail.contains("转") || detail.contains("送"))) {
-								bh.setHasZhuanGu(1);// 转送股
-							}
-							bh.setUpdate(sysdate);
-							// System.err.println(bh.toString());
-							bhl.add(bh);
-							// }
 						} catch (Exception e) {
 							e.printStackTrace();
 						}

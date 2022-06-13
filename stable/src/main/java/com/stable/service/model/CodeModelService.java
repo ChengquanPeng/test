@@ -117,7 +117,6 @@ public class CodeModelService {
 	private int pre1Year = 0;// 一年以前
 	private int pre3Year = 0;// 三年以前
 	private int pre4Year = 0;// 四年以前
-	private int bonusCheckYear = 0;
 
 	private synchronized void runByJobv2(int t, boolean isweekend) {
 		tradeDate = t;
@@ -134,8 +133,6 @@ public class CodeModelService {
 		StringBuffer sbc = new StringBuffer();
 
 		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
-		int currYear = DateUtil.getCurYYYY();
-		bonusCheckYear = currYear - 5;// TODO 是否准确?
 		for (StockBaseInfo s : codelist) {
 			try {
 				this.processingByCode(s, poolMap, poolList, listLast, histMap, isweekend, sbc);
@@ -275,7 +272,7 @@ public class CodeModelService {
 		newOne.setShooting6(0);
 		newOne.setShooting8(0);
 		newOne.setShooting9(0);
-		
+
 		// 系统指标：自动监听
 		if ((newOne.getBousOK() == 1 || newOne.getFinOK() == 1)) {// 1.基本面没有什么大问题
 			// 小票的增发&大宗
@@ -387,20 +384,32 @@ public class CodeModelService {
 			String code = newOne.getCode();
 			int c = 0;
 			List<FinanceBaseInfo> yearRpts = financeService.getFinacesReportByYearRpt(code, EsQueryPageUtil.queryPage5);
+			int start = Integer.MAX_VALUE;
+			int end = 0;
 			if (yearRpts != null) {
 				c = yearRpts.size();
 				for (FinanceBaseInfo f : yearRpts) {
 					if (f.getGsjlr() < 0 || f.getKfjlr() < 0) {
 						c--;
 					}
+
+					// 结束年份
+					if (f.getQuarter() == 4 && f.getYear() > end) {
+						end = f.getYear();
+					}
+					// 开始年份
+					if (f.getQuarter() == 4 && f.getYear() < start) {
+						start = f.getYear();
+					}
 				}
 				if (c == yearRpts.size()) {
 					newOne.setFinOK(1);
 				}
 			}
-			if (bonusService.isBonusOk(code, bonusCheckYear)) {
-				newOne.setBousOK(1);
+			if (start == Integer.MAX_VALUE) {
+				start = 0;
 			}
+			bonusService.bonusYear(code, start, end, newOne);
 			return yearRpts;
 		}
 		return null;
