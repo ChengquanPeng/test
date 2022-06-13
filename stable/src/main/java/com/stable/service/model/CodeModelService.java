@@ -375,6 +375,20 @@ public class CodeModelService {
 		}
 	}
 
+//	@javax.annotation.PostConstruct
+//	private void a() {
+//		new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				com.stable.utils.ThreadsUtil.sleepSleepSeconds(8);
+//				CodeBaseModel2 newOne = new CodeBaseModel2();
+//				newOne.setCode("603797");
+//				finBonus(true, true, newOne);
+//				System.err.println(newOne.getFinOK() + "," + newOne.getBousOK());
+//			}
+//		}).start();
+//	}
+
 	// 周末计算-至少N年未大涨?
 	private List<FinanceBaseInfo> finBonus(boolean isweekend, boolean online4Year, CodeBaseModel2 newOne) {
 		// 周末计算-至少N年未大涨?

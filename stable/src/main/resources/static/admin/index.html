@@ -35,9 +35,9 @@
 				</div>
 			</div>
 			<div class="mg">
-				国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp;
-				业绩OK(近5年不亏):<input type="checkbox" id="finOK" title="近5年不亏" />&nbsp;&nbsp;
-				分红OK(近5年分红):<input type="checkbox" id="bousOK" />&nbsp;&nbsp;
+				国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp; 业绩:<input
+					type="text" id="finOK" placeholder="至少连续多少年不亏" value="0" />&nbsp;&nbsp;
+				分红:<input type="text" id="bousOK" placeholder="至少连续多少年分红" value="0" />&nbsp;&nbsp;
 				几年未涨&gt;=<input type="text" id="zfjjup" />&nbsp;&nbsp;
 				几年未涨stable&gt;=<input type="text" id="zfjjupStable"
 					placeholder="算法偏严" />&nbsp;&nbsp;
@@ -230,8 +230,8 @@
 									param.totalAmt = $('#totalAmt').val();
 									param.totalAmt60d = $('#totalAmt60d').val();
 
-									param.finOK = 0;
-									param.bousOK = 0;
+									param.finOK = $('#finOK').val();
+									param.bousOK = $('#bousOK').val();
 									param.compnayType = 0;
 									param.kline = 0;
 									param.pre1Year = 0;
@@ -268,12 +268,6 @@
 
 									if (document.getElementById("pre1Year").checked) {
 										param.pre1Year = 1;
-									}
-									if (document.getElementById("finOK").checked) {
-										param.finOK = 1;
-									}
-									if (document.getElementById("bousOK").checked) {
-										param.bousOK = 1;
 									}
 									if (document.getElementById("compnayType").checked) {
 										param.compnayType = 1;
