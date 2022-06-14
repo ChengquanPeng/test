@@ -27,7 +27,10 @@ import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 
+import lombok.extern.log4j.Log4j2;
+
 @Service
+@Log4j2
 public class CodeModelKLineService {
 	@Autowired
 	private MonitorPoolUserDao monitorPoolDao;
@@ -96,6 +99,7 @@ public class CodeModelKLineService {
 		if (poolList.size() > 0) {
 			monitorPoolDao.saveAll(poolList);
 		}
+		log.info("基本面完成");
 	}
 
 	private int tradeDate = 0;

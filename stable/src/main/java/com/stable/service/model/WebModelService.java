@@ -745,6 +745,8 @@ public class WebModelService {
 			order = SortOrder.ASC;
 		} else if (orderBy == 14) {
 			field = "reducZb";
+		} else if (orderBy == 15) {
+			field = "qixing";
 		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);
