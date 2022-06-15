@@ -66,7 +66,7 @@ public class CodeModelKLineService {
 //		// K线模型
 //		new Thread(new Runnable() {
 //			public void run() {
-//				int date = 20220610;
+//				int date = 20220615;
 //				runKLineModel(date);
 //			}
 //		}).start();
@@ -99,7 +99,7 @@ public class CodeModelKLineService {
 		if (poolList.size() > 0) {
 			monitorPoolDao.saveAll(poolList);
 		}
-		log.info("基本面完成");
+		log.info("KLine基本完成");
 	}
 
 	private int tradeDate = 0;

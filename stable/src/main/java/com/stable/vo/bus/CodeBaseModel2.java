@@ -44,11 +44,11 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int shooting53 = 0;// 交易量活跃
 
-	@Field(type = FieldType.Integer)
+	@Field(type = FieldType.Long)
 	private int qixing = 0;// 旗形
 	@Field(type = FieldType.Integer)
 	private int dibuQixing = 0;// 旗形
-	@Field(type = FieldType.Integer)
+	@Field(type = FieldType.Long)
 	private int zyxing = 0;// 中阳带星
 
 	@Field(type = FieldType.Integer)
