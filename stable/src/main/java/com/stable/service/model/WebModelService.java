@@ -636,9 +636,13 @@ public class WebModelService {
 		if (mr.getBousOK() > 0) {
 			bqb.must(QueryBuilders.rangeQuery("bousOK").gte(mr.getBousOK()));
 		}
+		if (mr.getDibuqixing() == 1) {// 底部旗形
+			bqb.must(QueryBuilders.rangeQuery("dibuqixing").gte(1));
+		}
 		if (mr.getQixing() == 1) {// 旗形
 			bqb.must(QueryBuilders.rangeQuery("qixing").gte(1));
 		}
+
 		if (mr.getZyxing() == 1) {// 中阳带星
 			bqb.must(QueryBuilders.matchPhraseQuery("zyxing", 1));
 		}

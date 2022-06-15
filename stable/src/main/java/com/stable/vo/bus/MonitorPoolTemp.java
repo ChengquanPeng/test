@@ -65,6 +65,8 @@ public class MonitorPoolTemp extends EsBase {
 //	private int shotPointCheck = 0;// 起爆点
 	@Field(type = FieldType.Double)
 	private double shotPointPrice = 0;// 起爆点
+	@Field(type = FieldType.Double)
+	private double shotPointPriceLow = 0;// 底部起爆点
 	// 增发
 
 	public String getMsg() {

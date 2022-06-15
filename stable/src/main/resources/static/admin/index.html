@@ -75,12 +75,14 @@
 				</div>
 			</div>
 			<div class="mg">
-				技术面:&nbsp;&nbsp;&nbsp;&nbsp;旗形:<input type="checkbox" id="qixing" />&nbsp;&nbsp;&nbsp;
-				中阳十字星:<input type="checkbox" id="zyxing" />&nbsp;&nbsp;&nbsp;
-				5日均线多头排列:<input type="checkbox" id="shooting51" />&nbsp;&nbsp;&nbsp;
-				5日内一阳穿4线:<input type="checkbox" id="shooting52" />&nbsp;&nbsp;&nbsp;
-				K线攻击形态:<input type="checkbox" id="kline" />&nbsp;&nbsp;&nbsp;
-				接近1年新高:<input type="checkbox" id="pre1Year" />&nbsp;&nbsp;&nbsp;5日交易活跃:<input
+				技术面:&nbsp;&nbsp;&nbsp;&nbsp;底部旗形:<input type="checkbox"
+					id="dibuqixing" />&nbsp;&nbsp;&nbsp;旗形:<input type="checkbox"
+					id="qixing" />&nbsp;&nbsp;&nbsp; 中阳十字星:<input type="checkbox"
+					id="zyxing" />&nbsp;&nbsp;&nbsp; 5日均线多头排列:<input type="checkbox"
+					id="shooting51" />&nbsp;&nbsp;&nbsp; 5日内一阳穿4线:<input
+					type="checkbox" id="shooting52" />&nbsp;&nbsp;&nbsp; K线攻击形态:<input
+					type="checkbox" id="kline" />&nbsp;&nbsp;&nbsp; 接近1年新高:<input
+					type="checkbox" id="pre1Year" />&nbsp;&nbsp;&nbsp;5日交易活跃:<input
 					type="checkbox" id="shooting53" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;大市值：&nbsp;白马走势:<input
 					type="checkbox" id="whiteHors" />
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -246,7 +248,11 @@
 									param.gdrsp = $('#gdrsp').val();
 									param.qixing = 0;
 									param.zyxing = 0;
+									param.dibuqixing = 0;
 
+									if (document.getElementById("dibuqixing").checked) {
+										param.dibuqixing = 1;
+									}
 									if (document.getElementById("qixing").checked) {
 										param.qixing = 1;
 									}

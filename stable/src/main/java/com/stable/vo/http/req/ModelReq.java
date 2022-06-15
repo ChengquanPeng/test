@@ -55,5 +55,6 @@ public class ModelReq {
 
 	int qixing = 0;// 旗形
 	int zyxing = 0;// 中阳带星
+	int dibuqixing = 0;
 
 }

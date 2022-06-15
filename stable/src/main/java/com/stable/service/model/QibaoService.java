@@ -61,11 +61,13 @@ public class QibaoService {
 		}
 		if (res != null) {
 			newOne.setQixing(res.getDate());
+			dibuqixing(newOne, pool, res);
 		} else {
+			newOne.setDibuQixing(0);
 			newOne.setQixing(0);
 			pool.setShotPointPrice(0);
+			pool.setShotPointPriceLow(0);
 		}
-
 		// 起爆点：中阳线,第二天十字星或者小影线
 		// 1. 3-6个点
 		// 2. 5天涨幅低于2%
@@ -81,6 +83,30 @@ public class QibaoService {
 					}
 				}
 			}
+		}
+	}
+
+	private void dibuqixing(CodeBaseModel2 newOne, MonitorPoolTemp pool, TradeHistInfoDaliy res) {
+		if (newOne.getZfjjup() >= 2 && newOne.getZfjjupStable() >= 1) {
+			List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0,
+					res.getDate(), EsQueryPageUtil.queryPage30, SortOrder.DESC);
+			double low = Integer.MAX_VALUE;
+			for (TradeHistInfoDaliy nf : list) {
+				if (nf.getClosed() < low) {
+					low = nf.getClosed();// 最小
+				}
+			}
+			if (low < res.getYesterdayPrice()) {
+				if (CurrencyUitl.cutProfit(low, res.getYesterdayPrice()) > 20) {// 本身已经大涨了，之前就不能涨太多
+					pool.setShotPointPrice(0);
+					pool.setShotPointPriceLow(0);
+					return;// 涨幅太大
+				}
+			}
+			newOne.setDibuQixing(1);
+		} else {
+			pool.setShotPointPrice(0);
+			pool.setShotPointPriceLow(0);
 		}
 	}
 
@@ -112,7 +138,7 @@ public class QibaoService {
 	 */
 	private boolean isQixing(TradeHistInfoDaliy first, TradeHistInfoDaliy chk, List<TradeHistInfoDaliy> list,
 			MonitorPoolTemp pool) {
-		if (first.getDate() == chk.getDate()) {
+		if (first.getDate() == chk.getDate()) {// 第一天不算
 			// System.err.println("=====chk?:" + chk.getDate());
 			return false;
 		}
@@ -143,6 +169,7 @@ public class QibaoService {
 			double high = (chk.getHigh() > d2t.getHigh()) ? chk.getHigh() : d2t.getHigh();
 			if (isOk(high, tmp)) {
 				pool.setShotPointPrice(high);
+				pool.setShotPointPriceLow(CurrencyUitl.roundHalfUp(chk.getYesterdayPrice() * 1.05));// 旗形底部预警
 				return true;
 			}
 		}

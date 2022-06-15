@@ -58,6 +58,7 @@ public class LoginController {
 		if (ui == null || ui.getS1() < DateUtil.getTodayIntYYYYMMDD()) {
 			r.setStatus(JsonResult.FAIL);
 			r.setResult("请联系管理员进行服务续约,抖音号：wudao_shunfeng 悟个p道，微信号：chengquan0755");
+			redisUtil.del(RedisConstant.RDS_LOGIN_ERROR_TIME_ + phone);
 		} else {
 			if (StringUtils.isNotBlank(ui.getWxpush())) {
 				String str = MathUtil.getRandomLengthStr4();
