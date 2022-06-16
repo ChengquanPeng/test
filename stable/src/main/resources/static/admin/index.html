@@ -235,6 +235,12 @@
 
 									param.finOK = $('#finOK').val();
 									param.bousOK = $('#bousOK').val();
+									if ("" == param.finOK) {
+										param.finOK = 0;
+									}
+									if ("" == param.bousOK) {
+										param.bousOK = 0;
+									}
 									param.compnayType = 0;
 									param.kline = 0;
 									param.pre1Year = 0;

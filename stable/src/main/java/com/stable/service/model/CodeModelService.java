@@ -279,7 +279,7 @@ public class CodeModelService {
 		if ((newOne.getBousOK() > 0 || newOne.getFinOK() >= 3)) {// 1.基本面没有什么大问题
 			// 小票的增发&大宗
 			if (isSmallStock) {
-				if (newOne.getZfjjupStable() >= 2 || newOne.getZfjjup() >= 2) {// 2.底部没涨
+				if (newOne.getZfjjup() >= 2 || newOne.getZfjjupStable() >= 1) {// 2.底部没涨
 					if (newOne.getHolderNumT3() > 45.0) {// 三大股东持股比例
 						// 行情指标1：底部小票大宗：超活筹5%,董监高机构代减持?
 						if (newOne.getDzjyp365d() >= 4.5) {// 大宗超过4.5%
@@ -301,7 +301,7 @@ public class CodeModelService {
 					}
 
 					if (!isOk1 && !isOk8 && newOne.getZfStatus() == ZfStatus.DONE.getCode() && newOne.getZfself() == 1
-							&& newOne.getZfjjup() >= 2 && newOne.getZfjjupStable() >= 2 && newOne.getZfObjType() != 3) {
+							&& newOne.getZfjjup() >= 2 && newOne.getZfjjupStable() >= 1 && newOne.getZfObjType() != 3) {
 						isOk9 = true;
 						log.info("{} 小票,底部横盘定增2年", code);
 					}
@@ -309,7 +309,7 @@ public class CodeModelService {
 			}
 			// -流通大市值
 			if (mkv >= smallStocklimit) {
-				if (newOne.getZfjjupStable() >= 2 || newOne.getZfjjup() >= 2) {// 2.底部没涨
+				if (newOne.getZfjjup() >= 2 || newOne.getZfjjupStable() >= 1) {// 2.底部没涨
 					// 行情指标2：底部大票增发：超过50亿(越大越好),股东集中,证监会核准-之前有明显底部拿筹痕迹-涨停？
 					if (ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
 						if (newOne.getZfYjAmt() >= ZF_50YI) {
