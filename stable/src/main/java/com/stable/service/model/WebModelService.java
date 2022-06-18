@@ -98,20 +98,25 @@ public class WebModelService {
 	public String getSystemPoint(CodeBaseModel2 dh, String splitor) {
 		String s = "";
 		// --中长--
-		if (dh.getShooting1() > 0) {
-			s = "小票-底部大宗-大宗交易量占流通筹码超5%" + splitor;
-		}
-		if (dh.getShooting8() > 0) {
-			s += "小票-底部定增完成+至少3年未涨" + splitor;
-		}
-		if (dh.getShooting9() > 0) {
-			s += "小票-底部定增完成+2年未涨" + splitor;
+		if (dh.getShooting7() > 0) {
+			s += "底部优质小票" + splitor;
+		} else if (dh.getShooting9() > 0) {
+			s += "底部小票" + splitor;
 		}
 		if (dh.getShooting2() > 0) {
-			s += "大票-底部定增已核准-募集资金超50亿(越大越好),股东集中,底部拿筹涨停?" + splitor;
+			s += "底部大票定增-涨停吸筹?" + splitor;
+		}
+		if (dh.getShooting1() > 0) {
+			s += "底部小票大宗-占流通筹码超5%" + splitor;
+		}
+		if (dh.getShooting6() > 0) {
+			s += "底部小票减持" + splitor;
+		}
+		if (dh.getShooting8() > 0) {
+			s += "底部小票定增-" + dh.getZfjjupStable() + "年未涨" + splitor;
 		}
 		if (dh.getShooting4() > 0) {
-			s += "底部股东人数大幅减少(3年内减少40%)" + splitor;
+			s += "底部股东人数大幅减少" + dh.getHolderNum() + "%" + splitor;
 		}
 		// --短线--
 		if (dh.getShooting3() > 0) {
@@ -119,9 +124,6 @@ public class WebModelService {
 		}
 		if (dh.getShooting5() > 0) {
 			s += "股价极速拉升:妖股?龙抬头?(短线2)" + splitor;
-		}
-		if (dh.getShooting6() > 0) {
-			s += "小票-底部减持" + splitor;
 		}
 
 		return s;
@@ -562,24 +564,32 @@ public class WebModelService {
 			}
 
 		}
-		if (mr.getShooting() > 0) {
-			if (mr.getShooting() == 1) {
-				bqb.must(QueryBuilders.matchPhraseQuery("shooting1", 1));
-			} else if (mr.getShooting() == 2) {
-				bqb.must(QueryBuilders.matchPhraseQuery("shooting2", 1));
-			} else if (mr.getShooting() == 3) {
-				bqb.must(QueryBuilders.matchPhraseQuery("shooting3", 1));
-			} else if (mr.getShooting() == 4) {
-				bqb.must(QueryBuilders.matchPhraseQuery("shooting4", 1));
-			} else if (mr.getShooting() == 5) {
-				bqb.must(QueryBuilders.rangeQuery("shooting5").gte(1));// 这是一个时间值
-			} else if (mr.getShooting() == 6) {
-				bqb.must(QueryBuilders.matchPhraseQuery("shooting6", 1));
-			} else if (mr.getShooting() == 8) {
-				bqb.must(QueryBuilders.matchPhraseQuery("shooting8", 1));
-			} else if (mr.getShooting() == 9) {
-				bqb.must(QueryBuilders.matchPhraseQuery("shooting9", 1));
-			}
+		if (mr.getShooting1() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting1", 1));
+		}
+		if (mr.getShooting2() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting2", 1));
+		}
+		if (mr.getShooting3() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting3", 1));
+		}
+		if (mr.getShooting4() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting4", 1));
+		}
+		if (mr.getShooting5() == 1) {
+			bqb.must(QueryBuilders.rangeQuery("shooting5").gte(1));// 这是一个时间值
+		}
+		if (mr.getShooting6() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting6", 1));
+		}
+		if (mr.getShooting7() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting8", 1));
+		}
+		if (mr.getShooting8() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting9", 1));
+		}
+		if (mr.getShooting9() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting9", 1));
 		}
 		// 技术面
 		if ("1".equals(mr.getPre1Year())) {
@@ -598,7 +608,7 @@ public class WebModelService {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting53", 1));
 		}
 		if (mr.getWhiteHors() == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));// 交易面疑似白马
+			bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));// 白马走势(大票)
 		}
 
 		if (StringUtils.isNotBlank(mr.getTotalAmt())) {

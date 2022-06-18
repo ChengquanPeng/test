@@ -266,97 +266,98 @@ public class CodeModelService {
 		boolean isOk1 = false;
 		boolean isOk2 = false;
 		boolean isOk6 = false;
+		boolean isOk7 = false;
 		boolean isOk8 = false;
-		boolean isOk9 = false;
 		newOne.setShooting1(0);
 		newOne.setShooting2(0);
 		newOne.setShooting4(0);
 		newOne.setShooting6(0);
+		newOne.setShooting7(0);
 		newOne.setShooting8(0);
 		newOne.setShooting9(0);
 
-		// 系统指标：自动监听
-		if ((newOne.getBousOK() > 0 || newOne.getFinOK() >= 3)) {// 1.基本面没有什么大问题
-			// 小票的增发&大宗
+		/** 底部小票:带基本面 **/
+		if ((newOne.getFinOK() > 0 || newOne.getBousOK() > 0) && newOne.getZfjjup() >= 2
+				&& newOne.getZfjjupStable() >= 1) {
+			/** 小票:增发&大宗&减持 **/
 			if (isSmallStock) {
-				if (newOne.getZfjjup() >= 2 || newOne.getZfjjupStable() >= 1) {// 2.底部没涨
+				if (newOne.getFinOK() >= 2 && newOne.getBousOK() > 0) {// 基本面没有问题
 					if (newOne.getHolderNumT3() > 45.0) {// 三大股东持股比例
-						// 行情指标1：底部小票大宗：超活筹5%,董监高机构代减持?
-						if (newOne.getDzjyp365d() >= 4.5) {// 大宗超过4.5%
-							isOk1 = true;
-							log.info("{} 小票,底部大宗超5千万", code);
-						}
+						isOk7 = true;// 做小做底模型
 						// 行情指标8：底部小票增发：横盘3-4年以上==>1.基本面没问题，2.没涨，3:底部自己人增发，4排除大股东 (已完成的底部自己人增发)
-						if (!isOk1 && newOne.getZfStatus() == ZfStatus.DONE.getCode() && newOne.getZfself() == 1
-								&& (newOne.getZfjjup() >= 3 || newOne.getZfjjupStable() >= 3)
+						if (newOne.getZfStatus() == ZfStatus.DONE.getCode() && newOne.getZfself() == 1
 								&& newOne.getZfObjType() != 3) {
 							isOk8 = true;
-							log.info("{} 小票,底部横盘定增", code);
+							log.info("{} 小票,底部定增", code);
 						}
-
-						// 行情指标8：底部减持
-						if (newOne.getReducZb() >= 1) {
-							isOk6 = true;
-						}
-					}
-
-					if (!isOk1 && !isOk8 && newOne.getZfStatus() == ZfStatus.DONE.getCode() && newOne.getZfself() == 1
-							&& newOne.getZfjjup() >= 2 && newOne.getZfjjupStable() >= 1 && newOne.getZfObjType() != 3) {
-						isOk9 = true;
-						log.info("{} 小票,底部横盘定增2年", code);
 					}
 				}
+
+				// 行情指标1：底部小票大宗：超活筹5%,董监高机构代减持?
+				if (newOne.getDzjyp365d() >= 4.5) {// 大宗超过4.5%
+					isOk1 = true;
+					log.info("{} 小票,底部大宗超4.5%", code);
+				}
+
+				// 行情指标8：底部小票减持-业绩不能亏
+				if (newOne.getReducZb() >= 2 && newOne.getFinOK() >= 1) {
+					log.info("{} 小票,减持%", code);
+					isOk6 = true;
+				}
 			}
-			// -流通大市值
+
+			/** 底部大票 **/
 			if (mkv >= smallStocklimit) {
-				if (newOne.getZfjjup() >= 2 || newOne.getZfjjupStable() >= 1) {// 2.底部没涨
-					// 行情指标2：底部大票增发：超过50亿(越大越好),股东集中,证监会核准-之前有明显底部拿筹痕迹-涨停？
-					if (ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
-						if (newOne.getZfYjAmt() >= ZF_50YI) {
+				// 行情指标2：底部大票增发：超过50亿(越大越好),股东集中,证监会核准-之前有明显底部拿筹痕迹-涨停？
+				if (ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
+					if (newOne.getZfYjAmt() >= ZF_50YI) {
+						isOk2 = true;
+						log.info("{} 大票，底部定增超过50亿", code);
+					} else if (newOne.getZfYjAmt() >= ZF_20YI) {// 定增超过20亿,活动筹码小于40亿
+						// 增发金额接近活动的筹码的1半
+						long ackm = CurrencyUitl.covertToLong(newOne.getActMkv() + CurrencyUitl.YI);
+						if ((ackm / newOne.getZfYjAmt()) <= 2.0) {
 							isOk2 = true;
-							log.info("{} 大票，底部增发超过50亿", code);
-						} else if (newOne.getZfYjAmt() >= ZF_20YI) {// 定增超过20亿,活动筹码小于40亿
-							// 增发金额接近活动的筹码的1半
-							long ackm = CurrencyUitl.covertToLong(newOne.getActMkv() + CurrencyUitl.YI);
-							if ((ackm / newOne.getZfYjAmt()) <= 2.0) {
-								isOk2 = true;
-							}
 						}
 					}
 				}
 			}
 
 			// 行情指标4：底部股东人数：大幅减少(3年减少40%)
-			if (newOne.getZfjjup() >= 2 && newOne.getHolderNum() < -40.0) {// 股价3年没大涨，人数少了接近一半人
+			if (newOne.getHolderNum() < -25.0) {// 股价3年没大涨，人数少了接近一半人
 				log.info("{} 股东人数少了一半人", code);
 				newOne.setShooting4(1);
 			}
 		}
 
-		// 系统指标：自动化监听
-		if (isOk1 || isOk2 || isOk6 || isOk8 || isOk9) {
+		/** 底部小票 **/
+		if (isSmallStock && newOne.getZfjjup() >= 2 && newOne.getZfjjupStable() >= 1) {
+			newOne.setShooting9(1);
+		}
+
+		// 系统指标->自动化监听:底部优质小票，底部大票定增，底部小票大宗，底部小票定增，底部小票减持
+		if (isOk1 || isOk2 || isOk6 || isOk8) {
 			int motp = 0;
+			if (isOk7) {
+				motp = MonitorType.SmallLow.getCode();
+				newOne.setShooting7(1);
+			}
 			if (isOk8) {
 				motp = MonitorType.ZengFaAuto.getCode();
 				newOne.setShooting8(1);
-			}
-			if (isOk1) {
-				motp = MonitorType.DZJY.getCode();
-				newOne.setShooting1(1);
 			}
 			if (isOk6) {
 				motp = MonitorType.Reduce.getCode();
 				newOne.setShooting6(1);
 			}
+			if (isOk1) {
+				motp = MonitorType.DZJY.getCode();
+				newOne.setShooting1(1);
+			}
 			if (isOk2) {
 				motp = MonitorType.PreZengFa.getCode();
 				newOne.setShooting2(1);
 			}
-			if (isOk9) {
-				motp = MonitorType.ZengFaAuto2.getCode();
-				newOne.setShooting9(1);
-			}
-
 			// 自动监听
 			if (newOne.getPls() == 0) {// 未确定的自动监听，// 0不确定，1确定，2排除
 				pool.setMonitor(motp);

@@ -27,7 +27,7 @@ public class ModelReq {
 	String mkv2;
 	int pls;
 	int tagIndex;
-	int shooting;
+	
 	String zfPriceLow;
 	int dzjyRct;
 
@@ -44,6 +44,15 @@ public class ModelReq {
 	String kline;
 	String pre1Year;
 
+	int shooting1;
+	int shooting2;
+	int shooting3;
+	int shooting4;
+	int shooting5;
+	int shooting6;
+	int shooting7;
+	int shooting8;
+	int shooting9;
 	int shooting51 = 0;
 	int shooting52 = 0;
 	int shooting53 = 0;

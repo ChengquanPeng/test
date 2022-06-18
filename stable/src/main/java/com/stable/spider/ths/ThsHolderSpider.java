@@ -208,7 +208,7 @@ public class ThsHolderSpider {
 		ThreadsUtil.sleepRandomSecBetween5And15Ths();
 		do {
 			try {
-				//log.info(url);
+				// log.info(url);
 				header.put("Referer", host + code + "/");
 				HtmlPage page = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url, header);
 				HtmlElement body = page.getBody();
@@ -345,6 +345,9 @@ public class ThsHolderSpider {
 			it4.next();// 持股变化(股)
 			String zb = it4.next().asText();// 占总股本比例
 			double d = Double.valueOf(zb.replace("%", ""));
+			if (i == 1) {// 第一大股东
+				hp.setTop1(d);
+			}
 			if (i <= 3) {// 前三大股东
 				hp.addTop3(d);
 			}

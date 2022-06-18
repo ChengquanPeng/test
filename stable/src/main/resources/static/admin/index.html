@@ -75,6 +75,20 @@
 				</div>
 			</div>
 			<div class="mg">
+				<div class="input-group">
+					系统指标: &nbsp;&nbsp; 底部大票定增:<input type="checkbox" id="shooting2" />
+					&nbsp;&nbsp; 底部小票大宗:<input type="checkbox" id="shooting1" />
+					&nbsp;&nbsp; 底部小票减持:<input type="checkbox" id="shooting6" />
+					&nbsp;&nbsp; 底部小票定增:<input type="checkbox" id="shooting8" />
+					&nbsp;&nbsp; 底部优质小票:<input type="checkbox" id="shooting7" />
+					&nbsp;&nbsp; 底部融资飙升:<input type="checkbox" id="shooting3" />
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 其他指标:&nbsp;&nbsp;
+					股价极速拉升(妖股?龙抬头?):<input type="checkbox" id="shooting5" />&nbsp;&nbsp;
+					底部小票:<input type="checkbox" id="shooting9" /> 底部股东人数减少:<input
+						type="checkbox" id="shooting4" />
+				</div>
+			</div>
+			<div class="mg">
 				技术面:&nbsp;&nbsp;&nbsp;&nbsp;底部旗形:<input type="checkbox"
 					id="dibuqixing" />&nbsp;&nbsp;&nbsp;旗形:<input type="checkbox"
 					id="qixing" />&nbsp;&nbsp;&nbsp; 中阳十字星:<input type="checkbox"
@@ -83,43 +97,22 @@
 					type="checkbox" id="shooting52" />&nbsp;&nbsp;&nbsp; K线攻击形态:<input
 					type="checkbox" id="kline" />&nbsp;&nbsp;&nbsp; 接近1年新高:<input
 					type="checkbox" id="pre1Year" />&nbsp;&nbsp;&nbsp;5日交易活跃:<input
-					type="checkbox" id="shooting53" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;大市值：&nbsp;白马走势:<input
+					type="checkbox" id="shooting53" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;白马走势(大票):<input
 					type="checkbox" id="whiteHors" />
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			</div>
+
 			<div class="mg">
 				<div class="input-group">
-					所有监听:<input type="checkbox" id="monitor" />&nbsp;&nbsp; 系统指标:<select
-						id="shooting">
-						<option value="0" selected="selected">无限制</option>
-						<option value="6">小票-底部减持</option>
-						<option value="2">大票-底部定增已核准-募集资金超50亿</option>
-						<option value="1">小票-底部大宗-大宗交易量占流通筹码超5%</option>
-						<option value="8">小票-底部定增完成+至少3年未涨</option>
-						<option value="9">小票-底部定增完成+2年未涨</option>
-						<option value="4">底部股东人数大幅减少</option>
-						<option value="3">底部融资余额飙升-确认是主力在融资买入?(短线1)</option>
-						<option value="5">股价极速拉升:妖股?龙抬头?(短线2)</option>
-						<option value="7">短线3:散户3/5天情绪,见好就收(未做)</option>
-						<option value="10">底部小票1年左右的区间放量(未做)</option>
-					</select>&nbsp;&nbsp;人工状态:<select id="pls">
+					所有监听:<input type="checkbox" id="monitor" />&nbsp;&nbsp;
+					&nbsp;&nbsp;人工状态:<select id="pls">
 						<option value="-1" selected="selected">无限制</option>
 						<option value="0">未确定</option>
 						<option value="1">已确定</option>
 						<option value="2">已排除</option>
 						<option value="3">确定+未</option>
-					</select>
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				</div>
-			</div>
-			<div class="mg">
-				<div class="input-group">
-					标签:<select id="tagIndex">
+					</select> 标签:<select id="tagIndex">
 						<option value="-1" selected="selected">无限制</option>
 						<option value="5">小而美</option>
 						<option value="2">业绩较牛</option>
@@ -228,7 +221,7 @@
 											.val();
 									param.zfself = 0;
 									param.tagIndex = $('#tagIndex').val();
-									param.shooting = $('#shooting').val();
+
 									param.zfPriceLow = $('#zfPriceLow').val();
 									param.totalAmt = $('#totalAmt').val();
 									param.totalAmt60d = $('#totalAmt60d').val();
@@ -246,9 +239,6 @@
 									param.pre1Year = 0;
 									param.monitor = 0;
 									param.zfObjType = $('#zfObjType').val();
-									param.shooting51 = 0;
-									param.shooting52 = 0;
-									param.shooting53 = 0;
 									param.whiteHors = 0;
 									param.gdrs = $('#gdrs').val();
 									param.gdrsp = $('#gdrsp').val();
@@ -269,15 +259,6 @@
 									if (document.getElementById("whiteHors").checked) {
 										param.whiteHors = 1;
 									}
-									if (document.getElementById("shooting51").checked) {
-										param.shooting51 = 1;
-									}
-									if (document.getElementById("shooting52").checked) {
-										param.shooting52 = 1;
-									}
-									if (document.getElementById("shooting53").checked) {
-										param.shooting53 = 1;
-									}
 
 									if (document.getElementById("pre1Year").checked) {
 										param.pre1Year = 1;
@@ -294,9 +275,57 @@
 									if (document.getElementById("monitor").checked) {
 										param.monitor = 1;
 									}
-
 									if (!document.getElementById("asc").checked) {
 										param.asc = 2;
+									}
+									param.shooting1 = 0;
+									if (document.getElementById("shooting1").checked) {
+										param.shooting1 = 1;
+									}
+									param.shooting2 = 0;
+									if (document.getElementById("shooting2").checked) {
+										param.shooting2 = 1;
+									}
+									param.shooting3 = 0;
+									if (document.getElementById("shooting3").checked) {
+										param.shooting3 = 1;
+									}
+									param.shooting4 = 0;
+									if (document.getElementById("shooting4").checked) {
+										param.shooting4 = 1;
+									}
+									param.shooting5 = 0;
+									if (document.getElementById("shooting5").checked) {
+										param.shooting5 = 1;
+									}
+									param.shooting6 = 0;
+									if (document.getElementById("shooting6").checked) {
+										param.shooting6 = 1;
+									}
+									param.shooting7 = 0;
+									if (document.getElementById("shooting7").checked) {
+										param.shooting7 = 1;
+									}
+									param.shooting8 = 0;
+									if (document.getElementById("shooting8").checked) {
+										param.shooting8 = 1;
+									}
+									param.shooting9 = 0;
+									if (document.getElementById("shooting9").checked) {
+										param.shooting9 = 1;
+									}
+
+									param.shooting51 = 0;
+									param.shooting52 = 0;
+									param.shooting53 = 0;
+									if (document.getElementById("shooting51").checked) {
+										param.shooting51 = 1;
+									}
+									if (document.getElementById("shooting52").checked) {
+										param.shooting52 = 1;
+									}
+									if (document.getElementById("shooting53").checked) {
+										param.shooting53 = 1;
 									}
 									return param;
 								},

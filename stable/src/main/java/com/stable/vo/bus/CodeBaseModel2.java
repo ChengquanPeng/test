@@ -26,11 +26,13 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int shooting5 = 0;// 行情指标5：短线拉升小平台。
 	@Field(type = FieldType.Integer)
-	private int shooting6 = 0;//
+	private int shooting6 = 0;// 底部小票-减持
+	@Field(type = FieldType.Integer)
+	private int shooting7 = 0;// 底部优质小票
 	@Field(type = FieldType.Integer)
 	private int shooting8 = 0;// 行情指标8：底部横盘3-4年以上的增发-小票
 	@Field(type = FieldType.Integer)
-	private int shooting9 = 0;// 行情指标9：底部横盘2年
+	private int shooting9 = 0;// 行情指标9：底部未涨小票-做短线用
 
 	// 技术面
 	@Field(type = FieldType.Integer)
