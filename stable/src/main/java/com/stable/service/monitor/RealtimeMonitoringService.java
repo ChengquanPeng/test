@@ -16,15 +16,11 @@ import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.UserService;
 import com.stable.service.model.WebModelService;
-import com.stable.service.model.prd.Prd1RealtimeMonitor;
-import com.stable.service.model.prd.Prd1Service;
-import com.stable.service.model.prd.TickService;
 import com.stable.spider.tick.TencentTickReal;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.MonitorPoolTemp;
-import com.stable.vo.bus.OnlineTesting;
 import com.stable.vo.bus.UserInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -44,10 +40,10 @@ public class RealtimeMonitoringService {
 	private WebModelService modelWebService;
 //	@Autowired
 //	private ShotPointCheck shotPointCheck;
-	@Autowired
-	private Prd1Service prd1Service;
-	@Autowired
-	private TickService tickService;
+//	@Autowired
+//	private Prd1Service prd1Service;
+//	@Autowired
+//	private TickService tickService;
 	@Autowired
 	private RedisUtil redisUtil;
 	@Autowired
@@ -123,33 +119,33 @@ public class RealtimeMonitoringService {
 
 			// ====产品1：三五天 => 买点 === 卖点 ====
 			TencentTickReal.tradeDate = idate;
-			Prd1RealtimeMonitor prd1m = new Prd1RealtimeMonitor(prd1Service.getMonitorList(), tickService, prd1Service);
-			new Thread(prd1m).start();
+			// Prd1RealtimeMonitor prd1m = new
+			// Prd1RealtimeMonitor(prd1Service.getMonitorList(), tickService, prd1Service);
+			// new Thread(prd1m).start();
 
 			long from3 = new Date().getTime();
 			int millis = (int) ((endtime - from3));
 			if (millis > 0) {
 				Thread.sleep(millis);
 			}
-			// List<BuyTrace> buyedList = new LinkedList<BuyTrace>();
-			// List<BuyTrace> selledList = new LinkedList<BuyTrace>();
-			// 到点停止所有线程
+
+			/** 到点停止所有线程 */
 			for (RealtimeDetailsAnalyzer t : list) {
 				t.stop();
 			}
 
 			// 停止线程
-			prd1m.stop();
+			// prd1m.stop();
 			// OnlineTesting -> 转换持仓量:可卖=vol，今日买归0
-			Map<String, OnlineTesting> testinglist = prd1m.getTestinglist();
-			for (String code : testinglist.keySet()) {
-				OnlineTesting p1 = testinglist.get(code);
-				if (p1.getVol() > 0) {// 未卖完
-					p1.setCanSold(p1.getVol());
-					p1.setBuyToday(0);
-					prd1Service.saveTesting(p1);
-				}
-			}
+			// Map<String, OnlineTesting> testinglist = prd1m.getTestinglist();
+//			for (String code : testinglist.keySet()) {
+//				OnlineTesting p1 = testinglist.get(code);
+//				if (p1.getVol() > 0) {// 未卖完
+//					p1.setCanSold(p1.getVol());
+//					p1.setBuyToday(0);
+//					prd1Service.saveTesting(p1);
+//				}
+//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

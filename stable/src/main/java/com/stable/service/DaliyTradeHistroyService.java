@@ -36,7 +36,6 @@ import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
 import com.stable.job.MyCallable;
-import com.stable.service.model.prd.TickService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
@@ -89,8 +88,8 @@ public class DaliyTradeHistroyService {
 	private XqDailyBaseSpider xqDailyBaseSpider;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
-	@Autowired
-	private TickService tickService;
+//	@Autowired
+//	private TickService tickService;
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -212,7 +211,7 @@ public class DaliyTradeHistroyService {
 			if (isJob) {
 				int dddd = Integer.valueOf(today);
 				if (daliybasicList.size() > 0) {
-					//tickService.genTickEveryDay(daliybasicList, dddd);
+					// tickService.genTickEveryDay(daliybasicList, dddd);
 					xqDailyBaseSpider.fetchAll(daliybasicList);
 				}
 				// 离线价格监听

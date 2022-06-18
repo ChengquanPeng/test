@@ -1,12 +1,10 @@
 package com.stable.service.model.prd;
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.stable.constant.Constant;
 import com.stable.spider.realtime.RealTime;
@@ -26,6 +24,7 @@ import com.stable.vo.bus.OnlineTesting;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
+@SuppressWarnings("unused")
 public class Prd1MoniWorker implements Runnable {
 
 	private String code;
