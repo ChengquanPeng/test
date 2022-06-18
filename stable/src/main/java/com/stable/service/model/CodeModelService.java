@@ -276,13 +276,13 @@ public class CodeModelService {
 		newOne.setShooting8(0);
 		newOne.setShooting9(0);
 
-		/** 底部小票:带基本面 **/
+		/** 底部横盘小票:看基本面 **/
 		if ((newOne.getFinOK() > 0 || newOne.getBousOK() > 0) && newOne.getZfjjup() >= 2
 				&& newOne.getZfjjupStable() >= 1) {
 			/** 小票:增发&大宗&减持 **/
 			if (isSmallStock) {
-				if (newOne.getFinOK() >= 2 && newOne.getBousOK() > 0) {// 基本面没有问题
-					if (newOne.getHolderNumT3() > 45.0) {// 三大股东持股比例
+				if (newOne.getHolderNumT3() > 30.0) {// 三大股东持股比例
+					if (newOne.getFinOK() >= 2 && newOne.getBousOK() > 0 && newOne.getHolderNumT3() > 45.0) {// 基本面没有问题
 						isOk7 = true;// 做小做底模型
 						// 行情指标8：底部小票增发：横盘3-4年以上==>1.基本面没问题，2.没涨，3:底部自己人增发，4排除大股东 (已完成的底部自己人增发)
 						if (newOne.getZfStatus() == ZfStatus.DONE.getCode() && newOne.getZfself() == 1
@@ -291,18 +291,18 @@ public class CodeModelService {
 							log.info("{} 小票,底部定增", code);
 						}
 					}
-				}
 
-				// 行情指标1：底部小票大宗：超活筹5%,董监高机构代减持?
-				if (newOne.getDzjyp365d() >= 4.5) {// 大宗超过4.5%
-					isOk1 = true;
-					log.info("{} 小票,底部大宗超4.5%", code);
-				}
+					// 行情指标1：底部小票大宗：超活筹5%,董监高机构代减持?
+					if (newOne.getDzjyp365d() >= 4.5) {// 大宗超过4.5%
+						isOk1 = true;
+						log.info("{} 小票,底部大宗超4.5%", code);
+					}
 
-				// 行情指标8：底部小票减持-业绩不能亏
-				if (newOne.getReducZb() >= 2 && newOne.getFinOK() >= 1) {
-					log.info("{} 小票,减持%", code);
-					isOk6 = true;
+					// 行情指标8：底部小票减持-业绩不能亏
+					if (newOne.getReducZb() >= 2 && newOne.getFinOK() >= 1) {
+						log.info("{} 小票,减持%", code);
+						isOk6 = true;
+					}
 				}
 			}
 
@@ -330,7 +330,7 @@ public class CodeModelService {
 			}
 		}
 
-		/** 底部小票 **/
+		/** 底部横盘小票(不看基本面) **/
 		if (isSmallStock && newOne.getZfjjup() >= 2 && newOne.getZfjjupStable() >= 1) {
 			newOne.setShooting9(1);
 		}
