@@ -189,7 +189,7 @@ public class CodeModelService {
 		}
 		double mkv = lastTrade.getCircMarketVal();// 流通市值
 		if (mkv <= 0) {
-			ErrorLogFileUitl.writeError(null, code + "无最新流通市值mkv", tradeDate + "", "");
+			ErrorLogFileUitl.writeError(null, code + "," + s.getName() + ",无最新流通市值mkv", tradeDate + "", "");
 			DaliyBasicInfo2 ltt = daliyBasicHistroyService.queryLastest(code, 0, 1);
 			if (ltt != null) {
 				mkv = ltt.getCircMarketVal();
