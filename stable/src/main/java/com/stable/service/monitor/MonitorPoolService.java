@@ -54,6 +54,7 @@ import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.MonitorPoolTemp;
+import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.bus.ZengFa;
@@ -648,9 +649,44 @@ public class MonitorPoolService {
 				List<String> bao = new LinkedList<String>();
 				for (MonitorPoolTemp cp : list) {
 					TradeHistInfoDaliyNofq d = map.get(cp.getCode());
-					if (d != null && d.getHigh() >= cp.getShotPointPrice()) {
-						bao.add(stockBasicService.getCodeName2(cp.getCode()) + " "
-								+ MonitorType.getCode(cp.getMonitor()) + " 价格:" + cp.getShotPointPrice());
+					if (d != null) {
+						String line = null;
+						if (d.getHigh() >= cp.getShotPointPrice()) {
+							line = stockBasicService.getCodeName2(cp.getCode()) + " "
+									+ MonitorType.getCode(cp.getMonitor()) + " 突破价格:" + cp.getShotPointPrice();
+						} else if (cp.getShotPointDate() > 0) {
+							List<TradeHistInfoDaliy> listt = daliyTradeHistroyService.queryListByCodeWithLastQfq(
+									cp.getCode(), cp.getShotPointDate(), d.getDate(), EsQueryPageUtil.queryPage30,
+									SortOrder.DESC);
+
+							double up = CurrencyUitl.cutProfit(d.getLow(), listt.get(1).getLow());
+							if (up <= 1.0) {// 最低点的波动
+								double maxvol = listt.get(list.size() - 1).getVolume();
+								if (listt.get(list.size() - 2).getVolume() > maxvol) {
+									maxvol = listt.get(list.size() - 2).getVolume();
+								}
+								if (listt.get(list.size() - 3).getVolume() > maxvol) {
+									maxvol = listt.get(list.size() - 3).getVolume();
+								}
+
+								if ((d.getVolume() * 2) <= (maxvol * 1.2)) {// 缩量
+									line = stockBasicService.getCodeName2(cp.getCode()) + " "
+											+ MonitorType.getCode(cp.getMonitor()) + " 缩量买点";
+								}
+							}
+						}
+						if (cp.getShotPointPriceLow() <= d.getLow() && d.getLow() <= cp.getShotPointPriceLow5()) {
+							if (line != null) {
+								line += ",接近旗形底部买点:" + cp.getShotPointPrice() + "-" + cp.getShotPointPriceLow5();
+							} else {
+								line = stockBasicService.getCodeName2(cp.getCode()) + " "
+										+ MonitorType.getCode(cp.getMonitor()) + " 接近旗形底部买点:" + cp.getShotPointPrice()
+										+ "-" + cp.getShotPointPriceLow5();
+							}
+						}
+						if (line != null) {
+							bao.add(line);
+						}
 					}
 				}
 				StringBuffer s1 = new StringBuffer();

@@ -152,11 +152,6 @@ public class CodeModelService {
 		}
 	}
 
-	// 小市值股票(流通市值小于70亿，5%以下的流通小于50亿)
-	public boolean isSmallStock(double mkv, double actMkv) {
-		return (mkv <= smallStocklimit || actMkv <= smallStocklimitAck);
-	}
-
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
 			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, boolean isweekend, StringBuffer sbc) {
 		String code = s.getCode();
@@ -251,11 +246,40 @@ public class CodeModelService {
 		newOne.setShooting8(0);
 		newOne.setShooting9(0);
 
-		/** 底部横盘小票:看基本面 **/
-		if ((newOne.getFinOK() > 0 || newOne.getBousOK() > 0) && newOne.getZfjjup() >= 2
-				&& newOne.getZfjjupStable() >= 1) {
-			/** 小票:增发&大宗&减持 **/
-			if (isSmallStock) {
+		/** 纯基本面 **/
+		if (newOne.getFinOK() > 0 || newOne.getBousOK() > 0) {
+			/** 行情指标4：底部股东人数：大幅减少(3年减少40%) **/
+			if (newOne.getHolderNum() < -25.0) {// 股价3年没大涨，人数少了接近一半人
+				log.info("{} 股东人数少了一半人", code);
+				newOne.setShooting4(1);
+			}
+
+			/** 底部大票 **/
+			if (isDibu(newOne) && newOne.getMkv() >= smallStocklimit) {
+				// 行情指标2：底部大票增发：超过50亿(越大越好),股东集中,证监会核准-之前有明显底部拿筹痕迹-涨停？
+				if (ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
+					if (newOne.getZfYjAmt() >= ZF_50YI) {
+						isOk2 = true;
+						log.info("{} 大票，底部定增超过50亿", code);
+					} else if (newOne.getZfYjAmt() >= ZF_20YI) {// 定增超过20亿,活动筹码小于40亿
+						// 增发金额接近活动的筹码的1半
+						long ackm = CurrencyUitl.covertToLong(newOne.getActMkv() + CurrencyUitl.YI);
+						if ((ackm / newOne.getZfYjAmt()) <= 2.0) {
+							isOk2 = true;
+						}
+					}
+				}
+			}
+		}
+
+		/** 底部横盘小票(不看基本面) **/
+		if (isDibuSmall(isSmallStock, newOne)) {
+			newOne.setShooting9(1);
+
+			/** 底部横盘小票:看基本面 **/
+			if (newOne.getFinOK() > 0 || newOne.getBousOK() > 0) {
+
+				/** 小票:增发&大宗&减持 **/
 				if (newOne.getHolderNumT3() > 30.0) {// 三大股东持股比例
 					if (newOne.getFinOK() >= 2 && newOne.getBousOK() > 0 && newOne.getHolderNumT3() > 45.0) {// 基本面没有问题
 						isOk7 = true;// 做小做底模型
@@ -280,38 +304,10 @@ public class CodeModelService {
 					}
 				}
 			}
-
-			/** 底部大票 **/
-			if (newOne.getMkv() >= smallStocklimit) {
-				// 行情指标2：底部大票增发：超过50亿(越大越好),股东集中,证监会核准-之前有明显底部拿筹痕迹-涨停？
-				if (ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
-					if (newOne.getZfYjAmt() >= ZF_50YI) {
-						isOk2 = true;
-						log.info("{} 大票，底部定增超过50亿", code);
-					} else if (newOne.getZfYjAmt() >= ZF_20YI) {// 定增超过20亿,活动筹码小于40亿
-						// 增发金额接近活动的筹码的1半
-						long ackm = CurrencyUitl.covertToLong(newOne.getActMkv() + CurrencyUitl.YI);
-						if ((ackm / newOne.getZfYjAmt()) <= 2.0) {
-							isOk2 = true;
-						}
-					}
-				}
-			}
-
-			// 行情指标4：底部股东人数：大幅减少(3年减少40%)
-			if (newOne.getHolderNum() < -25.0) {// 股价3年没大涨，人数少了接近一半人
-				log.info("{} 股东人数少了一半人", code);
-				newOne.setShooting4(1);
-			}
-		}
-
-		/** 底部横盘小票(不看基本面) **/
-		if (isSmallStock && newOne.getZfjjup() >= 2 && newOne.getZfjjupStable() >= 1) {
-			newOne.setShooting9(1);
 		}
 
 		// 系统指标->自动化监听:底部优质小票，底部大票定增，底部小票大宗，底部小票定增，底部小票减持
-		if (isOk1 || isOk2 || isOk6 || isOk8) {
+		if (isOk1 || isOk2 || isOk6 || isOk7 || isOk8) {
 			int motp = 0;
 			if (isOk7) {
 				motp = MonitorType.SmallLow.getCode();
@@ -364,6 +360,20 @@ public class CodeModelService {
 //			}
 //		}).start();
 //	}
+
+	// 小市值股票(流通市值小于70亿，5%以下的流通小于50亿)
+	public boolean isSmallStock(double mkv, double actMkv) {
+		return (mkv <= smallStocklimit || actMkv <= smallStocklimitAck);
+	}
+
+	// 底部
+	public boolean isDibu(CodeBaseModel2 newOne) {
+		return newOne.getZfjjup() >= 2 && newOne.getZfjjupStable() >= 1;
+	}
+
+	public boolean isDibuSmall(boolean isSmallStock, CodeBaseModel2 newOne) {
+		return isSmallStock && isDibu(newOne);
+	}
 
 	// 周末计算-至少N年未大涨?
 	private List<FinanceBaseInfo> finBonus(boolean isweekend, boolean online4Year, CodeBaseModel2 newOne) {

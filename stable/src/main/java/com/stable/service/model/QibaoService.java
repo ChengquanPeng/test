@@ -20,6 +20,8 @@ import com.stable.vo.bus.TradeHistInfoDaliy;
 public class QibaoService {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
+	@Autowired
+	private CodeModelService codeModelService;
 
 //	@javax.annotation.PostConstruct
 	public void test() {
@@ -54,25 +56,33 @@ public class QibaoService {
 		TradeHistInfoDaliy res = null;
 		for (TradeHistInfoDaliy nf : list) {
 			if (nf.getTodayChangeRate() >= 8.0) {
-				if (isQixing(first, nf, list, pool)) {
+				if (isQixing(first, nf, list, pool)) {// 是否旗形
 					res = nf;
 					break;
 				}
 			}
 		}
+		boolean isdibu = false;
 		if (res != null) {
 			newOne.setQixing(res.getDate());
-			dibuqixing(newOne, pool, res);
+			isdibu = dibuqixing(newOne, pool, res);// 旗形过滤：1.在底部旗形，2.旗形前没怎么涨
+		} else {
+			newOne.setQixing(0);
+		}
+
+		if (isdibu) {
+			pool.setShotPointDate(res.getDate());
+			newOne.setDibuQixing(1);
 		} else {
 			if (newOne.getDibuQixing() == 1) {
 				String jsHist = newOne.getQixing() + "底部旗形" + ";" + newOne.getJsHist();
 				newOne.setJsHist(StringUtil.subString(jsHist, 100));
 			}
-
 			newOne.setDibuQixing(0);
-			newOne.setQixing(0);
+			pool.setShotPointDate(0);
 			pool.setShotPointPrice(0);
 			pool.setShotPointPriceLow(0);
+			pool.setShotPointPriceLow5(0);
 		}
 		// 起爆点：中阳线,第二天十字星或者小影线
 		// 1. 3-6个点
@@ -84,9 +94,6 @@ public class QibaoService {
 			if (3.0 <= nd2.getTodayChangeRate() && nd2.getTodayChangeRate() <= 7.0) {// 1. 3-6个点
 				if (isShizixing(newOne.getCode(), nd2.getDate())) {
 					getZyx = true;
-					if (pool.getShotPointPrice() == 0) {
-						pool.setShotPointPrice(first.getHigh());
-					}
 				}
 			}
 		}
@@ -102,8 +109,8 @@ public class QibaoService {
 		}
 	}
 
-	private void dibuqixing(CodeBaseModel2 newOne, MonitorPoolTemp pool, TradeHistInfoDaliy res) {
-		if (newOne.getZfjjup() >= 2 && newOne.getZfjjupStable() >= 1) {
+	private boolean dibuqixing(CodeBaseModel2 newOne, MonitorPoolTemp pool, TradeHistInfoDaliy res) {
+		if (codeModelService.isDibu(newOne)) {
 			List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0,
 					res.getDate(), EsQueryPageUtil.queryPage30, SortOrder.DESC);
 			double low = Integer.MAX_VALUE;
@@ -114,16 +121,12 @@ public class QibaoService {
 			}
 			if (low < res.getYesterdayPrice()) {
 				if (CurrencyUitl.cutProfit(low, res.getYesterdayPrice()) > 20) {// 本身已经大涨了，之前就不能涨太多
-					pool.setShotPointPrice(0);
-					pool.setShotPointPriceLow(0);
-					return;// 涨幅太大
+					return false;// 涨幅太大
 				}
 			}
-			newOne.setDibuQixing(1);
-		} else {
-			pool.setShotPointPrice(0);
-			pool.setShotPointPriceLow(0);
+			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -185,7 +188,8 @@ public class QibaoService {
 			double high = (chk.getHigh() > d2t.getHigh()) ? chk.getHigh() : d2t.getHigh();
 			if (isOk(high, tmp)) {
 				pool.setShotPointPrice(high);
-				pool.setShotPointPriceLow(CurrencyUitl.roundHalfUp(chk.getYesterdayPrice() * 1.05));// 旗形底部预警
+				pool.setShotPointPriceLow(CurrencyUitl.roundHalfUp(chk.getYesterdayPrice() * 1.01));// 旗形底部预警1%
+				pool.setShotPointPriceLow5(CurrencyUitl.roundHalfUp(chk.getYesterdayPrice() * 1.05));// 旗形底部预警5%
 				return true;
 			}
 		}

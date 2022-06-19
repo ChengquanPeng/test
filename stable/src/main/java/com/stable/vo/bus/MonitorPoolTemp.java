@@ -63,10 +63,15 @@ public class MonitorPoolTemp extends EsBase {
 //	private double yearHigh1 = 0;// 1年历史新高
 //	@Field(type = FieldType.Integer)
 //	private int shotPointCheck = 0;// 起爆点
+
+	@Field(type = FieldType.Integer)
+	private int shotPointDate = 0;// 底部旗形-时间
 	@Field(type = FieldType.Double)
-	private double shotPointPrice = 0;// 起爆点
+	private double shotPointPrice = 0;// 底部旗形-股价预警
 	@Field(type = FieldType.Double)
-	private double shotPointPriceLow = 0;// 底部起爆点
+	private double shotPointPriceLow5 = 0;// 底部旗形-股价预警-5%
+	@Field(type = FieldType.Double)
+	private double shotPointPriceLow = 0;// 底部旗形-股价预警-1%
 	// 增发
 
 	public String getMsg() {
