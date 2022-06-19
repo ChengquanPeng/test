@@ -52,6 +52,9 @@ public class CodeBaseModel2 extends EsBase {
 	private int dibuQixing = 0;// 旗形
 	@Field(type = FieldType.Long)
 	private int zyxing = 0;// 中阳带星
+	
+	@Field(type = FieldType.Text)
+	private String jsHist;// 技术面历史
 
 	@Field(type = FieldType.Integer)
 	private int moni = 0;// 是否监听

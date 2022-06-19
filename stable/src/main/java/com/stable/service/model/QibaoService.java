@@ -11,6 +11,7 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.utils.CurrencyUitl;
+import com.stable.utils.StringUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.TradeHistInfoDaliy;
@@ -63,6 +64,11 @@ public class QibaoService {
 			newOne.setQixing(res.getDate());
 			dibuqixing(newOne, pool, res);
 		} else {
+			if (newOne.getDibuQixing() == 1) {
+				String jsHist = newOne.getQixing() + "底部旗形" + ";" + newOne.getJsHist();
+				newOne.setJsHist(StringUtil.subString(jsHist, 100));
+			}
+
 			newOne.setDibuQixing(0);
 			newOne.setQixing(0);
 			pool.setShotPointPrice(0);
@@ -71,18 +77,28 @@ public class QibaoService {
 		// 起爆点：中阳线,第二天十字星或者小影线
 		// 1. 3-6个点
 		// 2. 5天涨幅低于2%
-		newOne.setZyxing(0);
+		boolean getZyx = false;
 		if (first.getOpen() >= first.getClosed() || CurrencyUitl.cutProfit(first.getOpen(), first.getClosed()) <= 0.5) {
 			// 收影线或者10字星
 			TradeHistInfoDaliy nd2 = list.get(1);
 			if (3.0 <= nd2.getTodayChangeRate() && nd2.getTodayChangeRate() <= 7.0) {// 1. 3-6个点
 				if (isShizixing(newOne.getCode(), nd2.getDate())) {
-					newOne.setZyxing(1);
+					getZyx = true;
 					if (pool.getShotPointPrice() == 0) {
 						pool.setShotPointPrice(first.getHigh());
 					}
 				}
 			}
+		}
+
+		if (getZyx) {
+			newOne.setZyxing(1);
+		} else {
+			if (newOne.getZyxing() == 1) {
+				String jsHist = newOne.getQixing() + "十字星" + ";" + newOne.getJsHist();
+				newOne.setJsHist(StringUtil.subString(jsHist, 100));
+			}
+			newOne.setZyxing(0);
 		}
 	}
 

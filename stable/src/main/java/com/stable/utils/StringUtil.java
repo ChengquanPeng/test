@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class ToolsUtil {
+public class StringUtil {
 	/**
 	 * 字符串每隔指定长度插入指定字符串
 	 */
@@ -31,5 +31,12 @@ public class ToolsUtil {
 			rtnString = StringUtils.join(strList, insertString);
 		}
 		return rtnString;
+	}
+
+	public static String subString(String original, int length) {
+		if (original.length() <= length) {
+			return original;
+		}
+		return original.substring(0, length);
 	}
 }

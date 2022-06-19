@@ -160,7 +160,12 @@ public class WebModelService {
 		StringBuffer tag = new StringBuffer("");
 		tag.append("<font color='red'>");
 		if (dh.getQixing() > 0) {
-			tag.append("旗形").append(dh.getQixing()).append(Constant.HTML_LINE);
+			if (dh.getDibuQixing() > 0) {
+				tag.append("底部旗形").append(dh.getQixing()).append(Constant.HTML_LINE);
+			} else {
+				tag.append("旗形").append(dh.getQixing()).append(Constant.HTML_LINE);
+			}
+
 		}
 		if (dh.getZyxing() > 0) {
 			tag.append("中阳十字星").append(Constant.HTML_LINE);
@@ -198,6 +203,9 @@ public class WebModelService {
 		}
 		if (dh.getSortMode7() == 1) {
 			tag.append("突破箱体").append(Constant.HTML_LINE);
+		}
+		if (StringUtils.isNotBlank(dh.getJsHist())) {
+			tag.append("异动记录:").append(dh.getJsHist()).append(Constant.HTML_LINE);
 		}
 		resp.setTagInfo(tag.toString());
 
@@ -583,10 +591,10 @@ public class WebModelService {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting6", 1));
 		}
 		if (mr.getShooting7() == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("shooting8", 1));
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting7", 1));
 		}
 		if (mr.getShooting8() == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("shooting9", 1));
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting8", 1));
 		}
 		if (mr.getShooting9() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting9", 1));
