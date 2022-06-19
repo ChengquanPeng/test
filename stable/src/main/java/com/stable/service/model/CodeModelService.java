@@ -650,8 +650,8 @@ public class CodeModelService {
 				newOne.setBaseRed(1);
 				sb1.append(red++).append(".st风险或退市风险:扣非净利润为负且营收低于1亿元").append(Constant.HTML_LINE);
 			} else {
-				newOne.setBaseYellow(1);
-				sb2.append(yellow++).append(".营收低于1亿元").append(Constant.HTML_LINE);
+				newOne.setBaseRed(1);
+				sb1.append(red++).append(".st风险或退市风险:营收低于1亿元").append(Constant.HTML_LINE);
 			}
 		}
 		// 应缴税费
