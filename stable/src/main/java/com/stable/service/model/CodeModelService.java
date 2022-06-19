@@ -92,8 +92,6 @@ public class CodeModelService {
 	@Autowired
 	private DzjyService dzjyService;
 	@Autowired
-	private ChipsSortService chipsSortService;
-	@Autowired
 	private DataChangeService dataChangeService;
 	@Autowired
 	private BuyBackService buyBackService;
@@ -155,7 +153,7 @@ public class CodeModelService {
 	}
 
 	// 小市值股票(流通市值小于70亿，5%以下的流通小于50亿)
-	private boolean isSmallStock(double mkv, double actMkv) {
+	public boolean isSmallStock(double mkv, double actMkv) {
 		return (mkv <= smallStocklimit || actMkv <= smallStocklimitAck);
 	}
 
@@ -187,15 +185,6 @@ public class CodeModelService {
 		if (lastTrade == null) {
 			lastTrade = new DaliyBasicInfo2();
 		}
-		double mkv = lastTrade.getCircMarketVal();// 流通市值
-		if (mkv <= 0) {
-			ErrorLogFileUitl.writeError(null, code + "," + s.getName() + ",无最新流通市值mkv", tradeDate + "", "");
-			DaliyBasicInfo2 ltt = daliyBasicHistroyService.queryLastest(code, 0, 1);
-			if (ltt != null) {
-				mkv = ltt.getCircMarketVal();
-			}
-		}
-
 		// 财报分析排雷
 		baseAnalyse(s, newOne, lastTrade);
 		// 市盈率ttm
@@ -204,13 +193,6 @@ public class CodeModelService {
 		game(newOne, lastTrade);
 		// 国企|民企
 		newOne.setCompnayType(s.getCompnayType());
-		// 市值-死筹计算
-		newOne.setMkv(mkv);
-		if (mkv > 0 && s.getCircZb() > 0) {// 5%以下的流通股份
-			newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (100 - s.getCircZb()) / 100)));
-		} else {
-			newOne.setActMkv(mkv);
-		}
 		// 人工审核是否时间到期-重置
 		if (newOne.getPlst() < tradeDate) {
 			if (newOne.getPls() == 1) {
@@ -232,7 +214,7 @@ public class CodeModelService {
 		boolean online4Year = stockBasicService.onlinePreYearChk(code, pre4Year);
 		// N年未大涨
 		List<FinanceBaseInfo> yearRpts = finBonus(isweekend, online4Year, newOne);
-		boolean isSmallStock = isSmallStock(mkv, newOne.getActMkv());
+		boolean isSmallStock = isSmallStock(newOne.getMkv(), newOne.getActMkv());
 		// 小而美模型：未涨&&年报 && 大股东集中
 		if (newOne.getZfjjup() >= 2 && isSmallStock && newOne.getHolderNumP5() >= 50) {
 			if (yearRpts == null) {
@@ -251,13 +233,6 @@ public class CodeModelService {
 				log.info("{} 小而美模型", code);
 			}
 		}
-		// 收集筹码的短线-拉过一波，所以市值可以大一点
-		newOne.setSortChips(0);
-		if (online4Year && mkv > 0 && isSmallStock && chipsSortService.isCollectChips(code, tradeDate)) {
-			newOne.setSortChips(1);
-			log.info("{} 主力筹码收集", code);
-		}
-
 		// 以下是系统指标，没有4年直接退出
 		if (!online4Year) {// 4年以上，退出
 			return;
@@ -307,7 +282,7 @@ public class CodeModelService {
 			}
 
 			/** 底部大票 **/
-			if (mkv >= smallStocklimit) {
+			if (newOne.getMkv() >= smallStocklimit) {
 				// 行情指标2：底部大票增发：超过50亿(越大越好),股东集中,证监会核准-之前有明显底部拿筹痕迹-涨停？
 				if (ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
 					if (newOne.getZfYjAmt() >= ZF_50YI) {

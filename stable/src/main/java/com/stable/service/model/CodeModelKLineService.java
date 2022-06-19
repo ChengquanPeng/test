@@ -60,6 +60,10 @@ public class CodeModelKLineService {
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private QibaoService qibaoService;
+	@Autowired
+	private ChipsSortService chipsSortService;
+	@Autowired
+	private CodeModelService codeModelService;
 
 //	@javax.annotation.PostConstruct
 //	private void aded() {
@@ -138,6 +142,21 @@ public class CodeModelKLineService {
 		if (lastTrade == null) {
 			lastTrade = new DaliyBasicInfo2();
 		}
+		double mkv = lastTrade.getCircMarketVal();// 流通市值
+		if (mkv <= 0) {
+			ErrorLogFileUitl.writeError(null, code + "," + s.getName() + ",无最新流通市值mkv", tradeDate + "", "");
+			DaliyBasicInfo2 ltt = daliyBasicHistroyService.queryLastest(code, 0, 1);
+			if (ltt != null) {
+				mkv = ltt.getCircMarketVal();
+			}
+		}
+		// 市值-死筹计算
+		newOne.setMkv(mkv);
+		if (mkv > 0 && s.getCircZb() > 0) {// 5%以下的流通股份
+			newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (100 - s.getCircZb()) / 100)));
+		} else {
+			newOne.setActMkv(mkv);
+		}
 		// N年未大涨
 		noup(online4Year, newOne, s.getList_date());
 		// ==============技术面-量价==============
@@ -145,6 +164,13 @@ public class CodeModelKLineService {
 		year1(newOne, lastTrade);
 		// 短线：妖股形态，短线拉的急，说明货多。一倍了，说明资金已经投入。新高:说明出货失败或者有更多的想法，要继续拉。
 		sort1ModeService.sort1ModeChk(newOne, pool, tradeDate);
+		// 收集筹码的短线-拉过一波，所以市值可以大一点
+		newOne.setSortChips(0);
+		if (online4Year && codeModelService.isSmallStock(mkv, newOne.getActMkv())
+				&& chipsSortService.isCollectChips(code, tradeDate)) {
+			newOne.setSortChips(1);
+			log.info("{} 主力筹码收集", code);
+		}
 		// 均线排列，一阳穿N线
 		LineAvgPrice.avgLineUp(s, newOne, avgService, code, tradeDate);
 		// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
