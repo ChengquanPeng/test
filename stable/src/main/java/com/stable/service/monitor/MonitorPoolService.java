@@ -35,7 +35,7 @@ import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
-import com.stable.service.UserService;
+import com.stable.service.biz.UserService;
 import com.stable.service.model.WebModelService;
 import com.stable.spider.ths.ThsAnnSpider;
 import com.stable.spider.ths.ThsBonusSpider;

@@ -1,4 +1,4 @@
-package com.stable.service;
+package com.stable.service.biz;
 
 import java.util.LinkedList;
 import java.util.List;

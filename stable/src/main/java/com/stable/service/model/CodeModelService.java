@@ -337,7 +337,7 @@ public class CodeModelService {
 				pool.setMonitor(motp);
 				pool.setRealtime(1);
 				pool.setOffline(1);
-				pool.setUpTodayChange(3.5);
+				pool.setUpTodayChange(6);
 //				pool.setShotPointCheck(1);
 				pool.setRemark(Constant.AUTO_MONITOR + this.modelWebService.getSystemPoint(newOne, Constant.FEN_HAO));
 			}

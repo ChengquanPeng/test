@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.stable.service.UserService;
+import com.stable.service.biz.UserService;
 import com.stable.service.model.WebModelService;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.JsonResult;
