@@ -631,41 +631,48 @@ public class MonitorPoolService {
 				List<String> bao = new LinkedList<String>();
 				for (MonitorPoolTemp cp : list) {
 					TradeHistInfoDaliyNofq d = map.get(cp.getCode());
+
 					if (d != null) {
-						String line = null;
-						if (d.getHigh() >= cp.getShotPointPrice()) {
-							line = stockBasicService.getCodeName2(cp.getCode()) + " "
-									+ MonitorType.getCode(cp.getMonitor()) + " 突破价格:" + cp.getShotPointPrice();
-						} else if (cp.getShotPointDate() > 0) {
-							List<TradeHistInfoDaliy> listt = daliyTradeHistroyService.queryListByCodeWithLastQfq(
-									cp.getCode(), cp.getShotPointDate(), d.getDate(), EsQueryPageUtil.queryPage30,
-									SortOrder.DESC);
+						try {
+							String line = null;
+							if (d.getHigh() >= cp.getShotPointPrice()) {
+								line = stockBasicService.getCodeName2(cp.getCode()) + " " + " 突破价格:"
+										+ cp.getShotPointPrice();
+							} else if (cp.getShotPointDate() > 0) {
+								List<TradeHistInfoDaliy> listt = daliyTradeHistroyService.queryListByCodeWithLastQfq(
+										cp.getCode(), cp.getShotPointDate(), d.getDate(), EsQueryPageUtil.queryPage30,
+										SortOrder.DESC);
 
-							double up = CurrencyUitl.cutProfit(d.getLow(), listt.get(1).getLow());
-							if (up <= 1.0) {// 最低点的波动
-								double maxvol = listt.get(list.size() - 1).getVolume();
-								if (listt.get(list.size() - 2).getVolume() > maxvol) {
-									maxvol = listt.get(list.size() - 2).getVolume();
-								}
-								if (listt.get(list.size() - 3).getVolume() > maxvol) {
-									maxvol = listt.get(list.size() - 3).getVolume();
-								}
+								double up = CurrencyUitl.cutProfit(d.getLow(), listt.get(1).getLow());
+								if (up <= 1.0) {// 最低点的波动
+									double maxvol = listt.get(listt.size() - 1).getVolume();
+									if (listt.get(listt.size() - 2).getVolume() > maxvol) {
+										maxvol = listt.get(listt.size() - 2).getVolume();
+									}
+									if (listt.get(listt.size() - 3).getVolume() > maxvol) {
+										maxvol = listt.get(listt.size() - 3).getVolume();
+									}
 
-								if ((d.getVolume() * 2) <= (maxvol * 1.2)) {// 缩量
-									line = stockBasicService.getCodeName2(cp.getCode()) + " " + " 缩量买点";
+									if ((d.getVolume() * 2) <= (maxvol * 1.2)) {// 缩量
+										line = stockBasicService.getCodeName2(cp.getCode()) + " " + " 缩量买点";
+									}
 								}
 							}
-						}
-						if (cp.getShotPointPriceLow() <= d.getLow() && d.getLow() <= cp.getShotPointPriceLow5()) {
+							if (cp.getShotPointPriceLow() <= d.getLow() && d.getLow() <= cp.getShotPointPriceLow5()) {
+								if (line != null) {
+									line += ",接近旗形底部买点:" + cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5();
+								} else {
+									line = stockBasicService.getCodeName2(cp.getCode()) + " 接近旗形底部买点:["
+											+ cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5() + "]";
+								}
+							}
 							if (line != null) {
-								line += ",接近旗形底部买点:" + cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5();
-							} else {
-								line = stockBasicService.getCodeName2(cp.getCode()) + " 接近旗形底部买点:["
-										+ cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5() + "]";
+								bao.add(line);
 							}
-						}
-						if (line != null) {
-							bao.add(line);
+
+						} catch (Exception e) {
+							e.printStackTrace();
+							WxPushUtil.pushSystem1(d.getCode() + "起爆点异常");
 						}
 					}
 				}
