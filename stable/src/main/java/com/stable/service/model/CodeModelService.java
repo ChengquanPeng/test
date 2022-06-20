@@ -1,3 +1,4 @@
+
 package com.stable.service.model;
 
 import java.util.HashSet;
@@ -173,6 +174,8 @@ public class CodeModelService {
 		if (pool == null) {
 			pool = new MonitorPoolTemp();
 			pool.setCode(code);
+			pool.setUserId(Constant.MY_ID);
+			pool.setId(monitorPoolService.getId(pool.getUserId(), code));
 		}
 		poolList.add(pool);
 		// 最新收盘情况

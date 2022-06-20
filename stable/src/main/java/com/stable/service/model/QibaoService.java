@@ -24,25 +24,25 @@ public class QibaoService {
 	private CodeModelService codeModelService;
 
 //	@javax.annotation.PostConstruct
-	public void test() {
+//	public void test() {
 //		String code = "002612";
 //		int date = 20210208 ,20210209, 20210223 20210315
 //		String code = "002612";
 //		int date = 20200526;
-		String code = "002603";
-		int date = 20220613;
-		System.err.println("=====");
-		CodeBaseModel2 newOne = new CodeBaseModel2();
-		newOne.setCode(code);
-		MonitorPoolTemp pool = new MonitorPoolTemp();
-		qibao(date, newOne, pool);
-		System.err.println("Qixing:" + newOne.getQixing());
-		System.err.println("Zyxing:" + newOne.getZyxing());
-		System.err.println("=====");
-		System.exit(0);
-	}
+//		String code = "002603";
+//		int date = 20220613;
+//		System.err.println("=====");
+//		CodeBaseModel2 newOne = new CodeBaseModel2();
+//		newOne.setCode(code);
+//		MonitorPoolTemp pool = new MonitorPoolTemp();
+//		qibao(date, newOne, pool, true);
+//		System.err.println("Qixing:" + newOne.getQixing());
+//		System.err.println("Zyxing:" + newOne.getZyxing());
+//		System.err.println("=====");
+//		System.exit(0);
+//	}
 
-	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool) {
+	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll) {
 		// 起爆点1：旗形
 		List<TradeHistInfoDaliy> list = null;
 		if (newOne.getQixing() == 0) {
@@ -65,7 +65,7 @@ public class QibaoService {
 		boolean isdibu = false;
 		if (res != null) {
 			newOne.setQixing(res.getDate());
-			isdibu = dibuqixing(newOne, pool, res);// 旗形过滤：1.在底部旗形，2.旗形前没怎么涨
+			isdibu = dibuqixing(newOne, pool, res, isSamll);// 旗形过滤：1.在底部旗形，2.旗形前没怎么涨
 		} else {
 			newOne.setQixing(0);
 		}
@@ -109,8 +109,8 @@ public class QibaoService {
 		}
 	}
 
-	private boolean dibuqixing(CodeBaseModel2 newOne, MonitorPoolTemp pool, TradeHistInfoDaliy res) {
-		if (codeModelService.isDibu(newOne)) {
+	private boolean dibuqixing(CodeBaseModel2 newOne, MonitorPoolTemp pool, TradeHistInfoDaliy res, boolean isSamll) {
+		if (codeModelService.isDibuSmall(isSamll, newOne)) {
 			List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0,
 					res.getDate(), EsQueryPageUtil.queryPage30, SortOrder.DESC);
 			double low = Integer.MAX_VALUE;

@@ -166,8 +166,8 @@ public class CodeModelKLineService {
 		sort1ModeService.sort1ModeChk(newOne, pool, tradeDate);
 		// 收集筹码的短线-拉过一波，所以市值可以大一点
 		newOne.setSortChips(0);
-		if (online4Year && codeModelService.isSmallStock(mkv, newOne.getActMkv())
-				&& chipsSortService.isCollectChips(code, tradeDate)) {
+		boolean isSamll = codeModelService.isSmallStock(mkv, newOne.getActMkv());
+		if (online4Year && isSamll && chipsSortService.isCollectChips(code, tradeDate)) {
 			newOne.setSortChips(1);
 			log.info("{} 主力筹码收集", code);
 		}
@@ -180,7 +180,7 @@ public class CodeModelKLineService {
 		// 攻击形态
 		sort0Service.attackAndW(newOne, tradeDate);
 		// 起爆点
-		qibaoService.qibao(tradeDate, newOne, pool);
+		qibaoService.qibao(tradeDate, newOne, pool, isSamll);
 	}
 
 	private void year1(CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade) {

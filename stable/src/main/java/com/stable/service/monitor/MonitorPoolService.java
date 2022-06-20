@@ -96,7 +96,7 @@ public class MonitorPoolService {
 	@Autowired
 	private FinanceService financeService;
 
-	private String getId(long userId, String code) {
+	public String getId(long userId, String code) {
 		if (userId < Constant.MY_ID) {
 			throw new RuntimeException("错误的userId");
 		}
@@ -205,27 +205,6 @@ public class MonitorPoolService {
 		cp.setId(id);
 		cp.setUserId(userId);
 		return cp;
-	}
-
-//	@PostConstruct
-	public void init() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-//				List<MonitorPoolTemp> tl = new LinkedList<MonitorPoolTemp>();
-//				List<MonitorPool> list = getMonitorPool();
-//				for (MonitorPool m : list) {
-//					MonitorPoolTemp t = new MonitorPoolTemp();
-//					BeanCopy.copy(m, t);
-//					t.setCode(m.getCode());
-//					t.setId(t.getUserId() + t.getCode());
-//					tl.add(t);
-//				}
-//				monitorPoolDao.saveAll(list);
-//				monitorPoolUserDao.saveAll(tl);
-				log.info("done.init");
-			}
-		}).start();
 	}
 
 	// 所有监听池
