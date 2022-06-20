@@ -649,18 +649,16 @@ public class MonitorPoolService {
 								}
 
 								if ((d.getVolume() * 2) <= (maxvol * 1.2)) {// 缩量
-									line = stockBasicService.getCodeName2(cp.getCode()) + " "
-											+ MonitorType.getCode(cp.getMonitor()) + " 缩量买点";
+									line = stockBasicService.getCodeName2(cp.getCode()) + " " + " 缩量买点";
 								}
 							}
 						}
 						if (cp.getShotPointPriceLow() <= d.getLow() && d.getLow() <= cp.getShotPointPriceLow5()) {
 							if (line != null) {
-								line += ",接近旗形底部买点:" + cp.getShotPointPrice() + "-" + cp.getShotPointPriceLow5();
+								line += ",接近旗形底部买点:" + cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5();
 							} else {
-								line = stockBasicService.getCodeName2(cp.getCode()) + " "
-										+ MonitorType.getCode(cp.getMonitor()) + " 接近旗形底部买点:" + cp.getShotPointPrice()
-										+ "-" + cp.getShotPointPriceLow5();
+								line = stockBasicService.getCodeName2(cp.getCode()) + " 接近旗形底部买点:["
+										+ cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5() + "]";
 							}
 						}
 						if (line != null) {

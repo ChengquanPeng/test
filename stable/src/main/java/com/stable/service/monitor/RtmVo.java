@@ -2,6 +2,7 @@ package com.stable.service.monitor;
 
 import com.stable.constant.Constant;
 import com.stable.enums.MonitorType;
+import com.stable.service.biz.BizPushService;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.http.resp.CodeBaseModelResp;
 
@@ -14,6 +15,8 @@ public class RtmVo {
 	public String wxpush;
 	public boolean waitSend = true;
 	public boolean highPriceGot = false;
+	public BizPushService bizPushService;
+	public double warningYellow = 0.0;
 
 	public RtmVo(MonitorPoolTemp cp, CodeBaseModelResp cbm) {
 		this.orig = cp;
@@ -24,6 +27,11 @@ public class RtmVo {
 		}
 //		msgt += " " + cp.getMsg();
 		msg = msgt;
+	}
+
+	public void setBizPushService(BizPushService bizs) {
+		this.bizPushService = bizs;
+		warningYellow = orig.getShotPointPrice() * 0.98;
 	}
 
 }

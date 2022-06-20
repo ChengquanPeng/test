@@ -15,6 +15,7 @@ import com.stable.constant.RedisConstant;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.UserService;
+import com.stable.service.biz.BizPushService;
 import com.stable.service.model.WebModelService;
 import com.stable.spider.tick.TencentTickReal;
 import com.stable.utils.DateUtil;
@@ -48,6 +49,8 @@ public class RealtimeMonitoringService {
 	private RedisUtil redisUtil;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private BizPushService bizPushService;
 
 	public synchronized void startObservable() {
 		String date = DateUtil.getTodayYYYYMMDD();
@@ -67,7 +70,6 @@ public class RealtimeMonitoringService {
 
 		try {
 			// 获取监听列表-常规
-			List<RtmVo> listall = new LinkedList<RtmVo>();
 			List<UserInfo> ulist = userService.getUserListForMonitorS1();
 			HashMap<String, List<RtmVo>> allmap = new HashMap<String, List<RtmVo>>();
 			for (UserInfo u : ulist) {
@@ -86,10 +88,25 @@ public class RealtimeMonitoringService {
 						RtmVo rv = new RtmVo(t,
 								modelWebService.getLastOneByCodeResp(t.getCode(), t.getUserId() == Constant.MY_ID));
 						rv.setWxpush(u.getWxpush());
-						ml.add(rv);
+						ml.add(rv);// code对应的每个人
 						allmap.put(t.getCode(), ml);
-						listall.add(rv);
 					}
+				}
+			}
+			// 起爆点监听
+			List<MonitorPoolTemp> tl = monitorPoolService.getMyQibao();
+			if (tl != null) {
+				for (MonitorPoolTemp t : tl) {
+					List<RtmVo> ml = allmap.get(t.getCode());
+					if (ml == null) {
+						ml = new LinkedList<RtmVo>();
+					}
+
+					RtmVo rv = new RtmVo(t,
+							modelWebService.getLastOneByCodeResp(t.getCode(), t.getUserId() == Constant.MY_ID));
+					rv.setBizPushService(bizPushService);
+					ml.add(rv);
+					allmap.put(t.getCode(), ml);
 				}
 			}
 

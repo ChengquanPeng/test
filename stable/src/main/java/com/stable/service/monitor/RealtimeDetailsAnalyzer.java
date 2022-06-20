@@ -3,7 +3,6 @@ package com.stable.service.monitor;
 import java.util.Date;
 import java.util.List;
 
-import com.stable.constant.Constant;
 import com.stable.spider.realtime.RealTime;
 import com.stable.spider.realtime.RealtimeCall;
 import com.stable.utils.DateUtil;
@@ -24,10 +23,12 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private String today = DateUtil.getTodayYYYYMMDD();
 	public List<RtmVo> cps;
 	private boolean chkCodeClosed = false;
-	private boolean burstPointCheck = false;// 起爆点
-//	private ShotPointCheck shotPointCheck;
-	private RtmVo my;
+	private RtmVo qibao;
 	private double yearHigh1;
+
+	private boolean burstPointCheckTopPrew = false;// 突破前1%
+	private boolean burstPointCheckTop = false;// 突破
+	private boolean burstPointCheckLow = false;// 底线
 
 	public void stop() {
 		isRunning = false;
@@ -48,8 +49,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 	public void run() {
 		for (RtmVo rv : cps) {
-			if (rv.getOrig().getUserId() == Constant.MY_ID && rv.getOrig().getShotPointPrice() > 0) {
-				my = rv;
+			if (rv.getBizPushService() != null) {
+				qibao = rv;
 			}
 		}
 		if (chkCodeClosed) {// 重新检测停牌
@@ -109,28 +110,26 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						rv.highPriceGot = true;
 					}
 					// 起爆点
-					if (my != null && !burstPointCheck) {
-						if (rt.getHigh() >= my.getOrig().getShotPointPrice()) {
-							burstPointCheck = true;
-							WxPushUtil.pushSystem1(rv.getWxpush(),
-									codeName + " 到达起爆买点:" + my.getOrig().getShotPointPrice());
+					if (qibao != null) {
+						if (!burstPointCheckTop) {
+							if (rt.getHigh() >= qibao.getOrig().getShotPointPrice()) {
+								burstPointCheckTop = true;
+								qibao.bizPushService
+										.PushS1(codeName + " 已经到达起爆买点:" + qibao.getOrig().getShotPointPrice());
+							} else if (!burstPointCheckTopPrew && rt.getHigh() >= rv.warningYellow) {
+								burstPointCheckTopPrew = true;
+								qibao.bizPushService
+										.PushS1(codeName + " 准备突破起爆买点:" + qibao.getOrig().getShotPointPrice());
+							}
+						}
+						if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
+								&& rt.getLow() <= qibao.getOrig().getShotPointPriceLow5()) {
+							burstPointCheckLow = true;
+							qibao.bizPushService
+									.PushS1(codeName + " 接近旗形底部买点[:" + qibao.getOrig().getShotPointPriceLow() + "-"
+											+ qibao.getOrig().getShotPointPriceLow5() + "]");
 						}
 					}
-//					if (my != null && now > d1450) {
-//						WAIT_MIN = ONE_MIN;
-//						if (!burstPointCheck && my.getOrig().getShotPointCheck() == 1) {
-//							burstPointCheck = true;
-//							ShotPoint sp = shotPointCheck.check(code, 0, rt);
-//							if (sp.getResult()) {
-//								if ("".equals(smsg)) {
-//									smsg += "疑似起爆:" + sp.getMsg() + "！ 备注:" + rv.getMsg();
-//
-//								} else {
-//									smsg = "疑似起爆:" + sp.getMsg() + smsg;
-//								}
-//							}
-//						}
-//					}
 					// 发送
 					if (!smsg.equals("")) {
 						WxPushUtil.pushSystem1(rv.getWxpush(), codeName + " " + smsg);
