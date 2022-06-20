@@ -1,17 +1,26 @@
 package com.stable.service.biz;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.log4j.Log4j2;
+import com.stable.utils.WxPushUtil;
+import com.stable.vo.bus.UserInfo;
 
 /**
  * 商用消息推送
  */
 @Service
-@Log4j2
 public class BizPushService {
 
-	public void PushS1(String msg) {
+	@Autowired
+	private UserService userService;
 
+	public void PushS2(String msg) {
+		List<UserInfo> ulist = userService.getUserListForMonitorS2();
+		for (UserInfo u : ulist) {
+			WxPushUtil.pushSystem2Html(u.getWxpush(), msg);
+		}
 	}
 }

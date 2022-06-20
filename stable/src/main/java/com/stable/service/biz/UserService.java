@@ -61,6 +61,26 @@ public class UserService {
 		return r;
 	}
 
+	public List<UserInfo> getUserListForMonitorS2() {
+		List<UserInfo> r = new LinkedList<UserInfo>();
+		int today = DateUtil.getTodayIntYYYYMMDD();
+		UserInfo q = new UserInfo();
+		q.setS2(today);
+		List<UserInfo> l = this.getList(q, EsQueryPageUtil.queryPage9999);
+		if (l != null) {
+			for (UserInfo u : l) {
+				if (StringUtils.isNotBlank(u.getWxpush())) {
+					r.add(u);
+				}
+			}
+		}
+		UserInfo myid = new UserInfo();
+		myid.setId(Constant.MY_ID);
+		myid.setWxpush(WxPushUtil.myUid);
+		r.add(myid);
+		return r;
+	}
+
 	// 查询
 	public List<UserInfo> getList(UserInfo user, EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();

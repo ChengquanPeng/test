@@ -35,6 +35,7 @@ import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
+import com.stable.service.biz.BizPushService;
 import com.stable.service.biz.UserService;
 import com.stable.service.model.WebModelService;
 import com.stable.spider.ths.ThsAnnSpider;
@@ -95,6 +96,8 @@ public class MonitorPoolService {
 //	private ShotPointCheck shotPointCheck;
 	@Autowired
 	private FinanceService financeService;
+	@Autowired
+	private BizPushService bizPushService;
 
 	public String getId(long userId, String code) {
 		if (userId < Constant.MY_ID) {
@@ -617,7 +620,7 @@ public class MonitorPoolService {
 					}
 					// WxPush
 					if (StringUtils.isNotBlank(ends)) {
-						WxPushUtil.pushSystem2Html(u.getWxpush(), ends);
+						bizPushService.PushS2(ends);
 					}
 				}
 			}

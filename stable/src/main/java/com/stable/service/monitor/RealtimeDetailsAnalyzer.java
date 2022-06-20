@@ -115,18 +115,18 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 							if (rt.getHigh() >= qibao.getOrig().getShotPointPrice()) {
 								burstPointCheckTop = true;
 								qibao.bizPushService
-										.PushS1(codeName + " 已经到达起爆买点:" + qibao.getOrig().getShotPointPrice());
+										.PushS2(codeName + " 已经到达起爆买点:" + qibao.getOrig().getShotPointPrice());
 							} else if (!burstPointCheckTopPrew && rt.getHigh() >= rv.warningYellow) {
 								burstPointCheckTopPrew = true;
 								qibao.bizPushService
-										.PushS1(codeName + " 准备突破起爆买点:" + qibao.getOrig().getShotPointPrice());
+										.PushS2(codeName + " 准备突破起爆买点:" + qibao.getOrig().getShotPointPrice());
 							}
 						}
 						if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
 								&& rt.getLow() <= qibao.getOrig().getShotPointPriceLow5()) {
 							burstPointCheckLow = true;
 							qibao.bizPushService
-									.PushS1(codeName + " 接近旗形底部买点[:" + qibao.getOrig().getShotPointPriceLow() + "-"
+									.PushS2(codeName + " 接近旗形底部买点[:" + qibao.getOrig().getShotPointPriceLow() + "-"
 											+ qibao.getOrig().getShotPointPriceLow5() + "]");
 						}
 					}
