@@ -115,9 +115,6 @@ body {
 					id="holderNumDate"></span>
 			</div>
 			<div class="input-group">
-				经营现金流净额转正：<input type="checkbox" id="xjl" name="xjl" />
-			</div>
-			<div class="input-group">
 				流动性地量：<input type="text" class="form-control" id="buyLowVol">&nbsp;<span
 					style="font-size: 12px; color: gray;">(多少天交易日缩量?)</span>
 			</div>
@@ -179,10 +176,6 @@ body {
 			if (document.getElementById("dzjy").checked) {
 				dzjy = 1;
 			}
-			var xjl = 0
-			if (document.getElementById("xjl").checked) {
-				xjl = 1;
-			}
 			var ykb = 0
 			if (document.getElementById("ykb").checked) {
 				ykb = 1;
@@ -206,7 +199,6 @@ body {
 					downPrice : $('#downPrice').val(),
 					upTodayChange : $('#upTodayChange').val(),
 					ykb : ykb,
-					xjl : xjl,
 					listenerGg : listenerGg,
 					holderNum : holderNum,
 					dzjy : dzjy,
@@ -246,9 +238,6 @@ body {
 				}
 				if (reData.result.listenerGg == 1) {
 					$('#listenerGg').attr("checked", 'checked');
-				}
-				if (reData.result.xjl == 1) {
-					$('#xjl').attr("checked", 'checked');
 				}
 				if (reData.result.holderNum > 0) {
 					$('#holderNum').attr("checked", 'checked');

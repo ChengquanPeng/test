@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
+import com.stable.service.StockBasicService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.StringUtil;
@@ -22,6 +23,8 @@ public class QibaoService {
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private CodeModelService codeModelService;
+	@Autowired
+	private StockBasicService stockBasicService;
 
 //	@javax.annotation.PostConstruct
 //	public void test() {
@@ -42,7 +45,7 @@ public class QibaoService {
 //		System.exit(0);
 //	}
 
-	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll) {
+	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
 		// 起爆点1：旗形
 		List<TradeHistInfoDaliy> list = null;
 		if (newOne.getQixing() == 0) {
@@ -65,12 +68,15 @@ public class QibaoService {
 		boolean isdibu = false;
 		if (res != null) {
 			newOne.setQixing(res.getDate());
-			isdibu = dibuqixing(newOne, pool, res, isSamll);// 旗形过滤：1.在底部旗形，2.旗形前没怎么涨
+			isdibu = dibuqixing(newOne, res, isSamll);// 旗形过滤：1.在底部旗形，2.旗形前没怎么涨
 		} else {
 			newOne.setQixing(0);
 		}
 
 		if (isdibu) {
+			if (newOne.getDibuQixing() == 0) {
+				qx.append(stockBasicService.getCodeName2(newOne.getCode())).append(",");
+			}
 			pool.setShotPointDate(res.getDate());
 			newOne.setDibuQixing(1);
 		} else {
@@ -109,7 +115,7 @@ public class QibaoService {
 		}
 	}
 
-	private boolean dibuqixing(CodeBaseModel2 newOne, MonitorPoolTemp pool, TradeHistInfoDaliy res, boolean isSamll) {
+	private boolean dibuqixing(CodeBaseModel2 newOne, TradeHistInfoDaliy res, boolean isSamll) {
 		if (codeModelService.isDibuSmall(isSamll, newOne)) {
 			List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0,
 					res.getDate(), EsQueryPageUtil.queryPage30, SortOrder.DESC);

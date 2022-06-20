@@ -153,6 +153,18 @@ public class CodeModelService {
 		}
 	}
 
+	public MonitorPoolTemp getPool(String code, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList) {
+		MonitorPoolTemp pool = poolMap.get(code);
+		if (pool == null) {
+			pool = new MonitorPoolTemp();
+			pool.setCode(code);
+			pool.setUserId(Constant.MY_ID);
+			pool.setId(monitorPoolService.getId(pool.getUserId(), code));
+		}
+		poolList.add(pool);
+		return pool;
+	}
+
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
 			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, boolean isweekend, StringBuffer sbc) {
 		String code = s.getCode();
@@ -170,14 +182,7 @@ public class CodeModelService {
 			return;
 		}
 		// 监听池
-		MonitorPoolTemp pool = poolMap.get(code);
-		if (pool == null) {
-			pool = new MonitorPoolTemp();
-			pool.setCode(code);
-			pool.setUserId(Constant.MY_ID);
-			pool.setId(monitorPoolService.getId(pool.getUserId(), code));
-		}
-		poolList.add(pool);
+		MonitorPoolTemp pool = getPool(code, poolMap, poolList);
 		// 最新收盘情况
 		DaliyBasicInfo2 lastTrade = daliyBasicHistroyService.queryLastest(code, 0, 0);
 		if (lastTrade == null) {

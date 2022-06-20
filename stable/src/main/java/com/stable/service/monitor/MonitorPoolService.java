@@ -118,7 +118,7 @@ public class MonitorPoolService {
 		c.setOffline(0);
 		c.setBuyLowVol(0);
 		c.setHolderNum(0);
-		c.setXjl(0);
+//		c.setXjl(0);
 		c.setDzjy(0);
 		if (StringUtils.isBlank(remark)) {
 			c.setRemark("");
@@ -158,7 +158,7 @@ public class MonitorPoolService {
 		c.setUpTodayChange(upTodayChange);
 		c.setZfdone(zfdone);
 		c.setBuyLowVol(buyLowVol);
-		c.setXjl(xjl);
+//		c.setXjl(xjl);
 //		c.setShotPointCheck(shotPointCheck);
 		c.setListenerGg(listenerGg);
 
@@ -620,7 +620,7 @@ public class MonitorPoolService {
 					}
 					// WxPush
 					if (StringUtils.isNotBlank(ends)) {
-						bizPushService.PushS2(ends);
+						WxPushUtil.pushSystem2Html(ends);
 					}
 				}
 			}
@@ -660,7 +660,8 @@ public class MonitorPoolService {
 							}
 							if (cp.getShotPointPriceLow() <= d.getLow() && d.getLow() <= cp.getShotPointPriceLow5()) {
 								if (line != null) {
-									line += ",接近旗形底部买点:" + cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5();
+									line += ",接近旗形底部买点:[" + cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5()
+											+ "]";
 								} else {
 									line = stockBasicService.getCodeName2(cp.getCode()) + " 接近旗形底部买点:["
 											+ cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5() + "]";
@@ -681,7 +682,7 @@ public class MonitorPoolService {
 					s1.append(a).append(Constant.HTML_LINE);
 				}
 				if (s1.length() > 0) {
-					WxPushUtil.pushSystem2Html("起爆点:" + Constant.HTML_LINE + s1.toString() + Constant.HTML_LINE);
+					bizPushService.PushS2(s1.toString());
 				}
 			}
 		}

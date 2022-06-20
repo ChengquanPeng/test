@@ -14,6 +14,7 @@ import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
+import com.stable.service.biz.BizPushService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.monitor.MonitorPoolService;
@@ -64,6 +65,8 @@ public class CodeModelKLineService {
 	private ChipsSortService chipsSortService;
 	@Autowired
 	private CodeModelService codeModelService;
+	@Autowired
+	private BizPushService bizPushService;
 
 //	@javax.annotation.PostConstruct
 //	private void aded() {
@@ -88,11 +91,12 @@ public class CodeModelKLineService {
 		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
 
 		Map<String, MonitorPoolTemp> poolMap = monitorPoolService.getMonitorPoolMap();
-		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();// TODO
+		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();
+		StringBuffer qx = new StringBuffer();
 
 		for (StockBaseInfo s : codelist) {
 			try {
-				this.processingByCode(s, poolMap, poolList, listLast, histMap);
+				this.processingByCode(s, poolMap, poolList, listLast, histMap, qx);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -103,6 +107,9 @@ public class CodeModelKLineService {
 		if (poolList.size() > 0) {
 			monitorPoolDao.saveAll(poolList);
 		}
+		if (qx.length() > 0) {
+			bizPushService.PushS2("今日最新旗形:" + qx.toString());
+		}
 		log.info("KLine基本完成");
 	}
 
@@ -111,15 +118,10 @@ public class CodeModelKLineService {
 	private int pre4Year = 0;// 四年以前
 
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
-			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap) {
+			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, StringBuffer qx) {
 		String code = s.getCode();
 		// 监听池
-		MonitorPoolTemp pool = poolMap.get(code);
-		if (pool == null) {
-			pool = new MonitorPoolTemp();
-			pool.setCode(code);
-		}
-		poolList.add(pool);
+		MonitorPoolTemp pool = this.codeModelService.getPool(code, poolMap, poolList);
 		boolean onlineYear = stockBasicService.onlinePreYearChk(code, pre1Year);
 		if (!onlineYear) {// 不买卖新股
 			CodeBaseModel2 tone = new CodeBaseModel2();
@@ -180,7 +182,7 @@ public class CodeModelKLineService {
 		// 攻击形态
 		sort0Service.attackAndW(newOne, tradeDate);
 		// 起爆点
-		qibaoService.qibao(tradeDate, newOne, pool, isSamll);
+		qibaoService.qibao(tradeDate, newOne, pool, isSamll, qx);
 	}
 
 	private void year1(CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade) {
