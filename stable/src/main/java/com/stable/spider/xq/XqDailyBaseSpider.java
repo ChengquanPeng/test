@@ -22,6 +22,7 @@ import com.stable.service.model.CodeModelKLineService;
 import com.stable.service.model.prd.PreSelectSave;
 import com.stable.service.model.prd.PreSelectSearch;
 import com.stable.service.model.prd.PreSelectTask;
+import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
@@ -30,6 +31,7 @@ import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.StockBaseInfo;
+import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -55,6 +57,8 @@ public class XqDailyBaseSpider {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private CodeModelKLineService codeModelKLineService;
+	@Autowired
+	private MonitorPoolService monitorPoolService;
 
 	private String F1 = "市盈率(静)";
 	private String F2 = "市盈率(动)";
@@ -81,17 +85,18 @@ public class XqDailyBaseSpider {
 
 	}
 
-	public void fetchAll(List<DaliyBasicInfo2> list) {
+	public void fetchAll(List<DaliyBasicInfo2> list, List<TradeHistInfoDaliyNofq> listNofq) {
 		new Thread(new Runnable() {
 			public void run() {
-				dofetchEntry(list);
+				dofetchEntry(list, listNofq);
 			}
 		}).start();
 	}
 
-	private synchronized void dofetchEntry(List<DaliyBasicInfo2> list) {
+	private synchronized void dofetchEntry(List<DaliyBasicInfo2> list, List<TradeHistInfoDaliyNofq> listNofq) {
 		try {
-			//PreSelectSearch pd1 = new PreSelectSearch(daliyTradeHistroyService, preSelectSave);
+			// PreSelectSearch pd1 = new PreSelectSearch(daliyTradeHistroyService,
+			// preSelectSave);
 			String today = DateUtil.getTodayYYYYMMDD();
 			List<DaliyBasicInfo2> upd = new LinkedList<DaliyBasicInfo2>();
 			int date = DateUtil.getTodayIntYYYYMMDD();
@@ -102,8 +107,9 @@ public class XqDailyBaseSpider {
 						if (dofetch(b, today)) {
 							upd.add(b);
 							// 产品1：选股程序
-							// TasksWorkerPrd1.add(new PreSelectTask(pd1, b.getCode(), b.getCircMarketVal(), date));
-							//分时分笔
+							// TasksWorkerPrd1.add(new PreSelectTask(pd1, b.getCode(), b.getCircMarketVal(),
+							// date));
+							// 分时分笔
 						}
 						// 流通股份
 						if (b.getFloatShare() > 0 && b.getTotalShare() > 0) {
@@ -138,6 +144,10 @@ public class XqDailyBaseSpider {
 			new Thread(new Runnable() {
 				public void run() {
 					codeModelKLineService.runKLineModel(date);
+					// 离线价格监听
+					ThreadsUtil.sleepRandomSecBetween5And15();
+					monitorPoolService.priceChk(listNofq, date);
+					monitorPoolService.jobBuyLowVolWarning();
 				}
 			}).start();
 

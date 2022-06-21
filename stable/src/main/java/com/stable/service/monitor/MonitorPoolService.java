@@ -98,7 +98,7 @@ public class MonitorPoolService {
 	private FinanceService financeService;
 	@Autowired
 	private BizPushService bizPushService;
-	
+
 //	@javax.annotation.PostConstruct
 //	public void init() {
 //		new Thread(new Runnable() {
@@ -121,7 +121,6 @@ public class MonitorPoolService {
 //			}
 //		}).start();
 //	}
-
 
 	public String getId(long userId, String code) {
 		if (userId < Constant.MY_ID) {
@@ -706,7 +705,7 @@ public class MonitorPoolService {
 					s1.append(a).append(Constant.HTML_LINE);
 				}
 				if (s1.length() > 0) {
-					bizPushService.PushS2(s1.toString());
+					bizPushService.PushS2("起爆点:" + Constant.HTML_LINE + s1.toString());
 				}
 			}
 		}
