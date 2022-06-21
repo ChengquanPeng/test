@@ -98,6 +98,30 @@ public class MonitorPoolService {
 	private FinanceService financeService;
 	@Autowired
 	private BizPushService bizPushService;
+	
+//	@javax.annotation.PostConstruct
+//	public void init() {
+//		new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				int pageNum = EsQueryPageUtil.queryPage9999.getPageNum();
+//				int size = EsQueryPageUtil.queryPage9999.getPageSize();
+//				log.info("queryPage pageNum={},size={}", pageNum, size);
+//				Pageable pageable = PageRequest.of(pageNum, size);
+//				BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+//				bqb.must(QueryBuilders.matchPhraseQuery("userId", 0));
+//				NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+//				SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+//
+//				Page<MonitorPoolTemp> page = monitorPoolDao.search(sq);
+//				if (page != null && !page.isEmpty()) {
+//					monitorPoolDao.deleteAll(page.getContent());
+//				}
+//				log.info("done.init");
+//			}
+//		}).start();
+//	}
+
 
 	public String getId(long userId, String code) {
 		if (userId < Constant.MY_ID) {

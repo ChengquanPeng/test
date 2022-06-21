@@ -103,14 +103,8 @@
 
 			<div class="mg">
 				<div class="input-group">
-					所有监听:<input type="checkbox" id="monitor" />&nbsp;&nbsp;
-					&nbsp;&nbsp;人工状态:<select id="pls">
-						<option value="-1" selected="selected">无限制</option>
-						<option value="0">未确定</option>
-						<option value="1">已确定</option>
-						<option value="2">已排除</option>
-						<option value="3">确定+未</option>
-					</select> 标签:<select id="tagIndex">
+					所有监听:<input type="checkbox" id="monitor" />&nbsp;&nbsp; 标签:<select
+						id="tagIndex">
 						<option value="-1" selected="selected">无限制</option>
 						<option value="5">小而美</option>
 						<option value="2">业绩较牛</option>
@@ -129,7 +123,14 @@
 						<option value="13">持股人数变化</option>
 						<option value="14">减持占比</option>
 						<option value="15">旗形倒序</option>
-					</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 倒序排序:<input type="checkbox"
+					</select>&nbsp;&nbsp;人工状态:<select id="pls">
+						<option value="3" selected="selected">确定+未</option>
+						<option value="-1">无限制</option>
+						<option value="0">未确定</option>
+						<option value="1">已确定</option>
+						<option value="2">已排除</option>
+
+					</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 倒序排序: <input type="checkbox"
 						id="asc" name="asc" checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
 						<button class="btn btn-default" type="button" id="queryAction">
