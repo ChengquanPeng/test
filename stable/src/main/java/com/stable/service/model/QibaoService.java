@@ -1,5 +1,6 @@
 package com.stable.service.model;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
@@ -32,14 +34,17 @@ public class QibaoService {
 //		int date = 20210208 ,20210209, 20210223 20210315
 //		String code = "002612";
 //		int date = 20200526;
-//		String code = "002603";
-//		int date = 20220613;
+//		String code = "000023";
+//		int date = 20220620;
 //		System.err.println("=====");
 //		CodeBaseModel2 newOne = new CodeBaseModel2();
+//		newOne.setZfjjup(2);
+//		newOne.setZfjjupStable(1);
 //		newOne.setCode(code);
 //		MonitorPoolTemp pool = new MonitorPoolTemp();
-//		qibao(date, newOne, pool, true);
+//		qibao(date, newOne, pool, true, new StringBuffer());
 //		System.err.println("Qixing:" + newOne.getQixing());
+//		System.err.println("DiQixing:" + newOne.getDibuQixing());
 //		System.err.println("Zyxing:" + newOne.getZyxing());
 //		System.err.println("=====");
 //		System.exit(0);
@@ -116,9 +121,12 @@ public class QibaoService {
 	}
 
 	private boolean dibuqixing(CodeBaseModel2 newOne, TradeHistInfoDaliy res, boolean isSamll) {
+		// 底部小票
 		if (codeModelService.isDibuSmall(isSamll, newOne)) {
+
+			// 排除1拉高后的旗形：旗形日前1个月涨幅低于20%
 			List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0,
-					res.getDate(), EsQueryPageUtil.queryPage30, SortOrder.DESC);
+					res.getDate(), EsQueryPageUtil.queryPage20, SortOrder.DESC);
 			double low = Integer.MAX_VALUE;
 			for (TradeHistInfoDaliy nf : list) {
 				if (nf.getClosed() < low) {
@@ -129,6 +137,38 @@ public class QibaoService {
 				if (CurrencyUitl.cutProfit(low, res.getYesterdayPrice()) > 20) {// 本身已经大涨了，之前就不能涨太多
 					return false;// 涨幅太大
 				}
+			}
+
+			// 排除2：半年内已经拉高过的旗形，之前没有连续20个交易日涨幅超过50%的
+			List<TradeHistInfoDaliy> list2 = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0,
+					res.getDate(), EsQueryPageUtil.queryPage120, SortOrder.DESC);
+			List<TradeHistInfoDaliy> tmpl = new LinkedList<TradeHistInfoDaliy>();
+			for (int i = list2.size() - 1; i >= 0; i--) {
+				TradeHistInfoDaliy t = list2.get(i);
+				if (tmpl.size() <= 20) {
+					tmpl.add(t);
+				}
+				if (tmpl.size() > 20) {
+					tmpl.remove(0);
+				}
+				if (tmpl.size() == 20) {
+					TradeHistInfoDaliy topDate = tmpl.stream()
+							.max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+					TradeHistInfoDaliy lowDate = tmpl.stream()
+							.min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
+					// 上涨趋势
+					if (topDate.getDate() > lowDate.getDate()) {
+						if (CurrencyUitl.cutProfit(lowDate.getLow(), topDate.getHigh()) >= 50) {
+							return false;
+						}
+					}
+				}
+			}
+
+			// 排除3:排除退市股票
+			String name = stockBasicService.getCodeName(newOne.getCode());
+			if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI)) {
+				return false;
 			}
 			return true;
 		}

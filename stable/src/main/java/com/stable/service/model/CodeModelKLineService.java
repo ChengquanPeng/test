@@ -73,7 +73,7 @@ public class CodeModelKLineService {
 //		// K线模型
 //		new Thread(new Runnable() {
 //			public void run() {
-//				int date = 20220615;
+//				int date = 20220620;
 //				runKLineModel(date);
 //			}
 //		}).start();

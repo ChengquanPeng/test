@@ -367,36 +367,31 @@
 											formatter : function(value, row,
 													index) {
 												var v = value
-														+ "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+row.code+"/event.html#stockpage'>大事提醒=></a>";
-												v += "<br/><a target='_blank' href='/web/chips/reduce/list?code="
+														+ "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+row.code+"/event.html#stockpage'>大事提醒</a>";
+												v += "&nbsp;&nbsp;<a target='_blank' href='/web/chips/reduce/list?code="
 														+ row.code
-														+ "'>减持历史=></a>"
+														+ "'>减持历史</a>"
+												v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/dzjy/detail/"+row.code+".html'>大宗</a>";
 												if (row.shooting3 == 1) {
-													v += "<br/><a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资融券=></a>";
+													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资融券</a>";
 												}
 												if (row.tagHighZyChance == 1) {
-													v += "<br/><a target='_blank' href='https://data.eastmoney.com/gpzy/detail/"+row.code+".html'>股票质押=></a>";
+													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/gpzy/detail/"+row.code+".html'>股票质押</a>";
 												}
-												return v;
-											}
-										},
-										{
-											field : 'a',
-											title : '人工',
-											formatter : function(value, row,
-													index) {
-												return "<a target='_blank' href='/web/"
-														+ ustr
-														+ "/manual.html?code="
-														+ row.code
-														+ "'>checklist</a><br/>"
-														+ "<a target='_blank' href='/web/"
+
+												var ckl = "<br/><a target='_blank' href='/web/"
 														+ ustr
 														+ "/addMonitor.html?code="
 														+ row.code
-														+ "'>更改监听</a>";
-											}
+														+ "'>更改监听</a>"
+														+ "&nbsp;&nbsp;<a target='_blank' href='/web/"
+														+ ustr
+														+ "/manual.html?code="
+														+ row.code
+														+ "'>checklist</a>";
 
+												return v + ckl;
+											}
 										} ],
 								responseHandler : function responseHandler(res) {
 

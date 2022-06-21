@@ -24,6 +24,8 @@ public class Constant {
 	public static final String HTML_LINE = "<br/>";
 	public static final String AUTO_MONITOR = "Auto-Monitor:";
 
+	public static final String TUI_SHI = "退";
+
 	public static final int END_DATE = 20140101;// 6年
 
 	public static final double WAN_10 = 10 * 10000;// 10万
