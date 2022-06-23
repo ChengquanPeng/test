@@ -644,25 +644,35 @@ public class CodeModelService {
 		int yellow = 1;
 		StringBuffer sb1 = new StringBuffer();
 		StringBuffer sb2 = new StringBuffer();
-		// 退市风险
-		if (fa.profitDown2Year() == 1) {
-			newOne.setBaseRed(1);
-			sb1.append(red++).append(".退市风险:2年利润亏损").append(Constant.HTML_LINE);
-		} else if (fa.getCurrYear().getGsjlr() < 0) {
-			newOne.setBaseYellow(1);
-			sb2.append(yellow++).append(".年报亏损").append(Constant.HTML_LINE);
-		}
-		// 营收低于1亿
+		// 退市风险:营收低于1亿
 		if (fa.getCurrJidu().getYyzsr() < CurrencyUitl.YI_N.longValue()) {
 			if (fa.getCurrJidu().getKfjlr() < 0) {
 				newOne.setBaseRed(1);
-				sb1.append(red++).append(".st风险或退市风险:扣非净利润为负且营收低于1亿元").append(Constant.HTML_LINE);
+				sb1.append(red++).append(".退市风险(ST):扣非净利润为负且营收低于1亿元").append(Constant.HTML_LINE);
 			} else {
 				newOne.setBaseRed(1);
-				sb1.append(red++).append(".st风险或退市风险:营收低于1亿元").append(Constant.HTML_LINE);
+				sb1.append(red++).append(".退市风险(ST):营收低于1亿元(净利暂不为负)").append(Constant.HTML_LINE);
 			}
 		}
-		// 应缴税费
+		// 退市风险:净资产为负
+		if (fbi.getNetAsset() < CurrencyUitl.YI_N.longValue() && fbi.getNetAsset() != 0.0) {
+			if (fbi.getNetAsset() < 0) {
+				newOne.setBaseRed(1);
+				sb1.append(red++).append(".退市风险(ST):净资产为负值").append(Constant.HTML_LINE);
+			} else {
+				newOne.setBaseRed(1);
+				sb1.append(red++).append(".退市风险(ST):净资产低于1亿元(容易暴雷)").append(Constant.HTML_LINE);
+			}
+		}
+		// 年报
+		if (fa.profitDown2Year() == 1) {
+			newOne.setBaseRed(1);
+			sb1.append(red++).append(".至少2年亏损").append(Constant.HTML_LINE);
+		} else if (fa.getCurrYear().getGsjlr() < 0) {
+			newOne.setBaseRed(1);
+			sb1.append(red++).append(".年报亏损").append(Constant.HTML_LINE);
+		}
+
 		if (fbis.size() >= 5) {
 			FinanceBaseInfo f0 = fbis.get(0);
 			FinanceBaseInfo f1 = fbis.get(1);
@@ -670,6 +680,7 @@ public class CodeModelService {
 			FinanceBaseInfo f3 = fbis.get(3);
 			FinanceBaseInfo f4 = fbis.get(4);
 
+			// 应缴税费
 			if (f0.getTaxPayable() >= f1.getTaxPayable() && f1.getTaxPayable() >= f2.getTaxPayable()
 					&& f2.getTaxPayable() >= f3.getTaxPayable() && f3.getTaxPayable() >= f4.getTaxPayable()
 					&& f0.getTaxPayable() > 0) {
@@ -712,7 +723,7 @@ public class CodeModelService {
 			// 连续3季度
 			if (c >= 4) {
 				newOne.setBaseRed(1);
-				sb1.append(red++).append(".暴雷破产风险:连续4季度负债超高-净资产低于应付账款").append(Constant.HTML_LINE);
+				sb1.append(red++).append(".暴雷风险:连续4季度负债超高-净资产低于应付账款").append(Constant.HTML_LINE);
 			} else {// 最近2年
 				// 连续季度
 				c = 0;
@@ -732,47 +743,6 @@ public class CodeModelService {
 				}
 			}
 
-		}
-		// 净资产
-		if (fbi.getNetAsset() < 0) {
-			newOne.setBaseRed(1);
-			sb1.append(red++).append(".净资产为负资产").append(Constant.HTML_LINE);
-
-			int c = 0;
-			int fort = 0;// 最近2年
-			if (fbis.size() > 2) {
-				for (FinanceBaseInfo ft : fbis) {
-					if (ft.getNetAsset() < 0) {
-						c++;
-					}
-					fort++;
-					if (fort >= 3) {
-						break;
-					}
-				}
-			}
-			// 连续3季度
-			if (c >= 4) {
-				newOne.setBaseRed(1);
-				sb1.append(red++).append(".暴雷风险:连续4季度净资产为负资产").append(Constant.HTML_LINE);
-			} else {// 最近2年
-				// 连续季度
-				c = 0;
-				fort = 0;// 最近2年
-				for (FinanceBaseInfo ft : fbis) {
-					fort++;
-					if (fort > 8) {
-						break;
-					}
-					if (ft.getNetAsset() < 0) {
-						c++;
-					}
-				}
-				if (c >= (fbis.size() / 2)) {
-					newOne.setBaseRed(1);
-					sb1.append(red++).append(".暴雷风险:最近" + c + "季度净资产为负资产").append(Constant.HTML_LINE);
-				}
-			}
 		}
 		// 流动负债高于流动资产
 		if (fbi.getSumLasset() < fbi.getSumDebtLd()) {
@@ -816,7 +786,7 @@ public class CodeModelService {
 		}
 		if (fbi.getFundNotOk3() == 1) {
 			newOne.setBaseYellow(1);
-			sb2.append(yellow++).append(".财务疑似三高,详查各报告期短长期借款和货币资金(现金流净额?)").append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".财务三高疑似造假?详查各报告期短长期借款和货币资金?现金流净额?").append(Constant.HTML_LINE);
 		}
 		if (fbi.getFundNotOk() == 1) {
 			newOne.setBaseYellow(1);

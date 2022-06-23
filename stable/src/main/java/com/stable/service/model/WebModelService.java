@@ -458,7 +458,7 @@ public class WebModelService {
 		String remark = (req.getBuyRea() + " " + req.getSoldRea()).trim();
 		if (date != 1) {
 			MonitorPoolTemp pool = monitorPoolService.getMonitorPoolById(userId, code);
-			if (pls == 2) {// 2不在池子
+			if (pls == 2 || pls == 0) {// 2不在池子
 				pool.setMonitor(MonitorType.NO.getCode());
 				pool.setUpTodayChange(0);
 				pool.setRealtime(0);
@@ -487,10 +487,18 @@ public class WebModelService {
 			monitorPoolDao.save(pool);
 
 			BeanCopy.copy(req, model);
+
+			// 同步监听
+			if (pool.getMonitor() > MonitorType.NO.getCode()) {
+				model.setMoni(pool.getMonitor());
+			} else {
+				model.setMoni(0);
+			}
 		}
 		model.setPls(pls);
 		model.setPlst(date);
 		model.setBuyRea(remark);
+
 		codeBaseModel2Dao.save(model);
 	}
 
