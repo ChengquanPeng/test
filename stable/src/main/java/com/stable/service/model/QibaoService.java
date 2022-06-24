@@ -36,12 +36,8 @@ public class QibaoService {
 		// 000678-20220610
 		// 000025-20220519
 		// 000017-20220526
-//		String code = "002612";
-//		int date = 20210208 ,20210209, 20210223 20210315
-//		String code = "002612";
-//		int date = 20200526;
-//		String code = "002681";
-//		int date = 20220624;
+//		String code = "002864";
+//		int date = 20220315;
 //		System.out.println("=====");
 //		CodeBaseModel2 newOne = new CodeBaseModel2();
 //		newOne.setZfjjup(2);
@@ -214,7 +210,8 @@ public class QibaoService {
 					// 上涨趋势
 					if (topDate.getDate() > lowDate.getDate()) {
 						if (CurrencyUitl.cutProfit(lowDate.getLow(), topDate.getHigh()) >= 35) {
-							System.out.println("10个交易日超过35%");
+							// 有的是K线是挖坑，有的是拉高，拉高收货回踩后的旗形可能会错过，比如002864
+							System.out.println("10个交易日超过35%," + lowDate.getDate() + "-" + topDate.getDate());
 							return null;
 						}
 					}
