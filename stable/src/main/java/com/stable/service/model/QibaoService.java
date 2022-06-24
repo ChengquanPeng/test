@@ -34,8 +34,8 @@ public class QibaoService {
 //		int date = 20210208 ,20210209, 20210223 20210315
 //		String code = "002612";
 //		int date = 20200526;
-//		String code = "000023";
-//		int date = 20220620;
+//		String code = "000678";
+//		int date = 20220607;
 //		System.err.println("=====");
 //		CodeBaseModel2 newOne = new CodeBaseModel2();
 //		newOne.setZfjjup(2);
@@ -64,31 +64,36 @@ public class QibaoService {
 		TradeHistInfoDaliy res = null;
 		for (TradeHistInfoDaliy nf : list) {
 			if (nf.getTodayChangeRate() >= 8.0) {
-				if (isQixing(first, nf, list, pool)) {// 是否旗形
+				if (isQixing(first, nf, list, pool)) {// 1.是否旗形
 					res = nf;
 					break;
 				}
 			}
 		}
-		boolean isdibu = false;
+		List<TradeHistInfoDaliy> list2 = null;
 		if (res != null) {
-			newOne.setQixing(res.getDate());
-			isdibu = dibuqixing(newOne, res, isSamll);// 旗形过滤：1.在底部旗形，2.旗形前没怎么涨
-		} else {
-			newOne.setQixing(0);
+			list2 = dibuqixing(newOne, res, isSamll);// 2.是否底部旗形(旗形过滤)：1.在底部旗形，2.旗形前没怎么涨
 		}
 
-		if (isdibu) {
-			if (newOne.getDibuQixing() == 0) {
-				qx.append(stockBasicService.getCodeName2(newOne.getCode())).append(",");
+		if (list2 != null) {
+			newOne.setQixing(res.getDate());
+			boolean yzdi = dibuqixing2(list2);// 3.是否更优的旗形:进一步判断底部旗形
+			if (yzdi) {
+				if (newOne.getDibuQixing() == 0) {
+					qx.append(stockBasicService.getCodeName2(newOne.getCode())).append(",");
+				}
+				pool.setShotPointDate(res.getDate());
+				newOne.setDibuQixing(1);
+			} else {
+				pool.setShotPointDate(0);
+				newOne.setDibuQixing(0);
 			}
-			pool.setShotPointDate(res.getDate());
-			newOne.setDibuQixing(1);
 		} else {
 			if (newOne.getDibuQixing() == 1) {
 				String jsHist = newOne.getQixing() + "底部旗形" + ";" + newOne.getJsHist();
 				newOne.setJsHist(StringUtil.subString(jsHist, 100));
 			}
+			newOne.setQixing(0);
 			newOne.setDibuQixing(0);
 			pool.setShotPointDate(0);
 			pool.setShotPointPrice(0);
@@ -120,7 +125,24 @@ public class QibaoService {
 		}
 	}
 
-	private boolean dibuqixing(CodeBaseModel2 newOne, TradeHistInfoDaliy res, boolean isSamll) {
+	private boolean dibuqixing2(List<TradeHistInfoDaliy> list2) {
+		System.err.println(list2.get(list2.size() - 1).getDate());
+		System.err.println(list2.get(0).getDate());
+		int up4 = 0;
+		for (int i = 1; i <= 10; i++) {// 排除大涨的哪天
+			TradeHistInfoDaliy nf = list2.get(i);
+			if (nf.getTodayChangeRate() >= 4) {// 涨幅超过4个点，++
+				up4++;
+			}
+		}
+		// 前面几个交易日波动必须小于4个点（只允许1-2次）
+		if (up4 <= 2) {
+			return true;
+		}
+		return false;
+	}
+
+	private List<TradeHistInfoDaliy> dibuqixing(CodeBaseModel2 newOne, TradeHistInfoDaliy res, boolean isSamll) {
 		// 底部小票
 		if (codeModelService.isDibuSmall(isSamll, newOne)) {
 
@@ -135,7 +157,7 @@ public class QibaoService {
 			}
 			if (low < res.getYesterdayPrice()) {
 				if (CurrencyUitl.cutProfit(low, res.getYesterdayPrice()) > 20) {// 本身已经大涨了，之前就不能涨太多
-					return false;// 涨幅太大
+					return null;// 涨幅太大
 				}
 			}
 
@@ -159,7 +181,7 @@ public class QibaoService {
 					// 上涨趋势
 					if (topDate.getDate() > lowDate.getDate()) {
 						if (CurrencyUitl.cutProfit(lowDate.getLow(), topDate.getHigh()) >= 50) {
-							return false;
+							return null;
 						}
 					}
 				}
@@ -168,11 +190,11 @@ public class QibaoService {
 			// 排除3:排除退市股票
 			String name = stockBasicService.getCodeName(newOne.getCode());
 			if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI)) {
-				return false;
+				return null;
 			}
-			return true;
+			return list;
 		}
-		return false;
+		return null;
 	}
 
 	/**
@@ -243,15 +265,22 @@ public class QibaoService {
 		return false;
 	}
 
-	// 旗形：后续的都不能超过之前高点
+	// 旗形：后续的都不能超过之前高点(只允许一次)
 	private boolean isOk(double high, List<TradeHistInfoDaliy> tmp) {
+		int tims = 0;
 		for (TradeHistInfoDaliy t : tmp) {
 			if (t.getHigh() > high) {
 				// System.err.println("=====>超过最高");
-				return false;
+				tims++;
+				if (tims > 1) {
+					return false;
+				}
 			}
 		}
-		return true;
+		if (tims <= 1) {
+			return true;
+		}
+		return false;
 	}
 
 }
