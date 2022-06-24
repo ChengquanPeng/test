@@ -125,9 +125,9 @@ public class LineAvgPrice {
 	public static void main(String[] args) {
 		TradeHistInfoDaliy t = new TradeHistInfoDaliy();
 		t.setTodayChange(1);
-		t.setYesterdayPrice(5.54);
-		t.setHigh(6.09);
-		t.setClosed(5.79);
+		t.setYesterdayPrice(7.11);
+		t.setHigh(7.81);
+		t.setClosed(7.48);
 		System.err.println(isShangYingXian(t));
 	}
 
