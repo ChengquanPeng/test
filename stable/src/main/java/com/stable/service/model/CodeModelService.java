@@ -215,27 +215,11 @@ public class CodeModelService {
 //			pool.setShotPointCheck(0);
 		}
 		boolean online4Year = stockBasicService.onlinePreYearChk(code, pre4Year);
-		// N年未大涨
-		List<FinanceBaseInfo> yearRpts = finBonus(isweekend, online4Year, newOne);
+		// 小市值
 		boolean isSmallStock = isSmallStock(newOne.getMkv(), newOne.getActMkv());
-		// 小而美模型：未涨&&年报 && 大股东集中
-		if (newOne.getZfjjup() >= 2 && isSmallStock && newOne.getHolderNumP5() >= 50) {
-			if (yearRpts == null) {
-				yearRpts = financeService.getFinacesReportByYearRpt(code, EsQueryPageUtil.queryPage5);
-			}
-			int c = yearRpts.size();
-			if (yearRpts != null) {
-				for (FinanceBaseInfo f : yearRpts) {
-					if (f.getGsjlr() <= 0) {
-						c--;
-					}
-				}
-			}
-			if (c >= (yearRpts.size() - 1)) {// 亏损最多一次
-				newOne.setTagSmallAndBeatf(1);
-				log.info("{} 小而美模型", code);
-			}
-		}
+		// N年未大涨
+		financeAndBonus(isweekend, online4Year, newOne, isSmallStock);
+
 		// 以下是系统指标，没有4年直接退出
 		if (!online4Year) {// 4年以上，退出
 			return;
@@ -387,11 +371,12 @@ public class CodeModelService {
 	}
 
 	// 周末计算-至少N年未大涨?
-	private List<FinanceBaseInfo> finBonus(boolean isweekend, boolean online4Year, CodeBaseModel2 newOne) {
+	private void financeAndBonus(boolean isweekend, boolean online4Year, CodeBaseModel2 newOne, boolean isSmallStock) {
 		// 周末计算-至少N年未大涨?
 		if (isweekend) {
 			newOne.setFinOK(0);
 			newOne.setBousOK(0);
+			newOne.setFinanceInc(0);
 
 			String code = newOne.getCode();
 			List<FinanceBaseInfo> yearRpts = financeService.getFinacesReportByYearRpt(code, EsQueryPageUtil.queryPage5);
@@ -400,20 +385,18 @@ public class CodeModelService {
 			if (yearRpts != null) {
 				Set<Integer> set = new HashSet<Integer>();
 				for (FinanceBaseInfo f : yearRpts) {
-					if (f.getQuarter() == 4) {
-						if (f.getGsjlr() < 0) {// 归属净利润
-						} else {
-							set.add(f.getYear());// 获取不亏年份
-						}
+					if (f.getGsjlr() < 0) {// 归属净利润
+					} else {
+						set.add(f.getYear());// 获取不亏年份
+					}
 
-						// 结束年份
-						if (f.getYear() > end) {
-							end = f.getYear();
-						}
-						// 开始年份
-						if (f.getYear() < start) {
-							start = f.getYear();
-						}
+					// 结束年份
+					if (f.getYear() > end) {
+						end = f.getYear();
+					}
+					// 开始年份
+					if (f.getYear() < start) {
+						start = f.getYear();
 					}
 				}
 
@@ -421,23 +404,47 @@ public class CodeModelService {
 					newOne.setFinOK(5);
 				} else {
 					int c = 0;
-					for (int s = end; s >= start; s--) {
+					for (int s = end; s >= start; s--) {// 从最近年份开始往前循环
 						if (set.contains(s)) {
 							c++;
-						} else {
+						} else {// 没有找到就结束
 							break;
 						}
 					}
 					newOne.setFinOK(c);
 				}
+
+				int inc = 0;
+				FinanceBaseInfo tmp = null;
+				for (FinanceBaseInfo f : yearRpts) {
+					if (tmp == null) {
+						tmp = f;
+					} else {
+						if (tmp.getGsjlr() > f.getGsjlr()) {
+							inc++;
+						} else {
+							break;
+						}
+						tmp = f;
+					}
+				}
+				if (inc >= 2) {
+					newOne.setFinanceInc(inc);
+				}
+
 			}
+			// 小而美模型：未涨&&年报 && 大股东集中
+			newOne.setTagSmallAndBeatf(0);
+			if (isDibuSmall(isSmallStock, newOne) && newOne.getHolderNumP5() >= 50 && newOne.getFinOK() >= 3) {
+				newOne.setTagSmallAndBeatf(1);
+			}
+
+			// 分红
 			if (start == Integer.MAX_VALUE) {
 				start = 0;
 			}
 			bonusService.bonusYear(code, start, end, newOne);
-			return yearRpts;
 		}
-		return null;
 	}
 
 	private void baseAnalyse(StockBaseInfo s, CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade) {

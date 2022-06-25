@@ -236,13 +236,20 @@ public class WebModelService {
 				if (dh.getZfjjupStable() > 0) {
 					sb5.append("<font color='red'>/stable").append(dh.getZfjjupStable()).append("</font>");
 				}
-				sb5.append("年未大涨,");
+				sb5.append("年未大涨");
+			}
+
+			if (dh.getFinOK() > 0) {
+				sb5.append(",连续" + dh.getFinOK() + "年业绩盈利");
+				if (dh.getFinanceInc() > 0) {
+					sb5.append(",连续" + dh.getFinanceInc() + "年增长");
+				}
 			}
 			if (dh.getBousOK() > 0) {
-				sb5.append("近" + dh.getBousOK() + "年分红,");
+				sb5.append(",连续" + dh.getBousOK() + "年分红");
 			}
 			if (dh.getFinOK() > 0) {
-				sb5.append("近" + dh.getFinOK() + "年业绩不亏,市盈率ttm:").append(dh.getPettm());
+				sb5.append(",市盈率ttm:").append(dh.getPettm());
 			}
 			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 		}
@@ -577,6 +584,8 @@ public class WebModelService {
 				bqb.must(QueryBuilders.matchPhraseQuery("tagHighZyChance", 1));// 高质押机会
 			} else if (mr.getTagIndex() == 7) {
 				bqb.must(QueryBuilders.matchPhraseQuery("sortMode7", 1));// 高质押机会
+			} else if (mr.getTagIndex() == 3) {
+				bqb.must(QueryBuilders.rangeQuery("financeInc").gte(1));// 业绩连续增长
 			}
 
 		}

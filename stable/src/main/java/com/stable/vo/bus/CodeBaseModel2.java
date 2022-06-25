@@ -52,7 +52,7 @@ public class CodeBaseModel2 extends EsBase {
 	private int dibuQixing = 0;// 旗形
 	@Field(type = FieldType.Long)
 	private int zyxing = 0;// 中阳带星
-	
+
 	@Field(type = FieldType.Text)
 	private String jsHist;// 技术面历史
 
@@ -138,6 +138,8 @@ public class CodeBaseModel2 extends EsBase {
 	// 标签
 	@Field(type = FieldType.Integer)
 	private int tagSmallAndBeatf;// 小而美
+	@Field(type = FieldType.Integer)
+	private int financeInc;// 业绩连续增长
 	@Field(type = FieldType.Integer)
 	protected int tagHighZyChance;// 高质押机会
 	@Field(type = FieldType.Integer)
