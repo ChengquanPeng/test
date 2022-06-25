@@ -655,13 +655,24 @@ public class CodeModelService {
 		StringBuffer sb1 = new StringBuffer();
 		StringBuffer sb2 = new StringBuffer();
 		// 退市风险:营收低于1亿
-		if (fa.getCurrJidu().getYyzsr() < CurrencyUitl.YI_N.longValue()) {
-			if (fa.getCurrJidu().getKfjlr() < 0) {
-				newOne.setBaseRed(1);
-				sb1.append(red++).append(".退市风险(ST):扣非净利润为负且营收低于1亿元").append(Constant.HTML_LINE);
+		if (fbi.getYyzsr() < CurrencyUitl.YI_N.longValue()) {
+			boolean chk = false;
+			if (fbi.getQuarter() <= 3) {
+				// 前面3季度要算平均值，且要超过1.3亿
+				if ((fbi.getYyzsr() / fbi.getQuarter()) * 4 <= (CurrencyUitl.YI_N.longValue() * 1.3)) {
+					chk = true;
+				}
 			} else {
-				newOne.setBaseRed(1);
-				sb1.append(red++).append(".退市风险(ST):营收低于1亿元(净利暂不为负)").append(Constant.HTML_LINE);
+				chk = true;
+			}
+			if (chk) {
+				if (fbi.getKfjlr() < 0) {
+					newOne.setBaseRed(1);
+					sb1.append(red++).append(".退市风险(ST):扣非净利润为负且营收低于1亿元").append(Constant.HTML_LINE);
+				} else {
+					newOne.setBaseRed(1);
+					sb1.append(red++).append(".退市风险(ST):营收低于1亿元(净利暂不为负)").append(Constant.HTML_LINE);
+				}
 			}
 		}
 		// 退市风险:净资产为负
