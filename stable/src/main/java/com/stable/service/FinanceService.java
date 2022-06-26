@@ -784,6 +784,6 @@ public class FinanceService {
 		esFinanceBaseInfoDao.saveAll(rl);
 		log.info("同步财务报告报告[end]");
 		WxPushUtil.pushSystem1("同步股票财务报告完成！股票总数：[" + total + "],成功股票数[" + cnt + "],失败股票数=" + (total - cnt));
-		monitorPoolService.jobXjlWarning();
+		// monitorPoolService.jobXjlWarning();
 	}
 }

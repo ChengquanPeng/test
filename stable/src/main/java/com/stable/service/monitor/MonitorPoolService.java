@@ -654,12 +654,17 @@ public class MonitorPoolService {
 				List<String> bao = new LinkedList<String>();
 				for (MonitorPoolTemp cp : list) {
 					TradeHistInfoDaliyNofq d = map.get(cp.getCode());
-
 					if (d != null) {
 						try {
+							CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(d.getCode());
+							String yz = "";
+							if (cbm.getShooting7() > 0) {
+								yz = "[优]";
+							}
+							// 旗形起爆
 							String line = null;
 							if (d.getHigh() >= cp.getShotPointPrice()) {
-								line = stockBasicService.getCodeName2(cp.getCode()) + " " + " 突破价格:"
+								line = yz + stockBasicService.getCodeName2(cp.getCode()) + " " + " 突破价格:"
 										+ cp.getShotPointPrice();
 							} else if (cp.getShotPointDate() > 0) {
 								List<TradeHistInfoDaliy> listt = daliyTradeHistroyService.queryListByCodeWithLastQfq(
@@ -677,7 +682,7 @@ public class MonitorPoolService {
 									}
 
 									if ((d.getVolume() * 2) <= (maxvol * 1.2)) {// 缩量
-										line = stockBasicService.getCodeName2(cp.getCode()) + " " + " 缩量买点";
+										line = yz + stockBasicService.getCodeName2(cp.getCode()) + " " + " 缩量买点";
 									}
 								}
 							}
@@ -686,14 +691,22 @@ public class MonitorPoolService {
 									line += ",接近旗形底部买点:[" + cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5()
 											+ "]";
 								} else {
-									line = stockBasicService.getCodeName2(cp.getCode()) + " 接近旗形底部买点:["
+									line = yz + stockBasicService.getCodeName2(cp.getCode()) + " 接近旗形底部买点:["
 											+ cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5() + "]";
+								}
+							}
+
+							// 十字星
+							if (cbm.getZyxing() == 1) {
+								if (line != null) {
+									line += ",[中阳十字星]";
+								} else {
+									line = yz + stockBasicService.getCodeName2(cp.getCode()) + " [中阳十字星]";
 								}
 							}
 							if (line != null) {
 								bao.add(line);
 							}
-
 						} catch (Exception e) {
 							e.printStackTrace();
 							WxPushUtil.pushSystem1(d.getCode() + "起爆点异常");
@@ -712,22 +725,22 @@ public class MonitorPoolService {
 	}
 
 	// 经营现金流转正监听
-	public void jobXjlWarning() {
-		List<UserInfo> ulist = userService.getUserListForMonitorS1();
-		for (UserInfo u : ulist) {
-			List<MonitorPoolTemp> list = this.getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0,
-					0, 1);
-			if (list != null) {
-				for (MonitorPoolTemp mp : list) {
-					FinanceBaseInfo fbi = financeService.getLastFinaceReport(mp.getCode());
-					if (fbi.getJyxjlce() > 0 || fbi.getMgjyxjl() > 0) {
-						WxPushUtil.pushSystem1(u.getWxpush(),
-								mp.getCode() + " 经营现金流净额已转正(" + fbi.getYear() + "年" + fbi.getQuarter() + "季度)");
-					}
-				}
-			}
-		}
-	}
+//	public void jobXjlWarning() {
+//		List<UserInfo> ulist = userService.getUserListForMonitorS1();
+//		for (UserInfo u : ulist) {
+//			List<MonitorPoolTemp> list = this.getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0,
+//					0, 1);
+//			if (list != null) {
+//				for (MonitorPoolTemp mp : list) {
+//					FinanceBaseInfo fbi = financeService.getLastFinaceReport(mp.getCode());
+//					if (fbi.getJyxjlce() > 0 || fbi.getMgjyxjl() > 0) {
+//						WxPushUtil.pushSystem1(u.getWxpush(),
+//								mp.getCode() + " 经营现金流净额已转正(" + fbi.getYear() + "年" + fbi.getQuarter() + "季度)");
+//					}
+//				}
+//			}
+//		}
+//	}
 
 	// 快预报监听
 	public void kybMonitor() {
