@@ -46,7 +46,23 @@ public class WxPushUtil {
 	}
 
 	private final static boolean pushMsg(int contentType, String content, String singleId) {
-		return pushMsg(contentType, content, singleId, null);
+		return pushMsgWarp(contentType, content, singleId, null);
+	}
+
+	private final static boolean pushMsgWarp(int contentType, String content, String singleId, Set<String> uids) {
+		if (pushMsg(contentType, content, singleId, uids)) {
+			return true;
+		}
+		int i = 1;
+		while (i <= 3) {
+			ThreadsUtil.sleepRandomSecBetween1And5();
+			if (pushMsg(contentType, content, singleId, uids)) {
+				return true;
+			}
+			i++;
+		}
+
+		return false;
 	}
 
 	private final static boolean pushMsg(int contentType, String content, String singleId, Set<String> uids) {
