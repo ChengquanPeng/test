@@ -137,23 +137,42 @@ public class ConceptService {
 		return null;
 	}
 
+	public List<Concept> getConceptList(int limit) {
+		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		if (limit > 0) {
+			bqb.must(QueryBuilders.rangeQuery("cnt").lte(limit));
+		}
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+		Page<Concept> page = esConceptDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		log.info("no records 1");
+		return null;
+	}
+
 	/**
 	 * 根据板块/概率获取相关股票
 	 */
 	public List<String> listCodesByAliasCode(String aliasCode, EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		Concept cp = getConceptId(aliasCode);
-		if (cp == null) {
-			return null;
-		}
-		String conceptId = cp.getId();
-		if (StringUtils.isNotBlank(conceptId)) {
-			bqb.must(QueryBuilders.matchPhraseQuery("conceptId", conceptId));
-		} else {
-			return null;
-		}
-		// TODO -后面可以直接查询整个，不需要转换
-//		bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", aliasCode));
+//		Concept cp = getConceptId(aliasCode);
+//		if (cp == null) {
+//			return null;
+//		}
+//		String conceptId = cp.getId();
+//		if (StringUtils.isNotBlank(conceptId)) {
+//			bqb.must(QueryBuilders.matchPhraseQuery("conceptId", conceptId));
+//		} else {
+//			return null;
+//		}
+		// 后面可以直接查询整个，不需要转换
+		bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", aliasCode));
 		FieldSortBuilder sort = SortBuilders.fieldSort("code").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());

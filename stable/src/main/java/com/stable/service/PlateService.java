@@ -11,9 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.service.model.WebModelService;
 import com.stable.utils.CurrencyUitl;
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.Concept;
 import com.stable.vo.bus.FinanceBaseInfo;
+import com.stable.vo.http.req.ModelReq;
 import com.stable.vo.http.resp.PlateResp;
 
 import lombok.extern.log4j.Log4j2;
@@ -30,6 +33,33 @@ public class PlateService {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private FinanceService financeService;
+	@Autowired
+	private WebModelService webModelService;
+
+	public List<PlateResp> klinelist() {
+		List<PlateResp> res = new LinkedList<PlateResp>();
+		int limit = 200;
+		List<Concept> list = conceptService.getConceptList(limit);
+		for (Concept cp : list) {
+			if (cp.getCnt() > 0) {
+				ModelReq mr = new ModelReq();
+				mr.setConceptId(cp.getAliasCode2());
+				mr.setShooting52(1);
+				List<CodeBaseModel2> listr = webModelService.getList(mr, EsQueryPageUtil.queryPage9999);
+				if (listr != null) {
+					PlateResp pr = new PlateResp();
+					pr.setCode(cp.getAliasCode2());
+					pr.setCodeName(cp.getName());
+					pr.setT4(listr.size() / Double.valueOf(cp.getCnt()));
+					pr.setRanking1(listr.size());
+					pr.setRanking2(cp.getCnt());
+					res.add(pr);
+				}
+			}
+		}
+		arSort(res);
+		return res;
+	}
 
 	public List<PlateResp> plateAnalyse(String aliasCode, String codes, int sort) {
 		List<PlateResp> rl = new LinkedList<PlateResp>();
