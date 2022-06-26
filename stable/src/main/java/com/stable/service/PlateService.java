@@ -41,7 +41,7 @@ public class PlateService {
 		int limit = 200;
 		List<Concept> list = conceptService.getConceptList(limit);
 		for (Concept cp : list) {
-			if (cp.getCnt() > 0) {
+			if (cp.getCnt() > 0 && !cp.getAliasCode2().equals(cp.getName())) {
 				ModelReq mr = new ModelReq();
 				mr.setConceptId(cp.getAliasCode2());
 				mr.setShooting52(1);
@@ -50,7 +50,7 @@ public class PlateService {
 					PlateResp pr = new PlateResp();
 					pr.setCode(cp.getAliasCode2());
 					pr.setCodeName(cp.getName());
-					pr.setT4(listr.size() / Double.valueOf(cp.getCnt()));
+					pr.setT4(cp.getCnt() / Double.valueOf(listr.size()));
 					pr.setRanking1(listr.size());
 					pr.setRanking2(cp.getCnt());
 					res.add(pr);
