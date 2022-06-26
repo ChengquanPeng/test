@@ -50,22 +50,22 @@ public class WxPushUtil {
 	}
 
 	private final static boolean pushMsgWarp(int contentType, String content, String singleId, Set<String> uids) {
-		if (pushMsg(contentType, content, singleId, uids)) {
+		if (pushMsg(contentType, content, singleId, uids, false)) {
 			return true;
 		}
 		int i = 1;
 		while (i <= 3) {
 			ThreadsUtil.sleepRandomSecBetween1And5();
-			if (pushMsg(contentType, content, singleId, uids)) {
+			if (pushMsg(contentType, content, singleId, uids, (i == 3))) {
 				return true;
 			}
 			i++;
 		}
-
 		return false;
 	}
 
-	private final static boolean pushMsg(int contentType, String content, String singleId, Set<String> uids) {
+	private final static boolean pushMsg(int contentType, String content, String singleId, Set<String> uids,
+			boolean showErrorLog) {
 		try {
 			Message message = new Message();
 			message.setAppToken(appToken);
@@ -84,8 +84,10 @@ public class WxPushUtil {
 			log.info("微信推送内容:{},状态:{}", content, mr.getStatus());
 			return true;
 		} catch (Exception e) {
-			ErrorLogFileUitl.writeError(e, "微信推送内容异常", content, "");
-			e.printStackTrace();
+			if (showErrorLog) {
+				ErrorLogFileUitl.writeError(e, "微信推送内容异常", content, "");
+				e.printStackTrace();
+			}
 		}
 		return false;
 	}

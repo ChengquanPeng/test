@@ -238,17 +238,14 @@ public class WebModelService {
 				}
 				sb5.append("年未大涨");
 			}
-
+			if (dh.getBousOK() > 0) {
+				sb5.append(",连续" + dh.getBousOK() + "年分红");
+			}
 			if (dh.getFinOK() > 0) {
 				sb5.append(",连续" + dh.getFinOK() + "年业绩盈利");
 				if (dh.getFinanceInc() > 0) {
 					sb5.append(",连续" + dh.getFinanceInc() + "年增长");
 				}
-			}
-			if (dh.getBousOK() > 0) {
-				sb5.append(",连续" + dh.getBousOK() + "年分红");
-			}
-			if (dh.getFinOK() > 0) {
 				sb5.append(",市盈率ttm:").append(dh.getPettm());
 			}
 			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
