@@ -50,7 +50,7 @@ public class PlateController {
 			PrintWriter w = response.getWriter();
 			List<PlateResp> list = plateService.klinelist();
 			if (list != null && list.size() > 0) {
-				w.write("攻击形态板块排序<br/><table><tr><td>code</td><td>name</td><td>排名</td><td>攻击数量/总数量</td><tr/>");
+				w.write("攻击形态板块排序<br/><table><tr><td>code</td><td>name</td><td>排名</td><td>攻击形态数量/板块总数量</td><tr/>");
 				for (PlateResp row : list) {
 					w.write("<tr><td>" + row.getCode() + "</td><td>" + row.getCodeName() + "</td><td>" + row.getT4()
 							+ "</td><td>" + row.getRanking1() + "/" + row.getRanking2() + "</td><tr/>");
