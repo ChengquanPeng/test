@@ -104,7 +104,7 @@ public class RealtimeMonitoringService {
 
 					RtmVo rv = new RtmVo(t,
 							modelWebService.getLastOneByCodeResp(t.getCode(), t.getUserId() == Constant.MY_ID));
-					rv.setBizPushService(bizPushService);
+					rv.setServiceAndPrew(bizPushService);
 					ml.add(rv);
 					allmap.put(t.getCode(), ml);
 				}

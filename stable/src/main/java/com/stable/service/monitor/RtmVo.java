@@ -29,7 +29,7 @@ public class RtmVo {
 		msg = msgt;
 	}
 
-	public void setBizPushService(BizPushService bizs) {
+	public void setServiceAndPrew(BizPushService bizs) {
 		this.bizPushService = bizs;
 		warningYellow = (orig.getShotPointPrice() * 0.98);
 	}
