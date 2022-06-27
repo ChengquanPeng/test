@@ -45,15 +45,20 @@ public class PlateService {
 					&& !"885869|885582|885905|885907|885906".contains(cp.getAliasCode2())) {
 				ModelReq mr = new ModelReq();
 				mr.setConceptId(cp.getAliasCode2());
-				mr.setShooting52(1);
 				List<CodeBaseModel2> listr = webModelService.getList(mr, EsQueryPageUtil.queryPage9999);
 				if (listr != null) {
+					int ck = 0;
+					for (CodeBaseModel2 cm : listr) {
+						if (cm.getShootingw() == 1) {
+							ck++;
+						}
+					}
 					PlateResp pr = new PlateResp();
 					pr.setCode(cp.getAliasCode2());
 					pr.setCodeName(cp.getName());
-					pr.setT4(cp.getCnt() / Double.valueOf(listr.size()));
-					pr.setRanking1(listr.size());
-					pr.setRanking2(cp.getCnt());
+					pr.setT4(ck / Double.valueOf(listr.size()));
+					pr.setRanking1(ck);
+					pr.setRanking2(listr.size());
 					res.add(pr);
 				}
 			}
