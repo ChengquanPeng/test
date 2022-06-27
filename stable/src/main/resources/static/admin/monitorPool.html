@@ -206,6 +206,14 @@ body {
 											title : '流动性-地量'
 										},
 										{
+											field : 'ab',
+											title : '起爆监听'',
+												formatter : function(value, row,
+														index) {
+													return row.shotPointPrice+",["+row.shotPointPriceLow+"-"+row.shotPointPriceLow5+"]";
+												}
+										},
+										{
 											field : 'monitor',
 											title : '操作',
 											formatter : function(value, row,

@@ -31,7 +31,6 @@ public class RtmVo {
 
 	public void setBizPushService(BizPushService bizs) {
 		this.bizPushService = bizs;
-		warningYellow = orig.getShotPointPrice() * 0.98;
+		warningYellow = (orig.getShotPointPrice() * 0.98);
 	}
-
 }

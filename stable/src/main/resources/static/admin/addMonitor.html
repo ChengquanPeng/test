@@ -86,6 +86,10 @@ body {
 				</div>
 				<br />
 				<div class="input-group">
+					起爆监听：<span id="qibao"></span>
+				</div>
+				<br />
+				<div class="input-group">
 					在线：<input type="checkbox" id="realtime" name="realtime" />
 				</div>
 				<div class="input-group">
@@ -180,7 +184,7 @@ body {
 			if (document.getElementById("dzjy").checked) {
 				dzjy = 1;
 			}
-			
+
 			var listenerGg = 0
 			if (document.getElementById("listenerGg").checked) {
 				listenerGg = 1;
@@ -261,6 +265,14 @@ body {
 				}
 				$('#zfdone').val(reData.result.zfdone);
 				$('#buyLowVol').val(reData.result.buyLowVol);
+				if (reData.result.shotPointPrice > 0) {
+					$('#qibao').html(
+							reData.result.shotPointPrice + ",["
+									+ reData.result.shotPointPriceLow + "-"
+									+ reData.result.shotPointPriceLow5 + "]");
+				} else {
+					$('#qibao').html("无");
+				}
 			}
 		});
 	</script>

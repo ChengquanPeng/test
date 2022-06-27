@@ -118,8 +118,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 										.PushS2(codeName + " 已经到达起爆买点:" + qibao.getOrig().getShotPointPrice());
 							} else if (!burstPointCheckTopPrew && rt.getHigh() >= rv.warningYellow) {
 								burstPointCheckTopPrew = true;
-								qibao.bizPushService
-										.PushS2(codeName + " 准备突破起爆买点:" + qibao.getOrig().getShotPointPrice());
+								qibao.bizPushService.PushS2(codeName + " 准备突破起爆买点:"
+										+ qibao.getOrig().getShotPointPrice() + "目前:" + rv.warningYellow);
 							}
 						}
 						if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()

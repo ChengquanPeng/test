@@ -30,12 +30,12 @@ public class QibaoService {
 
 //	@javax.annotation.PostConstruct
 //	public void test() {
-		// 002612-20200527
-		// 002900-20210315
-		// 600789-20200115
-		// 000678-20220610
-		// 000025-20220519
-		// 000017-20220526
+	// 002612-20200527
+	// 002900-20210315
+	// 600789-20200115
+	// 000678-20220610
+	// 000025-20220519
+	// 000017-20220526
 //		String code = "002864";
 //		int date = 20220315;
 //		System.out.println("=====");
@@ -87,8 +87,11 @@ public class QibaoService {
 				pool.setShotPointDate(res.getDate());
 				newOne.setDibuQixing(1);
 			} else {
-				pool.setShotPointDate(0);
 				newOne.setDibuQixing(0);
+				pool.setShotPointDate(0);
+				pool.setShotPointPrice(0);
+				pool.setShotPointPriceLow(0);
+				pool.setShotPointPriceLow5(0);
 			}
 		} else {
 			if (newOne.getDibuQixing() == 1) {

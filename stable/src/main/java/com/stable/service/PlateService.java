@@ -41,7 +41,8 @@ public class PlateService {
 		int limit = 200;
 		List<Concept> list = conceptService.getConceptList(limit);
 		for (Concept cp : list) {
-			if (cp.getCnt() > 0 && !cp.getAliasCode2().equals(cp.getName())) {
+			if (cp.getCnt() > 0 && !cp.getAliasCode2().equals(cp.getName())
+					&& !"885869|885582|885905|885907|885906".contains(cp.getAliasCode2())) {
 				ModelReq mr = new ModelReq();
 				mr.setConceptId(cp.getAliasCode2());
 				mr.setShooting52(1);
