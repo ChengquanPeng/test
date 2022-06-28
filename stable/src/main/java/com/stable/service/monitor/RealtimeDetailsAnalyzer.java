@@ -28,7 +28,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 	private boolean burstPointCheckTopPrew = false;// 突破前1%
 	private boolean burstPointCheckTop = false;// 突破
-	private boolean burstPointCheckLow = false;// 底线
+//	private boolean burstPointCheckLow = false;// 底线
 
 	public void stop() {
 		isRunning = false;
@@ -74,7 +74,11 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		long d1300 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(date);
 		// long d1450 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
 		// DateUtil.parseDate(today + "145000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
-
+		if (qibao != null) {
+			WAIT_MIN = ONE_MIN;// 起爆一分钟一次
+//			double today = CurrencyUitl.topPrice(srt.getYesterday(), false);//今天涨停价格
+//			qibao.getOrig().getShotPointPrice()
+		}
 		String smsg = null;
 		while (isRunning) {
 			try {
@@ -122,13 +126,13 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 										+ qibao.getOrig().getShotPointPrice() + "目前:" + qibao.warningYellow);
 							}
 						}
-						if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
-								&& rt.getLow() <= qibao.getOrig().getShotPointPriceLow5()) {
-							burstPointCheckLow = true;
-							qibao.bizPushService
-									.PushS2(codeName + " 接近旗形底部买点[:" + qibao.getOrig().getShotPointPriceLow() + "-"
-											+ qibao.getOrig().getShotPointPriceLow5() + "]");
-						}
+//						if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
+//								&& rt.getLow() <= qibao.getOrig().getShotPointPriceLow5()) {
+//							burstPointCheckLow = true;
+//							qibao.bizPushService
+//									.PushS2(codeName + " 接近旗形底部买点[:" + qibao.getOrig().getShotPointPriceLow() + "-"
+//											+ qibao.getOrig().getShotPointPriceLow5() + "]");
+//						}
 					}
 					// 发送
 					if (!smsg.equals("")) {
