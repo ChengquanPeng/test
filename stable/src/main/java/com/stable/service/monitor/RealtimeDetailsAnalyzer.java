@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.stable.spider.realtime.RealTime;
 import com.stable.spider.realtime.RealtimeCall;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MonitoringUitl;
 import com.stable.utils.WxPushUtil;
@@ -53,13 +54,14 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				qibao = rv;
 			}
 		}
+		RealTime srt = null;
 		if (chkCodeClosed) {// 重新检测停牌
 			try {
 				Thread.sleep(TEN_MIN);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			RealTime srt = RealtimeCall.get(code);
+			srt = RealtimeCall.get(code);
 			if (srt.getOpen() == 0.0) {
 				log.info("SINA 今日停牌,{}", codeName);
 				for (RtmVo rv : cps) {
@@ -76,8 +78,16 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		// DateUtil.parseDate(today + "145000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
 		if (qibao != null) {
 			WAIT_MIN = ONE_MIN;// 起爆一分钟一次
-//			double today = CurrencyUitl.topPrice(srt.getYesterday(), false);//今天涨停价格
-//			qibao.getOrig().getShotPointPrice()
+			if (srt == null) {
+				srt = RealtimeCall.get(code);
+			}
+			double today = CurrencyUitl.topPrice(srt.getYesterday(), false);// 今天涨停价格
+			if (today < qibao.getOrig().getShotPointPrice()) {
+				double wp4 = CurrencyUitl.roundHalfUp((qibao.getOrig().getShotPointPrice() * 0.94));// 起爆点的-4%
+				if (wp4 <= today && today < qibao.getOrig().getShotPointPrice()) {// 涨停价+2%触及起爆点时，就提前4%预警
+					qibao.warningYellow = wp4;
+				}
+			}
 		}
 		String smsg = null;
 		while (isRunning) {

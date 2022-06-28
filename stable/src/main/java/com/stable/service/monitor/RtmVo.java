@@ -3,6 +3,7 @@ package com.stable.service.monitor;
 import com.stable.constant.Constant;
 import com.stable.enums.MonitorType;
 import com.stable.service.biz.BizPushService;
+import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.http.resp.CodeBaseModelResp;
 
@@ -31,6 +32,6 @@ public class RtmVo {
 
 	public void setServiceAndPrew(BizPushService bizs) {
 		this.bizPushService = bizs;
-		warningYellow = (orig.getShotPointPrice() * 0.98);
+		warningYellow = CurrencyUitl.roundHalfUp((orig.getShotPointPrice() * 0.98));
 	}
 }

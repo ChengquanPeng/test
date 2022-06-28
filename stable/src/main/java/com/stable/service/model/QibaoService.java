@@ -37,20 +37,22 @@ public class QibaoService {
 		// 000678-20220610
 		// 000025-20220519
 		// 000017-20220526
-//		String code = "600503";
-//		int date = 20220627;
+//		String[] codes = { "002612", "002900", "600789", "000678", "000025", "000017" };
+//		int[] dates = { 20200527, 20210315, 20200115, 20220610, 20220519, 20220526 };
 //
-//		CodeBaseModel2 newOne = new CodeBaseModel2();
-//		newOne.setZfjjup(2);
-//		newOne.setZfjjupStable(1);
-//		newOne.setCode(code);
-//		MonitorPoolTemp pool = new MonitorPoolTemp();
-//		qibao(date, newOne, pool, true, new StringBuffer());
-//		System.err.println("=====");
-//		System.err.println("Qixing:" + newOne.getQixing());
-//		System.err.println("DiQixing:" + newOne.getDibuQixing());
-//		System.err.println("Zyxing:" + newOne.getZyxing());
-//		System.err.println("=====");
+//		for (int i = 0; i < codes.length; i++) {
+//			String code = codes[i];
+//			int date = dates[i];
+//
+//			CodeBaseModel2 newOne = new CodeBaseModel2();
+//			newOne.setZfjjup(2);
+//			newOne.setZfjjupStable(1);
+//			newOne.setCode(code);
+//			MonitorPoolTemp pool = new MonitorPoolTemp();
+//			qibao(date, newOne, pool, true, new StringBuffer());
+//			System.err.println(code + "=====" + "Qixing:" + newOne.getQixing() + ",DiQixing:" + newOne.getDibuQixing()
+//					+ ",Zyxing:" + newOne.getZyxing());
+//		}
 //		System.exit(0);
 //	}
 
