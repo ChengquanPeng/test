@@ -108,12 +108,9 @@ public class LoginController {
 
 		// 管理登录
 		if ((phone.equals(String.valueOf(Constant.MY_ID)) && "3n10b".equals(code))) {
-			UserInfo ui = new UserInfo();
-			ui.setType(1);
-			ui.setId(Constant.MY_ID);
+			mylogin(req);
 			r.setResult(Constant.LOGINED_URL_ADMIN);
 			r.setStatus(JsonResult.OK);
-			req.getSession().setAttribute(Constant.SESSION_USER, ui);
 			return ResponseEntity.ok(r);
 		}
 
@@ -133,6 +130,13 @@ public class LoginController {
 		r.setStatus(JsonResult.FAIL);
 		r.setResult("动态码错误");
 		return ResponseEntity.ok(r);
+	}
+
+	public void mylogin(HttpServletRequest req) {
+		UserInfo ui = new UserInfo();
+		ui.setType(1);
+		ui.setId(Constant.MY_ID);
+		req.getSession().setAttribute(Constant.SESSION_USER, ui);
 	}
 
 	@RequestMapping(value = "/logout", method = RequestMethod.GET)
