@@ -31,12 +31,12 @@ public class QibaoService {
 
 //	@javax.annotation.PostConstruct
 //	public void test() {
-		// 002612-20200527
-		// 002900-20210315
-		// 600789-20200115
-		// 000678-20220610
-		// 000025-20220519
-		// 000017-20220526
+	// 002612-20200527
+	// 002900-20210315
+	// 600789-20200115
+	// 000678-20220610
+	// 000025-20220519
+	// 000017-20220526
 //		String[] codes = { "002612", "002900", "600789", "000678", "000025", "000017" };
 //		int[] dates = { 20200527, 20210315, 20200115, 20220610, 20220519, 20220526 };
 //
@@ -56,7 +56,28 @@ public class QibaoService {
 //		System.exit(0);
 //	}
 
-	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
+	private void setQxRes(CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isQx) {
+		if (newOne.getDibuQixing() == 1) {
+			String jsHist = newOne.getQixing() + "底部旗形" + ";" + newOne.getJsHist();
+			newOne.setJsHist(StringUtil.subString(jsHist, 100));
+		}
+		if (isQx) {
+			newOne.setQixing(1);
+		} else {
+			newOne.setQixing(0);
+		}
+		newOne.setDibuQixing(0);
+		pool.setShotPointDate(0);
+		pool.setShotPointPrice(0);
+		pool.setShotPointPriceLow(0);
+		pool.setShotPointPriceLow5(0);
+	}
+
+	private void qx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
+		if (newOne.getPls() == 2 || !isSamll) {
+			setQxRes(newOne, pool, false);
+			return;
+		}
 		// 起爆点1：旗形
 		List<TradeHistInfoDaliy> list = null;
 		if (newOne.getQixing() == 0) {
@@ -91,27 +112,24 @@ public class QibaoService {
 				pool.setShotPointDate(res.getDate());
 				newOne.setDibuQixing(1);
 			} else {
-				newOne.setDibuQixing(0);
-				pool.setShotPointDate(0);
-				pool.setShotPointPrice(0);
-				pool.setShotPointPriceLow(0);
-				pool.setShotPointPriceLow5(0);
+				setQxRes(newOne, pool, true);
 			}
 		} else {
-			if (newOne.getDibuQixing() == 1) {
-				String jsHist = newOne.getQixing() + "底部旗形" + ";" + newOne.getJsHist();
-				newOne.setJsHist(StringUtil.subString(jsHist, 100));
-			}
-			newOne.setQixing(0);
-			newOne.setDibuQixing(0);
-			pool.setShotPointDate(0);
-			pool.setShotPointPrice(0);
-			pool.setShotPointPriceLow(0);
-			pool.setShotPointPriceLow5(0);
+			setQxRes(newOne, pool, false);
 		}
+	}
+
+	private void szx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
+		if (newOne.getPls() == 2) {
+			newOne.setZyxing(0);
+			return;
+		}
+		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0, date,
+				EsQueryPageUtil.queryPage30, SortOrder.DESC);
 		// 起爆点：中阳线,第二天十字星或者小影线
 		// 1. 3-6个点
 		// 2. 5天涨幅低于2%
+		TradeHistInfoDaliy first = list.get(0);
 		boolean getZyx = false;
 		if (first.getOpen() >= first.getClosed() || CurrencyUitl.cutProfit(first.getOpen(), first.getClosed()) <= 0.5) {
 			// 收影线或者10字星
@@ -132,6 +150,11 @@ public class QibaoService {
 			}
 			newOne.setZyxing(0);
 		}
+	}
+
+	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
+		qx(date, newOne, pool, isSamll, qx);
+		szx(date, newOne, pool, isSamll, qx);
 	}
 
 	private boolean dibuqixing2(List<TradeHistInfoDaliy> list2, QiBaoInfo res) {

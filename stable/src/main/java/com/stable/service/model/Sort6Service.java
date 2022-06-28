@@ -6,8 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
@@ -20,12 +18,11 @@ import com.stable.vo.spi.req.EsQueryPageReq;
 
 import lombok.extern.log4j.Log4j2;
 
-@Service
+//@Service 已废弃
 @Log4j2
+@Deprecated
 public class Sort6Service {
-	@Autowired
 	private AvgService avgService;
-	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	// 符合短线 //短线模型6(前期3-50%吸筹，深度回踩突然涨停后再2-5个交易日回踩拉起,涨停日不放量，超过涨停价格后买入，买入2内未大幅拉升放弃
 	// sortV6Service.isWhiteHorseForSortV6(sortV6Service.is15DayTodayPriceOk(code,

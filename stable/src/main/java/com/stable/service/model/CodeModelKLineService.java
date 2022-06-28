@@ -48,8 +48,6 @@ public class CodeModelKLineService {
 	@Autowired
 	private Sort0Service sort0Service;
 	@Autowired
-	private Sort6Service sort6Service;
-	@Autowired
 	private Sort1ModeService sort1ModeService;
 	@Autowired
 	private RedisUtil redisUtil;
@@ -176,9 +174,9 @@ public class CodeModelKLineService {
 		}
 		// 均线排列，一阳穿N线
 		LineAvgPrice.avgLineUp(s, newOne, avgService, code, tradeDate);
-		// 基本面-疑似白马//TODO白马更多细节，比如市值，基金
+		// 基本面-疑似白马
 		susWhiteHorses(code, newOne);
-		// 短线模型
+		// 短线模型(箱体震荡-已废弃，实际是半年新高)
 		sortModel(newOne, tradeDate);
 		// 攻击形态
 		sort0Service.attackAndW(newOne, tradeDate);
@@ -208,13 +206,14 @@ public class CodeModelKLineService {
 	}
 
 	private void sortModel(CodeBaseModel2 newOne, int tradeDate) {
-		String code = newOne.getCode();
-		// 短线模型7(箱体震荡新高，是否有波浪走势)
-		if (sort6Service.isWhiteHorseForSortV7(code, tradeDate)) {
-			newOne.setSortMode7(1);
-		} else {
-			newOne.setSortMode7(0);
-		}
+		newOne.setSortMode7(0);// 箱体震荡实际就是半年新高，暂时移除
+//		String code = newOne.getCode();
+//		// 短线模型7(箱体震荡新高，是否有波浪走势)
+//		if (sort6Service.isWhiteHorseForSortV7(code, tradeDate)) {
+//			newOne.setSortMode7(1);
+//		} else {
+//			newOne.setSortMode7(0);
+//		}
 	}
 
 	// 周末计算-至少N年未大涨?
