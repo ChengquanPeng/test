@@ -237,6 +237,7 @@ public class PriceLifeService {
 				break;
 			}
 			int start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, i * days));
+//			System.err.println("1start=" + start + ",end=" + end);
 			TradeHistInfoDaliy low = getlowest(code, start, end);
 			if (low != null) {// 停牌太久
 				TradeHistInfoDaliy high = getHighest(code, start, end);
@@ -246,8 +247,10 @@ public class PriceLifeService {
 					if (stable && !stable(code, start, end, days, days2)) {
 						break;
 					}
+//					System.err.println(
+//							"year==>" + year + ",index=" + index + ",high=" + high.getDate() + ",low=" + low.getDate());
 					year = i;
-					// System.err.println("year==>" + year);
+
 				} else {
 					break;
 				}
@@ -267,21 +270,22 @@ public class PriceLifeService {
 		if (stable) {
 			rateup = 75;
 		}
-		end = DateUtil.formatYYYYMMDDReturnInt(now);
-		int endt = Integer.MAX_VALUE;
+		int endt = DateUtil.formatYYYYMMDDReturnInt(now);
 		for (int i = 1; i <= 5; i++) {
 			int start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, i * days));
 			if (endt < listdate) {
 				break;
 			}
+//			System.err.println("start=" + start + ",end=" + endt);
 			if (stable && !stable(code, start, endt, days, days2)) {
 				break;
 			} else {
-				TradeHistInfoDaliy low = getlowest(code, start, end);
+				TradeHistInfoDaliy low = getlowest(code, start, endt);
 				if (low != null) {// 停牌太久
-					TradeHistInfoDaliy high = getHighest(code, start, end);
+					TradeHistInfoDaliy high = getHighest(code, start, endt);
 					double profit = CurrencyUitl.cutProfit(low.getLow(), high.getHigh());
 					if (profit <= rateup) {// 整幅120
+//						System.err.println("year==>" + year + ",high=" + high.getDate() + ",low=" + low.getDate());
 					} else {
 						break;
 					}
@@ -289,10 +293,21 @@ public class PriceLifeService {
 					break;
 				}
 			}
+
 			year = i;
 			endt = start;
 		}
 		if (year >= 2) {
+			int start = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, (year == 2 ? 3 : year) * days));
+			endt = DateUtil.formatYYYYMMDDReturnInt(now);
+//			System.err.println("3start=" + start + ",end=" + endt);
+			TradeHistInfoDaliy low = getlowest(code, start, endt);
+			TradeHistInfoDaliy high = getHighest(code, start, endt);
+			double profit = CurrencyUitl.cutProfit(low.getLow(), high.getHigh());
+//			System.err.println("profit==>" + profit + ",high=" + high.getDate() + ",low=" + low.getDate());
+			if (profit >= rateup) {
+				return 0;
+			}
 			return year;
 		}
 		if (stable && year == 1) {

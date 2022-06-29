@@ -20,7 +20,10 @@ import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 
+import lombok.extern.log4j.Log4j2;
+
 @Service
+@Log4j2
 public class QibaoService {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
@@ -31,14 +34,16 @@ public class QibaoService {
 
 //	@javax.annotation.PostConstruct
 //	public void test() {
-	// 002612-20200527
-	// 002900-20210315
-	// 600789-20200115
-	// 000678-20220610
-	// 000025-20220519
-	// 000017-20220526
+		// 002612-20200527
+		// 002900-20210315
+		// 600789-20200115
+		// 000678-20220610
+		// 000025-20220519
+		// 000017-20220526
 //		String[] codes = { "002612", "002900", "600789", "000678", "000025", "000017" };
 //		int[] dates = { 20200527, 20210315, 20200115, 20220610, 20220519, 20220526 };
+//		String[] codes = { "600695", "603991" };
+//		int[] dates = { 20220628, 20220628 };
 //
 //		for (int i = 0; i < codes.length; i++) {
 //			String code = codes[i];
@@ -52,6 +57,7 @@ public class QibaoService {
 //			qibao(date, newOne, pool, true, new StringBuffer());
 //			System.err.println(code + "=====" + "Qixing:" + newOne.getQixing() + ",DiQixing:" + newOne.getDibuQixing()
 //					+ ",Zyxing:" + newOne.getZyxing());
+//			System.err.println(pool);
 //		}
 //		System.exit(0);
 //	}
@@ -158,18 +164,18 @@ public class QibaoService {
 	}
 
 	private boolean dibuqixing2(List<TradeHistInfoDaliy> list2, QiBaoInfo res) {
-		// System.out.println(list2.get(list2.size() - 1).getDate());
-		// System.out.println(list2.get(0).getDate());
+		// log.info(list2.get(list2.size() - 1).getDate());
+		// log.info(list2.get(0).getDate());
 		int up4 = 0;
 		for (int i = 1; i <= 10; i++) {// 排除大涨的哪天
 			TradeHistInfoDaliy nf = list2.get(i);
 			if (nf.getTodayChangeRate() >= 7.5) {// 大涨直接排除
-				System.out.println("之前已经大涨7%");
+				log.info("之前已经大涨7%");
 				return false;
 			}
 			// 上涨趋势前上涨，量大于这天，不要
 			if (nf.getLow() < res.getLow() && nf.getTodayChangeRate() > 0 && nf.getVolume() > res.getVol()) {
-				System.out.println("之前已经上涨放量");
+				log.info("之前已经上涨放量");
 				return false;
 			}
 			if (nf.getTodayChangeRate() >= 4) {// 涨幅超过4个点，++
@@ -180,7 +186,7 @@ public class QibaoService {
 		if (up4 <= 1) {
 			return true;
 		}
-		System.out.println("前面几个交易日波动4%超1");
+		log.info("前面几个交易日波动4%超1");
 		return false;
 	}
 
@@ -199,7 +205,7 @@ public class QibaoService {
 			}
 			if (low < res.getYesterdayPrice()) {
 				if (CurrencyUitl.cutProfit(low, res.getYesterdayPrice()) > 15) {// 本身已经大涨了，之前就不能涨太多
-					System.out.println("本身已经大涨了，之前就不能涨太多1");
+					log.info("本身已经大涨了，之前就不能涨太多1");
 					return null;// 涨幅太大
 				}
 			}
@@ -212,7 +218,7 @@ public class QibaoService {
 			}
 			if (low < res.getYesterdayPrice()) {
 				if (CurrencyUitl.cutProfit(low, res.getYesterdayPrice()) > 20) {// 本身已经大涨了，之前就不能涨太多
-					System.out.println("本身已经大涨了，之前就不能涨太多2");
+					log.info("本身已经大涨了，之前就不能涨太多2");
 					return null;// 涨幅太大
 				}
 			}
@@ -241,7 +247,7 @@ public class QibaoService {
 					if (topDate.getDate() > lowDate.getDate()) {
 						if (CurrencyUitl.cutProfit(lowDate.getLow(), topDate.getHigh()) >= 35) {
 							// 有的是K线是挖坑，有的是拉高，拉高收货回踩后的旗形可能会错过，比如002864
-							System.out.println("10个交易日超过35%," + lowDate.getDate() + "-" + topDate.getDate());
+							log.info("10个交易日超过35%," + lowDate.getDate() + "-" + topDate.getDate());
 							return null;
 						}
 					}
@@ -262,7 +268,7 @@ public class QibaoService {
 					// 上涨趋势
 					if (topDate.getDate() > lowDate.getDate()) {
 						if (CurrencyUitl.cutProfit(lowDate.getLow(), topDate.getHigh()) >= 50) {
-							System.out.println("20个交易日超过50%");
+							log.info("20个交易日超过50%");
 							return null;
 						}
 					}
@@ -272,7 +278,7 @@ public class QibaoService {
 			// 排除3:排除退市股票
 			String name = stockBasicService.getCodeName(newOne.getCode());
 			if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI)) {
-				System.out.println("退市");
+				log.info("退市");
 				return null;
 			}
 			return list;
@@ -309,10 +315,10 @@ public class QibaoService {
 	private QiBaoInfo isQixing(TradeHistInfoDaliy first, TradeHistInfoDaliy chk, List<TradeHistInfoDaliy> list,
 			MonitorPoolTemp pool) {
 		if (first.getDate() == chk.getDate()) {// 第一天不算
-			// System.out.println("=====chk?:" + chk.getDate());
+			// log.info("=====chk?:" + chk.getDate());
 			return null;
 		}
-		// System.out.println("=====chk:" + chk.getDate());
+		// log.info("=====chk:" + chk.getDate());
 		List<TradeHistInfoDaliy> tmp = new LinkedList<TradeHistInfoDaliy>();
 		int tims = 0;
 		for (TradeHistInfoDaliy nf : list) {// 倒序循环
@@ -321,7 +327,7 @@ public class QibaoService {
 				if (nf.getClosed() < chk.getYesterdayPrice()) {// 单阳不破:已经破掉
 					tims++;
 					if (tims > 1) {
-						System.out.println("=====>单阳不破:已经破掉(只能破一次)");
+						log.info("=====>单阳不破:已经破掉(只能破一次)");
 						return null;
 					}
 				}
@@ -335,7 +341,7 @@ public class QibaoService {
 					// 不是十字星或不是上影线
 					if (!LineAvgPrice.isShangYingXian(d2tian)
 							&& CurrencyUitl.cutProfit(d2tian.getOpen(), d2tian.getClosed()) > 0.5) {
-						System.out.println("=====>非十字星或上影线");
+						log.info("=====>非十字星或上影线");
 						return null;
 					}
 
@@ -357,7 +363,7 @@ public class QibaoService {
 				return qi;
 			}
 		}
-		System.out.println("=====>默认false");
+		log.info("=====>默认false");
 		return null;
 	}
 
@@ -368,7 +374,7 @@ public class QibaoService {
 			if (t.getHigh() > high) {
 				tims++;
 				if (tims > 1) {
-					System.out.println("=====>超过最高");
+					log.info("=====>超过最高");
 					return false;
 				}
 			}
@@ -376,7 +382,7 @@ public class QibaoService {
 		if (tims <= 1) {
 			return true;
 		}
-		System.out.println("=====>超过最高2");
+		log.info("=====>超过最高2");
 		return false;
 	}
 

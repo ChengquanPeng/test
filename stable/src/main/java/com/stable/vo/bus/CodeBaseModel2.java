@@ -9,9 +9,11 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
+@ToString
 @Document(indexName = "code_base_model2")
 public class CodeBaseModel2 extends EsBase {
 	private static final long serialVersionUID = 1L;
