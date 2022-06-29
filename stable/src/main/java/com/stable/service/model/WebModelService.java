@@ -428,9 +428,16 @@ public class WebModelService {
 	}
 
 	public void addPlsManual(long userId, ModelManulReq req) {
-		String code = req.getCode();
-		int pls = req.getPls();
 		int timemonth = req.getTimemonth();
+		if (timemonth == 10) {
+			String code = req.getCode();
+			CodeBaseModel2 model = getLastOneByCode2(code);
+			model.setBuyRea((req.getBuyRea() + " " + req.getSoldRea()).trim());
+			codeBaseModel2Dao.save(model);
+			return;
+		}
+
+		int pls = req.getPls();
 		if (pls != 0 && pls != 1 && pls != 2) {
 			throw new RuntimeException("i != 0 && i != 1 && i != 2 ? ");
 		}
@@ -457,7 +464,7 @@ public class WebModelService {
 				date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, days));
 			}
 		}
-
+		String code = req.getCode();
 		CodeBaseModel2 model = getLastOneByCode2(code);
 		String remark = (req.getBuyRea() + " " + req.getSoldRea()).trim();
 		if (date != 1) {
@@ -487,11 +494,8 @@ public class WebModelService {
 				pool.setBuyLowVol(30);
 //				pool.setShotPointCheck(1);
 			}
-			pool.setRemark(remark);
 			monitorPoolDao.save(pool);
-
 			BeanCopy.copy(req, model);
-
 			// 同步监听
 			if (pool.getMonitor() > MonitorType.NO.getCode()) {
 				model.setMoni(pool.getMonitor());

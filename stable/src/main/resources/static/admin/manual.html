@@ -370,6 +370,7 @@ table {
 							<option value="3">3个月</option>
 							<option value="4">半年</option>
 							<option value="9">归0</option>
+							<option value="10">纯备注</option>
 					</select></td>
 					<td><span id="plst"></span></td>
 					<td></td>
@@ -442,7 +443,7 @@ table {
 	</script>
 	<script type="text/javascript">
 		function dianwo() {
-			if ($('#pls').val() == 0) {
+			if ($('#pls').val() == 0 && $('#timemonth').val() != 10) {
 				alert("请选择-结果");
 				return;
 			}
