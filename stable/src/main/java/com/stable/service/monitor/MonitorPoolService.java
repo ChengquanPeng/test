@@ -28,6 +28,7 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.MonitorType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
+import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.es.dao.base.MonitorPoolUserDao;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
@@ -55,6 +56,7 @@ import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.MonitorPoolTemp;
+import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.bus.UserInfo;
@@ -92,12 +94,12 @@ public class MonitorPoolService {
 	private ChipsService chipsService;
 	@Autowired
 	private UserService userService;
-//	@Autowired
-//	private ShotPointCheck shotPointCheck;
 	@Autowired
 	private FinanceService financeService;
 	@Autowired
 	private BizPushService bizPushService;
+	@Autowired
+	private EsStockBaseInfoDao esStockBaseInfoDao;
 
 //	@javax.annotation.PostConstruct
 //	public void init() {
@@ -833,6 +835,37 @@ public class MonitorPoolService {
 				}
 			}
 		}
+	}
+
+	// 删除退市监听
+	public void deleteTsMoni() {
+		List<StockBaseInfo> l = this.stockBasicService.tssc();
+		if (l != null) {
+			for (StockBaseInfo s : l) {
+				s.setTssc(1);
+				List<MonitorPoolTemp> lt = this.getMonitorPool(s.getCode());
+				if (lt != null) {
+					monitorPoolDao.deleteAll(lt);
+				}
+			}
+			esStockBaseInfoDao.saveAll(l);
+		}
+	}
+
+	public List<MonitorPoolTemp> getMonitorPool(String code) {
+		EsQueryPageReq querypage = EsQueryPageUtil.queryPage9999;
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		queryBuilder = queryBuilder.withQuery(bqb);
+		queryBuilder = queryBuilder.withPageable(PageRequest.of(querypage.getPageNum(), querypage.getPageSize()));
+		SearchQuery sq = queryBuilder.build();
+
+		Page<MonitorPoolTemp> page = monitorPoolDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent();
+		}
+		return null;
 	}
 
 //	/**

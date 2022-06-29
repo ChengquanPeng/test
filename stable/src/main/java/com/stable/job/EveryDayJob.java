@@ -61,6 +61,7 @@ public class EveryDayJob extends MySimpleJob {
 		financeService.jobSpiderKuaiYuBao();
 		log.info("定增完成预警公告");
 		monitorPoolService.jobZfDoneWarning();
+		monitorPoolService.deleteTsMoni();
 		log.info("定增扩展属性");
 		chipsZfService.jobZengFaExt(true);
 		log.info("无效概念清除");

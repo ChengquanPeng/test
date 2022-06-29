@@ -92,6 +92,8 @@ public class StockBaseInfo extends EsBase {
 
 	@Field(type = FieldType.Integer)
 	private int dfcwCompnayType;// 公司类型：1券商，2保险,3银行，4企业
+	@Field(type = FieldType.Integer)
+	private int tssc = 0;// 退市删除
 
 	public StockBaseInfo() {
 
