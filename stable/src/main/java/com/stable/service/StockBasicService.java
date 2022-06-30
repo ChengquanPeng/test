@@ -43,6 +43,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class StockBasicService {
 
+	private static final String NO = "no";
 	@Autowired
 	private TushareSpider tushareSpider;
 	@Autowired
@@ -96,7 +97,7 @@ public class StockBasicService {
 		Optional<StockBaseInfo> db = esStockBaseInfoDao.findById(code);
 		if (!db.isPresent()) {
 			StockBaseInfo sb = new StockBaseInfo();
-			sb.setCode("no");
+			sb.setCode(NO);
 			return sb;
 		}
 		return db.get();
@@ -168,22 +169,25 @@ public class StockBasicService {
 	public void synDwcfCompanyType(String code, int dfcwCompnayType) {
 		StockBaseInfo b = this.getCode(code);
 		b.setDfcwCompnayType(dfcwCompnayType);
-		redisUtil.set(code, b);
-		esStockBaseInfoDao.save(b);
+		save(b);
 	}
 
 	public void synBaseStockInfoCircZb(String code, double circZb) {
 		if (circZb > 0) {
 			StockBaseInfo b = this.getCode(code);
 			b.setCircZb(CurrencyUitl.roundHalfUp(circZb));
-			redisUtil.set(code, b);
+			save(b);
+		}
+	}
+
+	private void save(StockBaseInfo b) {
+		if (!b.getCode().equals(NO)) {
+			redisUtil.set(b.getCode(), b);
 			esStockBaseInfoDao.save(b);
 		}
 	}
 
 	public void synBaseStockInfo(StockBaseInfo base, boolean fromNotTushare) {
-		// esStockBaseInfoDao.save(base);
-
 		if (!fromNotTushare) {// 以下字段来自同花顺,雪球,东方财富,需要进行同步
 			StockBaseInfo old = getCode(base.getCode());
 			base.setThsIndustry(old.getThsIndustry());
@@ -200,10 +204,9 @@ public class StockBasicService {
 			base.setDfcwCompnayType(old.getDfcwCompnayType());
 		}
 		if (fromNotTushare) {// 非tushare需要更新，tushare 统一更新
-			esStockBaseInfoDao.save(base);
+			save(base);
 		}
 		redisUtil.set(base.getCode(), base);
-		// dbStockBaseInfoDao.saveOrUpdate(base);
 		CODE_NAME_MAP_LOCAL_HASH.put(base.getCode(), base.getName());
 		log.info("syn stock code:{}", base);
 	}
