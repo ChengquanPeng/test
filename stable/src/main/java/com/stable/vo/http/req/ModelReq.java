@@ -27,7 +27,7 @@ public class ModelReq {
 	String mkv2;
 	int pls;
 	int tagIndex;
-	
+
 	String zfPriceLow;
 	int dzjyRct;
 
@@ -57,6 +57,8 @@ public class ModelReq {
 	int shooting52 = 0;
 	int shooting53 = 0;
 	int whiteHors = 0;
+	int finDbl = 0;
+
 	boolean trymsg;
 
 	String gdrs;

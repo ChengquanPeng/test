@@ -646,6 +646,22 @@ public class CodeModelService {
 		newOne.setGoodWill(fbi.getGoodWill());
 		newOne.setGoodWillRatioGsjlr(fbi.getGoodWillRatioGsjlr());
 		newOne.setGoodWillRatioNetAsset(fbi.getGoodWillRatioNetAsset());
+		// 业绩暴涨
+		newOne.setFinDbl(0);
+		if (fa.getCurrYear().getGsjlr() > 0 && fa.getPrevYear().getGsjlr() > 0) {
+			double a = CurrencyUitl
+					.roundHalfUp(fa.getCurrYear().getGsjlr() / Double.valueOf(fa.getPrevYear().getGsjlr()));
+			if (a >= 2) {
+				newOne.setFinDbl(1);
+			}
+		}
+		if (fa.getCurrYear().getGsjlr() > 0 && fa.getCurrJidu().getGsjlr() > 0) {
+			double a = CurrencyUitl
+					.roundHalfUp(fa.getCurrJidu().getGsjlr() / Double.valueOf(fa.getPrevYear().getGsjlr()));
+			if (a >= 2) {
+				newOne.setFinDbl(1);
+			}
+		}
 
 		// ======== 红色警告 ========
 		// ======== 黄色警告 ========

@@ -241,6 +241,9 @@ public class WebModelService {
 			if (dh.getBousOK() > 0) {
 				sb5.append(",连续" + dh.getBousOK() + "年分红");
 			}
+			if (dh.getFinDbl() > 0) {
+				sb5.append("<font color='red'>,业绩暴涨</font>");
+			}
 			if (dh.getFinOK() > 0) {
 				sb5.append(",连续" + dh.getFinOK() + "年业绩盈利");
 				if (dh.getFinanceInc() > 0) {
@@ -672,6 +675,9 @@ public class WebModelService {
 		if (mr.getBousOK() > 0) {
 			bqb.must(QueryBuilders.rangeQuery("bousOK").gte(mr.getBousOK()));
 		}
+		if (mr.getFinDbl() > 0) {// 业绩暴涨
+			bqb.must(QueryBuilders.rangeQuery("finDbl").gt(0));
+		}
 		if (mr.getDibuqixing() == 1) {// 底部旗形
 			bqb.must(QueryBuilders.rangeQuery("dibuQixing").gte(1));
 		}
@@ -787,6 +793,8 @@ public class WebModelService {
 			field = "reducZb";
 		} else if (orderBy == 15) {
 			field = "qixing";
+		} else if (orderBy == 16) {
+			field = "finDbl";
 		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);
