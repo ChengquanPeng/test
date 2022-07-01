@@ -88,9 +88,9 @@
 				</div>
 			</div>
 			<div class="mg">
-				技术面:&nbsp;&nbsp;&nbsp;&nbsp;底部旗形:<input type="checkbox"
-					id="dibuqixing" />&nbsp;&nbsp;&nbsp;旗形:<input type="checkbox"
-					id="qixing" />&nbsp;&nbsp;&nbsp; 中阳十字星:<input type="checkbox"
+				技术面:&nbsp;&nbsp;&nbsp;&nbsp;大旗形:<input type="checkbox"
+					id="dibuqixing" />&nbsp;&nbsp;&nbsp;小旗形:<input type="checkbox"
+					id="dibuqixing2" />&nbsp;&nbsp;&nbsp; 中阳十字星:<input type="checkbox"
 					id="zyxing" />&nbsp;&nbsp;&nbsp; 5日均线多头排列:<input type="checkbox"
 					id="shooting51" />&nbsp;&nbsp;&nbsp; 5日内一阳穿4线:<input
 					type="checkbox" id="shooting52" />&nbsp;&nbsp;&nbsp; K线攻击形态:<input
@@ -243,9 +243,10 @@
 									param.whiteHors = 0;
 									param.gdrs = $('#gdrs').val();
 									param.gdrsp = $('#gdrsp').val();
-									param.qixing = 0;
+
 									param.zyxing = 0;
 									param.dibuqixing = 0;
+									param.dibuqixing2 = 0;
 
 									param.finDbl = 0;
 									if (document.getElementById("finDbl").checked) {
@@ -255,8 +256,8 @@
 									if (document.getElementById("dibuqixing").checked) {
 										param.dibuqixing = 1;
 									}
-									if (document.getElementById("qixing").checked) {
-										param.qixing = 1;
+									if (document.getElementById("dibuqixing2").checked) {
+										param.dibuqixing2 = 1;
 									}
 									if (document.getElementById("zyxing").checked) {
 										param.zyxing = 1;

@@ -159,13 +159,10 @@ public class WebModelService {
 		// 标签
 		StringBuffer tag = new StringBuffer("");
 		tag.append("<font color='red'>");
-		if (dh.getQixing() > 0) {
-			if (dh.getDibuQixing() > 0) {
-				tag.append("底部旗形").append(dh.getQixing()).append(Constant.HTML_LINE);
-			} else {
-				tag.append("旗形").append(dh.getQixing()).append(Constant.HTML_LINE);
-			}
-
+		if (dh.getDibuQixing() > 0) {
+			tag.append("大旗形").append(dh.getDibuQixing()).append(Constant.HTML_LINE);
+		} else if (dh.getDibuQixing2() > 0) {
+			tag.append("小旗形").append(dh.getDibuQixing2()).append(Constant.HTML_LINE);
 		}
 		if (dh.getZyxing() > 0) {
 			tag.append("中阳十字星").append(Constant.HTML_LINE);
@@ -681,8 +678,8 @@ public class WebModelService {
 		if (mr.getDibuqixing() == 1) {// 底部旗形
 			bqb.must(QueryBuilders.rangeQuery("dibuQixing").gte(1));
 		}
-		if (mr.getQixing() == 1) {// 旗形
-			bqb.must(QueryBuilders.rangeQuery("qixing").gte(1));
+		if (mr.getDibuqixing2() == 1) {// 旗形
+			bqb.must(QueryBuilders.rangeQuery("dibuQixing2").gte(1));
 		}
 
 		if (mr.getZyxing() == 1) {// 中阳带星

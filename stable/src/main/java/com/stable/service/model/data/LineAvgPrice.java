@@ -114,16 +114,16 @@ public class LineAvgPrice {
 	// 上影线(上涨情况下：收盘>昨收+(最高-昨收)/2)
 	private static boolean isShangYingXian(double change, double yest, double high, double closed) {
 		if (change > 0) {
-			double up = yest - yest;// 今天涨了多少
+			double up = high - yest;// 今天涨了多少
 			double half = up / 2;// 中间值
 			double t1 = CurrencyUitl.roundHalfUp(half) + yest;
-//			System.err.println(t1);
 			double mid = CurrencyUitl.multiplyDecimal(t1, 1.01).doubleValue();// 加权1%,1个点,如果涨停回落6%算上影线
-//			System.err.println(mid);
-//			System.err.println(CurrencyUitl.cutProfit(t.getYesterdayPrice(), t1) + "%");
-//			System.err.println(CurrencyUitl.cutProfit(t.getYesterdayPrice(), mid) + "%");
-//			System.err.println(CurrencyUitl.cutProfit(t.getYesterdayPrice(), t.getHigh()) + "%");
-//			System.err.println(CurrencyUitl.cutProfit(t.getYesterdayPrice(), t.getClosed()) + "%");
+//			System.err.println(
+//					"yest=" + yest + ",high=" + high + ",up=" + up + ",half=" + half + ",t1=" + t1 + ",mid=" + mid);
+//			System.err.println(CurrencyUitl.cutProfit(yest, t1) + "%");
+//			System.err.println(CurrencyUitl.cutProfit(yest, mid) + "%");
+//			System.err.println(CurrencyUitl.cutProfit(yest, high) + "%");
+//			System.err.println(CurrencyUitl.cutProfit(yest, closed) + "%");
 			if (mid >= closed) {
 				return true;
 			}

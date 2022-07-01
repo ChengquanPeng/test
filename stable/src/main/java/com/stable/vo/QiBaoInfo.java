@@ -10,4 +10,5 @@ public class QiBaoInfo {
 	private double vol;
 	private double yesterdayPrice;
 	private double low;
+	private double chkRate = 15;
 }

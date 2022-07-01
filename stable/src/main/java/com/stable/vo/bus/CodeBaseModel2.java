@@ -52,6 +52,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int qixing = 0;// 旗形
 	@Field(type = FieldType.Integer)
 	private int dibuQixing = 0;// 旗形
+	@Field(type = FieldType.Integer)
+	private int dibuQixing2 = 0;// 旗形2
 	@Field(type = FieldType.Long)
 	private int zyxing = 0;// 中阳带星
 

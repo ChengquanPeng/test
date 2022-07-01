@@ -177,7 +177,7 @@ public class CurrencyUitl {
 	}
 
 	/**
-	 * 涨停价格3
+	 * 计算利润 buyPrice:买入价格 soldPrice:卖出价格
 	 */
 	public final static double cutProfit(double buyPrice, double soldPrice) {
 		try {
