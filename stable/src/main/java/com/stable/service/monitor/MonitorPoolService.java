@@ -39,6 +39,7 @@ import com.stable.service.StockBasicService;
 import com.stable.service.biz.BizPushService;
 import com.stable.service.biz.UserService;
 import com.stable.service.model.WebModelService;
+import com.stable.service.model.data.LineAvgPrice;
 import com.stable.spider.ths.ThsAnnSpider;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.utils.CurrencyUitl;
@@ -706,6 +707,22 @@ public class MonitorPoolService {
 									line = yz + stockBasicService.getCodeName2(cp.getCode()) + " [中阳十字星]";
 								}
 							}
+
+							if (d.getOpen() >= d.getClosed()) {
+								if (line != null) {
+									line += ",[阴线]";
+								} else {
+									line = yz + stockBasicService.getCodeName2(cp.getCode()) + " [阴线]";
+								}
+							}
+							if (LineAvgPrice.isShangYingXian(d)) {
+								if (line != null) {
+									line += ",[上影线]";
+								} else {
+									line = yz + stockBasicService.getCodeName2(cp.getCode()) + " [上影线]";
+								}
+							}
+
 							if (line != null) {
 								bao.add(line);
 							}

@@ -8,6 +8,7 @@ import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.StockAvgBase;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
+import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -102,12 +103,20 @@ public class LineAvgPrice {
 		}
 	}
 
-	// 上影线(上涨情况下：收盘>昨收+(最高-昨收)/2)
+	public static boolean isShangYingXian(TradeHistInfoDaliyNofq t) {
+		return isShangYingXian(t.getTodayChange(), t.getYesterdayPrice(), t.getHigh(), t.getClosed());
+	}
+
 	public static boolean isShangYingXian(TradeHistInfoDaliy t) {
-		if (t.getTodayChange() > 0) {
-			double up = t.getHigh() - t.getYesterdayPrice();// 今天涨了多少
+		return isShangYingXian(t.getTodayChange(), t.getYesterdayPrice(), t.getHigh(), t.getClosed());
+	}
+
+	// 上影线(上涨情况下：收盘>昨收+(最高-昨收)/2)
+	private static boolean isShangYingXian(double change, double yest, double high, double closed) {
+		if (change > 0) {
+			double up = yest - yest;// 今天涨了多少
 			double half = up / 2;// 中间值
-			double t1 = CurrencyUitl.roundHalfUp(half) + t.getYesterdayPrice();
+			double t1 = CurrencyUitl.roundHalfUp(half) + yest;
 //			System.err.println(t1);
 			double mid = CurrencyUitl.multiplyDecimal(t1, 1.01).doubleValue();// 加权1%,1个点,如果涨停回落6%算上影线
 //			System.err.println(mid);
@@ -115,7 +124,7 @@ public class LineAvgPrice {
 //			System.err.println(CurrencyUitl.cutProfit(t.getYesterdayPrice(), mid) + "%");
 //			System.err.println(CurrencyUitl.cutProfit(t.getYesterdayPrice(), t.getHigh()) + "%");
 //			System.err.println(CurrencyUitl.cutProfit(t.getYesterdayPrice(), t.getClosed()) + "%");
-			if (mid >= t.getClosed()) {
+			if (mid >= closed) {
 				return true;
 			}
 		}
