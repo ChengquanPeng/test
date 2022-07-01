@@ -32,35 +32,35 @@ public class QibaoService {
 	@Autowired
 	private StockBasicService stockBasicService;
 
-	@javax.annotation.PostConstruct
-	public void test() {
+//	@javax.annotation.PostConstruct
+//	public void test() {
 		// 002612-20200527
 		// 002900-20210315
 		// 600789-20200115
 		// 000678-20220610
 		// 000025-20220519
 		// 000017-20220526
-		String[] codes = { "002612", "002900", "600789", "000678", "000025", "000017" };
-		int[] dates = { 20200527, 20210315, 20200115, 20220610, 20220519, 20220526 };
-//		String[] codes = { "000017" };
-//		int[] dates = { 20220526 };
-
-		for (int i = 0; i < codes.length; i++) {
-			String code = codes[i];
-			int date = dates[i];
-
-			CodeBaseModel2 newOne = new CodeBaseModel2();
-			newOne.setZfjjup(2);
-			newOne.setZfjjupStable(1);
-			newOne.setCode(code);
-			MonitorPoolTemp pool = new MonitorPoolTemp();
-			qibao(date, newOne, pool, true, new StringBuffer());
-			System.err.println(code + "=====" + "Qixing:" + newOne.getQixing() + ",大旗形:" + newOne.getDibuQixing()
-					+ ",小旗形:" + newOne.getDibuQixing2() + ",Zyxing:" + newOne.getZyxing());
-			System.err.println(pool);
-		}
-		System.exit(0);
-	}
+//		String[] codes = { "002612", "002900", "600789", "000678", "000025", "000017" };
+//		int[] dates = { 20200527, 20210315, 20200115, 20220610, 20220519, 20220526 };
+//		String[] codes = { "000563", "601515" };
+//		int[] dates = { 20220701, 20220701 };
+//
+//		for (int i = 0; i < codes.length; i++) {
+//			String code = codes[i];
+//			int date = dates[i];
+//
+//			CodeBaseModel2 newOne = new CodeBaseModel2();
+//			newOne.setZfjjup(2);
+//			newOne.setZfjjupStable(1);
+//			newOne.setCode(code);
+//			MonitorPoolTemp pool = new MonitorPoolTemp();
+//			qibao(date, newOne, pool, true, new StringBuffer());
+//			System.err.println(code + "=====" + "Qixing:" + newOne.getQixing() + ",大旗形:" + newOne.getDibuQixing()
+//					+ ",小旗形:" + newOne.getDibuQixing2() + ",Zyxing:" + newOne.getZyxing());
+//			System.err.println(pool);
+//		}
+//		System.exit(0);
+//	}
 
 	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
 		qx(date, newOne, pool, isSamll, qx);
