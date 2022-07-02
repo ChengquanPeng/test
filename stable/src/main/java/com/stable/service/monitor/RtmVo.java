@@ -29,7 +29,7 @@ public class RtmVo {
 		}
 //		msgt += " " + cp.getMsg();
 		msg = msgt;
-		if (cbm.getShooting7() == 1) {
+		if (cbm.getShooting7() > 0) {
 			you = "[优]";
 		}
 	}
