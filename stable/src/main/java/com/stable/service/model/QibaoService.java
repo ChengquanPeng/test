@@ -32,44 +32,51 @@ public class QibaoService {
 	@Autowired
 	private StockBasicService stockBasicService;
 
-	@javax.annotation.PostConstruct
-	public void test() {
+//	@javax.annotation.PostConstruct
+//	public void test() {
 //		 002612-20200527
 //		 002900-20210315
 //		 600789-20200115
 //		 000678-20220610
 //		 000025-20220519
 //		 000017-20220526
+	// 大旗形
 //		String[] codes = { "002612", "002900", "600789", "000678", "000025", "000017" };
 //		int[] dates = { 20200527, 20210315, 20200115, 20220610, 20220519, 20220526 };
+	// 小旗形
 //		String[] codes = { "000563", "601515" };
 //		int[] dates = { 20220701, 20220701 };
-		String[] codes = { "000582" };
-		int[] dates = { 20220330 };
+	// 十字星
+//		String[] codes = { "002752" };
+//		int[] dates = { 20211115 };
 
-		for (int i = 0; i < codes.length; i++) {
-			String code = codes[i];
-			int date = dates[i];
-
-			CodeBaseModel2 newOne = new CodeBaseModel2();
-			newOne.setZfjjup(2);
-			newOne.setZfjjupStable(1);
-			newOne.setCode(code);
-			MonitorPoolTemp pool = new MonitorPoolTemp();
-			qibao(date, newOne, pool, true, new StringBuffer());
-			System.err.println(code + "=====" + "Qixing:" + newOne.getQixing() + ",大旗形:" + newOne.getDibuQixing()
-					+ ",小旗形:" + newOne.getDibuQixing2() + ",Zyxing:" + newOne.getZyxing());
-			System.err.println(pool);
-		}
-		System.exit(0);
-	}
+//		String[] codes = { "000582" };
+//		int[] dates = { 20220330 };
+//
+//		for (int i = 0; i < codes.length; i++) {
+//			String code = codes[i];
+//			int date = dates[i];
+//
+//			CodeBaseModel2 newOne = new CodeBaseModel2();
+//			newOne.setZfjjup(2);
+//			newOne.setZfjjupStable(1);
+//			newOne.setCode(code);
+//			MonitorPoolTemp pool = new MonitorPoolTemp();
+//			qibao(date, newOne, pool, true, new StringBuffer());
+//			System.err.println(code + "=====" + "Qixing:" + newOne.getQixing() + ",大旗形:" + newOne.getDibuQixing()
+//					+ ",小旗形:" + newOne.getDibuQixing2() + ",Zyxing:" + newOne.getZyxing());
+//			System.err.println(pool);
+//		}
+//		System.exit(0);
+//	}
 
 	/** 起爆 */
-	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
+	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx,
+			StringBuffer szx) {
 		/** 大小旗形 */
 		qx(date, newOne, pool, isSamll, qx);
-		/** 中阳十字星 */ // TODO,十字星不破
-		szx(date, newOne, pool, isSamll, qx);
+		/** 中阳十字星 */
+		szx(date, newOne, pool, isSamll, szx);
 
 		/** 是否在起爆位 */
 		if (newOne.getDibuQixing() > 0 || newOne.getDibuQixing2() > 0 || newOne.getZyxing() > 0) {
@@ -173,36 +180,71 @@ public class QibaoService {
 		}
 	}
 
-	private void szx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
-		if (newOne.getPls() == 2) {
+	private void szx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer szx) {
+		if (newOne.getPls() == 2 || !codeModelService.isDibuSmall(isSamll, newOne)) {
 			newOne.setZyxing(0);
 			return;
 		}
 		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0, date,
 				EsQueryPageUtil.queryPage30, SortOrder.DESC);
 		// 起爆点：中阳线,第二天十字星或者小影线
-		// 1. 3-6个点
-		// 2. 5天涨幅低于2%
-		TradeHistInfoDaliy first = list.get(0);
-		boolean getZyx = false;
-		if (first.getOpen() >= first.getClosed() || CurrencyUitl.cutProfit(first.getOpen(), first.getClosed()) <= 0.5) {
-			// 收影线或者10字星
-			TradeHistInfoDaliy nd2 = list.get(1);
-			if (3.0 <= nd2.getTodayChangeRate() && nd2.getTodayChangeRate() <= 7.0) {// 1. 3-6个点
-				if (isShizixing(newOne.getCode(), nd2.getDate())) {
-					getZyx = true;
+		// 1. 第一天中阳线,3-6个点,,第二天十字星或者小影线
+		// 2.前5天涨幅低于2%
+		TradeHistInfoDaliy d2tian = list.get(0);
+		TradeHistInfoDaliy res = null;
+		double moniHigh = 0.0;
+		for (int i = 1; i < list.size(); i++) {
+			TradeHistInfoDaliy chk = list.get(i);
+			if (d2tian.getOpen() >= d2tian.getClosed()
+					|| CurrencyUitl.cutProfit(d2tian.getOpen(), d2tian.getClosed()) <= 0.5) {// 第二天十字星或者小影线
+				// 收影线或者10字星
+				if (3.0 <= chk.getTodayChangeRate() && chk.getTodayChangeRate() <= 7.0) {// 第一天中阳线,3-6个点
+					if (isShizixing(newOne.getCode(), chk.getDate())) {
+						res = chk;
+						moniHigh = (chk.getHigh() > d2tian.getHigh()) ? chk.getHigh() : d2tian.getHigh();
+						break;
+					}
 				}
 			}
+			d2tian = chk;
 		}
 
-		if (getZyx) {
-			newOne.setZyxing(1);
+		boolean isOk = false;
+		if (res != null) {// chkdate之后的验证
+			boolean preChkOk = true;
+			int tims = 0;
+			for (TradeHistInfoDaliy nf : list) {// 倒序循环
+				if (nf.getDate() > res.getDate()) {
+					if (nf.getClosed() < res.getYesterdayPrice()) {// 单阳不破:已经破掉
+						tims++;
+						if (tims > 1) {
+							log.info(res.getDate() + " zyx=====>单阳不破:已经破掉(只能破一次)" + nf.getDate());
+							preChkOk = false;
+							break;
+						}
+					}
+					if (nf.getClosed() > res.getHigh()) {
+						preChkOk = false;
+						break;
+					}
+				}
+			}
+			isOk = preChkOk;
+		}
+
+		if (isOk) {
+			if (newOne.getZyxing() == 0) {
+				szx.append(stockBasicService.getCodeName2(newOne.getCode())).append(",");
+			}
+			newOne.setZyxing(res.getDate());
+			pool.setShotPointPriceSzx(moniHigh);
 		} else {
-			if (newOne.getZyxing() == 1) {
-				String jsHist = newOne.getQixing() + "十字星" + ";" + newOne.getJsHist();
+			if (newOne.getZyxing() > 0) {
+				String jsHist = newOne.getZyxing() + "十字星" + ";" + newOne.getJsHist();
 				newOne.setJsHist(StringUtil.subString(jsHist, 100));
 			}
 			newOne.setZyxing(0);
+			pool.setShotPointPriceSzx(0);
 		}
 	}
 
@@ -230,6 +272,7 @@ public class QibaoService {
 		}
 	}
 
+	// CHK Date 之前的验证
 	private boolean dibuqixing(CodeBaseModel2 newOne, QiBaoInfo res) {
 		if (res == null) {
 			return false;
@@ -349,6 +392,9 @@ public class QibaoService {
 		return false;
 	}
 
+	/**
+	 * CHK Date 之前的验证
+	 */
 	private boolean dibuqixing2(CodeBaseModel2 newOne, QiBaoInfo res) {
 		if (res == null) {
 			return false;
@@ -493,7 +539,7 @@ public class QibaoService {
 	}
 
 	/**
-	 * 旗形1-大阳
+	 * chkdate之后的验证旗形1-大阳
 	 */
 	private QiBaoInfo isQixingType1(TradeHistInfoDaliy chk, List<TradeHistInfoDaliy> list, MonitorPoolTemp pool) {
 		// log.info("=====chk:" + chk.getDate());

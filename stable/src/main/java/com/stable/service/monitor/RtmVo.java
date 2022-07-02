@@ -18,6 +18,7 @@ public class RtmVo {
 	public boolean highPriceGot = false;
 	public BizPushService bizPushService;
 	public double warningYellow = 0.0;
+	public String you = "";
 
 	public RtmVo(MonitorPoolTemp cp, CodeBaseModelResp cbm) {
 		this.orig = cp;
@@ -28,6 +29,9 @@ public class RtmVo {
 		}
 //		msgt += " " + cp.getMsg();
 		msg = msgt;
+		if (cbm.getShooting7() == 1) {
+			you = "[优]";
+		}
 	}
 
 	public void setServiceAndPrew(BizPushService bizs) {

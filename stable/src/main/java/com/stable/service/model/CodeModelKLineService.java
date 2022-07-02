@@ -92,10 +92,11 @@ public class CodeModelKLineService {
 		Map<String, MonitorPoolTemp> poolMap = monitorPoolService.getMonitorPoolMap();
 		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();
 		StringBuffer qx = new StringBuffer();
+		StringBuffer szx = new StringBuffer();
 
 		for (StockBaseInfo s : codelist) {
 			try {
-				this.processingByCode(s, poolMap, poolList, listLast, histMap, qx);
+				this.processingByCode(s, poolMap, poolList, listLast, histMap, qx, szx);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -105,6 +106,9 @@ public class CodeModelKLineService {
 		}
 		if (poolList.size() > 0) {
 			monitorPoolDao.saveAll(poolList);
+		}
+		if (szx.length() > 0) {
+			bizPushService.PushS2("今日十字星:" + szx.toString());
 		}
 		if (qx.length() > 0) {
 			bizPushService.PushS2("今日最新旗形:" + qx.toString());
@@ -117,7 +121,7 @@ public class CodeModelKLineService {
 	private int pre4Year = 0;// 四年以前
 
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
-			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, StringBuffer qx) {
+			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, StringBuffer qx, StringBuffer szx) {
 		String code = s.getCode();
 		// 监听池
 		MonitorPoolTemp pool = this.codeModelService.getPool(code, poolMap, poolList);
@@ -181,7 +185,7 @@ public class CodeModelKLineService {
 		// 攻击形态
 		sort0Service.attackAndW(newOne, tradeDate);
 		// 起爆点
-		qibaoService.qibao(tradeDate, newOne, pool, isSamll, qx);
+		qibaoService.qibao(tradeDate, newOne, pool, isSamll, qx, szx);
 	}
 
 	private void year1(CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade) {

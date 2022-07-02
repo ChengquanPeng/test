@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +95,7 @@ public class RealtimeMonitoringService {
 				}
 			}
 			// 起爆点监听
-			List<MonitorPoolTemp> tl = monitorPoolService.getMyQibao();
+			Set<MonitorPoolTemp> tl = monitorPoolService.getMyQibao();
 			if (tl != null) {
 				for (MonitorPoolTemp t : tl) {
 					List<RtmVo> ml = allmap.get(t.getCode());

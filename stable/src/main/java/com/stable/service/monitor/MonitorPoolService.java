@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -284,10 +285,14 @@ public class MonitorPoolService {
 	}
 
 	// 查询My的起爆点
-	public List<MonitorPoolTemp> getMyQibao() {
+	public Set<MonitorPoolTemp> getMyQibao() {
 		int pageNum = EsQueryPageUtil.queryPage9999.getPageNum();
 		int size = EsQueryPageUtil.queryPage9999.getPageSize();
 		log.info("queryPage pageNum={},size={}", pageNum, size);
+
+		Set<MonitorPoolTemp> listall = new HashSet<MonitorPoolTemp>();
+
+		// 1.旗形
 		Pageable pageable = PageRequest.of(pageNum, size);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("userId", Constant.MY_ID));
@@ -296,9 +301,22 @@ public class MonitorPoolService {
 		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
 		Page<MonitorPoolTemp> page = monitorPoolDao.search(sq);
 		if (page != null && !page.isEmpty()) {
-			return page.getContent();
+			List<MonitorPoolTemp> t1 = page.getContent();
+			listall.addAll(t1);
 		}
-		return null;
+
+		// 2.十字星
+		BoolQueryBuilder bqb2 = QueryBuilders.boolQuery();
+		bqb2.must(QueryBuilders.matchPhraseQuery("userId", Constant.MY_ID));
+		bqb2.must(QueryBuilders.rangeQuery("shotPointPriceSzx").gt(0));
+		NativeSearchQueryBuilder queryBuilder2 = new NativeSearchQueryBuilder();
+		SearchQuery sq2 = queryBuilder2.withQuery(bqb2).withPageable(pageable).build();
+		Page<MonitorPoolTemp> page2 = monitorPoolDao.search(sq2);
+		if (page2 != null && !page2.isEmpty()) {
+			List<MonitorPoolTemp> t2 = page2.getContent();
+			listall.addAll(t2);
+		}
+		return listall;
 	}
 
 	/**
@@ -652,7 +670,7 @@ public class MonitorPoolService {
 			}
 
 			// 起爆点
-			List<MonitorPoolTemp> list = this.getMyQibao();
+			Set<MonitorPoolTemp> list = this.getMyQibao();
 			if (list != null) {
 				List<String> bao = new LinkedList<String>();
 				for (MonitorPoolTemp cp : list) {

@@ -689,9 +689,8 @@ public class WebModelService {
 		if (mr.getDibuqixing2() == 1) {// 旗形
 			bqb.must(QueryBuilders.rangeQuery("dibuQixing2").gte(1));
 		}
-
 		if (mr.getZyxing() == 1) {// 中阳带星
-			bqb.must(QueryBuilders.matchPhraseQuery("zyxing", 1));
+			bqb.must(QueryBuilders.rangeQuery("zyxing").gte(1));
 		}
 
 		if (StringUtils.isNotBlank(mr.getZfStatus())) {
