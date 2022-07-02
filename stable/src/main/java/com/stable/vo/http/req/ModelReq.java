@@ -64,6 +64,7 @@ public class ModelReq {
 	String gdrs;
 	String gdrsp;
 
+	int qb = 0;
 	int zyxing = 0;// 中阳带星
 	int dibuqixing = 0;
 	int dibuqixing2 = 0;

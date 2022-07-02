@@ -159,14 +159,19 @@ public class WebModelService {
 		// 标签
 		StringBuffer tag = new StringBuffer("");
 		tag.append("<font color='red'>");
+		if (dh.getQb() > 0) {
+			tag.append("起爆->");
+		}
 		if (dh.getDibuQixing() > 0) {
 			tag.append("大旗形").append(dh.getDibuQixing()).append(Constant.HTML_LINE);
-		} else if (dh.getDibuQixing2() > 0) {
+		}
+		if (dh.getDibuQixing2() > 0) {
 			tag.append("小旗形").append(dh.getDibuQixing2()).append(Constant.HTML_LINE);
 		}
 		if (dh.getZyxing() > 0) {
 			tag.append("中阳十字星").append(Constant.HTML_LINE);
 		}
+		tag.append("</font>");
 		if (dh.getShooting51() == 1) {
 			tag.append("均线多头排列").append(Constant.HTML_LINE);
 		}
@@ -185,7 +190,7 @@ public class WebModelService {
 		if (dh.getShooting53() == 1) {
 			tag.append("交易活跃").append(Constant.HTML_LINE);
 		}
-		tag.append("</font>");
+
 		if (dh.getTagSmallAndBeatf() > 0) {
 			tag.append("小而美").append(Constant.HTML_LINE);
 		}
@@ -674,6 +679,9 @@ public class WebModelService {
 		}
 		if (mr.getFinDbl() > 0) {// 业绩暴涨
 			bqb.must(QueryBuilders.rangeQuery("finDbl").gt(0));
+		}
+		if (mr.getQb() == 1) {// 起爆
+			bqb.must(QueryBuilders.matchPhraseQuery("qb", 1));
 		}
 		if (mr.getDibuqixing() == 1) {// 底部旗形
 			bqb.must(QueryBuilders.rangeQuery("dibuQixing").gte(1));

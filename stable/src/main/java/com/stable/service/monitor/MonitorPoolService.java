@@ -683,7 +683,6 @@ public class MonitorPoolService {
 									if (listt.get(listt.size() - 3).getVolume() > maxvol) {
 										maxvol = listt.get(listt.size() - 3).getVolume();
 									}
-
 									if ((d.getVolume() * 2) <= (maxvol * 1.2)) {// 缩量
 										line = yz + stockBasicService.getCodeName2(cp.getCode()) + " " + " 缩量买点";
 									}

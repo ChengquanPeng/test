@@ -18,6 +18,7 @@ import com.stable.es.dao.base.RztjDao;
 import com.stable.service.DzjyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.WebModelService;
+import com.stable.service.model.CodeModelService;
 import com.stable.service.model.Sort1ModeService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -58,6 +59,8 @@ public class RzrqSpider {
 	private RztjDao rztjDao;
 	@Autowired
 	private Sort1ModeService sort1ModeService;
+	@Autowired
+	private CodeModelService codeModelService;
 
 	public synchronized void byDaily(String dateYYYY_, int date) {
 		Set<String> codes = new HashSet<String>();
@@ -106,7 +109,7 @@ public class RzrqSpider {
 				CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(code);
 				cbm.setShooting3(0);
 				// 1：2年没涨，200亿以下
-				if (cbm.getZfjjupStable() >= 2 && cbm.getZfjjupStable() >= 2 && cbm.getMkv() <= 200.0) {
+				if (codeModelService.isDibu(cbm) && cbm.getMkv() <= 200.0) {
 					// 2：融资满足条件
 					if (rztj.getValid() > 0) {
 						// 3:涨幅在65%以下

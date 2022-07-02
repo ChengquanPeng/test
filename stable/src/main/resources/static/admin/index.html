@@ -88,16 +88,16 @@
 				</div>
 			</div>
 			<div class="mg">
-				技术面:&nbsp;&nbsp;&nbsp;&nbsp;大旗形:<input type="checkbox"
-					id="dibuqixing" />&nbsp;&nbsp;&nbsp;小旗形:<input type="checkbox"
-					id="dibuqixing2" />&nbsp;&nbsp;&nbsp; 中阳十字星:<input type="checkbox"
-					id="zyxing" />&nbsp;&nbsp;&nbsp; 5日均线多头排列:<input type="checkbox"
-					id="shooting51" />&nbsp;&nbsp;&nbsp; 5日内一阳穿4线:<input
-					type="checkbox" id="shooting52" />&nbsp;&nbsp;&nbsp; K线攻击形态:<input
-					type="checkbox" id="kline" />&nbsp;&nbsp;&nbsp; 接近1年新高:<input
-					type="checkbox" id="pre1Year" />&nbsp;&nbsp;&nbsp;5日交易活跃:<input
+				技术面:&nbsp;&nbsp;&nbsp;&nbsp;起爆:<input type="checkbox" id="qb" />&nbsp;&nbsp;大旗形:<input
+					type="checkbox" id="dibuqixing" />&nbsp;&nbsp;小旗形:<input
+					type="checkbox" id="dibuqixing2" />&nbsp;&nbsp;中阳十字星:<input
+					type="checkbox" id="zyxing" />&nbsp;&nbsp; 5日均线多头排列:<input
+					type="checkbox" id="shooting51" />&nbsp;&nbsp;5日内一阳穿4线:<input
+					type="checkbox" id="shooting52" />&nbsp;&nbsp; K线攻击形态:<input
+					type="checkbox" id="kline" />&nbsp;&nbsp; 接近1年新高:<input
+					type="checkbox" id="pre1Year" />&nbsp;&nbsp;5日交易活跃:<input
 					type="checkbox" id="shooting53" />&nbsp;&nbsp; 股价极速拉升(妖股?龙抬头?):<input
-					type="checkbox" id="shooting5" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;白马走势(大票):<input
+					type="checkbox" id="shooting5" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;白马走势(大票):<input
 					type="checkbox" id="whiteHors" />
 			</div>
 
@@ -244,15 +244,18 @@
 									param.gdrs = $('#gdrs').val();
 									param.gdrsp = $('#gdrsp').val();
 
-									param.zyxing = 0;
+									param.qb = 0;
 									param.dibuqixing = 0;
 									param.dibuqixing2 = 0;
+									param.zyxing = 0;
 
 									param.finDbl = 0;
 									if (document.getElementById("finDbl").checked) {
 										param.finDbl = 1;
 									}
-
+									if (document.getElementById("qb").checked) {
+										param.qb = 1;
+									}
 									if (document.getElementById("dibuqixing").checked) {
 										param.dibuqixing = 1;
 									}
