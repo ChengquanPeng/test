@@ -87,20 +87,23 @@ public class QibaoService {
 	}
 
 	private void qx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
-		if (newOne.getPls() == 2 || !codeModelService.isDibuSmall(isSamll, newOne)) {
-			setQxRes(newOne, pool, true, true);
-			return;
+		if (newOne.getPls() == 2 || !codeModelService.isDibuSmall(isSamll, newOne)) {// 排除的和大票大票不用check
+			if (newOne.getPls() == 1) {// 人工的需要check
+			} else {
+				setQxRes(newOne, pool, true, true);
+				return;
+			}
 		}
 		/** 起爆点,底部旗形1：大旗形 **/
-		qx1(date, newOne, pool, isSamll, qx);
+		qx1(date, newOne, pool, qx);
 		if (newOne.getDibuQixing() == 0) {
 			/** 起爆点,底部旗形2：小旗形 **/
-			qx2(date, newOne, pool, isSamll, qx);
+			qx2(date, newOne, pool, qx);
 		}
 	}
 
 	/** 起爆点,底部旗形1：大旗形 **/
-	private void qx1(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
+	private void qx1(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, StringBuffer qx) {
 		List<TradeHistInfoDaliy> list = null;
 		if (newOne.getDibuQixing() == 0) {
 			list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0, date,
@@ -134,7 +137,7 @@ public class QibaoService {
 	}
 
 	/** 起爆点,底部旗形2：小旗形 **/
-	private void qx2(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
+	private void qx2(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, StringBuffer qx) {
 		List<TradeHistInfoDaliy> list = null;
 		if (newOne.getDibuQixing2() == 0) {
 			list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0, date,
@@ -182,8 +185,11 @@ public class QibaoService {
 
 	private void szx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer szx) {
 		if (newOne.getPls() == 2 || !codeModelService.isDibuSmall(isSamll, newOne)) {
-			newOne.setZyxing(0);
-			return;
+			if (newOne.getPls() == 1) {// 人工的需要check
+			} else {
+				newOne.setZyxing(0);
+				return;
+			}
 		}
 		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0, date,
 				EsQueryPageUtil.queryPage30, SortOrder.DESC);
