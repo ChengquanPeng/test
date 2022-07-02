@@ -40,9 +40,11 @@ public class QibaoService {
 //		 000678-20220610
 //		 000025-20220519
 //		 000017-20220526
+//		 000582-20211115
+//		 600798-20201113
 	// 大旗形
-//		String[] codes = { "002612", "002900", "600789", "000678", "000025", "000017" };
-//		int[] dates = { 20200527, 20210315, 20200115, 20220610, 20220519, 20220526 };
+//		String[] codes = { "002612", "002900", "600789", "000678", "000025", "000017","000582" };
+//		int[] dates = { 20200527, 20210315, 20200115, 20220610, 20220519, 20220526,20211115 };
 	// 小旗形
 //		String[] codes = { "000563", "601515" };
 //		int[] dates = { 20220701, 20220701 };
@@ -50,8 +52,8 @@ public class QibaoService {
 //		String[] codes = { "002752" };
 //		int[] dates = { 20211115 };
 
-//		String[] codes = { "000582" };
-//		int[] dates = { 20220330 };
+//		String[] codes = { "600798" };
+//		int[] dates = { 20201113 };
 //
 //		for (int i = 0; i < codes.length; i++) {
 //			String code = codes[i];
@@ -62,7 +64,7 @@ public class QibaoService {
 //			newOne.setZfjjupStable(1);
 //			newOne.setCode(code);
 //			MonitorPoolTemp pool = new MonitorPoolTemp();
-//			qibao(date, newOne, pool, true, new StringBuffer());
+//			qibao(date, newOne, pool, true, new StringBuffer(), new StringBuffer());
 //			System.err.println(code + "=====" + "Qixing:" + newOne.getQixing() + ",大旗形:" + newOne.getDibuQixing()
 //					+ ",小旗形:" + newOne.getDibuQixing2() + ",Zyxing:" + newOne.getZyxing());
 //			System.err.println(pool);
