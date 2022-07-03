@@ -738,7 +738,7 @@ public class MonitorPoolService {
 									line = yz + stockBasicService.getCodeName2(cp.getCode()) + " [中阳十字星]";
 								}
 
-								if (d.getClosed() >= cp.getShotPointPriceSzx()) {
+								if (cp.getShotPointPriceSzx() > 0 && d.getClosed() >= cp.getShotPointPriceSzx()) {
 									line += ",<突破十字星>";
 								}
 							}
@@ -753,8 +753,10 @@ public class MonitorPoolService {
 					}
 				}
 				StringBuffer s1 = new StringBuffer();
+				int i = 1;
 				for (String a : bao) {
-					s1.append(a).append(Constant.HTML_LINE);
+					s1.append(i).append(".").append(a).append(Constant.HTML_LINE);
+					i++;
 				}
 				if (s1.length() > 0) {
 					bizPushService.PushS2("起爆点:" + Constant.HTML_LINE + s1.toString());

@@ -368,9 +368,7 @@ public class QibaoService {
 		}
 
 		// 排除3:排除退市股票
-		String name = stockBasicService.getCodeName(newOne.getCode());
-		if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI)) {
-			log.info("退市");
+		if(stTuiShi(newOne)) {
 			return false;
 		}
 
@@ -490,10 +488,7 @@ public class QibaoService {
 			}
 		}
 
-		// 排除3:排除退市股票
-		String name = stockBasicService.getCodeName(newOne.getCode());
-		if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI)) {
-			log.info("退市");
+		if (stTuiShi(newOne)) {
 			return false;
 		}
 
@@ -520,6 +515,16 @@ public class QibaoService {
 			return true;
 		}
 		log.info("前面几个交易日波动4%超1");
+		return false;
+	}
+
+	// 排除3:排除退市股票
+	private boolean stTuiShi(CodeBaseModel2 newOne) {
+		String name = stockBasicService.getCodeName(newOne.getCode());
+		if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI)||name.contains("ST")) {
+			log.info("退市");
+			return true;
+		}
 		return false;
 	}
 
