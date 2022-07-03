@@ -6,18 +6,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.stable.constant.Constant;
-import com.stable.web.controller.LoginController;
 
 @Component
 public class LoginInterceptor implements HandlerInterceptor {
 
-	@Autowired
-	private LoginController loginController;
+//	@Autowired
+//	private LoginController loginController;
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -27,10 +25,10 @@ public class LoginInterceptor implements HandlerInterceptor {
 		// 这里的User是登陆时放入session的
 		Object user = session.getAttribute(Constant.SESSION_USER);
 
-		if (user == null) {
-			loginController.mylogin(request);
-			user = session.getAttribute(Constant.SESSION_USER);
-		}
+//		if (user == null) {
+//			loginController.mylogin(request);
+//			user = session.getAttribute(Constant.SESSION_USER);
+//		}
 
 		// 如果session中没有user，表示没登陆
 		if (user == null) {

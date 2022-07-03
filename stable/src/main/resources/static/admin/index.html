@@ -22,25 +22,29 @@
 	<div class="container-fluid">
 		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div class="mg">
-				股票代码：<input type="text" id="queryCode" width="30">&nbsp;&nbsp;&nbsp;
-				概念id：<input type="text" id="conceptId" width="30">&nbsp;&nbsp;&nbsp;
-				板块名称搜索：<input type="text" id="conceptName" width="30">&nbsp;&nbsp;&nbsp;
+				股票代码：<input type="text" id="queryCode" width="30"
+					placeholder="多个代码以英文逗号分开">&nbsp;&nbsp;&nbsp; 概念id：<input
+					type="text" id="conceptId" width="30" placeholder="同花顺板块、概念id">&nbsp;&nbsp;&nbsp;
+				板块名称搜索：<input type="text" id="conceptName" width="30"
+					placeholder="板块、概念关键字">&nbsp;&nbsp;&nbsp;
 			</div>
 			<div class="mg">
 				<div class="input-group">
 					<input type="text" id="mkv2" width="10" />&gt;=流通市值&lt;=<input
-						type="text" id="mkv" width="10" />亿&nbsp;&nbsp; 前3大股东持股&gt;=<input
-						type="text" id="holderNumT3" width="30" />%&nbsp;&nbsp;
-					市盈率ttm&lt;=<input type="text" id="pettm" width="20" />&nbsp;&nbsp;
+						type="text" id="mkv" width="10" placeholder="数字,单位亿,支持小数" />亿&nbsp;&nbsp;
+					前3大股东持股&gt;=<input type="text" id="holderNumT3" width="30"
+						placeholder="百分比" />%&nbsp;&nbsp; 市盈率ttm&lt;=<input type="text"
+						id="pettm" width="20" />&nbsp;&nbsp;
 				</div>
 			</div>
 			<div class="mg">
 				国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp; 业绩:<input
-					type="text" id="finOK" placeholder="至少连续多少年不亏" value="0" />&nbsp;&nbsp;
-				分红:<input type="text" id="bousOK" placeholder="至少连续多少年分红" value="0" />&nbsp;&nbsp;
+					type="text" id="finOK" placeholder="至少连续多少年不亏" />&nbsp;&nbsp; 分红:<input
+					type="text" id="bousOK" placeholder="至少连续多少年分红" />&nbsp;&nbsp;
 				业绩暴涨:<input type="checkbox" id="finDbl" />&nbsp;&nbsp; 几年未涨&gt;=<input
-					type="text" id="zfjjup" />&nbsp;&nbsp; 几年未涨stable&gt;=<input
-					type="text" id="zfjjupStable" placeholder="算法偏严" />&nbsp;&nbsp;
+					type="text" id="zfjjup" placeholder="数字" />&nbsp;&nbsp;
+				几年未涨stable&gt;=<input type="text" id="zfjjupStable"
+					placeholder="算法偏严" />&nbsp;&nbsp;
 			</div>
 			<div class="mg">
 				<div class="input-group">
@@ -58,16 +62,18 @@
 						<option value="2">混合</option>
 						<option value="3">大股东</option>
 						<option value="4">其他</option>
-					</select>&nbsp;&nbsp; <input type="text" id="zfYjAmt2" width="10" />&gt;=增发金额&lt;=<input
-						type="text" id="zfYjAmt" width="10" width="30">&nbsp;&nbsp;
-					低于增发价&gt;=<input type="text" id="zfPriceLow" width="30" />%&nbsp;&nbsp;
+					</select>&nbsp;&nbsp; <input type="text" id="zfYjAmt2" width="10"
+						placeholder="数字,单位亿" />&gt;=增发金额&lt;=<input type="text"
+						id="zfYjAmt" width="10" width="30">&nbsp;&nbsp; 低于增发价&gt;=<input
+						type="text" id="zfPriceLow" width="30" placeholder="百分比" />%&nbsp;&nbsp;
 				</div>
 			</div>
 			<div class="mg">
 				<div class="input-group">
 					大宗:&nbsp;&nbsp;&nbsp;&nbsp;1年交易金额&gt;=<input type="text" width="10"
-						width="30" id="totalAmt">&nbsp;&nbsp; 2月交易金额&gt;=<input
-						type="text" width="10" width="30" id="totalAmt60d">
+						width="30" id="totalAmt" placeholder="数字,单位亿,支持小数">&nbsp;&nbsp;
+					2月交易金额&gt;=<input type="text" width="10" width="30"
+						id="totalAmt60d" placeholder="数字,单位亿,支持小数">
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					股东人数&lt;=<input type="text" width="10" width="30" id="gdrs"
 						placeholder="股东人数低于多少人">人，减少幅度超过%:<input type="text"
@@ -381,8 +387,12 @@
 														+ "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+row.code+"/event.html#stockpage'>大事提醒</a>";
 												v += "&nbsp;&nbsp;<a target='_blank' href='/web/chips/reduce/list?code="
 														+ row.code
-														+ "'>减持历史</a>"
+														+ "'>减持历史</a>";
 												v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/dzjy/detail/"+row.code+".html'>大宗</a>";
+												v += "&nbsp;&nbsp;<a target='_blank' href='/web/comon/zengFa.html?code="
+														+ row.code
+														+ "&ustr="
+														+ ustr + "'>定增历史</a>";
 												if (row.shooting3 == 1) {
 													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资融券</a>";
 												}

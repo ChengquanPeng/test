@@ -22,10 +22,10 @@
 	<div class="container-fluid">
 		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<div class="mg">
-				股票代码:<input type="text" id="queryCode" width="30"
-					placeholder="多个代码以英文逗号分开">&nbsp;&nbsp;&nbsp; 概念id:<input
+				股票代码：<input type="text" id="queryCode" width="30"
+					placeholder="多个代码以英文逗号分开">&nbsp;&nbsp;&nbsp; 概念id：<input
 					type="text" id="conceptId" width="30" placeholder="同花顺板块、概念id">&nbsp;&nbsp;&nbsp;
-				板块名称搜索:<input type="text" id="conceptName" width="30"
+				板块名称搜索：<input type="text" id="conceptName" width="30"
 					placeholder="板块、概念关键字">&nbsp;&nbsp;&nbsp;
 			</div>
 			<div class="mg">
@@ -39,34 +39,33 @@
 			</div>
 			<div class="mg">
 				国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp; 业绩:<input
-					type="text" id="finOK" placeholder="至少连续多少年不亏" value="0" />&nbsp;&nbsp;
-				分红:<input type="text" id="bousOK" placeholder="至少连续多少年分红" value="0" />&nbsp;&nbsp;
-				几年未涨&gt;=<input type="text" id="zfjjup" placeholder="数字" />&nbsp;&nbsp;
+					type="text" id="finOK" placeholder="至少连续多少年不亏" />&nbsp;&nbsp; 分红:<input
+					type="text" id="bousOK" placeholder="至少连续多少年分红" />&nbsp;&nbsp;
+				业绩暴涨:<input type="checkbox" id="finDbl" />&nbsp;&nbsp; 几年未涨&gt;=<input
+					type="text" id="zfjjup" placeholder="数字" />&nbsp;&nbsp;
 				几年未涨stable&gt;=<input type="text" id="zfjjupStable"
 					placeholder="算法偏严" />&nbsp;&nbsp;
 			</div>
 			<div class="mg">
 				<div class="input-group">
 					增发:&nbsp;&nbsp;&nbsp;&nbsp;底部增发:<input type="checkbox" id="zfself" />&nbsp;&nbsp;
-					增发状态:<select id="zfStatus">
+					增发状态：<select id="zfStatus">
 						<option value="" selected="selected">不限制</option>
 						<option value="1">增发中</option>
 						<option value="6">证监会核准</option>
 						<option value="2">增发完成</option>
 						<option value="8">增发中和完成</option>
 						<option value="0">无增发</option>
-					</select>&nbsp;&nbsp; &nbsp;&nbsp;<input type="text" id="zfYjAmt2"
-						width="10" placeholder="数字,单位亿" />&gt;=增发金额&lt;=<input
-						type="text" id="zfYjAmt" width="10" width="30">&nbsp;&nbsp;
-					低于增发价&gt;=<input type="text" id="zfPriceLow" width="30"
-						placeholder="百分比" />%&nbsp;&nbsp;&nbsp;&nbsp; 增发对象:<select
-						id="zfObjType">
+					</select>&nbsp;&nbsp; 增发对象：<select id="zfObjType">
 						<option value="0" selected="selected">不限制</option>
 						<option value="1">6个月</option>
 						<option value="2">混合</option>
 						<option value="3">大股东</option>
 						<option value="4">其他</option>
-					</select>
+					</select>&nbsp;&nbsp; <input type="text" id="zfYjAmt2" width="10"
+						placeholder="数字,单位亿" />&gt;=增发金额&lt;=<input type="text"
+						id="zfYjAmt" width="10" width="30">&nbsp;&nbsp; 低于增发价&gt;=<input
+						type="text" id="zfPriceLow" width="30" placeholder="百分比" />%&nbsp;&nbsp;
 				</div>
 			</div>
 			<div class="mg">
@@ -87,36 +86,37 @@
 					&nbsp;&nbsp; 底部小票大宗:<input type="checkbox" id="shooting1" />
 					&nbsp;&nbsp; 底部小票减持:<input type="checkbox" id="shooting6" />
 					&nbsp;&nbsp; 底部小票定增:<input type="checkbox" id="shooting8" />
-					&nbsp;&nbsp; 底部优质小票:<input type="checkbox" id="shooting7" />
+					&nbsp;&nbsp; 底部小票(优):<input type="checkbox" id="shooting7" />
 					&nbsp;&nbsp; 底部融资飙升:<input type="checkbox" id="shooting3" />
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 底部小票(粗):<input type="checkbox"
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 底部小票(全):<input type="checkbox"
 						id="shooting9" /> &nbsp;&nbsp; 底部股东人数减少:<input type="checkbox"
 						id="shooting4" />
 				</div>
 			</div>
 			<div class="mg">
-				技术面:&nbsp;&nbsp;&nbsp;&nbsp;底部旗形:<input type="checkbox"
-					id="dibuqixing" />&nbsp;&nbsp;&nbsp;旗形:<input type="checkbox"
-					id="qixing" />&nbsp;&nbsp;&nbsp; 中阳十字星:<input type="checkbox"
-					id="zyxing" />&nbsp;&nbsp;&nbsp; 5日均线多头排列:<input type="checkbox"
-					id="shooting51" />&nbsp;&nbsp;&nbsp; 5日内一阳穿4线:<input
-					type="checkbox" id="shooting52" />&nbsp;&nbsp;&nbsp; K线攻击形态:<input
-					type="checkbox" id="kline" />&nbsp;&nbsp;&nbsp; 接近1年新高:<input
-					type="checkbox" id="pre1Year" />&nbsp;&nbsp;&nbsp;5日交易活跃:<input
+				技术面:&nbsp;&nbsp;&nbsp;&nbsp;起爆:<input type="checkbox" id="qb" />&nbsp;&nbsp;大旗形:<input
+					type="checkbox" id="dibuqixing" />&nbsp;&nbsp;小旗形:<input
+					type="checkbox" id="dibuqixing2" />&nbsp;&nbsp;中阳十字星:<input
+					type="checkbox" id="zyxing" />&nbsp;&nbsp; 5日均线多头排列:<input
+					type="checkbox" id="shooting51" />&nbsp;&nbsp;5日内一阳穿4线:<input
+					type="checkbox" id="shooting52" />&nbsp;&nbsp; K线攻击形态:<input
+					type="checkbox" id="kline" />&nbsp;&nbsp; 接近1年新高:<input
+					type="checkbox" id="pre1Year" />&nbsp;&nbsp;5日交易活跃:<input
 					type="checkbox" id="shooting53" />&nbsp;&nbsp; 股价极速拉升(妖股?龙抬头?):<input
-					type="checkbox" id="shooting5" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;白马走势(大票):<input
+					type="checkbox" id="shooting5" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;白马走势(大票):<input
 					type="checkbox" id="whiteHors" />
 			</div>
+
 			<div class="mg">
 				<div class="input-group">
 					&nbsp;&nbsp; 标签:<select id="tagIndex">
 						<option value="-1" selected="selected">无限制</option>
+						<option value="3">业绩连续增长</option>
 						<option value="5">小而美</option>
 						<option value="2">业绩较牛</option>
-						<option value="7">半年新高-突破箱体?</option>
 						<option value="1">拉升吸筹?</option>
 						<option value="4">高质押机会</option>
-					</select>&nbsp;&nbsp; 排序:<select id="gsort">
+					</select>&nbsp;&nbsp; 排序：<select id="gsort">
 						<option value="9" selected="selected">人均持股</option>
 						<option value="3">资产收益率ttm</option>
 						<option value="6">大股东持股</option>
@@ -128,7 +128,8 @@
 						<option value="13">持股人数变化</option>
 						<option value="14">减持占比</option>
 						<option value="15">旗形倒序</option>
-					</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 倒序排序:<input type="checkbox"
+						<option value="16">业绩暴涨</option>
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 倒序排序: <input type="checkbox"
 						id="asc" name="asc" checked="checked" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="input-group-btn">
 						<button class="btn btn-default" type="button" id="queryAction">
@@ -217,6 +218,7 @@
 											.val();
 									param.zfself = 0;
 									param.tagIndex = $('#tagIndex').val();
+
 									param.zfPriceLow = $('#zfPriceLow').val();
 									param.totalAmt = $('#totalAmt').val();
 									param.totalAmt60d = $('#totalAmt60d').val();
@@ -234,17 +236,27 @@
 									param.pre1Year = 0;
 									param.monitor = 0;
 									param.zfObjType = $('#zfObjType').val();
-									param.shooting51 = 0;
-									param.shooting52 = 0;
-									param.shooting53 = 0;
 									param.whiteHors = 0;
 									param.gdrs = $('#gdrs').val();
 									param.gdrsp = $('#gdrsp').val();
-									param.qixing = 0;
+
+									param.qb = 0;
+									param.dibuqixing = 0;
+									param.dibuqixing2 = 0;
 									param.zyxing = 0;
 
-									if (document.getElementById("qixing").checked) {
-										param.qixing = 1;
+									param.finDbl = 0;
+									if (document.getElementById("finDbl").checked) {
+										param.finDbl = 1;
+									}
+									if (document.getElementById("qb").checked) {
+										param.qb = 1;
+									}
+									if (document.getElementById("dibuqixing").checked) {
+										param.dibuqixing = 1;
+									}
+									if (document.getElementById("dibuqixing2").checked) {
+										param.dibuqixing2 = 1;
 									}
 									if (document.getElementById("zyxing").checked) {
 										param.zyxing = 1;
@@ -252,15 +264,6 @@
 
 									if (document.getElementById("whiteHors").checked) {
 										param.whiteHors = 1;
-									}
-									if (document.getElementById("shooting51").checked) {
-										param.shooting51 = 1;
-									}
-									if (document.getElementById("shooting52").checked) {
-										param.shooting52 = 1;
-									}
-									if (document.getElementById("shooting53").checked) {
-										param.shooting53 = 1;
 									}
 
 									if (document.getElementById("pre1Year").checked) {
@@ -275,7 +278,9 @@
 									if (document.getElementById("zfself").checked) {
 										param.zfself = 1;
 									}
-
+									if (!document.getElementById("asc").checked) {
+										param.asc = 2;
+									}
 									param.shooting1 = 0;
 									if (document.getElementById("shooting1").checked) {
 										param.shooting1 = 1;
@@ -313,8 +318,17 @@
 										param.shooting9 = 1;
 									}
 
-									if (!document.getElementById("asc").checked) {
-										param.asc = 2;
+									param.shooting51 = 0;
+									param.shooting52 = 0;
+									param.shooting53 = 0;
+									if (document.getElementById("shooting51").checked) {
+										param.shooting51 = 1;
+									}
+									if (document.getElementById("shooting52").checked) {
+										param.shooting52 = 1;
+									}
+									if (document.getElementById("shooting53").checked) {
+										param.shooting53 = 1;
 									}
 									return param;
 								},
@@ -353,21 +367,26 @@
 										},
 										{
 											field : 'baseInfo',
-											title : '基本面-避雷区',
+											title : '基本面-避雷区(通达信app扫雷)',
 											formatter : function(value, row,
 													index) {
 												var v = value
 														+ "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+row.code+"/event.html#stockpage'>大事提醒</a>";
 												v += "&nbsp;&nbsp;<a target='_blank' href='/web/chips/reduce/list?code="
 														+ row.code
-														+ "'>减持历史</a>"
+														+ "'>减持历史</a>";
 												v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/dzjy/detail/"+row.code+".html'>大宗</a>";
+												v += "&nbsp;&nbsp;<a target='_blank' href='/web/comon/zengFa.html?code="
+														+ row.code
+														+ "&ustr="
+														+ ustr + "'>定增历史</a>";
 												if (row.shooting3 == 1) {
 													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资融券</a>";
 												}
 												if (row.tagHighZyChance == 1) {
 													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/gpzy/detail/"+row.code+".html'>股票质押</a>";
 												}
+												v += "&nbsp;&nbsp;<a target='_blank' href='http://data.eastmoney.com/notices/stock/"+row.code+".html'>公告</a>";
 
 												var ckl = "<br/><a target='_blank' href='/web/"
 														+ ustr
