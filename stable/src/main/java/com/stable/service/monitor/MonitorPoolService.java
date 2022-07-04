@@ -757,7 +757,11 @@ public class MonitorPoolService {
 							}
 
 							if (line != null) {
-								bao.add(line);
+								if (cbm.getPls() == 1) {
+									bao.add(0, "[人工]," + line);
+								} else {
+									bao.add(line);
+								}
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
