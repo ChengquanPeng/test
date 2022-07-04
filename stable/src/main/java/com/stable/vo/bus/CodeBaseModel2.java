@@ -52,6 +52,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int qb = 0;// 处于起爆
 	@Field(type = FieldType.Long)
 	private int qixing = 0;// 旗形
+	@Field(type = FieldType.Text)
+	private String qixingStr;// 旗形恶心走势
 	@Field(type = FieldType.Integer)
 	private int dibuQixing = 0;// 旗形
 	@Field(type = FieldType.Integer)

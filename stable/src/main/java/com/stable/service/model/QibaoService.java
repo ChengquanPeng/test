@@ -34,7 +34,7 @@ public class QibaoService {
 
 //	@javax.annotation.PostConstruct
 //	public void test() {
-//		 002612-20200527
+//		 002612-20200529
 //		 002900-20210315
 //		 600789-20200115
 //		 000678-20220610
@@ -42,13 +42,13 @@ public class QibaoService {
 //		 000017-20220526
 //		 000582-20220331
 //		 600798-20201113
-		// 大旗形
+	// 大旗形
 //		String[] codes = { "002612", "002900", "600789", "000678", "000025", "000017", "600798" };
-//		int[] dates = { 20200527, 20210315, 20200115, 20220610, 20220519, 20220526, 20201113 };
-		// 小旗形
+//		int[] dates = { 20200529, 20210315, 20200115, 20220610, 20220519, 20220526, 20201113 };
+	// 小旗形
 //		String[] codes = { "000582", "000563", "601515" };
 //		int[] dates = { 20220331, 20220701, 20220701 };
-		// 十字星
+	// 十字星
 //		String[] codes = { "002752" };
 //		int[] dates = { 20211115 };
 ////
@@ -66,7 +66,8 @@ public class QibaoService {
 //			MonitorPoolTemp pool = new MonitorPoolTemp();
 //			qibao(date, newOne, pool, true, new StringBuffer(), new StringBuffer());
 //			System.err.println(code + "=====" + "Qixing:" + newOne.getQixing() + ",大旗形:" + newOne.getDibuQixing()
-//					+ ",小旗形:" + newOne.getDibuQixing2() + ",Zyxing:" + newOne.getZyxing());
+//					+ ",小旗形:" + newOne.getDibuQixing2() + ",Zyxing:" + newOne.getZyxing() + ",EX:"
+//					+ newOne.getQixingStr());
 //			System.err.println(pool);
 //		}
 //		System.exit(0);
@@ -130,6 +131,7 @@ public class QibaoService {
 				qx.append(stockBasicService.getCodeName2(newOne.getCode())).append(",");
 			}
 			pool.setShotPointDate(res.getDate());
+			newOne.setQixingStr(res.ex());
 			newOne.setQixing(res.getDate());
 			newOne.setDibuQixing(res.getDate());
 		} else {
@@ -177,6 +179,7 @@ public class QibaoService {
 				qx.append(stockBasicService.getCodeName2(newOne.getCode())).append(",");
 			}
 			pool.setShotPointDate(res.getDate());
+			newOne.setQixingStr(res.ex());
 			newOne.setQixing(res.getDate());
 			newOne.setDibuQixing2(res.getDate());
 		} else {
@@ -280,6 +283,7 @@ public class QibaoService {
 		}
 		if (newOne.getDibuQixing() == 0 && newOne.getDibuQixing2() == 0) {
 			newOne.setQixing(0);
+			newOne.setQixingStr("");
 			pool.setShotPointDate(0);
 			pool.setShotPointPrice(0);
 			pool.setShotPointPriceLow(0);
@@ -521,11 +525,28 @@ public class QibaoService {
 				if (chkrateupdate) {
 					qi.setChkRate(20);
 				}
+				qxrange(qi, tmp);
 				return qi;
 			}
 		}
 		log.info("=====>默认false");
 		return null;
+
+	}
+
+	private void qxrange(QiBaoInfo qi, List<TradeHistInfoDaliy> tmp) {
+		System.err.println("check rate:" + tmp.get(1).getDate() + "-" + tmp.get(tmp.size() - 1).getDate());
+		for (int i = 1; i < tmp.size(); i++) {
+			TradeHistInfoDaliy td = tmp.get(i);
+			if (LineAvgPrice.isShangYingXian(td) && CurrencyUitl.cutProfit(td.getLow(), td.getHigh()) >= 4.5) {
+				System.err.println("syx:" + td);
+				qi.setSyx(1);
+			}
+			if (LineAvgPrice.isDaYingxian(td)) {
+				System.err.println("dyx:" + td);
+				qi.setDyx(1);
+			}
+		}
 	}
 
 	/**
@@ -562,6 +583,8 @@ public class QibaoService {
 				qi.setVol((chk.getVolume() > d2tian.getVolume()) ? chk.getVolume() : d2tian.getVolume());
 				qi.setYesterdayPrice(chk.getYesterdayPrice());
 				qi.setLow(chk.getLow());
+
+				qxrange(qi, tmp);
 				return qi;
 			}
 		}

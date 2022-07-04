@@ -1,5 +1,7 @@
 package com.stable.service.monitor;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.stable.constant.Constant;
 import com.stable.enums.MonitorType;
 import com.stable.service.biz.BizPushService;
@@ -19,6 +21,7 @@ public class RtmVo {
 	public BizPushService bizPushService;
 	public double warningYellow = 0.0;
 	public String you = "";
+	public String ex = "";
 
 	public RtmVo(MonitorPoolTemp cp, CodeBaseModelResp cbm) {
 		this.orig = cp;
@@ -31,6 +34,9 @@ public class RtmVo {
 		msg = msgt;
 		if (cbm.getShooting7() > 0) {
 			you = "[优]";
+		}
+		if (StringUtils.isNotBlank(cbm.getQixingStr())) {
+			ex = cbm.getQixingStr();
 		}
 	}
 

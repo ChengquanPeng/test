@@ -131,13 +131,45 @@ public class LineAvgPrice {
 		return false;
 	}
 
+	public static boolean isDaYingxian(TradeHistInfoDaliyNofq t) {
+		return isDaYingxian(t.getTodayChangeRate(), t.getOpen(), t.getClosed());
+	}
+
+	public static boolean isDaYingxian(TradeHistInfoDaliy t) {
+		return isDaYingxian(t.getTodayChangeRate(), t.getOpen(), t.getClosed());
+	}
+
+	// 大阴线
+	private static boolean isDaYingxian(double change, double open, double closed) {
+		if (change <= -5) {
+			return true;
+		}
+		if (open > closed) {
+			if (CurrencyUitl.cutProfit(closed, open) >= 2.8) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static void main(String[] args) {
 		TradeHistInfoDaliy t = new TradeHistInfoDaliy();
-		t.setTodayChange(1);
-		t.setYesterdayPrice(7.11);
-		t.setHigh(7.81);
-		t.setClosed(7.48);
-		System.err.println(isShangYingXian(t));
+		t.setOpen(7.64);
+		t.setHigh(7.8);
+		t.setClosed(7.71);
+		t.setLow(7.39);
+		t.setYesterdayPrice(7.68);
+		t.setTodayChange(0.39);
+
+		System.err.println(LineAvgPrice.isShangYingXian(t) && CurrencyUitl.cutProfit(t.getLow(), t.getHigh()) >= 4.5);
+
+//		TradeHistInfoDaliy t = new TradeHistInfoDaliy();
+//		t.setTodayChange(1);
+//		t.setYesterdayPrice(7.11);
+//		t.setHigh(7.81);
+//		t.setOpen(8.07);
+//		t.setClosed(7.6);
+//		System.err.println(isDaYingxian(t));
 	}
 
 }

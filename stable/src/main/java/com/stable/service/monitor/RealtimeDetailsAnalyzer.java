@@ -130,19 +130,20 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 									&& qibao.getOrig().getShotPointPrice() > 0) {
 								burstPointCheckTop = true;
 
-								qibao.bizPushService.PushS2(
-										codeName + qibao.you + "[7]突破买点:" + qibao.getOrig().getShotPointPrice());
+								qibao.bizPushService.PushS2(codeName + qibao.you + "[7]突破买点:"
+										+ qibao.getOrig().getShotPointPrice() + " " + qibao.ex);
 							} else if (!burstPointCheckTopPrew && rt.getHigh() >= qibao.warningYellow) {
 								burstPointCheckTopPrew = true;
-								qibao.bizPushService.PushS2(codeName + qibao.you + "[7]突破买点:"
-										+ qibao.getOrig().getShotPointPrice() + "目前:" + qibao.warningYellow);
+								qibao.bizPushService
+										.PushS2(codeName + qibao.you + "[7]突破买点:" + qibao.getOrig().getShotPointPrice()
+												+ "目前:" + qibao.warningYellow + " " + qibao.ex);
 							}
 						}
 						if (!burstPointCheckSzx && qibao.getOrig().getShotPointPriceSzx() > 0
 								&& rt.getHigh() >= qibao.getOrig().getShotPointPriceSzx()) {
 							burstPointCheckSzx = true;
-							qibao.bizPushService
-									.PushS2(codeName + qibao.you + " [10]突破买点:" + qibao.getOrig().getShotPointPrice());
+							qibao.bizPushService.PushS2(codeName + qibao.you + " [10]突破买点:"
+									+ qibao.getOrig().getShotPointPrice() + " " + qibao.ex);
 						}
 
 //						if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
