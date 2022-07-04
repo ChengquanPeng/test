@@ -1,9 +1,6 @@
 package com.stable.utils;
 
 import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.stable.config.SpringConfig;
 import com.zjiecode.wxpusher.client.WxPusher;
@@ -46,17 +43,17 @@ public class WxPushUtil {
 	}
 
 	private final static boolean pushMsg(int contentType, String content, String singleId) {
-		return pushMsgWarp(contentType, content, singleId, null);
+		return pushMsgWarp(contentType, content, singleId);
 	}
 
-	private final static boolean pushMsgWarp(int contentType, String content, String singleId, Set<String> uids) {
-		if (pushMsg(contentType, content, singleId, uids, false)) {
+	private final static boolean pushMsgWarp(int contentType, String content, String singleId) {
+		if (pushMsg(contentType, content, singleId, false)) {
 			return true;
 		}
 		int i = 1;
 		while (i <= 3) {
 			ThreadsUtil.sleepRandomSecBetween1And5();
-			if (pushMsg(contentType, content, singleId, uids, (i == 3))) {
+			if (pushMsg(contentType, content, singleId, (i == 3))) {
 				return true;
 			}
 			i++;
@@ -64,18 +61,18 @@ public class WxPushUtil {
 		return false;
 	}
 
-	private final static boolean pushMsg(int contentType, String content, String singleId, Set<String> uids,
-			boolean showErrorLog) {
+	private final static boolean pushMsg(int contentType, String content, String singleId, boolean showErrorLog) {
 		try {
 			Message message = new Message();
 			message.setAppToken(appToken);
 			message.setContentType(contentType);
 			message.setContent(content + env + DateUtil.getTodayYYYYMMDDHHMMSS());
-			if (StringUtils.isNotBlank(singleId)) {
-				message.setUid(singleId);
-			} else {
-				message.setUids(uids);
-			}
+			message.setUid(singleId);
+//			if (StringUtils.isNotBlank(singleId)) {
+//				
+//			} else {
+//				message.setUids(uids);
+//			}
 			message.setUrl(null);
 			Result<List<MessageResult>> result = WxPusher.send(message);
 			List<MessageResult> lresult = result.getData();
@@ -85,7 +82,7 @@ public class WxPushUtil {
 			return true;
 		} catch (Exception e) {
 			if (showErrorLog) {
-				ErrorLogFileUitl.writeError(e, "微信推送内容异常", content, "");
+				ErrorLogFileUitl.writeError(e, "微信推送内容异常", singleId, content);
 				e.printStackTrace();
 			}
 		}

@@ -437,7 +437,8 @@ public class WebModelService {
 		if (timemonth == 10) {
 			String code = req.getCode();
 			CodeBaseModel2 model = getLastOneByCode2(code);
-			model.setBuyRea((req.getBuyRea() + " " + req.getSoldRea()).trim());
+			model.setBuyRea(
+					(req.getBuyRea() + " " + req.getSoldRea()).trim() + " " + DateUtil.formatYYYYMMDD2(new Date()));
 			codeBaseModel2Dao.save(model);
 			return;
 		}
