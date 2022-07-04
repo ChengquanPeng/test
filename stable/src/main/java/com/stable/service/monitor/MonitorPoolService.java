@@ -677,9 +677,9 @@ public class MonitorPoolService {
 					if (d != null) {
 						try {
 							CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(d.getCode());
-							String yz = "";
+							String yz = stockBasicService.getCodeName2(cp.getCode());
 							if (cbm.getShooting7() > 0) {
-								yz = "[优]";
+								yz = "[优]" + yz;
 							}
 
 							String line = null;
@@ -689,14 +689,13 @@ public class MonitorPoolService {
 								line = "";
 								// 突破
 								if (d.getHigh() >= cp.getShotPointPrice()) {
-									line += yz + stockBasicService.getCodeName2(cp.getCode()) + " " + " 突破价格:"
-											+ cp.getShotPointPrice();
+									line = " 突破价格:" + cp.getShotPointPrice();
 
 									// 缩量
 								} else if (cp.getShotPointDate() > 0) {
 									List<TradeHistInfoDaliy> listt = daliyTradeHistroyService
 											.queryListByCodeWithLastQfq(cp.getCode(), cp.getShotPointDate(),
-													d.getDate(), EsQueryPageUtil.queryPage30, SortOrder.DESC);
+													d.getDate(), EsQueryPageUtil.queryPage9999, SortOrder.DESC);
 
 									double up = CurrencyUitl.cutProfit(d.getLow(), listt.get(1).getLow());
 									if (up <= 1.0) {// 最低点的波动
@@ -708,7 +707,7 @@ public class MonitorPoolService {
 											maxvol = listt.get(listt.size() - 3).getVolume();
 										}
 										if ((d.getVolume() * 2) <= (maxvol * 1.2)) {// 缩量
-											line += yz + stockBasicService.getCodeName2(cp.getCode()) + " " + " 缩量买点";
+											line = " 缩量买点";
 										}
 									}
 								}
@@ -721,13 +720,13 @@ public class MonitorPoolService {
 								}
 
 								if (StringUtils.isNotBlank(cbm.getQixingStr())) {
-									line += "," + cbm.getQixingStr();
+									line += ",<font color='red'>" + cbm.getQixingStr() + "</font>";
 								}
 								if (cbm.getZyxing() == 1) {
 									line += ",[中阳十字星]";
 								}
 								if (StringUtils.isNotBlank(line)) {
-									line = "<<7>>" + line;
+									line = "<<7>>" + yz + line;
 								}
 							}
 
@@ -735,9 +734,9 @@ public class MonitorPoolService {
 							if (cp.getShotPointPriceSzx() > 0) {
 								if (d.getClosed() >= cp.getShotPointPriceSzx()) {
 									if (StringUtils.isNotBlank(line)) {
-										line = line + ",<<10>>-突破十字星";
+										line = line + ",<font color='red'><<10>>-突破十字星</font>";
 									} else {
-										line = "<<10>>-<突破十字星>";
+										line = yz + "<font color='red'><<10>>-</font>突破十字星</font>";
 									}
 								}
 							}

@@ -163,11 +163,12 @@ public class WebModelService {
 			tag.append("起爆->");
 		}
 		if (dh.getDibuQixing() > 0) {
-			tag.append("大旗形").append(dh.getDibuQixing()).append(Constant.HTML_LINE);
+			tag.append("大旗形").append(dh.getDibuQixing()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
 		}
 		if (dh.getDibuQixing2() > 0) {
-			tag.append("小旗形").append(dh.getDibuQixing2()).append(Constant.HTML_LINE);
+			tag.append("小旗形").append(dh.getDibuQixing2()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
 		}
+
 		if (dh.getZyxing() > 0) {
 			tag.append("中阳十字星").append(Constant.HTML_LINE);
 		}
