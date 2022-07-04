@@ -734,18 +734,25 @@ public class MonitorPoolService {
 										line = yz + stockBasicService.getCodeName2(cp.getCode()) + " [上影线]";
 									}
 								}
-							}
-
-							// 十字星
-							if (cbm.getZyxing() > 0) {
 								if (line != null) {
 									line += ",[中阳十字星]";
 								} else {
 									line = yz + stockBasicService.getCodeName2(cp.getCode()) + " [中阳十字星]";
 								}
 
-								if (cp.getShotPointPriceSzx() > 0 && d.getClosed() >= cp.getShotPointPriceSzx()) {
-									line += ",<突破十字星>";
+								if (line != null) {
+									line = "[7]" + line;
+								}
+							}
+
+							// 十字星
+							if (cp.getShotPointPriceSzx() > 0) {
+								if (d.getClosed() >= cp.getShotPointPriceSzx()) {
+									if (line != null) {
+										line = ",[10]<突破十字星>" + line;
+									} else {
+										line = ",<突破十字星>";
+									}
 								}
 							}
 
