@@ -126,7 +126,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					// 起爆点
 					if (qibao != null) {
 						if (!burstPointCheckTop) {
-							if (rt.getHigh() >= qibao.getOrig().getShotPointPrice()) {
+							if (rt.getHigh() >= qibao.getOrig().getShotPointPrice()
+									&& qibao.getOrig().getShotPointPrice() > 0) {
 								burstPointCheckTop = true;
 
 								qibao.bizPushService.PushS2(

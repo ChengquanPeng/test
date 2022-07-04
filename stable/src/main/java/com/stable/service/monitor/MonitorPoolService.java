@@ -682,54 +682,60 @@ public class MonitorPoolService {
 							if (cbm.getShooting7() > 0) {
 								yz = "[优]";
 							}
-							// 旗形起爆
+
 							String line = null;
-							if (d.getHigh() >= cp.getShotPointPrice()) {
-								line = yz + stockBasicService.getCodeName2(cp.getCode()) + " " + " 突破价格:"
-										+ cp.getShotPointPrice();
-							} else if (cp.getShotPointDate() > 0) {
-								List<TradeHistInfoDaliy> listt = daliyTradeHistroyService.queryListByCodeWithLastQfq(
-										cp.getCode(), cp.getShotPointDate(), d.getDate(), EsQueryPageUtil.queryPage30,
-										SortOrder.DESC);
 
-								double up = CurrencyUitl.cutProfit(d.getLow(), listt.get(1).getLow());
-								if (up <= 1.0) {// 最低点的波动
-									double maxvol = listt.get(listt.size() - 1).getVolume();
-									if (listt.get(listt.size() - 2).getVolume() > maxvol) {
-										maxvol = listt.get(listt.size() - 2).getVolume();
-									}
-									if (listt.get(listt.size() - 3).getVolume() > maxvol) {
-										maxvol = listt.get(listt.size() - 3).getVolume();
-									}
-									if ((d.getVolume() * 2) <= (maxvol * 1.2)) {// 缩量
-										line = yz + stockBasicService.getCodeName2(cp.getCode()) + " " + " 缩量买点";
+							// 旗形起爆
+							if (cp.getShotPointPrice() > 0) {
+								if (d.getHigh() >= cp.getShotPointPrice()) {
+									line = yz + stockBasicService.getCodeName2(cp.getCode()) + " " + " 突破价格:"
+											+ cp.getShotPointPrice();
+								} else if (cp.getShotPointDate() > 0) {
+									List<TradeHistInfoDaliy> listt = daliyTradeHistroyService
+											.queryListByCodeWithLastQfq(cp.getCode(), cp.getShotPointDate(),
+													d.getDate(), EsQueryPageUtil.queryPage30, SortOrder.DESC);
+
+									double up = CurrencyUitl.cutProfit(d.getLow(), listt.get(1).getLow());
+									if (up <= 1.0) {// 最低点的波动
+										double maxvol = listt.get(listt.size() - 1).getVolume();
+										if (listt.get(listt.size() - 2).getVolume() > maxvol) {
+											maxvol = listt.get(listt.size() - 2).getVolume();
+										}
+										if (listt.get(listt.size() - 3).getVolume() > maxvol) {
+											maxvol = listt.get(listt.size() - 3).getVolume();
+										}
+										if ((d.getVolume() * 2) <= (maxvol * 1.2)) {// 缩量
+											line = yz + stockBasicService.getCodeName2(cp.getCode()) + " " + " 缩量买点";
+										}
 									}
 								}
-							}
-							if (cp.getShotPointPriceLow() <= d.getLow() && d.getLow() <= cp.getShotPointPriceLow5()) {
-								if (line != null) {
-									line += ",接近旗形底部买点:[" + cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5()
-											+ "]";
-								} else {
-									line = yz + stockBasicService.getCodeName2(cp.getCode()) + " 接近旗形底部买点:["
-											+ cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5() + "]";
+								if (cp.getShotPointPriceLow() <= d.getLow()
+										&& d.getLow() <= cp.getShotPointPriceLow5()) {
+									if (line != null) {
+										line += ",接近旗形底部买点:[" + cp.getShotPointPriceLow() + "-"
+												+ cp.getShotPointPriceLow5() + "]";
+									} else {
+										line = yz + stockBasicService.getCodeName2(cp.getCode()) + " 接近旗形底部买点:["
+												+ cp.getShotPointPriceLow() + "-" + cp.getShotPointPriceLow5() + "]";
+									}
+								}
+
+								if (d.getOpen() >= d.getClosed()) {
+									if (line != null) {
+										line += ",[阴线]";
+									} else {
+										line = yz + stockBasicService.getCodeName2(cp.getCode()) + " [阴线]";
+									}
+								}
+								if (LineAvgPrice.isShangYingXian(d)) {
+									if (line != null) {
+										line += ",[上影线]";
+									} else {
+										line = yz + stockBasicService.getCodeName2(cp.getCode()) + " [上影线]";
+									}
 								}
 							}
 
-							if (d.getOpen() >= d.getClosed()) {
-								if (line != null) {
-									line += ",[阴线]";
-								} else {
-									line = yz + stockBasicService.getCodeName2(cp.getCode()) + " [阴线]";
-								}
-							}
-							if (LineAvgPrice.isShangYingXian(d)) {
-								if (line != null) {
-									line += ",[上影线]";
-								} else {
-									line = yz + stockBasicService.getCodeName2(cp.getCode()) + " [上影线]";
-								}
-							}
 							// 十字星
 							if (cbm.getZyxing() > 0) {
 								if (line != null) {
