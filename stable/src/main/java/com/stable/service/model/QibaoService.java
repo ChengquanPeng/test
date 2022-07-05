@@ -53,10 +53,8 @@ public class QibaoService {
 //		 十字星
 //		String[] codes = { "002752", "000498", "601117" };
 //		int[] dates = { 20211115, 20220105, 20210608 };
-
 //		String[] codes = { "601117" };
 //		int[] dates = { 20210608 };
-
 //		for (int i = 0; i < codes.length; i++) {
 //			String code = codes[i];
 //			int date = dates[i];
@@ -207,8 +205,9 @@ public class QibaoService {
 		boolean isOk = false;
 		// 1.放量对比前日
 		if (chk.getVolume() > preChk.getVolume() * 1.8) {
-			// 2.中阳线,3-6个点
-			if (3.0 <= chk.getTodayChangeRate() && chk.getTodayChangeRate() <= 6.5) {// 第一天中阳线,3-6个点
+			// 2.中阳线,3-6个点,不是上影线
+			if ((3.0 <= chk.getTodayChangeRate() && chk.getTodayChangeRate() <= 6.5)
+					&& !LineAvgPrice.isShangYingXian(chk)) {// 第一天中阳线,3-6个点
 				// 3.收影线或者10字星
 				if ((d2tian.getOpen() >= d2tian.getClosed()
 						|| CurrencyUitl.cutProfit(d2tian.getOpen(), d2tian.getClosed()) <= 0.99)
@@ -488,15 +487,15 @@ public class QibaoService {
 	}
 
 	private void qxrange(QiBaoInfo qi, List<TradeHistInfoDaliy> tmp) {
-		System.err.println("check rate:" + tmp.get(1).getDate() + "-" + tmp.get(tmp.size() - 1).getDate());
+//		System.err.println("check rate:" + tmp.get(1).getDate() + "-" + tmp.get(tmp.size() - 1).getDate());
 		for (int i = 1; i < tmp.size(); i++) {
 			TradeHistInfoDaliy td = tmp.get(i);
 			if (LineAvgPrice.isShangYingXian(td) && CurrencyUitl.cutProfit(td.getLow(), td.getHigh()) >= 4.5) {
-				System.err.println("syx:" + td);
+//				System.err.println("syx:" + td);
 				qi.setSyx(1);
 			}
 			if (LineAvgPrice.isDaYingxian(td)) {
-				System.err.println("dyx:" + td);
+//				System.err.println("dyx:" + td);
 				qi.setDyx(1);
 			}
 		}

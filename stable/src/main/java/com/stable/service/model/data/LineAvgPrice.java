@@ -161,7 +161,7 @@ public class LineAvgPrice {
 		t.setYesterdayPrice(7.68);
 		t.setTodayChange(0.39);
 
-		System.err.println(LineAvgPrice.isShangYingXian(t) && CurrencyUitl.cutProfit(t.getLow(), t.getHigh()) >= 4.5);
+		System.err.println(LineAvgPrice.isShangYingXian(t));
 
 //		TradeHistInfoDaliy t = new TradeHistInfoDaliy();
 //		t.setTodayChange(1);
