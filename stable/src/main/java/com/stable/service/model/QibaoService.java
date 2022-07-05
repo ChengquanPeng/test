@@ -53,8 +53,8 @@ public class QibaoService {
 //		 十字星
 //		String[] codes = { "002752", "000498", "601117" };
 //		int[] dates = { 20211115, 20220105, 20210608 };
-//		String[] codes = { "601117" };
-//		int[] dates = { 20210608 };
+//		String[] codes = { "600729", "600488" };
+//		int[] dates = { 20220705, 20220705 };
 //		for (int i = 0; i < codes.length; i++) {
 //			String code = codes[i];
 //			int date = dates[i];
@@ -77,6 +77,12 @@ public class QibaoService {
 	/** 起爆 */
 	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx,
 			StringBuffer szx) {
+		if (stTuiShi(newOne)) {
+			setQxRes(newOne, pool, true, true);
+			newOne.setZyxing(0);
+			pool.setShotPointPriceSzx(0);
+			return;
+		}
 		/** 大小旗形 */
 		qx(date, newOne, pool, isSamll, qx);
 		/** 中阳十字星 */
@@ -205,7 +211,7 @@ public class QibaoService {
 		boolean isOk = false;
 		// 1.放量对比前日
 		if (chk.getVolume() > preChk.getVolume() * 1.8) {
-			// 2.中阳线,3-6个点,不是上影线
+			// 2.中阳线,3-6个点,不是上影线,实体阳性-不能高开
 			if ((3.0 <= chk.getTodayChangeRate() && chk.getTodayChangeRate() <= 6.5)
 					&& !LineAvgPrice.isShangYingXian(chk)) {// 第一天中阳线,3-6个点
 				// 3.收影线或者10字星
@@ -220,6 +226,11 @@ public class QibaoService {
 							preChkOk = false;
 							break;
 						}
+					}
+					// 阳线要收实体
+					if (chk.getOpen() > chk.getYesterdayPrice()
+							&& CurrencyUitl.cutProfit(chk.getYesterdayPrice(), chk.getOpen()) > 1.1) {
+						preChkOk = false;
 					}
 					isOk = preChkOk;
 				}
@@ -355,11 +366,6 @@ public class QibaoService {
 			}
 		}
 
-		// 排除3:排除退市股票&ST
-		if (stTuiShi(newOne)) {
-			return false;
-		}
-
 		if (isQx) {
 			// 前10个交易
 			int up4 = 0;
@@ -387,16 +393,6 @@ public class QibaoService {
 		} else {
 			return true;
 		}
-	}
-
-	// 排除3:排除退市股票&ST
-	private boolean stTuiShi(CodeBaseModel2 newOne) {
-		String name = stockBasicService.getCodeName(newOne.getCode());
-		if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI) || name.contains("ST")) {
-			log.info("退市");
-			return true;
-		}
-		return false;
 	}
 
 	/**
@@ -563,4 +559,13 @@ public class QibaoService {
 		return false;
 	}
 
+	// 排除3:排除退市股票&ST
+	private boolean stTuiShi(CodeBaseModel2 newOne) {
+		String name = stockBasicService.getCodeName(newOne.getCode());
+		if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI) || name.contains("ST")) {
+			log.info("退市");
+			return true;
+		}
+		return false;
+	}
 }
