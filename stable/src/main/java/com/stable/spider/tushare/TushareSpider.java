@@ -101,7 +101,7 @@ public class TushareSpider {
 
 	public static void main(String[] args) {
 		try {
-			
+
 			TushareSpider tushareSpider = new TushareSpider();
 			String today = DateUtil.getTodayYYYYMMDD();
 			tushareSpider.tuToken = "f7b8fb50ce43ba5e6e3a45f9ff24539e13319b3ab5e7a1824d032cc6";
@@ -114,6 +114,19 @@ public class TushareSpider {
 	}
 
 	public JSONArray getStockDaliyTrade(String ts_code, String trade_date, String start_date, String end_date) {
+		// 偶尔会空异常
+		for (int j = 0; j < 3; j++) {
+			try {
+				return getStockDaliyTradeProxy(ts_code, trade_date, start_date, end_date);
+			} catch (NullPointerException e) {
+				ThreadsUtil.sleepRandomSecBetween1And30();
+			}
+		}
+		return null;
+	}
+
+	private JSONArray getStockDaliyTradeProxy(String ts_code, String trade_date, String start_date, String end_date) {
+		String result = "";
 		try {
 			StockDaliyReq req = new StockDaliyReq();
 			if (StringUtils.isNotBlank(ts_code)) {
@@ -134,10 +147,15 @@ public class TushareSpider {
 			json.put("params", JSON.parse(JSON.toJSONString(req)));
 			json.put("fields", daily_fields);
 
-			String result = post(json);
+			result = post(json);
+
 			JSONObject datas = JSON.parseObject(result);
 			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
 			return items;
+		} catch (RuntimeException e) {
+			System.err.println(result);
+			e.printStackTrace();
+			throw e;
 		} finally {
 			ThreadsUtil.tuShareSleepRandom();
 		}
