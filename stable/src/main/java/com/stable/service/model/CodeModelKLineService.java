@@ -66,14 +66,27 @@ public class CodeModelKLineService {
 	@Autowired
 	private BizPushService bizPushService;
 
+//	@Autowired
+//	private com.stable.spider.tushare.TushareSpider tushareSpider;
+//
 //	@javax.annotation.PostConstruct
 //	private void aded() {
 //		// K线模型
 //		new Thread(new Runnable() {
 //			public void run() {
-//				int date = 20220623;
+//				int date = 20220705;
 //				runKLineModel(date);
-//				codeModelService.runModel(date, true);
+//				// codeModelService.runModel(date, true);
+//				// 离线价格监听
+//				com.stable.utils.ThreadsUtil.sleepRandomSecBetween5And15();
+//				List<com.stable.vo.bus.TradeHistInfoDaliyNofq> listNofq = new LinkedList<com.stable.vo.bus.TradeHistInfoDaliyNofq>();
+//				com.alibaba.fastjson.JSONArray array = tushareSpider.getStockDaliyTrade(null, date + "", null, null);
+//				for (int i = 0; i < array.size(); i++) {
+//					TradeHistInfoDaliyNofq nofq = new TradeHistInfoDaliyNofq(array.getJSONArray(i));
+//					listNofq.add(nofq);
+//				}
+//				monitorPoolService.priceChk(listNofq, date);
+//				monitorPoolService.jobBuyLowVolWarning();
 //			}
 //		}).start();
 //	}
