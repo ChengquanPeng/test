@@ -114,7 +114,7 @@ public class CodeModelService {
 		}
 	}
 
-	private int tradeDate = 0;
+	public int tradeDate = 0;
 	private int pre1Year = 0;// 一年以前
 	private int pre3Year = 0;// 三年以前
 	private int pre4Year = 0;// 四年以前
@@ -161,6 +161,7 @@ public class CodeModelService {
 			pool.setUserId(Constant.MY_ID);
 			pool.setId(monitorPoolService.getId(pool.getUserId(), code));
 		}
+		pool.setUpdatedate(tradeDate);
 		poolList.add(pool);
 		return pool;
 	}

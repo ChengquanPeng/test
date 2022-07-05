@@ -201,16 +201,21 @@ public class PriceLifeService {
 //		new Thread(new Runnable() {
 //			@Override
 //			public void run() {
-//				ThreadsUtil.sleepSleepSeconds(5);
-//				int listdate = 20150101;
-//				String[] codes = { "300399", "002405", "002739", "600519", "002752", "600987", "600820", "600098",
-//						"300550" };
+//				int pre4Year = DateUtil.getPreYear(DateUtil.getTodayIntYYYYMMDD(), 4);
+//				System.err.println("pre4Year:" + pre4Year);
+//				int listdate = 20190412;
+//				String[] codes = { "300768" };
 //				System.err.println("start ==============");
 //				for (String c : codes) {
-//					System.err.println(c + ":noupYear=" + noupYear(c, 20150101) + ",noupYearstable="
-//							+ (noupYearstable(c, listdate)));
+//					if (listdate > pre4Year) {// ----preYearChk<listDate
+//						System.err.println("online for 4 year?");
+//					} else {
+//						System.err.println(c + ":noupYear=" + noupYear(c, listdate) + ",noupYearstable="
+//								+ (noupYearstable(c, listdate)));
+//					}
 //				}
 //				System.err.println("end ==============");
+//				System.exit(0);
 //			}
 //		}).start();
 //	}

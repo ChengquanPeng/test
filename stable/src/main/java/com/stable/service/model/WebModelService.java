@@ -29,7 +29,6 @@ import com.stable.enums.SylType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
-import com.stable.es.dao.base.MonitorPoolUserDao;
 import com.stable.service.ConceptService;
 import com.stable.service.ReducingHoldingSharesService;
 import com.stable.service.StockBasicService;
@@ -65,8 +64,6 @@ public class WebModelService {
 	private ConceptService conceptService;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
-	@Autowired
-	private MonitorPoolUserDao monitorPoolDao;
 	@Autowired
 	private ReducingHoldingSharesService reducingHoldingSharesService;
 	@Autowired
@@ -501,7 +498,7 @@ public class WebModelService {
 				pool.setBuyLowVol(30);
 //				pool.setShotPointCheck(1);
 			}
-			monitorPoolDao.save(pool);
+			monitorPoolService.toSave(pool);
 			BeanCopy.copy(req, model);
 			// 同步监听
 			if (pool.getMonitor() > MonitorType.NO.getCode()) {

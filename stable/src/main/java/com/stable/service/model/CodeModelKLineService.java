@@ -83,6 +83,7 @@ public class CodeModelKLineService {
 //			date = tradeCalService.getPretradeDate(date);
 //		}
 		tradeDate = date;
+		codeModelService.tradeDate = date;
 		pre1Year = DateUtil.getPreYear(tradeDate);
 		pre4Year = DateUtil.getPreYear(tradeDate, 4);
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();

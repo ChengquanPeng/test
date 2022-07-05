@@ -151,12 +151,8 @@ public class MonitorPoolService {
 		} else {
 			c.setRemark(remark);
 		}
-		monitorPoolDao.save(c);
+		toSave(c);
 		updateBaseMoniStatus(userId, code, c.getRemark());
-	}
-
-	public void saveOrUpdate(MonitorPoolTemp mp) {
-		monitorPoolDao.save(mp);
 	}
 
 	private void updateBaseMoniStatus(long userId, String code, String buyRea) {
@@ -214,7 +210,7 @@ public class MonitorPoolService {
 //			c.setShotPointCheck(0);
 			c.setListenerGg(0);
 		}
-		monitorPoolDao.save(c);
+		toSave(c);
 		updateBaseMoniStatus(userId, code, c.getRemark());
 	}
 
@@ -457,14 +453,14 @@ public class MonitorPoolService {
 					if (!chipsZfService.isZfDateOk(zf, oneYearAgo)) {
 						mp.setZfdone(0);
 						mp.setZfdoneZjh(0);
-						monitorPoolDao.save(mp);
+						toSave(mp);
 						WxPushUtil.pushSystem1(u.getWxpush(),
 								stockBasicService.getCodeName2(mp.getCode()) + " 已完成增发,备注:" + mp.getRemark());
 					} else {
 						if (mp.getZfdoneZjh() == 0 && zf != null
 								&& ZfStatus.ZF_ZJHHZ.getDesc().equals(zf.getStatusDesc())) {
 							mp.setZfdoneZjh(1);
-							monitorPoolDao.save(mp);
+							toSave(mp);
 							WxPushUtil.pushSystem1(u.getWxpush(),
 									stockBasicService.getCodeName2(mp.getCode()) + " 增发已通过证监会核准！ 备注:" + mp.getRemark());
 						}
@@ -472,6 +468,11 @@ public class MonitorPoolService {
 				}
 			}
 		}
+	}
+
+	public void toSave(MonitorPoolTemp mp) {
+		mp.setUpdatedate(DateUtil.getTodayIntYYYYMMDD());
+		monitorPoolDao.save(mp);
 	}
 
 	// 公告监听
@@ -548,7 +549,7 @@ public class MonitorPoolService {
 							sb.append(stockBasicService.getCodeName2(mp.getCode()) + (islow ? ":下降" : ":上涨"))
 									.append(Constant.DOU_HAO).append(Constant.HTML_LINE);
 							mp.setHolderNum(DateUtil.getTodayIntYYYYMMDD());
-							monitorPoolDao.save(mp);
+							toSave(mp);
 						}
 					}
 				}
@@ -602,7 +603,7 @@ public class MonitorPoolService {
 					if (dzjy.getDate() > mp.getDzjy()) {
 						l.add(mp.getCode());
 						mp.setDzjy(today);
-						monitorPoolDao.save(mp);
+						toSave(mp);
 					}
 				}
 				if (l.size() > 0) {
@@ -862,7 +863,7 @@ public class MonitorPoolService {
 								}
 							}
 							if (find) {
-								monitorPoolDao.save(mp);
+								toSave(mp);
 								sssb.append(sb.toString()).append(Constant.HTML_LINE);
 							}
 						} catch (Exception e) {
