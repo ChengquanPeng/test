@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.MonitorPoolUserDao;
+import com.stable.service.ConceptService;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.PriceLifeService;
@@ -21,8 +23,10 @@ import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
+import com.stable.utils.FileWriteUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.vo.bus.CodeBaseModel2;
+import com.stable.vo.bus.CodeConcept;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.StockBaseInfo;
@@ -33,6 +37,8 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class CodeModelKLineService {
+	@Autowired
+	private ConceptService conceptService;
 	@Autowired
 	private MonitorPoolUserDao monitorPoolDao;
 	@Autowired
@@ -65,6 +71,9 @@ public class CodeModelKLineService {
 	private CodeModelService codeModelService;
 	@Autowired
 	private BizPushService bizPushService;
+
+	@Value("${html.folder}")
+	private String htmlFolder;
 
 //	@Autowired
 //	private com.stable.spider.tushare.TushareSpider tushareSpider;
@@ -109,9 +118,11 @@ public class CodeModelKLineService {
 		StringBuffer qx = new StringBuffer();
 		StringBuffer szx = new StringBuffer();
 
+		List<CodeBaseModel2> genList = new LinkedList<CodeBaseModel2>();
+
 		for (StockBaseInfo s : codelist) {
 			try {
-				this.processingByCode(s, poolMap, poolList, listLast, histMap, qx, szx);
+				this.processingByCode(s, poolMap, poolList, listLast, histMap, qx, szx, genList);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -128,6 +139,7 @@ public class CodeModelKLineService {
 		if (qx.length() > 0) {
 			bizPushService.PushS2("今日最新旗形:" + qx.toString());
 		}
+		printHtml(genList, "qf.html");
 		log.info("KLine基本完成");
 	}
 
@@ -136,7 +148,8 @@ public class CodeModelKLineService {
 	private int pre4Year = 0;// 四年以前
 
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
-			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, StringBuffer qx, StringBuffer szx) {
+			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, StringBuffer qx, StringBuffer szx,
+			List<CodeBaseModel2> genList) {
 		String code = s.getCode();
 		// 监听池
 		MonitorPoolTemp pool = this.codeModelService.getPool(code, poolMap, poolList);
@@ -201,6 +214,10 @@ public class CodeModelKLineService {
 		sort0Service.attackAndW(newOne, tradeDate);
 		// 起爆点
 		qibaoService.qibao(tradeDate, newOne, pool, isSamll, qx, szx);
+
+		if (newOne.getQb() == 1) {
+			genList.add(newOne);
+		}
 	}
 
 	private void year1(CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade) {
@@ -250,4 +267,64 @@ public class CodeModelKLineService {
 		}
 	}
 
+	private void printHtml(List<CodeBaseModel2> newList, String htmlnamet) {
+		StringBuffer sb = new StringBuffer();
+		// 更新时间
+		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("</div><br/>");
+		// table
+		sb.append("起飞<br/><table border='1' cellspacing='0' cellpadding='0'>");
+		// head
+		sb.append(
+				"<tr><th>序号</th><th>代码</th><th>名称</th><th>起飞形态</th><th>Desc</th><th>底部类型</th><th>板块概念</th><th></th></tr>");
+
+		// data
+		if (newList != null && newList.size() > 0) {
+			for (int i = 0; i < newList.size(); i++) {
+				CodeBaseModel2 p1 = newList.get(i);
+				String code = p1.getCode();
+				StockBaseInfo sbsb = stockBasicService.getCode(code);
+				sb.append("<tr><td>").append(i + 1).append("</td>");// 序号
+				sb.append("<td>").append(code).append("</td>");// 代码
+				sb.append("<td>").append(sbsb.getName()).append("</td>");// 简称
+				sb.append("<td>").append(getQif(p1)).append("</td>");//
+				sb.append("<td>").append(p1.getQixingStr()).append("</td>");//
+				sb.append("<td>").append(p1.getShooting7() == 1 ? "优" : "普").append("</td>");//
+				sb.append("<td>").append(sbsb.getThsIndustry()).append("|")
+						.append(getGn(conceptService.getCodeConcept(code))).append("</td>");// CD2
+				sb.append("<td>").append("").append("</td>");// CD3
+				sb.append("</tr>");
+
+			}
+		} else {
+			sb.append("<tr><td>无数据</td></tr>");
+		}
+		// end
+		sb.append("</table>");
+		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
+		fw.writeLine(sb.toString());
+		fw.close();
+	}
+
+	private String getGn(List<CodeConcept> l) {
+		StringBuffer sb = new StringBuffer("");
+		if (l != null) {
+			for (CodeConcept cc : l) {
+				sb.append(cc.getConceptName()).append(",");
+			}
+		}
+		return sb.toString();
+	}
+
+	private String getQif(CodeBaseModel2 p1) {
+		String s = "";
+		if (p1.getDibuQixing() > 0) {
+			s = "大旗形";
+		} else if (p1.getDibuQixing2() > 0) {
+			s = "小旗形";
+		}
+		if (p1.getZyxing() > 0) {
+			s += "-中阳十字星";
+		}
+		return s;
+	}
 }
