@@ -36,6 +36,7 @@ import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
+import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.HolderAnalyse;
 import com.stable.vo.bus.CodeBaseModel2;
@@ -107,6 +108,8 @@ public class CodeModelService {
 			}
 			log.info("Actually processing request date={}", date);
 			runByJobv2(date, isweekend);
+			ThreadsUtil.sleepRandomSecBetween15And30();
+			plateService.getPlateStat();
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "CodeModel模型运行异常", "", "");

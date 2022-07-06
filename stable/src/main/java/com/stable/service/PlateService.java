@@ -8,16 +8,20 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.model.WebModelService;
 import com.stable.utils.CurrencyUitl;
+import com.stable.utils.DateUtil;
+import com.stable.utils.FileWriteUitl;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.Concept;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.http.req.ModelReq;
 import com.stable.vo.http.resp.PlateResp;
+import com.stable.vo.http.resp.PlateStat;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -35,9 +39,13 @@ public class PlateService {
 	private FinanceService financeService;
 	@Autowired
 	private WebModelService webModelService;
+	@Value("${html.folder}")
+	private String htmlFolder;
+	private String htmlname1 = "w.html";
+	private String htmlname2 = "d.html";
 
-	public List<PlateResp> klinelist() {
-		List<PlateResp> res = new LinkedList<PlateResp>();
+	public void getPlateStat() {
+		List<PlateStat> res = new LinkedList<PlateStat>();
 		int limit = 200;
 		List<Concept> list = conceptService.getConceptList(limit);
 		for (Concept cp : list) {
@@ -46,25 +54,82 @@ public class PlateService {
 				ModelReq mr = new ModelReq();
 				mr.setConceptId(cp.getAliasCode2());
 				List<CodeBaseModel2> listr = webModelService.getList(mr, EsQueryPageUtil.queryPage9999);
-				if (listr != null) {
+				if (listr != null && listr.size() >= 5) {
 					int ck = 0;
+					int cd1 = 0;
+					int cd2 = 0;
+					int cd3 = 0;
 					for (CodeBaseModel2 cm : listr) {
 						if (cm.getShootingw() == 1) {
 							ck++;
 						}
+						if (cm.getZfjjup() >= 2 && cm.getZfjjupStable() >= 1) {
+							cd1++;
+						}
+						if (cm.getShooting9() == 1) {// 底部小票
+							cd2++;
+						}
+						if (cm.getShooting7() == 1) {// 底部优质小票
+							cd3++;
+						}
 					}
-					PlateResp pr = new PlateResp();
+					PlateStat pr = new PlateStat();
 					pr.setCode(cp.getAliasCode2());
 					pr.setCodeName(cp.getName());
-					pr.setT4(ck / Double.valueOf(listr.size()));
-					pr.setRanking1(ck);
-					pr.setRanking2(listr.size());
+					pr.setCt(listr.size());
+					pr.setCw(ck);
+					pr.setCd1(cd1);
+					pr.setCd2(cd2);
+					pr.setCd3(cd3);
 					res.add(pr);
 				}
 			}
 		}
-		arSort(res);
-		return res;
+
+		arSortRw(res);
+		printHtml(res, htmlname1);
+		arSortRd(res);
+		printHtml(res, htmlname2);
+	}
+
+	private void printHtml(List<PlateStat> newList, String htmlnamet) {
+		StringBuffer sb = new StringBuffer();
+		// 更新时间
+		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("</div><br/>");
+		// table
+		sb.append("板块分析-攻击形态排序<br/><table border='1' cellspacing='0' cellpadding='0'>");
+		// head
+		sb.append(
+				"<tr><th>排名</th><th>板块代码</th><th>板块名称</th><th>板块总数量</th><th>攻击数量</th><th>底部数量(全)</th><th>底部数量(小)</th><th>底部数量(优)</th></tr>");
+
+		// data
+		if (newList != null && newList.size() > 0) {
+			for (int i = 0; i < newList.size(); i++) {
+				PlateStat p1 = newList.get(i);
+				String code = p1.getCode();
+				sb.append("<tr><td>").append(i + 1).append("</td>");// 序号
+				sb.append("<td>").append(code).append("</td>");// 代码
+				sb.append("<td>").append(p1.getCodeName()).append("</td>");// 简称
+				sb.append("<td>").append(p1.getCt()).append("</td>");// CT
+				sb.append("<td>").append(p1.getCw()).append("  |  ").append(p1.getCw() / Double.valueOf(p1.getCt()))
+						.append("</td>");// CW
+				sb.append("<td>").append(p1.getCd1()).append("  |  ").append(p1.getCd1() / Double.valueOf(p1.getCt()))
+						.append("</td>");// CD1
+				sb.append("<td>").append(p1.getCd2()).append("  |  ").append(p1.getCd2() / Double.valueOf(p1.getCt()))
+						.append("</td>");// CD2
+				sb.append("<td>").append(p1.getCd3()).append("  |  ").append(p1.getCd3() / Double.valueOf(p1.getCt()))
+						.append("</td>");// CD3
+				sb.append("</tr>");
+
+			}
+		} else {
+			sb.append("<tr><td>无数据</td></tr>");
+		}
+		// end
+		sb.append("</table>");
+		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
+		fw.writeLine(sb.toString());
+		fw.close();
 	}
 
 	public List<PlateResp> plateAnalyse(String aliasCode, String codes, int sort) {
@@ -272,6 +337,32 @@ public class PlateService {
 					return 0;
 				}
 				return o2.getT3() - o1.getT3() > 0 ? 1 : -1;
+			}
+		});
+	}
+
+	// Rw 倒序
+	public static void arSortRw(List<PlateStat> rl) {
+		Collections.sort(rl, new Comparator<PlateStat>() {
+			@Override
+			public int compare(PlateStat o1, PlateStat o2) {
+				if (o1.getRw() == o2.getRw()) {
+					return 0;
+				}
+				return o2.getRw() - o1.getRw() > 0 ? 1 : -1;
+			}
+		});
+	}
+
+	// Rd倒序
+	public static void arSortRd(List<PlateStat> rl) {
+		Collections.sort(rl, new Comparator<PlateStat>() {
+			@Override
+			public int compare(PlateStat o1, PlateStat o2) {
+				if (o1.getRd() == o2.getRd()) {
+					return 0;
+				}
+				return o2.getRd() - o1.getRd() > 0 ? 1 : -1;
 			}
 		});
 	}
