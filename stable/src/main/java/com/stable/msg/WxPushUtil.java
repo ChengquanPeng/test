@@ -17,7 +17,7 @@ import com.zjiecode.wxpusher.client.bean.WxUser;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class WxPushUtil2 {
+public class WxPushUtil {
 
 	private static String appToken;
 	public static String myUid;
@@ -31,19 +31,19 @@ public class WxPushUtil2 {
 	}
 
 	public final static void pushSystem1(String content) {
-		WxPushUtil2.pushMsg(Message.CONTENT_TYPE_TEXT, content, myUid);
+		WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, myUid);
 	}
 
 	public final static boolean pushSystem1(String uid, String content) {
-		return WxPushUtil2.pushMsg(Message.CONTENT_TYPE_TEXT, content, uid);
+		return WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, uid);
 	}
 
 	public final static boolean pushSystem2Html(String uid, String content) {
-		return WxPushUtil2.pushMsg(Message.CONTENT_TYPE_HTML, content, uid);
+		return WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, uid);
 	}
 
 	public final static void pushSystem2Html(String content) {
-		WxPushUtil2.pushMsg(Message.CONTENT_TYPE_HTML, content, myUid);
+		WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, myUid);
 	}
 
 	private final static boolean pushMsg(int contentType, String content, String singleId) {
