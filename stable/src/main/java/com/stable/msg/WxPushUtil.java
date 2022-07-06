@@ -30,8 +30,8 @@ public class WxPushUtil {
 		log.info("appToken={},myUid={}", appToken, myUid);
 	}
 
-	public final static void pushSystem1(String content) {
-		WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, myUid);
+	public final static boolean pushSystem1(String content) {
+		return WxPushUtil.pushMsg(Message.CONTENT_TYPE_TEXT, content, myUid);
 	}
 
 	public final static boolean pushSystem1(String uid, String content) {
@@ -42,8 +42,8 @@ public class WxPushUtil {
 		return WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, uid);
 	}
 
-	public final static void pushSystem2Html(String content) {
-		WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, myUid);
+	public final static boolean pushSystem2Html(String content) {
+		return WxPushUtil.pushMsg(Message.CONTENT_TYPE_HTML, content, myUid);
 	}
 
 	private final static boolean pushMsg(int contentType, String content, String singleId) {

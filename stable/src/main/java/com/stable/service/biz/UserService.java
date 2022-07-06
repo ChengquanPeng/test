@@ -56,7 +56,7 @@ public class UserService {
 		}
 		UserInfo myid = new UserInfo();
 		myid.setId(Constant.MY_ID);
-		myid.setWxpush(MsgPushServer.myUid);
+		myid.setWxpush(MsgPushServer.getMyId());
 		r.add(myid);
 		return r;
 	}
@@ -76,7 +76,7 @@ public class UserService {
 		}
 		UserInfo myid = new UserInfo();
 		myid.setId(Constant.MY_ID);
-		myid.setWxpush(MsgPushServer.myUid);
+		myid.setWxpush(MsgPushServer.getMyId());
 		r.add(myid);
 		return r;
 	}
