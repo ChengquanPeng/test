@@ -13,7 +13,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.DataChangeService;
@@ -120,7 +120,7 @@ public class XqDailyBaseSpider {
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
-						WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包出错,code=" + b.getCode());
+						MsgPushServer.pushSystem1("雪球=>每日指标-市盈率记录抓包出错,code=" + b.getCode());
 					}
 				} else {
 					s--;
@@ -137,7 +137,7 @@ public class XqDailyBaseSpider {
 //			}).start();
 			log.info("雪球=>每日指标-市盈率完成,期望数:{" + s + "},实际成功数:" + upd.size());
 			if (upd.size() != s) {
-				WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + s + "},实际成功数:" + upd.size());
+				MsgPushServer.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + s + "},实际成功数:" + upd.size());
 			}
 			ThreadsUtil.sleepRandomSecBetween15And30();
 			// K线模型
@@ -153,7 +153,7 @@ public class XqDailyBaseSpider {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			WxPushUtil.pushSystem1("雪球=>每日指标-市盈率记录抓包出错");
+			MsgPushServer.pushSystem1("雪球=>每日指标-市盈率记录抓包出错");
 		}
 	}
 
@@ -264,7 +264,7 @@ public class XqDailyBaseSpider {
 			ThreadsUtil.sleepRandomSecBetween1And5(trytime);
 			if (trytime >= 10) {
 				fetched = true;
-				WxPushUtil.pushSystem1("雪球每日信息出错(pe,pe-ttm),code=" + code + ",url=" + url);
+				MsgPushServer.pushSystem1("雪球每日信息出错(pe,pe-ttm),code=" + code + ",url=" + url);
 			}
 		} while (!fetched);
 		return false;

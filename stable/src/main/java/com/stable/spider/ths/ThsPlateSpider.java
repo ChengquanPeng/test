@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.StockBasicService;
 import com.stable.spider.eastmoney.EastmoneyCompanySpider;
 import com.stable.utils.HtmlunitSpider;
@@ -68,12 +68,12 @@ public class ThsPlateSpider {
 				log.info("current index:{}", c);
 			}
 			if (needUpd > 0 && needUpd != upded) {
-				WxPushUtil.pushSystem1("同花顺-亮点，主营-抓包不完整，需要更新数={" + needUpd + "},实际更新数={" + upded + "}");
+				MsgPushServer.pushSystem1("同花顺-亮点，主营-抓包不完整，需要更新数={" + needUpd + "},实际更新数={" + upded + "}");
 			}
 			log.info("同花顺-亮点，主营,东方财富曾用名，网站完成");
 		} catch (Exception e) {
 			e.printStackTrace();
-			WxPushUtil.pushSystem1("同花顺-亮点，主营-抓包出错");
+			MsgPushServer.pushSystem1("同花顺-亮点，主营-抓包出错");
 		}
 
 	}
@@ -118,7 +118,7 @@ public class ThsPlateSpider {
 			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 			if (trytime >= 10) {
 				fetched = true;
-				WxPushUtil.pushSystem1("同花顺-亮点，主营出错出错code=" + code + ",url=" + url);
+				MsgPushServer.pushSystem1("同花顺-亮点，主营出错出错code=" + code + ",url=" + url);
 			}
 		} while (!fetched);
 		return false;

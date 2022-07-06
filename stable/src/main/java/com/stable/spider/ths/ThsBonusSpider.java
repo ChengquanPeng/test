@@ -20,7 +20,7 @@ import com.stable.es.dao.base.FenHongDao;
 import com.stable.es.dao.base.ZengFaDao;
 import com.stable.es.dao.base.ZengFaDetailDao;
 import com.stable.es.dao.base.ZengFaSummaryDao;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.ChipsZfService;
 import com.stable.service.StockBasicService;
 import com.stable.utils.CurrencyUitl;
@@ -148,7 +148,7 @@ public class ThsBonusSpider {
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "同花顺分红&增发异常运行异常..", "", "");
-			WxPushUtil.pushSystem1("同花顺分红&增发异常运行异常");
+			MsgPushServer.pushSystem1("同花顺分红&增发异常运行异常");
 		}
 	}
 
@@ -397,7 +397,7 @@ public class ThsBonusSpider {
 				if (trytime >= 10) {
 					fetched = true;
 					e2.printStackTrace();
-					WxPushUtil.pushSystem1("同花顺-分红&增发获取出错,url=" + url);
+					MsgPushServer.pushSystem1("同花顺-分红&增发获取出错,url=" + url);
 				}
 			} finally {
 				htmlunitSpider.close();

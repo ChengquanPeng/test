@@ -3,7 +3,7 @@ package com.stable.spider.ths;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
@@ -78,7 +78,7 @@ public class ThsAnnSpider {
 						log.info("org:" + org);
 						// log.info("UnicodeToCN:" + UnicodeToCN);
 						fetched = true;
-						WxPushUtil.pushSystem1("同花顺-抓包公告出错-抓包出错code=" + code + ",url=" + url);
+						MsgPushServer.pushSystem1("同花顺-抓包公告出错-抓包出错code=" + code + ",url=" + url);
 					}
 				} finally {
 				}

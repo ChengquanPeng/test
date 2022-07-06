@@ -27,7 +27,7 @@ import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.job.MyCallable;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.RedisUtil;
@@ -153,7 +153,7 @@ public class StockBasicService {
 							return null;
 						} catch (Exception e) {
 							e.printStackTrace();
-							WxPushUtil.pushSystem1("同步股票列表异常");
+							MsgPushServer.pushSystem1("同步股票列表异常");
 							throw e;
 						} finally {
 							semap.release();

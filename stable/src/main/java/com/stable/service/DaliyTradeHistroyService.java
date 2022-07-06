@@ -36,7 +36,7 @@ import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
 import com.stable.job.MyCallable;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.spider.xq.XqDailyBaseSpider;
@@ -129,7 +129,7 @@ public class DaliyTradeHistroyService {
 			if (array == null || array.size() <= 0) {
 				log.warn("未获取到日交易记录,tushare,code={}");
 				if (tradeCalService.isOpen(Integer.valueOf(today))) {
-					WxPushUtil.pushSystem1("未获取到日交易记录,tushare,日期=" + today);
+					MsgPushServer.pushSystem1("未获取到日交易记录,tushare,日期=" + today);
 				}
 				return 0;
 			}
@@ -169,7 +169,7 @@ public class DaliyTradeHistroyService {
 									spiderDaliyTradeHistoryInfoFromIPOCenter(code, today, 0);
 									spiderDaliyTradeHistoryInfoFromIPOCenterNofq(code, 0);
 								} catch (Exception e) {
-									WxPushUtil.pushSystem1("重新获取前后复权出错：" + code);
+									MsgPushServer.pushSystem1("重新获取前后复权出错：" + code);
 								} finally {
 									cnt.countDown();
 								}
@@ -189,7 +189,7 @@ public class DaliyTradeHistroyService {
 			}
 			try {
 				if (!cnt.await(12, TimeUnit.HOURS)) {
-					WxPushUtil.pushSystem1("前复权qfq获取超时异常==>日期:" + today);
+					MsgPushServer.pushSystem1("前复权qfq获取超时异常==>日期:" + today);
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -216,7 +216,7 @@ public class DaliyTradeHistroyService {
 			e.printStackTrace();
 			log.error(e.getMessage(), e);
 			if (warning) {
-				WxPushUtil.pushSystem1("前复权qfq获取异常，获取日期:" + today);
+				MsgPushServer.pushSystem1("前复权qfq获取异常，获取日期:" + today);
 			}
 		}
 		return 0;

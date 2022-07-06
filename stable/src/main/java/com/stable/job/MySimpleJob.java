@@ -3,7 +3,7 @@ package com.stable.job;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
 import com.stable.config.SpringConfig;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.utils.ErrorLogFileUitl;
 
 import lombok.extern.log4j.Log4j2;
@@ -21,7 +21,7 @@ public abstract class MySimpleJob implements SimpleJob {
 			this.myexecute(shardingContext);
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, "执行job异常", "", "");
-			WxPushUtil.pushSystem1("执行job异常:MySimpleJob");
+			MsgPushServer.pushSystem1("执行job异常:MySimpleJob");
 		}
 	}
 

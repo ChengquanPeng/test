@@ -30,7 +30,7 @@ import com.stable.es.dao.base.EsFinYjygDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.job.MyCallable;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
@@ -109,7 +109,7 @@ public class FinanceService {
 			}
 			if (datas.size() <= 0) {
 				log.warn("{},未从df抓取到Finane记录,code={}", index, code);
-				WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录,code=" + code);
+				MsgPushServer.pushSystem1("未从东方财富抓取到Finane记录,code=" + code);
 				return false;
 			}
 			// 东方财富限制，目前最多抓取5条
@@ -490,7 +490,7 @@ public class FinanceService {
 					monitorPoolService.kybMonitor();
 				} catch (Exception e) {
 					e.printStackTrace();
-					WxPushUtil.pushSystem1("同步业绩预报和快报异常");
+					MsgPushServer.pushSystem1("同步业绩预报和快报异常");
 					throw e;
 				}
 				return null;
@@ -559,7 +559,7 @@ public class FinanceService {
 					}
 				}
 			} catch (Exception e) {
-				WxPushUtil.pushSystem1("行业分析（毛利率，应收占款）计算异常:" + code);
+				MsgPushServer.pushSystem1("行业分析（毛利率，应收占款）计算异常:" + code);
 				ErrorLogFileUitl.writeError(e, "行业分析（毛利率，应收占款）计算异常:", "", "");
 			}
 		}
@@ -783,7 +783,7 @@ public class FinanceService {
 		}
 		esFinanceBaseInfoDao.saveAll(rl);
 		log.info("同步财务报告报告[end]");
-		WxPushUtil.pushSystem1("同步股票财务报告完成！股票总数：[" + total + "],成功股票数[" + cnt + "],失败股票数=" + (total - cnt));
+		MsgPushServer.pushSystem1("同步股票财务报告完成！股票总数：[" + total + "],成功股票数[" + cnt + "],失败股票数=" + (total - cnt));
 		// monitorPoolService.jobXjlWarning();
 	}
 }

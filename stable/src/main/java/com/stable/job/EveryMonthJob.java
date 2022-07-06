@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.TradeCalService;
 import com.stable.spider.eastmoney.DzjySpider;
 import com.stable.spider.ths.ThsJiejinSpider;
@@ -34,6 +34,6 @@ public class EveryMonthJob extends MySimpleJob {
 		thsJiejinSpider.byJob();// 同花顺, 解禁
 		log.info("同花顺-亮点，主营 fetchAll=true");
 		thsPlateSpider.fetchAll(true);// 同花顺-亮点，主营 多线程
-		WxPushUtil.pushSystem1("每月任务EveryMonthJob 已完成调用");
+		MsgPushServer.pushSystem1("每月任务EveryMonthJob 已完成调用");
 	}
 }

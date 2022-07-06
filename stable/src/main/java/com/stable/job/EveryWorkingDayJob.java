@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
@@ -44,7 +44,7 @@ public class EveryWorkingDayJob extends MySimpleJob {
 		String today = DateUtil.getTodayYYYYMMDD();
 		if (!tradeCalService.isOpen(Integer.valueOf(today))) {
 			log.info("非交易日");
-			WxPushUtil.pushSystem1(today + " 非交易日 ,Seq1=>Seq5流水任务不会执行");
+			MsgPushServer.pushSystem1(today + " 非交易日 ,Seq1=>Seq5流水任务不会执行");
 			return;
 		}
 		try {
@@ -52,7 +52,7 @@ public class EveryWorkingDayJob extends MySimpleJob {
 			log.info("获取日交易(分红除权)");
 			int result = tradeHistroyService.spiderTodayDaliyTrade(true, today);
 			if (result == 0) {
-				WxPushUtil.pushSystem1("异常执行Seq1=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:0,以后的链条不会被执行");
+				MsgPushServer.pushSystem1("异常执行Seq1=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:0,以后的链条不会被执行");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

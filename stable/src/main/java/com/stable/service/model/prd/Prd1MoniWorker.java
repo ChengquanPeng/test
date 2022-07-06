@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.stable.constant.Constant;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.spider.realtime.RealTime;
 import com.stable.spider.realtime.RealtimeCall;
 import com.stable.spider.tick.TencentTick;
@@ -110,7 +110,7 @@ public class Prd1MoniWorker implements Runnable {
 		} catch (Exception e) {
 			isException = true;
 			e.printStackTrace();
-			WxPushUtil.pushSystem1(code + " Prd1MoniWorker 异常！");
+			MsgPushServer.pushSystem1(code + " Prd1MoniWorker 异常！");
 		}
 	}
 

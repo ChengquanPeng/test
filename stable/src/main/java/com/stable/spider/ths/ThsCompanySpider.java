@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.StockBasicService;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HtmlunitSpider;
@@ -53,7 +53,7 @@ public class ThsCompanySpider {
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "同花顺公司资料异常运行异常..", "", "");
-			WxPushUtil.pushSystem1("同花顺公司资料异常运行异常");
+			MsgPushServer.pushSystem1("同花顺公司资料异常运行异常");
 		}
 	}
 
@@ -187,7 +187,7 @@ public class ThsCompanySpider {
 				if (trytime >= 10) {
 					fetched = true;
 					e2.printStackTrace();
-					WxPushUtil.pushSystem1("同花顺-公司资料获取出错,url=" + url);
+					MsgPushServer.pushSystem1("同花顺-公司资料获取出错,url=" + url);
 				}
 			} finally {
 				htmlunitSpider.close();

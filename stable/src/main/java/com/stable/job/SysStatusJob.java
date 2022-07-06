@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.model.WebModelService;
 import com.stable.utils.OSystemUtil;
 
@@ -27,7 +27,7 @@ public class SysStatusJob implements SimpleJob {
 			modelWebService.getLastOneByCode2("000001");
 		} catch (Exception e) {
 			e.printStackTrace();
-			WxPushUtil.pushSystem1("系统异常，正在重启...");
+			MsgPushServer.pushSystem1("系统异常，正在重启...");
 			OSystemUtil.restart();
 		}
 	}

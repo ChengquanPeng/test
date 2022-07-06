@@ -27,7 +27,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeConceptDao;
 import com.stable.es.dao.base.EsConceptDao;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.TradeCalService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
@@ -160,7 +160,7 @@ public class ThsSpider {
 			getGnList(isFirday, map);
 		} catch (Exception e) {
 			e.printStackTrace();
-			WxPushUtil.pushSystem1("同花顺板块出错");
+			MsgPushServer.pushSystem1("同花顺板块出错");
 			map = null;
 		}
 		return map;
@@ -251,7 +251,7 @@ public class ThsSpider {
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 				if (trytime >= 10) {
 					e.printStackTrace();
-					WxPushUtil.pushSystem1("同花顺概念-列表抓包出错,url=" + url);
+					MsgPushServer.pushSystem1("同花顺概念-列表抓包出错,url=" + url);
 					if (list.size() > 0) {
 						cntList += list.size();
 						saveConcept(list);
@@ -283,7 +283,7 @@ public class ThsSpider {
 			saveConcept(list);
 		}
 		if (newGn.length() > 0) {
-			WxPushUtil.pushSystem1("同花顺获取到新概念:" + newGn.toString());
+			MsgPushServer.pushSystem1("同花顺获取到新概念:" + newGn.toString());
 		}
 		log.info("同花顺板块同步成功,同步概念[" + cntList + "],概念相关股票[" + cntCodelist + "]"
 				+ (newGn.length() > 0 ? ",获取到新概念:" + newGn.toString() : ""));
@@ -309,7 +309,7 @@ public class ThsSpider {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			WxPushUtil.pushSystem1("同花顺概念-成分股抓包出错,url=" + cp.getHref());
+			MsgPushServer.pushSystem1("同花顺概念-成分股抓包出错,url=" + cp.getHref());
 			throw new RuntimeException(e);
 		} finally {
 			htmlunitSpider.close();
@@ -369,7 +369,7 @@ public class ThsSpider {
 				if (trytime >= 10) {
 					e.printStackTrace();
 					log.info(page.asText());
-					WxPushUtil.pushSystem1("同花顺行业概念-成分股抓包出错,url=" + url);
+					MsgPushServer.pushSystem1("同花顺行业概念-成分股抓包出错,url=" + url);
 					// throw new RuntimeException(e);
 				}
 			} finally {
@@ -456,7 +456,7 @@ public class ThsSpider {
 					trytime++;
 					if (trytime >= 5) {
 						fetched = true;
-						WxPushUtil.pushSystem1("同花顺-行业抓包出错，url=" + url);
+						MsgPushServer.pushSystem1("同花顺-行业抓包出错，url=" + url);
 					}
 				}
 			} while (!fetched);

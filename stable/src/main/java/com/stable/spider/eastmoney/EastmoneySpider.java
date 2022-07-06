@@ -21,7 +21,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.es.dao.base.EsFinYjkbDao;
 import com.stable.es.dao.base.EsFinYjygDao;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.StockBasicService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -95,7 +95,7 @@ public class EastmoneySpider {
 		if (companyType == 0) {
 			companyType = getcompanyType(code);
 			if (companyType == 0) {
-				WxPushUtil.pushSystem1("东方财富-财务companyType-抓包出错,code=" + code);
+				MsgPushServer.pushSystem1("东方财富-财务companyType-抓包出错,code=" + code);
 				return null;
 			}
 		}

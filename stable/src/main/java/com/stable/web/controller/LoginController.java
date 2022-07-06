@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.constant.Constant;
 import com.stable.constant.RedisConstant;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.biz.UserService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MathUtil;
@@ -65,7 +65,7 @@ public class LoginController {
 				// 登录KEY
 				redisUtil.set(RedisConstant.RDS_LOGIN_KEY_ + phone, str, Duration.ofMinutes(10));
 
-				if (WxPushUtil.pushSystem1(ui.getWxpush(), str + " 动态码")) {
+				if (MsgPushServer.pushSystem1(ui.getWxpush(), str + " 动态码")) {
 					r.setResult("动态码已发送，请查看微信消息，有效期10分钟");
 					r.setStatus(JsonResult.OK);
 				} else {

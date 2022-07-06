@@ -15,7 +15,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.RzrqDaliyDao;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.DzjyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
@@ -133,7 +133,7 @@ public class RzrqSpider {
 			codeBaseModel2Dao.saveAll(update);
 		}
 		if (shootNotice3.length() > 0) {
-			WxPushUtil.pushSystem1("行情指标3：融资暴涨，股价涨幅在65%以下，散户没有充足的空间融资买入，只有主力可以,(短线):" + shootNotice3.toString());
+			MsgPushServer.pushSystem1("行情指标3：融资暴涨，股价涨幅在65%以下，散户没有充足的空间融资买入，只有主力可以,(短线):" + shootNotice3.toString());
 		}
 	}
 
@@ -163,7 +163,7 @@ public class RzrqSpider {
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 			}
 		} while (trytime <= 10);
-		WxPushUtil.pushSystem1("东方财富-融资融券(每日)-抓包出错,date=" + d);
+		MsgPushServer.pushSystem1("东方财富-融资融券(每日)-抓包出错,date=" + d);
 		return pages;
 	}
 
@@ -232,11 +232,11 @@ public class RzrqSpider {
 				rzrqDaliyDao.saveAll(dzl);
 			}
 			exeRzrqTime(codes, date);
-			WxPushUtil.pushSystem1(date + " 东方财富-融资融券-已完成-ALL");
+			MsgPushServer.pushSystem1(date + " 东方财富-融资融券-已完成-ALL");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "东方财富-融资融券-运行异常..", "", "");
-			WxPushUtil.pushSystem1("东方财富-融资融券-运行异常");
+			MsgPushServer.pushSystem1("东方财富-融资融券-运行异常");
 		}
 	}
 
@@ -272,7 +272,7 @@ public class RzrqSpider {
 				} catch (Exception e) {
 					e.printStackTrace();
 					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
-					WxPushUtil.pushSystem1("东方财富-融资融券-抓包出错,code=" + code + ",page=" + runPage);
+					MsgPushServer.pushSystem1("东方财富-融资融券-抓包出错,code=" + code + ",page=" + runPage);
 					return;
 				}
 			} while (trytime <= 10);

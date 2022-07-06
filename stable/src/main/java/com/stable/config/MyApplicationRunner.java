@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import com.stable.job.RealtimeJob;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.utils.OSystemUtil;
 import com.stable.utils.SpringUtil;
 
@@ -46,7 +46,7 @@ public class MyApplicationRunner implements ApplicationRunner {
 			// printUrl();
 			return;
 		}
-		WxPushUtil.pushSystem1("系统正常启动");
+		MsgPushServer.pushSystem1("系统正常启动");
 
 		new Thread(new Runnable() {
 			@Override

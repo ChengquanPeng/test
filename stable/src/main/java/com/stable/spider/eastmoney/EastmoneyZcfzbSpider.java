@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.constant.Constant;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.ThreadsUtil;
@@ -79,7 +79,7 @@ public class EastmoneyZcfzbSpider {
 			}
 			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 		} while (trytime <= 10);
-		WxPushUtil.pushSystem1("东方财富-财务(资产负债表-dates)-抓包出错,code=" + code);
+		MsgPushServer.pushSystem1("东方财富-财务(资产负债表-dates)-抓包出错,code=" + code);
 		return null;
 	}
 
@@ -189,7 +189,7 @@ public class EastmoneyZcfzbSpider {
 			}
 			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 		} while (trytime <= 10);
-		WxPushUtil.pushSystem1("东方财富-财务(资产负债表)-抓包出错,code=" + code);
+		MsgPushServer.pushSystem1("东方财富-财务(资产负债表)-抓包出错,code=" + code);
 		return new HashMap<String, FinanceZcfzb>();
 	}
 
@@ -255,7 +255,7 @@ public class EastmoneyZcfzbSpider {
 			}
 			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 		} while (trytime <= 10);
-		WxPushUtil.pushSystem1("东方财富-财务(现金流量表)-抓包出错,code=" + code);
+		MsgPushServer.pushSystem1("东方财富-财务(现金流量表)-抓包出错,code=" + code);
 		return new HashMap<String, FinanceZcfzb>();
 	}
 }

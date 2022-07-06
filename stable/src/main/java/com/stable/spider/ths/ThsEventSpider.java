@@ -14,7 +14,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsBuyBackInfoDao;
 import com.stable.es.dao.base.EsReducingHoldingSharesDao;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.ReducingHoldingSharesService;
 import com.stable.service.StockBasicService;
 import com.stable.utils.DateUtil;
@@ -73,7 +73,7 @@ public class ThsEventSpider {
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "同花顺-近期重要事件-异常运行异常..", "", "");
-			WxPushUtil.pushSystem1("同花顺-近期重要事件-异常运行异常");
+			MsgPushServer.pushSystem1("同花顺-近期重要事件-异常运行异常");
 		}
 	}
 
@@ -166,7 +166,7 @@ public class ThsEventSpider {
 				if (trytime >= 10) {
 					fetched = true;
 					e2.printStackTrace();
-					WxPushUtil.pushSystem1("同花顺-近期重要事件-获取出错,url=" + url);
+					MsgPushServer.pushSystem1("同花顺-近期重要事件-获取出错,url=" + url);
 				}
 			} finally {
 				htmlunitSpider.close();

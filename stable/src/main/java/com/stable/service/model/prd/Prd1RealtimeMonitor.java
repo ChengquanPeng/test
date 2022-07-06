@@ -10,7 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.monitor.RealtimeDetailsAnalyzer;
 import com.stable.utils.DateUtil;
 import com.stable.vo.Prd1Monitor;
@@ -88,7 +88,7 @@ public class Prd1RealtimeMonitor implements Runnable {
 				Thread.sleep(RealtimeDetailsAnalyzer.ONE_MIN);
 			} catch (Exception e) {
 				if (!isPushedException) {
-					WxPushUtil.pushSystem1("Prd1RealtimeMonitor 监听异常！");
+					MsgPushServer.pushSystem1("Prd1RealtimeMonitor 监听异常！");
 					isPushedException = true;
 					e.printStackTrace();
 				}

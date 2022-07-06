@@ -3,7 +3,7 @@ package com.stable.service.monitor;
 import java.util.Date;
 import java.util.List;
 
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.spider.realtime.RealTime;
 import com.stable.spider.realtime.RealtimeCall;
 import com.stable.utils.CurrencyUitl;
@@ -65,7 +65,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			if (srt.getOpen() == 0.0) {
 				log.info("SINA 今日停牌,{}", codeName);
 				for (RtmVo rv : cps) {
-					WxPushUtil.pushSystem1(rv.getWxpush(), codeName + "今日停牌:" + rv.getMsg());
+					MsgPushServer.pushSystem1(rv.getWxpush(), codeName + "今日停牌:" + rv.getMsg());
 				}
 				return;
 			}
@@ -151,14 +151,14 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					}
 					// 发送
 					if (!smsg.equals("")) {
-						WxPushUtil.pushSystem1(rv.getWxpush(), codeName + " " + smsg);
+						MsgPushServer.pushSystem1(rv.getWxpush(), codeName + " " + smsg);
 					}
 				}
 
 				Thread.sleep(WAIT_MIN);
 			} catch (Exception e) {
 				if (!isPushedException) {
-					WxPushUtil.pushSystem1(code + " 监听异常！");
+					MsgPushServer.pushSystem1(code + " 监听异常！");
 					isPushedException = true;
 					e.printStackTrace();
 				}

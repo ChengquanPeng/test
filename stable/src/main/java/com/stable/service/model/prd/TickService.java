@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
@@ -77,7 +77,7 @@ public class TickService {
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					WxPushUtil.pushSystem1("每日Tick 数据文件生成异常或删除异常");
+					MsgPushServer.pushSystem1("每日Tick 数据文件生成异常或删除异常");
 				}
 			}
 		}).start();
@@ -90,7 +90,7 @@ public class TickService {
 			log.warn("未获取到日交易记录,tushare,code={}");
 			if (tradeCalService.isOpen(today)) {
 				log.warn("未获取到日交易记录,tushare,日期=" + today);
-				WxPushUtil.pushSystem1("未获取到日交易记录,tushare,日期=" + today);
+				MsgPushServer.pushSystem1("未获取到日交易记录,tushare,日期=" + today);
 			}
 			return;
 		}

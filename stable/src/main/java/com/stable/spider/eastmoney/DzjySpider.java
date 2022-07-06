@@ -14,7 +14,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.es.dao.base.DzjyDao;
 import com.stable.es.dao.base.DzjyYiTimeDao;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.DzjyService;
 import com.stable.service.StockBasicService;
 import com.stable.utils.DateUtil;
@@ -132,7 +132,7 @@ public class DzjySpider {
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 			}
 		} while (trytime <= 10);
-		WxPushUtil.pushSystem1("东方财富-大宗交易(每日)-抓包出错,date=" + d);
+		MsgPushServer.pushSystem1("东方财富-大宗交易(每日)-抓包出错,date=" + d);
 		return pages;
 
 	}
@@ -199,11 +199,11 @@ public class DzjySpider {
 				dzjyDao.saveAll(dzl);
 			}
 			exeDzjyYiTime();
-			WxPushUtil.pushSystem1(date + " 东方财富-大宗交易-已完成-ALL");
+			MsgPushServer.pushSystem1(date + " 东方财富-大宗交易-已完成-ALL");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "东方财富-大宗交易-运行异常..", "", "");
-			WxPushUtil.pushSystem1("东方财富-大宗交易-运行异常");
+			MsgPushServer.pushSystem1("东方财富-大宗交易-运行异常");
 		}
 	}
 
@@ -236,7 +236,7 @@ public class DzjySpider {
 				} catch (Exception e) {
 					e.printStackTrace();
 					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
-					WxPushUtil.pushSystem1("东方财富-大宗交易-抓包出错,code=" + code + ",page=" + runPage);
+					MsgPushServer.pushSystem1("东方财富-大宗交易-抓包出错,code=" + code + ",page=" + runPage);
 					return;
 				}
 			} while (trytime <= 10);

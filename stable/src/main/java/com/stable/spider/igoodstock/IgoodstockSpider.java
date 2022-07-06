@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.es.dao.base.ForeignCapitalSumDao;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.StockBasicService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -71,7 +71,7 @@ public class IgoodstockSpider {
 			log.info("igoodstock-外资:done,size:{}", upd.size());
 		} catch (Exception e) {
 			e.printStackTrace();
-			WxPushUtil.pushSystem1("igoodstock-外资-抓包异常");
+			MsgPushServer.pushSystem1("igoodstock-外资-抓包异常");
 		}
 	}
 
@@ -102,7 +102,7 @@ public class IgoodstockSpider {
 			}
 			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 		} while (trytime <= 10);
-		WxPushUtil.pushSystem1("igoodstock-外资-抓包出错,code=" + code);
+		MsgPushServer.pushSystem1("igoodstock-外资-抓包出错,code=" + code);
 		return null;
 	}
 

@@ -16,7 +16,7 @@ import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsTradeCalDao;
 import com.stable.job.MyCallable;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
@@ -97,7 +97,7 @@ public class TradeCalService {
 			}
 		} else {
 			log.warn("未获取到交易日历");
-			WxPushUtil.pushSystem1("未获取到交易日历");
+			MsgPushServer.pushSystem1("未获取到交易日历");
 		}
 		String msg = start_date + " " + end_date + "获取交易日历条数=" + cnt;
 		log.info(msg);

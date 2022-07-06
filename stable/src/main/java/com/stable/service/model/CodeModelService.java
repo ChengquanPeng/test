@@ -18,7 +18,7 @@ import com.stable.enums.MonitorType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.MonitorPoolUserDao;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.BonusService;
 import com.stable.service.BuyBackService;
 import com.stable.service.ChipsService;
@@ -113,7 +113,7 @@ public class CodeModelService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "CodeModel模型运行异常", "", "");
-			WxPushUtil.pushSystem1("CodeModel模型运行异常..");
+			MsgPushServer.pushSystem1("CodeModel模型运行异常..");
 		}
 	}
 
@@ -152,7 +152,7 @@ public class CodeModelService {
 		}
 		log.info("CodeModel v2 模型执行完成");
 		if (sbc.length() > 0) {
-			WxPushUtil.pushSystem1("人工pls==1已到期:" + sbc.toString());
+			MsgPushServer.pushSystem1("人工pls==1已到期:" + sbc.toString());
 		}
 	}
 

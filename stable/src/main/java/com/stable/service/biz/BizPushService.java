@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.vo.bus.UserInfo;
 
 /**
@@ -21,7 +21,7 @@ public class BizPushService {
 		List<UserInfo> ulist = userService.getUserListForMonitorS2();
 		boolean isSendSc = true;
 		for (UserInfo u : ulist) {
-			if (!WxPushUtil.pushSystem2Html(u.getWxpush(), msg)) {
+			if (!MsgPushServer.pushSystem2Html(u.getWxpush(), msg)) {
 				isSendSc = false;
 			}
 		}

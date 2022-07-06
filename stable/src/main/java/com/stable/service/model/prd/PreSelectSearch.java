@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.elasticsearch.search.sort.SortOrder;
 
 import com.stable.constant.EsQueryPageUtil;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.ErrorLogFileUitl;
@@ -61,7 +61,7 @@ public class PreSelectSearch {// Sort2Feeling35Day
 					last = cur;
 				}
 				if (times >= 5) {
-					WxPushUtil.pushSystem1("错误:连续5分钟未成功执行任务PRD PreSelectCode PrdModeService.java");
+					MsgPushServer.pushSystem1("错误:连续5分钟未成功执行任务PRD PreSelectCode PrdModeService.java");
 					break;
 				}
 			}

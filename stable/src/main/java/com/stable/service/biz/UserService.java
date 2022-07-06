@@ -22,7 +22,7 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.Stype;
 import com.stable.es.dao.base.UserAmtLogDao;
 import com.stable.es.dao.base.UserDao;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.utils.DateUtil;
 import com.stable.vo.bus.UserAmtLog;
 import com.stable.vo.bus.UserInfo;
@@ -56,7 +56,7 @@ public class UserService {
 		}
 		UserInfo myid = new UserInfo();
 		myid.setId(Constant.MY_ID);
-		myid.setWxpush(WxPushUtil.myUid);
+		myid.setWxpush(MsgPushServer.myUid);
 		r.add(myid);
 		return r;
 	}
@@ -76,7 +76,7 @@ public class UserService {
 		}
 		UserInfo myid = new UserInfo();
 		myid.setId(Constant.MY_ID);
-		myid.setWxpush(WxPushUtil.myUid);
+		myid.setWxpush(MsgPushServer.myUid);
 		r.add(myid);
 		return r;
 	}

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
 import com.stable.constant.RedisConstant;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.biz.BizPushService;
@@ -132,7 +132,7 @@ public class RealtimeMonitoringService {
 					}
 				}
 			}
-			WxPushUtil.pushSystem1("实时监听，监听总数:[" + allmap.size() + "],牛熊环境开启:[" + getMonisort1() + "],短线实际总数["
+			MsgPushServer.pushSystem1("实时监听，监听总数:[" + allmap.size() + "],牛熊环境开启:[" + getMonisort1() + "],短线实际总数["
 					+ list.size() + "],监听失败[" + failtt + "]");
 
 			// ====产品1：三五天 => 买点 === 卖点 ====

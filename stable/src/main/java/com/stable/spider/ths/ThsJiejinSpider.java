@@ -13,7 +13,7 @@ import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.JiejinDao;
-import com.stable.msg.WxPushUtil;
+import com.stable.msg.MsgPushServer;
 import com.stable.service.StockBasicService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -84,7 +84,7 @@ public class ThsJiejinSpider {
 			log.info("同花顺-抓包解禁-完成");
 		} catch (Exception e) {
 			e.printStackTrace();
-			WxPushUtil.pushSystem1("同花顺-抓包解禁出错-抓包出错");
+			MsgPushServer.pushSystem1("同花顺-抓包解禁出错-抓包出错");
 		}
 	}
 
@@ -150,7 +150,7 @@ public class ThsJiejinSpider {
 				if (trytime >= 10) {
 					fetched = true;
 					e2.printStackTrace();
-					WxPushUtil.pushSystem1("同花顺-解禁获取出错,url=" + url);
+					MsgPushServer.pushSystem1("同花顺-解禁获取出错,url=" + url);
 				}
 			} finally {
 				htmlunitSpider.close();
