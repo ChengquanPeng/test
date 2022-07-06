@@ -114,7 +114,7 @@ public class PlateService {
 		sb.append("板块分析-攻击形态排序<br/><table border='1' cellspacing='0' cellpadding='0'>");
 		// head
 		sb.append(
-				"<tr><th>排名</th><th>板块代码</th><th>板块名称</th><th>板块总数</th><th>攻击数</th><th>底部数</th><th>底部小票</th><th>底部小票(优)</th></tr>");
+				"<tr><th>排名</th><th>同花顺板块代码</th><th>板块名称</th><th>板块股票数</th><th>攻击形态数</th><th>底部股票数(含大)</th><th>底部小票</th><th>底部小票(优)</th></tr>");
 
 		// data
 		if (newList != null && newList.size() > 0) {
@@ -126,12 +126,12 @@ public class PlateService {
 				sb.append("<td>").append(code).append("</td>");// 代码
 				sb.append("<td>").append(p1.getCodeName()).append("</td>");// 简称
 				sb.append("<td>").append(p1.getCt()).append("</td>");// CT
-				sb.append("<td>").append(p1.getCw()).append("  |  ").append(p1.getRw()).append("</td>");// CW
-				sb.append("<td>").append(p1.getCd1()).append("  |  ").append(p1.getRd()).append("</td>");// CD1
-				sb.append("<td>").append(p1.getCd2()).append("  |  ")
-						.append(CurrencyUitl.roundHalfUp(p1.getCd2() / Double.valueOf(p1.getCt()))).append("</td>");// CD2
-				sb.append("<td>").append(p1.getCd3()).append("  |  ")
-						.append(CurrencyUitl.roundHalfUp(p1.getCd3() / Double.valueOf(p1.getCt()))).append("</td>");// CD3
+				sb.append("<td>").append(p1.getCw()).append("(").append(p1.getRw()).append(")</td>");// CW
+				sb.append("<td>").append(p1.getCd1()).append("(").append(p1.getRd()).append(")</td>");// CD1
+				sb.append("<td>").append(p1.getCd2()).append("(")
+						.append(CurrencyUitl.roundHalfUp(p1.getCd2() / Double.valueOf(p1.getCt()))).append(")</td>");// CD2
+				sb.append("<td>").append(p1.getCd3()).append("(")
+						.append(CurrencyUitl.roundHalfUp(p1.getCd3() / Double.valueOf(p1.getCt()))).append(")</td>");// CD3
 				sb.append("</tr>");
 
 			}
