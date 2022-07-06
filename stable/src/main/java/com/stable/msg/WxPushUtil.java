@@ -21,7 +21,7 @@ public class WxPushUtil {
 
 	private static String appToken;
 	public static String myUid;
-	private static String env;
+	public static String env;
 	static {
 		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 		appToken = efc.getAppToken().trim();

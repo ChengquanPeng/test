@@ -11,6 +11,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.Constant;
+import com.stable.utils.DateUtil;
+
 @Service
 public class SendEamilService {
 
@@ -25,7 +28,7 @@ public class SendEamilService {
 	public boolean pushSystemT1(String title, String content, String... toId) {
 		try {
 			SimpleMailMessage message = new SimpleMailMessage();
-			message.setText(content);
+			message.setText(content + " " + WxPushUtil.env + DateUtil.getTodayYYYYMMDDHHMMSS());
 			message.setSubject(title);
 			message.setBcc(toId);
 			message.setFrom(fromId);
@@ -45,7 +48,7 @@ public class SendEamilService {
 			helper.setBcc(toId);
 			helper.setFrom(fromId);
 			helper.setSentDate(new Date());// 发送时间
-			helper.setText(content, true);// 第一个参数要发送的内容，第二个参数是不是Html格式。
+			helper.setText(content + Constant.HTML_LINE + WxPushUtil.env + DateUtil.getTodayYYYYMMDDHHMMSS(), true);// 第一个参数要发送的内容，第二个参数是不是Html格式。
 			javaMailSender.send(mailMessage);
 		} catch (Exception e) {
 			e.printStackTrace();
