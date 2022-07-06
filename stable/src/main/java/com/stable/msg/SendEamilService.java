@@ -22,11 +22,7 @@ public class SendEamilService {
 	@Value("${spring.mail.username}")
 	private String fromId;
 
-	public boolean pushSystem1(String title, String content) {
-		return pushSystem1(title, content, myId);
-	}
-
-	public boolean pushSystem1(String title, String content, String... toId) {
+	public boolean pushSystemT1(String title, String content, String... toId) {
 		try {
 			SimpleMailMessage message = new SimpleMailMessage();
 			message.setText(content);
@@ -41,11 +37,7 @@ public class SendEamilService {
 		return true;
 	}
 
-	public boolean pushSystem2Html(String title, String content) {
-		return pushSystem2Html(title, content, myId);
-	}
-
-	public boolean pushSystem2Html(String title, String content, String... toId) {
+	public boolean pushSystemHtmlT2(String title, String content, String... toId) {
 		MimeMessage mailMessage = javaMailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(mailMessage);// 需要借助Helper类
 		try {
@@ -61,4 +53,5 @@ public class SendEamilService {
 		}
 		return true;
 	}
+
 }

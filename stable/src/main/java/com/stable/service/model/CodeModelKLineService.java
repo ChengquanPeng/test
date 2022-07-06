@@ -134,10 +134,10 @@ public class CodeModelKLineService {
 			monitorPoolDao.saveAll(poolList);
 		}
 		if (szx.length() > 0) {
-			bizPushService.PushS2("今日十字星:" + szx.toString());
+			bizPushService.PushS2("今日十字星", szx.toString());
 		}
 		if (qx.length() > 0) {
-			bizPushService.PushS2("今日最新旗形:" + qx.toString());
+			bizPushService.PushS2("今日最新旗形", qx.toString());
 		}
 
 		log.info("KLine基本完成");

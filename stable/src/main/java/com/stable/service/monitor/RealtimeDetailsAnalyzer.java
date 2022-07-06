@@ -65,7 +65,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			if (srt.getOpen() == 0.0) {
 				log.info("SINA 今日停牌,{}", codeName);
 				for (RtmVo rv : cps) {
-					MsgPushServer.pushSystem1(rv.getWxpush(), codeName + "今日停牌:" + rv.getMsg());
+					MsgPushServer.pushSystemT1(codeName + "今日停牌", rv.getMsg(), rv.getUser());
 				}
 				return;
 			}
@@ -127,18 +127,18 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					if (qibao != null) {
 						if (!burstPointCheckTop && qibao.getOrig().getShotPointPrice() > 0) {
 							if (rt.getHigh() >= qibao.getOrig().getShotPointPrice()) {
-								burstPointCheckTop = qibao.bizPushService.PushS2(codeName + qibao.you + "[7]突破买点:"
-										+ qibao.getOrig().getShotPointPrice() + " " + qibao.ex);
+								burstPointCheckTop = qibao.bizPushService.PushS2(
+										codeName + qibao.you + "[7]突破买点:" + qibao.getOrig().getShotPointPrice(),
+										qibao.ex);
 							} else if (!burstPointCheckTopPrew && rt.getHigh() >= qibao.warningYellow) {
-								burstPointCheckTopPrew = qibao.bizPushService
-										.PushS2(codeName + qibao.you + "[7]突破买点:" + qibao.getOrig().getShotPointPrice()
-												+ "目前:" + qibao.warningYellow + " " + qibao.ex);
+								burstPointCheckTopPrew = qibao.bizPushService.PushS2(codeName + qibao.you + "[7]准备突破买点:"
+										+ qibao.getOrig().getShotPointPrice() + "现价:" + qibao.warningYellow, qibao.ex);
 							}
 						}
 						if (!burstPointCheckSzx && qibao.getOrig().getShotPointPriceSzx() > 0
 								&& rt.getHigh() >= qibao.getOrig().getShotPointPriceSzx()) {
-							burstPointCheckSzx = qibao.bizPushService.PushS2(codeName + qibao.you + " [10]突破买点:"
-									+ qibao.getOrig().getShotPointPriceSzx() + " " + qibao.ex);
+							burstPointCheckSzx = qibao.bizPushService.PushS2(
+									codeName + qibao.you + " [10]突破买点:" + qibao.getOrig().getShotPointPriceSzx(), " ");
 						}
 
 //						if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
@@ -151,14 +151,14 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					}
 					// 发送
 					if (!smsg.equals("")) {
-						MsgPushServer.pushSystem1(rv.getWxpush(), codeName + " " + smsg);
+						MsgPushServer.pushSystemT1(codeName + " " + smsg, "", rv.getUser());
 					}
 				}
 
 				Thread.sleep(WAIT_MIN);
 			} catch (Exception e) {
 				if (!isPushedException) {
-					MsgPushServer.pushSystem1(code + " 监听异常！");
+					MsgPushServer.pushSystemT1(code + " 监听异常！", "");
 					isPushedException = true;
 					e.printStackTrace();
 				}

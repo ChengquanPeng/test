@@ -7,6 +7,7 @@ import com.stable.enums.MonitorType;
 import com.stable.service.biz.BizPushService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.MonitorPoolTemp;
+import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.resp.CodeBaseModelResp;
 
 import lombok.Data;
@@ -15,7 +16,7 @@ import lombok.Data;
 public class RtmVo {
 	public MonitorPoolTemp orig;
 	public String msg;
-	public String wxpush;
+	public UserInfo user;
 	public boolean waitSend = true;
 	public boolean highPriceGot = false;
 	public BizPushService bizPushService;

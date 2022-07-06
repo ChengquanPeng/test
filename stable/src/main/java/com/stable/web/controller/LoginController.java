@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,24 +56,18 @@ public class LoginController {
 		UserInfo ui = userService.getListById(Long.valueOf(phone));
 		if (ui == null || ui.getS1() < DateUtil.getTodayIntYYYYMMDD()) {
 			r.setStatus(JsonResult.FAIL);
-			r.setResult("请联系管理员进行服务续约,抖音号：wudao_shunfeng 悟个p道，微信号：chengquan0755");
+			r.setResult("请联系抖音连续管理员进行服务续约，微信号：chengquan0755");
 			redisUtil.del(RedisConstant.RDS_LOGIN_ERROR_TIME_ + phone);
 		} else {
-			if (StringUtils.isNotBlank(ui.getWxpush())) {
-				String str = MathUtil.getRandomLengthStr4();
-				// 登录KEY
-				redisUtil.set(RedisConstant.RDS_LOGIN_KEY_ + phone, str, Duration.ofMinutes(10));
+			String str = MathUtil.getRandomLengthStr4();
+			// 登录KEY
+			redisUtil.set(RedisConstant.RDS_LOGIN_KEY_ + phone, str, Duration.ofMinutes(10));
 
-				if (MsgPushServer.pushSystem1(ui.getWxpush(), str + " 动态码")) {
-					r.setResult("动态码已发送，请查看微信消息，有效期10分钟");
-					r.setStatus(JsonResult.OK);
-				} else {
-					r.setResult("动态码发送失败，微信推送id=" + ui.getWxpush());
-					r.setStatus(JsonResult.FAIL);
-				}
-
+			if (MsgPushServer.pushSystemT1(str, " 动态码", ui)) {
+				r.setResult("动态码已发送，请查看微信消息，有效期10分钟");
+				r.setStatus(JsonResult.OK);
 			} else {
-				r.setResult("请联系管理员设置微信推送id,(抖音号：wudao_shunfeng 悟个p道，微信号：chengquan0755)");
+				r.setResult("动态码发送失败，微信推送id=" + ui.getWxpush());
 				r.setStatus(JsonResult.FAIL);
 			}
 		}

@@ -454,15 +454,15 @@ public class MonitorPoolService {
 						mp.setZfdone(0);
 						mp.setZfdoneZjh(0);
 						toSave(mp);
-						MsgPushServer.pushSystem1(u.getWxpush(),
-								stockBasicService.getCodeName2(mp.getCode()) + " 已完成增发,备注:" + mp.getRemark());
+						MsgPushServer.pushSystemT1(stockBasicService.getCodeName2(mp.getCode()) + " 已完成增发",
+								"备注:" + mp.getRemark(), u);
 					} else {
 						if (mp.getZfdoneZjh() == 0 && zf != null
 								&& ZfStatus.ZF_ZJHHZ.getDesc().equals(zf.getStatusDesc())) {
 							mp.setZfdoneZjh(1);
 							toSave(mp);
-							MsgPushServer.pushSystem1(u.getWxpush(),
-									stockBasicService.getCodeName2(mp.getCode()) + " 增发已通过证监会核准！ 备注:" + mp.getRemark());
+							MsgPushServer.pushSystemT1(stockBasicService.getCodeName2(mp.getCode()) + " 增发已通过证监会核准！",
+									"备注:" + mp.getRemark(), u);
 						}
 					}
 				}
@@ -491,7 +491,7 @@ public class MonitorPoolService {
 					}
 				}
 				if (annc.length() > 0) {
-					MsgPushServer.pushSystem1("最新公告:" + annc.toString());
+					MsgPushServer.pushSystemT1("最新公告", annc.toString(), u);
 				}
 			}
 		}
@@ -554,7 +554,7 @@ public class MonitorPoolService {
 					}
 				}
 				if (sb.length() > 0) {
-					MsgPushServer.pushSystem2Html(u.getWxpush(), "股东人数:" + sb.toString());
+					MsgPushServer.pushSystemHtmlT2("股东人数", sb.toString(), u);
 				}
 			}
 		}
@@ -582,7 +582,7 @@ public class MonitorPoolService {
 					}
 				}
 				if (sb.length() > 0) {
-					MsgPushServer.pushSystem2Html(u.getWxpush(), "流动性地量:" + sb.toString());
+					MsgPushServer.pushSystemHtmlT2("流动性地量", sb.toString(), u);
 				}
 			}
 		}
@@ -611,7 +611,7 @@ public class MonitorPoolService {
 					for (String s : l) {
 						sb.append(stockBasicService.getCodeName2(s)).append(Constant.DOU_HAO);
 					}
-					MsgPushServer.pushSystem1(u.getWxpush(), "关注票的大宗交易:" + sb.toString());
+					MsgPushServer.pushSystemT1("关注票的大宗交易", sb.toString(), u);
 				}
 			}
 		}
@@ -650,7 +650,6 @@ public class MonitorPoolService {
 							}
 						}
 					}
-					String ends = "";
 					// 价格
 					StringBuffer s = new StringBuffer();
 					for (String a : Other) {
@@ -660,11 +659,7 @@ public class MonitorPoolService {
 						s.append(a).append(Constant.HTML_LINE);
 					}
 					if (s.length() > 0) {
-						ends += "离线价格监听:" + s.toString();
-					}
-					// WxPush
-					if (StringUtils.isNotBlank(ends)) {
-						MsgPushServer.pushSystem2Html(ends);
+						MsgPushServer.pushSystemHtmlT2("离线价格监听", s.toString(), u);
 					}
 				}
 			}
@@ -751,7 +746,7 @@ public class MonitorPoolService {
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
-							MsgPushServer.pushSystem1(d.getCode() + "起爆点异常");
+							MsgPushServer.pushSystemT1(d.getCode() + "起爆点异常", "");
 						}
 					}
 				}
@@ -762,7 +757,7 @@ public class MonitorPoolService {
 					i++;
 				}
 				if (s1.length() > 0) {
-					bizPushService.PushS2("起飞:" + Constant.HTML_LINE + s1.toString());
+					bizPushService.PushS2("起飞形态列表", s1.toString());
 				}
 			}
 		}
@@ -873,7 +868,7 @@ public class MonitorPoolService {
 				}
 
 				if (sssb.length() > 0) {
-					MsgPushServer.pushSystem2Html(u.getWxpush(), "业绩快预报预警:" + sssb.toString());
+					MsgPushServer.pushSystemHtmlT2("业绩快预报预警", sssb.toString(), u);
 				}
 			}
 		}

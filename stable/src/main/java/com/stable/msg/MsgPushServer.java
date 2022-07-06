@@ -1,9 +1,14 @@
 package com.stable.msg;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import com.stable.utils.SpringUtil;
+import com.stable.vo.bus.UserInfo;
 
 public class MsgPushServer {
-	public static boolean isWxPush = true;
+	public static final String qqmail = "@qq.com";
+
 	public static SendEamilService email;
 	static {
 		try {
@@ -13,57 +18,64 @@ public class MsgPushServer {
 		}
 	}
 
-	public static String getMyId() {
-		if (isWxPush) {
-			return WxPushUtil.myUid;
-		} else {
-			return email.myId;
-		}
-	}
-
+	/** --管理员推送-- */
 	public final static boolean pushSystem1(String content) {
-		return pushSystemWithTitle("", content);
+		if (!email.pushSystemT1(content, content, email.myId)) {
+			return WxPushUtil.pushSystemT1(content, WxPushUtil.myUid);
+		}
+		return true;
 	}
 
-	public final static boolean pushSystemWithTitle(String title, String content) {
-		if (isWxPush) {
-			return WxPushUtil.pushSystem1(content);
+	public final static boolean pushSystemT1(String title, String content) {
+		if (!email.pushSystemT1(title, content, email.myId)) {
+			return WxPushUtil.pushSystemT1(title + content, WxPushUtil.myUid);
+		}
+		return true;
+	}
+
+	public final static boolean pushSystemHtmlT2(String title, String content) {
+		if (!email.pushSystemHtmlT2(title, content, email.myId)) {
+			return WxPushUtil.pushSystemHtmlT2(title + content, WxPushUtil.myUid);
+		}
+		return true;
+	}
+
+	/** --管理员推送-- */
+
+	/** --单个客户推送-- */
+	public final static boolean pushSystemT1(String title, String content, UserInfo user) {
+		if (user.getPushWay()) {
+			return email.pushSystemT1(title, content, user.getWxpush());
 		} else {
-			return email.pushSystem1(title, content);
+			return WxPushUtil.pushSystemT1(title + content, user.getWxpush());
 		}
 	}
 
-	public final static boolean pushSystem1(String toId, String content) {
-		return pushSystemWithTitle("", content, toId);
-	}
-
-	public final static boolean pushSystemWithTitle(String title, String content, String... toId) {
-		if (isWxPush) {
-			return WxPushUtil.pushSystem1(toId[0], content);
+	public final static boolean pushSystemHtmlT2(String title, String content, UserInfo user) {
+		if (user.getPushWay()) {
+			return email.pushSystemHtmlT2(title, content, user.getWxpush());
 		} else {
-			return email.pushSystem1(title, content, toId);
+			return WxPushUtil.pushSystemHtmlT2(title + content, user.getWxpush());
 		}
 	}
 
-	public final static boolean pushSystem2Html(String title, String content, String... toId) {
-		if (isWxPush) {
-			return WxPushUtil.pushSystem2Html(toId[0], content);
-		} else {
-			return email.pushSystem2Html(title, content, toId);
+	/** --单个客户推送-- */
+
+	/** --多个客户推送-- */
+	public final static boolean pushSystemHtmlBatch(String title, String content, List<UserInfo> users) {
+		List<String> l = new LinkedList<String>();
+		for (UserInfo user : users) {
+			if (user.getPushWay()) {
+				l.add(user.getWxpush());
+			} else {
+				WxPushUtil.pushSystemHtmlT2(title + content, user.getWxpush());
+			}
 		}
-
-	}
-
-	public final static boolean pushSystem2Html(String content) {
-		return pushSystem2Html("", content);
-	}
-
-	public final static boolean pushSystem2Html(String title, String content) {
-		if (isWxPush) {
-			return WxPushUtil.pushSystem2Html(content);
-		} else {
-			return email.pushSystem2Html(title, content);
+		if (l.size() > 0) {
+			String[] us = new String[l.size()];
+			email.pushSystemHtmlT2(title, content, l.toArray(us));
 		}
+		return true;
 	}
-
+	/** --多个客户推送-- */
 }
