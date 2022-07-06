@@ -15,9 +15,9 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import com.stable.job.RealtimeJob;
+import com.stable.msg.WxPushUtil;
 import com.stable.utils.OSystemUtil;
 import com.stable.utils.SpringUtil;
-import com.stable.utils.WxPushUtil;
 
 @Component
 //@Log4j2

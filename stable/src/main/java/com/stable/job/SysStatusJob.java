@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
+import com.stable.msg.WxPushUtil;
 import com.stable.service.model.WebModelService;
 import com.stable.utils.OSystemUtil;
-import com.stable.utils.WxPushUtil;
 
 /**
  * 这是我们的测试job类

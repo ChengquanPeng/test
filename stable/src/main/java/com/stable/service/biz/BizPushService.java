@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.stable.utils.WxPushUtil;
+import com.stable.msg.WxPushUtil;
 import com.stable.vo.bus.UserInfo;
 
 /**

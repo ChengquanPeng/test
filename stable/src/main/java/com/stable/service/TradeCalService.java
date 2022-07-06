@@ -16,11 +16,11 @@ import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsTradeCalDao;
 import com.stable.job.MyCallable;
+import com.stable.msg.WxPushUtil;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
-import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.TradeCal;
 
 import lombok.extern.log4j.Log4j2;

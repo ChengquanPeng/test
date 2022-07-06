@@ -3,8 +3,8 @@ package com.stable.job;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
 import com.stable.config.SpringConfig;
+import com.stable.msg.WxPushUtil;
 import com.stable.utils.ErrorLogFileUitl;
-import com.stable.utils.WxPushUtil;
 
 import lombok.extern.log4j.Log4j2;
 

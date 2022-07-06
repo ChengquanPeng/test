@@ -13,12 +13,12 @@ import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.JiejinDao;
+import com.stable.msg.WxPushUtil;
 import com.stable.service.StockBasicService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
-import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.StockBaseInfo;
 

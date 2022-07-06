@@ -10,10 +10,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.elasticsearch.search.sort.SortOrder;
 
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.msg.WxPushUtil;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.ErrorLogFileUitl;
-import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.Prd1;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 

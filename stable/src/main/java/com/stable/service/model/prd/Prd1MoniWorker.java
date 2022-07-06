@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.stable.constant.Constant;
+import com.stable.msg.WxPushUtil;
 import com.stable.spider.realtime.RealTime;
 import com.stable.spider.realtime.RealtimeCall;
 import com.stable.spider.tick.TencentTick;
@@ -17,7 +18,6 @@ import com.stable.spider.tick.TickFb;
 import com.stable.spider.tick.TickFz;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
-import com.stable.utils.WxPushUtil;
 import com.stable.vo.Prd1Monitor;
 import com.stable.vo.bus.OnlineTesting;
 

@@ -27,11 +27,11 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeConceptDao;
 import com.stable.es.dao.base.EsConceptDao;
+import com.stable.msg.WxPushUtil;
 import com.stable.service.TradeCalService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
-import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.CodeConcept;
 import com.stable.vo.bus.Concept;
 

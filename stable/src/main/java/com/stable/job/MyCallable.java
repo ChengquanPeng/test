@@ -5,9 +5,9 @@ import java.util.concurrent.TimeUnit;
 
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
+import com.stable.msg.WxPushUtil;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
-import com.stable.utils.WxPushUtil;
 
 import lombok.extern.log4j.Log4j2;
 

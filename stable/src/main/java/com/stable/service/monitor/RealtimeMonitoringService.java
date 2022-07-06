@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
 import com.stable.constant.RedisConstant;
+import com.stable.msg.WxPushUtil;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.biz.BizPushService;
@@ -21,7 +22,6 @@ import com.stable.service.model.WebModelService;
 import com.stable.spider.tick.TencentTickReal;
 import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
-import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.UserInfo;
 

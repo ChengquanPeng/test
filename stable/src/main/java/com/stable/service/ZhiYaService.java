@@ -18,11 +18,11 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
 import com.stable.es.dao.base.ZhiYaDao;
+import com.stable.msg.WxPushUtil;
 import com.stable.spider.eastmoney.EastmoneyZytjSpider2;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
-import com.stable.utils.WxPushUtil;
 import com.stable.vo.Zya;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.ZhiYa;

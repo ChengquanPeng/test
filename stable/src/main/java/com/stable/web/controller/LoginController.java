@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.constant.Constant;
 import com.stable.constant.RedisConstant;
+import com.stable.msg.WxPushUtil;
 import com.stable.service.biz.UserService;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MathUtil;
 import com.stable.utils.RedisUtil;
-import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.JsonResult;
 
