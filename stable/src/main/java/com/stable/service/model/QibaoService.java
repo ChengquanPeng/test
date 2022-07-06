@@ -79,8 +79,7 @@ public class QibaoService {
 			StringBuffer szx) {
 		if (stTuiShi(newOne)) {
 			setQxRes(newOne, pool, true, true);
-			newOne.setZyxing(0);
-			pool.setShotPointPriceSzx(0);
+			setSzxRes(newOne, pool);
 			return;
 		}
 		/** 大小旗形 */
@@ -197,7 +196,7 @@ public class QibaoService {
 	private void szx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer szx) {
 		// 人工或者底部优质票
 		if (newOne.getPls() != 1 && newOne.getShooting7() != 1) {
-			newOne.setZyxing(0);
+			setSzxRes(newOne, pool);
 			return;
 		}
 		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0, date,
@@ -243,37 +242,7 @@ public class QibaoService {
 			newOne.setZyxing(chk.getDate());
 			pool.setShotPointPriceSzx(moniHigh);
 		} else {
-			if (newOne.getZyxing() > 0) {
-				String jsHist = newOne.getZyxing() + "十字星" + ";" + newOne.getJsHist();
-				newOne.setJsHist(StringUtil.subString(jsHist, 100));
-			}
-			newOne.setZyxing(0);
-			pool.setShotPointPriceSzx(0);
-		}
-	}
-
-	private void setQxRes(CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isQx1, boolean isQx2) {
-		if (isQx1) {
-			if (newOne.getDibuQixing() > 0) {
-				String jsHist = newOne.getDibuQixing() + "大旗形" + ";" + newOne.getJsHist();
-				newOne.setJsHist(StringUtil.subString(jsHist, 100));
-			}
-			newOne.setDibuQixing(0);
-		}
-		if (isQx2) {
-			if (newOne.getDibuQixing2() > 0) {
-				String jsHist = newOne.getDibuQixing2() + "小旗形" + ";" + newOne.getJsHist();
-				newOne.setJsHist(StringUtil.subString(jsHist, 100));
-			}
-			newOne.setDibuQixing2(0);
-		}
-		if (newOne.getDibuQixing() == 0 && newOne.getDibuQixing2() == 0) {
-			newOne.setQixing(0);
-			newOne.setQixingStr("");
-			pool.setShotPointDate(0);
-			pool.setShotPointPrice(0);
-			pool.setShotPointPriceLow(0);
-			pool.setShotPointPriceLow5(0);
+			setSzxRes(newOne, pool);
 		}
 	}
 
@@ -567,5 +536,39 @@ public class QibaoService {
 			return true;
 		}
 		return false;
+	}
+
+	private void setQxRes(CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isQx1, boolean isQx2) {
+		if (isQx1) {
+			if (newOne.getDibuQixing() > 0) {
+				String jsHist = newOne.getDibuQixing() + "大旗形" + ";" + newOne.getJsHist();
+				newOne.setJsHist(StringUtil.subString(jsHist, 100));
+			}
+			newOne.setDibuQixing(0);
+		}
+		if (isQx2) {
+			if (newOne.getDibuQixing2() > 0) {
+				String jsHist = newOne.getDibuQixing2() + "小旗形" + ";" + newOne.getJsHist();
+				newOne.setJsHist(StringUtil.subString(jsHist, 100));
+			}
+			newOne.setDibuQixing2(0);
+		}
+		if (newOne.getDibuQixing() == 0 && newOne.getDibuQixing2() == 0) {
+			newOne.setQixing(0);
+			newOne.setQixingStr("");
+			pool.setShotPointDate(0);
+			pool.setShotPointPrice(0);
+			pool.setShotPointPriceLow(0);
+			pool.setShotPointPriceLow5(0);
+		}
+	}
+
+	private void setSzxRes(CodeBaseModel2 newOne, MonitorPoolTemp pool) {
+		if (newOne.getZyxing() > 0) {
+			String jsHist = newOne.getZyxing() + "十字星" + ";" + newOne.getJsHist();
+			newOne.setJsHist(StringUtil.subString(jsHist, 100));
+		}
+		newOne.setZyxing(0);
+		pool.setShotPointPriceSzx(0);
 	}
 }
