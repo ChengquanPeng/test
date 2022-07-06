@@ -17,10 +17,14 @@ public class BizPushService {
 	@Autowired
 	private UserService userService;
 
-	public void PushS2(String msg) {
+	public boolean PushS2(String msg) {
 		List<UserInfo> ulist = userService.getUserListForMonitorS2();
+		boolean isSendSc = true;
 		for (UserInfo u : ulist) {
-			WxPushUtil.pushSystem2Html(u.getWxpush(), msg);
+			if (!WxPushUtil.pushSystem2Html(u.getWxpush(), msg)) {
+				isSendSc = false;
+			}
 		}
+		return isSendSc;
 	}
 }

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.service.model.CodeModelKLineService;
 import com.stable.service.model.WebModelService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -43,6 +44,8 @@ public class PlateService {
 	private String htmlFolder;
 	private String htmlname1 = "w.html";
 	private String htmlname2 = "d.html";
+	@Autowired
+	private CodeModelKLineService codeModelKLineService;
 
 	public void getPlateStat() {
 		List<PlateStat> res = new LinkedList<PlateStat>();
@@ -81,6 +84,8 @@ public class PlateService {
 					pr.setCd1(cd1);
 					pr.setCd2(cd2);
 					pr.setCd3(cd3);
+					pr.setRw(CurrencyUitl.roundHalfUp(pr.getCw() / Double.valueOf(pr.getCt())));
+					pr.setRd(CurrencyUitl.roundHalfUp(pr.getCd1() / Double.valueOf(pr.getCt())));
 					res.add(pr);
 				}
 			}
@@ -90,6 +95,15 @@ public class PlateService {
 		printHtml(res, htmlname1);
 		arSortRd(res);
 		printHtml(res, htmlname2);
+
+		List<CodeBaseModel2> genList = new LinkedList<CodeBaseModel2>();
+		List<CodeBaseModel2> listr2 = webModelService.getList(new ModelReq(), EsQueryPageUtil.queryPage9999);
+		for (CodeBaseModel2 cm : listr2) {
+			if (cm.getQb() == 1) {
+				genList.add(cm);
+			}
+		}
+		codeModelKLineService.printKlHtml(genList);
 	}
 
 	private void printHtml(List<PlateStat> newList, String htmlnamet) {
@@ -100,25 +114,24 @@ public class PlateService {
 		sb.append("板块分析-攻击形态排序<br/><table border='1' cellspacing='0' cellpadding='0'>");
 		// head
 		sb.append(
-				"<tr><th>排名</th><th>板块代码</th><th>板块名称</th><th>板块总数量</th><th>攻击数量</th><th>底部数量(全)</th><th>底部数量(小)</th><th>底部数量(优)</th></tr>");
+				"<tr><th>排名</th><th>板块代码</th><th>板块名称</th><th>板块总数</th><th>攻击数</th><th>底部数</th><th>底部小票</th><th>底部小票(优)</th></tr>");
 
 		// data
 		if (newList != null && newList.size() > 0) {
 			for (int i = 0; i < newList.size(); i++) {
 				PlateStat p1 = newList.get(i);
 				String code = p1.getCode();
+
 				sb.append("<tr><td>").append(i + 1).append("</td>");// 序号
 				sb.append("<td>").append(code).append("</td>");// 代码
 				sb.append("<td>").append(p1.getCodeName()).append("</td>");// 简称
 				sb.append("<td>").append(p1.getCt()).append("</td>");// CT
-				sb.append("<td>").append(p1.getCw()).append("  |  ").append(p1.getCw() / Double.valueOf(p1.getCt()))
-						.append("</td>");// CW
-				sb.append("<td>").append(p1.getCd1()).append("  |  ").append(p1.getCd1() / Double.valueOf(p1.getCt()))
-						.append("</td>");// CD1
-				sb.append("<td>").append(p1.getCd2()).append("  |  ").append(p1.getCd2() / Double.valueOf(p1.getCt()))
-						.append("</td>");// CD2
-				sb.append("<td>").append(p1.getCd3()).append("  |  ").append(p1.getCd3() / Double.valueOf(p1.getCt()))
-						.append("</td>");// CD3
+				sb.append("<td>").append(p1.getCw()).append("  |  ").append(p1.getRw()).append("</td>");// CW
+				sb.append("<td>").append(p1.getCd1()).append("  |  ").append(p1.getRd()).append("</td>");// CD1
+				sb.append("<td>").append(p1.getCd2()).append("  |  ")
+						.append(CurrencyUitl.roundHalfUp(p1.getCd2() / Double.valueOf(p1.getCt()))).append("</td>");// CD2
+				sb.append("<td>").append(p1.getCd3()).append("  |  ")
+						.append(CurrencyUitl.roundHalfUp(p1.getCd3() / Double.valueOf(p1.getCt()))).append("</td>");// CD3
 				sb.append("</tr>");
 
 			}

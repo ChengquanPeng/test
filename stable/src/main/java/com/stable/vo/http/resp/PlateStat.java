@@ -2,9 +2,11 @@ package com.stable.vo.http.resp;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
+@ToString
 public class PlateStat {
 
 	private String code;

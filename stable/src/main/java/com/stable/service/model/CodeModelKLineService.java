@@ -139,8 +139,12 @@ public class CodeModelKLineService {
 		if (qx.length() > 0) {
 			bizPushService.PushS2("今日最新旗形:" + qx.toString());
 		}
-		printHtml(genList, "qf.html");
+
 		log.info("KLine基本完成");
+	}
+
+	public void printKlHtml(List<CodeBaseModel2> genList) {
+		printHtml(genList, "qf.html");
 	}
 
 	private int tradeDate = 0;
