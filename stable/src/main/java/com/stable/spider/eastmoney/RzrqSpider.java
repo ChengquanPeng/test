@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +15,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.RzrqDaliyDao;
-import com.stable.es.dao.base.RztjDao;
 import com.stable.service.DzjyService;
 import com.stable.service.StockBasicService;
-import com.stable.service.model.WebModelService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.model.Sort1ModeService;
+import com.stable.service.model.WebModelService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
@@ -28,7 +28,6 @@ import com.stable.utils.ThreadsUtil;
 import com.stable.utils.WxPushUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.RzrqDaliy;
-import com.stable.vo.bus.Rztj;
 import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -55,8 +54,6 @@ public class RzrqSpider {
 	private WebModelService modelWebService;
 	@Autowired
 	private RzrqDaliyDao rzrqDaliyDao;
-	@Autowired
-	private RztjDao rztjDao;
 	@Autowired
 	private Sort1ModeService sort1ModeService;
 	@Autowired
@@ -93,48 +90,44 @@ public class RzrqSpider {
 	// 底部融资余额飙升。顶部融券余额飙升。（300339）
 	// 融资融券可以大概率判断多空双发的态度。
 	private synchronized void exeRzrqTime(Set<String> codes, int date) {
-		int invalidDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(DateUtil.parseDate(date), 30));// 不满足有效期
 		ThreadsUtil.sleepRandomSecBetween15And30();
-		List<Rztj> l = new LinkedList<Rztj>();
 		List<CodeBaseModel2> update = new LinkedList<CodeBaseModel2>();
 		StringBuffer shootNotice3 = new StringBuffer();
+		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
+		boolean isOk = false;
 		for (String code : codes) {
-			Rztj rztj = dzjyService.getLastRztj(code);
-			if (date > rztj.getValidDate()) {// 已失效
-				rztj.setUpdateDate(date);
-				if (dzjyService.rzrqAvg20d(code, vaildLine, validBlance, rztj)) {
-					rztj.setValid(1);
-				}
-
-				CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(code);
-				cbm.setShooting3(0);
-				// 1：2年没涨，200亿以下
-				if (codeModelService.isDibu(cbm) && cbm.getMkv() <= 200.0) {
-					// 2：融资满足条件
-					if (rztj.getValid() > 0) {
-						// 3:涨幅在65%以下
-						if (sort1ModeService.xyIs30DayTodayPriceOk(code, date, checkLine)) {
-							cbm.setShooting3(1);
-							shootNotice3.append(stockBasicService.getCodeName2(code)).append(",");
-						} else {
-							rztj.setValidDate(invalidDate);
-						}
-					}
-					// 200亿以下，继续监听融资余额
-				} else {
-					rztj.setValidDate(invalidDate);
-				}
-				l.add(rztj);
-				update.add(cbm);
-				if (l.size() > 200) {
-					rztjDao.saveAll(l);
-					l = new LinkedList<Rztj>();
-				}
+			isOk = false;
+			CodeBaseModel2 cbm = histMap.get(code);
+			if (cbm == null) {
+				cbm = new CodeBaseModel2();
+				cbm.setId(code);
+				cbm.setCode(code);
 			}
-		}
+			// 1：2年没涨，200亿以下
+			if (codeModelService.isDibu(cbm) && cbm.getMkv() <= 200.0) {
+				// 2：融资满足条件
+				if (dzjyService.rzrqAvg20d(code, vaildLine, validBlance)) {
+					// 3:涨幅在65%以下
+					if (sort1ModeService.xyIs30DayTodayPriceOk(code, date, checkLine)) {
+						isOk = true;
+					}
+				}
+				// 200亿以下，继续监听融资余额
+			}
+			if (isOk) {
+				if (cbm.getShooting3() == 0) {
+					shootNotice3.append(stockBasicService.getCodeName2(code)).append(",");
+				}
+				cbm.setShooting3(1);
+			} else {
+				cbm.setShooting3(0);
+			}
 
-		if (l.size() > 0) {
-			rztjDao.saveAll(l);
+			update.add(cbm);
+			if (update.size() > 200) {
+				codeBaseModel2Dao.saveAll(update);
+				update = new LinkedList<CodeBaseModel2>();
+			}
 		}
 		if (update.size() > 0) {
 			codeBaseModel2Dao.saveAll(update);
