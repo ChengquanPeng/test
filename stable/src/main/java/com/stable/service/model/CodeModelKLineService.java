@@ -25,8 +25,8 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.FileWriteUitl;
 import com.stable.utils.RedisUtil;
+import com.stable.utils.StringUtil;
 import com.stable.vo.bus.CodeBaseModel2;
-import com.stable.vo.bus.CodeConcept;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.StockBaseInfo;
@@ -294,7 +294,7 @@ public class CodeModelKLineService {
 				sb.append("<td>").append(p1.getQixingStr()).append("</td>");//
 				sb.append("<td>").append(p1.getShooting7() == 1 ? "优" : "普").append("</td>");//
 				sb.append("<td>").append(sbsb.getThsIndustry()).append("|")
-						.append(getGn(conceptService.getCodeConcept(code))).append("</td>");// CD2
+						.append(StringUtil.getGn(conceptService.getCodeConcept(code))).append("</td>");// CD2
 				sb.append("<td>").append("").append("</td>");// CD3
 				sb.append("</tr>");
 
@@ -307,16 +307,6 @@ public class CodeModelKLineService {
 		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
 		fw.writeLine(sb.toString());
 		fw.close();
-	}
-
-	private String getGn(List<CodeConcept> l) {
-		StringBuffer sb = new StringBuffer("");
-		if (l != null) {
-			for (CodeConcept cc : l) {
-				sb.append(cc.getConceptName()).append(",");
-			}
-		}
-		return sb.toString();
 	}
 
 	private String getQif(CodeBaseModel2 p1) {

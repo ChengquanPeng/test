@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.Constant;
 import com.stable.constant.RedisConstant;
 import com.stable.msg.MsgPushServer;
+import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.biz.BizPushService;
@@ -52,6 +53,8 @@ public class RealtimeMonitoringService {
 	private UserService userService;
 	@Autowired
 	private BizPushService bizPushService;
+	@Autowired
+	private ConceptService conceptService;
 
 	public synchronized void startObservable() {
 		String date = DateUtil.getTodayYYYYMMDD();
@@ -122,7 +125,7 @@ public class RealtimeMonitoringService {
 				for (String code : allmap.keySet()) {
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
 					int r = task.init(code, allmap.get(code), stockBasicService.getCodeName2(code),
-							redisUtil.get(RedisConstant.YEAR_PRICE_ + code, 0.0));
+							redisUtil.get(RedisConstant.YEAR_PRICE_ + code, 0.0), conceptService);
 					if (r == 1) {
 						new Thread(task).start();
 						list.add(task);

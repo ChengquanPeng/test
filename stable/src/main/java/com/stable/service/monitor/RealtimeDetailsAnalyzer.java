@@ -3,17 +3,21 @@ package com.stable.service.monitor;
 import java.util.Date;
 import java.util.List;
 
+import com.stable.constant.Constant;
 import com.stable.msg.MsgPushServer;
+import com.stable.service.ConceptService;
 import com.stable.spider.realtime.RealTime;
 import com.stable.spider.realtime.RealtimeCall;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MonitoringUitl;
+import com.stable.utils.StringUtil;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class RealtimeDetailsAnalyzer implements Runnable {
+	private ConceptService conceptService;
 	public static final long ONE_MIN = 1 * 60 * 1000;// 5MIN
 	private static final long FIVE_MIN = 5 * 60 * 1000;// 5MIN
 	private static final long TEN_MIN = 10 * 60 * 1000;// 5MIN
@@ -43,7 +47,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		return sb.toString();
 	}
 
-	public int init(String code, List<RtmVo> t, String codeName, double yh) {
+	public int init(String code, List<RtmVo> t, String codeName, double yh, ConceptService c) {
 		log.info(code + ":" + getUsers(t));
 		this.code = code;
 		this.codeName = codeName;
@@ -54,6 +58,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			chkCodeClosed = true;
 		}
 		this.yearHigh1 = yh;
+		this.conceptService = c;
 		return 1;
 	}
 
@@ -138,10 +143,14 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 							if (rt.getHigh() >= qibao.getOrig().getShotPointPrice()) {
 								burstPointCheckTop = qibao.bizPushService.PushS2(
 										codeName + qibao.you + "[7]突破买点:" + qibao.getOrig().getShotPointPrice(),
-										qibao.ex);
+										qibao.ex + Constant.HTML_LINE
+												+ StringUtil.getGn(conceptService.getCodeConcept(code)));
 							} else if (!burstPointCheckTopPrew && rt.getHigh() >= qibao.warningYellow) {
-								burstPointCheckTopPrew = qibao.bizPushService.PushS2(codeName + qibao.you + "[7]准备突破买点:"
-										+ qibao.getOrig().getShotPointPrice() + "现价:" + qibao.warningYellow, qibao.ex);
+								burstPointCheckTopPrew = qibao.bizPushService.PushS2(
+										codeName + qibao.you + "[7]准备突破买点:" + qibao.getOrig().getShotPointPrice()
+												+ "现价:" + qibao.warningYellow,
+										qibao.ex + Constant.HTML_LINE
+												+ StringUtil.getGn(conceptService.getCodeConcept(code)));
 							}
 						}
 						if (!burstPointCheckSzx && qibao.getOrig().getShotPointPriceSzx() > 0
