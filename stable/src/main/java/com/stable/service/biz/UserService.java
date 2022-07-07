@@ -3,7 +3,6 @@ package com.stable.service.biz;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -48,9 +47,7 @@ public class UserService {
 		List<UserInfo> l = this.getList(q, EsQueryPageUtil.queryPage9999);
 		if (l != null) {
 			for (UserInfo u : l) {
-				if (StringUtils.isNotBlank(u.getWxpush())) {
-					r.add(u);
-				}
+				r.add(u);
 			}
 		}
 		UserInfo myid = new UserInfo();
@@ -67,9 +64,7 @@ public class UserService {
 		List<UserInfo> l = this.getList(q, EsQueryPageUtil.queryPage9999);
 		if (l != null) {
 			for (UserInfo u : l) {
-				if (StringUtils.isNotBlank(u.getWxpush())) {
-					r.add(u);
-				}
+				r.add(u);
 			}
 		}
 		UserInfo myid = new UserInfo();
