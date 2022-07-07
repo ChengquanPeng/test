@@ -36,6 +36,12 @@ public class RtmVo {
 		if (cbm.getShooting7() > 0) {
 			you = "[优]";
 		}
+		if (cbm.getShooting11() > 0) {
+			you += "[大]" + you;
+		}
+		if (cbm.getFinDbl() > 0 || (cbm.getFinOK() > 0 && cbm.getFinanceInc() > 0)) {
+			you += "[绩]" + you;
+		}
 		if (StringUtils.isNotBlank(cbm.getQixingStr())) {
 			ex = cbm.getQixingStr();
 		}
