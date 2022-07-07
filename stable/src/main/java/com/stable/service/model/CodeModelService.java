@@ -252,7 +252,7 @@ public class CodeModelService {
 			}
 
 			/** 底部大票 **/
-			if (TagUtil.isDibu(newOne) && newOne.getMkv() >= smallStocklimit) {
+			if (TagUtil.isDibu21(newOne) && newOne.getMkv() >= smallStocklimit) {
 				// 行情指标2：底部大票增发：超过50亿(越大越好),股东集中,证监会核准-之前有明显底部拿筹痕迹-涨停？
 				if (ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
 					if (newOne.getZfYjAmt() >= ZF_50YI) {

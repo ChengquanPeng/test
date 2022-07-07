@@ -17,6 +17,7 @@ import com.stable.utils.DateUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
+import com.stable.vo.spi.req.EsQueryPageReq;
 
 @Service
 public class Sort1ModeService {
@@ -94,9 +95,9 @@ public class Sort1ModeService {
 	/**
 	 * 1.30个交易日内振幅超的涨幅
 	 */
-	public boolean xyIs30DayTodayPriceOk(String code, int date, double checkLine) {
-		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date,
-				EsQueryPageUtil.queryPage30, SortOrder.DESC);
+	public boolean xyIs30DayTodayPriceOk(String code, int date, double checkLine, EsQueryPageReq req) {
+		List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(code, 0, date, req,
+				SortOrder.DESC);
 
 		TradeHistInfoDaliyNofq topDate = l2.stream().max(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getHigh))
 				.get();

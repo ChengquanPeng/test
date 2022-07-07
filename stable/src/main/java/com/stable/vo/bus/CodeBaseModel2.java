@@ -24,6 +24,8 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int shooting3 = 0;// 行情指标3：融资票
 	@Field(type = FieldType.Integer)
+	private int shooting30 = 0;// 过期日期
+	@Field(type = FieldType.Integer)
 	private int shooting4 = 0;// 行情指标4：股东人数底部大幅减少
 	@Field(type = FieldType.Integer)
 	private int shooting5 = 0;// 行情指标5：短线拉升小平台。

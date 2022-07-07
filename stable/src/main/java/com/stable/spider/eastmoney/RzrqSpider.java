@@ -13,10 +13,11 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.RzrqDaliyDao;
 import com.stable.msg.MsgPushServer;
-import com.stable.service.DzjyService;
+import com.stable.service.RzrqService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.Sort1ModeService;
 import com.stable.service.model.WebModelService;
@@ -49,7 +50,7 @@ public class RzrqSpider {
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
-	private DzjyService dzjyService;
+	private RzrqService rzrqService;
 	@Autowired
 	private WebModelService modelWebService;
 	@Autowired
@@ -81,14 +82,52 @@ public class RzrqSpider {
 		log.info("STEP3:done");
 	}
 
+//	@javax.annotation.PostConstruct
+//	private void a() {
+//		new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				ThreadsUtil.sleepRandomSecBetween5And15();
+//				int date = 20220706;
+//				int startDate = DateUtil.getPre6MONTH(DateUtil.getTodayIntYYYYMMDD());
+//				Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
+//				for (String code : histMap.keySet()) {
+//					CodeBaseModel2 cbm = histMap.get(code);
+//					if (TagUtil.isDibu11(cbm) && cbm.getMkv() <= 200.0) {
+//						double up = rzrqService.plan2(code, startDate);
+//						if (code.equals("603789")) {
+//							System.err.println("603789:" + up);
+//						}
+//						if (up >= 30) {
+//							System.err.println("get code1:" + code);
+//							if (sort1ModeService.xyIs30DayTodayPriceOk(code, date, 40, EsQueryPageUtil.queryPage60)) {
+//								System.err.println("get code===:" + code);
+//							}
+//
+//						} else if (up >= 20) {
+//							System.err.println("get code2:" + code);
+//							if (sort1ModeService.xyIs30DayTodayPriceOk(code, date, 30, EsQueryPageUtil.queryPage60)) {
+//								System.err.println("get code====:" + code);
+//							}
+//						}
+//					}
+//				}
+//				System.err.println("===done==");
+//				System.exit(0);
+//			}
+//		}).start();
+//	}
+
 	private double vaildLine = 18.0;// 超过平均数15%认为有效
 	private double validBlance = 2.5 * CurrencyUitl.YI_N.doubleValue();// 至少2.5亿
 	private double checkLine = 65.0;// 低于65%
+	private double plan2VaildLine = 25.0;// 超过平均数35%认为有效
 
 	// 底部融资余额飙升。顶部融券余额飙升。（300339）
 	// 融资融券可以大概率判断多空双发的态度。
 	private synchronized void exeRzrqTime(Set<String> codes, int date) {
 		ThreadsUtil.sleepRandomSecBetween15And30();
+		int startDate = DateUtil.getPre6MONTH(date);
 		List<CodeBaseModel2> update = new LinkedList<CodeBaseModel2>();
 		StringBuffer shootNotice3 = new StringBuffer();
 		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
@@ -101,17 +140,23 @@ public class RzrqSpider {
 				cbm.setId(code);
 				cbm.setCode(code);
 			}
-			// 1：2年没涨，200亿以下
-			if (TagUtil.isDibu(cbm) && cbm.getMkv() <= 200.0) {
+
+			if (TagUtil.isDibu11(cbm) && cbm.getMkv() <= 200.0 && date > cbm.getShooting30()) {
+				// 方案1:突然拉升的融资融券，散户没有时间买入,200亿以下
 				// 2：融资满足条件
-				if (dzjyService.rzrqAvg20d(code, vaildLine, validBlance)) {
+				if (rzrqService.rzrqAvg20d(code, vaildLine, validBlance)) {
 					// 3:涨幅在65%以下
-					if (sort1ModeService.xyIs30DayTodayPriceOk(code, date, checkLine)) {
+					if (sort1ModeService.xyIs30DayTodayPriceOk(code, date, checkLine, EsQueryPageUtil.queryPage30)) {
 						isOk = true;
 					}
 				}
-				// 200亿以下，继续监听融资余额
+
+				// 方案2：底部融资融券萎缩发育
+				if (!isOk) {
+					isOk = rzrqService.plan2(code, startDate) >= plan2VaildLine;
+				}
 			}
+
 			if (isOk) {
 				if (cbm.getShooting3() == 0) {
 					shootNotice3.append(stockBasicService.getCodeName2(code)).append(",");
@@ -283,14 +328,11 @@ public class RzrqSpider {
 	}
 
 	public static void main(String[] args) {
-
 		RzrqSpider es = new RzrqSpider();
 		es.byDaily("2022-01-04", 20220104);
-
 //		List<RzrqDaliy> list = new LinkedList<RzrqDaliy>();
 //		es.dofetchByCode("000728", list);
 //		System.err.println(list.size());
-
 	}
 
 }

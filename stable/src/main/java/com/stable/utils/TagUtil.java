@@ -7,25 +7,34 @@ import com.stable.vo.bus.CodeConcept;
 
 public class TagUtil {
 
-	// 底部
-	public static boolean isDibu(CodeBaseModel2 cbm) {
+	// 底部2-1
+	public static boolean isDibu21(CodeBaseModel2 cbm) {
 		return cbm.getZfjjup() >= 2 && cbm.getZfjjupStable() >= 1;
+	}
+
+	// 底部1-1
+	public static boolean isDibu11(CodeBaseModel2 cbm) {
+		return cbm.getZfjjup() >= 1 && cbm.getZfjjupStable() >= 1;
 	}
 
 	// 底部-小票
 	public static boolean isDibuSmall(boolean isSmallStock, CodeBaseModel2 cbm) {
-		return isSmallStock && isDibu(cbm);
+		return isSmallStock && isDibu21(cbm);
 	}
 
 	// 底部-大票-基本面OK
 	public static boolean isDibuOKBig(boolean isSmallStock, CodeBaseModel2 cbm) {
-		return !isSmallStock && cbm.getZfjjup() >= 1 && cbm.getZfjjupStable() >= 1 && cbm.getFinOK() >= 1
-				&& cbm.getBousOK() >= 1;
+		return !isSmallStock && isDibu11(cbm) && isFinNomarl(cbm);
 	}
 
-	// 业绩不错
+	// 业绩正常/普通
+	public static boolean isFinNomarl(CodeBaseModel2 cbm) {
+		return cbm.getFinOK() >= 1 && cbm.getBousOK() >= 1;
+	}
+
+	// 业绩不错-连续增长或者暴涨
 	public static boolean isFinPerfect(CodeBaseModel2 cbm) {
-		return cbm.getFinOK() >= 1 && cbm.getBousOK() >= 1 && (cbm.getFinDbl() > 0 || cbm.getFinanceInc() > 0);
+		return isFinNomarl(cbm) && (cbm.getFinDbl() > 0 || cbm.getFinanceInc() > 0);
 	}
 
 	// 概念
@@ -48,10 +57,10 @@ public class TagUtil {
 			you = "[普]";
 		}
 		if (cbm.getShooting11() > 0) {
-			you += "[大]" + you;
+			you += "[大]";
 		}
 		if (isFinPerfect(cbm)) {
-			you += "[绩]" + you;
+			you += "[绩]";
 		}
 		return you;
 	}
