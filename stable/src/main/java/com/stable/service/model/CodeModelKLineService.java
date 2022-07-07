@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.Constant;
 import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.MonitorPoolUserDao;
@@ -278,7 +279,7 @@ public class CodeModelKLineService {
 		sb.append("起飞<br/><table border='1' cellspacing='0' cellpadding='0'>");
 		// head
 		sb.append(
-				"<tr><th>序号</th><th>代码</th><th>名称</th><th>起飞形态</th><th>Desc</th><th>底部类型</th><th>板块概念</th><th></th></tr>");
+				"<tr><th>序号</th><th>代码</th><th>名称</th><th>逻辑模型</th><th>起飞形态</th><th>Desc</th><th>底部类型</th><th>板块概念</th><th></th></tr>");
 
 		// data
 		if (newList != null && newList.size() > 0) {
@@ -288,6 +289,7 @@ public class CodeModelKLineService {
 				StockBaseInfo sbsb = stockBasicService.getCode(code);
 				sb.append("<tr><td>").append(i + 1).append("</td>");// 序号
 				sb.append("<td>").append(code).append("</td>");// 代码
+				sb.append("<td>").append(modelWebService.getSystemPoint(p1, Constant.HTML_LINE)).append("</td>");// 逻辑
 				sb.append("<td>").append(sbsb.getName()).append("</td>");// 简称
 				sb.append("<td>").append(getQif(p1)).append("</td>");//
 				sb.append("<td>").append(p1.getQixingStr()).append("</td>");//
