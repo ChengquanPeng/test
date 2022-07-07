@@ -37,6 +37,7 @@ import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
+import com.stable.utils.TagUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.HolderAnalyse;
 import com.stable.vo.bus.CodeBaseModel2;
@@ -251,7 +252,7 @@ public class CodeModelService {
 			}
 
 			/** 底部大票 **/
-			if (isDibu(newOne) && newOne.getMkv() >= smallStocklimit) {
+			if (TagUtil.isDibu(newOne) && newOne.getMkv() >= smallStocklimit) {
 				// 行情指标2：底部大票增发：超过50亿(越大越好),股东集中,证监会核准-之前有明显底部拿筹痕迹-涨停？
 				if (ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
 					if (newOne.getZfYjAmt() >= ZF_50YI) {
@@ -269,7 +270,7 @@ public class CodeModelService {
 		}
 
 		/** 底部横盘小票(不看基本面) **/
-		if (isDibuSmall(isSmallStock, newOne)) {
+		if (TagUtil.isDibuSmall(isSmallStock, newOne)) {
 			newOne.setShooting9(1);
 
 			/** 底部横盘小票:看基本面 **/
@@ -335,7 +336,7 @@ public class CodeModelService {
 					pool.setUpTodayChange(3);
 				}
 //				pool.setShotPointCheck(1);
-				pool.setRemark(Constant.AUTO_MONITOR + this.modelWebService.getSystemPoint(newOne, Constant.FEN_HAO));
+				pool.setRemark(Constant.AUTO_MONITOR + TagUtil.getSystemPoint(newOne, Constant.FEN_HAO));
 			}
 		}
 		// 同步监听
@@ -363,20 +364,6 @@ public class CodeModelService {
 	// 小市值股票(流通市值小于70亿，5%以下的流通小于50亿)
 	public boolean isSmallStock(double mkv, double actMkv) {
 		return (mkv <= smallStocklimit || actMkv <= smallStocklimitAck);
-	}
-
-	// 底部
-	public boolean isDibu(CodeBaseModel2 newOne) {
-		return newOne.getZfjjup() >= 2 && newOne.getZfjjupStable() >= 1;
-	}
-
-	public boolean isDibuSmall(boolean isSmallStock, CodeBaseModel2 newOne) {
-		return isSmallStock && isDibu(newOne);
-	}
-
-	public boolean isDibuOKBig(boolean isSmallStock, CodeBaseModel2 newOne) {
-		return !isSmallStock && newOne.getZfjjup() >= 1 && newOne.getZfjjupStable() >= 1 && newOne.getFinOK() >= 1
-				&& newOne.getBousOK() >= 1;
 	}
 
 	// 周末计算-至少N年未大涨?
@@ -444,7 +431,7 @@ public class CodeModelService {
 			}
 			// 小而美模型：未涨&&年报 && 大股东集中
 			newOne.setTagSmallAndBeatf(0);
-			if (isDibuSmall(isSmallStock, newOne) && newOne.getHolderNumP5() >= 50 && newOne.getFinOK() >= 3) {
+			if (TagUtil.isDibuSmall(isSmallStock, newOne) && newOne.getHolderNumP5() >= 50 && newOne.getFinOK() >= 3) {
 				newOne.setTagSmallAndBeatf(1);
 			}
 			// 分红

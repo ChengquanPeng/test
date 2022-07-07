@@ -26,7 +26,7 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.FileWriteUitl;
 import com.stable.utils.RedisUtil;
-import com.stable.utils.StringUtil;
+import com.stable.utils.TagUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.MonitorPoolTemp;
@@ -142,10 +142,6 @@ public class CodeModelKLineService {
 		log.info("KLine基本完成");
 	}
 
-	public void printKlHtml(List<CodeBaseModel2> genList) {
-		printHtml(genList, "qf.html");
-	}
-
 	private int tradeDate = 0;
 	private int pre1Year = 0;// 一年以前
 	private int pre4Year = 0;// 四年以前
@@ -215,7 +211,7 @@ public class CodeModelKLineService {
 		// 攻击形态
 		sort0Service.attackAndW(newOne, tradeDate);
 		// 底部优质大票
-		if (codeModelService.isDibuOKBig(isSamll, newOne)) {
+		if (TagUtil.isDibuOKBig(isSamll, newOne)) {
 			newOne.setShooting11(1);
 		} else {
 			newOne.setShooting11(0);
@@ -271,7 +267,8 @@ public class CodeModelKLineService {
 		}
 	}
 
-	private void printHtml(List<CodeBaseModel2> newList, String htmlnamet) {
+	public void printKlHtml(List<CodeBaseModel2> newList, List<CodeBaseModel2> genList2) {
+		String htmlnamet = "qf.html";
 		StringBuffer sb = new StringBuffer();
 		// 更新时间
 		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("</div><br/>");
@@ -279,47 +276,51 @@ public class CodeModelKLineService {
 		sb.append("起飞<br/><table border='1' cellspacing='0' cellpadding='0'>");
 		// head
 		sb.append(
-				"<tr><th>序号</th><th>代码</th><th>名称</th><th>逻辑模型</th><th>起飞形态</th><th>Desc</th><th>底部类型</th><th>板块概念</th><th></th></tr>");
-
-		// data
+				"<tr><th>序号</th><th>简称-代码</th><th>逻辑模型</th><th>起飞形态</th><th>Desc</th><th>底部类型</th><th>板块概念</th></tr>");
+		// data2
+		if (genList2 != null && genList2.size() > 0) {
+			for (int i = 0; i < genList2.size(); i++) {
+				CodeBaseModel2 p1 = genList2.get(i);
+				String code = p1.getCode();
+				StockBaseInfo sbsb = stockBasicService.getCode(code);
+				sb.append("<tr><td>").append(i + 1).append("</td>");// 序号
+				sb.append("<td>").append(sbsb.getName()).append("-").append(code).append("</td>");// 简称-代码
+				sb.append("<td>").append(TagUtil.getSystemPoint(p1, Constant.HTML_LINE)).append("</td>");// 逻辑
+				sb.append("<td>中阳十字星-特</td>");//
+				sb.append("<td>").append(p1.getQixingStr()).append("</td>");//
+				sb.append("<td>").append(TagUtil.getTag(p1)).append("</td>");//
+				sb.append("<td>").append(sbsb.getThsIndustry()).append("|")
+						.append(TagUtil.getGn(conceptService.getCodeConcept(code))).append("</td>");// CD2
+				sb.append("</tr>");
+			}
+		} else {
+			sb.append("<tr><td>无数据1</td></tr>");
+		}
+		// data1
 		if (newList != null && newList.size() > 0) {
 			for (int i = 0; i < newList.size(); i++) {
 				CodeBaseModel2 p1 = newList.get(i);
 				String code = p1.getCode();
 				StockBaseInfo sbsb = stockBasicService.getCode(code);
 				sb.append("<tr><td>").append(i + 1).append("</td>");// 序号
-				sb.append("<td>").append(code).append("</td>");// 代码
-				sb.append("<td>").append(modelWebService.getSystemPoint(p1, Constant.HTML_LINE)).append("</td>");// 逻辑
-				sb.append("<td>").append(sbsb.getName()).append("</td>");// 简称
-				sb.append("<td>").append(getQif(p1)).append("</td>");//
+				sb.append("<td>").append(sbsb.getName()).append("-").append(code).append("</td>");// 简称-代码
+				sb.append("<td>").append(TagUtil.getSystemPoint(p1, Constant.HTML_LINE)).append("</td>");// 逻辑
+				sb.append("<td>").append(TagUtil.getQif(p1)).append("</td>");//
 				sb.append("<td>").append(p1.getQixingStr()).append("</td>");//
-				sb.append("<td>").append(StringUtil.getTag(p1)).append("</td>");//
+				sb.append("<td>").append(TagUtil.getTag(p1)).append("</td>");//
 				sb.append("<td>").append(sbsb.getThsIndustry()).append("|")
-						.append(StringUtil.getGn(conceptService.getCodeConcept(code))).append("</td>");// CD2
-				sb.append("<td>").append("").append("</td>");// CD3
+						.append(TagUtil.getGn(conceptService.getCodeConcept(code))).append("</td>");// CD2
 				sb.append("</tr>");
-
 			}
 		} else {
-			sb.append("<tr><td>无数据</td></tr>");
+			sb.append("<tr><td>无数据1</td></tr>");
 		}
 		// end
 		sb.append("</table>");
 		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
 		fw.writeLine(sb.toString());
 		fw.close();
+
 	}
 
-	private String getQif(CodeBaseModel2 p1) {
-		String s = "";
-		if (p1.getDibuQixing() > 0) {
-			s = "大旗形";
-		} else if (p1.getDibuQixing2() > 0) {
-			s = "小旗形";
-		}
-		if (p1.getZyxing() > 0) {
-			s += "-中阳十字星";
-		}
-		return s;
-	}
 }

@@ -15,6 +15,7 @@ import com.stable.service.StockBasicService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.StringUtil;
+import com.stable.utils.TagUtil;
 import com.stable.vo.QiBaoInfo;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPoolTemp;
@@ -27,8 +28,6 @@ import lombok.extern.log4j.Log4j2;
 public class QibaoService {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
-	@Autowired
-	private CodeModelService codeModelService;
 	@Autowired
 	private StockBasicService stockBasicService;
 
@@ -81,6 +80,7 @@ public class QibaoService {
 		if (stTuiShi(newOne)) {
 			setQxRes(newOne, pool, true, true);
 			setSzxRes(newOne, pool);
+			newOne.setZyxingt(0);
 			return;
 		}
 		/** 大小旗形 */
@@ -97,7 +97,7 @@ public class QibaoService {
 	}
 
 	private void qx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
-		if (newOne.getPls() == 2 || !codeModelService.isDibuSmall(isSamll, newOne)) {// 排除的和大票大票不用check
+		if (newOne.getPls() == 2 || !TagUtil.isDibuSmall(isSamll, newOne)) {// 排除的和大票大票不用check
 			if (newOne.getPls() == 1 || newOne.getShooting11() == 1) {// 人工的需要check||底部优质大票
 			} else {
 				setQxRes(newOne, pool, true, true);
@@ -195,6 +195,55 @@ public class QibaoService {
 	}
 
 	private void szx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer szx) {
+		szx1(date, newOne, pool, isSamll, szx);
+		szx2(date, newOne, pool);
+	}
+
+	/** 特别处理:最强逻辑十字星 */
+	private void szx2(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool) {
+		// 人工,大宗,大票定增,做小做底+业绩不错
+		if (newOne.getPls() == 1 || newOne.getShooting1() == 1 || newOne.getShooting2() == 1
+				|| (newOne.getShooting7() == 1 && TagUtil.isFinPerfect(newOne))) {
+
+			List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0,
+					date, EsQueryPageUtil.queryPage30, SortOrder.DESC);
+			// 起爆点：中阳线,第二天十字星或者小影线
+			// 1. 第一天,,第二天十字星或者小影线
+			// 2.前5天涨幅低于2%
+			TradeHistInfoDaliy d2tian = list.get(0);
+			TradeHistInfoDaliy chk = list.get(1);
+			TradeHistInfoDaliy preChk = list.get(2);
+			boolean isOk = false;
+			// 1.放量对比前日
+			if (chk.getVolume() > preChk.getVolume() * 1.45) {
+				// 2.中阳线,3-6个点,不是上影线,实体阳性-不能高开
+				if ((3.0 <= chk.getTodayChangeRate() && chk.getTodayChangeRate() <= 6.5)
+						&& !LineAvgPrice.isShangYingXian(chk)) {// 第一天中阳线,3-6个点
+					// 3.收影线或者10字星
+					if ((d2tian.getOpen() >= d2tian.getClosed()
+							|| CurrencyUitl.cutProfit(d2tian.getOpen(), d2tian.getClosed()) <= 0.99)
+							&& chk.getVolume() > d2tian.getVolume()) {// 第二天缩量,十字星或者小影线
+						boolean preChkOk = true;
+						// 阳线要收实体
+						if (chk.getOpen() > chk.getYesterdayPrice()
+								&& CurrencyUitl.cutProfit(chk.getYesterdayPrice(), chk.getOpen()) > 1.1) {
+							preChkOk = false;
+						}
+						isOk = preChkOk;
+					}
+				}
+			}
+			if (isOk) {
+				newOne.setZyxingt(1);
+			} else {
+				newOne.setZyxingt(0);
+			}
+		} else {
+			newOne.setZyxingt(0);
+		}
+	}
+
+	private void szx1(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer szx) {
 		// 人工或者底部优质票
 		if (newOne.getPls() != 1 && newOne.getShooting7() != 1) {
 			setSzxRes(newOne, pool);

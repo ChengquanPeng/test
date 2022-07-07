@@ -11,7 +11,7 @@ import com.stable.spider.realtime.RealtimeCall;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MonitoringUitl;
-import com.stable.utils.StringUtil;
+import com.stable.utils.TagUtil;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -144,21 +144,20 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 								burstPointCheckTop = qibao.bizPushService.PushS2(
 										codeName + qibao.you + "[7]突破买点:" + qibao.getOrig().getShotPointPrice(),
 										qibao.ex + Constant.HTML_LINE + "行业/概念："
-												+ StringUtil.getGn(conceptService.getCodeConcept(code)));
+												+ TagUtil.getGn(conceptService.getCodeConcept(code)));
 							} else if (!burstPointCheckTopPrew && rt.getHigh() >= qibao.warningYellow) {
 								burstPointCheckTopPrew = qibao.bizPushService.PushS2(
 										codeName + qibao.you + "[7]准备突破买点:" + qibao.getOrig().getShotPointPrice()
 												+ "现价:" + qibao.warningYellow,
 										qibao.ex + Constant.HTML_LINE + "行业/概念："
-												+ StringUtil.getGn(conceptService.getCodeConcept(code)));
+												+ TagUtil.getGn(conceptService.getCodeConcept(code)));
 							}
 						}
 						if (!burstPointCheckSzx && qibao.getOrig().getShotPointPriceSzx() > 0
 								&& rt.getHigh() >= qibao.getOrig().getShotPointPriceSzx()) {
 							burstPointCheckSzx = qibao.bizPushService.PushS2(
 									codeName + qibao.you + " [10]突破买点:" + qibao.getOrig().getShotPointPriceSzx(),
-									Constant.HTML_LINE + "行业/概念："
-											+ StringUtil.getGn(conceptService.getCodeConcept(code)));
+									Constant.HTML_LINE + "行业/概念：" + TagUtil.getGn(conceptService.getCodeConcept(code)));
 						}
 
 //						if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()

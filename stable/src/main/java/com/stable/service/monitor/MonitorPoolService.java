@@ -46,7 +46,7 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.MonitoringUitl;
-import com.stable.utils.StringUtil;
+import com.stable.utils.TagUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.BonusHist;
 import com.stable.vo.bus.CodeBaseModel2;
@@ -672,7 +672,7 @@ public class MonitorPoolService {
 						try {
 							CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(d.getCode());
 							String yz = stockBasicService.getCodeName2(cp.getCode());
-							yz = StringUtil.getTag(cbm) + yz;
+							yz = TagUtil.getTag(cbm) + yz;
 
 							String line = null;
 

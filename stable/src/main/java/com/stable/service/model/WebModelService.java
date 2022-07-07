@@ -38,6 +38,7 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.RedisUtil;
+import com.stable.utils.TagUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.ReducingHoldingSharesStat;
 import com.stable.vo.bus.CodeBaseModel2;
@@ -90,40 +91,6 @@ public class WebModelService {
 
 	public CodeBaseModelResp getLastOneByCodeResp(String code, boolean isMyid) {
 		return getModelResp(false, getLastOneByCode2(code), isMyid);
-	}
-
-	public String getSystemPoint(CodeBaseModel2 dh, String splitor) {
-		String s = "";
-		// --中长--
-		if (dh.getShooting7() > 0) {
-			s += "底部优质小票" + splitor;
-		} else if (dh.getShooting9() > 0) {
-			s += "底部小票" + splitor;
-		}
-		if (dh.getShooting2() > 0) {
-			s += "底部大票定增-涨停吸筹?" + splitor;
-		}
-		if (dh.getShooting1() > 0) {
-			s += "底部小票大宗-占流通筹码超5%" + splitor;
-		}
-		if (dh.getShooting6() > 0) {
-			s += "底部小票减持" + splitor;
-		}
-		if (dh.getShooting8() > 0) {
-			s += "底部小票定增-" + dh.getZfjjupStable() + "年未涨" + splitor;
-		}
-		if (dh.getShooting4() > 0) {
-			s += "底部股东人数大幅减少" + dh.getHolderNum() + "%" + splitor;
-		}
-		// --短线--
-		if (dh.getShooting3() > 0) {
-			s += "底部融资余额飙升-确认是主力在融资买入?(短线1)" + splitor;
-		}
-		if (dh.getShooting5() > 0) {
-			s += "股价极速拉升:妖股?龙抬头?(短线2)" + splitor;
-		}
-
-		return s;
 	}
 
 	private CodeBaseModelResp getModelResp(boolean trymsg, CodeBaseModel2 dh, boolean isMyid) {
@@ -213,7 +180,7 @@ public class WebModelService {
 		StringBuffer sb5 = new StringBuffer();
 
 		sb5.append("<font color='red'>");
-		sb5.append(this.getSystemPoint(dh, Constant.HTML_LINE));
+		sb5.append(TagUtil.getSystemPoint(dh, Constant.HTML_LINE));
 		sb5.append("</font>");
 
 		if (dh.getCompnayType() == 1) {
@@ -690,6 +657,9 @@ public class WebModelService {
 		}
 		if (mr.getZyxing() == 1) {// 中阳带星
 			bqb.must(QueryBuilders.rangeQuery("zyxing").gte(1));
+		}
+		if (mr.getZyxingt() == 1) {// 中阳带星
+			bqb.must(QueryBuilders.matchPhraseQuery("zyxingt", 1));
 		}
 
 		if (StringUtils.isNotBlank(mr.getZfStatus())) {

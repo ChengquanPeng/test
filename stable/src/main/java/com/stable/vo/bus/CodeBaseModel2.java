@@ -18,9 +18,9 @@ import lombok.ToString;
 public class CodeBaseModel2 extends EsBase {
 	private static final long serialVersionUID = 1L;
 	@Field(type = FieldType.Integer)
-	private int shooting1 = 0;// 行情指标1：小票，底部大宗大额定增超流动5%
+	private int shooting1 = 0;// 行情指标1：小票，底部大宗超流动5%
 	@Field(type = FieldType.Integer)
-	private int shooting2 = 0;// 行情指标2：大票，底部增发超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停。
+	private int shooting2 = 0;// 行情指标2：大票，底部定增超过50亿（越大越好），且证监会通过-之前有明显底部拿筹痕迹-涨停。
 	@Field(type = FieldType.Integer)
 	private int shooting3 = 0;// 行情指标3：融资票
 	@Field(type = FieldType.Integer)
@@ -62,6 +62,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int dibuQixing2 = 0;// 旗形2
 	@Field(type = FieldType.Long)
 	private int zyxing = 0;// 中阳带星
+	@Field(type = FieldType.Integer)
+	private int zyxingt = 0;// 中阳带星(T)
 
 	@Field(type = FieldType.Text)
 	private String jsHist;// 技术面历史

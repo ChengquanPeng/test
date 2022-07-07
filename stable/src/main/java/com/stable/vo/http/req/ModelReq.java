@@ -66,6 +66,7 @@ public class ModelReq {
 
 	int qb = 0;
 	int zyxing = 0;// 中阳带星
+	int zyxingt = 0;// 中阳带星
 	int dibuqixing = 0;
 	int dibuqixing2 = 0;
 }
