@@ -514,7 +514,7 @@ public class CodeModelService {
 		newOne.setZfPrice(0.0);
 		ZengFa last = chipsZfService.getLastZengFa(newOne.getCode());
 		// start 一年以前
-		if (chipsZfService.isZfDateOk(last, pre1Year)) {
+		if (chipsZfService.isZfDateOk(last, pre3Year)) {
 			newOne.setZfStatus(last.getStatus());
 			newOne.setZfStatusDesc(last.getStatusDesc());
 			newOne.setZfYjAmt(last.getYjamt());
