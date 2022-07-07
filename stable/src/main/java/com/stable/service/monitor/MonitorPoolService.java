@@ -46,6 +46,7 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.MonitoringUitl;
+import com.stable.utils.StringUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.BonusHist;
 import com.stable.vo.bus.CodeBaseModel2;
@@ -671,15 +672,7 @@ public class MonitorPoolService {
 						try {
 							CodeBaseModel2 cbm = modelWebService.getLastOneByCode2(d.getCode());
 							String yz = stockBasicService.getCodeName2(cp.getCode());
-							if (cbm.getShooting7() > 0) {
-								yz = "[优]" + yz;
-							}
-							if (cbm.getShooting11() > 0) {
-								yz += "[大]" + yz;
-							}
-							if (cbm.getFinDbl() > 0 || (cbm.getFinOK() > 0 && cbm.getFinanceInc() > 0)) {
-								yz += "[绩]" + yz;
-							}
+							yz = StringUtil.getTag(cbm) + yz;
 
 							String line = null;
 

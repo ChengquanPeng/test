@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.CodeConcept;
 
 public class StringUtil {
@@ -50,5 +51,21 @@ public class StringUtil {
 			}
 		}
 		return sb.toString();
+	}
+
+	public static String getTag(CodeBaseModel2 cbm) {
+		String you = "";
+		if (cbm.getShooting7() > 0) {
+			you = "[优]";
+		} else {
+			you = "[普]";
+		}
+		if (cbm.getShooting11() > 0) {
+			you += "[大]" + you;
+		}
+		if (cbm.getFinDbl() > 0 || (cbm.getFinOK() > 0 && cbm.getFinanceInc() > 0)) {
+			you += "[绩]" + you;
+		}
+		return you;
 	}
 }

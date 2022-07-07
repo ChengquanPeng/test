@@ -6,6 +6,7 @@ import com.stable.constant.Constant;
 import com.stable.enums.MonitorType;
 import com.stable.service.biz.BizPushService;
 import com.stable.utils.CurrencyUitl;
+import com.stable.utils.StringUtil;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.resp.CodeBaseModelResp;
@@ -33,15 +34,7 @@ public class RtmVo {
 		}
 //		msgt += " " + cp.getMsg();
 		msg = msgt;
-		if (cbm.getShooting7() > 0) {
-			you = "[优]";
-		}
-		if (cbm.getShooting11() > 0) {
-			you += "[大]" + you;
-		}
-		if (cbm.getFinDbl() > 0 || (cbm.getFinOK() > 0 && cbm.getFinanceInc() > 0)) {
-			you += "[绩]" + you;
-		}
+		you = StringUtil.getTag(cbm);
 		if (StringUtils.isNotBlank(cbm.getQixingStr())) {
 			ex = cbm.getQixingStr();
 		}

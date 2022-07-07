@@ -73,9 +73,31 @@ public class RealtimeMonitoringService {
 		}
 
 		try {
+
+			HashMap<String, List<RtmVo>> allmap = new HashMap<String, List<RtmVo>>();
+			HashMap<String, RtmVo> qibaomap = new HashMap<String, RtmVo>();
+			// 起爆点监听
+			Set<MonitorPoolTemp> tl2 = monitorPoolService.getMyQibao();
+			if (tl2 != null) {
+				UserInfo my = new UserInfo();
+				my.setId(Constant.MY_ID);
+				for (MonitorPoolTemp t : tl2) {
+					List<RtmVo> ml = allmap.get(t.getCode());
+					if (ml == null) {
+						ml = new LinkedList<RtmVo>();
+					}
+
+					RtmVo rv = new RtmVo(t,
+							modelWebService.getLastOneByCodeResp(t.getCode(), t.getUserId() == Constant.MY_ID));
+					rv.setServiceAndPrew(bizPushService);
+					rv.setUser(my);
+					ml.add(rv);
+					allmap.put(t.getCode(), ml);
+					qibaomap.put(t.getCode(), rv);
+				}
+			}
 			// 获取监听列表-常规
 			List<UserInfo> ulist = userService.getUserListForMonitorS1();
-			HashMap<String, List<RtmVo>> allmap = new HashMap<String, List<RtmVo>>();
 			for (UserInfo u : ulist) {
 				List<MonitorPoolTemp> tl = monitorPoolService.getPoolListForMonitor(u.getId(), 1, 0, getMonisort1());
 				if (tl != null) {
@@ -89,31 +111,16 @@ public class RealtimeMonitoringService {
 						if (ml == null) {
 							ml = new LinkedList<RtmVo>();
 						}
-						RtmVo rv = new RtmVo(t,
-								modelWebService.getLastOneByCodeResp(t.getCode(), t.getUserId() == Constant.MY_ID));
-						rv.setUser(u);
-						ml.add(rv);// code对应的每个人
-						allmap.put(t.getCode(), ml);
+						// 不是我的监听,或者是我的监听但是不存在
+						if (u.getId() != Constant.MY_ID
+								|| (u.getId() == Constant.MY_ID && !qibaomap.containsKey(t.getCode()))) {
+							RtmVo rv = new RtmVo(t,
+									modelWebService.getLastOneByCodeResp(t.getCode(), t.getUserId() == Constant.MY_ID));
+							rv.setUser(u);
+							ml.add(rv);// code对应的每个人
+							allmap.put(t.getCode(), ml);
+						}
 					}
-				}
-			}
-			// 起爆点监听
-			Set<MonitorPoolTemp> tl = monitorPoolService.getMyQibao();
-			if (tl != null) {
-				UserInfo my = new UserInfo();
-				my.setId(Constant.MY_ID);
-				for (MonitorPoolTemp t : tl) {
-					List<RtmVo> ml = allmap.get(t.getCode());
-					if (ml == null) {
-						ml = new LinkedList<RtmVo>();
-					}
-
-					RtmVo rv = new RtmVo(t,
-							modelWebService.getLastOneByCodeResp(t.getCode(), t.getUserId() == Constant.MY_ID));
-					rv.setServiceAndPrew(bizPushService);
-					rv.setUser(my);
-					ml.add(rv);
-					allmap.put(t.getCode(), ml);
 				}
 			}
 

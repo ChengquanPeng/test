@@ -291,7 +291,7 @@ public class CodeModelKLineService {
 				sb.append("<td>").append(sbsb.getName()).append("</td>");// 简称
 				sb.append("<td>").append(getQif(p1)).append("</td>");//
 				sb.append("<td>").append(p1.getQixingStr()).append("</td>");//
-				sb.append("<td>").append(p1.getShooting7() == 1 ? "优" : "普").append("</td>");//
+				sb.append("<td>").append(StringUtil.getTag(p1)).append("</td>");//
 				sb.append("<td>").append(sbsb.getThsIndustry()).append("|")
 						.append(StringUtil.getGn(conceptService.getCodeConcept(code))).append("</td>");// CD2
 				sb.append("<td>").append("").append("</td>");// CD3

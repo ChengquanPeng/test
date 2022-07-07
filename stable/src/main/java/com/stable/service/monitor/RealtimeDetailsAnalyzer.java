@@ -143,20 +143,22 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 							if (rt.getHigh() >= qibao.getOrig().getShotPointPrice()) {
 								burstPointCheckTop = qibao.bizPushService.PushS2(
 										codeName + qibao.you + "[7]突破买点:" + qibao.getOrig().getShotPointPrice(),
-										qibao.ex + Constant.HTML_LINE
+										qibao.ex + Constant.HTML_LINE + "行业/概念："
 												+ StringUtil.getGn(conceptService.getCodeConcept(code)));
 							} else if (!burstPointCheckTopPrew && rt.getHigh() >= qibao.warningYellow) {
 								burstPointCheckTopPrew = qibao.bizPushService.PushS2(
 										codeName + qibao.you + "[7]准备突破买点:" + qibao.getOrig().getShotPointPrice()
 												+ "现价:" + qibao.warningYellow,
-										qibao.ex + Constant.HTML_LINE
+										qibao.ex + Constant.HTML_LINE + "行业/概念："
 												+ StringUtil.getGn(conceptService.getCodeConcept(code)));
 							}
 						}
 						if (!burstPointCheckSzx && qibao.getOrig().getShotPointPriceSzx() > 0
 								&& rt.getHigh() >= qibao.getOrig().getShotPointPriceSzx()) {
 							burstPointCheckSzx = qibao.bizPushService.PushS2(
-									codeName + qibao.you + " [10]突破买点:" + qibao.getOrig().getShotPointPriceSzx(), " ");
+									codeName + qibao.you + " [10]突破买点:" + qibao.getOrig().getShotPointPriceSzx(),
+									Constant.HTML_LINE + "行业/概念："
+											+ StringUtil.getGn(conceptService.getCodeConcept(code)));
 						}
 
 //						if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
