@@ -118,11 +118,9 @@ public class CodeModelKLineService {
 		StringBuffer qx = new StringBuffer();
 		StringBuffer szx = new StringBuffer();
 
-		List<CodeBaseModel2> genList = new LinkedList<CodeBaseModel2>();
-
 		for (StockBaseInfo s : codelist) {
 			try {
-				this.processingByCode(s, poolMap, poolList, listLast, histMap, qx, szx, genList);
+				this.processingByCode(s, poolMap, poolList, listLast, histMap, qx, szx);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -152,8 +150,7 @@ public class CodeModelKLineService {
 	private int pre4Year = 0;// 四年以前
 
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
-			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, StringBuffer qx, StringBuffer szx,
-			List<CodeBaseModel2> genList) {
+			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, StringBuffer qx, StringBuffer szx) {
 		String code = s.getCode();
 		// 监听池
 		MonitorPoolTemp pool = this.codeModelService.getPool(code, poolMap, poolList);
@@ -218,10 +215,6 @@ public class CodeModelKLineService {
 		sort0Service.attackAndW(newOne, tradeDate);
 		// 起爆点
 		qibaoService.qibao(tradeDate, newOne, pool, isSamll, qx, szx);
-
-		if (newOne.getQb() == 1) {
-			genList.add(newOne);
-		}
 	}
 
 	private void year1(CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade) {

@@ -56,6 +56,7 @@ public class PlateService {
 					&& !"885869|885582|885905|885907|885906".contains(cp.getAliasCode2())) {
 				ModelReq mr = new ModelReq();
 				mr.setConceptId(cp.getAliasCode2());
+				mr.setPls(-1);
 				List<CodeBaseModel2> listr = webModelService.getList(mr, EsQueryPageUtil.queryPage9999);
 				if (listr != null && listr.size() >= 5) {
 					int ck = 0;
@@ -96,13 +97,10 @@ public class PlateService {
 		arSortRd(res);
 		printHtml(res, htmlname2);
 
-		List<CodeBaseModel2> genList = new LinkedList<CodeBaseModel2>();
-		List<CodeBaseModel2> listr2 = webModelService.getList(new ModelReq(), EsQueryPageUtil.queryPage9999);
-		for (CodeBaseModel2 cm : listr2) {
-			if (cm.getQb() == 1) {
-				genList.add(cm);
-			}
-		}
+		ModelReq mr = new ModelReq();
+		mr.setQb(1);
+		mr.setPls(-1);
+		List<CodeBaseModel2> genList = webModelService.getList(mr, EsQueryPageUtil.queryPage9999);
 		codeModelKLineService.printKlHtml(genList);
 	}
 
