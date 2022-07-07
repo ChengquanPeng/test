@@ -74,26 +74,16 @@ public class RealtimeMonitoringService {
 
 		try {
 
-			HashMap<String, List<RtmVo>> allmap = new HashMap<String, List<RtmVo>>();
-			HashMap<String, RtmVo> qibaomap = new HashMap<String, RtmVo>();
+			HashMap<String, RtmMoniGbl> allmap = new HashMap<String, RtmMoniGbl>();
 			// 起爆点监听
 			Set<MonitorPoolTemp> tl2 = monitorPoolService.getMyQibao();
 			if (tl2 != null) {
 				UserInfo my = new UserInfo();
 				my.setId(Constant.MY_ID);
 				for (MonitorPoolTemp t : tl2) {
-					List<RtmVo> ml = allmap.get(t.getCode());
-					if (ml == null) {
-						ml = new LinkedList<RtmVo>();
-					}
-
-					RtmVo rv = new RtmVo(t,
-							modelWebService.getLastOneByCodeResp(t.getCode(), t.getUserId() == Constant.MY_ID));
-					rv.setServiceAndPrew(bizPushService);
-					rv.setUser(my);
-					ml.add(rv);
-					allmap.put(t.getCode(), ml);
-					qibaomap.put(t.getCode(), rv);
+					RtmMoniGbl rmt = new RtmMoniGbl(modelWebService.getLastOneByCodeResp(t.getCode(), true));
+					rmt.setServiceAndPrew(bizPushService, t);
+					allmap.put(t.getCode(), rmt);
 				}
 			}
 			// 获取监听列表-常规
@@ -107,19 +97,14 @@ public class RealtimeMonitoringService {
 							log.info("{} {} 没有在线价格监听", t.getUserId(), t.getCode());
 							continue;
 						}
-						List<RtmVo> ml = allmap.get(t.getCode());
-						if (ml == null) {
-							ml = new LinkedList<RtmVo>();
-						}
-						// 不是我的监听,或者是我的监听但是不存在
-						if (u.getId() != Constant.MY_ID
-								|| (u.getId() == Constant.MY_ID && !qibaomap.containsKey(t.getCode()))) {
-							RtmVo rv = new RtmVo(t,
+						RtmMoniGbl rmt = allmap.get(t.getCode());
+						if (rmt == null) {
+							rmt = new RtmMoniGbl(
 									modelWebService.getLastOneByCodeResp(t.getCode(), t.getUserId() == Constant.MY_ID));
-							rv.setUser(u);
-							ml.add(rv);// code对应的每个人
-							allmap.put(t.getCode(), ml);
+							allmap.put(t.getCode(), rmt);
 						}
+						RtmMoniUser ru = new RtmMoniUser(t);
+						rmt.getListu().add(ru);
 					}
 				}
 			}

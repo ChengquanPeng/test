@@ -26,9 +26,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private String codeName;
 	private boolean isRunning = true;
 	private String today = DateUtil.getTodayYYYYMMDD();
-	public List<RtmVo> cps;
+	RtmMoniGbl rtm;
 	private boolean chkCodeClosed = false;
-	private RtmVo qibao;
 	private double yearHigh1;
 
 	private boolean burstPointCheckTopPrew = false;// 突破前1%
@@ -39,19 +38,19 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		isRunning = false;
 	}
 
-	private String getUsers(List<RtmVo> t) {
+	private String getUsers(List<RtmMoniUser> listu) {
 		StringBuffer sb = new StringBuffer();
-		for (RtmVo r : t) {
+		for (RtmMoniUser r : listu) {
 			sb.append(r.getUser().getId()).append(",");
 		}
 		return sb.toString();
 	}
 
-	public int init(String code, List<RtmVo> t, String codeName, double yh, ConceptService c) {
-		log.info(code + ":" + getUsers(t));
+	public int init(String code, RtmMoniGbl rtm, String codeName, double yh, ConceptService c) {
+		log.info(code + ":" + getUsers(rtm.getListu()));
 		this.code = code;
 		this.codeName = codeName;
-		this.cps = t;
+		this.rtm = rtm;
 		RealTime srt = RealtimeCall.get(code);
 		if (srt.getOpen() == 0.0 && srt.getBuy1() == 0.0 && srt.getSell1() == 0.0) {
 			log.info("{}  SINA 今日疑似停牌或者可能没有集合竞价", codeName);
@@ -62,12 +61,15 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		return 1;
 	}
 
+	private String getBaseInfo() {
+		return Constant.HTML_LINE + Constant.HTML_LINE + "行业/概念：" + TagUtil.getGn(conceptService.getCodeConcept(code))
+				+ Constant.HTML_LINE + Constant.HTML_LINE + "基础信息：" + rtm.getBase().getZfjjInfo()// -
+				+ Constant.HTML_LINE + Constant.HTML_LINE + "避雷区：" + rtm.getBase().getBaseInfo() // -
+				+ Constant.HTML_LINE + Constant.HTML_LINE + "其他：" + rtm.getBase().getTagInfo();
+	}
+
 	public void run() {
-		for (RtmVo rv : cps) {
-			if (rv.getBizPushService() != null) {
-				qibao = rv;
-			}
-		}
+		boolean isQibao = (rtm.getBizPushService() != null);
 		RealTime srt = null;
 		if (chkCodeClosed) {// 重新检测停牌
 			try {
@@ -78,8 +80,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			srt = RealtimeCall.get(code);
 			if (srt.getOpen() == 0.0) {
 				log.info("SINA 今日停牌,{}", codeName);
-				for (RtmVo rv : cps) {
-					MsgPushServer.pushSystemT1(codeName + "今日停牌", rv.getMsg(), rv.getUser());
+				for (RtmMoniUser r : rtm.getListu()) {
+					MsgPushServer.pushSystemT1(codeName + "今日停牌", rtm.getMsg(r.getOrig()), r.getUser());
 				}
 				return;
 			}
@@ -90,16 +92,16 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		long d1300 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(date);
 		// long d1450 = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(
 		// DateUtil.parseDate(today + "145000", DateUtil.YYYY_MM_DD_HH_MM_SS_NO_SPIT));
-		if (qibao != null) {
+		if (isQibao) {
 			WAIT_MIN = ONE_MIN;// 起爆一分钟一次
 			if (srt == null) {
 				srt = RealtimeCall.get(code);
 			}
 			double today = CurrencyUitl.topPrice(srt.getYesterday(), false);// 今天涨停价格
-			if (today < qibao.getOrig().getShotPointPrice()) {
-				double wp4 = CurrencyUitl.roundHalfUp((qibao.getOrig().getShotPointPrice() * 0.94));// 起爆点的-4%
-				if (wp4 <= today && today < qibao.getOrig().getShotPointPrice()) {// 涨停价+2%触及起爆点时，就提前4%预警
-					qibao.warningYellow = wp4;
+			if (today < rtm.getOrig().getShotPointPrice()) {
+				double wp4 = CurrencyUitl.roundHalfUp((rtm.getOrig().getShotPointPrice() * 0.94));// 起爆点的-4%
+				if (wp4 <= today && today < rtm.getOrig().getShotPointPrice()) {// 涨停价+2%触及起爆点时，就提前4%预警
+					rtm.warningYellow = wp4;
 				}
 			}
 		}
@@ -117,60 +119,58 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				}
 
 				RealTime rt = RealtimeCall.get(code);
-				for (RtmVo rv : cps) {
+
+				// 起爆点
+				if (isQibao) {
+					if (!burstPointCheckTop && rtm.getOrig().getShotPointPrice() > 0) {
+						if (rt.getHigh() >= rtm.getOrig().getShotPointPrice()) {
+							burstPointCheckTop = rtm.bizPushService.PushS2(
+									codeName + rtm.you + "[7]突破买点:" + rtm.getOrig().getShotPointPrice(), getBaseInfo());
+						} else if (!burstPointCheckTopPrew && rt.getHigh() >= rtm.warningYellow) {
+							burstPointCheckTopPrew = rtm.bizPushService.PushS2(codeName + rtm.you + "[7]准备突破买点:"
+									+ rtm.getOrig().getShotPointPrice() + "现价:" + rtm.warningYellow, getBaseInfo());
+						}
+					}
+					if (!burstPointCheckSzx && rtm.getOrig().getShotPointPriceSzx() > 0
+							&& rt.getHigh() >= rtm.getOrig().getShotPointPriceSzx()) {
+						burstPointCheckSzx = rtm.bizPushService.PushS2(
+								codeName + rtm.you + " [10]突破买点:" + rtm.getOrig().getShotPointPriceSzx(),
+								getBaseInfo());
+					}
+
+//					if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
+//							&& rt.getLow() <= qibao.getOrig().getShotPointPriceLow5()) {
+//						burstPointCheckLow = true;
+//						qibao.bizPushService
+//								.PushS2(codeName + " 接近旗形底部买点[:" + qibao.getOrig().getShotPointPriceLow() + "-"
+//										+ qibao.getOrig().getShotPointPriceLow5() + "]");
+//					}
+				}
+
+				for (RtmMoniUser r : rtm.getListu()) {
 					smsg = "";
 					// 正常价格监听
-					boolean isOk = MonitoringUitl.isOkForRt(rv.getOrig(), rt);
+					boolean isOk = MonitoringUitl.isOkForRt(r.getOrig(), rt);
 					if (isOk) {
-						if (rv.waitSend) {
-							String st = MonitoringUitl.okMsg(rv.getOrig(), rt);
-							smsg = st + "," + rv.getMsg();
-							rv.waitSend = false;
+						if (r.waitSend) {
+							String st = MonitoringUitl.okMsg(r.getOrig(), rt);
+							smsg = st + "," + rtm.getMsg(r.getOrig());
+							r.waitSend = false;
 						}
 					}
 					// 一年新高
-					if (rt.getHigh() > yearHigh1 && !rv.highPriceGot && yearHigh1 > 0) {
+					if (rt.getHigh() > yearHigh1 && !r.highPriceGot && yearHigh1 > 0) {
 						if ("".equals(smsg)) {
-							smsg = " 一年新高! 备注:" + rv.getMsg();
+							smsg = " 一年新高! 备注:" + rtm.getMsg(r.getOrig());
 						} else {
 							smsg += "一年新高! " + smsg;
 						}
-						rv.highPriceGot = true;
+						r.highPriceGot = true;
 					}
-					// 起爆点
-					if (qibao != null) {
-						if (!burstPointCheckTop && qibao.getOrig().getShotPointPrice() > 0) {
-							if (rt.getHigh() >= qibao.getOrig().getShotPointPrice()) {
-								burstPointCheckTop = qibao.bizPushService.PushS2(
-										codeName + qibao.you + "[7]突破买点:" + qibao.getOrig().getShotPointPrice(),
-										qibao.ex + Constant.HTML_LINE + "行业/概念："
-												+ TagUtil.getGn(conceptService.getCodeConcept(code)));
-							} else if (!burstPointCheckTopPrew && rt.getHigh() >= qibao.warningYellow) {
-								burstPointCheckTopPrew = qibao.bizPushService.PushS2(
-										codeName + qibao.you + "[7]准备突破买点:" + qibao.getOrig().getShotPointPrice()
-												+ "现价:" + qibao.warningYellow,
-										qibao.ex + Constant.HTML_LINE + "行业/概念："
-												+ TagUtil.getGn(conceptService.getCodeConcept(code)));
-							}
-						}
-						if (!burstPointCheckSzx && qibao.getOrig().getShotPointPriceSzx() > 0
-								&& rt.getHigh() >= qibao.getOrig().getShotPointPriceSzx()) {
-							burstPointCheckSzx = qibao.bizPushService.PushS2(
-									codeName + qibao.you + " [10]突破买点:" + qibao.getOrig().getShotPointPriceSzx(),
-									Constant.HTML_LINE + "行业/概念：" + TagUtil.getGn(conceptService.getCodeConcept(code)));
-						}
 
-//						if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
-//								&& rt.getLow() <= qibao.getOrig().getShotPointPriceLow5()) {
-//							burstPointCheckLow = true;
-//							qibao.bizPushService
-//									.PushS2(codeName + " 接近旗形底部买点[:" + qibao.getOrig().getShotPointPriceLow() + "-"
-//											+ qibao.getOrig().getShotPointPriceLow5() + "]");
-//						}
-					}
 					// 发送
 					if (!smsg.equals("")) {
-						MsgPushServer.pushSystemT1(codeName + " " + smsg, "", rv.getUser());
+						MsgPushServer.pushSystemT1(codeName + " " + smsg, "", r.getUser());
 					}
 				}
 

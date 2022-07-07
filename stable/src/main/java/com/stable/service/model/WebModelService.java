@@ -315,23 +315,25 @@ public class WebModelService {
 			sb5.append("1年内减持:").append(rhss.getT()).append("次,").append(rhss.getYg()).append("亿股,流通占比:")
 					.append(dh.getReducZb()).append("%");
 		}
+		resp.setZfjjInfo(sb5.toString());
 
+		StringBuffer sb6 = new StringBuffer();
 		// 个人人工
 		if (isMyid) {
-			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
+			sb6.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 			// 是否确定
 			if (dh.getPls() == 0) {
-				sb5.append("人工: 未确定");
+				sb6.append("人工: 未确定");
 			} else if (dh.getPls() == 1) {
-				sb5.append("人工: 已确定");
+				sb6.append("人工: 已确定");
 			} else if (dh.getPls() == 2) {
-				sb5.append("人工: 已排除");
+				sb6.append("人工: 已排除");
 			}
 			if (dh.getMoni() > 0) {
-				sb5.append("        ,已监听:").append(MonitorType.getCodeName(dh.getMoni()));
+				sb6.append("        ,已监听:").append(MonitorType.getCodeName(dh.getMoni()));
 			}
+			resp.setRengong(sb6.toString());
 		}
-		resp.setZfjjInfo(sb5.toString());
 		return resp;
 	}
 
@@ -378,6 +380,9 @@ public class WebModelService {
 					dh.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, dh.getCode()).getRemark());
 				}
 				CodeBaseModelResp resp = getModelResp(mr.isTrymsg(), dh, isMyid);
+				if (isMyid) {
+					resp.setZfjjInfo(resp.getZfjjInfo() + resp.getRengong());
+				}
 //				resp.setBuyRea(ToolsUtil.stringInsertByInterval(resp.getBuyRea(), Constant.HTML_LINE, 20));
 				res.add(resp);
 			}
