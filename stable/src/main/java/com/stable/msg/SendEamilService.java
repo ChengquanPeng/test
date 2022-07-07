@@ -14,7 +14,10 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.Constant;
 import com.stable.utils.DateUtil;
 
+import lombok.extern.log4j.Log4j2;
+
 @Service
+@Log4j2
 public class SendEamilService {
 
 	@Autowired
@@ -27,6 +30,11 @@ public class SendEamilService {
 
 	public boolean pushSystemT1(String title, String content, String... toId) {
 		try {
+			for (String u : toId) {
+				log.info(u);
+			}
+			log.info(title);
+			log.info(content);
 			SimpleMailMessage message = new SimpleMailMessage();
 			message.setText(content + " " + WxPushUtil.env + DateUtil.getTodayYYYYMMDDHHMMSS());
 			message.setSubject(title);
@@ -44,6 +52,11 @@ public class SendEamilService {
 		MimeMessage mailMessage = javaMailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(mailMessage);// 需要借助Helper类
 		try {
+			for (String u : toId) {
+				log.info(u);
+			}
+			log.info(title);
+			log.info(content);
 			helper.setSubject(title);
 			helper.setBcc(toId);
 			helper.setFrom(fromId);

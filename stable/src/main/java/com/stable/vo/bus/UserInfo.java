@@ -52,14 +52,13 @@ public class UserInfo extends EsBase {
 	private String lastLogin;// 最后登录
 
 	public boolean getPushWay() {
-		if (StringUtils.isNotBlank(wxpush)) {
+		if (id == Constant.MY_ID) {
+			wxpush = MsgPushServer.email.myId;
+			return true;
+		} else if (StringUtils.isNotBlank(wxpush)) {
 			return false;
 		} else {
-			if (id == Constant.MY_ID) {
-				wxpush = MsgPushServer.email.myId;
-			} else {
-				wxpush = id + MsgPushServer.qqmail;
-			}
+			wxpush = id + MsgPushServer.qqmail;
 			return true;
 		}
 	}

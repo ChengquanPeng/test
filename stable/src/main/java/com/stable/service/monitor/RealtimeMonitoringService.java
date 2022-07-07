@@ -97,6 +97,8 @@ public class RealtimeMonitoringService {
 			// 起爆点监听
 			Set<MonitorPoolTemp> tl = monitorPoolService.getMyQibao();
 			if (tl != null) {
+				UserInfo my = new UserInfo();
+				my.setId(Constant.MY_ID);
 				for (MonitorPoolTemp t : tl) {
 					List<RtmVo> ml = allmap.get(t.getCode());
 					if (ml == null) {
@@ -106,6 +108,7 @@ public class RealtimeMonitoringService {
 					RtmVo rv = new RtmVo(t,
 							modelWebService.getLastOneByCodeResp(t.getCode(), t.getUserId() == Constant.MY_ID));
 					rv.setServiceAndPrew(bizPushService);
+					rv.setUser(my);
 					ml.add(rv);
 					allmap.put(t.getCode(), ml);
 				}
@@ -117,7 +120,6 @@ public class RealtimeMonitoringService {
 				// ====启动监听线程====
 				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
 				for (String code : allmap.keySet()) {
-					log.info(code);
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
 					int r = task.init(code, allmap.get(code), stockBasicService.getCodeName2(code),
 							redisUtil.get(RedisConstant.YEAR_PRICE_ + code, 0.0));

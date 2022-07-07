@@ -35,7 +35,16 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		isRunning = false;
 	}
 
+	private String getUsers(List<RtmVo> t) {
+		StringBuffer sb = new StringBuffer();
+		for (RtmVo r : t) {
+			sb.append(r.getUser().getId()).append(",");
+		}
+		return sb.toString();
+	}
+
 	public int init(String code, List<RtmVo> t, String codeName, double yh) {
+		log.info(code + ":" + getUsers(t));
 		this.code = code;
 		this.codeName = codeName;
 		this.cps = t;
