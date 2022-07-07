@@ -213,6 +213,12 @@ public class CodeModelKLineService {
 		sortModel(newOne, tradeDate);
 		// 攻击形态
 		sort0Service.attackAndW(newOne, tradeDate);
+		// 底部优质大票
+		if (codeModelService.isDibuOKBig(isSamll, newOne)) {
+			newOne.setShooting11(1);
+		} else {
+			newOne.setShooting11(0);
+		}
 		// 起爆点
 		qibaoService.qibao(tradeDate, newOne, pool, isSamll, qx, szx);
 	}
@@ -258,7 +264,7 @@ public class CodeModelKLineService {
 		if (online4Year) {
 			int listdate = Integer.valueOf(listdatestr);
 			newOne.setZfjjup(priceLifeService.noupYear(code, listdate));
-			if (newOne.getZfjjup() >= 2) {
+			if (newOne.getZfjjup() >= 1) {
 				newOne.setZfjjupStable(priceLifeService.noupYearstable(code, listdate));
 			}
 		}

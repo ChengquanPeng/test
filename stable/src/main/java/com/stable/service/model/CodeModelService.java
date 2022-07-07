@@ -374,6 +374,11 @@ public class CodeModelService {
 		return isSmallStock && isDibu(newOne);
 	}
 
+	public boolean isDibuOKBig(boolean isSmallStock, CodeBaseModel2 newOne) {
+		return !isSmallStock && newOne.getZfjjup() >= 1 && newOne.getZfjjupStable() >= 1 && newOne.getFinOK() >= 1
+				&& newOne.getBousOK() >= 1;
+	}
+
 	// 周末计算-至少N年未大涨?
 	private void financeAndBonus(boolean isweekend, boolean online4Year, CodeBaseModel2 newOne, boolean isSmallStock) {
 		// 周末计算-至少N年未大涨?

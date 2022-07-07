@@ -38,7 +38,6 @@ import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
-import com.stable.service.biz.BizPushService;
 import com.stable.service.biz.UserService;
 import com.stable.service.model.WebModelService;
 import com.stable.spider.ths.ThsAnnSpider;
@@ -97,8 +96,6 @@ public class MonitorPoolService {
 	private UserService userService;
 	@Autowired
 	private FinanceService financeService;
-	@Autowired
-	private BizPushService bizPushService;
 	@Autowired
 	private EsStockBaseInfoDao esStockBaseInfoDao;
 
@@ -757,7 +754,7 @@ public class MonitorPoolService {
 					i++;
 				}
 				if (s1.length() > 0) {
-					bizPushService.PushS2("起飞形态列表", s1.toString());
+					MsgPushServer.pushSystemHtmlT2("起飞形态列表", s1.toString());
 				}
 			}
 		}

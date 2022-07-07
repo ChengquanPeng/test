@@ -42,6 +42,7 @@ public class QibaoService {
 //		 000025-20220519
 //		 000017-20220526
 //		 600798-20201113
+//		 600187-002144
 	// 小旗形
 //	 	 000582-20220331
 	// 大旗形
@@ -97,7 +98,7 @@ public class QibaoService {
 
 	private void qx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
 		if (newOne.getPls() == 2 || !codeModelService.isDibuSmall(isSamll, newOne)) {// 排除的和大票大票不用check
-			if (newOne.getPls() == 1) {// 人工的需要check
+			if (newOne.getPls() == 1 || newOne.getShooting11() == 1) {// 人工的需要check||底部优质大票
 			} else {
 				setQxRes(newOne, pool, true, true);
 				return;
