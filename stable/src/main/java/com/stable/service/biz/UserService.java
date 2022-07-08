@@ -1,8 +1,11 @@
 package com.stable.service.biz;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -21,6 +24,7 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.Stype;
 import com.stable.es.dao.base.UserAmtLogDao;
 import com.stable.es.dao.base.UserDao;
+import com.stable.msg.MsgPushServer;
 import com.stable.utils.DateUtil;
 import com.stable.vo.bus.UserAmtLog;
 import com.stable.vo.bus.UserInfo;
@@ -254,6 +258,44 @@ public class UserService {
 		}
 	}
 
+	public synchronized void sendmail(String id, int stype, String titlet, String cenntt) {
+		Set<UserInfo> all = new HashSet<UserInfo>();
+		if (stype == 99) {
+			List<UserInfo> l1 = this.getUserListForMonitorS1();
+			if (l1 != null && l1.size() > 0) {
+				all.addAll(l1);
+			}
+			List<UserInfo> l2 = this.getUserListForMonitorS2();
+			if (l2 != null && l2.size() > 0) {
+				all.addAll(l2);
+			}
+		} else if (stype == 1) {
+			List<UserInfo> l1 = this.getUserListForMonitorS1();
+			if (l1 != null && l1.size() > 0) {
+				all.addAll(l1);
+			}
+		} else if (stype == 2) {
+			List<UserInfo> l2 = this.getUserListForMonitorS2();
+			if (l2 != null && l2.size() > 0) {
+				all.addAll(l2);
+			}
+		}
+		if (StringUtils.isNotBlank(id)) {
+			String[] idss = id.split(",");
+			for (int i = 0; i < idss.length; i++) {
+				UserInfo u = this.getListById(Long.valueOf(idss[i]));
+				if (u != null) {
+					all.add(u);
+				}
+			}
+		}
+		if (all.size() > 0) {
+			for (UserInfo u : all) {
+				MsgPushServer.pushSystemHtmlT2(titlet, cenntt, u);
+			}
+		}
+	}
+
 	private int getExpiredDate(int endDate, int month) {
 		int today = DateUtil.getTodayIntYYYYMMDD();
 		int startdate = today;
@@ -270,20 +312,5 @@ public class UserService {
 			startdate = endDate;
 		}
 		return DateUtil.addDate(startdate, days);
-	}
-
-	/*
-	 * type:服务类型, msg:服务,
-	 */
-	public synchronized void sendMsg(int type, String msg) {
-		if (type == 1) {// 所有在线服务1
-
-		}
-		if (type == 2) {// 所有在线服务2
-
-		}
-		if (type == 9) {// 所有服务
-
-		}
 	}
 }

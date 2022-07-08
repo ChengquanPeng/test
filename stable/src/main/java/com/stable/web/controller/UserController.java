@@ -181,8 +181,25 @@ public class UserController {
 	public ResponseEntity<JsonResult> sendmsg(int type, String msg) {
 		JsonResult r = new JsonResult();
 		try {
-			
+
 			r.setResult(this.modelWebService.pvlist);
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setResult(e.getClass().getName() + ":" + e.getMessage());
+			r.setStatus(JsonResult.ERROR);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * 更新
+	 */
+	@RequestMapping(value = "/user/manul/sendmail")
+	public ResponseEntity<JsonResult> sendmail(String id, int stype, String titlet, String cenntt) {
+		JsonResult r = new JsonResult();
+		try {
+			userService.sendmail(id, stype, titlet, cenntt);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
