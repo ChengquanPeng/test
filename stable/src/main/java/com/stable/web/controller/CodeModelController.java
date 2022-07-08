@@ -101,4 +101,20 @@ public class CodeModelController {
 		}
 		return ResponseEntity.ok(r);
 	}
+
+	/**
+	 * 人工
+	 */
+	@RequestMapping(value = "/rzrqm")
+	public ResponseEntity<JsonResult> rzrqm(ModelManulReq r1) {
+		JsonResult r = new JsonResult();
+		try {
+			modelWebService.rzrqm(r1.getCode(), r1.getTimemonth());
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setStatus(JsonResult.FAIL);
+			r.setResult(e.getMessage());
+		}
+		return ResponseEntity.ok(r);
+	}
 }

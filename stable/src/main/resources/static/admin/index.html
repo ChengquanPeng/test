@@ -395,6 +395,9 @@
 														+ ustr + "'>定增历史</a>";
 												if (row.shooting3 == 1) {
 													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资融券</a>";
+													v += "&nbsp;&nbsp;<a target='_blank' href='/web/admin/rzrqm.html?code="
+															+ row.code
+															+ "'>融资排除</a>";
 												}
 												if (row.tagHighZyChance == 1) {
 													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/gpzy/detail/"+row.code+".html'>股票质押</a>";

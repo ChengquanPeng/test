@@ -486,6 +486,28 @@ public class WebModelService {
 		codeBaseModel2Dao.save(model);
 	}
 
+	public void rzrqm(String code, int timemonth) {
+		int days = 0;
+		if (timemonth == 1) {
+			days = 30;
+		} else if (timemonth == 2) {
+			days = 60;
+		} else if (timemonth == 3) {
+			days = 90;
+		} else if (timemonth == 4) {
+			days = 180;
+		} else if (timemonth == 5) {
+			days = 365;
+		}
+		if (days > 0) {
+			Date now = new Date();
+			int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, days));
+			CodeBaseModel2 model = getLastOneByCode2(code);
+			model.setShooting30(date);
+			codeBaseModel2Dao.save(model);
+		}
+	}
+
 	public List<CodeBaseModel2> getList(ModelReq mr, EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(mr.getCode())) {
