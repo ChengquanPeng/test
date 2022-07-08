@@ -105,7 +105,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				}
 			}
 		}
-		String smsg = null;
+		String title = null;
 		while (isRunning) {
 			try {
 				long now = DateUtil.getTodayYYYYMMDDHHMMSS_NOspit(new Date());
@@ -148,29 +148,29 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				}
 
 				for (RtmMoniUser r : rtm.getListu()) {
-					smsg = "";
+					title = "";
 					// 正常价格监听
 					boolean isOk = MonitoringUitl.isOkForRt(r.getOrig(), rt);
 					if (isOk) {
 						if (r.waitSend) {
 							String st = MonitoringUitl.okMsg(r.getOrig(), rt);
-							smsg = st + "," + rtm.getMsg(r.getOrig());
+							title = st;
 							r.waitSend = false;
 						}
 					}
 					// 一年新高
 					if (rt.getHigh() > yearHigh1 && !r.highPriceGot && yearHigh1 > 0) {
-						if ("".equals(smsg)) {
-							smsg = " 一年新高! 备注:" + rtm.getMsg(r.getOrig());
+						if ("".equals(title)) {
+							title = " 一年新高!";
 						} else {
-							smsg += "一年新高! " + smsg;
+							title += "一年新高! ";
 						}
 						r.highPriceGot = true;
 					}
 
 					// 发送
-					if (!smsg.equals("")) {
-						MsgPushServer.pushSystemT1(codeName + " " + smsg, "", r.getUser());
+					if (!title.equals("")) {
+						MsgPushServer.pushSystemT1(codeName + " " + title, rtm.getMsg(r.getOrig()), r.getUser());
 					}
 				}
 
