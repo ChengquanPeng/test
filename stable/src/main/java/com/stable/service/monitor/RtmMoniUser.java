@@ -12,7 +12,8 @@ public class RtmMoniUser {
 	public boolean waitSend = true;
 	public boolean highPriceGot = false;
 
-	public RtmMoniUser(MonitorPoolTemp cp) {
+	public RtmMoniUser(MonitorPoolTemp cp, UserInfo user) {
 		this.orig = cp;
+		this.user = user;
 	}
 }

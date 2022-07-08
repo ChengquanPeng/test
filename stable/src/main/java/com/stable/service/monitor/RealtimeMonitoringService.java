@@ -103,7 +103,7 @@ public class RealtimeMonitoringService {
 									modelWebService.getLastOneByCodeResp(t.getCode(), t.getUserId() == Constant.MY_ID));
 							allmap.put(t.getCode(), rmt);
 						}
-						RtmMoniUser ru = new RtmMoniUser(t);
+						RtmMoniUser ru = new RtmMoniUser(t, u);
 						rmt.getListu().add(ru);
 					}
 				}
