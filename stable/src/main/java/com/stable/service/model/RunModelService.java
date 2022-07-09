@@ -76,7 +76,6 @@ public class RunModelService {
 		printModelHtml();
 	}
 
-	@javax.annotation.PostConstruct
 	private void printModelHtml() {
 		ModelReq mr = new ModelReq();
 		mr.setQb(1);
@@ -92,6 +91,7 @@ public class RunModelService {
 
 	private void printHtml(List<CodeBaseModel2> qbList, List<CodeBaseModel2> genListTe) {
 		String htmlnamet = "qf.html";
+		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
 		StringBuffer sb = new StringBuffer();
 		// 更新时间
 		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("</div><br/>");
@@ -100,11 +100,13 @@ public class RunModelService {
 		// head
 		sb.append(
 				"<tr><th>序号</th><th>简称-代码</th><th>逻辑模型</th><th>底部类型</th><th>形态</th><th>特征</th><th>买点</th><th>板块概念</th></tr>");
+		fw.writeLine(sb.toString());
+		sb = new StringBuffer();
 		sb.append(this.getHtml(genListTe, true));
+		fw.writeLine(sb.toString());
+		sb = new StringBuffer();
 		sb.append(this.getHtml(qbList, false));
-		// end
-		sb.append("</table>");
-		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
+		sb.append("</table>");// end
 		fw.writeLine(sb.toString());
 		fw.close();
 	}
@@ -122,26 +124,45 @@ public class RunModelService {
 				String code = p1.getCode();
 				MonitorPoolTemp cp = monitorPoolService.getMonitorPoolById(Constant.MY_ID, code);
 				StockBaseInfo sbsb = stockBasicService.getCode(code);
-				sb.append("<tr><td>").append(i + 1).append("</td>");// 序号
-				sb.append("<td>").append(sbsb.getName()).append("<br/>").append(code);
+
+				// 序号
+				sb.append("<tr><td>").append(i + 1).append("</td>");
+
+				// 简称-代码
+				sb.append("<td><a target='_blank' href='/web/code2/" + code + "'>").append(sbsb.getName())
+						.append("<br/>").append(code);
 				if (p1.getPls() == 1) {
-					sb.append("<font color='green'>[人]</font>");
+					sb.append("<font color='red'>[人]</font>");
 				}
-				sb.append("</td>");// 简称-代码
-				sb.append("<td>").append(TagUtil.getSystemPoint(p1, Constant.HTML_LINE)).append("</td>");// 逻辑
+				sb.append("</a></td>");
+				// 逻辑
+				sb.append("<td>").append(TagUtil.getSystemPoint(p1, Constant.HTML_LINE));
+				if (p1.getZfjjup() > 0) {
+					sb.append(p1.getZfjjup());
+					if (p1.getZfjjupStable() > 0) {
+						sb.append("/stable").append(p1.getZfjjupStable());
+					}
+					sb.append("年未大涨");
+				}
+				sb.append("</td>");
+				// 底部类型
 				sb.append("<td>").append(TagUtil.getTag(p1).replaceAll("绩", "<font color='blue'>绩</font>"))
-						.append("</td>");//
+						.append("</td>");
+
+				// 形态
 				if (isTe) {
-					sb.append("<td>中阳十字星-特</td>");//
+					sb.append("<td><font color='blue'>中阳十字星-特</font></td>");//
 				} else {
 					sb.append("<td>").append(TagUtil.getQif(p1)).append("</td>");//
 				}
+				// 特征
 				line2 = p1.getQixingStr();
 				if (line2 != null && line2.contains("大") && line2.contains("上")) {
 					line2 = "<font color='red'>" + line2 + "</font>";
 				}
 				sb.append("<td>").append(line2).append("</td>");//
 
+				// 买点
 				TradeHistInfoDaliy d = null;
 				if (cp.getShotPointPrice() > 0) {
 					d = daliyTradeHistroyService.queryLastfq(code);
@@ -167,7 +188,8 @@ public class RunModelService {
 						}
 					}
 				}
-				sb.append("<td>").append(line).append("</td>");//
+				sb.append("<td>").append(line).append("</td>");
+				// 板块概念
 				sb.append("<td>").append(sbsb.getThsIndustry()).append("|")
 						.append(TagUtil.getGn(conceptService.getCodeConcept(code))).append("</td>");// CD2
 				sb.append("</tr>");

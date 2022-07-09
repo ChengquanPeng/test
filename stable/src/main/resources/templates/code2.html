@@ -1,0 +1,177 @@
+<html>
+<head>
+<title th:text="${code}"></title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<style type="text/css">
+.bor {
+	border: 1px dashed #d8d8d8;
+	font-size: 14px;
+}
+
+.hder {
+	height: 40px;
+	font: bold;
+	font-size: 16px;
+}
+
+trtd {
+	border: 1px dashed #d8d8d8;
+	vertical-align: bottom;
+}
+</style>
+<script type="text/javascript" src="/html/static/addsinaurl.js"></script>
+</head>
+<body>
+	------------------------------------------------------------
+	<br />
+	<div>
+		<b>基本信息：<span th:text="${code}"></span>-<span
+			th:text="${codedetail.codeName}"></b>
+	</div>
+	------------------------------------------------------------
+	<br />
+	<div>
+		控股股东:<span th:text="${codeBasic.holderName}"></span>
+	</div>
+	<div>
+		最终控制人:<span th:text="${codeBasic.finalControl}"></span>
+	</div>
+	<div>
+		同花顺-主营:<span th:text="${codeBasic.thsMainBiz}"></span>
+	</div>
+	<div>
+		同花顺-亮点:<span th:text="${codeBasic.thsLightspot}"></span>
+	</div>
+	<div>
+		公司网站:<a th:href="@{'http://'+${codeBasic.webSite}}" target="_blank">http://<span
+			th:text="${codeBasic.webSite}"></span></a>
+	</div>
+	<div>
+		同花顺板块：<span th:text="${codeBasic.thsIndustry}"></span>&nbsp;&nbsp;&nbsp;&nbsp;概念：<span
+			th:text="${concepts}"></span>
+	</div>
+	<div>
+		分红概况:<span th:text="${fhgk}"></span>
+	</div>
+	<div>
+		增发概况:<span th:text="${zfgk}"></span>
+	</div>
+	<div>
+		<font color='#FF00FF'>曾用名(金字招牌)</font>:<span
+			th:text="${codeBasic.oldName}"></span>
+	</div>
+	<div>
+		<font color='#FF00FF'>违规处理和重大违法退市</font>:<a target="_blank"
+			th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/event.html'}">--></a>
+	</div>
+	<div>
+		<font color='#FF00FF'>项目进度:&nbsp;&nbsp;--></font><a target="_blank"
+			th:href="@{'http://basic.10jqka.com.cn/'+${code}+'/capital.html'}">同花顺</a>
+		&nbsp;&nbsp;--><a target="_blank"
+			th:href="@{'http://f10.eastmoney.com/f10_v2/CapitalOperation.aspx?code='+${dfcfcode}+'#xmjd-0'}">东方财富</a>
+	</div>
+
+	<br />------------------------------------------------------------
+	<br />
+	<b>博弈:</b>
+	<br />------------------------------------------------------------
+	<br />
+	<div th:utext="${gameinfo}"></div>
+	<div id="myurls"></div>
+
+	<br />------------------------------------------------------------
+	<br />
+	<b>基本面分析:</b>
+	<br />------------------------------------------------------------
+	<br />
+	<div th:utext="${codedetail.baseInfo}"></div>
+
+
+	<br />------------------------------------------------------------
+	<br />
+	<b>财务报告：<span th:text="${codedetail.currYear}"></span>-<span
+		th:text="${codedetail.currQuarter}"></span>季度&nbsp;&nbsp;&nbsp;&nbsp;</span></b>
+	<br />------------------------------------------------------------
+	<br />
+	<div>
+		流动资产合计(<span th:text="${sumLasset}"></span>) = 货币资金 (<span
+			th:text="${monetaryFund}"></span>) + 交易性金融资产(<span
+			th:text="${tradeFinassetNotfvtpl}"></span>) + 存货(<span
+			th:text="${inventory}"></span>,净资产占比:<span
+			th:text="${inventoryRatio}"></span>) + 应收账款(<span
+			th:text="${accountrec}"></span>,流动资产占比:<span
+			th:text="${accountrecRatio}"></span>) + 其他
+	</div>
+	<div>
+		流动负债合计(<span th:text="${sumDebtLd}"></span>) = 应付账款 (<span
+			th:text="${accountPay}"></span>)+ 应付利息(<span th:text="${interestPay}"></span>)
+		+ 短期借款(<span th:text="${stborrow}"></span>) + 其他
+	</div>
+	<div>
+		可用资金=货币资金 (<span th:text="${monetaryFund}"></span>) + 交易性金融资产(<span
+			th:text="${tradeFinassetNotfvtpl}"></span>)&nbsp;&nbsp;&nbsp;<br />
+		借款总计=短期借款(<span th:text="${stborrow}"></span>) + 长期借款(<span
+			th:text="${ltborrow}"></span>)
+	</div>
+	<div>
+		净资产(<span th:text="${netAsset}"></span>,商誉<span th:text="${goodWill}"></span>,占比:<span
+			th:text="${goodWillRatioNetAsset}"></span>) = 总资产(<span
+			th:text="${sumAsset}"></span>) - 负债合计(<span th:text="${sumDebt}"></span>)
+		+ (未分配利润<span th:text="${retaineDearning}"></span>) + 其他（公积金等）
+	</div>
+	<br />
+	<div>
+		营业总收入:<span th:text="${yyzsr}"></span> &nbsp;同比:<span
+			th:text="${finance.yyzsrtbzz}"></span>
+	</div>
+	<div>
+		归属净利润:<span th:text="${gsjlr}"></span> &nbsp;同比:<span
+			th:text="${finance.gsjlrtbzz}"></span>
+	</div>
+	<div>
+		扣非净利润:<span th:text="${kfjlr}"></span> &nbsp;同比:<span
+			th:text="${finance.kfjlrtbzz}"></span> --> 经营现金流净额:<span
+			th:text="${jyxjlce}"></span>,应收账款:<span th:text="${accountrec}"></span>
+	</div>
+	<div>
+		业绩快报/预告:<span th:text="${kb}"></span>
+	</div>
+	<div>
+		加权净资产收益率:<span th:text="${finance.jqjzcsyl}"></span>
+	</div>
+	<div>
+		净资产收益率(单季度|ttm):<span th:text="${finance.syldjd}"></span>|<span
+			th:text="${codedetail.sylttm}"></span>
+	</div>
+	<div>
+		资产负债率:<span th:text="${finance.zcfzl}"></span>%
+	</div>
+	<div>
+		每股经营现金流:<span th:text="${finance.mgjyxjl}"></span> -->现金流代表该是企业能不能活下来
+	</div>
+	<div>
+		毛利率:<span th:text="${finance.mll}"></span>
+	</div>
+	<br />
+</body>
+<script type="text/javascript" th:inline="javascript">
+	function getMyURLs() {
+		var myCode = [[${code}]];
+		var ustr = 'admin';
+		var v = "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+myCode+"/event.html#stockpage'>大事提醒</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='/web/chips/reduce/list?code="
+				+ myCode + "'>减持历史</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/dzjy/detail/"+myCode+".html'>大宗</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='/web/comon/zengFa.html?code="
+				+ myCode + "&ustr=" + ustr + "'>定增历史</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+myCode+".html'>融资融券</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='/web/admin/rzrqm.html?code="
+				+ myCode + "'>融资排除</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/gpzy/detail/"+myCode+".html'>股票质押</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='http://data.eastmoney.com/notices/stock/"+myCode+".html'>公告</a>";
+
+		return v;
+	}
+	document.getElementById("myurls").innerHTML = getMyURLs();
+</script>
+</html>

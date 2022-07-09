@@ -71,7 +71,7 @@ public class WebModelService {
 	private RedisUtil redisUtil;
 	public String pvlist = "";
 
-	private long WAN = CurrencyUitl.WAN_N.longValue();
+	public static long WAN = CurrencyUitl.WAN_N.longValue();
 
 	public CodeBaseModel2 getLastOneByCode2(String code) {
 		log.info("getLastOneByCode:{}", code);
@@ -176,146 +176,8 @@ public class WebModelService {
 		}
 		resp.setTagInfo(tag.toString());
 
-		// 博弈-行情指标
-		StringBuffer sb5 = new StringBuffer();
-
-		sb5.append("<font color='red'>");
-		sb5.append(TagUtil.getSystemPoint(dh, Constant.HTML_LINE));
-		sb5.append("</font>");
-
-		if (dh.getCompnayType() == 1) {
-			sb5.append("<font color='green'>");
-			sb5.append("国资,");
-			sb5.append("</font>");
-		}
-		// 基本面-筹码
-		sb5.append("流通:").append(dh.getMkv()).append("亿,");
-		sb5.append("除5%活筹:").append(dh.getActMkv()).append("亿,");
-		sb5.append("前3大股东:").append(dh.getHolderNumT3()).append("%");
-		sb5.append(",股东人数:").append(CurrencyUitl.covertToString(dh.getLastNum()));
-		sb5.append(",人均持股:").append(CurrencyUitl.covertToString(dh.getAvgNum()));
-		sb5.append(",变化:").append(dh.getHolderNum()).append("%");
-		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
-		// 行情-财务
-		if (dh.getZfjjup() > 0 || dh.getBousOK() > 0 || dh.getFinOK() > 0) {
-			if (dh.getZfjjup() > 0) {
-				sb5.append(dh.getZfjjup());
-				if (dh.getZfjjupStable() > 0) {
-					sb5.append("<font color='red'>/stable").append(dh.getZfjjupStable()).append("</font>");
-				}
-				sb5.append("年未大涨");
-			}
-			if (dh.getBousOK() > 0) {
-				sb5.append(",连续" + dh.getBousOK() + "年分红");
-			}
-			if (dh.getFinDbl() > 0) {
-				sb5.append("<font color='red'>,业绩暴涨</font>");
-			}
-			if (dh.getFinOK() > 0) {
-				sb5.append(",连续" + dh.getFinOK() + "年业绩盈利");
-				if (dh.getFinanceInc() > 0) {
-					sb5.append(",连续" + dh.getFinanceInc() + "年增长");
-				}
-				sb5.append(",市盈率ttm:").append(dh.getPettm());
-			}
-			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
-		}
-		// 增发
-		if (dh.getZfStatus() == 1 || dh.getZfStatus() == 2 || dh.getZflastOkDate() > 0 || dh.getZfjj() == 1) {
-			if (dh.getZfStatus() == 1 || dh.getZfStatus() == 2) {
-				if (dh.getZfStatus() == 1) {
-					sb5.append("<font color='red'>");
-				} else {
-					sb5.append("<font color='green'>");
-				}
-				sb5.append("增发进度" + ":" + dh.getZfStatusDesc());
-				sb5.append("</font>");
-
-				if (dh.getZfStatus() == 1) {
-					if (dh.getZfYjAmt() > 0) {
-						if (trymsg) {
-							sb5.append(",预增发金额:xx亿");
-						} else {
-							sb5.append(",预增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
-						}
-					}
-				} else {
-
-					if (trymsg) {
-						if (StringUtils.isNotBlank(dh.getZfAmt())) {
-							sb5.append(",实增发金额:xx亿");
-						} else if (dh.getZfYjAmt() > 0) {
-							sb5.append(",增发金额:xx亿");
-						}
-						sb5.append(",增发价格:xx元");
-					} else {
-						if (StringUtils.isNotBlank(dh.getZfAmt())) {
-							sb5.append(",实增发金额:").append(dh.getZfAmt());
-						} else if (dh.getZfYjAmt() > 0) {
-							sb5.append(",增发金额:").append(CurrencyUitl.covertToString(dh.getZfYjAmt()));
-						}
-						sb5.append(",增发价格:").append(dh.getZfPrice());
-					}
-				}
-
-			}
-			// 最近一次增发
-			if (dh.getZflastOkDate() > 0) {
-				if (trymsg) {
-					sb5.append(",实施日期:yyyy-mm-dd,");
-				} else {
-					sb5.append(",实施日期:").append(dh.getZflastOkDate()).append(",");
-				}
-				if (dh.getZfself() == 1) {
-					sb5.append("<font color='green'>底部增发</font>,");
-				}
-				if (dh.getZfPriceLow() > 0) {
-					sb5.append("<font color='red'>低于增发价:").append(dh.getZfPriceLow()).append("%</font>,");
-				}
-				if (dh.getGsz() == 1) {
-					sb5.append("3年内有高送转,");
-				}
-				if (dh.getZfObjType() == 1) {
-					sb5.append("6个月,");
-				} else if (dh.getZfObjType() == 2) {
-					sb5.append("混合(6月+大股东),");
-				} else if (dh.getZfObjType() == 3) {
-					sb5.append("大股东,");
-				} else if (dh.getZfObjType() == 4) {
-					sb5.append("其他,");
-				}
-			}
-			// 解禁
-			if (dh.getZfjj() == 1) {
-				if (trymsg) {
-					sb5.append("增发解禁(yyyy-mm-dd)");
-				} else {
-					sb5.append("增发解禁(" + dh.getZfjjDate() + ")");
-				}
-
-			}
-			sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
-		}
-		// 大宗
-		if (dh.getDzjy365d() > 0) {
-			sb5.append("1年内大宗:").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WAN)).append("(占比:")
-					.append(dh.getDzjyp365d()).append("%,均价:").append(dh.getDzjyAvgPrice()).append(")");
-			if (dh.getTagDzPriceLow() > 0) {
-				sb5.append(",低于均价:").append(dh.getTagDzPriceLow()).append("%");
-			}
-			if (dh.getDzjy60d() > 0) {
-				sb5.append(",2月:").append(CurrencyUitl.covertToString(dh.getDzjy60d() * WAN)).append("(")
-						.append(dh.getDzjyp60d()).append("%)");
-			}
-		}
-		// 减持
-		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 		ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLastStat(dh.getCode(), 0);
-		if (dh.getReducZb() > 0 || rhss.getYg() > 0) {
-			sb5.append("1年内减持:").append(rhss.getT()).append("次,").append(rhss.getYg()).append("亿股,流通占比:")
-					.append(dh.getReducZb()).append("%");
-		}
-		resp.setZfjjInfo(sb5.toString());
+		resp.setZfjjInfo(TagUtil.gameInfo(dh, rhss, trymsg));
 
 		StringBuffer sb6 = new StringBuffer();
 		// 个人人工
