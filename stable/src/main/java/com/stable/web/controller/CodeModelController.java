@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.constant.Constant;
 import com.stable.service.TradeCalService;
-import com.stable.service.model.CodeModelService;
+import com.stable.service.model.RunModelService;
 import com.stable.service.model.WebModelService;
 import com.stable.utils.DateUtil;
 import com.stable.vo.bus.UserInfo;
@@ -26,7 +26,7 @@ public class CodeModelController {
 	@Autowired
 	private WebModelService modelWebService;
 	@Autowired
-	private CodeModelService codeModelService;
+	private RunModelService runModelService;
 	@Autowired
 	private TradeCalService tradeCalService;
 
@@ -55,7 +55,7 @@ public class CodeModelController {
 			int date = DateUtil.getTodayIntYYYYMMDD();
 			date = tradeCalService.getPretradeDate(date);
 			// codeModelService.reset();
-			codeModelService.runModel(date, false);
+			runModelService.runModel(date, false);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

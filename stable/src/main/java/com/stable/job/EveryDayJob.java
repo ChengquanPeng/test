@@ -11,7 +11,6 @@ import com.stable.service.ChipsZfService;
 import com.stable.service.FinanceService;
 import com.stable.service.TradeCalService;
 import com.stable.service.ZhiYaService;
-import com.stable.service.model.CodeModelService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.DzjySpider;
 import com.stable.spider.eastmoney.EastmoneySpider;
@@ -29,8 +28,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class EveryDayJob extends MySimpleJob {
 
-	@Autowired
-	private CodeModelService codeModelService;
+//	@Autowired
+//	private RunModelService runModelService;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
 	@Autowired
@@ -101,9 +100,10 @@ public class EveryDayJob extends MySimpleJob {
 		log.info("大宗交易-预警");
 		monitorPoolService.jobDzjyWarning();
 		// 周一周4执行，每周末抓完财报后运行
-		if (calweek != Calendar.SUNDAY && calweek != Calendar.SATURDAY && calweek != Calendar.FRIDAY) {
-			codeModelService.runModel(date, false);
-			// WxPushUtil.pushSystem1("周五，周六，周日每晚23点不在运行定时运行 code model,周日下午在继续运行！");
-		}
+		// if (calweek != Calendar.SUNDAY && calweek != Calendar.SATURDAY && calweek !=
+		// Calendar.FRIDAY) {
+		// runModelService.runModel(date, false);
+		// WxPushUtil.pushSystem1("周五，周六，周日每晚23点不在运行定时运行 code model,周日下午在继续运行！");
+//		}
 	}
 }

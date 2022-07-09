@@ -102,7 +102,7 @@ public class CodeModelKLineService {
 //		}).start();
 //	}
 
-	public synchronized void runKLineModel(int date) {
+	public synchronized void runKLineModel1(int date) {
 //		if (!tradeCalService.isOpen(date)) {
 //			date = tradeCalService.getPretradeDate(date);
 //		}

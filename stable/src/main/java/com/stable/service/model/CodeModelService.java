@@ -30,7 +30,6 @@ import com.stable.service.FinanceService;
 import com.stable.service.PlateService;
 import com.stable.service.ReducingHoldingSharesService;
 import com.stable.service.StockBasicService;
-import com.stable.service.TradeCalService;
 import com.stable.service.ZhiYaService;
 import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.monitor.MonitorPoolService;
@@ -38,7 +37,6 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.TagUtil;
-import com.stable.utils.ThreadsUtil;
 import com.stable.vo.HolderAnalyse;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.DaliyBasicInfo2;
@@ -66,8 +64,6 @@ public class CodeModelService {
 	private double smallStocklimit;
 	private double smallStocklimitAck = 50;// 50亿
 
-	@Autowired
-	private TradeCalService tradeCalService;
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
@@ -101,16 +97,9 @@ public class CodeModelService {
 	@Autowired
 	private ReducingHoldingSharesService reducingHoldingSharesService;
 
-	public synchronized void runModel(int date, boolean isweekend) {
+	public synchronized void runModel1(int date, boolean isweekend) {
 		try {
-			log.info("CodeModel processing request date={}", date);
-			if (!tradeCalService.isOpen(date)) {
-				date = tradeCalService.getPretradeDate(date);
-			}
-			log.info("Actually processing request date={}", date);
 			runByJobv2(date, isweekend);
-			ThreadsUtil.sleepRandomSecBetween15And30();
-			plateService.getPlateStat();
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "CodeModel模型运行异常", "", "");

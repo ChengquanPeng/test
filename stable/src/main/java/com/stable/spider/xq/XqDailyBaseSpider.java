@@ -19,7 +19,7 @@ import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.DataChangeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
-import com.stable.service.model.CodeModelKLineService;
+import com.stable.service.model.RunModelService;
 import com.stable.service.model.prd.PreSelectSave;
 import com.stable.service.model.prd.PreSelectSearch;
 import com.stable.service.model.prd.PreSelectTask;
@@ -56,7 +56,7 @@ public class XqDailyBaseSpider {
 	@Autowired
 	private TradeCalService tradeCalService;
 	@Autowired
-	private CodeModelKLineService codeModelKLineService;
+	private RunModelService runModelService;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
 
@@ -143,7 +143,7 @@ public class XqDailyBaseSpider {
 			// K线模型
 			new Thread(new Runnable() {
 				public void run() {
-					codeModelKLineService.runKLineModel(date);
+					runModelService.runModel(date, false);
 					// 离线价格监听
 					ThreadsUtil.sleepRandomSecBetween5And15();
 					monitorPoolService.priceChk(listNofq, date);

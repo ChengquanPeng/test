@@ -31,7 +31,7 @@ import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.job.MyCallable;
 import com.stable.msg.MsgPushServer;
-import com.stable.service.model.CodeModelService;
+import com.stable.service.model.RunModelService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.ths.ThsHolderSpider;
@@ -75,7 +75,7 @@ public class FinanceService {
 	@Autowired
 	private EastmoneySpider eastmoneySpider;
 	@Autowired
-	private CodeModelService codeModelService;
+	private RunModelService runModelService;
 	@Autowired
 	private ThsHolderSpider thsHolderSpider;
 	@Autowired
@@ -534,7 +534,7 @@ public class FinanceService {
 		}
 		log.info("已完成所有事项");
 		// 运行完财务和行业对比后,重新运行
-		codeModelService.runModel(date, true);
+		runModelService.runModel(date, true);
 	}
 
 	private List<FinanceBaseInfoHangye> executeHangye(int date) {
