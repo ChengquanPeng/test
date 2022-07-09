@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
-import com.stable.service.model.CodeModelKLineService;
 import com.stable.service.model.WebModelService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -44,8 +43,6 @@ public class PlateService {
 	private String htmlFolder;
 	private String htmlname1 = "w.html";
 	private String htmlname2 = "d.html";
-	@Autowired
-	private CodeModelKLineService codeModelKLineService;
 
 	public void getPlateStat() {
 		List<PlateStat> res = new LinkedList<PlateStat>();
@@ -96,17 +93,6 @@ public class PlateService {
 		printHtml(res, htmlname1);
 		arSortRd(res);
 		printHtml(res, htmlname2);
-
-		ModelReq mr = new ModelReq();
-		mr.setQb(1);
-		mr.setPls(-1);
-		List<CodeBaseModel2> genList = webModelService.getList(mr, EsQueryPageUtil.queryPage9999);
-
-		ModelReq mr2 = new ModelReq();
-		mr2.setZyxingt(1);
-		mr2.setPls(-1);
-		List<CodeBaseModel2> genListTe = webModelService.getList(mr2, EsQueryPageUtil.queryPage9999);
-		codeModelKLineService.printKlHtml(genList, genListTe);
 	}
 
 	private void printHtml(List<PlateStat> newList, String htmlnamet) {
