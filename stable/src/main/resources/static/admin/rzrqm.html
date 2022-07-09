@@ -133,7 +133,7 @@ table {
 				url : "/web/model/rzrqm", //访问地址--action地址
 				type : "post", //提交方式
 				data : {
-					code : $('#code').val(),
+					code : $('#code').html(),
 					timemonth : $('#timemonth').val()
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
