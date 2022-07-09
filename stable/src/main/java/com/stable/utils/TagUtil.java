@@ -2,6 +2,8 @@ package com.stable.utils;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.CodeConcept;
 
@@ -42,7 +44,11 @@ public class TagUtil {
 		StringBuffer sb = new StringBuffer("");
 		if (l != null) {
 			for (CodeConcept cc : l) {
-				sb.append(cc.getConceptName()).append(",");
+				if (StringUtils.isNotBlank(cc.getConceptName())) {
+					if (!cc.getConceptName().equals(cc.getAliasCode())) {
+						sb.append(cc.getConceptName()).append(",");
+					}
+				}
 			}
 		}
 		return sb.toString();

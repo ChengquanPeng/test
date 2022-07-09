@@ -105,8 +105,8 @@ public class PlateService {
 		ModelReq mr2 = new ModelReq();
 		mr2.setZyxingt(1);
 		mr2.setPls(-1);
-		List<CodeBaseModel2> genList2 = webModelService.getList(mr2, EsQueryPageUtil.queryPage9999);
-		codeModelKLineService.printKlHtml(genList, genList2);
+		List<CodeBaseModel2> genListTe = webModelService.getList(mr2, EsQueryPageUtil.queryPage9999);
+		codeModelKLineService.printKlHtml(genList, genListTe);
 	}
 
 	private void printHtml(List<PlateStat> newList, String htmlnamet) {

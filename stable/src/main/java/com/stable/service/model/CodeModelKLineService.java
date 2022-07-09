@@ -267,7 +267,7 @@ public class CodeModelKLineService {
 		}
 	}
 
-	public void printKlHtml(List<CodeBaseModel2> newList, List<CodeBaseModel2> genList2) {
+	public void printKlHtml(List<CodeBaseModel2> newList, List<CodeBaseModel2> genListTe) {
 		String htmlnamet = "qf.html";
 		StringBuffer sb = new StringBuffer();
 		// 更新时间
@@ -278,9 +278,9 @@ public class CodeModelKLineService {
 		sb.append(
 				"<tr><th>序号</th><th>简称-代码</th><th>逻辑模型</th><th>起飞形态</th><th>Desc</th><th>底部类型</th><th>板块概念</th></tr>");
 		// data2
-		if (genList2 != null && genList2.size() > 0) {
-			for (int i = 0; i < genList2.size(); i++) {
-				CodeBaseModel2 p1 = genList2.get(i);
+		if (genListTe != null && genListTe.size() > 0) {
+			for (int i = 0; i < genListTe.size(); i++) {
+				CodeBaseModel2 p1 = genListTe.get(i);
 				String code = p1.getCode();
 				StockBaseInfo sbsb = stockBasicService.getCode(code);
 				sb.append("<tr><td>").append(i + 1).append("</td>");// 序号
