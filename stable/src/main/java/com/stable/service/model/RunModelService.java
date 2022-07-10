@@ -1,6 +1,7 @@
 
 package com.stable.service.model;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -104,8 +105,36 @@ public class RunModelService {
 		sb = new StringBuffer();
 		sb.append(this.getHtml(genListTe, true));
 		fw.writeLine(sb.toString());
+
+		List<CodeBaseModel2> ren = new LinkedList<CodeBaseModel2>();
+		List<CodeBaseModel2> dq = new LinkedList<CodeBaseModel2>();
+		List<CodeBaseModel2> xq = new LinkedList<CodeBaseModel2>();
+		List<CodeBaseModel2> dpiao = new LinkedList<CodeBaseModel2>();
+		List<CodeBaseModel2> other = new LinkedList<CodeBaseModel2>();
+		List<CodeBaseModel2> all = new LinkedList<CodeBaseModel2>();
+
+		for (CodeBaseModel2 c : qbList) {
+			if (c.getPls() == 1) {
+				ren.add(c);
+			} else if (c.getShooting11() > 0) {
+				dpiao.add(c);
+			} else if (c.getDibuQixing() > 0) {
+				dq.add(c);
+			} else if (c.getDibuQixing2() > 0) {
+				xq.add(c);
+			} else {
+				other.add(c);
+			}
+		}
+		all.addAll(ren);
+		all.addAll(dq);
+		all.addAll(xq);
+		all.addAll(other);
+		all.addAll(dpiao);
+
 		sb = new StringBuffer();
-		sb.append(this.getHtml(qbList, false));
+		sb.append(this.getHtml(all, false));
+
 		sb.append("</table>");// end
 		fw.writeLine(sb.toString());
 		fw.close();
@@ -129,10 +158,10 @@ public class RunModelService {
 				sb.append("<tr><td>").append(i + 1).append("</td>");
 
 				// 简称-代码
-				sb.append("<td><a target='_blank' href='/web/code2/" + code + "'>").append(sbsb.getName())
-						.append("<br/>").append(code);
+				sb.append("<td><a target='_blank' href='/web/code2/" + code + "'><font color='black'>")
+						.append(sbsb.getName()).append("<br/>").append(code).append("</font>");
 				if (p1.getPls() == 1) {
-					sb.append("<font color='red'>[人]</font>");
+					sb.append("<font color='blue'>[人]</font>");
 				}
 				sb.append("</a></td>");
 				// 逻辑
@@ -164,7 +193,7 @@ public class RunModelService {
 				// 特征
 				line2 = p1.getQixingStr();
 				if (line2 != null && line2.contains("大") && line2.contains("上")) {
-					line2 = "<font color='red'>" + line2 + "</font>";
+					line2 = "<font color='blue'>" + line2 + "</font>";
 				}
 				sb.append("<td>").append(line2).append("</td>");//
 
