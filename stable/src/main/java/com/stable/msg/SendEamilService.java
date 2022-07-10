@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.mail.internet.MimeMessage;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -18,7 +19,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
-public class SendEamilService {
+public class SendEamilService implements InitializingBean {
 
 	@Autowired
 	private JavaMailSender javaMailSender;
@@ -27,6 +28,8 @@ public class SendEamilService {
 	public String myId;
 	@Value("${spring.mail.username}")
 	private String fromId;
+
+	private String fromName;
 
 	public boolean pushSystemT1(String title, String content, String... toId) {
 		try {
@@ -39,7 +42,7 @@ public class SendEamilService {
 			message.setText(content + " " + WxPushUtil.env + DateUtil.getTodayYYYYMMDDHHMMSS());
 			message.setSubject(title);
 			message.setBcc(toId);
-			message.setFrom(fromId);
+			message.setFrom(fromName);
 			javaMailSender.send(message);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -59,7 +62,7 @@ public class SendEamilService {
 			log.info(content);
 			helper.setSubject(title);
 			helper.setBcc(toId);
-			helper.setFrom(fromId);
+			helper.setFrom(fromName);
 			helper.setSentDate(new Date());// 发送时间
 			helper.setText(content + Constant.HTML_LINE + WxPushUtil.env + DateUtil.getTodayYYYYMMDDHHMMSS(), true);// 第一个参数要发送的内容，第二个参数是不是Html格式。
 			javaMailSender.send(mailMessage);
@@ -68,6 +71,11 @@ public class SendEamilService {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		fromName = "底部炒家" + "<" + fromId + ">";
 	}
 
 }
