@@ -95,9 +95,9 @@ public class RunModelService {
 		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
 		StringBuffer sb = new StringBuffer();
 		// 更新时间
-		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("</div><br/>");
+		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("</div>");
 		// table
-		sb.append("起飞<br/><table border='1' cellspacing='0' cellpadding='0'>");
+		sb.append("<table border='1' cellspacing='0' cellpadding='0'>");
 		// head
 		sb.append(
 				"<tr><th>序号</th><th>简称-代码</th><th>逻辑模型</th><th>底部类型</th><th>形态</th><th>特征</th><th>买点</th><th>板块概念</th></tr>");
