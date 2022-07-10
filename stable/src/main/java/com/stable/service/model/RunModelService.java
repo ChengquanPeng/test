@@ -142,7 +142,13 @@ public class RunModelService {
 					if (p1.getZfjjupStable() > 0) {
 						sb.append("/stable").append(p1.getZfjjupStable());
 					}
-					sb.append("年未大涨");
+					sb.append("年未大涨").append(Constant.HTML_LINE);
+				}
+				if (p1.getFinOK() > 0) {
+					sb.append(p1.getFinOK()).append("年盈利,");
+				}
+				if (p1.getBousOK() > 0) {
+					sb.append(p1.getBousOK()).append("年分红");
 				}
 				sb.append("</td>");
 				// 底部类型
