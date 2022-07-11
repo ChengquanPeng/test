@@ -1,4 +1,4 @@
-package com.stable.service.model;
+package com.stable.service.model.prd;
 
 import java.util.Comparator;
 import java.util.LinkedList;

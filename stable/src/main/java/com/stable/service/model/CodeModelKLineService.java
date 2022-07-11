@@ -17,6 +17,7 @@ import com.stable.service.StockBasicService;
 import com.stable.service.biz.BizPushService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
+import com.stable.service.model.prd.QibaoService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
