@@ -8,10 +8,10 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
+import com.stable.service.model.RunModelService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.StringUtil;
@@ -30,6 +30,8 @@ public class QibaoService {
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private StockBasicService stockBasicService;
+	@Autowired
+	private RunModelService runModelService;
 
 //	@javax.annotation.PostConstruct
 //	public void test() {
@@ -53,8 +55,8 @@ public class QibaoService {
 //		 十字星
 //		String[] codes = { "002752", "000498", "601117" };
 //		int[] dates = { 20211115, 20220105, 20210608 };
-//		String[] codes = { "600729", "600488" };
-//		int[] dates = { 20220705, 20220705 };
+//		String[] codes = { "603289" };
+//		int[] dates = { 20220707 };
 //		for (int i = 0; i < codes.length; i++) {
 //			String code = codes[i];
 //			int date = dates[i];
@@ -77,7 +79,7 @@ public class QibaoService {
 	/** 起爆 */
 	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx,
 			StringBuffer szx) {
-		if (stTuiShi(newOne)) {
+		if (runModelService.stTuiShi(newOne)) {
 			setQxRes(newOne, pool, true, true);
 			setSzxRes(newOne, pool);
 			newOne.setZyxingt(0);
@@ -498,7 +500,6 @@ public class QibaoService {
 		}
 		log.info("=====>默认false");
 		return null;
-
 	}
 
 	private void qxrange(QiBaoInfo qi, List<TradeHistInfoDaliy> tmp) {
@@ -575,16 +576,6 @@ public class QibaoService {
 			return true;
 		}
 		log.info("=====>超过最高2");
-		return false;
-	}
-
-	// 排除3:排除退市股票&ST
-	private boolean stTuiShi(CodeBaseModel2 newOne) {
-		String name = stockBasicService.getCodeName(newOne.getCode());
-		if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI) || name.contains("ST")) {
-			log.info("退市");
-			return true;
-		}
 		return false;
 	}
 
