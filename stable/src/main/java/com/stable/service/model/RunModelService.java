@@ -3,6 +3,7 @@ package com.stable.service.model;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,10 @@ public class RunModelService {
 	private MonitorPoolService monitorPoolService;
 
 	public synchronized void runModel(int date, boolean isweekend) {
+		runModel(date, isweekend, null);
+	}
+
+	public synchronized void runModel(int date, boolean isweekend, Set<String> p1list) {
 		log.info("CodeModel processing request date={}", date);
 		if (!tradeCalService.isOpen(date)) {
 			date = tradeCalService.getPretradeDate(date);
@@ -64,9 +69,9 @@ public class RunModelService {
 			// 周末,先跑基本面在跑技术面
 			codeModelService.runModel1(date, true);
 			ThreadsUtil.sleepRandomSecBetween15And30();
-			codeModelKLineService.runKLineModel1(date);
+			codeModelKLineService.runKLineModel1(date, p1list);
 		} else {
-			codeModelKLineService.runKLineModel1(date);
+			codeModelKLineService.runKLineModel1(date, p1list);
 			ThreadsUtil.sleepRandomSecBetween15And30();
 			codeModelService.runModel1(date, false);
 		}
@@ -233,5 +238,49 @@ public class RunModelService {
 			sb.append("<tr><td>无数据...</td></tr>");
 		}
 		return sb.toString();
+	}
+
+	// 排除3:排除退市股票&ST
+	public boolean stTuiShi(CodeBaseModel2 newOne) {
+		String name = stockBasicService.getCodeName(newOne.getCode());
+		if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI) || name.contains("ST")) {
+			log.info("退市");
+			return true;
+		}
+		return false;
+	}
+
+	public void genPrdHtml(List<CodeBaseModel2> list) {
+		StringBuffer sb = new StringBuffer("");
+		// 更新时间
+		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("</div>");
+		// table
+		sb.append("<table border='1' cellspacing='0' cellpadding='0'>");
+		// head
+		sb.append("<tr><th>序号</th><th>简称-代码</th><th>板块概念</th></tr>");
+		// data2
+		if (list != null && list.size() > 0) {
+			for (int i = 0; i < list.size(); i++) {
+				CodeBaseModel2 p1 = list.get(i);
+				String code = p1.getCode();
+				StockBaseInfo sbsb = stockBasicService.getCode(code);
+				// 序号
+				sb.append("<tr><td>").append(i + 1).append("</td>");
+				// 简称-代码
+				sb.append("<td>").append(sbsb.getName()).append("--").append(code).append("</td>");
+				// 板块概念
+				sb.append("<td>").append(sbsb.getThsIndustry()).append("|")
+						.append(TagUtil.getGn(conceptService.getCodeConcept(code))).append("</td>");// CD2
+				sb.append("</tr>");
+			}
+		} else {
+			sb.append("<tr><td>无数据...</td></tr>");
+		}
+		sb.append("</table>");// end
+
+		String htmlnamet = "prd.html";
+		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
+		fw.writeLine(sb.toString());
+		fw.close();
 	}
 }

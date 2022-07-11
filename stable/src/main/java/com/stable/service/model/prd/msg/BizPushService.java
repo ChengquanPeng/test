@@ -1,11 +1,11 @@
-package com.stable.service.biz;
+package com.stable.service.model.prd.msg;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.stable.msg.MsgPushServer;
+import com.stable.service.model.prd.UserService;
 import com.stable.vo.bus.UserInfo;
 
 /**

@@ -1,4 +1,4 @@
-package com.stable.msg;
+package com.stable.service.model.prd.msg;
 
 import java.util.List;
 

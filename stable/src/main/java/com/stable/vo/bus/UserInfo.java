@@ -7,7 +7,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.stable.constant.Constant;
-import com.stable.msg.MsgPushServer;
+import com.stable.service.model.prd.msg.MsgPushServer;
 
 import lombok.Getter;
 import lombok.Setter;

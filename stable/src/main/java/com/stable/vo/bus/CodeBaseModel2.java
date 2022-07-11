@@ -67,6 +67,9 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int zyxingt = 0;// 中阳带星(T)
 
+	@Field(type = FieldType.Integer)
+	private int prd1 = 0;// 产品1
+
 	@Field(type = FieldType.Text)
 	private String jsHist;// 技术面历史
 

@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
-import com.stable.msg.MsgPushServer;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
+import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.utils.DateUtil;
 
 import lombok.extern.log4j.Log4j2;

@@ -36,7 +36,7 @@ import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
 import com.stable.job.MyCallable;
-import com.stable.msg.MsgPushServer;
+import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
 import com.stable.spider.xq.XqDailyBaseSpider;
@@ -554,7 +554,7 @@ public class DaliyTradeHistroyService {
 		return db;
 	}
 
-	private List<TradeHistInfoDaliyNofq> queryListByCodeNofq(String code, int startDate, int endDate,
+	public List<TradeHistInfoDaliyNofq> queryListByCodeNofq(String code, int startDate, int endDate,
 			EsQueryPageReq queryPage, SortOrder s) {
 		int pageNum = queryPage.getPageNum();
 		int size = queryPage.getPageSize();

@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import com.stable.job.RealtimeJob;
-import com.stable.msg.MsgPushServer;
+import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.utils.OSystemUtil;
 import com.stable.utils.SpringUtil;
 

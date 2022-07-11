@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
-import com.stable.msg.MsgPushServer;
+import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 

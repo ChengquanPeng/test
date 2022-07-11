@@ -4,8 +4,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.stable.constant.Constant;
-import com.stable.msg.MsgPushServer;
 import com.stable.service.ConceptService;
+import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.spider.realtime.RealTime;
 import com.stable.spider.realtime.RealtimeCall;
 import com.stable.utils.CurrencyUitl;

@@ -3,31 +3,24 @@ package com.stable.spider.xq;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
-import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
-import com.stable.msg.MsgPushServer;
-import com.stable.service.DaliyBasicHistroyService;
-import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.DataChangeService;
 import com.stable.service.StockBasicService;
-import com.stable.service.TradeCalService;
 import com.stable.service.model.RunModelService;
-import com.stable.service.model.prd.PreSelectSave;
-import com.stable.service.model.prd.PreSelectSearch;
-import com.stable.service.model.prd.PreSelectTask;
+import com.stable.service.model.prd.Prd1Service;
+import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
-import com.stable.utils.TasksWorkerPrd1;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.StockBaseInfo;
@@ -48,14 +41,6 @@ public class XqDailyBaseSpider {
 	@Autowired
 	private DataChangeService dataChangeService;
 	@Autowired
-	private DaliyTradeHistroyService daliyTradeHistroyService;
-	@Autowired
-	private PreSelectSave preSelectSave;
-	@Autowired
-	private DaliyBasicHistroyService daliyBasicHistroyService;
-	@Autowired
-	private TradeCalService tradeCalService;
-	@Autowired
 	private RunModelService runModelService;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
@@ -71,6 +56,9 @@ public class XqDailyBaseSpider {
 	// https://xueqiu.com/S/SH600109
 	// https://xueqiu.com/S/SZ000001
 	private String BASE_URL = "https://xueqiu.com/S/%s";
+
+	@Autowired
+	private Prd1Service prd1Service;
 
 	public static String formatCode2(String code) {
 		// 5开头，沪市基金或权证 60开头上证
@@ -139,11 +127,13 @@ public class XqDailyBaseSpider {
 			if (upd.size() != s) {
 				MsgPushServer.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + s + "},实际成功数:" + upd.size());
 			}
+
+			Set<String> p1list = prd1Service.todaySzx(listNofq);
 			ThreadsUtil.sleepRandomSecBetween15And30();
 			// K线模型
 			new Thread(new Runnable() {
 				public void run() {
-					runModelService.runModel(date, false);
+					runModelService.runModel(date, false, p1list);
 					// 离线价格监听
 					ThreadsUtil.sleepRandomSecBetween5And15();
 					monitorPoolService.priceChk(listNofq, date);
@@ -269,39 +259,6 @@ public class XqDailyBaseSpider {
 		} while (!fetched);
 		return false;
 
-	}
-
-	public void rerun() throws Exception {
-		PreSelectSearch pd1 = new PreSelectSearch(daliyTradeHistroyService, preSelectSave);
-		int date = DateUtil.getTodayIntYYYYMMDD();
-		if (!tradeCalService.isOpen(date)) {
-			date = tradeCalService.getPretradeDate(date);
-		}
-		List<DaliyBasicInfo2> list = daliyBasicHistroyService
-				.queryListByCode("", date, EsQueryPageUtil.queryPage9999, SortOrder.ASC).getContent();
-		log.info("PRD1 {} 获取到数据:{}条", date, list.size());
-		for (DaliyBasicInfo2 b : list) {
-			if (stockBasicService.isHuShenCode(b.getCode())) {
-				TasksWorkerPrd1.add(new PreSelectTask(pd1, b.getCode(), b.getCircMarketVal(), date));
-			}
-		}
-		new Thread(new Runnable() {
-			public void run() {
-				pd1.done();
-			}
-		}).start();
-	}
-
-	public void test() throws Exception {
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					rerun();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
 	}
 
 	public static void main(String[] args) {

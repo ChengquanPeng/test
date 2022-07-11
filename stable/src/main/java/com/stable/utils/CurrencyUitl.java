@@ -16,6 +16,7 @@ public class CurrencyUitl {
 	public static final String WAN = "万";
 	public static final BigDecimal WAN_N = new BigDecimal(10000L);
 	public static final String YUAN = "元";
+	public static final double YI_N_DOUBLE = YI_N.doubleValue();
 
 	public final static double roundHalfUp(double price) {
 		double result = new BigDecimal(new Double(price).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)

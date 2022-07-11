@@ -1,4 +1,4 @@
-package com.stable.service.biz;
+package com.stable.service.model.prd;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -24,7 +24,7 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.Stype;
 import com.stable.es.dao.base.UserAmtLogDao;
 import com.stable.es.dao.base.UserDao;
-import com.stable.msg.MsgPushServer;
+import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.utils.DateUtil;
 import com.stable.vo.bus.UserAmtLog;
 import com.stable.vo.bus.UserInfo;

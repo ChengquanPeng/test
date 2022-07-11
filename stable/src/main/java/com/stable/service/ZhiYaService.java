@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
 import com.stable.es.dao.base.ZhiYaDao;
-import com.stable.msg.MsgPushServer;
+import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.spider.eastmoney.EastmoneyZytjSpider2;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;

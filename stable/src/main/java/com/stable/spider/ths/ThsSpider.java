@@ -27,8 +27,9 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeConceptDao;
 import com.stable.es.dao.base.EsConceptDao;
-import com.stable.msg.MsgPushServer;
 import com.stable.service.TradeCalService;
+import com.stable.service.model.prd.msg.BizPushService;
+import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
@@ -48,6 +49,8 @@ public class ThsSpider {
 	private EsCodeConceptDao esCodeConceptDao;
 	@Autowired
 	private HtmlunitSpider htmlunitSpider;
+	@Autowired
+	private BizPushService bizPushService;
 
 	private String GN_LIST = "http://q.10jqka.com.cn/gn/index/field/addtime/order/desc/page/%s/ajax/1/";
 	private static int ths = 1;// 同花顺概念
@@ -283,7 +286,7 @@ public class ThsSpider {
 			saveConcept(list);
 		}
 		if (newGn.length() > 0) {
-			MsgPushServer.pushSystem1("同花顺获取到新概念:" + newGn.toString());
+			bizPushService.PushS2("同花顺获取到新概念:" + newGn.toString(), "");
 		}
 		log.info("同花顺板块同步成功,同步概念[" + cntList + "],概念相关股票[" + cntCodelist + "]"
 				+ (newGn.length() > 0 ? ",获取到新概念:" + newGn.toString() : ""));
