@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.FileWriteUitl;
 import com.stable.utils.TagUtil;
@@ -62,12 +64,15 @@ public class RunModelService {
 		runModel(date, isweekend, null);
 	}
 
+	private int tradeDate;
+
 	public synchronized void runModel(int date, boolean isweekend, Set<String> p1list) {
 		log.info("CodeModel processing request date={}", date);
 		if (!tradeCalService.isOpen(date)) {
 			date = tradeCalService.getPretradeDate(date);
 		}
 		log.info("Actually processing request date={}", date);
+		tradeDate = date;
 
 		if (isweekend) {
 			// 周末,先跑基本面在跑技术面
@@ -204,6 +209,15 @@ public class RunModelService {
 				if (line2 != null && line2.contains("大") && line2.contains("上")) {
 					line2 = "<font color='blue'>" + line2 + "</font>";
 				}
+				// 缩量
+
+				if (p1.getQixing() > 0) {
+					TradeHistInfoDaliy td = daliyTradeHistroyService.queryLastfq(code);
+					if (this.todayPrickOK(td.getClosed(), td.getOpen(), td.getAmt())
+							&& isSuoliang(code, p1.getQixing(), tradeDate)) {
+						line2 += "<font color='red'><缩量十字星></font>";
+					}
+				}
 				sb.append("<td>").append(line2).append("</td>");//
 
 				// 买点
@@ -288,5 +302,40 @@ public class RunModelService {
 		FileWriteUitl fw = new FileWriteUitl(tickFolder + htmlnamet, true);
 		fw.writeLine(sb.toString());
 		fw.close();
+	}
+
+	// 是否十字星
+	private boolean todayPrickOK(double close, double open, double amt) {
+		if (close == open) {
+			if (amt < CurrencyUitl.YI_N_DOUBLE) {
+				return true;
+			}
+		} else {
+			double p = CurrencyUitl.cutProfit(open, close);
+			if (-1.05 <= p && p <= 1.05) {// 收盘在1.05之间
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isSuoliang(String code, int start, int end) {
+		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, start, end,
+				EsQueryPageUtil.queryPage9999, SortOrder.DESC);
+		double lowVol = Integer.MAX_VALUE;
+		double max = 0.0;
+		for (int i = 0; i < list.size(); i++) {
+			TradeHistInfoDaliy t = list.get(i);
+			if (t.getTodayChangeRate() >= -9 && t.getVolume() < lowVol) {// 跌停不算
+				lowVol = t.getVolume();
+			}
+			if (t.getVolume() > max) {
+				max = t.getVolume();
+			}
+		}
+		if (lowVol * 3 < max) {
+			return true;
+		}
+		return false;
 	}
 }

@@ -1,5 +1,6 @@
 package com.stable.service.model.prd;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
+import com.stable.service.TradeCalService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.model.RunModelService;
 import com.stable.service.model.WebModelService;
@@ -41,31 +43,56 @@ public class Prd1Service {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private CodeModelService codeModelService;
+	@Autowired
+	private TradeCalService tradeCalService;
 
-	@javax.annotation.PostConstruct
+	// @javax.annotation.PostConstruct
 	public void test() {
-		int date = 20220711;
-		int pre1Year = DateUtil.getPreYear(date);
-		List<TradeHistInfoDaliyNofq> listNofq = daliyTradeHistroyService.queryListByCodeNofq("", date, date,
-				EsQueryPageUtil.queryPage9999, SortOrder.DESC);
-		Set<String> set = todaySzx(listNofq);
-		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
-		MonitorPoolTemp pool = new MonitorPoolTemp();
-		List<CodeBaseModel2> resl = new LinkedList<CodeBaseModel2>();
-		for (String code : set) {
-			CodeBaseModel2 cbm = histMap.get(code);
-			if (cbm != null) {
-				boolean isSamll = codeModelService.isSmallStock(cbm.getMkv(), cbm.getActMkv());
-				if (stockBasicService.onlinePreYearChk(code, pre1Year)) {
-					prd(date, cbm, pool, isSamll);
-					if (cbm.getPrd1() == 1) {
-						resl.add(cbm);
+		new Thread(new Runnable() {
+			public void run() {
+				t1();
+			}
+		}).start();
+
+	}
+
+	private void t1() {
+		int enddate = 20220711;
+		Date d = DateUtil.parseDate(20220601);
+		while (true) {
+			int date = DateUtil.formatYYYYMMDDReturnInt(d);
+			if (tradeCalService.isOpen(date)) {
+				int pre1Year = DateUtil.getPreYear(date);
+				List<TradeHistInfoDaliyNofq> listNofq = daliyTradeHistroyService.queryListByCodeNofq("", date, date,
+						EsQueryPageUtil.queryPage9999, SortOrder.DESC);
+				Set<String> set = todaySzx(listNofq);
+				Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
+				MonitorPoolTemp pool = new MonitorPoolTemp();
+				List<CodeBaseModel2> resl = new LinkedList<CodeBaseModel2>();
+				for (String code : set) {
+					CodeBaseModel2 cbm = histMap.get(code);
+					if (cbm != null) {
+						boolean isSamll = codeModelService.isSmallStock(cbm.getMkv(), cbm.getActMkv());
+						if (stockBasicService.onlinePreYearChk(code, pre1Year)) {
+							prd(date, cbm, pool, isSamll);
+							if (cbm.getPrd1() == 1) {
+								resl.add(cbm);
+							}
+						}
 					}
 				}
+				runModelService.genPrdHtml(date, resl);
 			}
+			System.err.println("===================================");
+			System.err.println("===================================");
+			System.err.println("=========== " + date + " ================");
+			System.err.println("===================================");
+			System.err.println("===================================");
+			if (date == enddate) {
+				break;
+			}
+			d = DateUtil.addDate(d, 1);
 		}
-		runModelService.genPrdHtml(resl);
-		System.exit(0);
 	}
 
 	public Set<String> todaySzx(List<TradeHistInfoDaliyNofq> listNofq) {
