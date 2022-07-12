@@ -321,7 +321,7 @@ public class CodeModelService {
 				pool.setRealtime(1);
 				pool.setOffline(1);
 				pool.setUpTodayChange(6);
-				if (isOk2) {
+				if (isOk2 || isOk1) {// 确定性高
 					pool.setUpTodayChange(3);
 				}
 //				pool.setShotPointCheck(1);
