@@ -18,6 +18,7 @@ import com.stable.service.PlateService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.monitor.MonitorPoolService;
+import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.FileWriteUitl;
 import com.stable.utils.TagUtil;
@@ -51,6 +52,9 @@ public class RunModelService {
 	private PlateService plateService;
 	@Value("${html.folder}")
 	private String htmlFolder;
+	@Value("${tick.folder}")
+	private String tickFolder;
+
 	@Autowired
 	private MonitorPoolService monitorPoolService;
 
@@ -244,16 +248,16 @@ public class RunModelService {
 	public boolean stTuiShi(CodeBaseModel2 newOne) {
 		String name = stockBasicService.getCodeName(newOne.getCode());
 		if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI) || name.contains("ST")) {
-			log.info("退市");
+			log.info("退市,{},{}", newOne.getCode(), name);
 			return true;
 		}
 		return false;
 	}
 
-	public void genPrdHtml(List<CodeBaseModel2> list) {
+	public void genPrdHtml(int date, List<CodeBaseModel2> list) {
 		StringBuffer sb = new StringBuffer("");
 		// 更新时间
-		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("</div>");
+		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append(",计算最后交易日:" + date + "</div>");
 		// table
 		sb.append("<table border='1' cellspacing='0' cellpadding='0'>");
 		// head
@@ -267,7 +271,9 @@ public class RunModelService {
 				// 序号
 				sb.append("<tr><td>").append(i + 1).append("</td>");
 				// 简称-代码
-				sb.append("<td>").append(sbsb.getName()).append("--").append(code).append("</td>");
+				sb.append("<td><a href='http://quote.eastmoney.com/" + EastmoneySpider.formatCode2(code)
+						+ ".html' target='_blank'>").append(sbsb.getName()).append("--").append(code)
+						.append("</a></td>");
 				// 板块概念
 				sb.append("<td>").append(sbsb.getThsIndustry()).append("|")
 						.append(TagUtil.getGn(conceptService.getCodeConcept(code))).append("</td>");// CD2
@@ -278,8 +284,8 @@ public class RunModelService {
 		}
 		sb.append("</table>");// end
 
-		String htmlnamet = "prd.html";
-		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
+		String htmlnamet = "prd" + date + ".html";
+		FileWriteUitl fw = new FileWriteUitl(tickFolder + htmlnamet, true);
 		fw.writeLine(sb.toString());
 		fw.close();
 	}
