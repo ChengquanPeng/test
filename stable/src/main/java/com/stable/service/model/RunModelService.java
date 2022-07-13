@@ -159,6 +159,8 @@ public class RunModelService {
 		// data2
 		String line = "";
 		String line2 = "";
+		String dz = "<font color='red'>[确]</font>";
+		String rg = "<font color='blue'>[人]</font>";
 		if (genListTe != null && genListTe.size() > 0) {
 			for (int i = 0; i < genListTe.size(); i++) {
 				line = "";
@@ -175,7 +177,10 @@ public class RunModelService {
 				sb.append("<td><a target='_blank' href='/web/code2/" + code + "'><font color='black'>")
 						.append(sbsb.getName()).append("<br/>").append(code).append("</font>");
 				if (p1.getPls() == 1) {
-					sb.append("<font color='blue'>[人]</font>");
+					sb.append(rg);
+				}
+				if (p1.getShooting2() > 0 || p1.getShooting1() > 0) {
+					sb.append(dz);
 				}
 				sb.append("</a></td>");
 				// 逻辑

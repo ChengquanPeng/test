@@ -290,6 +290,9 @@ public class CodeModelService {
 					}
 				}
 			}
+		} else if (isSmallStock && newOne.getZfjjup() >= 5 && newOne.getHolderNumT3() > 45.0
+				&& newOne.getDzjyp365d() >= 4.5) {
+			isOk1 = true;
 		}
 
 		// 系统指标->自动化监听:底部优质小票，底部大票定增，底部小票大宗，底部小票定增，底部小票减持

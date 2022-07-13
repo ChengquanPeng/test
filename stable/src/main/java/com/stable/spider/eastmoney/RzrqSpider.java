@@ -177,6 +177,8 @@ public class RzrqSpider {
 		}
 		if (shootNotice3.length() > 0) {
 			MsgPushServer.pushSystem1("行情指标3：融资暴涨，股价涨幅在65%以下，散户没有充足的空间融资买入，只有主力可以,(短线):" + shootNotice3.toString());
+		} else {
+			MsgPushServer.pushSystem1("行情指标3：融资暴涨:今日无");
 		}
 	}
 

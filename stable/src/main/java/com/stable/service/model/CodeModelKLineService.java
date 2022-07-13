@@ -208,7 +208,11 @@ public class CodeModelKLineService {
 		sort0Service.attackAndW(newOne, tradeDate);
 		// 底部优质大票
 		if (TagUtil.isDibuOKBig(isSamll, newOne)) {
-			newOne.setShooting11(1);
+			if (s.getName().contains("银行") || s.getName().contains("证券")) {
+				newOne.setShooting11(0);
+			} else {
+				newOne.setShooting11(1);
+			}
 		} else {
 			newOne.setShooting11(0);
 		}
