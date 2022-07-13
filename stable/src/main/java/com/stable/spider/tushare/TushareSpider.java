@@ -59,7 +59,7 @@ public class TushareSpider {
 	 * @param params
 	 * @return
 	 */
-	public String post(JSONObject params) {
+	private String post(JSONObject params) {
 		HttpHeaders headers = new HttpHeaders();
 		// 定义请求参数类型，这里用json所以是MediaType.APPLICATION_JSON
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -78,6 +78,17 @@ public class TushareSpider {
 	private final String stock_basic_fields = "ts_code,symbol,name,area,industry,fullname,enname,market,exchange,curr_type,list_status,list_date,delist_date,is_hs";
 
 	public JSONArray getStockCodeList() {
+		for (int j = 0; j < 3; j++) {
+			try {
+				return getStockCodeListProxy();
+			} catch (Exception e) {
+				ThreadsUtil.sleepRandomSecBetween5And15();
+			}
+		}
+		throw new RuntimeException("getStockCodeList exception");
+	}
+
+	private JSONArray getStockCodeListProxy() {
 		JSONObject json = new JSONObject();
 		json.put("api_name", "stock_basic");
 		// 只取上市的
@@ -118,11 +129,11 @@ public class TushareSpider {
 		for (int j = 0; j < 3; j++) {
 			try {
 				return getStockDaliyTradeProxy(ts_code, trade_date, start_date, end_date);
-			} catch (NullPointerException e) {
-				ThreadsUtil.sleepRandomSecBetween1And30();
+			} catch (Exception e) {
+				ThreadsUtil.sleepRandomSecBetween5And15();
 			}
 		}
-		return null;
+		throw new RuntimeException("getStockDaliyTrade exception");
 	}
 
 	private JSONArray getStockDaliyTradeProxy(String ts_code, String trade_date, String start_date, String end_date) {
@@ -171,7 +182,7 @@ public class TushareSpider {
 	 */
 	private final String trade_cal_fields = "cal_date,is_open,pretrade_date";
 
-	public JSONArray getTradeCal(String start_date, String end_date) {
+	private JSONArray getTradeCalProxy(String start_date, String end_date) {
 		try {
 			JSONObject json = new JSONObject();
 			json.put("api_name", "trade_cal");
@@ -187,4 +198,14 @@ public class TushareSpider {
 		}
 	}
 
+	public JSONArray getTradeCal(String start_date, String end_date) {
+		for (int j = 0; j < 3; j++) {
+			try {
+				return getTradeCalProxy(start_date, end_date);
+			} catch (Exception e) {
+				ThreadsUtil.sleepRandomSecBetween5And15();
+			}
+		}
+		throw new RuntimeException("getTradeCal exception");
+	}
 }
