@@ -290,8 +290,9 @@ public class CodeModelService {
 					}
 				}
 			}
-		} else if (isSmallStock && newOne.getZfjjup() >= 5 && newOne.getHolderNumT3() > 45.0
-				&& newOne.getDzjyp365d() >= 4.5) {
+		}
+		// 底部大宗
+		if (isSmallStock && newOne.getZfjjup() >= 5 && newOne.getHolderNumT3() > 50.0 && newOne.getDzjyp365d() >= 4.5) {
 			isOk1 = true;
 		}
 
