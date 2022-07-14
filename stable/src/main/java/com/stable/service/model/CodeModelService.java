@@ -212,10 +212,10 @@ public class CodeModelService {
 		// 小市值
 		boolean isSmallStock = isSmallStock(newOne.getMkv(), newOne.getActMkv());
 		// N年未大涨
-		financeAndBonus(isweekend, online4Year, newOne, isSmallStock);
+		financeAndBonus(isweekend, newOne, isSmallStock);
 
 		// 以下是系统指标，没有4年直接退出
-		if (!online4Year) {// 4年以上，退出
+		if (!online4Year) {// 4年以下，退出
 			return;
 		}
 
@@ -266,7 +266,7 @@ public class CodeModelService {
 			if (newOne.getFinOK() > 0 || newOne.getBousOK() > 0) {
 
 				/** 小票:增发&大宗&减持 **/
-				if (newOne.getHolderNumT3() > 30.0) {// 三大股东持股比例
+				if (newOne.getHolderNumT3() > 40.0) {// 三大股东持股比例
 					if (newOne.getFinOK() >= 2 && newOne.getBousOK() > 0 && newOne.getHolderNumT3() > 45.0) {// 基本面没有问题
 						isOk7 = true;// 做小做底模型
 						// 行情指标8：底部小票增发：横盘3-4年以上==>1.基本面没问题，2.没涨，3:底部自己人增发，4排除大股东 (已完成的底部自己人增发)
@@ -361,7 +361,7 @@ public class CodeModelService {
 	}
 
 	// 周末计算-至少N年未大涨?
-	private void financeAndBonus(boolean isweekend, boolean online4Year, CodeBaseModel2 newOne, boolean isSmallStock) {
+	private void financeAndBonus(boolean isweekend, CodeBaseModel2 newOne, boolean isSmallStock) {
 		// 周末计算-至少N年未大涨?
 		if (isweekend) {
 			newOne.setFinOK(0);
@@ -533,7 +533,7 @@ public class CodeModelService {
 
 		String code = newOne.getCode();
 		ZengFa zf = chipsZfService.getLastZengFa(code, ZfStatus.DONE.getCode());// 已完成的增发
-		if (chipsZfService.isZfDateOk(zf, pre1Year)) {
+		if (chipsZfService.isZfDateOk(zf, pre3Year)) {
 			newOne.setZflastOkDate(zf.getEndDate());
 			ZengFaExt zfe = chipsZfService.getZengFaExtById(zf.getId());
 			if (zfe != null) {
@@ -543,7 +543,7 @@ public class CodeModelService {
 				newOne.setGsz(1);
 			}
 			// 一年的之中的增发(低于增发价)
-			if (chipsZfService.isZfDateOk(zf, pre1Year)) {
+			if (chipsZfService.isZfDateOk(zf, pre3Year)) {
 				if (zf.getPrice() > 0 && zf.getPrice() > lastTrade.getClosed()) {
 					newOne.setZfPriceLow(
 							Double.valueOf(CurrencyUitl.cutProfit(lastTrade.getClosed(), zf.getPrice())).intValue());
