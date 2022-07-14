@@ -267,7 +267,9 @@ public class CodeModelService {
 
 				/** 小票:增发&大宗&减持 **/
 				if (newOne.getHolderNumT3() > 40.0) {// 三大股东持股比例
-					if (newOne.getFinOK() >= 2 && newOne.getBousOK() > 0 && newOne.getHolderNumT3() > 45.0) {// 基本面没有问题
+					if (newOne.getHolderNumT3() > 45.0
+							// 基本面没有问题:连续盈利或者分红，连续3年盈利
+							&& ((newOne.getFinOK() > 0 && newOne.getBousOK() > 0) || (newOne.getFinOK() > 3))) {
 						isOk7 = true;// 做小做底模型
 						// 行情指标8：底部小票增发：横盘3-4年以上==>1.基本面没问题，2.没涨，3:底部自己人增发，4排除大股东 (已完成的底部自己人增发)
 						if (newOne.getZfStatus() == ZfStatus.DONE.getCode() && newOne.getZfself() == 1
@@ -292,7 +294,7 @@ public class CodeModelService {
 			}
 		}
 		// 底部大宗
-		if (isSmallStock && newOne.getFinOK() > 0 && newOne.getZfjjup() >= 5 && newOne.getHolderNumT3() > 50.0
+		if (isSmallStock && newOne.getFinOK() > 0 && newOne.getZfjjup() >= 4 && newOne.getHolderNumT3() > 50.0
 				&& newOne.getDzjyp365d() >= 5) {
 			isOk1 = true;
 		}
