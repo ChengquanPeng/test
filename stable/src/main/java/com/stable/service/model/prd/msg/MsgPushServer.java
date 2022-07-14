@@ -20,22 +20,22 @@ public class MsgPushServer {
 
 	/** --管理员推送-- */
 	public final static boolean pushSystem1(String content) {
-		if (!email.pushSystemT1(content, content, email.myId)) {
-			return WxPushUtil.pushSystemT1(content, WxPushUtil.myUid);
+		if (!WxPushUtil.pushSystemT1(content, WxPushUtil.myUid)) {
+			return email.pushSystemT1(content, content, email.myId);
 		}
 		return true;
 	}
 
 	public final static boolean pushSystemT1(String title, String content) {
-		if (!email.pushSystemT1(title, content, email.myId)) {
-			return WxPushUtil.pushSystemT1(title + content, WxPushUtil.myUid);
+		if (!WxPushUtil.pushSystemT1(title + content, WxPushUtil.myUid)) {
+			return email.pushSystemT1(title, content, email.myId);
 		}
 		return true;
 	}
 
 	public final static boolean pushSystemHtmlT2(String title, String content) {
-		if (!email.pushSystemHtmlT2(title, content, email.myId)) {
-			return WxPushUtil.pushSystemHtmlT2(title + content, WxPushUtil.myUid);
+		if (!WxPushUtil.pushSystemHtmlT2(title + content, WxPushUtil.myUid)) {
+			return email.pushSystemHtmlT2(title, content, email.myId);
 		}
 		return true;
 	}

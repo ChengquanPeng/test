@@ -8,6 +8,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.stable.constant.Constant;
 import com.stable.service.model.prd.msg.MsgPushServer;
+import com.stable.service.model.prd.msg.WxPushUtil;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -53,8 +54,10 @@ public class UserInfo extends EsBase {
 
 	public boolean getPushWay() {
 		if (id == Constant.MY_ID) {
-			wxpush = MsgPushServer.email.myId;
-			return true;
+//			wxpush = MsgPushServer.email.myId;
+//			return true;
+			wxpush = WxPushUtil.myUid;
+			return false;
 		} else if (StringUtils.isNotBlank(wxpush)) {
 			return false;
 		} else {
