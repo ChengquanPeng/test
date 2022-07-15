@@ -15,12 +15,7 @@ public class CodeBaseModelResp extends CodeBaseModel2 {
 	private String codeName;
 	private double circZb;
 	private String baseInfo;
-	private String sylDesc;
-	private String codeType;
 	private String zfjjInfo;
-	private String sortInfo;
-	private String monitorDesc;
-	private String zfAmtInfo;
 	private String tagInfo;
 	private String bankuai;
 	private String rengong;

@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.MonitorType;
-import com.stable.enums.SylType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
@@ -32,7 +31,6 @@ import com.stable.service.ConceptService;
 import com.stable.service.ReducingHoldingSharesService;
 import com.stable.service.StockBasicService;
 import com.stable.service.monitor.MonitorPoolService;
-import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.TagUtil;
@@ -103,16 +101,7 @@ public class WebModelService {
 		if (dh.getBaseBlue() == 1) {
 			sb1.append("<font color='blue'>蓝:</font>" + dh.getBaseBlueDesc());
 		}
-		if (dh.getBaseGreen() == 1) {
-			sb1.append("<font color='green'>绿:</font>" + dh.getBaseGreenDesc());
-		}
 		resp.setBaseInfo(sb1.toString());
-		// 收益率
-		StringBuffer sb2 = new StringBuffer(SylType.getCodeName(dh.getSylType()));
-		sb2.append(Constant.HTML_LINE).append("ttm/jd").append(Constant.HTML_LINE).append(dh.getSylttm()).append("/")
-				.append(dh.getSyldjd());
-		resp.setSylDesc(sb2.toString());
-
 		// 标签
 		StringBuffer tag = new StringBuffer("");
 		tag.append("<font color='red'>");
@@ -210,7 +199,6 @@ public class WebModelService {
 				if (isMyid) {
 					resp.setZfjjInfo(resp.getZfjjInfo() + resp.getRengong());
 				}
-//				resp.setBuyRea(ToolsUtil.stringInsertByInterval(resp.getBuyRea(), Constant.HTML_LINE, 20));
 				res.add(resp);
 			}
 		}
@@ -234,8 +222,7 @@ public class WebModelService {
 		if (timemonth == 10) {
 			String code = req.getCode();
 			CodeBaseModel2 model = getLastOneByCode2(code);
-			model.setBuyRea(
-					(req.getBuyRea() + " " + req.getSoldRea()).trim() + " " + DateUtil.formatYYYYMMDD2(new Date()));
+			model.setBuyRea(req.getBuyRea().trim() + " " + DateUtil.formatYYYYMMDD2(new Date()));
 			codeBaseModel2Dao.save(model);
 			return;
 		}
@@ -269,7 +256,7 @@ public class WebModelService {
 		}
 		String code = req.getCode();
 		CodeBaseModel2 model = getLastOneByCode2(code);
-		String remark = (req.getBuyRea() + " " + req.getSoldRea()).trim() + " " + DateUtil.formatYYYYMMDD2(new Date());
+		String remark = req.getBuyRea().trim() + " " + DateUtil.formatYYYYMMDD2(new Date());
 		if (date != 1) {
 			MonitorPoolTemp pool = monitorPoolService.getMonitorPoolById(userId, code);
 			if (pls == 2 || pls == 0) {// 2不在池子
@@ -298,7 +285,6 @@ public class WebModelService {
 //				pool.setShotPointCheck(1);
 			}
 			monitorPoolService.toSave(pool);
-			BeanCopy.copy(req, model);
 			// 同步监听
 			if (pool.getMonitor() > MonitorType.NO.getCode()) {
 				model.setMoni(pool.getMonitor());

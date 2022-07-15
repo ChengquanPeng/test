@@ -26,7 +26,6 @@ import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DataChangeService;
 import com.stable.service.DzjyService;
 import com.stable.service.FinanceService;
-import com.stable.service.PlateService;
 import com.stable.service.ReducingHoldingSharesService;
 import com.stable.service.StockBasicService;
 import com.stable.service.ZhiYaService;
@@ -72,8 +71,6 @@ public class CodeModelService {
 	private WebModelService modelWebService;
 	@Autowired
 	private FinanceService financeService;
-	@Autowired
-	private PlateService plateService;
 	@Autowired
 	private ChipsService chipsService;
 	@Autowired
@@ -631,11 +628,9 @@ public class CodeModelService {
 		newOne.setBaseYellow(0);
 		newOne.setBaseRed(0);
 		newOne.setBaseBlue(0);
-		newOne.setBaseGreen(0);
 		newOne.setBaseYellowDesc("");
 		newOne.setBaseRedDesc("");
 		newOne.setBaseBlueDesc("");
-		newOne.setBaseGreenDesc("");
 
 		String code = newOne.getCode();
 		FinanceAnalyzer fa = new FinanceAnalyzer();
@@ -645,11 +640,6 @@ public class CodeModelService {
 		FinanceBaseInfo fbi = fa.getCurrJidu();
 		newOne.setCurrYear(fbi.getYear());
 		newOne.setCurrQuarter(fbi.getQuarter());
-		newOne.setZcfzl(CurrencyUitl.roundHalfUp(fbi.getZcfzl()));
-		newOne.setGsjlr(fa.getCurrYear().getGsjlr());// 年报的
-		newOne.setGoodWill(fbi.getGoodWill());
-		newOne.setGoodWillRatioGsjlr(fbi.getGoodWillRatioGsjlr());
-		newOne.setGoodWillRatioNetAsset(fbi.getGoodWillRatioNetAsset());
 		// 业绩暴涨
 		newOne.setFinDbl(0);
 		if (fa.getCurrYear().getGsjlr() > 0 && fa.getPrevYear().getGsjlr() > 0) {
@@ -1089,12 +1079,6 @@ public class CodeModelService {
 			newOne.setBaseBlue(1);
 			sb3.append("净利同比下降").append(Constant.HTML_LINE);
 		}
-		syl(newOne, fa, fbis);
-		if (newOne.getSylType() == 4 || newOne.getSylType() == 1) {
-		} else {
-			newOne.setBaseBlue(1);
-			sb3.append("资产收益率下降").append(Constant.HTML_LINE);
-		}
 		// 增持
 		String zc = buyBackService.getLastRecordZc(code, pre1Year);
 		if (StringUtils.isNotBlank(zc)) {
@@ -1143,24 +1127,6 @@ public class CodeModelService {
 			newOne.setSusBigBoss(1);
 		} else {
 			newOne.setSusBigBoss(0);
-		}
-	}
-
-	private void syl(CodeBaseModel2 newOne, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
-		FinanceBaseInfo currJidu = fa.getCurrJidu();
-		newOne.setSyl(currJidu.getJqjzcsyl());
-		newOne.setSylttm(plateService.getSylTtm(fbis));
-		newOne.setSyldjd(plateService.getSyldjd(currJidu));// 单季度？
-		newOne.setSylType(0);
-		if (newOne.getSyldjd() > newOne.getSylttm()) {
-			newOne.setSylType(1);// 自身收益率增长
-		}
-		if (newOne.getSylttm() >= 5.0) {// 单季度5%，全年20%
-			if (newOne.getSylType() == 1) {
-				newOne.setSylType(4);// 同时
-			} else {
-				newOne.setSylType(2);// 年收益率超过5.0%*4=20%
-			}
 		}
 	}
 }

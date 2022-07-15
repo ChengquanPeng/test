@@ -376,25 +376,11 @@ table {
 					<td></td>
 				</tr>
 				<tr>
-					<td id="pre_profit"></td>
-					<td>利润空间</td>
-					<td><input type="text" id="profit"></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
 					<td></td>
 					<td>买入理由</td>
 					<td><textarea rows="3" cols="30" id="buyRea" name="buyRea"></textarea></td>
 					<td></td>
-					<td>买入逻辑,有红色的人工确认后备注</td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>卖出逻辑</td>
-					<td><textarea rows="3" cols="30" id="soldRea" name="soldRea"></textarea></td>
-					<td></td>
-					<td>目标位：定增逻辑的价格和之前K线的放量位置。</td>
+					<td>买入逻辑,有红色的人工确认后备注。有利润空间，目标位：定增逻辑的价格和之前K线的放量位置。</td>
 				</tr>
 			</table>
 
@@ -456,28 +442,6 @@ table {
 					code : $('#code').val(),
 					pls : $('#pls').val(),
 					buyRea : $('#buyRea').val(),
-					soldRea : $('#soldRea').val(),
-					profit : $('#profit').val(),
-					dzz : $('#dzz').val(),
-					buyType : $('#buyType').val(),
-					dzOK : $('#dzOK').val(),
-					yj : $('#yj').val(),
-					hybk : $('#hybk').val(),
-					mainBusi : $('#mainBusi').val(),
-					dgdjc : $('#dgdjc').val(),
-					qujz : $('#qujz').val(),
-					legalOk : $('#legalOk').val(),
-					glprojeckOk : $('#glprojeckOk').val(),
-					mainChipOk : $('#mainChipOk').val(),
-					bonus : $('#bonus').val(),
-					jyxjlceOk : $('#jyxjlceOk').val(),
-					acRec : $('#acRec').val(),
-					acPay : $('#acPay').val(),
-					dzjyOk : $('#dzjyOk').val(),
-					recentPriceYear : $('#recentPriceYear').val(),
-					jjOk : $('#jjOk').val(),
-					gdrsOk : $('#gdrsOk').val(),
-					goodWillOk : $('#goodWillOk').val(),
 					timemonth : $('#timemonth').val()
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
@@ -596,97 +560,11 @@ table {
 								"http://basic.10jqka.com.cn/" + code
 										+ "/interactive.html#interactive");
 
-						//====系统值====
-						for ( var key in reData.result) {
-							if (document.getElementById(key)) {
-								$('#' + key).val(reData.result[key]);
-
-								if (document.getElementById("pre_" + key)) {
-									ysw("pre_" + key, reData.result[key]);
-								}
-							}
-						}
 						$('#mkv').html(reData.result.mkv);
-						var buyType = reData.result.buyType;
-						//买入
-						if (buyType > 0) {
-							$('#buyType').val(buyType);
-							ysw("pre_buyType", 2);
-						} else {
-							ysw("pre_buyType", 1);
-						}
-						//业绩
-						var yj = reData.result.yj;
-						if (yj > 0) {
-							$('#yj').val(yj);
-							if (yj == 6) {
-								ysw("pre_yj", 1);
-							} else {
-								ysw("pre_yj", 2);
-							}
-						} else {
-							ysw("pre_yj", 1);
-						}
-						//板块
-						var hybk = reData.result.hybk;
-						if (hybk > 0) {
-							$('#hybk').val(hybk);
-							if (hybk == 1 || hybk == 2 || hybk == 6) {
-								ysw("pre_hybk", 2);
-							} else {
-								ysw("pre_hybk", 0);
-							}
-						} else {
-							ysw("pre_hybk", 1);
-						}
-						//ROE
-						var sylttm = reData.result.sylttm;
-						$('#sylttm').html(sylttm);
-						$('#syldjd').html(reData.result.syldjd);
-						if (sylttm > 0) {
-							if (sylttm > 3) {
-								ysw("pre_sylttm", 2);
-							} else {
-								ysw("pre_sylttm", 1);
-							}
-						} else {
-							ysw("pre_sylttm", 0);
-						}
 						//资产负债率
 						var zcfzl = reData.result.zcfzl;
 						$('#zcfzl').html(zcfzl);
-						if (zcfzl > 0) {
-							if (zcfzl < 40) {
-								ysw("pre_zcfzl", 2);
-							} else if (zcfzl < 76) {
-								ysw("pre_zcfzl", 1);
-							} else {
-								ysw("pre_zcfzl", 0);
-							}
-						} else {
-							ysw("pre_zcfzl", 0);
-						}
-						//利润空间
-						var profit = reData.result.profit;
-
-						if (profit > 0) {
-							if (zcfzl < 50) {
-								ysw("pre_profit", 1);
-							} else {
-								ysw("pre_profit", 2);
-							}
-						} else {
-							ysw("pre_profit", 0);
-						}
-						//
 						$('#plst').html(reData.result.plst);
-						//dgdjc
-						var dgdjc = reData.result.dgdjc;
-						if (dgdjc == 2) {
-							ysw("pre_dgdjc", 2);
-						} else {
-							ysw("pre_dgdjc", 0);
-						}
 					}
 				});
 	</script>
