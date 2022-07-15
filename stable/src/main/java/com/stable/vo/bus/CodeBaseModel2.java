@@ -40,7 +40,7 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int shooting11 = 0;// 底部未涨大票
 	@Field(type = FieldType.Integer)
-	private int shooting6661 = 0;// 优质票大宗
+	private int shooting6661 = 0;// 小底-大宗
 
 	// 技术面
 	@Field(type = FieldType.Integer)
