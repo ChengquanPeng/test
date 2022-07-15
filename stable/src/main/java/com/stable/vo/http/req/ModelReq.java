@@ -59,6 +59,8 @@ public class ModelReq {
 	int whiteHors = 0;
 	int finDbl = 0;
 	int shooting6661;
+	String rzrq1;
+	String rzrq2;
 
 	boolean trymsg;
 

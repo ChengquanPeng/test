@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.stable.service.model.WebModelService;
 import com.stable.service.model.prd.UserService;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.JsonResult;
@@ -19,8 +18,6 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
-	@Autowired
-	private WebModelService modelWebService;
 
 	/**
 	 * 根据ID查询用户
@@ -140,60 +137,7 @@ public class UserController {
 	}
 
 	/**
-	 * pvlist-私有列表
-	 */
-	@RequestMapping(value = "/my/pvlist")
-	public ResponseEntity<JsonResult> pvlist() {
-		JsonResult r = new JsonResult();
-		try {
-			r.setResult(this.modelWebService.pvlist);
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
-
-	/**
-	 * pvlist-私有列表
-	 */
-	@RequestMapping(value = "/my/addpvlist")
-	public ResponseEntity<JsonResult> addpvlist(String pvlist) {
-		JsonResult r = new JsonResult();
-		try {
-			modelWebService.addPvList(pvlist == null ? "" : pvlist.trim());
-			r.setResult(this.modelWebService.pvlist);
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
-
-	/**
-	 * pvlist-私有列表
-	 */
-	@RequestMapping(value = "/sendmsg")
-	public ResponseEntity<JsonResult> sendmsg(int type, String msg) {
-		JsonResult r = new JsonResult();
-		try {
-
-			r.setResult(this.modelWebService.pvlist);
-			r.setStatus(JsonResult.OK);
-		} catch (Exception e) {
-			r.setResult(e.getClass().getName() + ":" + e.getMessage());
-			r.setStatus(JsonResult.ERROR);
-			e.printStackTrace();
-		}
-		return ResponseEntity.ok(r);
-	}
-
-	/**
-	 * 更新
+	 * 发送邮件
 	 */
 	@RequestMapping(value = "/user/manul/sendmail")
 	public ResponseEntity<JsonResult> sendmail(String id, int stype, String titlet, String cenntt) {

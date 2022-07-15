@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
-import com.stable.constant.RedisConstant;
 import com.stable.enums.MonitorType;
 import com.stable.enums.SylType;
 import com.stable.enums.ZfStatus;
@@ -36,10 +35,7 @@ import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.BeanCopy;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
-import com.stable.utils.ErrorLogFileUitl;
-import com.stable.utils.RedisUtil;
 import com.stable.utils.TagUtil;
-import com.stable.utils.ThreadsUtil;
 import com.stable.vo.ReducingHoldingSharesStat;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
@@ -67,9 +63,6 @@ public class WebModelService {
 	private MonitorPoolService monitorPoolService;
 	@Autowired
 	private ReducingHoldingSharesService reducingHoldingSharesService;
-	@Autowired
-	private RedisUtil redisUtil;
-	public String pvlist = "";
 
 	public static long WAN = CurrencyUitl.WAN_N.longValue();
 
@@ -199,30 +192,6 @@ public class WebModelService {
 		return resp;
 	}
 
-	@javax.annotation.PostConstruct
-	public void initpvlist() {
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					ThreadsUtil.sleepRandomSecBetween5And15();
-					pvlist = redisUtil.get(RedisConstant.RDS_PV_STOCK_LIST, "");
-				} catch (Exception e) {
-					ErrorLogFileUitl.writeError(e, "错误的pvlist init", "", "");
-					e.printStackTrace();
-				}
-			}
-		}).start();
-	}
-
-	public void addPvList(String list) {
-		redisUtil.set(RedisConstant.RDS_PV_STOCK_LIST, list);
-		pvlist = list;
-	}
-
-	private boolean isPvlist(String code) {
-		return pvlist.contains(code);
-	}
-
 	public List<CodeBaseModelResp> getListForWeb(ModelReq mr, EsQueryPageReq querypage, long userId) {
 		log.info("CodeBaseModel getListForWeb mr={}", mr);
 		boolean isMyid = (userId == Constant.MY_ID);
@@ -231,14 +200,10 @@ public class WebModelService {
 		}
 		List<CodeBaseModel2> list = getList(mr, querypage);
 		List<CodeBaseModelResp> res = new LinkedList<CodeBaseModelResp>();
-		boolean isFilter = StringUtils.isBlank(mr.getCode());
 		if (list != null) {
 			for (CodeBaseModel2 dh : list) {
 				// 备注
 				if (!isMyid) {
-					if (isFilter && isPvlist(dh.getCode())) {// 私有列表：除非指定code查询，否则过滤
-						continue;
-					}
 					dh.setBuyRea(this.monitorPoolService.getMonitorPoolById(userId, dh.getCode()).getRemark());
 				}
 				CodeBaseModelResp resp = getModelResp(mr.isTrymsg(), dh, isMyid);
@@ -432,6 +397,19 @@ public class WebModelService {
 			double mkv2 = Double.valueOf(mr.getMkv2());
 			if (mkv2 > 0) {
 				bqb.must(QueryBuilders.rangeQuery("mkv").gte(mkv2));
+			}
+		}
+
+		if (StringUtils.isNotBlank(mr.getRzrq1())) {
+			double rzrq1 = Double.valueOf(mr.getRzrq1());
+			if (rzrq1 > 0) {
+				bqb.must(QueryBuilders.rangeQuery("rzrqRate").lte(rzrq1));
+			}
+		}
+		if (StringUtils.isNotBlank(mr.getRzrq2())) {
+			double rzrq2 = Double.valueOf(mr.getRzrq2());
+			if (rzrq2 > 0) {
+				bqb.must(QueryBuilders.rangeQuery("rzrqRate").gte(rzrq2));
 			}
 		}
 
