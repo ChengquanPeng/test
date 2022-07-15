@@ -304,7 +304,7 @@ public class WebModelService {
 		}
 		String code = req.getCode();
 		CodeBaseModel2 model = getLastOneByCode2(code);
-		String remark = (req.getBuyRea() + " " + req.getSoldRea()).trim();
+		String remark = (req.getBuyRea() + " " + req.getSoldRea()).trim() + " " + DateUtil.formatYYYYMMDD2(new Date());
 		if (date != 1) {
 			MonitorPoolTemp pool = monitorPoolService.getMonitorPoolById(userId, code);
 			if (pls == 2 || pls == 0) {// 2不在池子

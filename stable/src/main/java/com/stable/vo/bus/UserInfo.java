@@ -1,14 +1,9 @@
 package com.stable.vo.bus;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-
-import com.stable.constant.Constant;
-import com.stable.service.model.prd.msg.MsgPushServer;
-import com.stable.service.model.prd.msg.WxPushUtil;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -51,18 +46,4 @@ public class UserInfo extends EsBase {
 
 	@Field(type = FieldType.Text)
 	private String lastLogin;// 最后登录
-
-	public boolean getPushWay() {
-		if (id == Constant.MY_ID) {
-//			wxpush = MsgPushServer.email.myId;
-//			return true;
-			wxpush = WxPushUtil.myUid;
-			return false;
-		} else if (StringUtils.isNotBlank(wxpush)) {
-			return false;
-		} else {
-			wxpush = id + MsgPushServer.qqmail;
-			return true;
-		}
-	}
 }
