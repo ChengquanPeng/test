@@ -97,6 +97,18 @@ public class CodeModelService {
 	@Autowired
 	private ReducingHoldingSharesService reducingHoldingSharesService;
 
+//	@javax.annotation.PostConstruct
+//	public void test() {
+//		new Thread(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				runModel1(20220714, false);
+//				System.err.println("runModel1 done");
+//			}
+//		}).start();
+//	}
+
 	public synchronized void runModel1(int date, boolean isweekend) {
 		try {
 			runByJobv2(date, isweekend);
@@ -111,6 +123,7 @@ public class CodeModelService {
 	private int pre1Year = 0;// 一年以前
 	private int pre3Year = 0;// 三年以前
 	private int pre4Year = 0;// 四年以前
+	private double yzdzamt = 0.3 * WebModelService.WAN;
 
 	private synchronized void runByJobv2(int t, boolean isweekend) {
 		tradeDate = t;
@@ -297,6 +310,11 @@ public class CodeModelService {
 		if (isSmallStock && newOne.getFinOK() > 0 && newOne.getZfjjup() >= 4 && newOne.getHolderNumT3() > 50.0
 				&& newOne.getDzjyp365d() >= 5) {
 			isOk1 = true;
+		}
+		if (isOk7 && newOne.getDzjy365d() >= yzdzamt) {
+			newOne.setShooting6661(1);
+		} else {
+			newOne.setShooting6661(0);
 		}
 
 		// 系统指标->自动化监听:底部优质小票，底部大票定增，底部小票大宗，底部小票定增，底部小票减持

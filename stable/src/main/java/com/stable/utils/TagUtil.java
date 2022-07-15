@@ -77,7 +77,9 @@ public class TagUtil {
 	public static String getSystemPoint(CodeBaseModel2 dh, String splitor) {
 		String s = "";
 		// --中长--
-		if (dh.getShooting7() > 0) {
+		if (dh.getShooting6661() > 0) {
+			s += "底部优质小票-大宗" + splitor;
+		} else if (dh.getShooting7() > 0) {
 			s += "底部优质小票" + splitor;
 		} else if (dh.getShooting9() > 0) {
 			s += "底部小票" + splitor;

@@ -58,6 +58,7 @@ public class ModelReq {
 	int shooting53 = 0;
 	int whiteHors = 0;
 	int finDbl = 0;
+	int shooting6661;
 
 	boolean trymsg;
 

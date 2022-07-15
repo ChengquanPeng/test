@@ -465,6 +465,9 @@ public class WebModelService {
 		if (mr.getShooting5() == 1) {
 			bqb.must(QueryBuilders.rangeQuery("shooting5").gte(1));// 这是一个时间值
 		}
+		if (mr.getShooting6661() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting6661", 1));
+		}
 		if (mr.getShooting6() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting6", 1));
 		}
