@@ -123,7 +123,7 @@ public class CodeModelService {
 	private int pre1Year = 0;// 一年以前
 	private int pre3Year = 0;// 三年以前
 	private int pre4Year = 0;// 四年以前
-	private double yzdzamt = 0.3 * WebModelService.WAN;
+	private double yzdzamt = 0.45 * WebModelService.WAN;
 
 	private synchronized void runByJobv2(int t, boolean isweekend) {
 		tradeDate = t;

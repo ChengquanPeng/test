@@ -366,6 +366,7 @@ public class WebModelService {
 			int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, days));
 			CodeBaseModel2 model = getLastOneByCode2(code);
 			model.setShooting30(date);
+			model.setShooting3(0);
 			codeBaseModel2Dao.save(model);
 		}
 	}

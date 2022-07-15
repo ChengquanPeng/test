@@ -21,7 +21,6 @@ import com.stable.service.StockBasicService;
 import com.stable.service.model.Sort1ModeService;
 import com.stable.service.model.WebModelService;
 import com.stable.service.model.prd.msg.MsgPushServer;
-import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HttpUtil;
@@ -83,45 +82,15 @@ public class RzrqSpider {
 	}
 
 //	@javax.annotation.PostConstruct
-//	private void a() {
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				ThreadsUtil.sleepRandomSecBetween5And15();
-//				int date = 20220706;
-//				int startDate = DateUtil.getPre6MONTH(DateUtil.getTodayIntYYYYMMDD());
-//				Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
-//				for (String code : histMap.keySet()) {
-//					CodeBaseModel2 cbm = histMap.get(code);
-//					if (TagUtil.isDibu11(cbm) && cbm.getMkv() <= 200.0) {
-//						double up = rzrqService.plan2(code, startDate);
-//						if (code.equals("603789")) {
-//							System.err.println("603789:" + up);
-//						}
-//						if (up >= 30) {
-//							System.err.println("get code1:" + code);
-//							if (sort1ModeService.xyIs30DayTodayPriceOk(code, date, 40, EsQueryPageUtil.queryPage60)) {
-//								System.err.println("get code===:" + code);
-//							}
-//
-//						} else if (up >= 20) {
-//							System.err.println("get code2:" + code);
-//							if (sort1ModeService.xyIs30DayTodayPriceOk(code, date, 30, EsQueryPageUtil.queryPage60)) {
-//								System.err.println("get code====:" + code);
-//							}
-//						}
-//					}
-//				}
-//				System.err.println("===done==");
-//				System.exit(0);
-//			}
-//		}).start();
+//	public void test() {
+//		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
+//		int date = 20220714;
+//		exeRzrqTime(histMap.keySet(), date);
+//		System.exit(0);
 //	}
 
-	private double vaildLine = 18.0;// 超过平均数15%认为有效
-	private double validBlance = 2.5 * CurrencyUitl.YI_N.doubleValue();// 至少2.5亿
-	private double checkLine = 65.0;// 低于65%
-	private double plan2VaildLine = 25.0;// 超过平均数35%认为有效
+	private double checkLine = 40.0;// 低于40%
+	private double plan2VaildLine = 30.0;// 超过平均数35%认为有效
 
 	// 底部融资余额飙升。顶部融券余额飙升。（300339）
 	// 融资融券可以大概率判断多空双发的态度。
@@ -131,33 +100,25 @@ public class RzrqSpider {
 		List<CodeBaseModel2> update = new LinkedList<CodeBaseModel2>();
 		StringBuffer shootNotice3 = new StringBuffer();
 		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
-		boolean isOk = false;
 		for (String code : codes) {
-			isOk = false;
 			CodeBaseModel2 cbm = histMap.get(code);
 			if (cbm == null) {
 				cbm = new CodeBaseModel2();
 				cbm.setId(code);
 				cbm.setCode(code);
 			}
+			cbm.setRzrqRate(0);
 
 			if (TagUtil.isDibu11(cbm) && cbm.getMkv() <= 200.0 && date > cbm.getShooting30()) {
 				// 方案1:突然拉升的融资融券，散户没有时间买入,200亿以下
 				// 2：融资满足条件
-				if (rzrqService.rzrqAvg20d(code, vaildLine, validBlance)) {
-					// 3:涨幅在65%以下
-					if (sort1ModeService.xyIs30DayTodayPriceOk(code, date, checkLine, EsQueryPageUtil.queryPage30)) {
-						isOk = true;
-					}
-				}
-
-				// 方案2：底部融资融券萎缩发育
-				if (!isOk) {
-					isOk = rzrqService.plan2(code, startDate) >= plan2VaildLine;
+				// 3:涨幅在65%以下
+				if (sort1ModeService.xyIs30DayTodayPriceOk(code, date, checkLine, EsQueryPageUtil.queryPage30)) {
+					cbm.setRzrqRate(rzrqService.plan2(code, startDate));
 				}
 			}
 
-			if (isOk) {
+			if (cbm.getRzrqRate() >= plan2VaildLine) {
 				if (cbm.getShooting3() == 0) {
 					shootNotice3.append(stockBasicService.getCodeName2(code)).append(",");
 				}

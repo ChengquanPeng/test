@@ -15,67 +15,18 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.RzrqDaliyDao;
-import com.stable.es.dao.base.RztjDao;
 import com.stable.utils.CurrencyUitl;
 import com.stable.vo.bus.RzrqDaliy;
-import com.stable.vo.bus.Rztj;
 
 /**
  * 
- * 大宗
+ * 融资融券
  */
 @Service
 //@Log4j2
 public class RzrqService {
 	@Autowired
 	private RzrqDaliyDao rzrqDaliyDao;
-	@Autowired
-	private RztjDao rztjDao;
-
-	Pageable pageable20 = PageRequest.of(EsQueryPageUtil.queryPage20.getPageNum(),
-			EsQueryPageUtil.queryPage20.getPageSize());
-
-	public boolean rzrqAvg20d(String code, double validPersentLine, double validBlance) {
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable20).build();
-
-		Page<RzrqDaliy> page = rzrqDaliyDao.search(sq);
-		if (page != null && !page.isEmpty() && page.getContent().size() > 1) {
-			RzrqDaliy daliy = page.getContent().get(0);
-			if (daliy.getBalance() < validBlance) {// 融资余额太少
-				return false;
-			}
-			double t = 0.0d;
-			for (int i = 0; i < page.getContent().size(); i++) {
-				RzrqDaliy rd = page.getContent().get(i);
-				if (i != 0) {// 除去最新的一天
-					t += rd.getBalance();
-				}
-			}
-			double avg = t / (page.getContent().size() - 1);// 除去最新的一天
-			if (CurrencyUitl.cutProfit(CurrencyUitl.roundHalfUp(avg), daliy.getBalance()) > validPersentLine) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public Rztj getLastRztj(String code) {
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).build();
-		Page<Rztj> page = rztjDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent().get(0);
-		}
-		Rztj rz = new Rztj();
-		rz.setCode(code);
-		return rz;
-	}
 
 	Pageable pageable60 = PageRequest.of(EsQueryPageUtil.queryPage60.getPageNum(),
 			EsQueryPageUtil.queryPage60.getPageSize());
@@ -114,9 +65,5 @@ public class RzrqService {
 			return CurrencyUitl.cutProfit(CurrencyUitl.roundHalfUp(r2), CurrencyUitl.roundHalfUp(r1));
 		}
 		return 0.0;
-	}
-
-	public static void main(String[] args) {
-		System.err.println(CurrencyUitl.cutProfit(CurrencyUitl.roundHalfUp(1.65), CurrencyUitl.roundHalfUp(2.50)));
 	}
 }
