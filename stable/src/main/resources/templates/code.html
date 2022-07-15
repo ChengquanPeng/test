@@ -1,5 +1,6 @@
 <html>
 <head>
+<title th:text="${code}"></title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <style type="text/css">
 .bor {
@@ -21,10 +22,10 @@ trtd {
 <script type="text/javascript" src="/html/static/addsinaurl.js"></script>
 </head>
 <body>
-	<br />------------------------------------------------------------
+	------------------------------------------------------------
 	<br />
 	<div>
-		<b>代码：<span th:text="${code}"></span>-<span
+		<b>基本信息：<span th:text="${code}"></span>-<span
 			th:text="${codedetail.codeName}"></b>
 	</div>
 	------------------------------------------------------------
@@ -42,14 +43,12 @@ trtd {
 		同花顺-亮点:<span th:text="${codeBasic.thsLightspot}"></span>
 	</div>
 	<div>
-		公司网站:http://<span th:text="${codeBasic.webSite}"></span>
+		公司网站:<a th:href="@{'http://'+${codeBasic.webSite}}" target="_blank">http://<span
+			th:text="${codeBasic.webSite}"></span></a>
 	</div>
 	<div>
-		同花顺板块：<span th:text="${codeBasic.thsIndustry}"></span>
-	</div>
-	<div>
-		同花顺概念：<span th:each="cp: ${concepts}"><span
-			th:text="${cp.conceptName}"></span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+		同花顺板块：<span th:text="${codeBasic.thsIndustry}"></span>&nbsp;&nbsp;&nbsp;&nbsp;概念：<span
+			th:text="${concepts}"></span>
 	</div>
 	<div>
 		分红概况:<span th:text="${fhgk}"></span>
@@ -71,11 +70,23 @@ trtd {
 		&nbsp;&nbsp;--><a target="_blank"
 			th:href="@{'http://f10.eastmoney.com/f10_v2/CapitalOperation.aspx?code='+${dfcfcode}+'#xmjd-0'}">东方财富</a>
 	</div>
-	<div>
-		<a target="_blank"
-			th:href="@{'http://data.eastmoney.com/bgcz/detail/'+${code}+'.html'}">并购重组记录</a>
-	</div>
-	
+
+	<br />------------------------------------------------------------
+	<br />
+	<b>博弈:</b>
+	<br />------------------------------------------------------------
+	<br />
+	<div th:utext="${gameinfo}"></div>
+	<div id="myurls"></div>
+
+	<br />------------------------------------------------------------
+	<br />
+	<b>基本面分析:</b>
+	<br />------------------------------------------------------------
+	<br />
+	<div th:utext="${codedetail.baseInfo}"></div>
+
+
 	<br />------------------------------------------------------------
 	<br />
 	<b>财务报告：<span th:text="${codedetail.currYear}"></span>-<span
@@ -129,8 +140,7 @@ trtd {
 		加权净资产收益率:<span th:text="${finance.jqjzcsyl}"></span>
 	</div>
 	<div>
-		净资产收益率(单季度|ttm):<span th:text="${finance.syldjd}"></span>|<span
-			th:text="${codedetail.sylttm}"></span>
+		净资产收益率(单季度):<span th:text="${finance.syldjd}"></span>
 	</div>
 	<div>
 		资产负债率:<span th:text="${finance.zcfzl}"></span>%
@@ -142,23 +152,6 @@ trtd {
 		毛利率:<span th:text="${finance.mll}"></span>
 	</div>
 	<br />
-	<br />------------------------------------------------------------
-	<br />
-	<b>基本面分析:</b>
-	<br />------------------------------------------------------------
-	<br />
-	<div th:utext="${codedetail.baseInfo}"></div>
-	<br />------------------------------------------------------------
-	<br />
-	<b>博弈:</b>
-	<br />------------------------------------------------------------
-	<br />
-	<div>
-		5%股东占比:<span th:text="${codedetail.holderNumP5}"></span>% 前3大股东占比:<span
-			th:text="${codedetail.holderNumT3}"></span>% 流通市值:<span
-			th:text="${codedetail.mkv}"></span>亿,持股5%以上股东占比:<span
-			th:text="${codedetail.circZb}"></span>%
-	</div>
 	<div>
 		外资持股：比例：<span th:text="${fcratio}"></span>%,金额：<span
 			th:text="${fcamt}"></span>元,数量：<span th:text="${fcvol}"></span>股
@@ -167,34 +160,6 @@ trtd {
 		&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank"
 			th:href="@{'http://data.eastmoney.com/hsgtcg/StockHdStatistics.aspx?stock='+${code}}">（东方财富）</a>
 	</div>
-	<div>
-		<a target="_blank"
-			th:href="@{'http://data.eastmoney.com/dzjy/detail/'+${code}+'.html'}">大宗交易记录</a>
-	</div>
-	<br />
-	<div>
-		最近增发记录:<span th:text="${lastZf}"></span>
-	</div>
-	<div>
-		1年前到现在解禁记录:</span>
-		<table border='1' cellspacing='0' cellpadding='0'>
-			<tr>
-				<th>解禁日期</th>
-				<th>解禁类型</th>
-				<th>解禁占比</th>
-				<th>解禁成本</th>
-			</tr>
-			<tr th:each="jj : ${jmsg}">
-				<td th:text="${jj.date}"></td>
-				<td th:text="${jj.type}"></td>
-				<td th:text="${jj.zzb}"></td>
-				<td th:text="${jj.cost}"></td>
-			</tr>
-		</table>
-	</div>
-	<br />
-	<br />
-	<br />
 	<br />
 	<br />------------------------------------------------------------
 	<br />
@@ -213,4 +178,24 @@ trtd {
 		<a target="_blank" href="/web/base.html">其他财务=></a>
 	</div>
 </body>
+<script type="text/javascript" th:inline="javascript">
+	function getMyURLs() {
+		var myCode = [[${code}]];
+		var ustr = 'admin';
+		var v = "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+myCode+"/event.html#stockpage'>大事提醒</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='/web/chips/reduce/list?code="
+				+ myCode + "'>减持历史</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/dzjy/detail/"+myCode+".html'>大宗</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='/web/comon/zengFa.html?code="
+				+ myCode + "&ustr=" + ustr + "'>定增历史</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+myCode+".html'>融资融券</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='/web/admin/rzrqm.html?code="
+				+ myCode + "'>融资排除</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/gpzy/detail/"+myCode+".html'>股票质押</a>";
+		v += "&nbsp;&nbsp;<a target='_blank' href='http://data.eastmoney.com/notices/stock/"+myCode+".html'>公告</a>";
+
+		return v;
+	}
+	document.getElementById("myurls").innerHTML = getMyURLs();
+</script>
 </html>
