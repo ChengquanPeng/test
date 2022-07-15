@@ -138,11 +138,12 @@ public class CodeModelService {
 		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();
 		// 到期提醒
 		StringBuffer sbc = new StringBuffer();
+		StringBuffer xddz = new StringBuffer();
 
 		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
 		for (StockBaseInfo s : codelist) {
 			try {
-				this.processingByCode(s, poolMap, poolList, listLast, histMap, isweekend, sbc);
+				this.processingByCode(s, poolMap, poolList, listLast, histMap, isweekend, sbc, xddz);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -173,7 +174,8 @@ public class CodeModelService {
 	}
 
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
-			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, boolean isweekend, StringBuffer sbc) {
+			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, boolean isweekend, StringBuffer sbc,
+			StringBuffer xddz) {
 		String code = s.getCode();
 		// 股票池
 		CodeBaseModel2 newOne = histMap.get(s.getCode());
@@ -282,7 +284,7 @@ public class CodeModelService {
 				if (newOne.getHolderNumT3() > 40.0) {// 三大股东持股比例
 					if (newOne.getHolderNumT3() > 45.0
 							// 基本面没有问题:连续盈利或者分红，连续3年盈利
-							&& ((newOne.getFinOK() > 0 && newOne.getBousOK() > 0) || (newOne.getFinOK() > 3))) {
+							&& ((newOne.getFinOK() > 0 && newOne.getBousOK() > 0) || (newOne.getFinOK() >= 2))) {
 						isOk7 = true;// 做小做底模型
 						// 行情指标8：底部小票增发：横盘3-4年以上==>1.基本面没问题，2.没涨，3:底部自己人增发，4排除大股东 (已完成的底部自己人增发)
 						if (newOne.getZfStatus() == ZfStatus.DONE.getCode() && newOne.getZfself() == 1
@@ -312,6 +314,9 @@ public class CodeModelService {
 			isOk1 = true;
 		}
 		if (isOk7 && newOne.getDzjy365d() >= yzdzamt) {
+			if (newOne.getShooting6661() == 0) {
+				xddz.append(stockBasicService.getCodeName2(code)).append(",");
+			}
 			newOne.setShooting6661(1);
 		} else {
 			newOne.setShooting6661(0);
