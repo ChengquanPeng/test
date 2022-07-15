@@ -353,6 +353,9 @@ public class CodeModelService {
 				pool.setRemark(Constant.AUTO_MONITOR + TagUtil.getSystemPoint(newOne, Constant.FEN_HAO));
 			}
 		}
+		if (newOne.getPls() != 2 && newOne.getShooting6661() == 1 && pool.getUpTodayChange() > 0) {
+			pool.setUpTodayChange(3);
+		}
 		// 同步监听
 		if (pool.getMonitor() > MonitorType.NO.getCode()) {
 			newOne.setMoni(pool.getMonitor());
@@ -360,20 +363,6 @@ public class CodeModelService {
 			newOne.setMoni(0);
 		}
 	}
-
-//	@javax.annotation.PostConstruct
-//	private void a() {
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				com.stable.utils.ThreadsUtil.sleepSleepSeconds(8);
-//				CodeBaseModel2 newOne = new CodeBaseModel2();
-//				newOne.setCode("603797");
-//				finBonus(true, true, newOne);
-//				System.err.println(newOne.getFinOK() + "," + newOne.getBousOK());
-//			}
-//		}).start();
-//	}
 
 	// 小市值股票(流通市值小于70亿，5%以下的流通小于50亿)
 	public boolean isSmallStock(double mkv, double actMkv) {
