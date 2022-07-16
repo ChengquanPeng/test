@@ -101,7 +101,7 @@ public class TagUtil {
 		}
 		// --短线--
 		if (dh.getShooting3() > 0) {
-			s += "底部融资余额飙升-确认是主力在融资买入?(短线1)" + splitor;
+			s += "底部融资余额飙升-主力融资买入?" + splitor;
 		}
 		if (dh.getShooting5() > 0) {
 			s += "股价极速拉升:妖股?龙抬头?(短线2)" + splitor;
