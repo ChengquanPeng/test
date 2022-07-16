@@ -49,12 +49,6 @@ public class CodeBaseModel2 extends EsBase {
 	private int shooting10 = 0;// 行情指标10：PRE/一年新高
 	@Field(type = FieldType.Integer)
 	private int shootingw = 0;// 行情指标w:横盘w
-	@Field(type = FieldType.Integer)
-	private int shooting51 = 0;// 均线排列
-	@Field(type = FieldType.Integer)
-	private int shooting52 = 0;// 一阳穿N线
-	@Field(type = FieldType.Integer)
-	private int shooting53 = 0;// 交易量活跃
 
 	@Field(type = FieldType.Integer)
 	private int qb = 0;// 处于起爆
@@ -70,6 +64,10 @@ public class CodeBaseModel2 extends EsBase {
 	private int zyxing = 0;// 中阳带星
 	@Field(type = FieldType.Integer)
 	private int zyxingt = 0;// 中阳带星(T)
+	@Field(type = FieldType.Integer)
+	private int dibuQixingV2 = 0;// 旗形
+	@Field(type = FieldType.Integer)
+	private int dibuQixingV22 = 0;// 旗形2
 
 	@Field(type = FieldType.Integer)
 	private int prd1 = 0;// 产品1

@@ -17,7 +17,6 @@ import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
-import com.stable.service.model.prd.Prd1Service;
 import com.stable.service.model.prd.QibaoService;
 import com.stable.service.model.prd.msg.BizPushService;
 import com.stable.service.monitor.MonitorPoolService;
@@ -69,8 +68,8 @@ public class CodeModelKLineService {
 	private CodeModelService codeModelService;
 	@Autowired
 	private BizPushService bizPushService;
-	@Autowired
-	private Prd1Service prd1Service;
+//	@Autowired
+//	private Prd1Service prd1Service;
 
 //	@Autowired
 //	private com.stable.spider.tushare.TushareSpider tushareSpider;
@@ -198,8 +197,6 @@ public class CodeModelKLineService {
 			newOne.setSortChips(1);
 			log.info("{} 主力筹码收集", code);
 		}
-		// 均线排列，一阳穿N线
-		LineAvgPrice.avgLineUp(s, newOne, avgService, code, tradeDate);
 		// 基本面-疑似白马
 		susWhiteHorses(code, newOne);
 		// 短线模型(箱体震荡-已废弃，实际是半年新高)
@@ -218,9 +215,9 @@ public class CodeModelKLineService {
 		}
 		// 起爆点
 		qibaoService.qibao(tradeDate, newOne, pool, isSamll, qx, szx);
-		if (p1list != null) {
-			prd1Service.prd(tradeDate, newOne, pool, isSamll);
-		}
+		// if (p1list != null) {
+		// prd1Service.prd(tradeDate, newOne, pool, isSamll);
+		// }
 	}
 
 	private void year1(CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade) {

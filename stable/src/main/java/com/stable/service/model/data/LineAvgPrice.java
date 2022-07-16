@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.utils.CurrencyUitl;
-import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.StockAvgBase;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
@@ -43,16 +42,13 @@ public class LineAvgPrice {
 	/**
 	 * 均线排列
 	 */
-	public static void avgLineUp(StockBaseInfo s, CodeBaseModel2 cbm, AvgService avgService, String code, int date) {
+	public static void avgLineUp1(StockBaseInfo s, AvgService avgService, String code, int date) {
 		try {
 			// 最近5条-倒序
 			List<StockAvgBase> clist5 = avgService.queryListByCodeForModelWithLastN(code, date,
 					EsQueryPageUtil.queryPage5, true, false);
 			// 是否上升趋势
 			if (clist5 != null && clist5.size() >= 5) {
-				cbm.setShooting51(1);
-				cbm.setShooting52(0);
-				cbm.setShooting53(1);
 
 				double unp5share = 0;// 总流通(万股)
 				if (s.getFloatShare() > 0) {
@@ -70,7 +66,7 @@ public class LineAvgPrice {
 							&& sa.getAvgPriceIndex20() <= sa.getAvgPriceIndex10()
 							&& sa.getAvgPriceIndex30() < sa.getAvgPriceIndex5()) {
 					} else {
-						cbm.setShooting51(0);
+
 					}
 
 					// 一阳穿N线
@@ -78,7 +74,7 @@ public class LineAvgPrice {
 							&& sa.getClosePrice() >= sa.getAvgPriceIndex20()
 							&& sa.getClosePrice() >= sa.getAvgPriceIndex10()
 							&& sa.getClosePrice() >= sa.getAvgPriceIndex5()) {
-						cbm.setShooting52(1);
+
 					}
 
 					// 交易活跃
@@ -87,16 +83,13 @@ public class LineAvgPrice {
 						if (CurrencyUitl.roundHalfUp(t / unp5share) >= 3.5) {// 实际换手3.5%以上
 
 						} else {
-							cbm.setShooting53(0);
+
 						}
 					} else {
-						cbm.setShooting53(0);
+
 					}
 				}
 			} else {
-				cbm.setShooting51(0);
-				cbm.setShooting52(0);
-				cbm.setShooting53(0);
 			}
 		} catch (Exception e) {
 			log.info("code={}, date={} 计算出错.", code, date);

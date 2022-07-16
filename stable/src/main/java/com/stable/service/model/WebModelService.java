@@ -119,12 +119,6 @@ public class WebModelService {
 			tag.append("中阳十字星").append(Constant.HTML_LINE);
 		}
 		tag.append("</font>");
-		if (dh.getShooting51() == 1) {
-			tag.append("均线多头排列").append(Constant.HTML_LINE);
-		}
-		if (dh.getShooting52() == 1) {
-			tag.append("一阳穿4线").append(Constant.HTML_LINE);
-		}
 		if (dh.getShootingw() == 1) {
 			tag.append("K线攻击形态").append(Constant.HTML_LINE);
 		}
@@ -134,10 +128,6 @@ public class WebModelService {
 		if (dh.getSusWhiteHors() == 1) {
 			tag.append("白马走势?").append(Constant.HTML_LINE);
 		}
-		if (dh.getShooting53() == 1) {
-			tag.append("交易活跃").append(Constant.HTML_LINE);
-		}
-
 		if (dh.getTagSmallAndBeatf() > 0) {
 			tag.append("小而美").append(Constant.HTML_LINE);
 		}
