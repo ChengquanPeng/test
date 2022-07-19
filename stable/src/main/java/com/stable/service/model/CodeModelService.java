@@ -310,6 +310,7 @@ public class CodeModelService {
 				&& newOne.getDzjyp365d() >= 5) {
 			isOk1 = true;
 		}
+		//
 		if (isOk7 && newOne.getDzjy365d() >= yzdzamt) {
 			if (newOne.getShooting6661() == 0) {
 				xddz.append(stockBasicService.getCodeName2(code)).append(",");
