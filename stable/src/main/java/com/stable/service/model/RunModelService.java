@@ -179,7 +179,7 @@ public class RunModelService {
 				if (p1.getPls() == 1) {
 					sb.append(rg);
 				}
-				if (p1.getShooting2() > 0 || p1.getShooting1() > 0) {
+				if (p1.getShooting2() > 0 || p1.getShooting6661() > 0) {
 					sb.append(dz);
 				}
 				sb.append("</a></td>");
