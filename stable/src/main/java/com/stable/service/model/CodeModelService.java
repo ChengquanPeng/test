@@ -278,8 +278,8 @@ public class CodeModelService {
 			if (newOne.getFinOK() > 0 || newOne.getBousOK() > 0) {
 
 				/** 小票:增发&大宗&减持 **/
-				if (newOne.getHolderNumT3() > 40.0) {// 三大股东持股比例
-					if (newOne.getHolderNumT3() > 45.0
+				if (newOne.getHolderNumP5() > 40.0) {// 三大股东持股比例
+					if (newOne.getHolderNumP5() > 45.0
 							// 基本面没有问题:连续盈利或者分红，连续3年盈利
 							&& ((newOne.getFinOK() > 0 && newOne.getBousOK() > 0) || (newOne.getFinOK() >= 2))) {
 						isOk7 = true;// 做小做底模型
@@ -306,7 +306,7 @@ public class CodeModelService {
 			}
 		}
 		// 底部大宗
-		if (isSmallStock && newOne.getFinOK() > 0 && newOne.getZfjjup() >= 4 && newOne.getHolderNumT3() > 50.0
+		if (isSmallStock && newOne.getFinOK() > 0 && newOne.getZfjjup() >= 4 && newOne.getHolderNumP5() > 45.0
 				&& newOne.getDzjyp365d() >= 5) {
 			isOk1 = true;
 		}
@@ -437,7 +437,7 @@ public class CodeModelService {
 			}
 			// 小而美模型：未涨&&年报 && 大股东集中
 			newOne.setTagSmallAndBeatf(0);
-			if (TagUtil.isDibuSmall(isSmallStock, newOne) && newOne.getHolderNumP5() >= 50 && newOne.getFinOK() >= 3) {
+			if (TagUtil.isDibuSmall(isSmallStock, newOne) && newOne.getHolderNumP5() >= 45 && newOne.getFinOK() >= 3) {
 				newOne.setTagSmallAndBeatf(1);
 			}
 			// 分红
@@ -1124,7 +1124,7 @@ public class CodeModelService {
 			}
 		}
 		// 连续6季度增长，且最近一季度同比增长超20%
-		if (continueJidu1 > 6 && high.get(0) >= 20.0) {
+		if (continueJidu1 >= 4 && high.get(0) >= 20.0) {
 			newOne.setSusBigBoss(1);
 		} else {
 			newOne.setSusBigBoss(0);
