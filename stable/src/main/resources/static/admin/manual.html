@@ -96,7 +96,9 @@ table {
 						id="tzzfd" target="_blank">投资者互动</a>&nbsp;&nbsp;&nbsp;<a id="jgdy"
 						target="_blank">机构调研</a>&nbsp;&nbsp;&nbsp;<a id="rzrq"
 						target="_blank">融资融券</a>&nbsp;&nbsp;&nbsp;<a id="gpzy"
-						target="_blank">股权质押</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小市值，最好低于50Y，新股和st排除</td>
+						target="_blank">股权质押</a>&nbsp;&nbsp;&nbsp;<a id="gdzjc"
+						target="_blank">股东增减持-东方财富</a>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小市值，最好低于50Y，新股和st排除</td>
 				</tr>
 				<tr>
 					<td id="pre_recentPriceYear"></td>
@@ -504,6 +506,11 @@ table {
 						$('#gpzy').attr(
 								"href",
 								"https://data.eastmoney.com/gpzy/detail/"
+										+ code + ".html");
+						//股东增减持
+						$('#gpzy').attr(
+								"href",
+								"https://data.eastmoney.com/executive/gdzjc/"
 										+ code + ".html");
 
 						//财务 yjq2
