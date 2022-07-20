@@ -114,7 +114,7 @@ public class RunModelService {
 		sb.append("<table border='1' cellspacing='0' cellpadding='0'>");
 		// head
 		sb.append(
-				"<tr><th>序号</th><th>简称-代码</th><th>逻辑模型</th><th>底部类型</th><th>形态</th><th>特征</th><th>买点</th><th>板块概念</th></tr>");
+				"<tr><th>序号</th><th>简称-代码</th><th>逻辑模型</th><th>底部类型</th><th>形态</th><th>特征</th><th>买点</th><th>备注</th><th>板块概念</th></tr>");
 		fw.writeLine(sb.toString());
 		sb = new StringBuffer();
 		sb.append(this.getHtml(genListTe, true));
@@ -215,7 +215,6 @@ public class RunModelService {
 					line2 = "<font color='blue'>" + line2 + "</font>";
 				}
 				// 缩量
-
 				if (p1.getQixing() > 0) {
 					TradeHistInfoDaliy td = daliyTradeHistroyService.queryLastfq(code);
 					if (this.todayPrickOK(td.getClosed(), td.getOpen(), td.getAmt())
@@ -252,6 +251,8 @@ public class RunModelService {
 					}
 				}
 				sb.append("<td>").append(line).append("</td>");
+				// 备注
+				sb.append("<td>").append(p1.getBuyRea()).append("</td>");
 				// 板块概念
 				sb.append("<td>").append(sbsb.getThsIndustry()).append("|")
 						.append(TagUtil.getGn(conceptService.getCodeConcept(code))).append("</td>");// CD2

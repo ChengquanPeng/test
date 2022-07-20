@@ -469,6 +469,7 @@ table {
 						var dfcode = getDfCode(code) + code;
 						$('#code').html(code);
 						$('#codeName').html(reData.result.codeName);
+						$('#buyRea').val(reData.result.buyRea);
 						//基本面
 						$('#base1').attr("href",
 								"http://basic.10jqka.com.cn/" + code);
@@ -507,7 +508,7 @@ table {
 								"https://data.eastmoney.com/gpzy/detail/"
 										+ code + ".html");
 						//股东增减持
-						$('#gpzy').attr(
+						$('#gdzjc').attr(
 								"href",
 								"https://data.eastmoney.com/executive/gdzjc/"
 										+ code + ".html");

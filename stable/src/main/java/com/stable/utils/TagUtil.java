@@ -78,9 +78,9 @@ public class TagUtil {
 		String s = "";
 		// --中长--
 		if (dh.getShooting6661() > 0) {
-			s += "底部优质小票-大宗" + splitor;
+			s += "小底-大宗" + splitor;
 		} else if (dh.getShooting7() > 0) {
-			s += "底部优质小票" + splitor;
+			s += "小底" + splitor;
 		} else if (dh.getShooting9() > 0) {
 			s += "底部小票" + splitor;
 		}
