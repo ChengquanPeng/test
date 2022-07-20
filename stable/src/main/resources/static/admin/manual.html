@@ -435,13 +435,12 @@ table {
 				alert("请选择-结果");
 				return;
 			}
-
 			$.ajax({
 				url : "/web/model/addManual", //访问地址--action地址
 				//url : "http://127.0.0.1:8081/web/monitorPool/addMonitor", //访问地址--action地址
 				type : "post", //提交方式
 				data : {
-					code : $('#code').val(),
+					code : $('#code').html(),
 					pls : $('#pls').val(),
 					buyRea : $('#buyRea').val(),
 					timemonth : $('#timemonth').val()
