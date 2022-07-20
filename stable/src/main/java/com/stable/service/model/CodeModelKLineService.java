@@ -200,7 +200,7 @@ public class CodeModelKLineService {
 		// 基本面-疑似白马
 		susWhiteHorses(code, newOne);
 		// 短线模型(箱体震荡-已废弃，实际是半年新高)
-		sortModel(newOne, tradeDate);
+//		sortModel(newOne, tradeDate);
 		// 攻击形态
 		sort0Service.attackAndW(newOne, tradeDate);
 		// 底部优质大票
@@ -241,8 +241,8 @@ public class CodeModelKLineService {
 		}
 	}
 
-	private void sortModel(CodeBaseModel2 newOne, int tradeDate) {
-		newOne.setSortMode7(0);// 箱体震荡实际就是半年新高，暂时移除
+//	private void sortModel(CodeBaseModel2 newOne, int tradeDate) {
+//		newOne.setSortMode7(0);// 箱体震荡实际就是半年新高，暂时移除
 //		String code = newOne.getCode();
 //		// 短线模型7(箱体震荡新高，是否有波浪走势)
 //		if (sort6Service.isWhiteHorseForSortV7(code, tradeDate)) {
@@ -250,7 +250,7 @@ public class CodeModelKLineService {
 //		} else {
 //			newOne.setSortMode7(0);
 //		}
-	}
+//	}
 
 	// 周末计算-至少N年未大涨?
 	private void noup(boolean online4Year, CodeBaseModel2 newOne, String listdatestr) {

@@ -140,9 +140,6 @@ public class WebModelService {
 		if (dh.getSortChips() == 1) {
 			tag.append("拉升吸筹?").append(Constant.HTML_LINE);
 		}
-		if (dh.getSortMode7() == 1) {
-			tag.append("突破箱体").append(Constant.HTML_LINE);
-		}
 		if (StringUtils.isNotBlank(dh.getJsHist())) {
 			tag.append("异动记录:").append(dh.getJsHist()).append(Constant.HTML_LINE);
 		}
@@ -348,21 +345,6 @@ public class WebModelService {
 				bqb.must(QueryBuilders.matchPhraseQuery("pls", Integer.valueOf(mr.getPls())));// 1或者2
 			}
 		}
-		if (StringUtils.isNotBlank(mr.getBred())) {
-			bqb.must(QueryBuilders.matchPhraseQuery("baseRed", Integer.valueOf(mr.getBred())));
-		}
-		if (StringUtils.isNotBlank(mr.getByellow())) {
-			bqb.must(QueryBuilders.matchPhraseQuery("baseYellow", Integer.valueOf(mr.getByellow())));
-		}
-//		if (StringUtils.isNotBlank(mr.getBblue())) {
-//			bqb.must(QueryBuilders.matchPhraseQuery("baseBlue", Integer.valueOf(mr.getBblue())));
-//		}
-//		if (StringUtils.isNotBlank(mr.getBgreen())) {
-//			bqb.must(QueryBuilders.matchPhraseQuery("baseGreen", Integer.valueOf(mr.getBgreen())));
-//		}
-		if (StringUtils.isNotBlank(mr.getBsyl())) {
-			bqb.must(QueryBuilders.matchPhraseQuery("sylType", Integer.valueOf(mr.getBsyl())));
-		}
 		if (StringUtils.isNotBlank(mr.getMkv())) {
 			double mkv = Double.valueOf(mr.getMkv());
 			if (mkv > 0) {
@@ -389,21 +371,30 @@ public class WebModelService {
 			}
 		}
 
+		if (mr.getFinDbl() > 0) {// 业绩暴涨
+			bqb.must(QueryBuilders.rangeQuery("finDbl").gt(0));
+		}
+		if (mr.getFinOK() > 0) {
+			bqb.must(QueryBuilders.rangeQuery("finOK").gte(mr.getFinOK()));
+		}
+		if (mr.getBousOK() > 0) {
+			bqb.must(QueryBuilders.rangeQuery("bousOK").gte(mr.getBousOK()));
+		}
+		if (mr.getSusBigBoss() > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("susBigBoss", 1));// 基本面疑似大牛
+		}
+		if (mr.getFinanceInc() > 0) {
+			bqb.must(QueryBuilders.rangeQuery("financeInc").gte(1));// 业绩连续增长
+		}
+
 		if (mr.getTagIndex() > 0) {
 			if (mr.getTagIndex() == 1) {
 				bqb.must(QueryBuilders.matchPhraseQuery("sortChips", 1));// 吸筹-收集筹码短线
-			} else if (mr.getTagIndex() == 2) {
-				bqb.must(QueryBuilders.matchPhraseQuery("susBigBoss", 1));// 基本面疑似大牛
 			} else if (mr.getTagIndex() == 5) {
 				bqb.must(QueryBuilders.matchPhraseQuery("tagSmallAndBeatf", 1));// 小而美
 			} else if (mr.getTagIndex() == 4) {
 				bqb.must(QueryBuilders.matchPhraseQuery("tagHighZyChance", 1));// 高质押机会
-			} else if (mr.getTagIndex() == 7) {
-				bqb.must(QueryBuilders.matchPhraseQuery("sortMode7", 1));// 高质押机会
-			} else if (mr.getTagIndex() == 3) {
-				bqb.must(QueryBuilders.rangeQuery("financeInc").gte(1));// 业绩连续增长
 			}
-
 		}
 		if (mr.getShooting1() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting1", 1));
@@ -471,28 +462,13 @@ public class WebModelService {
 		if (mr.getZfbuy() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfbuy", 1));
 		}
-
-		if (mr.getSort6() == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("sortMode6", 1));
-		}
-		if (mr.getSort7() == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("sortMode7", 1));
-		}
 		if (mr.getZfjj() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfjj", 1));
 		}
 		if (mr.getCompnayType() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("compnayType", 1));
 		}
-		if (mr.getFinOK() > 0) {
-			bqb.must(QueryBuilders.rangeQuery("finOK").gte(mr.getFinOK()));
-		}
-		if (mr.getBousOK() > 0) {
-			bqb.must(QueryBuilders.rangeQuery("bousOK").gte(mr.getBousOK()));
-		}
-		if (mr.getFinDbl() > 0) {// 业绩暴涨
-			bqb.must(QueryBuilders.rangeQuery("finDbl").gt(0));
-		}
+
 		if (mr.getQb() == 1) {// 起爆
 			bqb.must(QueryBuilders.matchPhraseQuery("qb", 1));
 		}

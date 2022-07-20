@@ -31,6 +31,8 @@ public class ZhiYa extends EsBase {
 	private double warningLine = 0.0;
 	@Field(type = FieldType.Double)
 	private double openLine = 0.0;
+	@Field(type = FieldType.Integer)
+	private int lastNoticeDate;// 最新公告日期
 
 	public ZhiYa() {
 

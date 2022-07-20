@@ -68,12 +68,22 @@ public class CodeBaseModel2 extends EsBase {
 	private int dibuQixingV2 = 0;// 旗形
 	@Field(type = FieldType.Integer)
 	private int dibuQixingV22 = 0;// 旗形2
-
 	@Field(type = FieldType.Integer)
 	private int prd1 = 0;// 产品1
-
 	@Field(type = FieldType.Text)
 	private String jsHist;// 技术面历史
+
+	// 财务业绩
+	@Field(type = FieldType.Integer)
+	private int bousOK;// 5年分红OK(至少4年分红)
+	@Field(type = FieldType.Integer)
+	private int finOK;// 5年业绩OK
+	@Field(type = FieldType.Integer)
+	private int financeInc;// 业绩连续增长
+	@Field(type = FieldType.Integer)
+	private int susBigBoss; // // 基本面疑似大牛
+	@Field(type = FieldType.Double)
+	private double finDbl;// 暴涨翻倍
 
 	@Field(type = FieldType.Integer)
 	private int moni = 0;// 是否监听
@@ -86,10 +96,7 @@ public class CodeBaseModel2 extends EsBase {
 	private double mkv;// 流通市值
 	@Field(type = FieldType.Double)
 	private double actMkv;// 除去5%以上股东以外的市值
-	@Field(type = FieldType.Integer)
-	private int finOK;// 5年业绩OK
-	@Field(type = FieldType.Integer)
-	private int bousOK;// 5年分红OK(至少4年分红)
+
 	@Field(type = FieldType.Integer)
 	private int zfjjup = 0; // 票未涨
 	@Field(type = FieldType.Integer)
@@ -158,17 +165,11 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int tagSmallAndBeatf;// 小而美
 	@Field(type = FieldType.Integer)
-	private int financeInc;// 业绩连续增长
-	@Field(type = FieldType.Integer)
 	protected int tagHighZyChance;// 高质押机会
 	@Field(type = FieldType.Integer)
 	private int sortChips = 0;// 吸筹-收集筹码短线
 	@Field(type = FieldType.Integer)
-	private int susBigBoss; // // 交易面疑似大牛
-	@Field(type = FieldType.Integer)
 	private int susWhiteHors; // // 交易面疑似白马
-	@Field(type = FieldType.Integer)
-	private int sortMode7 = 0;// 突破箱体震荡
 
 	@Id
 	private String id;
@@ -218,8 +219,6 @@ public class CodeBaseModel2 extends EsBase {
 	private double zcfzl; // 资产负债率
 	@Field(type = FieldType.Double)
 	private double pettm = 0.0;// 市盈率ttm
-	@Field(type = FieldType.Double)
-	private double finDbl;// 暴涨翻倍
 
 	@Transient
 	public String getKeyString() {

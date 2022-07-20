@@ -40,10 +40,15 @@
 				</div>
 			</div>
 			<div class="mg">
-				国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp; 业绩:<input
-					type="text" id="finOK" placeholder="至少连续多少年不亏" />&nbsp;&nbsp; 分红:<input
-					type="text" id="bousOK" placeholder="至少连续多少年分红" />&nbsp;&nbsp;
-				业绩暴涨:<input type="checkbox" id="finDbl" />&nbsp;&nbsp; 几年未涨&gt;=<input
+				财务:&nbsp;&nbsp;&nbsp;&nbsp;分红:<input type="text" id="bousOK"
+					placeholder="至少连续多少年分红" />&nbsp;&nbsp;不亏:<input type="text"
+					id="finOK" placeholder="至少连续多少年不亏" />&nbsp;&nbsp; 业绩暴涨:<input
+					type="checkbox" id="finDbl" />&nbsp;&nbsp;业绩较牛20%:<input
+					type="checkbox" id="susBigBoss" />&nbsp;&nbsp;业绩连续增长:<input
+					type="text" id="financeInc" placeholder="至少连续多少年增长" />&nbsp;&nbsp;
+			</div>
+			<div class="mg">
+				国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp; 几年未涨&gt;=<input
 					type="text" id="zfjjup" placeholder="数字" />&nbsp;&nbsp;
 				几年未涨stable&gt;=<input type="text" id="zfjjupStable"
 					placeholder="算法偏严" />&nbsp;&nbsp;
@@ -100,12 +105,9 @@
 				技术面:&nbsp;&nbsp;&nbsp;&nbsp;起爆:<input type="checkbox" id="qb" />&nbsp;&nbsp;大旗形:<input
 					type="checkbox" id="dibuqixing" />&nbsp;&nbsp;小旗形:<input
 					type="checkbox" id="dibuqixing2" />&nbsp;&nbsp;中阳十字星:<input
-					type="checkbox" id="zyxing" />&nbsp;&nbsp; 5日均线多头排列:<input
-					type="checkbox" id="shooting51" />&nbsp;&nbsp;5日内一阳穿4线:<input
-					type="checkbox" id="shooting52" />&nbsp;&nbsp; K线攻击形态:<input
+					type="checkbox" id="zyxing" />&nbsp;&nbsp; K线攻击形态:<input
 					type="checkbox" id="kline" />&nbsp;&nbsp; 接近1年新高:<input
-					type="checkbox" id="pre1Year" />&nbsp;&nbsp;5日交易活跃:<input
-					type="checkbox" id="shooting53" />&nbsp;&nbsp; 股价极速拉升(妖股?龙抬头?):<input
+					type="checkbox" id="pre1Year" />&nbsp;&nbsp; 股价极速拉升(妖股?龙抬头?):<input
 					type="checkbox" id="shooting5" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;白马走势(大票):<input
 					type="checkbox" id="whiteHors" />
 			</div>
@@ -115,9 +117,7 @@
 					所有监听:<input type="checkbox" id="monitor" />&nbsp;&nbsp; 标签:<select
 						id="tagIndex">
 						<option value="-1" selected="selected">无限制</option>
-						<option value="3">业绩连续增长</option>
 						<option value="5">小而美</option>
-						<option value="2">业绩较牛</option>
 						<option value="1">拉升吸筹?</option>
 						<option value="4">高质押机会</option>
 					</select>&nbsp;&nbsp; 排序：<select id="gsort">
@@ -209,18 +209,13 @@
 									param.conceptName = $('#conceptName').val();
 									param.zfStatus = $('#zfStatus').val();
 
-									param.bred = $('#bred').val();
-									param.byellow = $('#byellow').val();
-									param.bsyl = $('#bsyl').val();
-
 									param.mkv = $('#mkv').val();
 									param.mkv2 = $('#mkv2').val();
 									param.pls = $('#pls').val();
 									param.rzrq1 = $('#rzrq1').val();
 									param.rzrq2 = $('#rzrq2').val();
 
-									param.sort7 = 0;
-									param.sort6 = 0;
+									
 									param.zfbuy = 0;
 									param.zfjj = 0;
 									param.zfYjAmt = $('#zfYjAmt').val();
@@ -240,11 +235,15 @@
 
 									param.finOK = $('#finOK').val();
 									param.bousOK = $('#bousOK').val();
+									param.financeInc = $('#financeInc').val();
 									if ("" == param.finOK) {
 										param.finOK = 0;
 									}
 									if ("" == param.bousOK) {
 										param.bousOK = 0;
+									}
+									if ("" == param.financeInc) {
+										param.financeInc = 0;
 									}
 									param.compnayType = 0;
 									param.kline = 0;
@@ -259,8 +258,11 @@
 									param.dibuqixing = 0;
 									param.dibuqixing2 = 0;
 									param.zyxing = 0;
-
 									param.finDbl = 0;
+									param.susBigBoss = 0;
+									if (document.getElementById("susBigBoss").checked) {
+										param.susBigBoss = 1;
+									}
 									if (document.getElementById("finDbl").checked) {
 										param.finDbl = 1;
 									}

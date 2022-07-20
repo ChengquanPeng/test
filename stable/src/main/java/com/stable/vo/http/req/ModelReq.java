@@ -11,11 +11,6 @@ public class ModelReq {
 	String conceptName;
 	String zfStatus;
 	String monitor;
-	String bred;
-	String byellow;
-	String bsyl;
-	int sort6;
-	int sort7;
 	int zfbuy;
 	int zfjj;
 	String zfjjup;
@@ -31,8 +26,6 @@ public class ModelReq {
 	String zfPriceLow;
 	int dzjyRct;
 
-	int bousOK;
-	int finOK;
 	int compnayType;
 
 	int zfObjType;
@@ -57,7 +50,6 @@ public class ModelReq {
 	int shooting52 = 0;
 	int shooting53 = 0;
 	int whiteHors = 0;
-	int finDbl = 0;
 	int shooting6661;
 	String rzrq1;
 	String rzrq2;
@@ -72,4 +64,11 @@ public class ModelReq {
 	int zyxingt = 0;// 中阳带星
 	int dibuqixing = 0;
 	int dibuqixing2 = 0;
+
+	// 财务
+	int bousOK;
+	int finOK;
+	int finDbl = 0;
+	int susBigBoss = 0;
+	int financeInc = 0;
 }

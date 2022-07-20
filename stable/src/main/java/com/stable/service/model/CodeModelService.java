@@ -1098,6 +1098,10 @@ public class CodeModelService {
 			newOne.setBaseBlue(1);
 			sb3.append(ykb).append(Constant.HTML_LINE);
 		}
+		if (zy.getLastNoticeDate() > 0) {
+			newOne.setBaseBlue(1);
+			sb3.append("<font color='blue'>最新质押日期:" + zy.getLastNoticeDate() + "</font>").append(Constant.HTML_LINE);
+		}
 
 		if (newOne.getBaseRed() > 0) {
 			newOne.setBaseRedDesc(sb1.toString());

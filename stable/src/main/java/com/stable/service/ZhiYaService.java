@@ -113,6 +113,7 @@ public class ZhiYaService {
 					zy.setDetail(sb.toString());
 					zy.setOpenLine(openLine);
 					zy.setWarningLine(warningLine);
+					zy.setLastNoticeDate(this.getLastNoticeDate(l));
 				}
 
 			} catch (Exception e) {
@@ -124,6 +125,18 @@ public class ZhiYaService {
 			zhiYaDao.saveAll(rl);
 		}
 		log.info("质押抓包完成");
+	}
+
+	private int getLastNoticeDate(List<ZhiYaDetail> l) {
+		int noticeDate = 0;
+		if (l != null && l.size() > 0) {
+			for (ZhiYaDetail detail : l) {
+				if (detail.getNoticeDate() > noticeDate) {
+					noticeDate = detail.getNoticeDate();
+				}
+			}
+		}
+		return noticeDate;
 	}
 
 	private List<Zya> split(List<ZhiYaDetail> l) {
