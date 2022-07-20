@@ -46,11 +46,11 @@ public class MsgPushServer {
 	public final static boolean pushSystemT1(String title, String content, UserInfo user) {
 		int r = getPushWay(user);
 		if (r == 9) {
-			email.pushSystemHtmlT2(title, content, user.getWxpush());
+			email.pushSystemHtmlT2(title, content, user.getQqmail());
 			WxPushUtil.pushSystemHtmlT2(title + content, user.getWxpush());
 			return true;
 		} else if (r == 2) {
-			return email.pushSystemHtmlT2(title, content, user.getWxpush());
+			return email.pushSystemHtmlT2(title, content, user.getQqmail());
 		} else {
 			return WxPushUtil.pushSystemHtmlT2(title + content, user.getWxpush());
 		}
@@ -59,11 +59,11 @@ public class MsgPushServer {
 	public final static boolean pushSystemHtmlT2(String title, String content, UserInfo user) {
 		int r = getPushWay(user);
 		if (r == 9) {
-			email.pushSystemHtmlT2(title, content, user.getWxpush());
+			email.pushSystemHtmlT2(title, content, user.getQqmail());
 			WxPushUtil.pushSystemHtmlT2(title + content, user.getWxpush());
 			return true;
 		} else if (r == 2) {
-			return email.pushSystemHtmlT2(title, content, user.getWxpush());
+			return email.pushSystemHtmlT2(title, content, user.getQqmail());
 		} else {
 			return WxPushUtil.pushSystemHtmlT2(title + content, user.getWxpush());
 		}
@@ -77,10 +77,10 @@ public class MsgPushServer {
 		for (UserInfo user : users) {
 			int r = getPushWay(user);
 			if (r == 9) {
-				l.add(user.getWxpush());
+				l.add(user.getQqmail());
 				WxPushUtil.pushSystemHtmlT2(title + content, user.getWxpush());
 			} else if (r == 2) {
-				l.add(user.getWxpush());
+				l.add(user.getQqmail());
 			} else {
 				WxPushUtil.pushSystemHtmlT2(title + content, user.getWxpush());
 			}
@@ -99,11 +99,12 @@ public class MsgPushServer {
 //			wxpush = MsgPushServer.email.myId;
 //			return true;
 			u.setWxpush(WxPushUtil.myUid);
+			u.setQqmail(email.myId);
 			return 9;
 		} else if (StringUtils.isNotBlank(u.getWxpush())) {
 			return 1;
 		} else {
-			u.setWxpush(u.getId() + MsgPushServer.qqmail);
+			u.setQqmail(u.getId() + MsgPushServer.qqmail);
 			return 2;
 		}
 	}

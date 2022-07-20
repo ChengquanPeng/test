@@ -46,4 +46,6 @@ public class UserInfo extends EsBase {
 
 	@Field(type = FieldType.Text)
 	private String lastLogin;// 最后登录
+
+	private String qqmail;
 }
