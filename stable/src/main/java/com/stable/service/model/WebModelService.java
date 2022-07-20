@@ -158,7 +158,7 @@ public class WebModelService {
 			} else if (dh.getPls() == 1) {
 				sb6.append("人工: 已确定");
 			} else if (dh.getPls() == 2) {
-				sb6.append("人工: 已排除");
+				sb6.append("人工: 已排除 ").append(dh.getPlst());
 			}
 			if (dh.getMoni() > 0) {
 				sb6.append("        ,已监听:").append(MonitorType.getCodeName(dh.getMoni()));
