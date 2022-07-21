@@ -99,13 +99,9 @@ public class QibaoService {
 	}
 
 	private void qx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
-		if (newOne.getPls() == 2 || !TagUtil.isDibuSmall(isSamll, newOne)) {// 排除的和大票大票不用check
-			if (newOne.getPls() == 1 || (newOne.getZfjjup() >= 4 && newOne.getFinOK() >= 1 && isSamll
-					&& newOne.getHolderNumT3() >= 50)) {// 人工的需要check||底部优质大票||一些底部小涨-stable0有业绩的小票(热点票)
-			} else {
-				setQxRes(newOne, pool, true, true);
-				return;
-			}
+		if (!TagUtil.stockRange(isSamll, newOne)) {
+			setQxRes(newOne, pool, true, true);
+			return;
 		}
 		/** 起爆点,底部旗形1：大旗形 **/
 		qx1(date, newOne, pool, qx);

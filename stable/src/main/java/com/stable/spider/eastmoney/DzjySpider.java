@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +17,15 @@ import com.stable.es.dao.base.DzjyDao;
 import com.stable.es.dao.base.DzjyYiTimeDao;
 import com.stable.service.DzjyService;
 import com.stable.service.StockBasicService;
+import com.stable.service.model.CodeModelService;
+import com.stable.service.model.WebModelService;
 import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HttpUtil;
+import com.stable.utils.TagUtil;
 import com.stable.utils.ThreadsUtil;
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.Dzjy;
 import com.stable.vo.bus.DzjyYiTime;
 import com.stable.vo.bus.StockBaseInfo;
@@ -52,6 +57,12 @@ public class DzjySpider {
 	private DzjyYiTimeDao dzjyYiTimeDao;
 	@Autowired
 	private DzjyService dzjyService;
+	@Autowired
+	private WebModelService modelWebService;
+	@Autowired
+	private CodeModelService codeModelService;
+
+	private double warningLine = 3000.0;// 3千万
 
 	public synchronized void byDaily(String dateYYYY_) {
 		// setp1.get code
@@ -91,6 +102,8 @@ public class DzjySpider {
 	}
 
 	private void exeDzjyYiTime() {
+		StringBuffer sb = new StringBuffer();
+		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 		ThreadsUtil.sleepRandomSecBetween15And30();
 		List<DzjyYiTime> l = new LinkedList<DzjyYiTime>();
@@ -100,10 +113,22 @@ public class DzjySpider {
 			// 频繁统计
 			DzjyYiTime t = dzjyService.halfOver1Yi(s, startDate, startDate2);// 12个月
 			l.add(t);
+			if (t.getTotalAmt60d() >= warningLine) {
+				CodeBaseModel2 cbm = histMap.get(s.getCode());
+				if (cbm != null && cbm.getDzjy60d() < warningLine) {
+					boolean isSamll = codeModelService.isSmallStock(cbm.getMkv(), cbm.getActMkv());
+					if (TagUtil.stockRange(isSamll, cbm)) {
+						sb.append(stockBasicService.getCodeName2(s.getCode())).append(",");
+					}
+				}
+			}
 		}
 
 		if (l.size() > 0) {
 			dzjyYiTimeDao.saveAll(l);
+		}
+		if (sb.length() > 0) {
+			MsgPushServer.pushSystem1(DateUtil.getTodayYYYYMMDD() + " 大宗交易异动列表:" + sb.toString());
 		}
 	}
 
