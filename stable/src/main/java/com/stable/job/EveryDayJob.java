@@ -9,10 +9,8 @@ import org.springframework.stereotype.Component;
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.service.ChipsZfService;
 import com.stable.service.FinanceService;
-import com.stable.service.TradeCalService;
 import com.stable.service.ZhiYaService;
 import com.stable.service.monitor.MonitorPoolService;
-import com.stable.spider.eastmoney.DzjySpider;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.ths.ThsEventSpider;
 import com.stable.spider.ths.ThsSpider;
@@ -35,15 +33,13 @@ public class EveryDayJob extends MySimpleJob {
 	@Autowired
 	private ChipsZfService chipsZfService;
 	@Autowired
-	private DzjySpider emDzjySpider;
-	@Autowired
 	private ThsSpider thsSpider;
 	@Autowired
 	private ZhiYaService zhiYaService;
 	@Autowired
 	private EastmoneySpider eastmoneySpider;
-	@Autowired
-	private TradeCalService tradeCalService;
+//	@Autowired
+//	private TradeCalService tradeCalService;
 	@Autowired
 	private ThsEventSpider thsEventSpider;
 	@Autowired
@@ -60,6 +56,7 @@ public class EveryDayJob extends MySimpleJob {
 		financeService.jobSpiderKuaiYuBao();
 		log.info("定增完成预警公告");
 		monitorPoolService.jobZfDoneWarning();
+		// 删除退市监听
 		monitorPoolService.deleteTsMoni();
 		log.info("定增扩展属性");
 		chipsZfService.jobZengFaExt(true);
@@ -90,15 +87,10 @@ public class EveryDayJob extends MySimpleJob {
 		}
 		log.info("最新公告");
 		monitorPoolService.listenerGg(date);
-		if (!tradeCalService.isOpen(date)) {
-			return;
-		}
 
-		String dateYYYY_ = DateUtil.formatYYYYMMDD2(cal.getTime());
-		log.info("大宗交易");
-		emDzjySpider.byDaily(dateYYYY_);
-		log.info("大宗交易-预警");
-		monitorPoolService.jobDzjyWarning();
+//		if (!tradeCalService.isOpen(date)) {
+//			return;
+//		}
 		// 周一周4执行，每周末抓完财报后运行
 		// if (calweek != Calendar.SUNDAY && calweek != Calendar.SATURDAY && calweek !=
 		// Calendar.FRIDAY) {

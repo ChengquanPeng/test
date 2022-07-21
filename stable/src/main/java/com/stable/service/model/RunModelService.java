@@ -1,6 +1,7 @@
 
 package com.stable.service.model;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +20,7 @@ import com.stable.service.PlateService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.monitor.MonitorPoolService;
+import com.stable.spider.eastmoney.DzjySpider;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -36,6 +38,8 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class RunModelService {
+	@Autowired
+	private DzjySpider emDzjySpider;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
@@ -81,6 +85,12 @@ public class RunModelService {
 			codeModelKLineService.runKLineModel1(date, p1list);
 		} else {
 			codeModelKLineService.runKLineModel1(date, p1list);
+			ThreadsUtil.sleepRandomSecBetween15And30();
+			String dateYYYY_ = DateUtil.formatYYYYMMDD2(new Date());
+			log.info("大宗交易");
+			emDzjySpider.byDaily(dateYYYY_);
+			log.info("大宗交易-预警");
+			monitorPoolService.jobDzjyWarning();
 			ThreadsUtil.sleepRandomSecBetween15And30();
 			codeModelService.runModel1(date, false);
 		}
