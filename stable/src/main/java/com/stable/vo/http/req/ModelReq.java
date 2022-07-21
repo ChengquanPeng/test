@@ -64,6 +64,7 @@ public class ModelReq {
 	int zyxingt = 0;// 中阳带星
 	int dibuqixing = 0;
 	int dibuqixing2 = 0;
+	int breakingVol = 0;
 
 	// 财务
 	int bousOK;

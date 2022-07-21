@@ -105,9 +105,10 @@
 				技术面:&nbsp;&nbsp;&nbsp;&nbsp;起爆:<input type="checkbox" id="qb" />&nbsp;&nbsp;大旗形:<input
 					type="checkbox" id="dibuqixing" />&nbsp;&nbsp;小旗形:<input
 					type="checkbox" id="dibuqixing2" />&nbsp;&nbsp;中阳十字星:<input
-					type="checkbox" id="zyxing" />&nbsp;&nbsp; K线攻击形态:<input
-					type="checkbox" id="kline" />&nbsp;&nbsp; 接近1年新高:<input
-					type="checkbox" id="pre1Year" />&nbsp;&nbsp; 股价极速拉升(妖股?龙抬头?):<input
+					type="checkbox" id="zyxing" />&nbsp;&nbsp;成交异动:<input
+					type="checkbox" id="breakingVol" />&nbsp;&nbsp;K线攻击形态:<input
+					type="checkbox" id="kline" />&nbsp;&nbsp;接近1年新高:<input
+					type="checkbox" id="pre1Year" />&nbsp;&nbsp;股价极速拉升(妖股?龙抬头?):<input
 					type="checkbox" id="shooting5" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;白马走势(大票):<input
 					type="checkbox" id="whiteHors" />
 			</div>
@@ -215,7 +216,6 @@
 									param.rzrq1 = $('#rzrq1').val();
 									param.rzrq2 = $('#rzrq2').val();
 
-									
 									param.zfbuy = 0;
 									param.zfjj = 0;
 									param.zfYjAmt = $('#zfYjAmt').val();
@@ -260,6 +260,10 @@
 									param.zyxing = 0;
 									param.finDbl = 0;
 									param.susBigBoss = 0;
+									param.breakingVol = 0;
+									if (document.getElementById("breakingVol").checked) {
+										param.breakingVol = 1;
+									}
 									if (document.getElementById("susBigBoss").checked) {
 										param.susBigBoss = 1;
 									}
@@ -342,7 +346,7 @@
 									if (document.getElementById("shooting9").checked) {
 										param.shooting9 = 1;
 									}
-									
+
 									return param;
 								},
 								columns : [

@@ -484,6 +484,9 @@ public class WebModelService {
 		if (mr.getZyxingt() == 1) {// 中阳带星
 			bqb.must(QueryBuilders.matchPhraseQuery("zyxingt", 1));
 		}
+		if (mr.getBreakingVol() == 1) {// 成交量异动
+			bqb.must(QueryBuilders.rangeQuery("breakingVol").gte(1));
+		}
 
 		if (StringUtils.isNotBlank(mr.getZfStatus())) {
 			int t = Integer.valueOf(mr.getZfStatus());

@@ -126,21 +126,37 @@ public class QibaoService {
 		boolean yd = true;
 		double tot = 0.0;
 		TradeHistInfoDaliy last = list.get(0);
-		if (last.getTodayChangeRate() >= 3.0) {// 1.上涨
-			for (int i = 1; i <= 5; i++) {
-				TradeHistInfoDaliy t = list.get(i);
-				if (t.getVolume() > last.getVolume()) {
-					yd = false;
-					break;
+		int breakingVol = 0;
+		for (int j = 0; j < list.size() - 5; j++) {
+			TradeHistInfoDaliy chkday = list.get(j);
+			if (chkday.getTodayChangeRate() >= 3.0 && last.getClosed() > chkday.getYesterdayPrice()) {// 1.上涨,而且丹阳不破
+				yd = true;
+				tot = 0.0;
+				// System.err.println("========>" + chkday.getDate());
+				for (int i = j + 1; i <= j + 5; i++) {
+					TradeHistInfoDaliy t = list.get(i);
+					if (t.getVolume() > chkday.getVolume()) {
+						yd = false;
+						break;
+					}
+					tot += t.getVolume();
+					// System.err.println(i + ",t=" + t.getDate() + ",tot=" + tot);
 				}
-				tot += t.getVolume();
-			}
-			if (yd) {
-				if (last.getVolume() > ((tot / 5) * 2.9)) {// 3倍量
-					yds.append(stockBasicService.getCodeName2(newOne.getCode())).append(",");
+				if (yd) {
+					if (chkday.getVolume() > ((tot / 5) * 2.9)) {// 3倍量
+						// System.err.println(chkday.getVolume() + "|" + ((tot / 5) * 2.9));
+						breakingVol = chkday.getDate();
+						break;
+					}
 				}
 			}
 		}
+		if (breakingVol > 0 && newOne.getBreakingVol() != breakingVol) {
+			yds.append(stockBasicService.getCodeName2(newOne.getCode())).append(",");
+			String jsHist = "成交异动" + breakingVol + ";" + newOne.getJsHist();
+			newOne.setJsHist(StringUtil.subString(jsHist, 100));
+		}
+		newOne.setBreakingVol(breakingVol);
 		/** 股价放量异动 */
 
 		// 旗形开始
