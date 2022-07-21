@@ -70,6 +70,16 @@ public class RunModelService {
 
 	private int tradeDate;
 
+//	@javax.annotation.PostConstruct
+//	public void test() {
+//		new Thread(new Runnable() {
+//			public void run() {
+//				runModel(20220721, false, null);
+//				System.err.println("runModel1 done");
+//			}
+//		}).start();
+//	}
+
 	public synchronized void runModel(int date, boolean isweekend, Set<String> p1list) {
 		log.info("CodeModel processing request date={}", date);
 		if (!tradeCalService.isOpen(date)) {
