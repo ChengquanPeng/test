@@ -103,8 +103,12 @@ public class RealtimeMonitoringService {
 						}
 						RtmMoniGbl rmt = allmap.get(t.getCode());
 						if (rmt == null) {
-							rmt = new RtmMoniGbl(
-									modelWebService.getLastOneByCodeResp(t.getCode(), t.getUserId() == Constant.MY_ID));
+							CodeBaseModelResp cr = modelWebService.getLastOneByCodeResp(t.getCode(),
+									t.getUserId() == Constant.MY_ID);
+							if (cr.getPls() == 2) {
+								continue;
+							}
+							rmt = new RtmMoniGbl(cr);
 							allmap.put(t.getCode(), rmt);
 						}
 						RtmMoniUser ru = new RtmMoniUser(t, u);
