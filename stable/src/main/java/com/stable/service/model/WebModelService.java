@@ -106,7 +106,7 @@ public class WebModelService {
 		StringBuffer tag = new StringBuffer("");
 		tag.append("<font color='red'>");
 		if (dh.getQb() > 0) {
-			tag.append("起爆->");
+			tag.append("起飞->");
 		}
 		if (dh.getDibuQixing() > 0) {
 			tag.append("大旗形").append(dh.getDibuQixing()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
