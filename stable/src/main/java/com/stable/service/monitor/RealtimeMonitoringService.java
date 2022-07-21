@@ -25,6 +25,7 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.UserInfo;
+import com.stable.vo.http.resp.CodeBaseModelResp;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -81,9 +82,12 @@ public class RealtimeMonitoringService {
 				UserInfo my = new UserInfo();
 				my.setId(Constant.MY_ID);
 				for (MonitorPoolTemp t : tl2) {
-					RtmMoniGbl rmt = new RtmMoniGbl(modelWebService.getLastOneByCodeResp(t.getCode(), true));
-					rmt.setServiceAndPrew(bizPushService, t);
-					allmap.put(t.getCode(), rmt);
+					CodeBaseModelResp cr = modelWebService.getLastOneByCodeResp(t.getCode(), true);
+					if (cr.getPls() != 2) {
+						RtmMoniGbl rmt = new RtmMoniGbl(cr);
+						rmt.setServiceAndPrew(bizPushService, t);
+						allmap.put(t.getCode(), rmt);
+					}
 				}
 			}
 			// 获取监听列表-常规
