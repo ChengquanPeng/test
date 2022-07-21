@@ -19,6 +19,7 @@ import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.prd.QibaoService;
 import com.stable.service.model.prd.msg.BizPushService;
+import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -112,10 +113,11 @@ public class CodeModelKLineService {
 		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();
 		StringBuffer qx = new StringBuffer();
 		StringBuffer szx = new StringBuffer();
+		StringBuffer yds = new StringBuffer();
 
 		for (StockBaseInfo s : codelist) {
 			try {
-				this.processingByCode(s, poolMap, poolList, listLast, histMap, qx, szx, p1list);
+				this.processingByCode(s, poolMap, poolList, listLast, histMap, qx, szx, p1list, yds);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -132,6 +134,9 @@ public class CodeModelKLineService {
 		if (qx.length() > 0) {
 			bizPushService.PushS2("今日最新旗形", qx.toString());
 		}
+		if (yds.length() > 0) {
+			MsgPushServer.pushSystem1("今日成交量异动:" + yds.toString());
+		}
 
 		log.info("KLine基本完成");
 	}
@@ -142,7 +147,7 @@ public class CodeModelKLineService {
 
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
 			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, StringBuffer qx, StringBuffer szx,
-			Set<String> p1list) {
+			Set<String> p1list, StringBuffer yds) {
 		String code = s.getCode();
 		// 监听池
 		MonitorPoolTemp pool = this.codeModelService.getPool(code, poolMap, poolList);
@@ -214,7 +219,7 @@ public class CodeModelKLineService {
 			newOne.setShooting11(0);
 		}
 		// 起爆点
-		qibaoService.qibao(tradeDate, newOne, pool, isSamll, qx, szx);
+		qibaoService.qibao(tradeDate, newOne, pool, isSamll, qx, szx, yds);
 		// if (p1list != null) {
 		// prd1Service.prd(tradeDate, newOne, pool, isSamll);
 		// }

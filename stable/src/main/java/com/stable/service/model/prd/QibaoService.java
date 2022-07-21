@@ -78,7 +78,7 @@ public class QibaoService {
 
 	/** 起爆 */
 	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx,
-			StringBuffer szx) {
+			StringBuffer szx, StringBuffer yds) {
 		if (runModelService.stTuiShi(newOne)) {
 			setQxRes(newOne, pool, true, true);
 			setSzxRes(newOne, pool);
@@ -86,7 +86,7 @@ public class QibaoService {
 			return;
 		}
 		/** 大小旗形 */
-		qx(date, newOne, pool, isSamll, qx);
+		qx(date, newOne, pool, isSamll, qx, yds);
 		/** 中阳十字星 */
 		szx(date, newOne, pool, isSamll, szx);
 
@@ -98,13 +98,14 @@ public class QibaoService {
 		}
 	}
 
-	private void qx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx) {
+	private void qx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx,
+			StringBuffer yds) {
 		if (!TagUtil.stockRange(isSamll, newOne)) {
 			setQxRes(newOne, pool, true, true);
 			return;
 		}
 		/** 起爆点,底部旗形1：大旗形 **/
-		qx1(date, newOne, pool, qx);
+		qx1(date, newOne, pool, qx, yds);
 		if (newOne.getDibuQixing() == 0) {
 			/** 起爆点,底部旗形2：小旗形 **/
 			qx2(date, newOne, pool, qx);
@@ -112,7 +113,7 @@ public class QibaoService {
 	}
 
 	/** 起爆点,底部旗形1：大旗形 **/
-	private void qx1(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, StringBuffer qx) {
+	private void qx1(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, StringBuffer qx, StringBuffer yds) {
 		List<TradeHistInfoDaliy> list = null;
 		if (newOne.getDibuQixing() == 0) {
 			list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0, date,
@@ -121,6 +122,28 @@ public class QibaoService {
 			list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), newOne.getQixing(), date,
 					EsQueryPageUtil.queryPage9999, SortOrder.DESC);
 		}
+		/** 股价放量异动 */
+		boolean yd = true;
+		double tot = 0.0;
+		TradeHistInfoDaliy last = list.get(0);
+		if (last.getTodayChangeRate() >= 3.0) {// 1.上涨
+			for (int i = 1; i <= 5; i++) {
+				TradeHistInfoDaliy t = list.get(i);
+				if (t.getVolume() > last.getVolume()) {
+					yd = false;
+					break;
+				}
+				tot += t.getVolume();
+			}
+			if (yd) {
+				if (last.getVolume() > ((tot / 5) * 2.9)) {// 3倍量
+					yds.append(stockBasicService.getCodeName2(newOne.getCode())).append(",");
+				}
+			}
+		}
+		/** 股价放量异动 */
+
+		// 旗形开始
 		QiBaoInfo res = null;
 		for (int i = 1; i < list.size(); i++) {
 			TradeHistInfoDaliy chk = list.get(i);
