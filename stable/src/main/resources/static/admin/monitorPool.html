@@ -207,11 +207,16 @@ body {
 										},
 										{
 											field : 'ab',
-											title : '起爆监听'',
-												formatter : function(value, row,
-														index) {
-													return row.shotPointPrice+",["+row.shotPointPriceLow+"-"+row.shotPointPriceLow5+"]";
-												}
+											title : '起爆监听',
+											formatter : function(value, row,
+													index) {
+												return row.shotPointPrice
+														+ ",["
+														+ row.shotPointPriceLow
+														+ "-"
+														+ row.shotPointPriceLow5
+														+ "]";
+											}
 										},
 										{
 											field : 'monitor',
@@ -224,6 +229,7 @@ body {
 														+ "&nbsp;&nbsp;<a href='#' onclick='dianwo3(\""
 														+ row.code
 														+ "\",\""
+														+ row.remark
 														+ "\")'>移除</a>";
 											}
 										} ],
@@ -250,8 +256,8 @@ body {
 		loadData();
 	</script>
 	<script type="text/javascript">
-		function dianwo3(code, remark) {
-			var remark = prompt(code + " 移除监听", "");
+		function dianwo3(code, remark1) {
+			var remark = prompt(code + " 移除监听", remark1);
 			if (remark == null) {
 			} else {
 				$.ajax({

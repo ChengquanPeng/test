@@ -180,11 +180,11 @@ public class MonitorPoolService {
 //		c.setShotPointCheck(shotPointCheck);
 		c.setListenerGg(listenerGg);
 
-		if (StringUtils.isBlank(remark)) {
-			c.setRemark("");
-		} else {
-			c.setRemark(remark);
-		}
+//		if (StringUtils.isBlank(remark)) {
+//			c.setRemark("");
+//		} else {
+//			c.setRemark(remark);
+//		}
 		int dt = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
 		if (ykb > 0) {
 			c.setYkb(dt);
@@ -207,7 +207,7 @@ public class MonitorPoolService {
 			c.setListenerGg(0);
 		}
 		toSave(c);
-		updateBaseMoniStatus(userId, code, c.getRemark());
+//		updateBaseMoniStatus(userId, code, c.getRemark()); 统一在人工页维护
 	}
 
 	public MonitorPoolTemp getMonitorPoolById(long userId, String code) {
