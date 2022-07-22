@@ -641,20 +641,22 @@ public class CodeModelService {
 		FinanceBaseInfo fbi = fa.getCurrJidu();
 		newOne.setCurrYear(fbi.getYear());
 		newOne.setCurrQuarter(fbi.getQuarter());
-		// 业绩暴涨
+		// 业绩暴涨,至少超1亿吧
 		newOne.setFinDbl(0);
-		if (fa.getCurrYear().getGsjlr() > 0 && fa.getPrevYear().getGsjlr() > 0) {
-			double a = CurrencyUitl
-					.roundHalfUp(fa.getCurrYear().getGsjlr() / Double.valueOf(fa.getPrevYear().getGsjlr()));
-			if (a >= 2) {
-				newOne.setFinDbl(1);
+		if (fa.getCurrYear().getGsjlr() >= CurrencyUitl.YI_N_DOUBLE) {
+			if (fa.getPrevYear().getGsjlr() > 0) {
+				double a = CurrencyUitl
+						.roundHalfUp(fa.getCurrYear().getGsjlr() / Double.valueOf(fa.getPrevYear().getGsjlr()));
+				if (a >= 2) {
+					newOne.setFinDbl(1);
+				}
 			}
-		}
-		if (fa.getCurrYear().getGsjlr() > 0 && fa.getCurrJidu().getGsjlr() > 0) {
-			double a = CurrencyUitl
-					.roundHalfUp(fa.getCurrJidu().getGsjlr() / Double.valueOf(fa.getPrevYear().getGsjlr()));
-			if (a >= 2) {
-				newOne.setFinDbl(1);
+			if (fa.getCurrJidu().getGsjlr() > 0) {
+				double a = CurrencyUitl
+						.roundHalfUp(fa.getCurrJidu().getGsjlr() / Double.valueOf(fa.getPrevYear().getGsjlr()));
+				if (a >= 2) {
+					newOne.setFinDbl(1);
+				}
 			}
 		}
 

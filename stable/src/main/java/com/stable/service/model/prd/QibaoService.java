@@ -143,7 +143,7 @@ public class QibaoService {
 					// System.err.println(i + ",t=" + t.getDate() + ",tot=" + tot);
 				}
 				if (yd) {
-					if (chkday.getVolume() > ((tot / 5) * 2.9)) {// 3倍量
+					if (chkday.getVolume() > ((tot / 5) * 2.9) && (chkday.getClosed() * 1.05 > last.getClosed())) {// 3倍量,最新收盘价不要太高
 						// System.err.println(chkday.getVolume() + "|" + ((tot / 5) * 2.9));
 						breakingVol = chkday.getDate();
 						break;
