@@ -68,12 +68,6 @@ public class PriceLifeService {
 		redisUtil.set(RedisConstant.RDS_PRICE_LIFE_INDEX_ + code, index + "");
 	}
 
-	// 收盘价介于最高价和最低价的index
-	public int priceIndex(String code, double price) {
-		PriceLife pl = getPriceLife(code);
-		return priceIndex(pl, price);
-	}
-
 	public int getLastIndex(String code) {
 		return Integer.valueOf(redisUtil.get(RedisConstant.RDS_PRICE_LIFE_INDEX_ + code, "100"));
 	}
