@@ -76,6 +76,7 @@ public class WebModelService {
 			return page.getContent().get(0);
 		}
 		CodeBaseModel2 cbm = new CodeBaseModel2();
+		cbm.setId(code);
 		cbm.setCode(code);
 		return cbm;
 	}
