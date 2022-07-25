@@ -90,8 +90,14 @@ public class TagUtil {
 	public static String getSystemPoint(CodeBaseModel2 dh, String splitor) {
 		String s = "";
 		// --中长--
-		if (dh.getShooting6661() > 0) {
-			s += "底部小票模式-大宗" + splitor;
+		if (dh.getShooting6661() > 0 || dh.getShooting6662() > 0) {
+			if (dh.getShooting6661() > 0) {
+				s += "底部小票模式-大宗" + splitor;
+			}
+			if (dh.getShooting6662() > 0) {
+				s += "底部小票模式-减持" + splitor;
+			}
+
 		} else if (dh.getShooting7() > 0) {
 			s += "底部小票模式" + splitor;
 		} else if (dh.getShooting9() > 0) {

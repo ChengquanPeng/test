@@ -136,12 +136,15 @@ public class CodeModelService {
 		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();
 		// 到期提醒
 		StringBuffer sbc = new StringBuffer();
+		// 做小坐地大宗
 		StringBuffer xddz = new StringBuffer();
+		// 做小坐地减持
+		StringBuffer xdjc = new StringBuffer();
 
 		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
 		for (StockBaseInfo s : codelist) {
 			try {
-				this.processingByCode(s, poolMap, poolList, listLast, histMap, isweekend, sbc, xddz);
+				this.processingByCode(s, poolMap, poolList, listLast, histMap, isweekend, sbc, xddz, xdjc);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -155,6 +158,12 @@ public class CodeModelService {
 		log.info("CodeModel v2 模型执行完成");
 		if (sbc.length() > 0) {
 			MsgPushServer.pushSystem1("人工pls==1已到期:" + sbc.toString());
+		}
+		if (xddz.length() > 0) {
+			MsgPushServer.pushSystem1("最新小底-大宗:" + xddz.toString());
+		}
+		if (xdjc.length() > 0) {
+			MsgPushServer.pushSystem1("最新小底-减持:" + xdjc.toString());
 		}
 	}
 
@@ -173,7 +182,7 @@ public class CodeModelService {
 
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
 			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, boolean isweekend, StringBuffer sbc,
-			StringBuffer xddz) {
+			StringBuffer xddz, StringBuffer xdjc) {
 		String code = s.getCode();
 		// 股票池
 		CodeBaseModel2 newOne = histMap.get(s.getCode());
@@ -245,6 +254,12 @@ public class CodeModelService {
 		newOne.setShooting8(0);
 		newOne.setShooting9(0);
 
+		// 减持
+		ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLast(newOne.getCode(), pre1Year);
+		newOne.setReducZb(rhss.getZb());// 占比
+		newOne.setReducYg(rhss.getYg());// 数量-股
+		newOne.setReduceTims(rhss.getTims());// 次数
+
 		/** 纯基本面 **/
 		if (newOne.getFinOK() > 0 || newOne.getBousOK() > 0) {
 			/** 行情指标4：底部股东人数：大幅减少(3年减少40%) **/
@@ -311,8 +326,8 @@ public class CodeModelService {
 				&& newOne.getDzjyp365d() >= 5) {
 			isOk1 = true;
 		}
-		//
-		if (isOk7 && newOne.getDzjy365d() >= yzdzamt) {
+		// 小底-大宗
+		if (newOne.getPls() != 2 && isOk7 && newOne.getDzjy365d() >= yzdzamt) {
 			if (newOne.getShooting6661() == 0) {
 				xddz.append(stockBasicService.getCodeName2(code)).append(",");
 			}
@@ -320,6 +335,20 @@ public class CodeModelService {
 		} else {
 			newOne.setShooting6661(0);
 		}
+
+		// 小底-减持
+		if (newOne.getPls() != 2 && isOk7 && rhss.getLastPlanDate() > 0
+				&& rhss.getLastPlanDate() >= newOne.getReduceLastPlanDate()) {// 大于等于是保持6662=1
+			newOne.setShooting6662(1);
+		} else {
+			newOne.setShooting6662(0);
+		}
+		// 底部小票模式或者人工,减持计划通知
+		if (newOne.getPls() != 2 && (isOk7 || newOne.getPls() == 1) && rhss.getLastPlanDate() > 0
+				&& rhss.getLastPlanDate() > newOne.getReduceLastPlanDate()) {//// 没有等于为了通知
+			xdjc.append(stockBasicService.getCodeName2(code)).append(",");
+		}
+		newOne.setReduceLastPlanDate(rhss.getLastPlanDate());// 最新减持计划时间（大股东）
 
 		// 系统指标->自动化监听:底部优质小票，底部大票定增，底部小票大宗，底部小票定增，底部小票减持
 		if (isOk1 || isOk2 || isOk6 || isOk7 || isOk8) {
@@ -357,6 +386,7 @@ public class CodeModelService {
 				pool.setRemark(Constant.AUTO_MONITOR + TagUtil.getSystemPoint(newOne, Constant.FEN_HAO));
 			}
 		}
+
 		if (newOne.getPls() != 2 && newOne.getShooting6661() == 1 && pool.getUpTodayChange() > 0) {
 			pool.setUpTodayChange(3);
 		}
@@ -489,12 +519,6 @@ public class CodeModelService {
 			newOne.setTagDzPriceLow(
 					Double.valueOf(CurrencyUitl.cutProfit(lastTrade.getClosed(), dz.getAvgPrcie())).intValue());
 		}
-		// 减持
-		ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLast(newOne.getCode(), pre1Year);
-		newOne.setReducZb(rhss.getZb());// 占比
-		newOne.setReducYg(rhss.getYg());// 数量-股
-		newOne.setReduceTims(rhss.getTims());// 次数
-		newOne.setReduceLastPlanDate(rhss.getLastPlanDate());// 最新减持计划时间（大股东）
 	}
 
 	private void holderNum(CodeBaseModel2 newOne) {

@@ -51,6 +51,7 @@ public class ModelReq {
 	int shooting53 = 0;
 	int whiteHors = 0;
 	int shooting6661;
+	int shooting6662;
 	String rzrq1;
 	String rzrq2;
 

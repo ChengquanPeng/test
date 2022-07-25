@@ -410,6 +410,9 @@ public class WebModelService {
 		if (mr.getShooting6661() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting6661", 1));
 		}
+		if (mr.getShooting6662() == 1) {
+			bqb.must(QueryBuilders.matchPhraseQuery("shooting6662", 1));
+		}
 		if (mr.getShooting6() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting6", 1));
 		}
