@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
@@ -30,7 +29,6 @@ import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 
 import lombok.extern.log4j.Log4j2;
 
-@Service
 @Log4j2
 public class Prd1Service {
 	@Autowired

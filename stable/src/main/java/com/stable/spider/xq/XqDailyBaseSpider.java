@@ -3,7 +3,6 @@ package com.stable.spider.xq;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,6 @@ import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.service.DataChangeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.RunModelService;
-import com.stable.service.model.prd.Prd1Service;
 import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
@@ -57,8 +55,8 @@ public class XqDailyBaseSpider {
 	// https://xueqiu.com/S/SZ000001
 	private String BASE_URL = "https://xueqiu.com/S/%s";
 
-	@Autowired
-	private Prd1Service prd1Service;
+//	@Autowired
+//	private Prd1Service prd1Service;
 
 	public static String formatCode2(String code) {
 		// 5开头，沪市基金或权证 60开头上证

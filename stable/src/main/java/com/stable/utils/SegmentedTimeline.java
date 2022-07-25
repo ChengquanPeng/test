@@ -116,7 +116,7 @@ public class SegmentedTimeline implements Timeline, Cloneable, Serializable {
 	 * List of exception segments (exceptions segments that would otherwise be
 	 * included based on the periodic (included, excluded) grouping).
 	 */
-	private List exceptionSegments = new ArrayList();
+	private List<Object> exceptionSegments = new ArrayList<Object>();
 
 	/**
 	 * This base timeline is used to specify exceptions at a higher level. For
@@ -364,7 +364,7 @@ public class SegmentedTimeline implements Timeline, Cloneable, Serializable {
 	 * @return The exception segments.
 	 */
 
-	public List getExceptionSegments() {
+	public List<Object> getExceptionSegments() {
 		return Collections.unmodifiableList(this.exceptionSegments);
 	}
 
@@ -373,7 +373,7 @@ public class SegmentedTimeline implements Timeline, Cloneable, Serializable {
 	 *
 	 * @param exceptionSegments the exception segments.
 	 */
-	public void setExceptionSegments(List exceptionSegments) {
+	public void setExceptionSegments(List<Object> exceptionSegments) {
 		this.exceptionSegments = exceptionSegments;
 	}
 
@@ -670,8 +670,8 @@ public class SegmentedTimeline implements Timeline, Cloneable, Serializable {
 	 * @param exceptionList List of Date objects that identify the segments to
 	 *                      exclude.
 	 */
-	public void addExceptions(List exceptionList) {
-		for (Iterator iter = exceptionList.iterator(); iter.hasNext();) {
+	public void addExceptions(List<Object> exceptionList) {
+		for (Iterator<Object> iter = exceptionList.iterator(); iter.hasNext();) {
 			addException((Date) iter.next());
 		}
 	}
@@ -820,7 +820,7 @@ public class SegmentedTimeline implements Timeline, Cloneable, Serializable {
 		}
 
 		int n = 0;
-		for (Iterator iter = this.exceptionSegments.iterator(); iter.hasNext();) {
+		for (Iterator<Object> iter = this.exceptionSegments.iterator(); iter.hasNext();) {
 			Segment segment = (Segment) iter.next();
 			Segment intersection = segment.intersect(fromMillisecond, toMillisecond);
 			if (intersection != null) {
@@ -1005,6 +1005,7 @@ public class SegmentedTimeline implements Timeline, Cloneable, Serializable {
 	 * Each segment will know its segment number, segmentStart, segmentEnd and index
 	 * inside the segment.
 	 */
+	@SuppressWarnings({ "serial", "rawtypes" })
 	public class Segment implements Comparable, Cloneable, Serializable {
 
 		/** The segment number. */
@@ -1360,6 +1361,7 @@ public class SegmentedTimeline implements Timeline, Cloneable, Serializable {
 	 * allowing them to express a day exception as one SegmentRange instead of multi
 	 * Segments.
 	 */
+	@SuppressWarnings({ "serial" })
 	protected class SegmentRange extends Segment {
 
 		/** The number of segments in the range. */
@@ -1469,8 +1471,8 @@ public class SegmentedTimeline implements Timeline, Cloneable, Serializable {
 	/**
 	 * Special <code>SegmentRange that came from the BaseTimeline.
 	 */
+	@SuppressWarnings("serial")
 	protected class BaseTimelineSegmentRange extends SegmentRange {
-
 		/**
 		 * Constructor.
 		 *
