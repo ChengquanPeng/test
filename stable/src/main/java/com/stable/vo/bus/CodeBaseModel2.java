@@ -90,6 +90,11 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int moni = 0;// 是否监听
 
+	@Field(type = FieldType.Integer)
+	private int lastReducePlanDate = 0;// 最新减持计划
+	@Field(type = FieldType.Integer)
+	private int lastZyDate = 0;// 最新质押时间
+
 	@Field(type = FieldType.Double)
 	private double reducZb;// 减持占比
 

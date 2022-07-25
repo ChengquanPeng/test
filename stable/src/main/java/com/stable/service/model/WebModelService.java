@@ -595,6 +595,8 @@ public class WebModelService {
 			field = "qixing";
 		} else if (orderBy == 16) {
 			field = "finDbl";
+		} else if (orderBy == 17) {// 最新质押时间
+			field = "lastZyDate";
 		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);

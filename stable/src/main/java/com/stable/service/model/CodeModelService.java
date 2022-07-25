@@ -1100,9 +1100,13 @@ public class CodeModelService {
 			newOne.setBaseBlue(1);
 			sb3.append(ykb).append(Constant.HTML_LINE);
 		}
-		if (zy.getLastNoticeDate() > 0) {
+
+		if (zy.getLastNoticeDate() > 0 && zy.getLastNoticeDate() > this.pre1Year) {
+			newOne.setLastZyDate(zy.getLastNoticeDate());
 			newOne.setBaseBlue(1);
-			sb3.append("<font color='blue'>最新质押日期:" + zy.getLastNoticeDate() + "</font>").append(Constant.HTML_LINE);
+			sb3.append("<font color='blue'>最新解质押日期:" + zy.getLastNoticeDate() + "</font>").append(Constant.HTML_LINE);
+		} else {
+			newOne.setLastZyDate(0);
 		}
 
 		if (newOne.getBaseRed() > 0) {
