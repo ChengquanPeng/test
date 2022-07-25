@@ -91,12 +91,17 @@ public class CodeBaseModel2 extends EsBase {
 	private int moni = 0;// 是否监听
 
 	@Field(type = FieldType.Integer)
-	private int lastReducePlanDate = 0;// 最新减持计划
-	@Field(type = FieldType.Integer)
 	private int lastZyDate = 0;// 最新质押时间
 
+	// --- 减持 ---
 	@Field(type = FieldType.Double)
 	private double reducZb;// 减持占比
+	@Field(type = FieldType.Double)
+	private double reducYg;// 减持万股
+	@Field(type = FieldType.Integer)
+	private int reduceLastPlanDate = 0;// 最新减持计划
+	@Field(type = FieldType.Integer)
+	private int reduceTims = 0;// 减持次数
 
 	// Step.1.市值大小，股价K线形态是否横盘多年，且常年分红
 	@Field(type = FieldType.Double)

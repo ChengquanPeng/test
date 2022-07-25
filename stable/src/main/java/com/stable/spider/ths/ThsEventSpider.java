@@ -14,7 +14,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsBuyBackInfoDao;
 import com.stable.es.dao.base.EsReducingHoldingSharesDao;
-import com.stable.service.ReducingHoldingSharesService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.utils.DateUtil;
@@ -51,8 +50,6 @@ public class ThsEventSpider {
 	private EsBuyBackInfoDao buyBackInfoDao;
 	@Autowired
 	private EsReducingHoldingSharesDao reducingHoldingSharesDao;
-	@Autowired
-	private ReducingHoldingSharesService reducingHoldingSharesService;
 
 	private String urlbase = "https://basic.10jqka.com.cn/%s/event.html#stockpage?t=%s";
 	private String host = "http://basic.10jqka.com.cn/";
@@ -115,7 +112,6 @@ public class ThsEventSpider {
 		if (list2.size() > 0) {
 			buyBackInfoDao.saveAll(list2);
 		}
-		reducingHoldingSharesService.init();
 		log.info("同花顺-近期重要事件-done");
 	}
 

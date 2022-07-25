@@ -28,13 +28,11 @@ import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.service.ConceptService;
-import com.stable.service.ReducingHoldingSharesService;
 import com.stable.service.StockBasicService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.TagUtil;
-import com.stable.vo.ReducingHoldingSharesStat;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.FinanceBaseInfoHangye;
 import com.stable.vo.bus.MonitorPoolTemp;
@@ -59,8 +57,6 @@ public class WebModelService {
 	private ConceptService conceptService;
 	@Autowired
 	private MonitorPoolService monitorPoolService;
-	@Autowired
-	private ReducingHoldingSharesService reducingHoldingSharesService;
 
 	public static long WAN = CurrencyUitl.WAN_N.longValue();
 
@@ -146,8 +142,7 @@ public class WebModelService {
 		}
 		resp.setTagInfo(tag.toString());
 
-		ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLastStat(dh.getCode(), 0);
-		resp.setZfjjInfo(TagUtil.gameInfo(dh, rhss, trymsg));
+		resp.setZfjjInfo(TagUtil.gameInfo(dh, trymsg));
 
 		StringBuffer sb6 = new StringBuffer();
 		// 个人人工
@@ -597,6 +592,8 @@ public class WebModelService {
 			field = "finDbl";
 		} else if (orderBy == 17) {// 最新质押时间
 			field = "lastZyDate";
+		} else if (orderBy == 18) {// 最新减持计划
+			field = "reduceLastPlanDate";
 		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);

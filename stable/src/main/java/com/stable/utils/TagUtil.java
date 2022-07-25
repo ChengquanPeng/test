@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.stable.constant.Constant;
 import com.stable.service.model.WebModelService;
-import com.stable.vo.ReducingHoldingSharesStat;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.CodeConcept;
 
@@ -161,7 +160,7 @@ public class TagUtil {
 		return sb5.toString();
 	}
 
-	public static String gameInfo(CodeBaseModel2 dh, ReducingHoldingSharesStat rhss, boolean trymsg) {
+	public static String gameInfo(CodeBaseModel2 dh, boolean trymsg) {
 		// 博弈-行情指标
 		StringBuffer sb5 = new StringBuffer();
 
@@ -277,9 +276,12 @@ public class TagUtil {
 		}
 		// 减持
 		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
-		if (dh.getReducZb() > 0 || rhss.getYg() > 0) {
-			sb5.append("1年内减持:").append(rhss.getT()).append("次,").append(rhss.getYg()).append("亿股,流通占比:")
+		if (dh.getReducZb() > 0 || dh.getReducYg() > 0) {
+			sb5.append("1年内减持:").append(dh.getReduceTims()).append("次,").append(dh.getReducYg()).append("亿股,流通占比:")
 					.append(dh.getReducZb()).append("%");
+			if (dh.getReduceLastPlanDate() > 0) {
+				sb5.append(",最新计划日期:").append(dh.getReduceLastPlanDate());
+			}
 		}
 		return sb5.toString();
 	}

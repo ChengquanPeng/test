@@ -2,8 +2,6 @@ package com.stable.service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -12,7 +10,6 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
@@ -20,10 +17,8 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsReducingHoldingSharesDao;
 import com.stable.utils.CurrencyUitl;
-import com.stable.utils.DateUtil;
 import com.stable.vo.ReducingHoldingSharesStat;
 import com.stable.vo.bus.ReducingHoldingShares;
-import com.stable.vo.bus.StockBaseInfo;
 
 /**
  * 减持
@@ -31,36 +26,11 @@ import com.stable.vo.bus.StockBaseInfo;
 @Service
 public class ReducingHoldingSharesService {
 	@Autowired
-	private EsReducingHoldingSharesDao dao;
+	private EsReducingHoldingSharesDao rhssDao;
 	@Autowired
 	private StockBasicService stockBasicService;
 
-	private Map<String, ReducingHoldingSharesStat> datacash = new ConcurrentHashMap<String, ReducingHoldingSharesStat>();
-
-	public ReducingHoldingSharesStat getLastStat(String code, int pre1year) {
-		ReducingHoldingSharesStat r = datacash.get(code);
-		if (r == null) {
-			if (pre1year <= 0) {
-				pre1year = DateUtil.getPreYear(DateUtil.getTodayIntYYYYMMDD());
-			}
-			r = getLast(code, pre1year);
-			datacash.put(code, r);
-		}
-		return r;
-	}
-
-	public void init() {
-		int pre1year = DateUtil.getPreYear(DateUtil.getTodayIntYYYYMMDD());
-		ConcurrentHashMap<String, ReducingHoldingSharesStat> tmp = new ConcurrentHashMap<String, ReducingHoldingSharesStat>();
-
-		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithOutSort();
-		for (StockBaseInfo s : list) {
-			tmp.put(s.getCode(), getLastStat(s.getCode(), pre1year));
-		}
-		datacash = tmp;
-	}
-
-	private ReducingHoldingSharesStat getLast(String code, int pre1year) {
+	public ReducingHoldingSharesStat getLast(String code, int pre1year) {
 		ReducingHoldingSharesStat r = new ReducingHoldingSharesStat();
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -70,13 +40,17 @@ public class ReducingHoldingSharesService {
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(PageRequest.of(pageNum, size)).build();
 
-		List<ReducingHoldingShares> page = dao.search(sq).getContent();
+		List<ReducingHoldingShares> page = rhssDao.search(sq).getContent();
 		if (page != null && !page.isEmpty()) {
 			double gw = 0;
 			for (ReducingHoldingShares row : page) {
 				gw += row.getWg();
+
+				if (row.getType() == 2 && row.getDate() > r.getLastPlanDate()) {
+					r.setLastPlanDate(row.getDate());
+				}
 			}
-			r.setT(page.size());
+			r.setTims(page.size());
 			double floatShare = stockBasicService.getCode(code).getFloatShare();// 亿股
 			if (gw > 0) {
 				BigDecimal yg = CurrencyUitl.divideDecimal(gw, CurrencyUitl.WAN_N.doubleValue());
@@ -94,10 +68,9 @@ public class ReducingHoldingSharesService {
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		int pageNum = EsQueryPageUtil.queryPage500.getPageNum();
 		int size = EsQueryPageUtil.queryPage500.getPageSize();
-		Pageable pageable = PageRequest.of(pageNum, size);
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
-		return dao.search(sq).getContent();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(PageRequest.of(pageNum, size)).build();
+		return rhssDao.search(sq).getContent();
 	}
 }

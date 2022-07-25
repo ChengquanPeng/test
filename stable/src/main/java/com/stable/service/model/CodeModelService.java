@@ -37,6 +37,7 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.TagUtil;
 import com.stable.vo.HolderAnalyse;
+import com.stable.vo.ReducingHoldingSharesStat;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.DzjyYiTime;
@@ -488,8 +489,12 @@ public class CodeModelService {
 			newOne.setTagDzPriceLow(
 					Double.valueOf(CurrencyUitl.cutProfit(lastTrade.getClosed(), dz.getAvgPrcie())).intValue());
 		}
-		// 减持占比
-		newOne.setReducZb(reducingHoldingSharesService.getLastStat(newOne.getCode(), pre1Year).getZb());
+		// 减持
+		ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLast(newOne.getCode(), pre1Year);
+		newOne.setReducZb(rhss.getZb());// 占比
+		newOne.setReducYg(rhss.getYg());// 数量-股
+		newOne.setReduceTims(rhss.getTims());// 次数
+		newOne.setReduceLastPlanDate(rhss.getLastPlanDate());// 最新减持计划时间（大股东）
 	}
 
 	private void holderNum(CodeBaseModel2 newOne) {

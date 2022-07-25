@@ -5,7 +5,8 @@ import lombok.Data;
 @Data
 public class ReducingHoldingSharesStat {
 
-	private int t;
+	private int tims;
 	private double yg;
 	private double zb;
+	private int lastPlanDate;
 }

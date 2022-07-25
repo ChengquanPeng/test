@@ -11,13 +11,11 @@ import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
 import com.stable.service.FinanceService;
-import com.stable.service.ReducingHoldingSharesService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.WebModelService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.TagUtil;
-import com.stable.vo.ReducingHoldingSharesStat;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.ForeignCapitalSum;
 import com.stable.vo.http.resp.CodeBaseModelResp;
@@ -36,8 +34,6 @@ public class CodeController {
 	private ChipsZfService chipsZfService;
 	@Autowired
 	private FinanceService financeService;
-	@Autowired
-	private ReducingHoldingSharesService reducingHoldingSharesService;
 
 	/**
 	 * 个股当前状态
@@ -47,8 +43,7 @@ public class CodeController {
 		try {
 			CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code, true);
 			model.addAttribute("codedetail", cbm);
-			ReducingHoldingSharesStat rhss = reducingHoldingSharesService.getLastStat(code, 0);
-			model.addAttribute("gameinfo", TagUtil.gameInfo(cbm, rhss, false));
+			model.addAttribute("gameinfo", TagUtil.gameInfo(cbm, false));
 			prepare2(model, code);
 		} catch (Exception e) {
 			e.printStackTrace();
