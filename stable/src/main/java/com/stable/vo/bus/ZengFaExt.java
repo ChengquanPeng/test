@@ -21,11 +21,11 @@ public class ZengFaExt extends EsBase {
 	@Field(type = FieldType.Keyword)
 	private String code;
 	@Field(type = FieldType.Integer)
-	private int buy;// 0无，1购买资产 
+	private int buy;// 0无，1购买资产
 	@Field(type = FieldType.Integer)
-	private int selfzf;//自己人在增发， 0无，1确定，2不确定 
-	@Field(type = FieldType.Integer)
-	private int compType;//企业类型， 0未知，1国企，2民企 
+	private int selfzf;// 自己人在增发， 0无，1确定，2不确定
+	// @Field(type = FieldType.Integer)
+	// private int compType;//企业类型， 0未知，1国企，2民企
 //	@Field(type = FieldType.Double)
 //	private double totalMarketVal;//总市值
 //	@Field(type = FieldType.Double)

@@ -39,7 +39,7 @@ public class RtmMoniGbl {
 
 	public String getMsg(MonitorPoolTemp u) {
 		if (u.getUserId() == Constant.MY_ID) {
-			return base.getZfjjInfo() + base.getRengong();
+			return base.getBuyRea() + Constant.HTML_LINE + base.getZfjjInfo() + base.getRengong();
 		} else {
 			return u.getMsg();
 		}

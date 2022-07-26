@@ -161,6 +161,8 @@ public class WebModelService {
 			}
 			resp.setRengong(sb6.toString());
 		}
+
+		resp.setGnstr(TagUtil.getGn(conceptService.getCodeConcept(dh.getCode())));
 		return resp;
 	}
 

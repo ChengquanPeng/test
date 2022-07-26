@@ -12,9 +12,12 @@ import com.stable.vo.bus.CodeConcept;
 public class TagUtil {
 
 	public static boolean stockRange(boolean isSamll, CodeBaseModel2 newOne) {
-		// 1.排除的,2大票 直接false
-		if (newOne.getPls() == 2 || !TagUtil.isDibuSmall(isSamll, newOne)) {
-
+		// 1.排除的,
+		if (newOne.getPls() == 2) {
+			return false;
+		}
+		// 2大票 直接false
+		if (!TagUtil.isDibuSmall(isSamll, newOne)) {
 			// 人工的需要check||底部优质大票||一些底部小涨-stable0有业绩的小票(热点票)
 			if (newOne.getPls() == 1 || (newOne.getZfjjup() >= 4 && newOne.getFinOK() >= 1 && isSamll
 					&& newOne.getHolderNumP5() > 45.0)) {

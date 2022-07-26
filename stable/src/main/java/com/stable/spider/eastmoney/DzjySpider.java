@@ -128,7 +128,7 @@ public class DzjySpider {
 			dzjyYiTimeDao.saveAll(l);
 		}
 		if (sb.length() > 0) {
-			MsgPushServer.pushSystem1(DateUtil.getTodayYYYYMMDD() + " 大宗交易异动列表:" + sb.toString());
+			MsgPushServer.pushSystemT1(DateUtil.getTodayYYYYMMDD() + " 大宗交易异动列表:", sb.toString());
 		}
 	}
 

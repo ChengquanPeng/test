@@ -156,13 +156,6 @@ public class ChipsZfService {
 						} else {
 							r.setSelfzf("-");
 						}
-						if (ext.getCompType() == 1) {
-							r.setCompType("国企");
-						} else if (ext.getCompType() == 2) {
-							r.setCompType("民企");
-						} else {
-							r.setCompType("-");
-						}
 //						r.setMarketVal(ext.getCircMarketVal() + "<br/>" + ext.getTotalMarketVal());// 总市值
 					}
 				}
@@ -263,7 +256,7 @@ public class ChipsZfService {
 		}
 
 		// 国企
-		z.setCompType(stockBasicService.getCode(code).getCompnayType());
+//		z.setCompType(stockBasicService.getCode(code).getCompnayType());
 
 		// 增发时的市值
 //		if (zfEndDate >= 20210125) {

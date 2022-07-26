@@ -135,7 +135,7 @@ public class CodeModelKLineService {
 			bizPushService.PushS2("今日最新旗形", qx.toString());
 		}
 		if (yds.length() > 0) {
-			MsgPushServer.pushSystem1("今日成交量异动:" + yds.toString());
+			MsgPushServer.pushSystemT1("今日成交量异动:", yds.toString());
 		}
 
 		log.info("KLine基本完成");
