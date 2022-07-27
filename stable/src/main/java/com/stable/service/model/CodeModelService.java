@@ -268,7 +268,7 @@ public class CodeModelService {
 				newOne.setShooting4(1);
 			}
 
-			/** 底部大票 **/
+			/** 定增:底部大票 **/
 			if (TagUtil.isDibu21(newOne) && newOne.getMkv() >= smallStocklimit) {
 				// 行情指标2：底部大票增发：超过50亿(越大越好),股东集中,证监会核准-之前有明显底部拿筹痕迹-涨停？
 				if (ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
@@ -282,6 +282,15 @@ public class CodeModelService {
 							isOk2 = true;
 						}
 					}
+				}
+			}
+			// 底部优质票也可以这样。
+			if (TagUtil.isDibuSmall(isSmallStock, newOne)
+					&& ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
+				// 增发金额接近活动的筹码的1半
+				long ackm = CurrencyUitl.covertToLong(newOne.getActMkv() + CurrencyUitl.YI);
+				if ((ackm / newOne.getZfYjAmt()) <= 2.0) {
+					isOk2 = true;
 				}
 			}
 		}
