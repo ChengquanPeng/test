@@ -19,5 +19,4 @@ public class CodeBaseModelResp extends CodeBaseModel2 {
 	private String tagInfo;
 	private String bankuai;
 	private String rengong;
-	private String gnstr;
 }

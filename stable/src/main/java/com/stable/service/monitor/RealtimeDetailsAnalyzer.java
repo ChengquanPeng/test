@@ -62,7 +62,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	}
 
 	private String getBaseInfo() {
-		return Constant.HTML_LINE + Constant.HTML_LINE + "行业/概念：" + TagUtil.getGn(conceptService.getCodeConcept(code))
+		return Constant.HTML_LINE + Constant.HTML_LINE + "备注：" + rtm.getBase().getBuyRea() + Constant.HTML_LINE// -
+				+ Constant.HTML_LINE + "行业/概念：" + TagUtil.getGn(conceptService.getCodeConcept(code))
 				+ Constant.HTML_LINE + Constant.HTML_LINE + "基础信息：" + rtm.getBase().getZfjjInfo()// -
 				+ Constant.HTML_LINE + Constant.HTML_LINE + "避雷区：" + rtm.getBase().getBaseInfo() // -
 				+ Constant.HTML_LINE + Constant.HTML_LINE + "其他：" + rtm.getBase().getTagInfo();

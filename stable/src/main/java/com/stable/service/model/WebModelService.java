@@ -87,7 +87,6 @@ public class WebModelService {
 		resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
 		StockBaseInfo s = stockBasicService.getCode(dh.getCode());
 		resp.setCircZb(s.getCircZb());
-		resp.setBankuai(s.getThsIndustry() + "<br/> " + s.getThsLightspot());
 		StringBuffer sb1 = new StringBuffer("");
 		if (dh.getBaseRed() == 1) {
 			sb1.append("<font color='red'>红:</font>" + dh.getBaseRedDesc());
@@ -161,8 +160,8 @@ public class WebModelService {
 			}
 			resp.setRengong(sb6.toString());
 		}
-
-		resp.setGnstr(TagUtil.getGn(conceptService.getCodeConcept(dh.getCode())));
+		resp.setBankuai(s.getThsLightspot() + "<br/><br/>" + s.getThsIndustry() + "|"
+				+ TagUtil.getGn(conceptService.getCodeConcept(dh.getCode())));
 		return resp;
 	}
 
