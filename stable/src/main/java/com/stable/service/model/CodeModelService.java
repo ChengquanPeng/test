@@ -157,13 +157,13 @@ public class CodeModelService {
 		}
 		log.info("CodeModel v2 模型执行完成");
 		if (sbc.length() > 0) {
-			MsgPushServer.pushSystem1("人工pls==1已到期:" + sbc.toString());
+			MsgPushServer.pushSystemT1("人工pls==1已到期:", sbc.toString());
 		}
 		if (xddz.length() > 0) {
-			MsgPushServer.pushSystem1("最新小底-大宗:" + xddz.toString());
+			MsgPushServer.pushSystemT1("最新小底-大宗:", xddz.toString());
 		}
 		if (xdjc.length() > 0) {
-			MsgPushServer.pushSystem1("最新小底-减持:" + xdjc.toString());
+			MsgPushServer.pushSystemT1("最新小底-减持:", xdjc.toString());
 		}
 	}
 
