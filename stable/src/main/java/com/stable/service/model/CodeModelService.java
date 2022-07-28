@@ -278,7 +278,7 @@ public class CodeModelService {
 					} else if (newOne.getZfYjAmt() >= ZF_20YI) {// 定增超过20亿,活动筹码小于40亿
 						// 增发金额接近活动的筹码的1半
 						long ackm = CurrencyUitl.covertToLong(newOne.getActMkv() + CurrencyUitl.YI);
-						if ((ackm / newOne.getZfYjAmt()) <= 2.0) {
+						if ((ackm / Double.valueOf(newOne.getZfYjAmt())) <= 2.0) {
 							isOk2 = true;
 						}
 					}
@@ -289,7 +289,7 @@ public class CodeModelService {
 					&& ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
 				// 增发金额接近活动的筹码的1半
 				long ackm = CurrencyUitl.covertToLong(newOne.getActMkv() + CurrencyUitl.YI);
-				if ((ackm / newOne.getZfYjAmt()) <= 2.0) {
+				if ((ackm / Double.valueOf(newOne.getZfYjAmt())) <= 2.0) {
 					isOk2 = true;
 				}
 			}

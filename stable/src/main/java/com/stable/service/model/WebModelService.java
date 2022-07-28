@@ -210,71 +210,74 @@ public class WebModelService {
 			codeBaseModel2Dao.save(model);
 			return;
 		}
-
 		int pls = req.getPls();
+
+		int date = -1;
+		if (timemonth == 9) {// 归0
+			pls = 0;
+			date = 0;
+		}
+
 		if (pls != 0 && pls != 1 && pls != 2) {
 			throw new RuntimeException("i != 0 && i != 1 && i != 2 ? ");
 		}
 
-		int date = -1;
-		if (timemonth == 9) {
-			pls = 0;
-			date = 0;
-		} else {
-			int days = 0;
-			if (timemonth == 1) {
-				days = 30;
-			} else if (timemonth == 2) {
-				days = 60;
-			} else if (timemonth == 3) {
-				days = 90;
-			} else if (timemonth == 4) {
-				days = 180;
-			} else if (timemonth == 5) {
-				days = 365;
-			}
-			if (days > 0) {
-				Date now = new Date();
-				date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, days));
-			}
+		/** === start ===时间 */
+		int days = 0;
+		if (timemonth == 1) {
+			days = 30;
+		} else if (timemonth == 2) {
+			days = 60;
+		} else if (timemonth == 3) {
+			days = 90;
+		} else if (timemonth == 4) {
+			days = 180;
+		} else if (timemonth == 5) {
+			days = 365;
 		}
+		if (days > 0) {
+			Date now = new Date();
+			date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, days));
+		}
+		/** === end ===时间 */
+
 		String code = req.getCode();
 		CodeBaseModel2 model = getLastOneByCode2(code);
 		String remark = req.getBuyRea().trim() + " " + DateUtil.formatYYYYMMDD2(new Date());
-		if (date != 1) {
-			MonitorPoolTemp pool = monitorPoolService.getMonitorPoolById(userId, code);
-			if (pls == 2 || pls == 0) {// 2不在池子
-				pool.setMonitor(MonitorType.NO.getCode());
-				pool.setUpTodayChange(0);
-				pool.setRealtime(0);
-				pool.setOffline(0);
-				pool.setDzjy(0);
-				pool.setHolderNum(0);
-				pool.setYkb(0);
-				pool.setZfdone(0);
-				pool.setZfdoneZjh(0);
-				pool.setListenerGg(0);
-				pool.setBuyLowVol(0);
-//				pool.setShotPointCheck(0);
-			} else if (pls == 1 && model.getPls() != 1) {// 1不在池子，且原来不等于1
-				pool.setMonitor(MonitorType.MANUAL.getCode());
-				pool.setUpTodayChange(3);
-				pool.setRealtime(1);
-				int dt = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
-				pool.setDzjy(dt);
-				pool.setHolderNum(dt);
-				pool.setYkb(dt);
-				pool.setZfdone(1);
-				pool.setBuyLowVol(30);
-//				pool.setShotPointCheck(1);
-			}
+		MonitorPoolTemp pool = monitorPoolService.getMonitorPoolById(userId, code);
+		if (pls == 2 || pls == 0) {// 2不在池子
+			pool.setMonitor(MonitorType.NO.getCode());
+			pool.setUpTodayChange(0);
+			pool.setRealtime(0);
+			pool.setOffline(0);
+			pool.setDzjy(0);
+			pool.setHolderNum(0);
+			pool.setYkb(0);
+			pool.setZfdone(0);
+			pool.setZfdoneZjh(0);
+			pool.setListenerGg(0);// 监听公告
+			pool.setBuyLowVol(0);
+
 			monitorPoolService.toSave(pool);
-			// 同步监听
-			if (pool.getMonitor() > MonitorType.NO.getCode()) {
-				model.setMoni(pool.getMonitor());
-			} else {
-				model.setMoni(0);
-			}
+		} else if (pls == 1 && model.getPls() != 1) {// 1不在池子，且原来不等于1
+			pool.setMonitor(MonitorType.MANUAL.getCode());
+			pool.setUpTodayChange(3);
+			pool.setRealtime(1);
+			int dt = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
+			pool.setDzjy(dt);
+			pool.setHolderNum(dt);
+			pool.setYkb(dt);
+			pool.setZfdone(1);
+			pool.setBuyLowVol(30);
+
+			monitorPoolService.toSave(pool);
+		}
+
+		// 同步监听
+		if (pool.getMonitor() > MonitorType.NO.getCode()) {
+			model.setMoni(pool.getMonitor());
+		} else {
+			model.setMoni(0);
 		}
 		model.setPls(pls);
 		model.setPlst(date);
