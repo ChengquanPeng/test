@@ -857,7 +857,7 @@ public class CodeModelService {
 		}
 		if (fbi.getFundNotOk3() == 1) {
 			newOne.setBaseYellow(1);
-			sb2.append(yellow++).append(".财务三高疑似造假?详查各报告期短长期借款和货币资金?现金流净额?").append(Constant.HTML_LINE);
+			sb2.append(yellow++).append(".财务三高造假?短长期借款?货币资金?现金流?").append(Constant.HTML_LINE);
 		}
 		if (fbi.getFundNotOk() == 1) {
 			newOne.setBaseYellow(1);
