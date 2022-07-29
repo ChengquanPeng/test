@@ -601,6 +601,8 @@ public class WebModelService {
 			field = "lastZyDate";
 		} else if (orderBy == 18) {// 最新减持计划
 			field = "reduceLastPlanDate";
+		} else if (orderBy == 19) {// 小票未涨
+			field = "zfjjupStable";
 		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);
