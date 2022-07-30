@@ -396,6 +396,11 @@ public class CodeModelService {
 			}
 		}
 
+		// 人工的票，自动预警
+		if (newOne.getPls() == 1 && ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
+			pool.setZfdone(1);
+		}
+
 		if (newOne.getPls() != 2 && newOne.getShooting6661() == 1 && pool.getUpTodayChange() > 0) {
 			pool.setUpTodayChange(3);
 		}

@@ -27,21 +27,23 @@ public class RzrqJob extends MySimpleJob {
 
 	@Override
 	public void myexecute(ShardingContext sc) {
-		Date yes = DateUtil.addDate(new Date(), -1);
+		Date today = new Date();
 		Calendar cal = Calendar.getInstance();
-		cal.setTime(yes);
-		int date = DateUtil.formatYYYYMMDDReturnInt(yes);
-
+		cal.setTime(today);
+		// 周六，周天，不执行
+		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+			log.info("融资融券-周末");
+			return;
+		}
+		// 深圳要到下个交易日才有（通常是周一）
+		int date = DateUtil.formatYYYYMMDDReturnInt(today);
 		if (!tradeCalService.isOpen(date)) {
 			log.info("融资融券-非交易日");
 			return;
 		}
-		if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
-			String dateYYYY_ = DateUtil.formatYYYYMMDD2(yes);
-			log.info("融资融券-交易日开始:{}", dateYYYY_);
-			rzrqSpider.byDaily(dateYYYY_, date);
-		} else {
-			log.info("融资融券-周末");
-		}
+		int predate = tradeCalService.getPretradeDate(date);
+		String dateYYYY_ = DateUtil.formatYYYYMMDD2(DateUtil.parseDate(predate));
+		log.info("融资融券-交易日开始:{}", dateYYYY_);
+		rzrqSpider.byDaily(dateYYYY_, date);
 	}
 }
