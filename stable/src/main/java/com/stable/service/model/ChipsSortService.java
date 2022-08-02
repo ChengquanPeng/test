@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.constant.RedisConstant;
@@ -24,7 +23,7 @@ import lombok.extern.log4j.Log4j2;
  * 大涨收集筹码后，对应股东人数下跌的短线
  *
  */
-@Service
+//@Service
 @Log4j2
 public class ChipsSortService {
 	@Autowired

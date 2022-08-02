@@ -63,8 +63,8 @@ public class CodeModelKLineService {
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private QibaoService qibaoService;
-	@Autowired
-	private ChipsSortService chipsSortService;
+//	@Autowired
+//	private ChipsSortService chipsSortService;
 	@Autowired
 	private CodeModelService codeModelService;
 	@Autowired
@@ -195,13 +195,13 @@ public class CodeModelKLineService {
 		year1(newOne, lastTrade);
 		// 短线：妖股形态，短线拉的急，说明货多。一倍了，说明资金已经投入。新高:说明出货失败或者有更多的想法，要继续拉。
 		sort1ModeService.sort1ModeChk(newOne, pool, tradeDate);
-		// 收集筹码的短线-拉过一波，所以市值可以大一点
+		// 收集筹码的短线-拉过一波，所以市值可以大一点，-已废弃
 		newOne.setSortChips(0);
 		boolean isSamll = codeModelService.isSmallStock(mkv, newOne.getActMkv());
-		if (online4Year && isSamll && chipsSortService.isCollectChips(code, tradeDate)) {
-			newOne.setSortChips(1);
-			log.info("{} 主力筹码收集", code);
-		}
+//		if (online4Year && isSamll && chipsSortService.isCollectChips(code, tradeDate)) {
+//			newOne.setSortChips(1);
+//			log.info("{} 主力筹码收集", code);
+//		}
 		// 基本面-疑似白马
 		susWhiteHorses(code, newOne);
 		// 短线模型(箱体震荡-已废弃，实际是半年新高)
