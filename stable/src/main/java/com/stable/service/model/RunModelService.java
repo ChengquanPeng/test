@@ -129,7 +129,8 @@ public class RunModelService {
 		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
 		StringBuffer sb = new StringBuffer();
 		// 更新时间
-		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("</div>");
+		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("，<br/>特别十字星：人工,大宗,大票定增,做小做底+业绩不错")
+				.append("<br/>确：大宗超5%，小底-大宗，小底-减持</div>").append("<br/>十字星：K线形态，前期有洗盘[002752]，或者阴跌后[山东路桥，中国化学]");
 		// table
 		sb.append("<table border='1' cellspacing='0' cellpadding='0'>");
 		// head
@@ -239,7 +240,7 @@ public class RunModelService {
 					TradeHistInfoDaliy td = daliyTradeHistroyService.queryLastfq(code);
 					if (this.todayPrickOK(td.getClosed(), td.getOpen(), td.getAmt())
 							&& isSuoliang(code, p1.getQixing(), tradeDate)) {
-						line2 += "<font color='red'><缩量十字星></font>";
+						line2 += "<缩量十字星>";
 					}
 				}
 				sb.append("<td>").append(line2).append("</td>");//
