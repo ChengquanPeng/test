@@ -77,7 +77,7 @@ public class TagUtil {
 	public static String getTag(CodeBaseModel2 cbm) {
 		String you = "";
 		if (cbm.getShooting7() > 0) {
-			you = "[优]";
+			you = "[小底]";
 		} else {
 			you = "[普]";
 		}
