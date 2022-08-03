@@ -134,7 +134,7 @@ public class RunModelService {
 		sb.append("<table border='1' cellspacing='0' cellpadding='0'>");
 		// head
 		sb.append(
-				"<tr><th>序号</th><th>简称-代码</th><th>逻辑模型</th><th>底部类型</th><th>形态</th><th>特征</th><th>买点</th><th>备注</th><th>板块概念</th></tr>");
+				"<tr><th>序号</th><th>简称-代码</th><th>逻辑模型</th><th>底部类型</th><th>K线形态</th><th>特征</th><th>买点</th><th>备注</th><th>板块概念</th></tr>");
 		fw.writeLine(sb.toString());
 		sb = new StringBuffer();
 		sb.append(this.getHtml(genListTe, true));
