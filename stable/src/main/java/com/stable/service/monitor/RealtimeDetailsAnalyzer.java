@@ -33,6 +33,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean burstPointCheckTopPrew = false;// 突破前1%
 	private boolean burstPointCheckTop = false;// 突破
 	private boolean burstPointCheckSzx = false;// 十字星
+	private boolean burstPointCheckRg = false;// 人工
 
 	public void stop() {
 		isRunning = false;
@@ -137,6 +138,11 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						burstPointCheckSzx = rtm.bizPushService.PushS2(
 								codeName + rtm.you + " [10]突破买点:" + rtm.getOrig().getShotPointPriceSzx(),
 								getBaseInfo());
+					}
+					if (!burstPointCheckRg && rtm.getOrig().getRgqbPrice() > 0
+							&& rt.getHigh() >= rtm.getOrig().getRgqbPrice()) {
+						burstPointCheckRg = rtm.bizPushService
+								.PushS2(codeName + rtm.you + " 人工买点:" + rtm.getOrig().getRgqbPrice(), getBaseInfo());
 					}
 
 //					if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()

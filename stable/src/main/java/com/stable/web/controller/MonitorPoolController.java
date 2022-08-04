@@ -104,7 +104,7 @@ public class MonitorPoolController {
 	public ResponseEntity<JsonResult> addMonitor(String code, String monitor, String realtime, String offline,
 			String upPrice, String downPrice, String upTodayChange, String downTodayChange, String remark, String ykb,
 			String zfdone, String holderNum, String buyLowVol, String xjl, String dzjy, String listenerGg,
-			String shotPointCheck, HttpServletRequest req) {
+			String rgqbPrice, HttpServletRequest req) {
 		JsonResult r = new JsonResult();
 		try {
 			long userId = getUserId(req);
@@ -130,7 +130,7 @@ public class MonitorPoolController {
 					StringUtils.isNotBlank(xjl) ? Integer.valueOf(xjl) : 0,
 					StringUtils.isNotBlank(dzjy) ? Integer.valueOf(dzjy) : 0,
 					StringUtils.isNotBlank(listenerGg) ? Integer.valueOf(listenerGg) : 0,
-					StringUtils.isNotBlank(shotPointCheck) ? Integer.valueOf(shotPointCheck) : 0);
+					StringUtils.isNotBlank(rgqbPrice) ? Double.valueOf(rgqbPrice) : 0);
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setStatus(JsonResult.FAIL);

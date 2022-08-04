@@ -92,6 +92,9 @@ body {
 				<div class="input-group">
 					起爆监听：<span id="qibao"></span>
 				</div>
+				<div class="input-group">
+					人工起爆：<input type="checkbox" id="rgqbPrice" name="rgqbPrice" />
+				</div>
 				<br />
 				<div class="input-group">
 					在线：<input type="checkbox" id="realtime" name="realtime" />
@@ -217,6 +220,7 @@ body {
 					buyLowVol : $('#buyLowVol').val(),
 					zfdone : $('#zfdone').val(),
 					listenerGg : listenerGg,
+					rgqbPrice : $('#rgqbPrice').val(),
 					downTodayChange : $('#downTodayChange').val()
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
@@ -269,6 +273,7 @@ body {
 				}
 				$('#zfdone').val(reData.result.zfdone);
 				$('#buyLowVol').val(reData.result.buyLowVol);
+				$('#rgqbPrice').val(reData.result.rgqbPrice);
 				if (reData.result.shotPointPrice > 0) {
 					$('#qibao').html(
 							reData.result.shotPointPrice + ",["

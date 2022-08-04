@@ -162,11 +162,21 @@ public class MonitorPoolService {
 	// 加入监听
 	public void addMonitor(long userId, String code, int monitor, int realtime, int offline, double upPrice,
 			double downPrice, double upTodayChange, double downTodayChange, String remark, int ykb, int zfdone,
-			int holderNum, int buyLowVol, int xjl, int dzjy, int listenerGg, int shotPointCheck) {
+			int holderNum, int buyLowVol, int xjl, int dzjy, int listenerGg, double rgqbPrice) {
+		MonitorPoolTemp c = getMonitorPoolById(userId, code);
+		if (rgqbPrice > 0) {// 设置
+			c.setRgqbPrice(rgqbPrice);
+			toSave(c);
+			return;
+		} else if (rgqbPrice <= 0 && c.getRgqbPrice() > 0) {// 归0
+			c.setRgqbPrice(0);
+			toSave(c);
+			return;
+		}
+
 		if (monitor <= 0) {
 			throw new RuntimeException("monitor<=0 ?");
 		}
-		MonitorPoolTemp c = getMonitorPoolById(userId, code);
 		c.setMonitor(monitor);
 		c.setRealtime(realtime);
 		c.setOffline(offline);
@@ -297,9 +307,20 @@ public class MonitorPoolService {
 		}
 
 		// 2.十字星
+		BoolQueryBuilder bqb21 = QueryBuilders.boolQuery();
+		bqb21.must(QueryBuilders.matchPhraseQuery("userId", Constant.MY_ID));
+		bqb21.must(QueryBuilders.rangeQuery("shotPointPriceSzx").gt(0));
+		NativeSearchQueryBuilder queryBuilder21 = new NativeSearchQueryBuilder();
+		SearchQuery sq21 = queryBuilder21.withQuery(bqb21).withPageable(pageable).build();
+		Page<MonitorPoolTemp> page21 = monitorPoolDao.search(sq21);
+		if (page21 != null && !page21.isEmpty()) {
+			List<MonitorPoolTemp> t2 = page21.getContent();
+			listall.addAll(t2);
+		}
+		// 3.人工起爆
 		BoolQueryBuilder bqb2 = QueryBuilders.boolQuery();
 		bqb2.must(QueryBuilders.matchPhraseQuery("userId", Constant.MY_ID));
-		bqb2.must(QueryBuilders.rangeQuery("shotPointPriceSzx").gt(0));
+		bqb2.must(QueryBuilders.rangeQuery("rgqbPrice").gt(0));
 		NativeSearchQueryBuilder queryBuilder2 = new NativeSearchQueryBuilder();
 		SearchQuery sq2 = queryBuilder2.withQuery(bqb2).withPageable(pageable).build();
 		Page<MonitorPoolTemp> page2 = monitorPoolDao.search(sq2);

@@ -915,10 +915,12 @@ public class CodeModelService {
 		if (fbi.getZcfzl() >= 80) {
 			if (fbi.getZcfzl() >= 99) {
 				newOne.setBaseRed(1);
-				sb1.append(red++).append(".资产负债率超高:").append(fbi.getZcfzl()).append("%").append(Constant.HTML_LINE);
+				sb1.append(red++).append(".资产负债率超高:").append(CurrencyUitl.roundHalfUp(fbi.getZcfzl())).append("%")
+						.append(Constant.HTML_LINE);
 			} else {
 				newOne.setBaseYellow(1);
-				sb2.append(yellow++).append(".资产负债率高:").append(fbi.getZcfzl()).append("%").append(Constant.HTML_LINE);
+				sb2.append(yellow++).append(".资产负债率高:").append(CurrencyUitl.roundHalfUp(fbi.getZcfzl())).append("%")
+						.append(Constant.HTML_LINE);
 			}
 
 			int c = 0;
