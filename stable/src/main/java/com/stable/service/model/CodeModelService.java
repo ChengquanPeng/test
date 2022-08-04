@@ -392,7 +392,7 @@ public class CodeModelService {
 					pool.setUpTodayChange(3);
 				}
 //				pool.setShotPointCheck(1);
-				pool.setRemark(Constant.AUTO_MONITOR + TagUtil.getSystemPoint(newOne, Constant.FEN_HAO));
+//				pool.setRemark(Constant.AUTO_MONITOR + TagUtil.getSystemPoint(newOne, Constant.FEN_HAO));
 			}
 		}
 
@@ -410,6 +410,8 @@ public class CodeModelService {
 		} else {
 			newOne.setMoni(0);
 		}
+		// 同步备注
+		pool.setRemark(newOne.getBuyRea());
 	}
 
 	// 小市值股票(流通市值小于70亿，5%以下的流通小于50亿)

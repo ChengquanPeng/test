@@ -248,6 +248,7 @@ public class WebModelService {
 		if (pls == 2 || pls == 0) {// 2不在池子
 			pool.setMonitor(MonitorType.NO.getCode());
 			pool.setUpTodayChange(0);
+			pool.setDownTodayChange(0);
 			pool.setRealtime(0);
 			pool.setOffline(0);
 			pool.setDzjy(0);
@@ -257,6 +258,8 @@ public class WebModelService {
 			pool.setZfdoneZjh(0);
 			pool.setListenerGg(0);// 监听公告
 			pool.setBuyLowVol(0);
+			pool.setUpPrice(0);
+			pool.setDownPrice(0);
 
 			monitorPoolService.toSave(pool);
 		} else if (pls == 1 && model.getPls() != 1) {// 1不在池子，且原来不等于1
