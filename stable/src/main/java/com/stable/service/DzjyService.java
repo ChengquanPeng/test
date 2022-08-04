@@ -7,10 +7,13 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.DzjyDao;
 import com.stable.es.dao.base.DzjyYiTimeDao;
 import com.stable.utils.CurrencyUitl;
@@ -29,6 +32,8 @@ public class DzjyService {
 	private DzjyDao dzjyDao;
 	@Autowired
 	private DzjyYiTimeDao dzjyYiTimeDao;
+	Pageable pageable = PageRequest.of(EsQueryPageUtil.queryPage9999.getPageNum(),
+			EsQueryPageUtil.queryPage9999.getPageSize());
 
 	/**
 	 * 一段时间内的交易额
@@ -50,7 +55,7 @@ public class DzjyService {
 		bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).withSort(sort).build();
 
 		Page<Dzjy> page = dzjyDao.search(sq);
 		if (page != null && !page.isEmpty() && page.getContent().size() > 0) {
@@ -79,7 +84,7 @@ public class DzjyService {
 		bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).withSort(sort).build();
 
 		Page<Dzjy> page = dzjyDao.search(sq);
 		if (page != null && !page.isEmpty() && page.getContent().size() > 0) {
