@@ -90,7 +90,7 @@ public class RzrqSpider {
 //	}
 
 	private double checkLine = 40.0;// 低于40%
-	private double plan2VaildLine = 30.0;// 超过平均数35%认为有效
+	private double plan2VaildLine = 30.0;// 超过平均数30%认为有效
 
 	// 底部融资余额飙升。顶部融券余额飙升。（300339）
 	// 融资融券可以大概率判断多空双发的态度。
@@ -112,7 +112,7 @@ public class RzrqSpider {
 			if (TagUtil.isDibu11(cbm) && cbm.getMkv() <= 200.0 && date > cbm.getShooting30()) {
 				// 方案1:突然拉升的融资融券，散户没有时间买入,200亿以下
 				// 2：融资满足条件
-				// 3:涨幅在65%以下
+				// 3:涨幅在checkLine以下
 				if (sort1ModeService.xyIs30DayTodayPriceOk(code, date, checkLine, EsQueryPageUtil.queryPage30)) {
 					cbm.setRzrqRate(rzrqService.plan2(code, startDate));
 				}

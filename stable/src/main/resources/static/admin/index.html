@@ -363,13 +363,20 @@
 											formatter : function(value, row,
 													index) {
 												var actions = [];
+												var rzbl = "";
+												if (row.rzrqRate > 0) {
+													rzbl = "<br/><br/>融资增长:"
+															+ row.rzrqRate
+															+ "%";
+												}
 												actions
 														.push('<a target="_blank" href="/web/code/' + value + '">'
 																+ value
 																+ '</a><br/>'
 																+ row.codeName
 																+ '<br/><br/>'
-																+ row.bankuai);
+																+ row.bankuai
+																+ rzbl);
 												return actions.join('');
 											},
 											width : 180
@@ -404,18 +411,19 @@
 														+ row.code
 														+ "&ustr="
 														+ ustr + "'>定增历史</a>";
-												if (row.shooting3 == 1) {
-													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资融券</a>";
+												if (row.shooting3 == 1
+														|| row.rzrqRate > 0) {
+													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资</a>";
 													v += "&nbsp;&nbsp;<a target='_blank' href='/web/admin/rzrqm.html?code="
 															+ row.code
 															+ "'>融资排除</a>";
 												}
 												if (row.tagHighZyChance == 1) {
-													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/gpzy/detail/"+row.code+".html'>股票质押</a>";
+													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/gpzy/detail/"+row.code+".html'>质押</a>";
 												}
-												v += "&nbsp;&nbsp;<a target='_blank' href='http://data.eastmoney.com/notices/stock/"+row.code+".html'>公告</a>";
+												v += "<br/><a target='_blank' href='http://data.eastmoney.com/notices/stock/"+row.code+".html'>公告</a>";
 
-												var ckl = "<br/><a target='_blank' href='/web/"
+												var ckl = "&nbsp;&nbsp;<a target='_blank' href='/web/"
 														+ ustr
 														+ "/addMonitor.html?code="
 														+ row.code
