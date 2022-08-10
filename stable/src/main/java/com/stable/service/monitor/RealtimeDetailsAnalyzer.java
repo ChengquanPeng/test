@@ -126,17 +126,20 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				if (isQibao) {
 					if (!burstPointCheckTop && rtm.getOrig().getShotPointPrice() > 0) {
 						if (rt.getHigh() >= rtm.getOrig().getShotPointPrice()) {
-							burstPointCheckTop = rtm.bizPushService.PushS2(
-									codeName + rtm.you + "[7]突破买点:" + rtm.getOrig().getShotPointPrice(), getBaseInfo());
+							burstPointCheckTop = rtm.bizPushService.PushS2(codeName + rtm.you + "["
+									+ TagUtil.getXiPan(rtm.getBase()) + "]突破买点:" + rtm.getOrig().getShotPointPrice(),
+									getBaseInfo());
 						} else if (!burstPointCheckTopPrew && rt.getHigh() >= rtm.warningYellow) {
-							burstPointCheckTopPrew = rtm.bizPushService.PushS2(codeName + rtm.you + "[7]准备突破买点:"
-									+ rtm.getOrig().getShotPointPrice() + "现价:" + rtm.warningYellow, getBaseInfo());
+							burstPointCheckTopPrew = rtm.bizPushService.PushS2(
+									codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]准备突破买点:"
+											+ rtm.getOrig().getShotPointPrice() + "现价:" + rtm.warningYellow,
+									getBaseInfo());
 						}
 					}
 					if (!burstPointCheckSzx && rtm.getOrig().getShotPointPriceSzx() > 0
 							&& rt.getHigh() >= rtm.getOrig().getShotPointPriceSzx()) {
-						burstPointCheckSzx = rtm.bizPushService.PushS2(
-								codeName + rtm.you + " [10]突破买点:" + rtm.getOrig().getShotPointPriceSzx(),
+						burstPointCheckSzx = rtm.bizPushService.PushS2(codeName + rtm.you + " ["
+								+ TagUtil.getXiPan(rtm.getBase()) + "]突破买点:" + rtm.getOrig().getShotPointPriceSzx(),
 								getBaseInfo());
 					}
 					if (!burstPointCheckRg && rtm.getOrig().getRgqbPrice() > 0

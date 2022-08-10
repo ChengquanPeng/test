@@ -228,7 +228,7 @@ public class RunModelService {
 				if (isTe) {
 					sb.append("<td><font color='blue'>中阳十字星-特</font></td>");//
 				} else {
-					sb.append("<td>").append(TagUtil.getQif(p1)).append("</td>");//
+					sb.append("<td>").append(TagUtil.getXiPan(p1)).append("</td>");//
 				}
 				// 特征
 				line2 = p1.getQixingStr();

@@ -131,15 +131,15 @@ public class TagUtil {
 		return s;
 	}
 
-	public static String getQif(CodeBaseModel2 p1) {
+	public static String getXiPan(CodeBaseModel2 p1) {
 		String s = "";
 		if (p1.getDibuQixing() > 0) {
-			s = "大旗形";
+			s = "大7";
 		} else if (p1.getDibuQixing2() > 0) {
-			s = "小旗形";
+			s = "小7";
 		}
 		if (p1.getZyxing() > 0) {
-			s += "-中阳十字星";
+			s += "10";
 		}
 		return s;
 	}
