@@ -529,7 +529,8 @@ public class WebModelService {
 		if (StringUtils.isNotBlank(mr.getHolderNumT3())) {
 			double t = Double.valueOf(mr.getHolderNumT3().trim());
 			if (t > 0) {
-				bqb.must(QueryBuilders.rangeQuery("holderNumT3").gte(t));
+//				bqb.must(QueryBuilders.rangeQuery("holderNumT3").gte(t));//换成5%持股
+				bqb.must(QueryBuilders.rangeQuery("holderNumP5").gte(t));
 			}
 		}
 		if (StringUtils.isNotBlank(mr.getPettm())) {
