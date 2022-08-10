@@ -20,7 +20,7 @@ public class TagUtil {
 		if (!TagUtil.isDibuSmall(isSamll, newOne)) {
 			// 人工的需要check||底部优质大票||一些底部小涨-stable0有业绩的小票(热点票)
 			if (newOne.getPls() == 1 || (newOne.getZfjjup() >= 4 && newOne.getFinOK() >= 1 && isSamll
-					&& newOne.getHolderNumP5() > 45.0)) {
+					&& newOne.getHolderNumP5() > 30.0)) {// 旗形&大宗：短线，30比例OK。
 			} else {
 				return false;
 			}
