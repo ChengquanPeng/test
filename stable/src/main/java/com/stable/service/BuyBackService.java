@@ -14,13 +14,11 @@ import org.springframework.stereotype.Service;
 import com.stable.es.dao.base.EsBuyBackInfoDao;
 import com.stable.vo.bus.BuyBackInfo;
 
-import lombok.extern.log4j.Log4j2;
-
 /**
  * 回购、增持
  */
 @Service
-@Log4j2
+//@Log4j2
 public class BuyBackService {
 	@Autowired
 	private EsBuyBackInfoDao buyBackInfoDao;
@@ -60,7 +58,7 @@ public class BuyBackService {
 		if (page.getContent() != null && !page.getContent().isEmpty()) {
 			return page.getContent().get(0);
 		}
-		log.info("no BuyBackInfo ={}", code);
+		// log.info("no BuyBackInfo ={}", code);
 		return null;
 	}
 }
