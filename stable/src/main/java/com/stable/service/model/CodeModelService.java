@@ -295,9 +295,8 @@ public class CodeModelService {
 			}
 		}
 		boolean db1 = TagUtil.isDibuSmall(isSmallStock, newOne);// getZfjjup >= 2 && ZfjjupStable() >= 1;
-		boolean db2 = TagUtil.isDibuSmall2(isSmallStock, newOne);// FinOK() > 0 && Zfjjup() >= 4 &&P5() > 45.0
 		/** 底部横盘小票(不看基本面) **/
-		if (db1 || db2) {
+		if (db1) {
 			newOne.setShooting9(1);
 			/** 底部横盘小票:看基本面 **/
 			if (newOne.getFinOK() > 0 || newOne.getBousOK() > 0) {
@@ -329,6 +328,11 @@ public class CodeModelService {
 					}
 				}
 			}
+		}
+		boolean db2 = TagUtil.isDibuSmall2(isSmallStock, newOne);// FinOK() > 0 && Zfjjup() >= 4 &&P5() > 45.0
+		// 底部大宗
+		if (db2 && newOne.getDzjyp365d() >= 5) {
+			isOk1 = true;
 		}
 		// 小底-大宗
 		if (newOne.getPls() != 2 && isOk7 && newOne.getDzjy365d() >= yzdzamt) {
