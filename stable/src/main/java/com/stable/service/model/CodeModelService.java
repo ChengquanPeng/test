@@ -268,7 +268,7 @@ public class CodeModelService {
 				newOne.setShooting4(1);
 			}
 
-			/** 定增:底部大票 **/
+			/** 定增:底部大票1 **/
 			if (TagUtil.isDibu21(newOne) && newOne.getMkv() >= smallStocklimit) {
 				// 行情指标2：底部大票增发：超过50亿(越大越好),股东集中,证监会核准-之前有明显底部拿筹痕迹-涨停？
 				if (ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
@@ -284,7 +284,7 @@ public class CodeModelService {
 					}
 				}
 			}
-			// 底部优质票也可以这样。
+			/** 定增:底部大票2: 底部优质票也可以这样。 **/
 			if (TagUtil.isDibuSmall(isSmallStock, newOne)
 					&& ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
 				// 增发金额接近活动的筹码的1半
@@ -294,11 +294,11 @@ public class CodeModelService {
 				}
 			}
 		}
-
+		boolean db1 = TagUtil.isDibuSmall(isSmallStock, newOne);// getZfjjup >= 2 && ZfjjupStable() >= 1;
+		boolean db2 = TagUtil.isDibuSmall2(isSmallStock, newOne);// FinOK() > 0 && Zfjjup() >= 4 &&P5() > 45.0
 		/** 底部横盘小票(不看基本面) **/
-		if (TagUtil.isDibuSmall(isSmallStock, newOne)) {
+		if (db1 || db2) {
 			newOne.setShooting9(1);
-
 			/** 底部横盘小票:看基本面 **/
 			if (newOne.getFinOK() > 0 || newOne.getBousOK() > 0) {
 
@@ -329,11 +329,6 @@ public class CodeModelService {
 					}
 				}
 			}
-		}
-		// 底部大宗
-		if (isSmallStock && newOne.getFinOK() > 0 && newOne.getZfjjup() >= 4 && newOne.getHolderNumP5() > 45.0
-				&& newOne.getDzjyp365d() >= 5) {
-			isOk1 = true;
 		}
 		// 小底-大宗
 		if (newOne.getPls() != 2 && isOk7 && newOne.getDzjy365d() >= yzdzamt) {
@@ -387,7 +382,7 @@ public class CodeModelService {
 				pool.setMonitor(motp);
 				pool.setRealtime(1);
 				pool.setOffline(1);
-				pool.setUpTodayChange(6);
+				pool.setUpTodayChange(5);
 				if (isOk2 || isOk1) {// 确定性高
 					pool.setUpTodayChange(3);
 				}

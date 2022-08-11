@@ -38,9 +38,14 @@ public class TagUtil {
 		return cbm.getZfjjup() >= 1 && cbm.getZfjjupStable() >= 1;
 	}
 
-	// 底部-小票
+	// 底部-小票1
 	public static boolean isDibuSmall(boolean isSmallStock, CodeBaseModel2 cbm) {
 		return isSmallStock && isDibu21(cbm);
+	}
+
+	// 底部-小票2
+	public static boolean isDibuSmall2(boolean isSmallStock, CodeBaseModel2 cbm) {
+		return isSmallStock && cbm.getFinOK() > 0 && cbm.getZfjjup() >= 4 && cbm.getHolderNumP5() > 45.0;
 	}
 
 	// 底部-大票-基本面OK

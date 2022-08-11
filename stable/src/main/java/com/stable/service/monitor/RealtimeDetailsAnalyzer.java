@@ -130,10 +130,9 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 									+ TagUtil.getXiPan(rtm.getBase()) + "]突破买点:" + rtm.getOrig().getShotPointPrice(),
 									getBaseInfo());
 						} else if (!burstPointCheckTopPrew && rt.getHigh() >= rtm.warningYellow) {
-							burstPointCheckTopPrew = rtm.bizPushService.PushS2(
-									codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]准备突破买点:"
-											+ rtm.getOrig().getShotPointPrice() + "现价:" + rtm.warningYellow,
-									getBaseInfo());
+							burstPointCheckTopPrew = rtm.bizPushService
+									.PushS2(codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]准备突破买点:"
+											+ rtm.getOrig().getShotPointPrice() + "现价:" + rt.getBuy1(), getBaseInfo());
 						}
 					}
 					if (!burstPointCheckSzx && rtm.getOrig().getShotPointPriceSzx() > 0
