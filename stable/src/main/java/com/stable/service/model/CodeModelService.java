@@ -331,7 +331,7 @@ public class CodeModelService {
 		}
 		boolean db2 = TagUtil.isDibuSmall2(isSmallStock, newOne);// FinOK() > 0 && Zfjjup() >= 4 &&P5() > 45.0
 		// 底部大宗
-		if (db2 && newOne.getDzjyp365d() >= 5) {
+		if (db2 && newOne.getDzjyp365d() >= 4.5) {
 			isOk1 = true;
 		}
 		// 小底-大宗
@@ -703,7 +703,6 @@ public class CodeModelService {
 				}
 			}
 		}
-
 		// ======== 红色警告 ========
 		// ======== 黄色警告 ========
 		int red = 1;
@@ -1141,11 +1140,13 @@ public class CodeModelService {
 			sb3.append(bb).append(Constant.HTML_LINE);
 		}
 		// 快预报
-		String ykb = financeService.getyjkb(fbi.getCode(), fbi.getYear(), fbi.getQuarter());
-		if (StringUtils.isNotBlank(ykb)) {
+		StringBuffer ykbm = new StringBuffer("");
+		long ygjlr = financeService.getyjkb(fbi.getCode(), fbi.getYear(), fbi.getQuarter(), ykbm);
+		if (ykbm.length() > 0) {
 			newOne.setBaseBlue(1);
-			sb3.append(ykb).append(Constant.HTML_LINE);
+			sb3.append(ykbm).append(Constant.HTML_LINE);
 		}
+		
 
 		if (zy.getLastNoticeDate() > 0 && zy.getLastNoticeDate() > this.pre1Year) {
 			newOne.setLastZyDate(zy.getLastNoticeDate());

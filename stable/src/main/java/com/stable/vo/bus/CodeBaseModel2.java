@@ -218,19 +218,6 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Text)
 	private String buyRea; // 买入理由
 
-	// === 财务 ===
-	@Field(type = FieldType.Long)
-	private long gsjlr; // 归属净利润
-	@Field(type = FieldType.Double)
-	private double goodWill; // 商誉
-	@Field(type = FieldType.Double)
-	private double goodWillRatioGsjlr; // 商誉净利润占比（净利润）
-	@Field(type = FieldType.Double)
-	private double goodWillRatioNetAsset; // 商誉净资产占比（净利润）
-	@Field(type = FieldType.Double)
-	private double netAsset; // 净资产
-	@Field(type = FieldType.Double)
-	private double zcfzl; // 资产负债率
 	@Field(type = FieldType.Double)
 	private double pettm = 0.0;// 市盈率ttm
 

@@ -185,7 +185,8 @@ public class CodeController {
 		model.addAttribute("zfgk", chipsZfService.getZengFaSummary(code).getDesc());
 		model.addAttribute("fhgk", chipsService.getFenHong(code).getDetails());
 		// 快预报
-		String kb = financeService.getyjkb(code, fbi.getYear(), fbi.getQuarter());
-		model.addAttribute("kb", kb);
+		StringBuffer ykbm = new StringBuffer("");
+		financeService.getyjkb(code, fbi.getYear(), fbi.getQuarter(), ykbm);
+		model.addAttribute("kb", ykbm.toString());
 	}
 }

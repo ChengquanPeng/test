@@ -89,6 +89,10 @@ public class FinanceBaseInfo extends EsBase {
 	private double retaineDearning;// 未分配利润
 	@Field(type = FieldType.Double)
 	private double interestPay;// 应付利息:如果较高，公司在大量有息借钱，关联到货币资金和未分配利润。如果货币资金和未分配利润较高，明明有钱为什么借钱，
+	@Field(type = FieldType.Double)
+	private double djdKf;// 单季度扣非
+	@Field(type = FieldType.Double)
+	private double djdKfTbzz;// 单季度扣非增长
 
 	// 计算字段
 	@Field(type = FieldType.Double)

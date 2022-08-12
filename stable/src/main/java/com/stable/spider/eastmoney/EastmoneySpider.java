@@ -2,6 +2,7 @@ package com.stable.spider.eastmoney;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,7 @@ public class EastmoneySpider {
 	 * 财务信息-主要指标
 	 * 
 	 * @param code 6位普通股票代码
-	 * @param type 0按报告期、1=年报
+	 * @param type 0按报告期、1=年报、2=单季度
 	 * @return http://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=sz000001
 	 */
 	static final String financeUrl = "http://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew?type=%s&code=%s";
@@ -188,14 +189,22 @@ public class EastmoneySpider {
 					if (dates == null) {
 						throw new RuntimeException("未获取到dates参数");
 					}
-
-					Map<String, FinanceZcfzb> fzb = EastmoneyZcfzbSpider.getZcfzb(code, companyType, dates);
-					Map<String, FinanceZcfzb> llb = EastmoneyZcfzbSpider.getXjllb(code, companyType, dates);
+					Map<String, FinanceBaseInfoPage> djdMap = this.danjidu(code);// 单季度：扣非，业绩牛
+					Map<String, FinanceZcfzb> fzb = EastmoneyZcfzbSpider.getZcfzb(code, companyType, dates);// 现金流
+					Map<String, FinanceZcfzb> llb = EastmoneyZcfzbSpider.getXjllb(code, companyType, dates);// 负债表
 					for (FinanceBaseInfoPage page : list) {
+						// 单季度：扣非，业绩牛
+						FinanceBaseInfoPage djd = djdMap.get(page.getId());
+						if (djd != null) {
+							page.setDjdKf(djd.getDjdKf());
+							page.setDjdKfTbzz(djd.getDjdKfTbzz());
+						}
+						// 现金流
 						FinanceZcfzb llba = llb.get(page.getId());
 						if (llba != null) {
 							page.setJyxjlce(llba.getGoodWill());// yxjlce:经营现金流量差额， GoodWill:零时字段
 						}
+						// 负债表
 						FinanceZcfzb zcfzb = fzb.get(page.getId());
 						if (zcfzb != null) {
 							page.setDataOk(true);
@@ -676,10 +685,36 @@ public class EastmoneySpider {
 		}
 	}
 
+	private Map<String, FinanceBaseInfoPage> danjidu(String code) {
+		String url = String.format(financeUrl, 2, formatCode2(code));
+		String result = HttpUtil.doGet2(url);
+		JSONObject jsonobj = JSON.parseObject(result);
+		JSONArray objects = jsonobj.getJSONArray("data");
+		Map<String, FinanceBaseInfoPage> m = new HashMap<String, FinanceBaseInfoPage>();
+		for (int i = 0; i < objects.size(); i++) {
+			JSONObject data = objects.getJSONObject(i);
+			String date = data.get("REPORT_DATE").toString(); // 年报日期
+			FinanceBaseInfoPage page = new FinanceBaseInfoPage(code,
+					Integer.valueOf(date.substring(0, 10).replaceAll("-", "")));
+			try {
+				Double djdKf = data.getDouble("DEDU_PARENT_PROFIT"); // 单季度：扣非净利润
+				page.setDjdKf(djdKf);
+			} catch (Exception e) {
+			}
+			try {
+				Double djdKfTbzz = data.getDouble("DPNP_YOY_RATIO"); // 单季度： 扣非净利润同比增长(%)
+				page.setDjdKfTbzz(djdKfTbzz);
+			} catch (Exception e) {
+			}
+			m.put(page.getId(), page);
+		}
+		return m;
+	}
+
 	public static void main(String[] args) {
 		EastmoneySpider es = new EastmoneySpider();
 		es.htmlunitSpider = new HtmlunitSpider();
-		String code = "000498";
+		String code = "002895";
 		int beforeChkDate = 99999999;
 //		List<FinanceBaseInfoPage> l = es.getNewFinanceAnalysis(code, 4);
 //		for (FinanceBaseInfoPage f : l) {
@@ -688,8 +723,8 @@ public class EastmoneySpider {
 //		String result = HttpUtil.doGet2(yjygBase);
 //		EastmoneySpider es = new EastmoneySpider();
 //		es.getFinYjkb();
-
-		List<FinanceBaseInfoPage> l = es.getNewFinanceAnalysis(code, 1, beforeChkDate);
+		// 公司类型：1券商，2保险,3银行，4企业
+		List<FinanceBaseInfoPage> l = es.getNewFinanceAnalysis(code, 4, beforeChkDate);
 		for (FinanceBaseInfoPage r : l) {
 			System.err.println(r);
 		}

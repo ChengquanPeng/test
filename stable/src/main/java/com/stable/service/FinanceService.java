@@ -31,6 +31,7 @@ import com.stable.es.dao.base.EsFinanceBaseInfoDao;
 import com.stable.es.dao.base.EsFinanceBaseInfoHyDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.RunModelService;
+import com.stable.service.model.data.FinanceAnalyzer;
 import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
@@ -398,7 +399,32 @@ public class FinanceService {
 		return null;
 	}
 
-	public String getyjkb(String code, int currYear, int currQuarter) {
+	public boolean finBigBoss(long ygjlr, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
+		/** 业绩牛 */
+		if (ygjlr >= -1) {
+			long currKf = 0;
+			// 需要计算
+			if (ygjlr == -1) {// 没有找到，则计算最新的
+				currKf = fa.getCurrJidu().getKfjlr();// 公告
+			} else {
+				currKf = ygjlr;// 快预报
+			}
+		}
+		return false;
+	}
+
+//	private FinanceBaseInfo findPreFin(List<FinanceBaseInfo> fbis, int year, int quarter) {
+//		 
+//		for (FinanceBaseInfo f : fbis) {
+//
+//			if (f.getYear() == year && f.getQuarter() == quarter) {
+//
+//			}
+//
+//		}
+//	}
+
+	public long getyjkb(String code, int currYear, int currQuarter, StringBuffer ykbm) {
 		FinYjkb yjkb = getLastFinaceKbByReportDate(code, currYear, currQuarter);
 //		boolean hasKb = false;
 		// 业绩快报(准确的)
@@ -407,7 +433,8 @@ public class FinanceService {
 			sb.append(yjkb.getYear() + "-" + yjkb.getQuarter()).append(" ");
 			sb.append("营收同比:").append(yjkb.getYyzsrtbzz()).append("% ");
 			sb.append("净利同比:").append(yjkb.getJlrtbzz()).append("% ");
-			return sb.toString();
+			ykbm.append(sb.toString());
+			return yjkb.getJlr();
 		}
 		// 业绩预告(类似天气预报,可能不准)
 		FinYjyg yjyg = getLastFinaceYgByReportDate(code, currYear, currQuarter);
@@ -415,9 +442,10 @@ public class FinanceService {
 			StringBuffer sb = new StringBuffer("预告-->");
 			sb.append(yjyg.getYear() + "-" + yjyg.getQuarter()).append(" ");
 			sb.append("净利同比:").append(yjyg.getJlrtbzz()).append("% ").append(yjyg.getType());
-			return sb.toString();
+			ykbm.append(sb.toString());
+			return yjyg.getJlr();
 		}
-		return "";
+		return -1;
 	}
 
 	public FinYjkb getLastFinaceKbByReportDate(String code) {
