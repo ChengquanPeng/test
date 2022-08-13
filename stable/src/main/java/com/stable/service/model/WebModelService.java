@@ -130,9 +130,6 @@ public class WebModelService {
 		if (dh.getTagHighZyChance() > 0) {
 			tag.append("高质押机会?").append(Constant.HTML_LINE);
 		}
-		if (dh.getSusBigBoss() == 1) {
-			tag.append("业绩较牛?").append(Constant.HTML_LINE);
-		}
 		if (dh.getSortChips() == 1) {
 			tag.append("拉升吸筹?").append(Constant.HTML_LINE);
 		}
@@ -383,8 +380,11 @@ public class WebModelService {
 		if (mr.getBousOK() > 0) {
 			bqb.must(QueryBuilders.rangeQuery("bousOK").gte(mr.getBousOK()));
 		}
-		if (mr.getSusBigBoss() > 0) {
-			bqb.must(QueryBuilders.matchPhraseQuery("susBigBoss", 1));// 基本面疑似大牛
+		if (mr.getFinSusBoss() > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("finSusBoss", 1));// 疑似扣非大牛
+		}
+		if (mr.getFinBoss() > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("finBoss", 1));// 扣非大牛
 		}
 		if (mr.getFinanceInc() > 0) {
 			bqb.must(QueryBuilders.rangeQuery("financeInc").gte(1));// 业绩连续增长

@@ -43,6 +43,7 @@ import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.TasksWorker;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.WeekendFinFetchRtl;
+import com.stable.vo.YgInfo;
 import com.stable.vo.bus.CodeConcept;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
@@ -399,53 +400,71 @@ public class FinanceService {
 		return null;
 	}
 
-	public boolean finBigBoss(long ygjlr, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
+	public int finBigBoss(YgInfo yi, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
 		/** 业绩牛 */
-		if (ygjlr >= -1) {
-			long currKf = 0;
+		if (yi == null) {// 没有找到，则计算最新的
+			if (fa.getCurrJidu().getDjdKfTbzz() > 80) {
+				return 1;
+			}
+		} else if (yi.getYgjlr() > 0) {// 快报，预告，需要计算。然后人工校验
 			// 需要计算
-			if (ygjlr == -1) {// 没有找到，则计算最新的
-				currKf = fa.getCurrJidu().getKfjlr();// 公告
-			} else {
-				currKf = ygjlr;// 快预报
+			long currKf = yi.getYgjlr();// 包含整个季度的
+			// 非1季度
+			if (yi.getQuarter() != 1) {// 第一季就是当季度的，不用减。234季度需要获取当前季度的
+				FinanceBaseInfo preQutFin = fa.getCurrJidu();
+				currKf = currKf - preQutFin.getKfjlr();
+			}
+			if (currKf > 0) {
+				// 上次单季度
+				FinanceBaseInfo preYearFin = this.findPreFin(fbis, yi.getYear() - 1, yi.getQuarter());
+				if (CurrencyUitl.cutProfit(Double.valueOf(preYearFin.getKfjlr()), Double.valueOf(currKf)) > 80) {
+					return 2;
+				}
 			}
 		}
-		return false;
+		return 0;
 	}
 
-//	private FinanceBaseInfo findPreFin(List<FinanceBaseInfo> fbis, int year, int quarter) {
-//		 
-//		for (FinanceBaseInfo f : fbis) {
-//
-//			if (f.getYear() == year && f.getQuarter() == quarter) {
-//
-//			}
-//
-//		}
-//	}
+	private FinanceBaseInfo findPreFin(List<FinanceBaseInfo> fbis, int year, int quarter) {
+		for (FinanceBaseInfo f : fbis) {
+			if (f.getYear() == year && f.getQuarter() == quarter) {
+				return f;
+			}
+		}
+		return null;
+	}
 
-	public long getyjkb(String code, int currYear, int currQuarter, StringBuffer ykbm) {
+	public YgInfo getyjkb(String code, int currYear, int currQuarter, StringBuffer ykbm) {
 		FinYjkb yjkb = getLastFinaceKbByReportDate(code, currYear, currQuarter);
 //		boolean hasKb = false;
 		// 业绩快报(准确的)
 		if (yjkb != null) {
+			YgInfo y = new YgInfo();
 			StringBuffer sb = new StringBuffer("快报-->");
 			sb.append(yjkb.getYear() + "-" + yjkb.getQuarter()).append(" ");
 			sb.append("营收同比:").append(yjkb.getYyzsrtbzz()).append("% ");
 			sb.append("净利同比:").append(yjkb.getJlrtbzz()).append("% ");
 			ykbm.append(sb.toString());
-			return yjkb.getJlr();
+
+			y.setYear(yjkb.getYear());
+			y.setQuarter(yjkb.getQuarter());
+			y.setYgjlr(yjkb.getJlr());
+			return y;
 		}
 		// 业绩预告(类似天气预报,可能不准)
 		FinYjyg yjyg = getLastFinaceYgByReportDate(code, currYear, currQuarter);
 		if (yjyg != null) {
+			YgInfo y = new YgInfo();
 			StringBuffer sb = new StringBuffer("预告-->");
 			sb.append(yjyg.getYear() + "-" + yjyg.getQuarter()).append(" ");
 			sb.append("净利同比:").append(yjyg.getJlrtbzz()).append("% ").append(yjyg.getType());
 			ykbm.append(sb.toString());
-			return yjyg.getJlr();
+			y.setYear(yjyg.getYear());
+			y.setQuarter(yjyg.getQuarter());
+			y.setYgjlr(yjyg.getJlr());
+			return y;
 		}
-		return -1;
+		return null;
 	}
 
 	public FinYjkb getLastFinaceKbByReportDate(String code) {

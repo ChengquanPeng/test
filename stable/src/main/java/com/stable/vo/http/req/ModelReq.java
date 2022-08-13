@@ -71,6 +71,7 @@ public class ModelReq {
 	int bousOK;
 	int finOK;
 	int finDbl = 0;
-	int susBigBoss = 0;
+	int finBoss = 0;
+	int finSusBoss = 0;
 	int financeInc = 0;
 }

@@ -38,6 +38,7 @@ import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.TagUtil;
 import com.stable.vo.HolderAnalyse;
 import com.stable.vo.ReducingHoldingSharesStat;
+import com.stable.vo.YgInfo;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.DzjyYiTime;
@@ -140,11 +141,15 @@ public class CodeModelService {
 		StringBuffer xddz = new StringBuffer();
 		// 做小坐地减持
 		StringBuffer xdjc = new StringBuffer();
+		// 确定扣非大牛
+		StringBuffer yjm1 = new StringBuffer();
+		// 疑似扣非大牛
+		StringBuffer yjm2 = new StringBuffer();
 
 		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
 		for (StockBaseInfo s : codelist) {
 			try {
-				this.processingByCode(s, poolMap, poolList, listLast, histMap, isweekend, sbc, xddz, xdjc);
+				this.processingByCode(s, poolMap, poolList, listLast, histMap, isweekend, sbc, xddz, xdjc, yjm1, yjm2);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -165,6 +170,16 @@ public class CodeModelService {
 		if (xdjc.length() > 0) {
 			MsgPushServer.pushSystemT1("最新小底-减持:", xdjc.toString());
 		}
+		if (yjm1.length() > 0 || yjm2.length() > 0) {
+			String mt = "";
+			if (yjm1.length() > 0) {
+				mt = "确定扣非业绩大牛:" + yjm1.toString();
+			}
+			if (yjm2.length() > 0) {
+				mt += "<br/> 疑似扣非业绩大牛:" + yjm2.toString();
+			}
+			MsgPushServer.pushSystemHtmlT2("扣非业绩大牛", mt);
+		}
 	}
 
 	public MonitorPoolTemp getPool(String code, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList) {
@@ -182,7 +197,7 @@ public class CodeModelService {
 
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
 			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, boolean isweekend, StringBuffer sbc,
-			StringBuffer xddz, StringBuffer xdjc) {
+			StringBuffer xddz, StringBuffer xdjc, StringBuffer yjm1, StringBuffer yjm2) {
 		String code = s.getCode();
 		// 股票池
 		CodeBaseModel2 newOne = histMap.get(s.getCode());
@@ -205,7 +220,7 @@ public class CodeModelService {
 			lastTrade = new DaliyBasicInfo2();
 		}
 		// 财报分析排雷
-		baseAnalyse(s, newOne, lastTrade);
+		baseAnalyse(s, newOne, lastTrade, yjm1, yjm2);
 		// 市盈率ttm
 		dataChangeService.getPeTtmData(code, newOne);
 		// 资金筹码-博弈
@@ -494,7 +509,8 @@ public class CodeModelService {
 		}
 	}
 
-	private void baseAnalyse(StockBaseInfo s, CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade) {
+	private void baseAnalyse(StockBaseInfo s, CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade, StringBuffer yjm1,
+			StringBuffer yjm2) {
 		String code = s.getCode();
 		log.info("Code Model  processing for code:{}", code);
 		// 基本面池
@@ -506,9 +522,9 @@ public class CodeModelService {
 			return;
 		}
 		// 基本面-红蓝绿
-		color(s, newOne, fbis, lastTrade);
+		color(s, newOne, fbis, lastTrade, yjm1, yjm2);
 		// 基本面-疑似大牛
-		findBigBoss2(code, newOne, fbis);
+//		findBigBoss2(code, newOne, fbis);
 	}
 
 	// 资金博弈
@@ -669,7 +685,8 @@ public class CodeModelService {
 //		System.err.println("count:" + count);
 	}
 
-	private void color(StockBaseInfo s, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis, DaliyBasicInfo2 lastTrade) {
+	private void color(StockBaseInfo s, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis, DaliyBasicInfo2 lastTrade,
+			StringBuffer yjm1, StringBuffer yjm2) {
 		newOne.setBaseYellow(0);
 		newOne.setBaseRed(0);
 		newOne.setBaseBlue(0);
@@ -1141,12 +1158,30 @@ public class CodeModelService {
 		}
 		// 快预报
 		StringBuffer ykbm = new StringBuffer("");
-		long ygjlr = financeService.getyjkb(fbi.getCode(), fbi.getYear(), fbi.getQuarter(), ykbm);
+		YgInfo yi = financeService.getyjkb(fbi.getCode(), fbi.getYear(), fbi.getQuarter(), ykbm);
 		if (ykbm.length() > 0) {
 			newOne.setBaseBlue(1);
 			sb3.append(ykbm).append(Constant.HTML_LINE);
 		}
-		
+		int yjn = financeService.finBigBoss(yi, fa, fbis);
+		if (yjn == 0) {
+			newOne.setFinBoss(0);
+			newOne.setFinSusBoss(0);
+		}
+		// 确定
+		if (yjn == 1) {
+			if (newOne.getFinBoss() == 0) {
+				yjm1.append(stockBasicService.getCodeName2(code)).append(",");
+			}
+			newOne.setFinBoss(1);
+		}
+		// 疑似
+		if (yjn == 2) {
+			if (newOne.getFinSusBoss() == 0) {
+				yjm2.append(stockBasicService.getCodeName2(code)).append(",");
+			}
+			newOne.setFinSusBoss(1);
+		}
 
 		if (zy.getLastNoticeDate() > 0 && zy.getLastNoticeDate() > this.pre1Year) {
 			newOne.setLastZyDate(zy.getLastNoticeDate());
@@ -1166,25 +1201,25 @@ public class CodeModelService {
 			newOne.setBaseBlueDesc(sb3.toString());
 		}
 	}
-
-	private void findBigBoss2(String code, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis) {
-		log.info("findBigBoss code:{}", code);
-		// 业绩连续
-		int continueJidu1 = 0;
-		List<Double> high = new LinkedList<Double>();
-		for (FinanceBaseInfo fbi : fbis) {
-			if (fbi.getYyzsrtbzz() >= 1.0 && fbi.getGsjlrtbzz() >= 1.0) {// 连续增长季度的数量
-				continueJidu1++;
-				high.add(fbi.getGsjlrtbzz());
-			} else {
-				break;
-			}
-		}
-		// 连续6季度增长，且最近一季度同比增长超20%
-		if (continueJidu1 >= 4 && high.get(0) >= 20.0) {
-			newOne.setSusBigBoss(1);
-		} else {
-			newOne.setSusBigBoss(0);
-		}
-	}
+//
+//	private void findBigBoss2(String code, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis) {
+//		log.info("findBigBoss code:{}", code);
+//		// 业绩连续
+//		int continueJidu1 = 0;
+//		List<Double> high = new LinkedList<Double>();
+//		for (FinanceBaseInfo fbi : fbis) {
+//			if (fbi.getYyzsrtbzz() >= 1.0 && fbi.getGsjlrtbzz() >= 1.0) {// 连续增长季度的数量
+//				continueJidu1++;
+//				high.add(fbi.getGsjlrtbzz());
+//			} else {
+//				break;
+//			}
+//		}
+//		// 连续6季度增长，且最近一季度同比增长超20%
+//		if (continueJidu1 >= 4 && high.get(0) >= 20.0) {
+//			newOne.setSusBigBoss(1);
+//		} else {
+//			newOne.setSusBigBoss(0);
+//		}
+//	}
 }

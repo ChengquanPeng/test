@@ -84,10 +84,12 @@ public class CodeBaseModel2 extends EsBase {
 	private int finOK;// 5年业绩OK
 	@Field(type = FieldType.Integer)
 	private int financeInc;// 业绩连续增长
-	@Field(type = FieldType.Integer)
-	private int susBigBoss; // // 基本面疑似大牛
 	@Field(type = FieldType.Double)
 	private double finDbl;// 暴涨翻倍
+	@Field(type = FieldType.Integer)
+	private int finBoss = 0;// 业绩牛
+	@Field(type = FieldType.Integer)
+	private int finSusBoss = 0;// 疑似业绩牛
 
 	@Field(type = FieldType.Integer)
 	private int moni = 0;// 是否监听
