@@ -401,24 +401,32 @@ public class FinanceService {
 	}
 
 	public int finBigBoss(YgInfo yi, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
-		/** 业绩牛 */
-		if (yi == null) {// 没有找到，则计算最新的
-			if (fa.getCurrJidu().getDjdKfTbzz() > 80) {
-				return 1;
-			}
-		} else if (yi.getYgjlr() > 0) {// 快报，预告，需要计算。然后人工校验
-			// 需要计算
-			long currKf = yi.getYgjlr();// 包含整个季度的
-			// 非1季度
-			if (yi.getQuarter() != 1) {// 第一季就是当季度的，不用减。234季度需要获取当前季度的
-				FinanceBaseInfo preQutFin = fa.getCurrJidu();
-				currKf = currKf - preQutFin.getKfjlr();
-			}
-			if (currKf > 0) {
-				// 上次单季度
-				FinanceBaseInfo preYearFin = this.findPreFin(fbis, yi.getYear() - 1, yi.getQuarter());
-				if (CurrencyUitl.cutProfit(Double.valueOf(preYearFin.getKfjlr()), Double.valueOf(currKf)) > 80) {
-					return 2;
+		// 最新的年报不能亏损
+		if (fa.getCurrYear().getKfjlr() > 0) {
+			/** 业绩牛 */
+			if (yi == null) {// 没有找到，则计算最新的
+				if (fa.getCurrJidu().getDjdKfTbzz() > 80) {
+					FinanceBaseInfo preYearFin = this.findPreFin(fbis, fa.getCurrJidu().getYear() - 1,
+							fa.getCurrJidu().getQuarter());
+					if (preYearFin.getKfjlr() > 0) {// 上年的季度扣非不为0
+						return 1;
+					}
+				}
+			} else if (yi.getYgjlr() > 0) {// 快报，预告，需要计算。然后人工校验
+				// 需要计算
+				long currKf = yi.getYgjlr();// 包含整个季度的
+				// 非1季度
+				if (yi.getQuarter() != 1) {// 第一季就是当季度的，不用减。234季度需要获取当前季度的
+					FinanceBaseInfo preQutFin = fa.getCurrJidu();
+					currKf = currKf - preQutFin.getKfjlr();
+				}
+				if (currKf > 0) {
+					// 上次单季度,// 上年的季度扣非不为0
+					FinanceBaseInfo preYearFin = this.findPreFin(fbis, yi.getYear() - 1, yi.getQuarter());
+					if (preYearFin.getKfjlr() > 0 && CurrencyUitl.cutProfit(Double.valueOf(preYearFin.getKfjlr()),
+							Double.valueOf(currKf)) > 80) {
+						return 2;
+					}
 				}
 			}
 		}

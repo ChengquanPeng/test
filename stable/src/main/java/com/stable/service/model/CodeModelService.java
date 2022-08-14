@@ -110,7 +110,7 @@ public class CodeModelService {
 
 	public synchronized void runModel1(int date, boolean isweekend) {
 		try {
-			runByJobv2(date, isweekend);
+			runByJobv2(date);
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "CodeModel模型运行异常", "", "");
@@ -124,7 +124,7 @@ public class CodeModelService {
 	private int pre4Year = 0;// 四年以前
 	private double yzdzamt = 0.45 * WebModelService.WAN;
 
-	private synchronized void runByJobv2(int t, boolean isweekend) {
+	private synchronized void runByJobv2(int t) {
 		tradeDate = t;
 		pre1Year = DateUtil.getPreYear(tradeDate);
 		pre3Year = DateUtil.getPreYear(tradeDate, 3);
@@ -149,7 +149,7 @@ public class CodeModelService {
 		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
 		for (StockBaseInfo s : codelist) {
 			try {
-				this.processingByCode(s, poolMap, poolList, listLast, histMap, isweekend, sbc, xddz, xdjc, yjm1, yjm2);
+				this.processingByCode(s, poolMap, poolList, listLast, histMap, sbc, xddz, xdjc, yjm1, yjm2);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -196,8 +196,8 @@ public class CodeModelService {
 	}
 
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
-			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, boolean isweekend, StringBuffer sbc,
-			StringBuffer xddz, StringBuffer xdjc, StringBuffer yjm1, StringBuffer yjm2) {
+			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, StringBuffer sbc, StringBuffer xddz,
+			StringBuffer xdjc, StringBuffer yjm1, StringBuffer yjm2) {
 		String code = s.getCode();
 		// 股票池
 		CodeBaseModel2 newOne = histMap.get(s.getCode());
@@ -219,6 +219,10 @@ public class CodeModelService {
 		if (lastTrade == null) {
 			lastTrade = new DaliyBasicInfo2();
 		}
+		// 小市值
+		boolean isSmallStock = isSmallStock(newOne.getMkv(), newOne.getActMkv());
+		// N年未大涨
+		financeAndBonus(newOne, isSmallStock);
 		// 财报分析排雷
 		baseAnalyse(s, newOne, lastTrade, yjm1, yjm2);
 		// 市盈率ttm
@@ -246,10 +250,6 @@ public class CodeModelService {
 //			pool.setShotPointCheck(0);
 		}
 		boolean online4Year = stockBasicService.onlinePreYearChk(code, pre4Year);
-		// 小市值
-		boolean isSmallStock = isSmallStock(newOne.getMkv(), newOne.getActMkv());
-		// N年未大涨
-		financeAndBonus(isweekend, newOne, isSmallStock);
 
 		// 以下是系统指标，没有4年直接退出
 		if (!online4Year) {// 4年以下，退出
@@ -434,79 +434,77 @@ public class CodeModelService {
 	}
 
 	// 周末计算-至少N年未大涨?
-	private void financeAndBonus(boolean isweekend, CodeBaseModel2 newOne, boolean isSmallStock) {
+	private void financeAndBonus(CodeBaseModel2 newOne, boolean isSmallStock) {
 		// 周末计算-至少N年未大涨?
-		if (isweekend) {
-			newOne.setFinOK(0);
-			newOne.setBousOK(0);
-			newOne.setFinanceInc(0);
+		newOne.setFinOK(0);
+		newOne.setBousOK(0);
+		newOne.setFinanceInc(0);
 
-			String code = newOne.getCode();
-			List<FinanceBaseInfo> yearRpts = financeService.getFinacesReportByYearRpt(code, EsQueryPageUtil.queryPage5);
-			int start = Integer.MAX_VALUE;
-			int end = 0;
-			if (yearRpts != null) {
-				Set<Integer> set = new HashSet<Integer>();
-				for (FinanceBaseInfo f : yearRpts) {
-					if (f.getGsjlr() < 0) {// 归属净利润
-					} else {
-						set.add(f.getYear());// 获取不亏年份
-					}
-
-					// 结束年份
-					if (f.getYear() > end) {
-						end = f.getYear();
-					}
-					// 开始年份
-					if (f.getYear() < start) {
-						start = f.getYear();
-					}
-				}
-
-				if (set.size() >= 5) {
-					newOne.setFinOK(5);
+		String code = newOne.getCode();
+		List<FinanceBaseInfo> yearRpts = financeService.getFinacesReportByYearRpt(code, EsQueryPageUtil.queryPage5);
+		int start = Integer.MAX_VALUE;
+		int end = 0;
+		if (yearRpts != null) {
+			Set<Integer> set = new HashSet<Integer>();
+			for (FinanceBaseInfo f : yearRpts) {
+				if (f.getGsjlr() < 0) {// 归属净利润
 				} else {
-					int c = 0;
-					for (int s = end; s >= start; s--) {// 从最近年份开始往前循环
-						if (set.contains(s)) {
-							c++;
-						} else {// 没有找到就结束
-							break;
-						}
-					}
-					newOne.setFinOK(c);
+					set.add(f.getYear());// 获取不亏年份
 				}
 
-				int inc = 0;
-				FinanceBaseInfo tmp = null;
-				for (FinanceBaseInfo f : yearRpts) {
-					if (tmp == null) {
-						tmp = f;
+				// 结束年份
+				if (f.getYear() > end) {
+					end = f.getYear();
+				}
+				// 开始年份
+				if (f.getYear() < start) {
+					start = f.getYear();
+				}
+			}
+
+			if (set.size() >= 5) {
+				newOne.setFinOK(5);
+			} else {
+				int c = 0;
+				for (int s = end; s >= start; s--) {// 从最近年份开始往前循环
+					if (set.contains(s)) {
+						c++;
+					} else {// 没有找到就结束
+						break;
+					}
+				}
+				newOne.setFinOK(c);
+			}
+
+			int inc = 0;
+			FinanceBaseInfo tmp = null;
+			for (FinanceBaseInfo f : yearRpts) {
+				if (tmp == null) {
+					tmp = f;
+				} else {
+					if (tmp.getGsjlr() > f.getGsjlr()) {
+						inc++;
 					} else {
-						if (tmp.getGsjlr() > f.getGsjlr()) {
-							inc++;
-						} else {
-							break;
-						}
-						tmp = f;
+						break;
 					}
+					tmp = f;
 				}
-				if (inc >= 2) {
-					newOne.setFinanceInc(inc);
-				}
+			}
+			if (inc >= 2) {
+				newOne.setFinanceInc(inc);
+			}
 
-			}
-			// 小而美模型：未涨&&年报 && 大股东集中
-			newOne.setTagSmallAndBeatf(0);
-			if (TagUtil.isDibuSmall(isSmallStock, newOne) && newOne.getHolderNumP5() >= 45 && newOne.getFinOK() >= 3) {
-				newOne.setTagSmallAndBeatf(1);
-			}
-			// 分红
-			if (start == Integer.MAX_VALUE) {
-				start = 0;
-			}
-			bonusService.bonusYear(code, start, end, newOne);
 		}
+		// 小而美模型：未涨&&年报 && 大股东集中
+		newOne.setTagSmallAndBeatf(0);
+		if (TagUtil.isDibuSmall(isSmallStock, newOne) && newOne.getHolderNumP5() >= 45 && newOne.getFinOK() >= 3) {
+			newOne.setTagSmallAndBeatf(1);
+		}
+		// 分红
+		if (start == Integer.MAX_VALUE) {
+			start = 0;
+		}
+		bonusService.bonusYear(code, start, end, newOne);
 	}
 
 	private void baseAnalyse(StockBaseInfo s, CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade, StringBuffer yjm1,

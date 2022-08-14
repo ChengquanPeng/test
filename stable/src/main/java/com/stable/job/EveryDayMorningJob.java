@@ -39,7 +39,15 @@ public class EveryDayMorningJob extends MySimpleJob {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
 		int week = cal.get(Calendar.DAY_OF_WEEK);
-		// 周二到周五凌晨（实际是抓取周1到周4的情况）
+
+		/** 周一 */
+		if (week == Calendar.MONDAY) {
+			log.info("周日，同花顺-公司资料");
+			igoodstockSpider.byWeb();// 外资持股
+			thsCompanySpider.byJob();// 周日，同花顺-公司资料
+		}
+
+		/** 周二到周五凌晨（实际是抓取周1到周4的情况） **/
 		if (week == Calendar.TUESDAY || week == Calendar.WEDNESDAY || week == Calendar.THURSDAY
 				|| week == Calendar.FRIDAY) {
 			log.info("每日股东人数任务开始执行");
@@ -47,12 +55,7 @@ public class EveryDayMorningJob extends MySimpleJob {
 			thsHolderSpider.dofetchHolder(false);// 放到周日运行？
 		}
 
-		if (week == Calendar.SUNDAY) {
-			log.info("周日，同花顺-公司资料");
-			igoodstockSpider.byWeb();// 外资持股
-			thsCompanySpider.byJob();// 周日，同花顺-公司资料
-		}
-
+		/** 周六 */
 		if (week == Calendar.SATURDAY) {
 			log.info("周六,同花顺, 增发&分紅");
 			thsBonusSpider.byJob();// 同花顺, 增发&分紅
