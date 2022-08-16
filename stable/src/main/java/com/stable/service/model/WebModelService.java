@@ -389,6 +389,9 @@ public class WebModelService {
 		if (mr.getFinanceInc() > 0) {
 			bqb.must(QueryBuilders.rangeQuery("financeInc").gte(1));// 业绩连续增长
 		}
+		if (mr.getBossVal() > 0) {
+			bqb.must(QueryBuilders.rangeQuery("bossVal").gte(mr.getBossVal()));// 业绩牛增长率
+		}
 
 		if (mr.getTagIndex() > 0) {
 			if (mr.getTagIndex() == 1) {

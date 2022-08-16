@@ -90,6 +90,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int finBoss = 0;// 业绩牛
 	@Field(type = FieldType.Integer)
 	private int finSusBoss = 0;// 疑似业绩牛
+	@Field(type = FieldType.Double)
+	private double bossVal = 0;// 业绩牛增长率
 
 	@Field(type = FieldType.Integer)
 	private int moni = 0;// 是否监听

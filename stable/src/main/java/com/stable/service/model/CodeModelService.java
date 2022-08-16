@@ -1161,10 +1161,11 @@ public class CodeModelService {
 			newOne.setBaseBlue(1);
 			sb3.append(ykbm).append(Constant.HTML_LINE);
 		}
-		int yjn = financeService.finBigBoss(yi, fa, fbis);
+		int yjn = financeService.finBigBoss(yi, fa, fbis, newOne);
 		if (yjn == 0) {
 			newOne.setFinBoss(0);
 			newOne.setFinSusBoss(0);
+			newOne.setBossVal(0);
 		}
 		// 确定
 		if (yjn == 1) {

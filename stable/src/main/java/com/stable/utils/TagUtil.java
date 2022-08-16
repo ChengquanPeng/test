@@ -165,10 +165,10 @@ public class TagUtil {
 			sb5.append("<font color='red'>,业绩暴涨</font>");
 		}
 		if (dh.getFinBoss() > 0) {
-			sb5.append("<font color='red'>,业绩大牛</font>");
+			sb5.append("<font color='red'>,业绩大牛(" + dh.getBossVal() + "%)</font>");
 		}
 		if (dh.getFinSusBoss() > 0) {
-			sb5.append("<font color='blue'>,疑似业绩大牛</font>");
+			sb5.append("<font color='blue'>,疑似业绩大牛(" + dh.getBossVal() + "%)</font>");
 		}
 		if (dh.getFinOK() > 0) {
 			sb5.append(",连续" + dh.getFinOK() + "年业绩盈利");

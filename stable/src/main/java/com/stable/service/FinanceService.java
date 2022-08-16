@@ -44,6 +44,7 @@ import com.stable.utils.TasksWorker;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.WeekendFinFetchRtl;
 import com.stable.vo.YgInfo;
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.CodeConcept;
 import com.stable.vo.bus.FinYjkb;
 import com.stable.vo.bus.FinYjyg;
@@ -400,7 +401,7 @@ public class FinanceService {
 		return null;
 	}
 
-	public int finBigBoss(YgInfo yi, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis) {
+	public int finBigBoss(YgInfo yi, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis, CodeBaseModel2 newOne) {
 		// 最新的年报不能亏损
 		if (fa.getCurrYear().getKfjlr() > 0) {
 			/** 业绩牛 */
@@ -409,6 +410,7 @@ public class FinanceService {
 					FinanceBaseInfo preYearFin = this.findPreFin(fbis, fa.getCurrJidu().getYear() - 1,
 							fa.getCurrJidu().getQuarter());
 					if (preYearFin.getKfjlr() > 0) {// 上年的季度扣非不为0
+						newOne.setBossVal(CurrencyUitl.roundHalfUp(fa.getCurrJidu().getDjdKfTbzz()));
 						return 1;
 					}
 				}
@@ -423,8 +425,9 @@ public class FinanceService {
 				if (currKf > 0) {
 					// 上次单季度,// 上年的季度扣非不为0
 					FinanceBaseInfo preYearFin = this.findPreFin(fbis, yi.getYear() - 1, yi.getQuarter());
-					if (preYearFin.getKfjlr() > 0 && CurrencyUitl.cutProfit(Double.valueOf(preYearFin.getKfjlr()),
-							Double.valueOf(currKf)) > 80) {
+					double rate = CurrencyUitl.cutProfit(Double.valueOf(preYearFin.getKfjlr()), Double.valueOf(currKf));
+					if ((preYearFin.getKfjlr() > 0 && rate > 80) || rate >= 300) {// 往年季度不亏：80，亏：300
+						newOne.setBossVal(CurrencyUitl.roundHalfUp(rate));
 						return 2;
 					}
 				}

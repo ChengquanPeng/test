@@ -45,8 +45,9 @@
 					id="finOK" placeholder="至少连续多少年不亏" />&nbsp;&nbsp;<font
 					color="blue"> 业绩暴涨:<input type="checkbox" id="finDbl" />&nbsp;&nbsp;扣非业绩牛:<input
 					type="checkbox" id="finBoss" />&nbsp;&nbsp;疑似业绩牛(快预报):<input
-					type="checkbox" id="finSusBoss" /></font>&nbsp;&nbsp;业绩连续增长:<input
-					type="text" id="financeInc" placeholder="至少连续多少年增长" />&nbsp;&nbsp;
+					type="checkbox" id="finSusBoss" /></font>&nbsp;&nbsp;增长率:<input
+					type="text" id="bossVal" placeholder="增长率%" />&nbsp;&nbsp;业绩连续增长:<input
+					type="text" id="financeInc" placeholder="至少连续多少年增长" />
 			</div>
 			<div class="mg">
 				国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp; 几年未涨&gt;=<input
@@ -240,6 +241,8 @@
 									param.finOK = $('#finOK').val();
 									param.bousOK = $('#bousOK').val();
 									param.financeInc = $('#financeInc').val();
+									param.bossVal = $('#bossVal').val();
+
 									if ("" == param.finOK) {
 										param.finOK = 0;
 									}
@@ -248,6 +251,9 @@
 									}
 									if ("" == param.financeInc) {
 										param.financeInc = 0;
+									}
+									if ("" == param.bossVal) {
+										param.bossVal = 0;
 									}
 									param.compnayType = 0;
 									param.kline = 0;
