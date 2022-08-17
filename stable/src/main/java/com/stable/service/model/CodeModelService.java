@@ -178,7 +178,7 @@ public class CodeModelService {
 			if (yjm2.length() > 0) {
 				mt += "<br/> 疑似扣非业绩大牛:" + yjm2.toString();
 			}
-			MsgPushServer.pushSystemHtmlT2("扣非业绩大牛", mt);
+			MsgPushServer.pushSystemHtmlT2("扣非业绩大牛(最好是小票)", mt);
 		}
 	}
 

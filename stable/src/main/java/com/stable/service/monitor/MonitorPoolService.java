@@ -658,7 +658,8 @@ public class MonitorPoolService {
 						if (d != null) {
 							if (MonitoringUitl.isOk(cp, d.getTodayChangeRate(), d.getHigh(), d.getLow())) {
 								String s = stockBasicService.getCodeName2(cp.getCode()) + " "
-										+ MonitorType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg();
+										+ MonitorType.getCodeName(cp.getMonitor()) + cp.getRemark() + " " + cp.getMsg()
+										+ " 今日涨幅:" + d.getTodayChangeRate() + "%,收盘价:" + d.getClosed();
 								if (u.getId() == Constant.MY_ID) {// 管理员
 									if (cp.getMonitor() == MonitorType.ZengFaAuto.getCode()) {
 										ZengFaAuto.add(s);

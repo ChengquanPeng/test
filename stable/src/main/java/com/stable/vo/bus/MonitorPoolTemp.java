@@ -94,13 +94,13 @@ public class MonitorPoolTemp extends EsBase {
 			sb.append("股价上涨到" + upPrice + ",");
 		}
 		if (upTodayChange > 0) {
-			sb.append("涨幅" + upTodayChange + ",");
+			sb.append("涨幅" + upTodayChange + "%,");
 		}
 		if (downPrice > 0) {
 			sb.append("股价下跌到" + downPrice + ",");
 		}
 		if (downTodayChange > 0) {
-			sb.append("跌幅" + downTodayChange + ",");
+			sb.append("跌幅" + downTodayChange + "%,");
 		}
 		return sb.toString();
 	}

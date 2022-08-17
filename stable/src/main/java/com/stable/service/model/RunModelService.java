@@ -112,7 +112,7 @@ public class RunModelService {
 		printModelHtml();
 	}
 
-	private void printModelHtml() {
+	public void printModelHtml() {
 		ModelReq mr = new ModelReq();
 		mr.setQb(1);
 		mr.setPls(3);
