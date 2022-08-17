@@ -23,6 +23,7 @@ import com.stable.service.model.prd.msg.BizPushService;
 import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.spider.tick.TencentTickReal;
 import com.stable.utils.DateUtil;
+import com.stable.utils.OnlineCodeGen;
 import com.stable.utils.RedisUtil;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.UserInfo;
@@ -75,7 +76,7 @@ public class RealtimeMonitoringService {
 			log.info("now > isAlivingMillis,已超时");
 			return;
 		}
-		Map<String, String> warningCode = new ConcurrentHashMap<String, String>();
+		OnlineCodeGen ocg = new OnlineCodeGen(runModelService);
 		try {
 
 			HashMap<String, RtmMoniGbl> allmap = new HashMap<String, RtmMoniGbl>();
@@ -128,7 +129,7 @@ public class RealtimeMonitoringService {
 				for (String code : allmap.keySet()) {
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
 					int r = task.init(code, allmap.get(code), stockBasicService.getCodeName2(code),
-							redisUtil.get(RedisConstant.YEAR_PRICE_ + code, 0.0), conceptService, warningCode);
+							redisUtil.get(RedisConstant.YEAR_PRICE_ + code, 0.0), conceptService, ocg);
 					if (r == 1) {
 						new Thread(task).start();
 						list.add(task);
@@ -159,8 +160,8 @@ public class RealtimeMonitoringService {
 			for (RealtimeDetailsAnalyzer t : list) {
 				t.stop();
 			}
+			ocg.stop();
 
-			runModelService.printOnlineHtml(warningCode);
 			// 停止线程
 			// prd1m.stop();
 			// OnlineTesting -> 转换持仓量:可卖=vol，今日买归0

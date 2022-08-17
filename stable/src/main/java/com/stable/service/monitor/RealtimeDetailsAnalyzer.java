@@ -2,7 +2,6 @@ package com.stable.service.monitor;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import com.stable.constant.Constant;
 import com.stable.service.ConceptService;
@@ -12,6 +11,7 @@ import com.stable.spider.realtime.RealtimeCall;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.MonitoringUitl;
+import com.stable.utils.OnlineCodeGen;
 import com.stable.utils.TagUtil;
 
 import lombok.extern.log4j.Log4j2;
@@ -19,9 +19,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class RealtimeDetailsAnalyzer implements Runnable {
 	private ConceptService conceptService;
-	public static final long ONE_MIN = 1 * 60 * 1000;// 5MIN
+	public static final long ONE_MIN = 1 * 60 * 1000;// 1MIN
 	private static final long FIVE_MIN = 5 * 60 * 1000;// 5MIN
-	private static final long TEN_MIN = 10 * 60 * 1000;// 5MIN
+	private static final long TEN_MIN = 10 * 60 * 1000;// 10MIN
 	private long WAIT_MIN = FIVE_MIN;
 	public String code;
 	private String codeName;
@@ -30,7 +30,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	RtmMoniGbl rtm;
 	private boolean chkCodeClosed = false;
 	private double yearHigh1;
-	private Map<String, String> warningCode;
+	private OnlineCodeGen ocg;
 
 	private boolean burstPointCheckTopPrew = false;// 突破前1%
 	private boolean burstPointCheckTop = false;// 突破
@@ -49,8 +49,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		return sb.toString();
 	}
 
-	public int init(String code, RtmMoniGbl rtm, String codeName, double yh, ConceptService c,
-			Map<String, String> warningCode) {
+	public int init(String code, RtmMoniGbl rtm, String codeName, double yh, ConceptService c, OnlineCodeGen ocg) {
 		log.info(code + ":" + getUsers(rtm.getListu()));
 		this.code = code;
 		this.codeName = codeName;
@@ -62,7 +61,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		}
 		this.yearHigh1 = yh;
 		this.conceptService = c;
-		this.warningCode = warningCode;
+		this.ocg = ocg;
 		return 1;
 	}
 
@@ -133,12 +132,12 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 							String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]突破买点:"
 									+ rtm.getOrig().getShotPointPrice();
 							burstPointCheckTop = rtm.bizPushService.PushS2(title2, getBaseInfo());
-							warningCode.put(code, title2);
+							ocg.genMsg(code, title2);
 						} else if (!burstPointCheckTopPrew && rt.getHigh() >= rtm.warningYellow) {
 							String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]准备突破买点:"
 									+ rtm.getOrig().getShotPointPrice() + "现价:" + rt.getBuy1();
 							burstPointCheckTopPrew = rtm.bizPushService.PushS2(title2, getBaseInfo());
-							warningCode.put(code, title2);
+							ocg.genMsg(code, title2);
 						}
 					}
 					if (!burstPointCheckSzx && rtm.getOrig().getShotPointPriceSzx() > 0
@@ -146,13 +145,13 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						String title2 = codeName + rtm.you + " [" + TagUtil.getXiPan(rtm.getBase()) + "]突破买点:"
 								+ rtm.getOrig().getShotPointPriceSzx();
 						burstPointCheckSzx = rtm.bizPushService.PushS2(title2, getBaseInfo());
-						warningCode.put(code, title2);
+						ocg.genMsg(code, title2);
 					}
 					if (!burstPointCheckRg && rtm.getOrig().getRgqbPrice() > 0
 							&& rt.getHigh() >= rtm.getOrig().getRgqbPrice()) {
 						String title2 = codeName + rtm.you + " 人工买点:" + rtm.getOrig().getRgqbPrice();
 						burstPointCheckRg = rtm.bizPushService.PushS2(title2, getBaseInfo());
-						warningCode.put(code, title2);
+						ocg.genMsg(code, title2);
 					}
 
 //					if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
@@ -190,7 +189,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						MsgPushServer.pushSystemT1(codeName + " " + title, rtm.getMsg(r.getOrig()), r.getUser());
 
 						if (r.getOrig().getUserId() == Constant.MY_ID) {
-							warningCode.put(code, title);
+							ocg.genMsg(code, title);
 						}
 					}
 				}
