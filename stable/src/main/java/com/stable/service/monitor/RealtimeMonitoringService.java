@@ -16,6 +16,7 @@ import com.stable.constant.RedisConstant;
 import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
+import com.stable.service.model.RunModelService;
 import com.stable.service.model.WebModelService;
 import com.stable.service.model.prd.UserService;
 import com.stable.service.model.prd.msg.BizPushService;
@@ -56,6 +57,8 @@ public class RealtimeMonitoringService {
 	private BizPushService bizPushService;
 	@Autowired
 	private ConceptService conceptService;
+	@Autowired
+	private RunModelService runModelService;
 
 	public synchronized void startObservable() {
 		String date = DateUtil.getTodayYYYYMMDD();
@@ -72,7 +75,7 @@ public class RealtimeMonitoringService {
 			log.info("now > isAlivingMillis,已超时");
 			return;
 		}
-
+		Map<String, String> warningCode = new ConcurrentHashMap<String, String>();
 		try {
 
 			HashMap<String, RtmMoniGbl> allmap = new HashMap<String, RtmMoniGbl>();
@@ -125,7 +128,7 @@ public class RealtimeMonitoringService {
 				for (String code : allmap.keySet()) {
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
 					int r = task.init(code, allmap.get(code), stockBasicService.getCodeName2(code),
-							redisUtil.get(RedisConstant.YEAR_PRICE_ + code, 0.0), conceptService);
+							redisUtil.get(RedisConstant.YEAR_PRICE_ + code, 0.0), conceptService, warningCode);
 					if (r == 1) {
 						new Thread(task).start();
 						list.add(task);
@@ -157,6 +160,7 @@ public class RealtimeMonitoringService {
 				t.stop();
 			}
 
+			runModelService.printOnlineHtml(warningCode);
 			// 停止线程
 			// prd1m.stop();
 			// OnlineTesting -> 转换持仓量:可卖=vol，今日买归0

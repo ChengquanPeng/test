@@ -2,6 +2,7 @@ package com.stable.service.monitor;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.stable.constant.Constant;
 import com.stable.service.ConceptService;
@@ -29,6 +30,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	RtmMoniGbl rtm;
 	private boolean chkCodeClosed = false;
 	private double yearHigh1;
+	private Map<String, String> warningCode;
 
 	private boolean burstPointCheckTopPrew = false;// 突破前1%
 	private boolean burstPointCheckTop = false;// 突破
@@ -47,7 +49,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		return sb.toString();
 	}
 
-	public int init(String code, RtmMoniGbl rtm, String codeName, double yh, ConceptService c) {
+	public int init(String code, RtmMoniGbl rtm, String codeName, double yh, ConceptService c,
+			Map<String, String> warningCode) {
 		log.info(code + ":" + getUsers(rtm.getListu()));
 		this.code = code;
 		this.codeName = codeName;
@@ -59,6 +62,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		}
 		this.yearHigh1 = yh;
 		this.conceptService = c;
+		this.warningCode = warningCode;
 		return 1;
 	}
 
@@ -126,25 +130,29 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				if (isQibao) {
 					if (!burstPointCheckTop && rtm.getOrig().getShotPointPrice() > 0) {
 						if (rt.getHigh() >= rtm.getOrig().getShotPointPrice()) {
-							burstPointCheckTop = rtm.bizPushService.PushS2(codeName + rtm.you + "["
-									+ TagUtil.getXiPan(rtm.getBase()) + "]突破买点:" + rtm.getOrig().getShotPointPrice(),
-									getBaseInfo());
+							String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]突破买点:"
+									+ rtm.getOrig().getShotPointPrice();
+							burstPointCheckTop = rtm.bizPushService.PushS2(title2, getBaseInfo());
+							warningCode.put(code, title2);
 						} else if (!burstPointCheckTopPrew && rt.getHigh() >= rtm.warningYellow) {
-							burstPointCheckTopPrew = rtm.bizPushService
-									.PushS2(codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]准备突破买点:"
-											+ rtm.getOrig().getShotPointPrice() + "现价:" + rt.getBuy1(), getBaseInfo());
+							String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]准备突破买点:"
+									+ rtm.getOrig().getShotPointPrice() + "现价:" + rt.getBuy1();
+							burstPointCheckTopPrew = rtm.bizPushService.PushS2(title2, getBaseInfo());
+							warningCode.put(code, title2);
 						}
 					}
 					if (!burstPointCheckSzx && rtm.getOrig().getShotPointPriceSzx() > 0
 							&& rt.getHigh() >= rtm.getOrig().getShotPointPriceSzx()) {
-						burstPointCheckSzx = rtm.bizPushService.PushS2(codeName + rtm.you + " ["
-								+ TagUtil.getXiPan(rtm.getBase()) + "]突破买点:" + rtm.getOrig().getShotPointPriceSzx(),
-								getBaseInfo());
+						String title2 = codeName + rtm.you + " [" + TagUtil.getXiPan(rtm.getBase()) + "]突破买点:"
+								+ rtm.getOrig().getShotPointPriceSzx();
+						burstPointCheckSzx = rtm.bizPushService.PushS2(title2, getBaseInfo());
+						warningCode.put(code, title2);
 					}
 					if (!burstPointCheckRg && rtm.getOrig().getRgqbPrice() > 0
 							&& rt.getHigh() >= rtm.getOrig().getRgqbPrice()) {
-						burstPointCheckRg = rtm.bizPushService
-								.PushS2(codeName + rtm.you + " 人工买点:" + rtm.getOrig().getRgqbPrice(), getBaseInfo());
+						String title2 = codeName + rtm.you + " 人工买点:" + rtm.getOrig().getRgqbPrice();
+						burstPointCheckRg = rtm.bizPushService.PushS2(title2, getBaseInfo());
+						warningCode.put(code, title2);
 					}
 
 //					if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
@@ -180,6 +188,10 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					// 发送
 					if (!title.equals("")) {
 						MsgPushServer.pushSystemT1(codeName + " " + title, rtm.getMsg(r.getOrig()), r.getUser());
+
+						if (r.getOrig().getUserId() == Constant.MY_ID) {
+							warningCode.put(code, title);
+						}
 					}
 				}
 

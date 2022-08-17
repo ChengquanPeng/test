@@ -4,6 +4,7 @@ package com.stable.service.model;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -122,6 +123,34 @@ public class RunModelService {
 		mr2.setPls(3);
 		List<CodeBaseModel2> genListTe = webModelService.getList(mr2, EsQueryPageUtil.queryPage9999);
 		printHtml(qbList, genListTe);
+	}
+
+	public void printOnlineHtml(Map<String, String> warningCode) {
+		String htmlnamet = "online.html";
+		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
+		StringBuffer sb = new StringBuffer();
+		// 更新时间
+		sb.append("<div>在线监听-更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("</div>");
+		// table
+		sb.append("<br/><table border='1' cellspacing='0' cellpadding='0'>");
+		// head
+		sb.append("<tr><th>序号</th><th>代码</th><th>推送消息</th></tr>");
+		if (warningCode != null && warningCode.size() > 0) {
+			int i = 0;
+			for (String code : warningCode.keySet()) {
+				sb.append("<tr><td>").append(i + 1).append("</td>");
+				sb.append("<tr><td>").append(code).append("</td>");
+				sb.append("<tr><td>").append(warningCode.get(code)).append("</td>");
+				sb.append("</tr>");
+				i++;
+			}
+		} else {
+			sb.append("<tr><td>无数据...</td></tr>");
+		}
+		fw.writeLine(sb.toString());
+		sb.append("</table>");// end
+		fw.writeLine(sb.toString());
+		fw.close();
 	}
 
 	private void printHtml(List<CodeBaseModel2> qbList, List<CodeBaseModel2> genListTe) {
