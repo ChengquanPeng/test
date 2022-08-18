@@ -9,6 +9,7 @@ public class OnlineCodeGen {
 	private static final long WAIT_MIN = 30 * 60 * 1000;// 30MIN
 	Map<String, String> warningCode = new ConcurrentHashMap<String, String>();
 	public boolean isRunning = true;
+	public static boolean x7Chk = false;
 
 	public OnlineCodeGen(RunModelService runModelService) {
 		Runnable rtt2 = new Runnable() {

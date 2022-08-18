@@ -133,7 +133,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 									+ rtm.getOrig().getShotPointPrice();
 							burstPointCheckTop = rtm.bizPushService.PushS2(title2, getBaseInfo());
 							ocg.genMsg(code, title2);
-						} else if (!burstPointCheckTopPrew && rt.getHigh() >= rtm.warningYellow) {
+						} else if (OnlineCodeGen.x7Chk && !burstPointCheckTopPrew
+								&& rt.getHigh() >= rtm.warningYellow) {
 							String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]准备突破买点:"
 									+ rtm.getOrig().getShotPointPrice() + "现价:" + rt.getBuy1();
 							burstPointCheckTopPrew = rtm.bizPushService.PushS2(title2, getBaseInfo());
