@@ -139,9 +139,8 @@ public class RunModelService {
 			int i = 0;
 			for (String code : warningCode.keySet()) {
 				sb.append("<tr><td>").append(i + 1).append("</td>");
-				sb.append("<tr><td>").append(code).append("</td>");
-				sb.append("<tr><td>").append(warningCode.get(code)).append("</td>");
-				sb.append("</tr>");
+				sb.append("<td>").append(code).append("</td>");
+				sb.append("<td>").append(warningCode.get(code)).append("</td></tr>");
 				i++;
 			}
 		} else {
@@ -149,7 +148,6 @@ public class RunModelService {
 		}
 		fw.writeLine(sb.toString());
 		sb.append("</table>");// end
-		fw.writeLine(sb.toString());
 		fw.close();
 	}
 
