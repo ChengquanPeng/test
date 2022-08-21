@@ -410,9 +410,14 @@ public class FinanceService {
 					FinanceBaseInfo preYearFin = this.findPreFin(fbis, fa.getCurrJidu().getYear() - 1,
 							fa.getCurrJidu().getQuarter());
 					if (preYearFin.getKfjlr() > 0) {// 上年的季度扣非不为0
-						newOne.setBossVal(CurrencyUitl.roundHalfUp(fa.getCurrJidu().getDjdKfTbzz()));
-						newOne.setBossInc(this.kfInc(fbis));
-						return 1;
+
+						// 2个季度至少1亿
+						if (fa.getCurrJidu().getQuarter() == 1
+								|| fa.getCurrJidu().getKfjlr() >= CurrencyUitl.YI_N.longValue()) {
+							newOne.setBossVal(CurrencyUitl.roundHalfUp(fa.getCurrJidu().getDjdKfTbzz()));
+							newOne.setBossInc(this.kfInc(fbis));
+							return 1;
+						}
 					}
 				}
 			} else if (yi.getYgjlr() > 0) {// 快报，预告，需要计算。然后人工校验
@@ -422,6 +427,11 @@ public class FinanceService {
 				if (yi.getQuarter() != 1) {// 第一季就是当季度的，不用减。234季度需要获取当前季度的
 					FinanceBaseInfo preQutFin = fa.getCurrJidu();
 					currKf = currKf - preQutFin.getKfjlr();
+
+					// 2个季度至少1亿
+					if (yi.getYgjlr() <= CurrencyUitl.YI_N.longValue()) {
+						currKf = 0;
+					}
 				}
 				if (currKf > 0) {
 					// 上次单季度,// 上年的季度扣非不为0
