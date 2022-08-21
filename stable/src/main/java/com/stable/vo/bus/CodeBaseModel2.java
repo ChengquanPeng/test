@@ -80,6 +80,8 @@ public class CodeBaseModel2 extends EsBase {
 	// 财务业绩
 	@Field(type = FieldType.Integer)
 	private int bousOK;// 5年分红OK(至少4年分红)
+	@Field(type = FieldType.Text)
+	private String bousLast;// 5年分红OK(至少4年分红)
 	@Field(type = FieldType.Integer)
 	private int finOK;// 5年业绩OK
 	@Field(type = FieldType.Integer)
@@ -92,6 +94,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int finSusBoss = 0;// 疑似业绩牛
 	@Field(type = FieldType.Double)
 	private double bossVal = 0;// 业绩牛增长率
+	@Field(type = FieldType.Integer)
+	private int bossInc = 0;// 业绩牛连续季度
 
 	@Field(type = FieldType.Integer)
 	private int moni = 0;// 是否监听

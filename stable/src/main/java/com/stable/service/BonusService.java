@@ -91,12 +91,18 @@ public class BonusService {
 	}
 
 	public void bonusYear(String code, int start, int end, CodeBaseModel2 newOne) {
+		newOne.setBousOK(0);
+		newOne.setBousLast("");
 		List<BonusHist> l = this.getListByCode(code, null, null, null, start, end, EsQueryPageUtil.queryPage10);
 		if (l != null) {
 			List<Integer> set = new LinkedList<Integer>();
-			for (BonusHist bh : l) {
+			for (int i = 0; i < l.size(); i++) {
+				BonusHist bh = l.get(i);
 				if (bh.getDetail().contains("元")) {
 					set.add(bh.getBonusYear());
+					if (i == 0) {
+						newOne.setBousLast(bh.getAmt());
+					}
 				}
 			}
 			if (set.size() >= 5) {

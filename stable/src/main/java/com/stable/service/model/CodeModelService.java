@@ -437,7 +437,6 @@ public class CodeModelService {
 	private void financeAndBonus(CodeBaseModel2 newOne, boolean isSmallStock) {
 		// 周末计算-至少N年未大涨?
 		newOne.setFinOK(0);
-		newOne.setBousOK(0);
 		newOne.setFinanceInc(0);
 
 		String code = newOne.getCode();
@@ -1166,6 +1165,7 @@ public class CodeModelService {
 			newOne.setFinBoss(0);
 			newOne.setFinSusBoss(0);
 			newOne.setBossVal(0);
+			newOne.setBossInc(0);
 		}
 		// 确定
 		if (yjn == 1) {

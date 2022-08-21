@@ -392,7 +392,9 @@ public class WebModelService {
 		if (mr.getBossVal() > 0) {
 			bqb.must(QueryBuilders.rangeQuery("bossVal").gte(mr.getBossVal()));// 业绩牛增长率
 		}
-
+		if (mr.getBossInc() > 0) {
+			bqb.must(QueryBuilders.rangeQuery("bossInc").gte(mr.getBossInc()));// 暴涨季度
+		}
 		if (mr.getTagIndex() > 0) {
 			if (mr.getTagIndex() == 1) {
 				bqb.must(QueryBuilders.matchPhraseQuery("sortChips", 1));// 吸筹-收集筹码短线
@@ -610,6 +612,8 @@ public class WebModelService {
 			field = "reduceLastPlanDate";
 		} else if (orderBy == 19) {// 小票未涨
 			field = "zfjjupStable";
+		} else if (orderBy == 20) {// 业绩连续暴涨
+			field = "bossInc";
 		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);

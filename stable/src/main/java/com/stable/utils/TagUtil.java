@@ -159,7 +159,7 @@ public class TagUtil {
 			sb5.append("年未大涨");
 		}
 		if (dh.getBousOK() > 0) {
-			sb5.append(",连续" + dh.getBousOK() + "年分红");
+			sb5.append(",连续" + dh.getBousOK() + "年分红(最新:").append(dh.getBousLast()).append(")");
 		}
 		if (dh.getFinDbl() > 0) {
 			sb5.append("<font color='red'>,业绩暴涨</font>");
@@ -169,6 +169,9 @@ public class TagUtil {
 		}
 		if (dh.getFinSusBoss() > 0) {
 			sb5.append("<font color='blue'>,疑似业绩大牛(" + dh.getBossVal() + "%)</font>");
+		}
+		if (dh.getBossInc() > 0) {
+			sb5.append(",连续" + dh.getBossInc() + "季度暴涨");
 		}
 		if (dh.getFinOK() > 0) {
 			sb5.append(",连续" + dh.getFinOK() + "年业绩盈利");
@@ -196,7 +199,7 @@ public class TagUtil {
 		// 基本面-筹码
 		sb5.append("流通:").append(dh.getMkv()).append("亿,");
 		sb5.append("除5%活筹:").append(dh.getActMkv()).append("亿,");
-		sb5.append("%5股东:").append(dh.getHolderNumP5()).append("%");
+		sb5.append("5%股东:").append(dh.getHolderNumP5()).append("%");
 		sb5.append(",股东人数:").append(CurrencyUitl.covertToString(dh.getLastNum()));
 		sb5.append(",人均持股:").append(CurrencyUitl.covertToString(dh.getAvgNum()));
 		sb5.append(",变化:").append(dh.getHolderNum()).append("%");

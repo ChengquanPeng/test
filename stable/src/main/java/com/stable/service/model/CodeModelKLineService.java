@@ -51,8 +51,8 @@ public class CodeModelKLineService {
 	private PriceLifeService priceLifeService;
 	@Autowired
 	private Sort0Service sort0Service;
-	@Autowired
-	private Sort1ModeService sort1ModeService;
+//	@Autowired
+//	private Sort1ModeService sort1ModeService;
 	@Autowired
 	private RedisUtil redisUtil;
 	@Autowired
@@ -193,15 +193,16 @@ public class CodeModelKLineService {
 		// ==============技术面-量价==============
 		// 一年新高
 		year1(newOne, lastTrade);
+
 		// 短线：妖股形态，短线拉的急，说明货多。
 		// 一倍：说明资金已经投入，赶鸭子上架。
 		// 新高:说明出货失败或者有更多的想法，要继续拉。
 		// 调整或小平台：3-5天，时间太久容易出货
 		// 买在新高，做好止损止盈应对策略。
-		sort1ModeService.sort1ModeChk(newOne, pool, tradeDate);
+		// sort1ModeService.sort1ModeChk(newOne, pool, tradeDate);
 		// 收集筹码的短线-拉过一波，所以市值可以大一点，-已废弃
-		newOne.setSortChips(0);
-		boolean isSamll = codeModelService.isSmallStock(mkv, newOne.getActMkv());
+
+//		newOne.setSortChips(0);
 //		if (online4Year && isSamll && chipsSortService.isCollectChips(code, tradeDate)) {
 //			newOne.setSortChips(1);
 //			log.info("{} 主力筹码收集", code);
@@ -209,9 +210,11 @@ public class CodeModelKLineService {
 		// 基本面-疑似白马
 		susWhiteHorses(code, newOne);
 		// 短线模型(箱体震荡-已废弃，实际是半年新高)
-//		sortModel(newOne, tradeDate);
+		// sortModel(newOne, tradeDate);
 		// 攻击形态
 		sort0Service.attackAndW(newOne, tradeDate);
+
+		boolean isSamll = codeModelService.isSmallStock(mkv, newOne.getActMkv());
 		// 底部优质大票
 		if (TagUtil.isDibuOKBig(isSamll, newOne)) {
 			if (s.getName().contains("银行") || s.getName().contains("证券")) {

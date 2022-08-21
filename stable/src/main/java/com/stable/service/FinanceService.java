@@ -411,6 +411,7 @@ public class FinanceService {
 							fa.getCurrJidu().getQuarter());
 					if (preYearFin.getKfjlr() > 0) {// 上年的季度扣非不为0
 						newOne.setBossVal(CurrencyUitl.roundHalfUp(fa.getCurrJidu().getDjdKfTbzz()));
+						newOne.setBossInc(this.kfInc(fbis));
 						return 1;
 					}
 				}
@@ -428,12 +429,26 @@ public class FinanceService {
 					double rate = CurrencyUitl.cutProfit(Double.valueOf(preYearFin.getKfjlr()), Double.valueOf(currKf));
 					if ((preYearFin.getKfjlr() > 0 && rate > 80) || rate >= 300) {// 往年季度不亏：80，亏：300
 						newOne.setBossVal(CurrencyUitl.roundHalfUp(rate));
+						int i = this.kfInc(fbis) + 1;
+						newOne.setBossInc(i);
 						return 2;
 					}
 				}
 			}
 		}
 		return 0;
+	}
+
+	private int kfInc(List<FinanceBaseInfo> fbis) {
+		int inc = 0;
+		for (FinanceBaseInfo f : fbis) {
+			if (f.getDjdKfTbzz() > 80) {
+				inc++;
+			} else {
+				break;
+			}
+		}
+		return inc;
 	}
 
 	private FinanceBaseInfo findPreFin(List<FinanceBaseInfo> fbis, int year, int quarter) {
