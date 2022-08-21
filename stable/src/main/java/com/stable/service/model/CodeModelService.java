@@ -102,7 +102,7 @@ public class CodeModelService {
 //
 //			@Override
 //			public void run() {
-//				runModel1(20220714, false);
+//				runModel1(20220819, false);
 //				System.err.println("runModel1 done");
 //			}
 //		}).start();
@@ -1161,12 +1161,10 @@ public class CodeModelService {
 			sb3.append(ykbm).append(Constant.HTML_LINE);
 		}
 		int yjn = financeService.finBigBoss(yi, fa, fbis, newOne);
-		if (yjn == 0) {
-			newOne.setFinBoss(0);
-			newOne.setFinSusBoss(0);
-			newOne.setBossVal(0);
-			newOne.setBossInc(0);
-		}
+		newOne.setFinBoss(0);
+		newOne.setFinSusBoss(0);
+		newOne.setBossVal(0);
+		newOne.setBossInc(0);
 		// 确定
 		if (yjn == 1) {
 			if (newOne.getFinBoss() == 0) {
