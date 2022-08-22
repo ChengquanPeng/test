@@ -269,7 +269,7 @@ public class WebModelService {
 			pool.setHolderNum(dt);
 			pool.setYkb(dt);
 			pool.setZfdone(1);
-			pool.setBuyLowVol(30);
+			pool.setBuyLowVol(60);
 
 			monitorPoolService.toSave(pool);
 		}

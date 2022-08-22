@@ -590,6 +590,7 @@ public class MonitorPoolService {
 				StringBuffer sb = new StringBuffer();
 				Integer today = DateUtil.getTodayIntYYYYMMDD();
 				for (MonitorPoolTemp mp : list) {
+					mp.setBuyLowVol(60);// 理论是上面的参数，临时默认60,TODO 1年后去掉本行
 					EsQueryPageReq req = new EsQueryPageReq(mp.getBuyLowVol());
 					List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(mp.getCode(),
 							0, today, req, SortOrder.DESC);
