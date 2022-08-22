@@ -229,6 +229,7 @@ public class PriceLifeService {
 		int days = -365;
 		int days2 = 365;
 		int year = 0;
+		int situYear1 = 0;
 		int end = DateUtil.formatYYYYMMDDReturnInt(now);
 		// System.err.println("year==>" + year);
 		for (int i = 1; i <= 5; i++) {
@@ -264,6 +265,7 @@ public class PriceLifeService {
 		if (stable && year == 1) {
 			return 1;
 		}
+		situYear1 = year;// 先保存第一种情况，如果第二种算法不行就用第一种的结果year=1
 		// 第二种情况:高位横盘
 		double rateup = 120;
 		if (stable) {
@@ -312,6 +314,10 @@ public class PriceLifeService {
 		if (stable && year == 1) {
 			return 1;
 		}
+		if (situYear1 > 0) {
+			return situYear1;// 返回第一种情况结果
+		}
+
 		return 0;
 	}
 

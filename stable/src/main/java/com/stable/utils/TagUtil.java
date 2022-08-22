@@ -151,7 +151,7 @@ public class TagUtil {
 
 	public static String baseInfo(CodeBaseModel2 dh) {
 		StringBuffer sb5 = new StringBuffer("");
-		if (dh.getZfjjup() > 0) {
+		if (dh.getZfjjup() > 0 || dh.getZfjjupStable() > 0) {
 			sb5.append(dh.getZfjjup());
 			if (dh.getZfjjupStable() > 0) {
 				sb5.append("<font color='red'>/stable").append(dh.getZfjjupStable()).append("</font>");
