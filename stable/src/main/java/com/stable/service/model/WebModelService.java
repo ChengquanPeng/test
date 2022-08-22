@@ -258,7 +258,7 @@ public class WebModelService {
 			pool.setUpPrice(0);
 			pool.setDownPrice(0);
 			pool.setRgqbPrice(0);
-
+			remark += " 归0或排除";
 			monitorPoolService.toSave(pool);
 		} else if (pls == 1 && model.getPls() != 1) {// 1不在池子，且原来不等于1
 			pool.setMonitor(MonitorType.MANUAL.getCode());
