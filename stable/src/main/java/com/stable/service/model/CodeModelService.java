@@ -102,7 +102,7 @@ public class CodeModelService {
 //
 //			@Override
 //			public void run() {
-//				runModel1(20220819, false);
+//				runModel1(20220822, false);
 //				System.err.println("runModel1 done");
 //			}
 //		}).start();
@@ -1160,15 +1160,17 @@ public class CodeModelService {
 			newOne.setBaseBlue(1);
 			sb3.append(ykbm).append(Constant.HTML_LINE);
 		}
-		newOne.setFinBoss(0);
-		newOne.setFinSusBoss(0);
-		newOne.setBossVal(0);
-		newOne.setBossInc(0);
 
 		int yjn = 0;
 		// 股票范围：5%持股30以上，底部未涨
 		if (newOne.getHolderNumP5() > 30.0 && (TagUtil.isDibu11(newOne) || newOne.getZfjjup() >= 4)) {
 			yjn = financeService.finBigBoss(yi, fa, fbis, newOne);
+		}
+		if (yjn == 0) {
+			newOne.setFinBoss(0);
+			newOne.setFinSusBoss(0);
+			newOne.setBossVal(0);
+			newOne.setBossInc(0);
 		}
 
 		// 确定
@@ -1177,12 +1179,12 @@ public class CodeModelService {
 				yjm1.append(stockBasicService.getCodeName2(code)).append(",");
 			}
 			newOne.setFinBoss(1);
-		}
-		// 疑似
-		if (yjn == 2) {
+			newOne.setFinSusBoss(0);
+		} else if (yjn == 2) {// 疑似
 			if (newOne.getFinSusBoss() == 0) {
 				yjm2.append(stockBasicService.getCodeName2(code)).append(",");
 			}
+			newOne.setFinBoss(0);
 			newOne.setFinSusBoss(1);
 		}
 

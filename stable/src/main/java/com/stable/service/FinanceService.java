@@ -404,23 +404,8 @@ public class FinanceService {
 	public int finBigBoss(YgInfo yi, FinanceAnalyzer fa, List<FinanceBaseInfo> fbis, CodeBaseModel2 newOne) {
 		// 最新的年报不能亏损
 		if (fa.getCurrYear().getKfjlr() > 0) {
-			/** 业绩牛 */
-			if (yi == null) {// 没有找到，则计算最新的
-				if (fa.getCurrJidu().getDjdKfTbzz() > 80) {
-					FinanceBaseInfo preYearFin = this.findPreFin(fbis, fa.getCurrJidu().getYear() - 1,
-							fa.getCurrJidu().getQuarter());
-					if (preYearFin.getKfjlr() > 0) {// 上年的季度扣非不为0
-
-						// 2个季度至少1亿
-						if (fa.getCurrJidu().getQuarter() == 1
-								|| fa.getCurrJidu().getKfjlr() >= CurrencyUitl.YI_N.longValue()) {
-							newOne.setBossVal(CurrencyUitl.roundHalfUp(fa.getCurrJidu().getDjdKfTbzz()));
-							newOne.setBossInc(this.kfInc(fbis));
-							return 1;
-						}
-					}
-				}
-			} else if (yi.getYgjlr() > 0) {// 快报，预告，需要计算。然后人工校验
+			// 首先看： 快报，预告，需要计算。然后人工校验
+			if (yi != null && yi.getYgjlr() > 0) {
 				// 需要计算
 				long currKf = yi.getYgjlr();// 包含整个季度的
 				// 非1季度
@@ -442,6 +427,22 @@ public class FinanceService {
 						int i = this.kfInc(fbis) + 1;
 						newOne.setBossInc(i);
 						return 2;
+					}
+				}
+			}
+			/** 业绩牛 */
+			// 没有找到，则最新的财报重新计算
+			if (fa.getCurrJidu().getDjdKfTbzz() > 80) {
+				FinanceBaseInfo preYearFin = this.findPreFin(fbis, fa.getCurrJidu().getYear() - 1,
+						fa.getCurrJidu().getQuarter());
+				if (preYearFin.getKfjlr() > 0) {// 上年的季度扣非不为0
+
+					// 2个季度至少1亿
+					if (fa.getCurrJidu().getQuarter() == 1
+							|| fa.getCurrJidu().getKfjlr() >= CurrencyUitl.YI_N.longValue()) {
+						newOne.setBossVal(CurrencyUitl.roundHalfUp(fa.getCurrJidu().getDjdKfTbzz()));
+						newOne.setBossInc(this.kfInc(fbis));
+						return 1;
 					}
 				}
 			}
