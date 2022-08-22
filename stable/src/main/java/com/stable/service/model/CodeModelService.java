@@ -1160,11 +1160,17 @@ public class CodeModelService {
 			newOne.setBaseBlue(1);
 			sb3.append(ykbm).append(Constant.HTML_LINE);
 		}
-		int yjn = financeService.finBigBoss(yi, fa, fbis, newOne);
 		newOne.setFinBoss(0);
 		newOne.setFinSusBoss(0);
 		newOne.setBossVal(0);
 		newOne.setBossInc(0);
+
+		int yjn = 0;
+		// 股票范围：5%持股30以上，底部未涨
+		if (newOne.getHolderNumP5() > 30.0 && (TagUtil.isDibu11(newOne) || newOne.getZfjjup() >= 4)) {
+			yjn = financeService.finBigBoss(yi, fa, fbis, newOne);
+		}
+
 		// 确定
 		if (yjn == 1) {
 			if (newOne.getFinBoss() == 0) {
