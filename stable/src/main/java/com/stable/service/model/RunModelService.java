@@ -316,7 +316,7 @@ public class RunModelService {
 	public boolean stTuiShi(CodeBaseModel2 newOne) {
 		String name = stockBasicService.getCodeName(newOne.getCode());
 		if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI) || name.contains("ST")) {
-			log.info("退市,{},{}", newOne.getCode(), name);
+			log.info("ST或退市,{},{}", newOne.getCode(), name);
 			return true;
 		}
 		return false;
