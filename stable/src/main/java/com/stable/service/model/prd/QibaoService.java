@@ -530,7 +530,7 @@ public class QibaoService {
 				if (chkrateupdate) {
 					qi.setChkRate(20);
 				}
-				qxrange(qi, tmp);
+				// qxrange(qi, tmp);
 				return qi;
 			}
 		}
@@ -588,7 +588,7 @@ public class QibaoService {
 				qi.setYesterdayPrice(chk.getYesterdayPrice());
 				qi.setLow(chk.getLow());
 
-				qxrange(qi, tmp);
+//				qxrange(qi, tmp);
 				return qi;
 			}
 		}

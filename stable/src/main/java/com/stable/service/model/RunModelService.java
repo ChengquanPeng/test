@@ -139,7 +139,7 @@ public class RunModelService {
 			int i = 0;
 			for (String code : warningCode.keySet()) {
 				sb.append("<tr><td>").append(i + 1).append("</td>");
-				sb.append("<td>").append(code).append("</td>");
+				sb.append("<td>").append(stockBasicService.getCodeName2(code)).append("</td>");
 				sb.append("<td>").append(warningCode.get(code)).append("</td></tr>");
 				i++;
 			}
