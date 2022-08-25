@@ -200,7 +200,16 @@ public class TagUtil {
 		sb5.append("流通:").append(dh.getMkv()).append("亿,");
 		sb5.append("除5%活筹:").append(dh.getActMkv()).append("亿,");
 		sb5.append("5%股东:").append(dh.getHolderNumP5()).append("%");
-		sb5.append(",股东人数:").append(CurrencyUitl.covertToString(dh.getLastNum()));
+		sb5.append(",股东人数:");
+		boolean t = dh.getLastNum() >= Constant.WAN_5;
+		if (t) {
+			sb5.append("<font color='red'>");
+		}
+		sb5.append(CurrencyUitl.covertToString(dh.getLastNum()));
+		if (t) {
+			sb5.append("</font>");
+		}
+
 		sb5.append(",人均持股:").append(CurrencyUitl.covertToString(dh.getAvgNum()));
 		sb5.append(",变化:").append(dh.getHolderNum()).append("%");
 		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);

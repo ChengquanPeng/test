@@ -29,6 +29,7 @@ public class Constant {
 	public static final int END_DATE = 20140101;// 6年
 
 	public static final double WAN_10 = 10 * 10000;// 10万
+	public static final double WAN_5 = 5 * 10000;// 5万
 
 	public static final long MY_ID = 10000;// 我的ID
 
