@@ -306,8 +306,8 @@ public class CodeModelService {
 //				}
 //			}
 		}
-		/** 国资不低于净资产定增 */
-		if (s.getCompnayType() == 1 && newOne.getZfStatus() == 1 && lastTrade.getPb() < 1) {
+		/** 国资不低于净资产定增 ,pb负数：资不抵债 */
+		if (s.getCompnayType() == 1 && newOne.getZfStatus() == 1 && newOne.getPb() > 0 && newOne.getPb() < 1) {
 			isOk2 = true;
 		}
 		boolean db1 = TagUtil.isDibuSmall(isSmallStock, newOne);// getZfjjup >= 2 && ZfjjupStable() >= 1;

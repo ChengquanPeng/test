@@ -112,7 +112,7 @@ public class TagUtil {
 			s += "底部小票" + splitor;
 		}
 		if (dh.getShooting2() > 0) {
-			s += "底部大票定增-涨停吸筹?" + splitor;
+			s += "拉升定增-大额|国资，拿筹洗盘动作?" + splitor;
 		}
 		if (dh.getShooting1() > 0) {
 			s += "底部小票大宗-占流通筹码超5%" + splitor;
