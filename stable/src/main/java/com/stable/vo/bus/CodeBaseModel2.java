@@ -47,6 +47,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int shooting6662 = 0;// 小底-减持
 
 	// 技术面
+	@Field(type = FieldType.Double)
+	private double price3m = 0.0;// 3个月新高
 	@Field(type = FieldType.Integer)
 	private int shooting10 = 0;// 行情指标10：PRE/一年新高
 	@Field(type = FieldType.Integer)

@@ -8,7 +8,6 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.MonitorPoolUserDao;
 import com.stable.service.DaliyBasicHistroyService;
@@ -24,7 +23,6 @@ import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
-import com.stable.utils.RedisUtil;
 import com.stable.utils.TagUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.DaliyBasicInfo2;
@@ -53,8 +51,6 @@ public class CodeModelKLineService {
 	private Sort0Service sort0Service;
 //	@Autowired
 //	private Sort1ModeService sort1ModeService;
-	@Autowired
-	private RedisUtil redisUtil;
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
@@ -194,7 +190,7 @@ public class CodeModelKLineService {
 		// N年未大涨
 		noup(online4Year, newOne, s.getList_date());
 		// ==============技术面-量价==============
-		// 一年新高
+		// 3个月新高
 		year1(newOne, lastTrade);
 
 		// 短线：妖股形态，短线拉的急，说明货多。
@@ -236,8 +232,8 @@ public class CodeModelKLineService {
 	}
 
 	private void year1(CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade) {
-		TradeHistInfoDaliy high = daliyTradeHistroyService.queryYear1HighRecord(newOne.getCode(), tradeDate);
-		redisUtil.set(RedisConstant.YEAR_PRICE_ + newOne.getCode(), high.getHigh());
+		TradeHistInfoDaliy high = daliyTradeHistroyService.queryMonth3HighRecord(newOne.getCode(), tradeDate);
+		newOne.setPrice3m(high.getHigh());
 		if (lastTrade.getClosed() > 0 && high.getHigh() > lastTrade.getClosed()
 				&& CurrencyUitl.cutProfit(lastTrade.getClosed(), high.getHigh()) <= 15) {// 15%以内冲新高
 			newOne.setShooting10(1);

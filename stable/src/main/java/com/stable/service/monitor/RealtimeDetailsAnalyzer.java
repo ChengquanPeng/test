@@ -29,7 +29,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private String today = DateUtil.getTodayYYYYMMDD();
 	RtmMoniGbl rtm;
 	private boolean chkCodeClosed = false;
-	private double yearHigh1;
 	private OnlineCodeGen ocg;
 
 	private boolean burstPointCheckTopPrew = false;// 突破前1%
@@ -49,7 +48,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		return sb.toString();
 	}
 
-	public int init(String code, RtmMoniGbl rtm, String codeName, double yh, ConceptService c, OnlineCodeGen ocg) {
+	public int init(String code, RtmMoniGbl rtm, String codeName, ConceptService c, OnlineCodeGen ocg) {
 		log.info(code + ":" + getUsers(rtm.getListu()));
 		this.code = code;
 		this.codeName = codeName;
@@ -59,7 +58,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			log.info("{}  SINA 今日疑似停牌或者可能没有集合竞价", codeName);
 			chkCodeClosed = true;
 		}
-		this.yearHigh1 = yh;
 		this.conceptService = c;
 		this.ocg = ocg;
 		return 1;
@@ -176,11 +174,11 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						}
 					}
 					// 一年新高
-					if (rt.getHigh() > yearHigh1 && !r.highPriceGot && yearHigh1 > 0) {
+					if (rt.getHigh() > rtm.price3m && !r.highPriceGot && rtm.price3m > 0) {
 						if ("".equals(title)) {
-							title = " 一年新高!";
+							title = " 3个月新高!";
 						} else {
-							title += "一年新高! ";
+							title += "3个月新高! ";
 						}
 						r.highPriceGot = true;
 					}

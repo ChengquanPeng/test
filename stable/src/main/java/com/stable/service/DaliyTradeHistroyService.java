@@ -703,8 +703,17 @@ public class DaliyTradeHistroyService {
 	}
 
 	// 一年新高的价格（前复权）
-	public TradeHistInfoDaliy queryYear1HighRecord(String code, int date) {
-		List<TradeHistInfoDaliy> list = queryListByCodeWithLastQfq(code, 0, date, EsQueryPageUtil.queryPage250,
+//	private TradeHistInfoDaliy queryYear1HighRecord(String code, int date) {
+//		List<TradeHistInfoDaliy> list = queryListByCodeWithLastQfq(code, 0, date, EsQueryPageUtil.queryPage250,
+//				SortOrder.DESC);
+//		if (list != null && list.size() > 0) {
+//			return list.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+//		}
+//		return new TradeHistInfoDaliy();
+//	}
+
+	public TradeHistInfoDaliy queryMonth3HighRecord(String code, int date) {
+		List<TradeHistInfoDaliy> list = queryListByCodeWithLastQfq(code, 0, date, EsQueryPageUtil.queryPage60,
 				SortOrder.DESC);
 		if (list != null && list.size() > 0) {
 			return list.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();

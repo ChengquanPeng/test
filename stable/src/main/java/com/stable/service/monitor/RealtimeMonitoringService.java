@@ -137,8 +137,8 @@ public class RealtimeMonitoringService {
 				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
 				for (String code : allmap.keySet()) {
 					RealtimeDetailsAnalyzer task = new RealtimeDetailsAnalyzer();
-					int r = task.init(code, allmap.get(code), stockBasicService.getCodeName2(code),
-							redisUtil.get(RedisConstant.YEAR_PRICE_ + code, 0.0), conceptService, ocg);
+					int r = task.init(code, allmap.get(code), stockBasicService.getCodeName2(code), conceptService,
+							ocg);
 					if (r == 1) {
 						new Thread(task).start();
 						list.add(task);

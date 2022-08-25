@@ -25,9 +25,11 @@ public class RtmMoniGbl {
 	public String you = "";
 	// 公共信息
 	public CodeBaseModelResp base;
+	public double price3m;
 
 	public RtmMoniGbl(CodeBaseModelResp resp) {
 		this.base = resp;
+		this.price3m = resp.getPrice3m();
 	}
 
 	public void setServiceAndPrew(BizPushService bizs, MonitorPoolTemp orig) {
