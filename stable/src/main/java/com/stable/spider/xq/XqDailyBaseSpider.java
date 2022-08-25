@@ -11,7 +11,6 @@ import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
-import com.stable.service.DataChangeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.RunModelService;
 import com.stable.service.model.prd.msg.MsgPushServer;
@@ -36,8 +35,6 @@ public class XqDailyBaseSpider {
 	private EsDaliyBasicInfoDao esDaliyBasicInfoDao;
 	@Autowired
 	private StockBasicService stockBasicService;
-	@Autowired
-	private DataChangeService dataChangeService;
 	@Autowired
 	private RunModelService runModelService;
 	@Autowired
@@ -114,7 +111,6 @@ public class XqDailyBaseSpider {
 			}
 			if (upd.size() > 0) {
 				esDaliyBasicInfoDao.saveAll(list);
-				dataChangeService.putPeTtmData(upd);
 			}
 //			new Thread(new Runnable() {
 //				public void run() {

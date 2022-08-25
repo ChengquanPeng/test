@@ -174,6 +174,9 @@ public class CodeModelKLineService {
 			lastTrade = new DaliyBasicInfo2();
 		}
 		double mkv = lastTrade.getCircMarketVal();// 流通市值
+		newOne.setPb(lastTrade.getPb());// 市盈率ttm
+		newOne.setPettm(lastTrade.getPeTtm());// 市盈率ttm
+
 		if (mkv <= 0) {
 			ErrorLogFileUitl.writeError(null, code + "," + s.getName() + ",无最新流通市值mkv", tradeDate + "", "");
 			DaliyBasicInfo2 ltt = daliyBasicHistroyService.queryLastest(code, 0, 1);

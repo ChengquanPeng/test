@@ -228,6 +228,8 @@ public class CodeBaseModel2 extends EsBase {
 
 	@Field(type = FieldType.Double)
 	private double pettm = 0.0;// 市盈率ttm
+	@Field(type = FieldType.Double)
+	private double pb = 0.0;// 市净率
 
 	@Transient
 	public String getKeyString() {

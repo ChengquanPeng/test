@@ -193,7 +193,7 @@ public class TagUtil {
 
 		if (dh.getCompnayType() == 1) {
 			sb5.append("<font color='green'>");
-			sb5.append("国资,");
+			sb5.append("国资(" + dh.getPb() + "),");
 			sb5.append("</font>");
 		}
 		// 基本面-筹码

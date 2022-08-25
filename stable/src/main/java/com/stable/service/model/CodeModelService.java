@@ -23,7 +23,6 @@ import com.stable.service.BuyBackService;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.DaliyBasicHistroyService;
-import com.stable.service.DataChangeService;
 import com.stable.service.DzjyService;
 import com.stable.service.FinanceService;
 import com.stable.service.ReducingHoldingSharesService;
@@ -89,8 +88,6 @@ public class CodeModelService {
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private DzjyService dzjyService;
-	@Autowired
-	private DataChangeService dataChangeService;
 	@Autowired
 	private BuyBackService buyBackService;
 	@Autowired
@@ -219,14 +216,14 @@ public class CodeModelService {
 		if (lastTrade == null) {
 			lastTrade = new DaliyBasicInfo2();
 		}
+		newOne.setPb(lastTrade.getPb());// 市盈率ttm
+		newOne.setPettm(lastTrade.getPeTtm());// 市盈率ttm
 		// 小市值
 		boolean isSmallStock = isSmallStock(newOne.getMkv(), newOne.getActMkv());
 		// N年未大涨
 		financeAndBonus(newOne, isSmallStock);
 		// 财报分析排雷
 		baseAnalyse(s, newOne, lastTrade, yjm1, yjm2);
-		// 市盈率ttm
-		dataChangeService.getPeTtmData(code, newOne);
 		// 资金筹码-博弈
 		game(newOne, lastTrade);
 		// 国企|民企
@@ -299,15 +296,19 @@ public class CodeModelService {
 					}
 				}
 			}
-			/** 定增:底部大票2: 底部优质票也可以这样。 **/
-			if (TagUtil.isDibuSmall(isSmallStock, newOne)
-					&& ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
-				// 增发金额接近活动的筹码的1半
-				long ackm = CurrencyUitl.covertToLong(newOne.getActMkv() + CurrencyUitl.YI);
-				if ((ackm / Double.valueOf(newOne.getZfYjAmt())) <= 2.0) {
-					isOk2 = true;
-				}
-			}
+//			/** 定增:底部大票2: 底部优质票也可以这样。 **/
+//			if (TagUtil.isDibuSmall(isSmallStock, newOne)
+//					&& ZfStatus.ZF_ZJHHZ.getDesc().equals(newOne.getZfStatusDesc())) {
+//				// 增发金额接近活动的筹码的1半
+//				long ackm = CurrencyUitl.covertToLong(newOne.getActMkv() + CurrencyUitl.YI);
+//				if ((ackm / Double.valueOf(newOne.getZfYjAmt())) <= 2.0) {
+//					isOk2 = true;
+//				}
+//			}
+		}
+		/** 国资不低于净资产定增 */
+		if (s.getCompnayType() == 1 && newOne.getZfStatus() == 1 && lastTrade.getPb() < 1) {
+			isOk2 = true;
 		}
 		boolean db1 = TagUtil.isDibuSmall(isSmallStock, newOne);// getZfjjup >= 2 && ZfjjupStable() >= 1;
 		/** 底部横盘小票(不看基本面) **/
