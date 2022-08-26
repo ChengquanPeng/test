@@ -33,6 +33,10 @@ public class OnlineCodeGen {
 	}
 
 	public void genMsg(String code, String title) {
+		String t = warningCode.get(code);
+		if (t != null) {
+			title = t + " , " + title;
+		}
 		warningCode.put(code, title);
 	}
 

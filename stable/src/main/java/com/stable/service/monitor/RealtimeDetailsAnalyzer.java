@@ -178,7 +178,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						if ("".equals(title)) {
 							title = " 3个月新高!";
 						} else {
-							title += "3个月新高! ";
+							title += " , 3个月新高! ";
 						}
 						r.highPriceGot = true;
 					}
