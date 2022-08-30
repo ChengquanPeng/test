@@ -70,7 +70,7 @@ public class RunModelService {
 	public void test() {
 		new Thread(new Runnable() {
 			public void run() {
-				int date = 20220829;
+				int date = 20220830;
 				codeModelKLineService.runKLineModel1(date);
 //				ThreadsUtil.sleepRandomSecBetween15And30();
 //				codeModelService.runModel1(date, false);
