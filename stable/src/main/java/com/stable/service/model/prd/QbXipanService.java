@@ -37,6 +37,7 @@ public class QbXipanService {
 			newOne.setZfjjupStable(1);
 			newOne.setCode(code);
 			newOne.setPls(1);
+			newOne.setHolderNumP5(50);
 			System.err.println("==========" + stockBasicService.getCodeName2(code) + "==========");
 			xipanQb(date, newOne, true);
 			System.err.println("Res ==========> " + (newOne.getQbXipan() > 0) + ",CNT:" + newOne.getXipan() + ","
@@ -50,7 +51,7 @@ public class QbXipanService {
 
 	/** 起爆-Pre突破 */
 	public void xipanQb(int date, CodeBaseModel2 newOne, boolean isSamll) {
-		if (!TagUtil.stockRange(isSamll, newOne)) {
+		if (!(TagUtil.stockRange(isSamll, newOne) && newOne.getHolderNumP5() > 0 && newOne.getHolderNumP5() > 21.0)) {
 			this.resetXiPan(newOne);
 			return;
 		}
@@ -121,24 +122,30 @@ public class QbXipanService {
 			if (d3t.getDate() > high.getDate() && high.getHigh() > last.getClosed()
 					&& CurrencyUitl.cutProfit(last.getClosed(), high.getHigh()) <= 15) {// 15%以内冲新高
 
-				// 放量是接近最大的那个[3-60，去掉下跌的量]
-				List<TradeHistInfoDaliy> list3 = list.subList(3, 60).stream().filter(s -> s.getTodayChangeRate() > 0.0)
-						.collect(Collectors.toList()).stream()
-						.sorted(Comparator.comparing(TradeHistInfoDaliy::getVolume).reversed())
-						.collect(Collectors.toList());// 所有上涨date中最大的量
-				List<TradeHistInfoDaliy> list4 = volDate.stream()
-						.sorted(Comparator.comparing(TradeHistInfoDaliy::getVolume).reversed())
-						.collect(Collectors.toList());// 突破中最大的
+				List<TradeHistInfoDaliy> list5 = list.subList(3, 60).stream().filter(s -> s.getTodayChangeRate() > 0.0)
+						.collect(Collectors.toList());
+				List<TradeHistInfoDaliy> lt = list5.stream().filter(s -> s.getTodayChangeRate() >= 5.0)
+						.collect(Collectors.toList());
+				// 1.超过5%，5次以上不要。
+				if (lt.size() < 5) {
+					// 放量是接近最大的那个[3-60，去掉下跌的量]
+					List<TradeHistInfoDaliy> list3 = list5.stream()
+							.sorted(Comparator.comparing(TradeHistInfoDaliy::getVolume).reversed())
+							.collect(Collectors.toList());// 所有上涨date中最大的量
+					List<TradeHistInfoDaliy> list4 = volDate.stream()
+							.sorted(Comparator.comparing(TradeHistInfoDaliy::getVolume).reversed())
+							.collect(Collectors.toList());// 突破中最大的
 
-				if (list3.get(0).getDate() != list4.get(0).getDate()
-						&& list3.get(1).getDate() != list4.get(0).getDate()) {
-					// 最大的不是第一或者第二，没戏？
-					// System.err.println("Max:" + list4.get(0).getDate() + " -> " +
-					// list3.get(0).getDate() + ","
-					// + list3.get(1).getDate());
-				} else {
-					newOne.setPrice3m(high.getHigh());
-					isqb = true;
+					if (list3.get(0).getDate() != list4.get(0).getDate()
+							&& list3.get(1).getDate() != list4.get(0).getDate()) {
+						// 最大的不是第一或者第二，没戏？
+						// System.err.println("Max:" + list4.get(0).getDate() + " -> " +
+						// list3.get(0).getDate() + ","
+						// + list3.get(1).getDate());
+					} else {
+						newOne.setPrice3m(high.getHigh());
+						isqb = true;
+					}
 				}
 			}
 			newOne.setXipan(xipan);
