@@ -66,7 +66,7 @@ public class RunModelService {
 
 	private int tradeDate;
 
-	@javax.annotation.PostConstruct
+//	@javax.annotation.PostConstruct
 	public void test() {
 		new Thread(new Runnable() {
 			public void run() {
