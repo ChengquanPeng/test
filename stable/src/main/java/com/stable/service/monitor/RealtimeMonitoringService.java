@@ -61,6 +61,8 @@ public class RealtimeMonitoringService {
 	@Autowired
 	private RunModelService runModelService;
 
+	public Thread currThread = null;
+
 	public synchronized void startObservable() {
 		String date = DateUtil.getTodayYYYYMMDD();
 		int idate = Integer.valueOf(date);
@@ -158,11 +160,15 @@ public class RealtimeMonitoringService {
 			// Prd1RealtimeMonitor prd1m = new
 			// Prd1RealtimeMonitor(prd1Service.getMonitorList(), tickService, prd1Service);
 			// new Thread(prd1m).start();
-
+			currThread = Thread.currentThread();
 			long from3 = new Date().getTime();
 			int millis = (int) ((endtime - from3));
 			if (millis > 0) {
-				Thread.sleep(millis);
+				try {
+					Thread.sleep(millis);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 
 			/** 到点停止所有线程 */
@@ -186,8 +192,17 @@ public class RealtimeMonitoringService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
+			currThread = null;
 			map = null;
 			System.gc();
+		}
+	}
+
+	public void stopAllThreads() {
+		if (map != null && map.size() > 0) {
+			for (RealtimeDetailsAnalyzer r : map.values()) {
+				r.stop();
+			}
 		}
 	}
 

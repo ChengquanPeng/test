@@ -23,8 +23,20 @@ public class RealtimeCall {
 		return i;
 	}
 
+	public static int source = 0;
+
 	public static RealTime get(String code) {
-		RealTime rt = list.get(getIndex()).get(code);// 轮选调用
+		RealTime rt = null;
+		if (source > 0) {
+			if (source == 1) {// 指定sina
+				rt = list.get(0).get(code);
+			} else if (source == 2) {// 指定163
+				rt = list.get(1).get(code);
+			}
+		} else {
+			// 随机： 轮选调用
+			rt = list.get(getIndex()).get(code);
+		}
 		if (rt == null) {
 			return getRealTimeCycle(code);// 异常的时候，顺序调用
 		}
