@@ -174,8 +174,8 @@ public class CodeModelKLineService {
 //			newOne.setSortChips(1);
 //			log.info("{} 主力筹码收集", code);
 //		}
-		// 基本面-疑似白马
-		susWhiteHorses(code, newOne);
+		// 交易面-均线-疑似白马
+		// susWhiteHorses(code, newOne);
 		// 短线模型(箱体震荡-已废弃，实际是半年新高)
 		// sortModel(newOne, tradeDate);
 		// 攻击形态
@@ -204,18 +204,7 @@ public class CodeModelKLineService {
 		}
 	}
 
-//	private void year1(CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade) {
-//		TradeHistInfoDaliy high = daliyTradeHistroyService.queryMonth3HighRecord(newOne.getCode(), tradeDate);
-//		newOne.setPrice3m(high.getHigh());
-//		if (lastTrade.getClosed() > 0 && high.getHigh() > lastTrade.getClosed()
-//				&& CurrencyUitl.cutProfit(lastTrade.getClosed(), high.getHigh()) <= 15) {// 15%以内冲新高
-//			newOne.setShooting10(1);
-//		} else {
-//			newOne.setShooting10(0);
-//		}
-//	}
-
-	private void susWhiteHorses(String code, CodeBaseModel2 newOne) {
+	public void susWhiteHorses(String code, CodeBaseModel2 newOne) {
 		// 是否中线(60日线),市值300亿以上
 		if (newOne.getMkv() > 200 && priceLifeService.getLastIndex(code) >= 80
 				&& LineAvgPrice.isWhiteHorseForMidV2(avgService, code, newOne.getDate())) {
@@ -225,7 +214,7 @@ public class CodeModelKLineService {
 		}
 	}
 
-//	private void sortModel(CodeBaseModel2 newOne, int tradeDate) {
+//	public void sortModel(CodeBaseModel2 newOne, int tradeDate) {
 //		newOne.setSortMode7(0);// 箱体震荡实际就是半年新高，暂时移除
 //		String code = newOne.getCode();
 //		// 短线模型7(箱体震荡新高，是否有波浪走势)
