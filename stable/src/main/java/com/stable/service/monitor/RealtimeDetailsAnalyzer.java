@@ -85,7 +85,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			if (srt.getOpen() == 0.0) {
 				log.info("source={} 今日停牌,{}", srt.getSource(), codeName);
 				for (RtmMoniUser r : rtm.getListu()) {
-					MsgPushServer.pushSystemT1(codeName + "今日停牌", rtm.getMsg(r.getOrig()), r.getUser());
+					MsgPushServer.pushSystemT1(codeName + "今日停牌" + srt.getSource(), rtm.getMsg(r.getOrig()),
+							r.getUser());
 				}
 				return;
 			}
