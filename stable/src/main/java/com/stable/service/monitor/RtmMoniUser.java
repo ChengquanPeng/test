@@ -10,7 +10,6 @@ public class RtmMoniUser {
 	public MonitorPoolTemp orig;
 	public UserInfo user;
 	public boolean waitSend = true;
-	public boolean highPriceGot = false;
 
 	public RtmMoniUser(MonitorPoolTemp cp, UserInfo user) {
 		this.orig = cp;

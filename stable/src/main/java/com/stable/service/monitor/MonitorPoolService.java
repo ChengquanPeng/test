@@ -317,6 +317,18 @@ public class MonitorPoolService {
 			List<MonitorPoolTemp> t2 = page21.getContent();
 			listall.addAll(t2);
 		}
+		// 4.洗盘起爆
+		BoolQueryBuilder bqb4 = QueryBuilders.boolQuery();
+		bqb4.must(QueryBuilders.matchPhraseQuery("userId", Constant.MY_ID));
+		bqb4.must(QueryBuilders.rangeQuery("qbXipan").gt(0));
+		NativeSearchQueryBuilder queryBuilder4 = new NativeSearchQueryBuilder();
+		SearchQuery sq4 = queryBuilder4.withQuery(bqb4).withPageable(pageable).build();
+		Page<MonitorPoolTemp> page4 = monitorPoolDao.search(sq4);
+		if (page4 != null && !page4.isEmpty()) {
+			List<MonitorPoolTemp> t4 = page4.getContent();
+			listall.addAll(t4);
+		}
+
 		// 3.人工起爆
 		BoolQueryBuilder bqb2 = QueryBuilders.boolQuery();
 		bqb2.must(QueryBuilders.matchPhraseQuery("userId", Constant.MY_ID));

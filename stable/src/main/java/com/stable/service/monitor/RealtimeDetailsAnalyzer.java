@@ -35,6 +35,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean burstPointCheckTop = false;// 突破
 	private boolean burstPointCheckSzx = false;// 十字星
 	private boolean burstPointCheckRg = false;// 人工
+	private boolean highPriceGot = false;
 
 	public void stop() {
 		isRunning = false;
@@ -152,6 +153,12 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						burstPointCheckRg = rtm.bizPushService.PushS2(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
 					}
+					// 洗盘突破3个月
+					if (rt.getHigh() > rtm.price3m && !highPriceGot && rtm.price3m > 0) {
+						String title2 = "[洗盘突破]3个月新高! ";
+						highPriceGot = rtm.bizPushService.PushS2(title2, getBaseInfo());
+						ocg.genMsg(code, title2);
+					}
 
 //					if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
 //							&& rt.getLow() <= qibao.getOrig().getShotPointPriceLow5()) {
@@ -173,16 +180,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 							r.waitSend = false;
 						}
 					}
-					// 一年新高
-					if (rt.getHigh() > rtm.price3m && !r.highPriceGot && rtm.price3m > 0) {
-						if ("".equals(title)) {
-							title = " 3个月新高!";
-						} else {
-							title += " , 3个月新高! ";
-						}
-						r.highPriceGot = true;
-					}
-
 					// 发送
 					if (!title.equals("")) {
 						MsgPushServer.pushSystemT1(codeName + " " + title, rtm.getMsg(r.getOrig()), r.getUser());

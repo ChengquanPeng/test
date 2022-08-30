@@ -66,18 +66,18 @@ public class RunModelService {
 
 	private int tradeDate;
 
-//	@javax.annotation.PostConstruct
-//	public void test() {
-//		new Thread(new Runnable() {
-//			public void run() {
-//				int date = 20220825;
-//				codeModelKLineService.runKLineModel1(date, null);
+	@javax.annotation.PostConstruct
+	public void test() {
+		new Thread(new Runnable() {
+			public void run() {
+				int date = 20220829;
+				codeModelKLineService.runKLineModel1(date);
 //				ThreadsUtil.sleepRandomSecBetween15And30();
 //				codeModelService.runModel1(date, false);
-//				System.err.println("runModel1 done");
-//			}
-//		}).start();
-//	}
+				System.err.println("runModel1 done");
+			}
+		}).start();
+	}
 
 	public synchronized void runModel(int date, boolean isweekend) {
 		log.info("CodeModel processing request date={}", date);
