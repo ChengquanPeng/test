@@ -55,7 +55,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		this.rtm = rtm;
 		RealTime srt = RealtimeCall.get(code);
 		if (srt.getOpen() == 0.0 && srt.getBuy1() == 0.0 && srt.getSell1() == 0.0) {
-			log.info("{}  SINA 今日疑似停牌或者可能没有集合竞价", codeName);
+			log.info("{}  source={} 今日疑似停牌或者可能没有集合竞价", codeName, srt.getSource());
 			chkCodeClosed = true;
 		}
 		this.conceptService = c;
@@ -82,7 +82,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			}
 			srt = RealtimeCall.get(code);
 			if (srt.getOpen() == 0.0) {
-				log.info("SINA 今日停牌,{}", codeName);
+				log.info("source={} 今日停牌,{}", srt.getSource(), codeName);
 				for (RtmMoniUser r : rtm.getListu()) {
 					MsgPushServer.pushSystemT1(codeName + "今日停牌", rtm.getMsg(r.getOrig()), r.getUser());
 				}

@@ -87,61 +87,16 @@ public class WebModelService {
 		resp.setCodeName(stockBasicService.getCodeName(dh.getCode()));
 		StockBaseInfo s = stockBasicService.getCode(dh.getCode());
 		resp.setCircZb(s.getCircZb());
-		StringBuffer sb1 = new StringBuffer("");
-		if (dh.getBaseRed() == 1) {
-			sb1.append("<font color='red'>红:</font>" + dh.getBaseRedDesc());
-		}
-		if (dh.getBaseYellow() == 1) {
-			sb1.append("<font color='#FF00FF'>黄:</font>" + dh.getBaseYellowDesc());
-		}
-		if (dh.getBaseBlue() == 1) {
-			sb1.append("<font color='blue'>蓝:</font>" + dh.getBaseBlueDesc());
-		}
-		resp.setBaseInfo(sb1.toString());
-		// 标签
-		StringBuffer tag = new StringBuffer("");
-		tag.append("<font color='red'>");
-		if (dh.getQb() > 0) {
-			tag.append("起飞->");
-		}
-		if (dh.getDibuQixing() > 0) {
-			tag.append("大旗形").append(dh.getDibuQixing()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
-		}
-		if (dh.getDibuQixing2() > 0) {
-			tag.append("小旗形").append(dh.getDibuQixing2()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
-		}
 
-		if (dh.getZyxing() > 0) {
-			tag.append("中阳十字星").append(Constant.HTML_LINE);
-		}
-		tag.append("</font>");
-		if (dh.getShootingw() == 1) {
-			tag.append("K线攻击形态").append(Constant.HTML_LINE);
-		}
-		if (dh.getShooting10() > 0) {
-			tag.append("接近1年新高").append(Constant.HTML_LINE);
-		}
-		if (dh.getSusWhiteHors() == 1) {
-			tag.append("白马走势?").append(Constant.HTML_LINE);
-		}
-		if (dh.getTagSmallAndBeatf() > 0) {
-			tag.append("小而美").append(Constant.HTML_LINE);
-		}
-		if (dh.getTagHighZyChance() > 0) {
-			tag.append("高质押机会?").append(Constant.HTML_LINE);
-		}
-		if (dh.getSortChips() == 1) {
-			tag.append("拉升吸筹?").append(Constant.HTML_LINE);
-		}
-		if (StringUtils.isNotBlank(dh.getJsHist())) {
-			tag.append("异动记录:").append(dh.getJsHist()).append(Constant.HTML_LINE);
-		}
-		resp.setTagInfo(tag.toString());
-
+		// 博弈
 		resp.setZfjjInfo(TagUtil.gameInfo(dh, trymsg));
+		// 标签
+		resp.setTagInfo(TagUtil.tagInfo(dh));
+		// 基本面
+		resp.setBaseInfo(TagUtil.jbmInfo(dh));
 
+		// 个人-人工
 		StringBuffer sb6 = new StringBuffer();
-		// 个人人工
 		if (isMyid) {
 			sb6.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 			// 是否确定
@@ -499,6 +454,12 @@ public class WebModelService {
 		if (mr.getBreakingVol() == 1) {// 成交量异动
 			bqb.must(QueryBuilders.rangeQuery("breakingVol").gte(1));
 		}
+		if (mr.getXipan() == 1) {// 洗盘次数
+			bqb.must(QueryBuilders.rangeQuery("xipan").gte(1));
+		}
+		if (mr.getQbXipan() == 1) {// 洗盘起爆
+			bqb.must(QueryBuilders.matchPhraseQuery("qbXipan", 1));
+		}
 
 		if (StringUtils.isNotBlank(mr.getZfStatus())) {
 			int t = Integer.valueOf(mr.getZfStatus());
@@ -615,6 +576,8 @@ public class WebModelService {
 			field = "zfjjupStable";
 		} else if (orderBy == 20) {// 业绩连续暴涨
 			field = "bossInc";
+		} else if (orderBy == 21) {// 洗盘次数
+			field = "xipan";
 		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);

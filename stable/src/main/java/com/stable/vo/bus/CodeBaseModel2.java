@@ -79,6 +79,13 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int breakingVol = 0;// 放量
 
+	@Field(type = FieldType.Integer)
+	private int qbXipan = 0;// 洗盘起爆
+	@Field(type = FieldType.Integer)
+	private int xipan = 0;// 洗盘次数
+	@Field(type = FieldType.Text)
+	private String xipanHist;// 洗盘历史
+
 	// 财务业绩
 	@Field(type = FieldType.Integer)
 	private int bousOK;// 5年分红OK(至少4年分红)

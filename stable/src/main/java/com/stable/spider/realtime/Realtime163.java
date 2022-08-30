@@ -35,6 +35,7 @@ public class Realtime163 implements RealtimeProxy {
 			rt.setBuy1(t.getDoubleValue("bid1"));
 			rt.setSell1(t.getDoubleValue("ask1"));
 			rt.setDealNums(t.getLongValue("volume"));// 成交的股票数，由于股票交易以一百股为基本单位，所以在使用时，通常把该值除以一百；
+			rt.setSource(2);
 			return rt;
 		} catch (Exception e) {
 			return null;

@@ -3,22 +3,21 @@ package com.stable.service.model;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.Constant;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.MonitorPoolUserDao;
 import com.stable.service.DaliyBasicHistroyService;
-import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
+import com.stable.service.model.prd.QbXipanService;
 import com.stable.service.model.prd.QibaoService;
 import com.stable.service.model.prd.msg.BizPushService;
-import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -28,7 +27,6 @@ import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.StockBaseInfo;
-import com.stable.vo.bus.TradeHistInfoDaliy;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -49,51 +47,20 @@ public class CodeModelKLineService {
 	private PriceLifeService priceLifeService;
 	@Autowired
 	private Sort0Service sort0Service;
-//	@Autowired
-//	private Sort1ModeService sort1ModeService;
-	@Autowired
-	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private AvgService avgService;
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
 	private QibaoService qibaoService;
-//	@Autowired
-//	private ChipsSortService chipsSortService;
 	@Autowired
 	private CodeModelService codeModelService;
 	@Autowired
 	private BizPushService bizPushService;
-//	@Autowired
-//	private Prd1Service prd1Service;
+	@Autowired
+	private QbXipanService qbXipanService;
 
-//	@Autowired
-//	private com.stable.spider.tushare.TushareSpider tushareSpider;
-
-//	@javax.annotation.PostConstruct
-//	private void aded() {
-//		// K线模型
-//		new Thread(new Runnable() {
-//			public void run() {
-//				int date = 20220705;
-	// runKLineModel(date);
-	// codeModelService.runModel(date, true);
-	// 离线价格监听
-//				com.stable.utils.ThreadsUtil.sleepRandomSecBetween5And15();
-//				List<com.stable.vo.bus.TradeHistInfoDaliyNofq> listNofq = new LinkedList<com.stable.vo.bus.TradeHistInfoDaliyNofq>();
-//				com.alibaba.fastjson.JSONArray array = tushareSpider.getStockDaliyTrade(null, date + "", null, null);
-//				for (int i = 0; i < array.size(); i++) {
-//					com.stable.vo.bus.TradeHistInfoDaliyNofq nofq = new com.stable.vo.bus.TradeHistInfoDaliyNofq(
-//							array.getJSONArray(i));
-//					listNofq.add(nofq);
-//				}
-//				monitorPoolService.priceChk(listNofq, date);
-//				monitorPoolService.jobBuyLowVolWarning();
-//			}
-//		}).start();
-//	}
-	public synchronized void runKLineModel1(int date, Set<String> p1list) {
+	public synchronized void runKLineModel1(int date) {
 //		if (!tradeCalService.isOpen(date)) {
 //			date = tradeCalService.getPretradeDate(date);
 //		}
@@ -113,7 +80,7 @@ public class CodeModelKLineService {
 
 		for (StockBaseInfo s : codelist) {
 			try {
-				this.processingByCode(s, poolMap, poolList, listLast, histMap, qx, szx, p1list, yds);
+				this.processingByCode(s, poolMap, poolList, listLast, histMap, qx, szx, yds);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -125,13 +92,13 @@ public class CodeModelKLineService {
 			monitorPoolDao.saveAll(poolList);
 		}
 		if (szx.length() > 0) {
-			bizPushService.PushS2("今日十字星", szx.toString());
+			// bizPushService.PushS2("今日十字星", szx.toString());
 		}
 		if (qx.length() > 0) {
 			bizPushService.PushS2("今日最新旗形", qx.toString());
 		}
 		if (yds.length() > 0) {
-			MsgPushServer.pushSystemT1("今日成交量异动:", yds.toString());
+			// MsgPushServer.pushSystemT1("今日成交量异动:", yds.toString());
 		}
 
 		log.info("KLine基本完成");
@@ -143,7 +110,7 @@ public class CodeModelKLineService {
 
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
 			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, StringBuffer qx, StringBuffer szx,
-			Set<String> p1list, StringBuffer yds) {
+			StringBuffer yds) {
 		String code = s.getCode();
 		// 监听池
 		MonitorPoolTemp pool = this.codeModelService.getPool(code, poolMap, poolList);
@@ -191,7 +158,8 @@ public class CodeModelKLineService {
 		noup(online4Year, newOne, s.getList_date());
 		// ==============技术面-量价==============
 		// 3个月新高
-		year1(newOne, lastTrade);
+//		year1(newOne, lastTrade);
+		newOne.setShooting10(0);
 
 		// 短线：妖股形态，短线拉的急，说明货多。
 		// 一倍：说明资金已经投入，赶鸭子上架。
@@ -225,22 +193,27 @@ public class CodeModelKLineService {
 			newOne.setShooting11(0);
 		}
 		// 起爆点
-		qibaoService.qibao(tradeDate, newOne, pool, isSamll, qx, szx, yds);
-		// if (p1list != null) {
-		// prd1Service.prd(tradeDate, newOne, pool, isSamll);
-		// }
-	}
-
-	private void year1(CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade) {
-		TradeHistInfoDaliy high = daliyTradeHistroyService.queryMonth3HighRecord(newOne.getCode(), tradeDate);
-		newOne.setPrice3m(high.getHigh());
-		if (lastTrade.getClosed() > 0 && high.getHigh() > lastTrade.getClosed()
-				&& CurrencyUitl.cutProfit(lastTrade.getClosed(), high.getHigh()) <= 15) {// 15%以内冲新高
-			newOne.setShooting10(1);
+		if (stTuiShi(newOne)) {
+			qibaoService.setQxRes(newOne, pool, true, true);
+			qibaoService.setSzxRes(newOne, pool);
+			newOne.setZyxingt(0);
+			qbXipanService.resetXiPan(newOne);
 		} else {
-			newOne.setShooting10(0);
+			qibaoService.qibao(tradeDate, newOne, pool, isSamll, qx, szx, yds);
+			qbXipanService.xipanQb(tradeDate, newOne, isSamll);
 		}
 	}
+
+//	private void year1(CodeBaseModel2 newOne, DaliyBasicInfo2 lastTrade) {
+//		TradeHistInfoDaliy high = daliyTradeHistroyService.queryMonth3HighRecord(newOne.getCode(), tradeDate);
+//		newOne.setPrice3m(high.getHigh());
+//		if (lastTrade.getClosed() > 0 && high.getHigh() > lastTrade.getClosed()
+//				&& CurrencyUitl.cutProfit(lastTrade.getClosed(), high.getHigh()) <= 15) {// 15%以内冲新高
+//			newOne.setShooting10(1);
+//		} else {
+//			newOne.setShooting10(0);
+//		}
+//	}
 
 	private void susWhiteHorses(String code, CodeBaseModel2 newOne) {
 		// 是否中线(60日线),市值300亿以上
@@ -277,4 +250,15 @@ public class CodeModelKLineService {
 			}
 		}
 	}
+
+	// 排除3:排除退市股票&ST
+	public boolean stTuiShi(CodeBaseModel2 newOne) {
+		String name = stockBasicService.getCodeName(newOne.getCode());
+		if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI) || name.contains("ST")) {
+			log.info("ST或退市,{},{}", newOne.getCode(), name);
+			return true;
+		}
+		return false;
+	}
+
 }

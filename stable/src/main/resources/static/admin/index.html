@@ -117,7 +117,9 @@
 			<div class="mg">
 				技术面:&nbsp;&nbsp;&nbsp;&nbsp;起爆:<input type="checkbox" id="qb" />&nbsp;&nbsp;大旗形:<input
 					type="checkbox" id="dibuqixing" />&nbsp;&nbsp;小旗形:<input
-					type="checkbox" id="dibuqixing2" />&nbsp;&nbsp;中阳十字星:<input
+					type="checkbox" id="dibuqixing2" />&nbsp;&nbsp; 洗盘起爆:<input
+					type="checkbox" id="qbXipan" />&nbsp;&nbsp; 洗盘:<input
+					type="checkbox" id="xipan" />&nbsp;&nbsp;中阳十字星:<input
 					type="checkbox" id="zyxing" />&nbsp;&nbsp;成交异动:<input
 					type="checkbox" id="breakingVol" />&nbsp;&nbsp;K线攻击形态:<input
 					type="checkbox" id="kline" />&nbsp;&nbsp;接近1年新高:<input
@@ -151,6 +153,7 @@
 						<option value="17">最新质押时间</option>
 						<option value="18">最新减持计划</option>
 						<option value="20">业绩暴涨季度</option>
+						<option value="21">洗盘次数</option>
 					</select>&nbsp;&nbsp;人工状态:<select id="pls">
 						<option value="3" selected="selected">确定+未</option>
 						<option value="-1">无限制</option>
@@ -287,6 +290,9 @@
 									param.finBoss = 0;
 									param.finSusBoss = 0;
 									param.breakingVol = 0;
+									param.qbXipan = 0;
+									param.xipan = 0;
+
 									if (document.getElementById("breakingVol").checked) {
 										param.breakingVol = 1;
 									}
@@ -311,11 +317,15 @@
 									if (document.getElementById("zyxing").checked) {
 										param.zyxing = 1;
 									}
-
+									if (document.getElementById("qbXipan").checked) {
+										param.qbXipan = 1;
+									}
+									if (document.getElementById("xipan").checked) {
+										param.xipan = 1;
+									}
 									if (document.getElementById("whiteHors").checked) {
 										param.whiteHors = 1;
 									}
-
 									if (document.getElementById("pre1Year").checked) {
 										param.pre1Year = 1;
 									}

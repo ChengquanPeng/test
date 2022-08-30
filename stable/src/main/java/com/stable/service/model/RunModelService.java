@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.sort.SortOrder;
@@ -65,10 +64,6 @@ public class RunModelService {
 	@Autowired
 	private MonitorPoolService monitorPoolService;
 
-	public synchronized void runModel(int date, boolean isweekend) {
-		runModel(date, isweekend, null);
-	}
-
 	private int tradeDate;
 
 //	@javax.annotation.PostConstruct
@@ -84,7 +79,7 @@ public class RunModelService {
 //		}).start();
 //	}
 
-	public synchronized void runModel(int date, boolean isweekend, Set<String> p1list) {
+	public synchronized void runModel(int date, boolean isweekend) {
 		log.info("CodeModel processing request date={}", date);
 		if (!tradeCalService.isOpen(date)) {
 			date = tradeCalService.getPretradeDate(date);
@@ -96,9 +91,9 @@ public class RunModelService {
 			// 周末,先跑基本面在跑技术面
 			codeModelService.runModel1(date, true);
 			ThreadsUtil.sleepRandomSecBetween15And30();
-			codeModelKLineService.runKLineModel1(date, p1list);
+			codeModelKLineService.runKLineModel1(date);
 		} else {
-			codeModelKLineService.runKLineModel1(date, p1list);
+			codeModelKLineService.runKLineModel1(date);
 			ThreadsUtil.sleepRandomSecBetween15And30();
 			String dateYYYY_ = DateUtil.formatYYYYMMDD2(new Date());
 			log.info("大宗交易");
@@ -125,7 +120,13 @@ public class RunModelService {
 		mr2.setZyxingt(1);
 		mr2.setPls(3);
 		List<CodeBaseModel2> genListTe = webModelService.getList(mr2, EsQueryPageUtil.queryPage9999);
-		printHtml(qbList, genListTe);
+
+		ModelReq mr3 = new ModelReq();
+		mr2.setXipan(1);
+		mr2.setPls(3);
+		List<CodeBaseModel2> xp = webModelService.getList(mr3, EsQueryPageUtil.queryPage9999);
+
+		printHtml(qbList, genListTe, xp);
 	}
 
 	public void printOnlineHtml(Map<String, String> warningCode) {
@@ -154,7 +155,7 @@ public class RunModelService {
 		fw.close();
 	}
 
-	private void printHtml(List<CodeBaseModel2> qbList, List<CodeBaseModel2> genListTe) {
+	private void printHtml(List<CodeBaseModel2> qbList, List<CodeBaseModel2> genListTe, List<CodeBaseModel2> xp) {
 		String htmlnamet = "qf.html";
 		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
 		StringBuffer sb = new StringBuffer();
@@ -199,6 +200,11 @@ public class RunModelService {
 
 		sb = new StringBuffer();
 		sb.append(this.getHtml(all, false));
+		fw.writeLine(sb.toString());
+
+		sb = new StringBuffer();
+		sb.append(this.getHtml(xp, false));
+		fw.writeLine(sb.toString());
 
 		sb.append("</table>");// end
 		fw.writeLine(sb.toString());
@@ -313,16 +319,6 @@ public class RunModelService {
 			sb.append("<tr><td>无数据...</td></tr>");
 		}
 		return sb.toString();
-	}
-
-	// 排除3:排除退市股票&ST
-	public boolean stTuiShi(CodeBaseModel2 newOne) {
-		String name = stockBasicService.getCodeName(newOne.getCode());
-		if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI) || name.contains("ST")) {
-			log.info("ST或退市,{},{}", newOne.getCode(), name);
-			return true;
-		}
-		return false;
 	}
 
 	public void genPrdHtml(int date, List<CodeBaseModel2> list) {

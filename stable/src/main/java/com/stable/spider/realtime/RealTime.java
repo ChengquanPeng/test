@@ -14,4 +14,5 @@ public class RealTime {
 	private double sell1;
 	private long dealNums;// 股
 //	private double dealAmt;// 元
+	private int source;// 1,sina,2,163
 }

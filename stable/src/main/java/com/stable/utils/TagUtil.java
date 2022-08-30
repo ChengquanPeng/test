@@ -143,10 +143,74 @@ public class TagUtil {
 		} else if (p1.getDibuQixing2() > 0) {
 			s = "小7";
 		}
+		if (p1.getXipan() > 0) {
+			s += "-洗盘";
+			if (p1.getQbXipan() > 0) {
+				s += "起爆";
+			}
+			s += ":" + p1.getXipan();
+		}
 		if (p1.getZyxing() > 0) {
-			s += "10";
+			s += "-10";
 		}
 		return s;
+	}
+
+	public static String jbmInfo(CodeBaseModel2 dh) {
+		StringBuffer sb1 = new StringBuffer("");
+		if (dh.getBaseRed() == 1) {
+			sb1.append("<font color='red'>红:</font>" + dh.getBaseRedDesc());
+		}
+		if (dh.getBaseYellow() == 1) {
+			sb1.append("<font color='#FF00FF'>黄:</font>" + dh.getBaseYellowDesc());
+		}
+		if (dh.getBaseBlue() == 1) {
+			sb1.append("<font color='blue'>蓝:</font>" + dh.getBaseBlueDesc());
+		}
+		return sb1.toString();
+	}
+
+	public static String tagInfo(CodeBaseModel2 dh) {
+		StringBuffer tag = new StringBuffer("");
+		tag.append("<font color='red'>");
+		if (dh.getQb() > 0 || dh.getQbXipan() > 0) {
+			tag.append("起飞->");
+		}
+		if (dh.getDibuQixing() > 0) {
+			tag.append("大旗形").append(dh.getDibuQixing()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
+		}
+		if (dh.getDibuQixing2() > 0) {
+			tag.append("小旗形").append(dh.getDibuQixing2()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
+		}
+		if (dh.getXipan() > 0) {
+			tag.append("洗盘:").append(dh.getXipan()).append(",").append(dh.getXipanHist()).append(Constant.HTML_LINE);
+		}
+		if (dh.getZyxing() > 0) {
+			tag.append("中阳十字星").append(Constant.HTML_LINE);
+		}
+		tag.append("</font>");
+		if (dh.getShootingw() == 1) {
+			tag.append("K线攻击形态").append(Constant.HTML_LINE);
+		}
+		if (dh.getShooting10() > 0) {
+			tag.append("接近1年新高").append(Constant.HTML_LINE);
+		}
+		if (dh.getSusWhiteHors() == 1) {
+			tag.append("白马走势?").append(Constant.HTML_LINE);
+		}
+		if (dh.getTagSmallAndBeatf() > 0) {
+			tag.append("小而美").append(Constant.HTML_LINE);
+		}
+		if (dh.getTagHighZyChance() > 0) {
+			tag.append("高质押机会?").append(Constant.HTML_LINE);
+		}
+		if (dh.getSortChips() == 1) {
+			tag.append("拉升吸筹?").append(Constant.HTML_LINE);
+		}
+		if (StringUtils.isNotBlank(dh.getJsHist())) {
+			tag.append("异动记录:").append(dh.getJsHist()).append(Constant.HTML_LINE);
+		}
+		return tag.toString();
 	}
 
 	public static String baseInfo(CodeBaseModel2 dh) {

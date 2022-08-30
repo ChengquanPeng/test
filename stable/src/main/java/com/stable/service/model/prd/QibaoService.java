@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
-import com.stable.service.model.RunModelService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.StringUtil;
@@ -30,8 +29,6 @@ public class QibaoService {
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private StockBasicService stockBasicService;
-	@Autowired
-	private RunModelService runModelService;
 
 //	@javax.annotation.PostConstruct
 //	public void test() {
@@ -79,12 +76,6 @@ public class QibaoService {
 	/** 起爆 */
 	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx,
 			StringBuffer szx, StringBuffer yds) {
-		if (runModelService.stTuiShi(newOne)) {
-			setQxRes(newOne, pool, true, true);
-			setSzxRes(newOne, pool);
-			newOne.setZyxingt(0);
-			return;
-		}
 		/** 大小旗形 */
 		qx(date, newOne, pool, isSamll, qx, yds);
 		/** 中阳十字星 */
@@ -538,7 +529,7 @@ public class QibaoService {
 		return null;
 	}
 
-	private void qxrange(QiBaoInfo qi, List<TradeHistInfoDaliy> tmp) {
+	public void qxrange(QiBaoInfo qi, List<TradeHistInfoDaliy> tmp) {
 //		System.err.println("check rate:" + tmp.get(1).getDate() + "-" + tmp.get(tmp.size() - 1).getDate());
 		for (int i = 1; i < tmp.size(); i++) {
 			TradeHistInfoDaliy td = tmp.get(i);
@@ -615,15 +606,15 @@ public class QibaoService {
 		return false;
 	}
 
-	private void setQxRes(CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isQx1, boolean isQx2) {
-		if (isQx1) {
+	public void setQxRes(CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean sourceQx1, boolean sourceQx2) {
+		if (sourceQx1) {
 			if (newOne.getDibuQixing() > 0) {
 				String jsHist = newOne.getDibuQixing() + "大旗形" + ";" + newOne.getJsHist();
 				newOne.setJsHist(StringUtil.subString(jsHist, 100));
 			}
 			newOne.setDibuQixing(0);
 		}
-		if (isQx2) {
+		if (sourceQx2) {
 			if (newOne.getDibuQixing2() > 0) {
 				String jsHist = newOne.getDibuQixing2() + "小旗形" + ";" + newOne.getJsHist();
 				newOne.setJsHist(StringUtil.subString(jsHist, 100));
@@ -640,7 +631,7 @@ public class QibaoService {
 		}
 	}
 
-	private void setSzxRes(CodeBaseModel2 newOne, MonitorPoolTemp pool) {
+	public void setSzxRes(CodeBaseModel2 newOne, MonitorPoolTemp pool) {
 		if (newOne.getZyxing() > 0) {
 			String jsHist = newOne.getZyxing() + "十字星" + ";" + newOne.getJsHist();
 			newOne.setJsHist(StringUtil.subString(jsHist, 100));

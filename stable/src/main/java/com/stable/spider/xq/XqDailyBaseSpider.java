@@ -122,12 +122,11 @@ public class XqDailyBaseSpider {
 				MsgPushServer.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + s + "},实际成功数:" + upd.size());
 			}
 
-//			Set<String> p1list = prd1Service.todaySzx(listNofq);
 			ThreadsUtil.sleepRandomSecBetween15And30();
 			// K线模型
 			new Thread(new Runnable() {
 				public void run() {
-					runModelService.runModel(date, false, null);
+					runModelService.runModel(date, false);
 					// 离线价格监听
 					ThreadsUtil.sleepRandomSecBetween5And15();
 					monitorPoolService.priceChk(listNofq, date);

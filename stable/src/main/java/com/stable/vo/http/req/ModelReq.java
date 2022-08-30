@@ -76,4 +76,6 @@ public class ModelReq {
 	int financeInc = 0;
 	int bossInc;
 	double bossVal = 0;
+	int xipan = 0;
+	int qbXipan = 0;
 }
