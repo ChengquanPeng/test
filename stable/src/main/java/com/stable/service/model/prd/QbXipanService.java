@@ -3,6 +3,7 @@ package com.stable.service.model.prd;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,32 +39,13 @@ public class QbXipanService {
 			newOne.setPls(1);
 			System.err.println("==========" + stockBasicService.getCodeName2(code) + "==========");
 			xipanQb(date, newOne, true);
-			System.err.println("Res ==========> " + (newOne.getXipan() > 0) + ",CNT:" + newOne.getXipan() + ","
+			System.err.println("Res ==========> " + (newOne.getQbXipan() > 0) + ",CNT:" + newOne.getXipan() + ","
 					+ newOne.getXipanHist());
 		}
 		System.exit(0);
 	}
 
-	/** 以第三天作为分界线，找到最高的那天。 */
-	private boolean preP15(List<TradeHistInfoDaliy> t, CodeBaseModel2 newOne) {
-
-		List<TradeHistInfoDaliy> list = t.subList(0, 60);
-		TradeHistInfoDaliy last = list.get(0);// 第一天
-		TradeHistInfoDaliy d3t = list.get(2);// 第三天
-
-		TradeHistInfoDaliy high = list.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
-
-		/** 如果最高的那天是第三天之前，且价格合适，则OK */
-		if (d3t.getDate() > high.getDate() && high.getHigh() > last.getClosed()
-				&& CurrencyUitl.cutProfit(last.getClosed(), high.getHigh()) <= 15) {// 15%以内冲新高
-			newOne.setPrice3m(high.getHigh());
-			return true;
-		}
-		// System.err.println("preP15% false,high:" + high.getDate() + ",last:" +
-		// last.getDate());
-		return false;
-	}
-
+	List<TradeHistInfoDaliy> volDate = new LinkedList<TradeHistInfoDaliy>();
 	private int preDays = 3;
 
 	/** 起爆-Pre突破 */
@@ -82,8 +64,7 @@ public class QbXipanService {
 
 		int sz = list.size();
 
-		int xipan = 0;
-		String xph = "";
+		volDate.clear();
 		/** 1.15%新高 */
 
 		boolean yd = true;
@@ -121,16 +102,51 @@ public class QbXipanService {
 					}
 					if (ts == preDays && chkday.getVolume() > ((tot / preDays) * 1.8)) {// 几乎倍量
 						// System.err.println(chkday.getVolume() + "|" + ((tot / 3) * 1.8));
-						xipan++;
-						xph += chkday.getDate() + ",";
+						volDate.add(chkday);
 					}
 				}
 			}
 		}
-		newOne.setXipan(xipan);
-		newOne.setXipanHist(xph);
+		int xipan = volDate.size();
 
-		if (xipan > 0 && preP15(list, newOne)) {
+		boolean isqb = false;
+		/** 如果最高的那天是第三天之前，且价格合适，则OK */
+		/** 以第三天作为分界线，找到最高的那天。 */
+		if (xipan > 0) {
+			List<TradeHistInfoDaliy> list2 = list.subList(0, 60);
+			TradeHistInfoDaliy last = list2.get(0);// 第一天
+			TradeHistInfoDaliy d3t = list2.get(2);// 第三天
+			TradeHistInfoDaliy high = list2.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+
+			if (d3t.getDate() > high.getDate() && high.getHigh() > last.getClosed()
+					&& CurrencyUitl.cutProfit(last.getClosed(), high.getHigh()) <= 15) {// 15%以内冲新高
+
+				// 放量是接近最大的那个[3-60，去掉下跌的量]
+				List<TradeHistInfoDaliy> list3 = list.subList(3, 60).stream().filter(s -> s.getTodayChangeRate() > 0.0)
+						.collect(Collectors.toList()).stream()
+						.sorted(Comparator.comparing(TradeHistInfoDaliy::getVolume).reversed())
+						.collect(Collectors.toList());// 所有上涨date中最大的量
+				List<TradeHistInfoDaliy> list4 = volDate.stream()
+						.sorted(Comparator.comparing(TradeHistInfoDaliy::getVolume).reversed())
+						.collect(Collectors.toList());// 突破中最大的
+
+				if (list3.get(0).getDate() != list4.get(0).getDate()
+						&& list3.get(1).getDate() != list4.get(0).getDate()) {
+					// 最大的不是第一或者第二，没戏？
+					// System.err.println("Max:" + list4.get(0).getDate() + " -> " +
+					// list3.get(0).getDate() + ","
+					// + list3.get(1).getDate());
+				} else {
+					newOne.setPrice3m(high.getHigh());
+					isqb = true;
+				}
+			}
+			newOne.setXipan(xipan);
+			newOne.setXipanHist(
+					volDate.stream().map(s -> String.valueOf(s.getDate())).collect(Collectors.joining(",")));
+		}
+
+		if (isqb) {
 			newOne.setQbXipan(1);
 		} else {
 			newOne.setQbXipan(0);
