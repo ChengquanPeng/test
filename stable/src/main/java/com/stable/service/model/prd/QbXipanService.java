@@ -10,11 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
+import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.utils.CurrencyUitl;
+import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.TagUtil;
 import com.stable.vo.bus.CodeBaseModel2;
+import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 
 @Service
@@ -23,6 +26,8 @@ public class QbXipanService {
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private StockBasicService stockBasicService;
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
 
 //	@javax.annotation.PostConstruct
 	public void test() {
@@ -101,7 +106,7 @@ public class QbXipanService {
 							ts++;
 						}
 					}
-					if (ts == preDays && chkday.getVolume() > ((tot / preDays) * 1.8)) {// 几乎倍量
+					if (ts == preDays && bigVolChk(chkday, tot)) {// 几乎倍量
 						// System.err.println(chkday.getVolume() + "|" + ((tot / 3) * 1.8));
 						volDate.add(chkday);
 					}
@@ -159,6 +164,44 @@ public class QbXipanService {
 			newOne.setQbXipan(0);
 			newOne.setPrice3m(0);
 		}
+	}
+
+	public static void main(String[] args) {
+		double cjl = 28915700 * 100.0 / 10000.0;// 交易(万股)=手x100/10000;
+		double wg = 4.39 * 10000;
+		double ch = CurrencyUitl.roundHalfUp(cjl / wg);
+		System.err.println(ch);
+	}
+
+	private boolean bigVolChk(TradeHistInfoDaliy chkday, double tot) {
+		double def = 1.8;
+		double ch = 0.0;
+
+		// 直接获取换手
+		if (chkday.getChangeHands() > 0) {
+			ch = chkday.getChangeHands();
+		} else {// 成交获取换手
+			try {
+				DaliyBasicInfo2 db = daliyBasicHistroyService.queryByCodeAndDate(chkday.getCode(), chkday.getDate());
+				double cjl = chkday.getVolume() * 100.0 / 10000.0;// 交易(万股)=手x100/10000;
+				double wg = db.getTotalShare() * 10000;
+				ch = CurrencyUitl.roundHalfUp(cjl / wg);
+			} catch (Exception e) {
+				ErrorLogFileUitl.writeError(e, chkday.getCode(), chkday.getDate(), "");
+			}
+		}
+
+		/** 根据换手率来计算倍量，常规换手低则倍量高，常规倍量适中则默认1.8 */
+		if (ch > 0.0) {// 检查换手率
+			if (ch < 1.5) {
+				def = 2.2;
+			} else if (ch <= 2.0) {// 放量的换手率在2%以下
+				def = 2.0;
+			}
+		}
+
+		return (chkday.getVolume() > ((tot / preDays) * def));
+//		return (chkday.getVolume() > ((tot / preDays) * 1.8));
 	}
 
 	public void resetXiPan(CodeBaseModel2 newOne) {
