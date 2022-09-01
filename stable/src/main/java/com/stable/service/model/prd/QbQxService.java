@@ -24,7 +24,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
-public class QibaoService {
+public class QbQxService {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
@@ -74,7 +74,7 @@ public class QibaoService {
 //	}
 
 	/** 起爆 */
-	public void qibao(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx,
+	public void qixingQb(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx,
 			StringBuffer szx, StringBuffer yds) {
 		/** 大小旗形 */
 		qx(date, newOne, pool, isSamll, qx, yds);

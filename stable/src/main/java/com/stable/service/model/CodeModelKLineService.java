@@ -16,7 +16,7 @@ import com.stable.service.StockBasicService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.prd.QbXipanService;
-import com.stable.service.model.prd.QibaoService;
+import com.stable.service.model.prd.QbQxService;
 import com.stable.service.model.prd.msg.BizPushService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
@@ -52,7 +52,7 @@ public class CodeModelKLineService {
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
-	private QibaoService qibaoService;
+	private QbQxService qbQxService;
 	@Autowired
 	private CodeModelService codeModelService;
 	@Autowired
@@ -194,12 +194,12 @@ public class CodeModelKLineService {
 		}
 		// 起爆点
 		if (stTuiShi(newOne)) {
-			qibaoService.setQxRes(newOne, pool, true, true);
-			qibaoService.setSzxRes(newOne, pool);
+			qbQxService.setQxRes(newOne, pool, true, true);
+			qbQxService.setSzxRes(newOne, pool);
 			newOne.setZyxingt(0);
 			qbXipanService.resetXiPan(newOne);
 		} else {
-			qibaoService.qibao(tradeDate, newOne, pool, isSamll, qx, szx, yds);
+			qbQxService.qixingQb(tradeDate, newOne, pool, isSamll, qx, szx, yds);
 			qbXipanService.xipanQb(tradeDate, newOne, isSamll);
 		}
 	}
