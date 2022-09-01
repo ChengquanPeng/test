@@ -32,6 +32,7 @@ import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
+import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.StockBaseInfo;
 
 import lombok.extern.log4j.Log4j2;
@@ -50,6 +51,8 @@ public class StockBasicService {
 	private EsStockBaseInfoDao esStockBaseInfoDao;
 	@Autowired
 	private RedisUtil redisUtil;
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
 
 	// @Autowired
 	// private DbStockBaseInfoDao dbStockBaseInfoDao;
@@ -313,5 +316,25 @@ public class StockBasicService {
 			return page.getContent();
 		}
 		return null;
+	}
+
+	public boolean xiaoshizhi(StockBaseInfo s) {
+		if (s.getCircMarketVal() > 0) {
+			if (s.getCircMarketVal() < Constant.YI_200) {
+				return true;
+			}
+			return false;
+		}
+		// 缓存无数据，计算
+		DaliyBasicInfo2 db = daliyBasicHistroyService.queryLastest(s.getCode());
+		if (db != null && db.getCircMarketVal() > 0) {
+			if (db.getCircMarketVal() < Constant.YI_200) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		// 默认true
+		return true;
 	}
 }

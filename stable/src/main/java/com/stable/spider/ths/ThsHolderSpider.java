@@ -59,12 +59,15 @@ public class ThsHolderSpider {
 
 	public synchronized void dofetchHolder(boolean isWeekEnd) {
 		try {
+			Map<String, StockBaseInfo> basemap = null;
 			Collection<String> codesw = new LinkedList<String>();
 			if (isWeekEnd) {
+				basemap = new HashMap<String, StockBaseInfo>();
 				List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 				if (codelist != null) {
 					for (StockBaseInfo s : codelist) {
 						codesw.add(s.getCode());
+						basemap.put(s.getCode(), s);
 					}
 				}
 			} else {
@@ -72,7 +75,7 @@ public class ThsHolderSpider {
 			}
 			log.info("codesw size={},isWeekEnd={}", codesw.size(), isWeekEnd);
 			int sysdate = DateUtil.getTodayIntYYYYMMDD();
-			dofetchHolderInner(sysdate, codesw);
+			dofetchHolderInner(sysdate, codesw, isWeekEnd, basemap);
 			monitorPoolService.jobHolderWarning();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -95,7 +98,8 @@ public class ThsHolderSpider {
 		log.info(code + " 股东人数/股东研究抓包同花顺已完成");
 	}
 
-	private void dofetchHolderInner(int sysdate, Collection<String> codesw) {
+	private void dofetchHolderInner(int sysdate, Collection<String> codesw, boolean isWeekEnd,
+			Map<String, StockBaseInfo> basemap) {
 		if (codesw.size() <= 0) {
 			return;
 		}
@@ -114,19 +118,25 @@ public class ThsHolderSpider {
 				log.info("current index:{},{}", c, code);
 				// 预警，每天
 				if (stockBasicService.onlinePreYearChk(code, pre2Year)) {
-					dofetchHolderInner(sysdate, code, hns, hps);
-					if (hns.size() > 1000) {
-						esHolderNumDao.saveAll(hns);
-						esHolderPercentDao.saveAll(hps);
-						hps = new LinkedList<HolderPercent>();
-						hns = new LinkedList<HolderNum>();
+					if (!isWeekEnd || // 人工直接放行
+							(isWeekEnd && stockBasicService.xiaoshizhi(basemap.get(code)))// 周末
+					) {
+						dofetchHolderInner(sysdate, code, hns, hps);
+						if (hns.size() > 1000) {
+							esHolderNumDao.saveAll(hns);
+							esHolderPercentDao.saveAll(hps);
+							hps = new LinkedList<HolderPercent>();
+							hns = new LinkedList<HolderNum>();
+						}
 					}
 				}
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
 			}
 		}
-		if (hns.size() > 0) {
+		if (hns.size() > 0)
+
+		{
 			esHolderNumDao.saveAll(hns);
 		}
 		if (hps.size() > 0) {

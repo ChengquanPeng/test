@@ -16,7 +16,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.RzrqDaliyDao;
-import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.RzrqService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.Sort1ModeService;
@@ -57,8 +56,6 @@ public class RzrqSpider {
 	private RzrqDaliyDao rzrqDaliyDao;
 	@Autowired
 	private Sort1ModeService sort1ModeService;
-	@Autowired
-	private DaliyBasicHistroyService daliyBasicHistroyService;
 
 	public synchronized void byDaily(String dateYYYY_, int date) {
 		Set<String> codes = new HashSet<String>();
@@ -223,7 +220,7 @@ public class RzrqSpider {
 			// Set<String> codes = new HashSet<String>();
 			for (StockBaseInfo s : codelist) {
 				try {
-					if (daliyBasicHistroyService.xiaoshizhi(s)) {
+					if (stockBasicService.xiaoshizhi(s)) {
 						ThreadsUtil.sleepSleep1Seconds();
 						// codes.add(s.getCode());
 						dofetchByCode(s.getCode(), dzl);

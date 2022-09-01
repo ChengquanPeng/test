@@ -18,11 +18,9 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
-import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.vo.bus.DaliyBasicInfo2;
-import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.resp.DaliyBasicInfoResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -158,25 +156,5 @@ public class DaliyBasicHistroyService {
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 		return esDaliyBasicInfoDao.search(sq).getContent();
-	}
-
-	public boolean xiaoshizhi(StockBaseInfo s) {
-		if (s.getCircMarketVal() > 0) {
-			if (s.getCircMarketVal() < Constant.YI_200) {
-				return true;
-			}
-			return false;
-		}
-		// 缓存无数据，计算
-		DaliyBasicInfo2 db = this.queryLastest(s.getCode());
-		if (db != null && db.getCircMarketVal() > 0) {
-			if (db.getCircMarketVal() < Constant.YI_200) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-		// 默认true
-		return true;
 	}
 }

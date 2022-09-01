@@ -43,12 +43,13 @@ public class JiejinSpider {
 					List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
 					List<Jiejin> savelist = new ArrayList<Jiejin>();
 					for (StockBaseInfo b : list) {
-
-						dofetch(b.getCode(), savelist);
-						ThreadsUtil.sleepRandomSecBetween1And5();
-						if (savelist.size() > 100) {
-							jiejinDao.saveAll(savelist);
-							savelist = new ArrayList<Jiejin>();
+						if (stockBasicService.xiaoshizhi(b)) {
+							dofetch(b.getCode(), savelist);
+							ThreadsUtil.sleepRandomSecBetween1And5();
+							if (savelist.size() > 100) {
+								jiejinDao.saveAll(savelist);
+								savelist = new ArrayList<Jiejin>();
+							}
 						}
 					}
 					if (savelist.size() > 0) {

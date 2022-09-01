@@ -89,7 +89,7 @@ public class ThsEventSpider {
 			try {
 				String code = s1.getCode();
 				boolean online3Year = stockBasicService.onlinePreYearChk(code, pre3Year);
-				if (online3Year) {
+				if (online3Year && stockBasicService.xiaoshizhi(s1)) {
 					dofetchInner3(code, list0, list2);
 				}
 			} catch (Exception e) {

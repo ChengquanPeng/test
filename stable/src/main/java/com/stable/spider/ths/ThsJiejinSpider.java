@@ -70,10 +70,12 @@ public class ThsJiejinSpider {
 			List<Jiejin> savelist = new ArrayList<Jiejin>();
 			int c = 0;
 			for (StockBaseInfo b : list) {
-				dofetch(b.getCode(), savelist, sysdate);
-				if (savelist.size() > 100) {
-					jiejinDao.saveAll(savelist);
-					savelist = new ArrayList<Jiejin>();
+				if (stockBasicService.xiaoshizhi(b)) {
+					dofetch(b.getCode(), savelist, sysdate);
+					if (savelist.size() > 100) {
+						jiejinDao.saveAll(savelist);
+						savelist = new ArrayList<Jiejin>();
+					}
 				}
 				c++;
 				log.info("current index:{}", c);
