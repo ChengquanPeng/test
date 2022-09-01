@@ -108,7 +108,8 @@ public class EastmoneyQfqSpider {
 
 	public static void main(String[] args) {
 //		String code = "000001";
-		String code = "600000";
-		getQfq(code);
+		String code = "603336";
+		List<TradeHistInfoDaliyNofq> l = getWithOutfq(code);
+		System.err.println(l.get(l.size() - 1));
 	}
 }

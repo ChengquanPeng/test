@@ -156,7 +156,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					}
 					// 洗盘突破3个月
 					if (rt.getHigh() > rtm.price3m && !highPriceGot && rtm.price3m > 0) {
-						String title2 = "[洗盘突破]3个月新高! ";
+						String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "][洗盘突破]3个月新高! ";
 						highPriceGot = rtm.bizPushService.PushS2(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
 					}

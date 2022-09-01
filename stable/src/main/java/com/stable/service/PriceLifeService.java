@@ -327,7 +327,8 @@ public class PriceLifeService {
 		TradeHistInfoDaliy low1 = getlowest(code, start, end);
 
 		// 自然本年上涨趋势
-		if (high1.getDate() > low1.getDate() && CurrencyUitl.cutProfit(low1.getLow(), high1.getHigh()) >= 75) {
+		if (high1 != null && low1 != null && high1.getDate() > low1.getDate()
+				&& CurrencyUitl.cutProfit(low1.getLow(), high1.getHigh()) >= 75) {
 			return false;
 		}
 		// 高点前的一年

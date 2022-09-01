@@ -54,6 +54,9 @@ public class TradeHistInfoDaliyNofq extends EsBase {
 	// 今日涨跌幅
 	@Field(type = FieldType.Double)
 	private double todayChangeRate;
+	// 今日涨跌幅
+	@Field(type = FieldType.Double)
+	private double changeHands;
 
 	public TradeHistInfoDaliyNofq() {
 
@@ -94,6 +97,7 @@ public class TradeHistInfoDaliyNofq extends EsBase {
 		this.todayChangeRate = Double.valueOf(vals[i++]);// pct_chg涨跌幅
 		this.todayChange = Double.valueOf(vals[i++]);// change 涨跌额
 //		this.yesterdayPrice = Double.valueOf(arr.getString(i++));// pre_close
+		this.changeHands = Double.valueOf(vals[i++]);// 换手率
 		setId();
 	}
 
