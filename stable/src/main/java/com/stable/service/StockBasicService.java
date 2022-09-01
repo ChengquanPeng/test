@@ -202,8 +202,10 @@ public class StockBasicService {
 			base.setCircZb(old.getCircZb());
 			base.setHolderName(old.getHolderName());
 			base.setDfcwCompnayType(old.getDfcwCompnayType());
+			base.setTotalMarketVal(old.getTotalMarketVal());
+			base.setCircMarketVal(old.getCircMarketVal());
 		}
-		if (fromNotTushare) {// 非tushare需要更新，tushare 统一更新
+		if (fromNotTushare) {// 非tushare需要更新，tushare bath 统一更新
 			save(base);
 		}
 		redisUtil.set(base.getCode(), base);

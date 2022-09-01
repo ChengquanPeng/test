@@ -22,6 +22,7 @@ import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.vo.bus.DaliyBasicInfo2;
+import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.http.resp.DaliyBasicInfoResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -159,8 +160,15 @@ public class DaliyBasicHistroyService {
 		return esDaliyBasicInfoDao.search(sq).getContent();
 	}
 
-	public boolean xiaoshizhi(String code) {
-		DaliyBasicInfo2 db = this.queryLastest(code);
+	public boolean xiaoshizhi(StockBaseInfo s) {
+		if (s.getCircMarketVal() > 0) {
+			if (s.getCircMarketVal() < Constant.YI_200) {
+				return true;
+			}
+			return false;
+		}
+		// 缓存无数据，计算
+		DaliyBasicInfo2 db = this.queryLastest(s.getCode());
 		if (db != null && db.getCircMarketVal() > 0) {
 			if (db.getCircMarketVal() < Constant.YI_200) {
 				return true;
@@ -168,6 +176,7 @@ public class DaliyBasicHistroyService {
 				return false;
 			}
 		}
+		// 默认true
 		return true;
 	}
 }

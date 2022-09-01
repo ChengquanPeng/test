@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.service.BonusService;
+import com.stable.service.StockBasicService;
 import com.stable.spider.igoodstock.IgoodstockSpider;
 import com.stable.spider.ths.ThsBonusSpider;
 import com.stable.spider.ths.ThsCompanySpider;
@@ -31,6 +32,8 @@ public class EveryDayMorningJob extends MySimpleJob {
 	private ThsCompanySpider thsCompanySpider;
 	@Autowired
 	private IgoodstockSpider igoodstockSpider;
+	@Autowired
+	private StockBasicService stockBasicService;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
@@ -59,6 +62,10 @@ public class EveryDayMorningJob extends MySimpleJob {
 		if (week == Calendar.SATURDAY) {
 			log.info("周六,同花顺, 增发&分紅");
 			thsBonusSpider.byJob();// 同花顺, 增发&分紅
+		}
+
+		if (week != Calendar.SATURDAY && week != Calendar.SUNDAY) {
+			stockBasicService.recashToRedis();
 		}
 
 		log.info("同花顺-亮点，主营 fetchAll=false");

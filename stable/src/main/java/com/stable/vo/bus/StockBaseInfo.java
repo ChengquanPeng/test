@@ -95,6 +95,11 @@ public class StockBaseInfo extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int tssc = 0;// 退市删除
 
+	@Field(type = FieldType.Double)
+	private double totalMarketVal;// 总市值 （亿）
+	@Field(type = FieldType.Double)
+	private double circMarketVal;// 流通市值（亿）
+
 	public StockBaseInfo() {
 
 	}

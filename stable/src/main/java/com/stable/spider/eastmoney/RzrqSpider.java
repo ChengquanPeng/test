@@ -223,7 +223,7 @@ public class RzrqSpider {
 			// Set<String> codes = new HashSet<String>();
 			for (StockBaseInfo s : codelist) {
 				try {
-					if (daliyBasicHistroyService.xiaoshizhi(s.getCode())) {
+					if (daliyBasicHistroyService.xiaoshizhi(s)) {
 						ThreadsUtil.sleepSleep1Seconds();
 						// codes.add(s.getCode());
 						dofetchByCode(s.getCode(), dzl);

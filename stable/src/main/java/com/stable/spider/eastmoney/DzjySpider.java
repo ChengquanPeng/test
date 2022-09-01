@@ -118,7 +118,7 @@ public class DzjySpider {
 			l.add(t);
 			if (t.getTotalAmt60d() >= warningLine) {
 				CodeBaseModel2 cbm = histMap.get(s.getCode());
-				if (cbm != null && cbm.getDzjy60d() < warningLine) {
+				if (cbm != null) {
 					boolean isSamll = codeModelService.isSmallStock(cbm.getMkv(), cbm.getActMkv());
 					if (TagUtil.stockRange(isSamll, cbm)) {
 						sb.append(stockBasicService.getCodeName2(s.getCode())).append(",");
@@ -210,7 +210,7 @@ public class DzjySpider {
 			int c = 0;
 			for (StockBaseInfo s : codelist) {
 				try {
-					if (daliyBasicHistroyService.xiaoshizhi(s.getCode())) {
+					if (daliyBasicHistroyService.xiaoshizhi(s)) {
 						ThreadsUtil.sleepSleep1Seconds();
 						dofetchByCode(s.getCode(), dzl, true);
 					}

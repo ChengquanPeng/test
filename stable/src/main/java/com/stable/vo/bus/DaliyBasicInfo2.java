@@ -67,9 +67,9 @@ public class DaliyBasicInfo2 extends EsBase {
 	@Field(type = FieldType.Double)
 	private double floatShare;// float 流通股本 （万股）
 	@Field(type = FieldType.Double)
-	private double totalMarketVal;// float 总市值 （万元）
+	private double totalMarketVal;// 总市值 （亿）
 	@Field(type = FieldType.Double)
-	private double circMarketVal;// float 流通市值（万元）
+	private double circMarketVal;// 流通市值（亿）
 
 	public DaliyBasicInfo2() {
 

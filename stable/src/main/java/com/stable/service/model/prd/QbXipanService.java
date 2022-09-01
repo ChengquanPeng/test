@@ -29,10 +29,10 @@ public class QbXipanService {
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 
-//	@javax.annotation.PostConstruct
+	// @javax.annotation.PostConstruct
 	public void test() {
-		String[] codes = { "002445", "002658", "002432", "000957", "603366" };
-		int[] dates = { 20220816, 20220822, 20211112, 20220516, 20220726 };
+		String[] codes = { "002445", "002658", "002432", "000957" };
+		int[] dates = { 20220816, 20220822, 20211112, 20220516 };
 		for (int i = 0; i < codes.length; i++) {
 			String code = codes[i];
 			int date = dates[i];
@@ -68,71 +68,80 @@ public class QbXipanService {
 			list.add(t);
 		}
 
-		int sz = list.size();
+		List<TradeHistInfoDaliy> list5 = list.subList(3, 60).stream().filter(s -> s.getTodayChangeRate() > 0.0)
+				.collect(Collectors.toList());
+		List<TradeHistInfoDaliy> lt1 = list5.stream().filter(s -> s.getTodayChangeRate() >= 5.0)
+				.collect(Collectors.toList());
+		List<TradeHistInfoDaliy> lt2 = list5.stream().filter(s -> s.getTodayChangeRate() >= 9.8)
+				.collect(Collectors.toList());
 
-		volDate.clear();
-		/** 1.15%新高 */
+		boolean isqb = false;
+		boolean chk1 = false;
+		// 5.0%以上不能超过5天，涨停10%不能超过3天
+		if (lt1.size() < 5 || lt2.size() < 3) {
+			chk1 = true;
+		}
 
-		boolean yd = true;
-		double tot = 0.0;
-		for (int j = 2; j < list.size(); j++) {
-			TradeHistInfoDaliy chkday = list.get(j);
-			if (chkday.getTodayChangeRate() >= 2.0) {// 1.上涨
-				// System.err.println(code + "========>" + chkday.getDate());
-				yd = true;
-				tot = 0.0;
+		if (chk1) {
+			int sz = list.size();
+			volDate.clear();
+			/** 1.15%新高 */
 
-				/** 放量的后2天 */
-				for (int i = j - 1; i >= j - 2; i--) {
-					TradeHistInfoDaliy t = list.get(i);
-					if (t.getTodayChangeRate() > 0.0) {// 下跌
-						// System.err.println(" ChangeRate > 0.0 =" + t.getDate());
-						if ((t.getOpen() > t.getClosed() && t.getTodayChangeRate() < 1)) {
-							// 上涨不超过1%，且K线阴：收盘小于开盘
-						} else {
-							yd = false;
-							break;
+			boolean yd = true;
+			double tot = 0.0;
+			for (int j = 2; j < list.size(); j++) {
+				TradeHistInfoDaliy chkday = list.get(j);
+				if (chkday.getTodayChangeRate() >= 2.0) {// 1.上涨
+					// System.err.println(code + "========>" + chkday.getDate());
+					yd = true;
+					tot = 0.0;
+
+					/** 放量的后2天 */
+					for (int i = j - 1; i >= j - 2; i--) {
+						TradeHistInfoDaliy t = list.get(i);
+						if (t.getTodayChangeRate() > 0.0) {// 下跌
+							// System.err.println(" ChangeRate > 0.0 =" + t.getDate());
+							if ((t.getOpen() > t.getClosed() && t.getTodayChangeRate() < 1)) {
+								// 上涨不超过1%，且K线阴：收盘小于开盘
+							} else {
+								yd = false;
+								break;
+							}
 						}
 					}
-				}
 
-				/** 放量的前的3天 */
-				if (yd) {
-					int ts = 0;// 保证有3天
-					for (int i = j + 1; i <= j + preDays; i++) {
-						if (i < sz) {
-							TradeHistInfoDaliy t = list.get(i);
-							tot += t.getVolume();
-							ts++;
+					/** 放量的前的3天 */
+					if (yd) {
+						int ts = 0;// 保证有3天
+						for (int i = j + 1; i <= j + preDays; i++) {
+							if (i < sz) {
+								TradeHistInfoDaliy t = list.get(i);
+								tot += t.getVolume();
+								ts++;
+							}
 						}
-					}
-					if (ts == preDays && bigVolChk(chkday, tot)) {// 几乎倍量
-						// System.err.println(chkday.getVolume() + "|" + ((tot / 3) * 1.8));
-						volDate.add(chkday);
+						if (ts == preDays && bigVolChk(chkday, tot)) {// 几乎倍量
+							// System.err.println(chkday.getVolume() + "|" + ((tot / 3) * 1.8));
+							volDate.add(chkday);
+						}
 					}
 				}
 			}
-		}
-		int xipan = volDate.size();
+			int xipan = volDate.size();
+			/** 如果最高的那天是第三天之前，且价格合适，则OK */
+			/** 以第三天作为分界线，找到最高的那天。 */
+			if (xipan > 0) {
+				List<TradeHistInfoDaliy> list2 = list.subList(0, 60);
+				TradeHistInfoDaliy last = list2.get(0);// 第一天
+				TradeHistInfoDaliy d3t = list2.get(2);// 第三天
+				TradeHistInfoDaliy high = list2.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh))
+						.get();
 
-		boolean isqb = false;
-		/** 如果最高的那天是第三天之前，且价格合适，则OK */
-		/** 以第三天作为分界线，找到最高的那天。 */
-		if (xipan > 0) {
-			List<TradeHistInfoDaliy> list2 = list.subList(0, 60);
-			TradeHistInfoDaliy last = list2.get(0);// 第一天
-			TradeHistInfoDaliy d3t = list2.get(2);// 第三天
-			TradeHistInfoDaliy high = list2.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+				if (d3t.getDate() > high.getDate() && high.getHigh() > last.getClosed()
+						&& CurrencyUitl.cutProfit(last.getClosed(), high.getHigh()) <= 15) {// 15%以内冲新高
 
-			if (d3t.getDate() > high.getDate() && high.getHigh() > last.getClosed()
-					&& CurrencyUitl.cutProfit(last.getClosed(), high.getHigh()) <= 15) {// 15%以内冲新高
+					// 1.超过5%，5次以上不要。
 
-				List<TradeHistInfoDaliy> list5 = list.subList(3, 60).stream().filter(s -> s.getTodayChangeRate() > 0.0)
-						.collect(Collectors.toList());
-				List<TradeHistInfoDaliy> lt = list5.stream().filter(s -> s.getTodayChangeRate() >= 5.0)
-						.collect(Collectors.toList());
-				// 1.超过5%，5次以上不要。
-				if (lt.size() < 5) {
 					// 放量是接近最大的那个[3-60，去掉下跌的量]
 					List<TradeHistInfoDaliy> list3 = list5.stream()
 							.sorted(Comparator.comparing(TradeHistInfoDaliy::getVolume).reversed())
@@ -152,10 +161,10 @@ public class QbXipanService {
 						isqb = true;
 					}
 				}
+				newOne.setXipan(xipan);
+				newOne.setXipanHist(
+						volDate.stream().map(s -> String.valueOf(s.getDate())).collect(Collectors.joining(",")));
 			}
-			newOne.setXipan(xipan);
-			newOne.setXipanHist(
-					volDate.stream().map(s -> String.valueOf(s.getDate())).collect(Collectors.joining(",")));
 		}
 
 		if (isqb) {
@@ -177,10 +186,10 @@ public class QbXipanService {
 		double def = 1.8;
 		double ch = 0.0;
 
-		// 直接获取换手
+		// 直接获取换手率
 		if (chkday.getChangeHands() > 0) {
 			ch = chkday.getChangeHands();
-		} else {// 成交获取换手
+		} else {// 成交获取换手率
 			try {
 				DaliyBasicInfo2 db = daliyBasicHistroyService.queryByCodeAndDate(chkday.getCode(), chkday.getDate());
 				double cjl = chkday.getVolume() * 100.0 / 10000.0;// 交易(万股)=手x100/10000;

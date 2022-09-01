@@ -94,11 +94,21 @@ public class XqDailyBaseSpider {
 							// date));
 							// 分时分笔
 						}
-						// 流通股份
-						if (b.getFloatShare() > 0 && b.getTotalShare() > 0) {
+
+						// 更新市值和股本
+						if ((b.getFloatShare() > 0 && b.getTotalShare() > 0)
+								|| ((b.getTotalMarketVal() > 0 && b.getCircMarketVal() > 0))) {
+							// 流通股份
 							StockBaseInfo base = stockBasicService.getCode(b.getCode());
-							base.setFloatShare(b.getFloatShare());
-							base.setTotalShare(b.getTotalShare());
+							if (b.getFloatShare() > 0) {
+								base.setFloatShare(b.getFloatShare());
+								base.setTotalShare(b.getTotalShare());
+							}
+							// 市值
+							if (b.getTotalMarketVal() > 0) {
+								base.setTotalMarketVal(b.getTotalMarketVal());
+								base.setCircMarketVal(b.getCircMarketVal());
+							}
 							stockBasicService.synBaseStockInfo(base, true);
 						}
 					} catch (Exception e) {
