@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.stable.es.dao.base.DzjyDao;
 import com.stable.es.dao.base.DzjyYiTimeDao;
+import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DzjyService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
@@ -61,6 +62,8 @@ public class DzjySpider {
 	private WebModelService modelWebService;
 	@Autowired
 	private CodeModelService codeModelService;
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
 
 	private double warningLine = 3000.0;// 3千万
 
@@ -207,8 +210,10 @@ public class DzjySpider {
 			int c = 0;
 			for (StockBaseInfo s : codelist) {
 				try {
-					ThreadsUtil.sleepSleep1Seconds();
-					dofetchByCode(s.getCode(), dzl, true);
+					if (daliyBasicHistroyService.xiaoshizhi(s.getCode())) {
+						ThreadsUtil.sleepSleep1Seconds();
+						dofetchByCode(s.getCode(), dzl, true);
+					}
 				} catch (Exception e) {
 					ErrorLogFileUitl.writeError(e, "", "", "");
 				}

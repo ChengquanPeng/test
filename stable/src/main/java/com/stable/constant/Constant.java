@@ -35,4 +35,6 @@ public class Constant {
 
 	public static final String LOGINED_URL_USERS = "users";
 	public static final String LOGINED_URL_ADMIN = "admin";
+
+	public static final double YI_200 = 200;// 200亿
 }

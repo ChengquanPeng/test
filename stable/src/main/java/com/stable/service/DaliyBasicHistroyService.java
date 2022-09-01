@@ -18,6 +18,7 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.vo.bus.DaliyBasicInfo2;
@@ -156,5 +157,17 @@ public class DaliyBasicHistroyService {
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
 		return esDaliyBasicInfoDao.search(sq).getContent();
+	}
+
+	public boolean xiaoshizhi(String code) {
+		DaliyBasicInfo2 db = this.queryLastest(code);
+		if (db != null && db.getCircMarketVal() > 0) {
+			if (db.getCircMarketVal() < Constant.YI_200) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return true;
 	}
 }

@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.RzrqDaliyDao;
+import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.RzrqService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.Sort1ModeService;
@@ -56,6 +57,8 @@ public class RzrqSpider {
 	private RzrqDaliyDao rzrqDaliyDao;
 	@Autowired
 	private Sort1ModeService sort1ModeService;
+	@Autowired
+	private DaliyBasicHistroyService daliyBasicHistroyService;
 
 	public synchronized void byDaily(String dateYYYY_, int date) {
 		Set<String> codes = new HashSet<String>();
@@ -217,12 +220,14 @@ public class RzrqSpider {
 			List<RzrqDaliy> dzl = new LinkedList<RzrqDaliy>();
 			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 			int c = 0;
-			Set<String> codes = new HashSet<String>();
+			// Set<String> codes = new HashSet<String>();
 			for (StockBaseInfo s : codelist) {
 				try {
-					ThreadsUtil.sleepSleep1Seconds();
-					codes.add(s.getCode());
-					dofetchByCode(s.getCode(), dzl);
+					if (daliyBasicHistroyService.xiaoshizhi(s.getCode())) {
+						ThreadsUtil.sleepSleep1Seconds();
+						// codes.add(s.getCode());
+						dofetchByCode(s.getCode(), dzl);
+					}
 				} catch (Exception e) {
 					ErrorLogFileUitl.writeError(e, "", "", "");
 				}
@@ -237,7 +242,7 @@ public class RzrqSpider {
 			if (dzl.size() > 0) {
 				rzrqDaliyDao.saveAll(dzl);
 			}
-			exeRzrqTime(codes, date);
+			// exeRzrqTime(codes, date); 不计算，每人融资数据触发在计算
 			MsgPushServer.pushSystem1(date + " 东方财富-融资融券-已完成-ALL");
 		} catch (Exception e) {
 			e.printStackTrace();
