@@ -22,6 +22,8 @@ import com.stable.service.TradeCalService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.DzjySpider;
 import com.stable.spider.eastmoney.EastmoneySpider;
+import com.stable.spider.realtime.RealTime;
+import com.stable.spider.realtime.RealtimeCall;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.FileWriteUitl;
@@ -70,7 +72,7 @@ public class RunModelService {
 	public void test() {
 		new Thread(new Runnable() {
 			public void run() {
-				int date = 20220830;
+				int date = 20220901;
 				codeModelKLineService.runKLineModel1(date);
 //				ThreadsUtil.sleepRandomSecBetween15And30();
 //				codeModelService.runModel1(date, false);
@@ -138,13 +140,16 @@ public class RunModelService {
 		// table
 		sb.append("<br/><table border='1' cellspacing='0' cellpadding='0'>");
 		// head
-		sb.append("<tr><th>序号</th><th>代码</th><th>推送消息</th></tr>");
+		sb.append("<tr><th>序号</th><th>代码</th><th>推送消息</th><th>涨幅</th><th>股价</th></tr>");
 		if (warningCode != null && warningCode.size() > 0) {
 			int i = 0;
 			for (String code : warningCode.keySet()) {
+				RealTime rt = RealtimeCall.get(code);
 				sb.append("<tr><td>").append(i + 1).append("</td>");
 				sb.append("<td>").append(stockBasicService.getCodeName2(code)).append("</td>");
-				sb.append("<td>").append(warningCode.get(code)).append("</td></tr>");
+				sb.append("<td>").append(warningCode.get(code)).append("</td>");
+				sb.append("<td>").append(CurrencyUitl.cutProfit(rt.getYesterday(), rt.getNow())).append("%</td>");
+				sb.append("<td>").append(rt.getNow()).append("</td></tr>");
 				i++;
 			}
 		} else {
