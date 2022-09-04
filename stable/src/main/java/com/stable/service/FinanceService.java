@@ -827,8 +827,13 @@ public class FinanceService {
 		int cnt = 0;
 		for (int i = 0; i < list.size(); i++) {
 			StockBaseInfo s = list.get(i);
-			if (spiderFinaceHistoryInfo(s.getCode(), rl, s.getDfcwCompnayType(), pre6month, i)) {
-				cnt++;
+			try {
+				if (spiderFinaceHistoryInfo(s.getCode(), rl, s.getDfcwCompnayType(), pre6month, i)) {
+					cnt++;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				ErrorLogFileUitl.writeError(e, s.getCode(), s.getDfcwCompnayType(), i);
 			}
 			if (rl.size() > 1000) {
 				esFinanceBaseInfoDao.saveAll(rl);
