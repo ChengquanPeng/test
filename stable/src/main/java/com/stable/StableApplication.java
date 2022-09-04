@@ -16,9 +16,9 @@ public class StableApplication extends SpringBootServletInitializer {
 	private static void init() {
 		System.setProperty("es.set.netty.runtime.available.processors", "false");
 		if (OSystemUtil.isWindows()) {
-			log.info("OS System is WINDOWS");
+			log.info("OS System is Windows");
 		} else {
-			log.info("OS System is LINUX");
+			log.info("OS System is Linux");
 		}
 	}
 

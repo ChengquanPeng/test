@@ -31,8 +31,8 @@ public class QbXipanService {
 
 	// @javax.annotation.PostConstruct
 	public void test() {
-		String[] codes = { "002445", "002658", "002432", "000957" };
-		int[] dates = { 20220816, 20220822, 20211112, 20220516 };
+		String[] codes = { "002445", "002658", "002432", "000957", "603021" };
+		int[] dates = { 20220816, 20220822, 20211112, 20220516, 20220901 };
 		for (int i = 0; i < codes.length; i++) {
 			String code = codes[i];
 			int date = dates[i];
@@ -139,9 +139,6 @@ public class QbXipanService {
 
 				if (d3t.getDate() > high.getDate() && high.getHigh() > last.getClosed()
 						&& CurrencyUitl.cutProfit(last.getClosed(), high.getHigh()) <= 15) {// 15%以内冲新高
-
-					// 1.超过5%，5次以上不要。
-
 					// 放量是接近最大的那个[3-60，去掉下跌的量]
 					List<TradeHistInfoDaliy> list3 = list5.stream()
 							.sorted(Comparator.comparing(TradeHistInfoDaliy::getVolume).reversed())
@@ -161,6 +158,34 @@ public class QbXipanService {
 						isqb = true;
 					}
 				}
+
+				// 连续4天下跌或者影线
+				if (isqb) {
+					int lastdate = volDate.get(volDate.size() - 1).getDate();
+					int inc = 0;
+					boolean incOk = false;
+					for (int i = list2.size() - 1; i >= 0; i--) {
+						TradeHistInfoDaliy t = list2.get(i);
+						if (t.getDate() > lastdate) {
+							if (t.getTodayChangeRate() < 0) {
+								inc++;
+							} else if (t.getOpen() >= t.getClosed() && t.getTodayChangeRate() < 1) {
+								inc++;
+							} else {
+								inc = 0;
+							}
+						} else {
+							inc = 0;
+						}
+						if (inc >= 4) {
+							incOk = true;
+							System.err.println(t.getDate());
+						}
+					}
+					isqb = incOk;
+					System.err.println(incOk);
+				}
+
 				newOne.setXipan(xipan);
 				newOne.setXipanHist(
 						volDate.stream().map(s -> String.valueOf(s.getDate())).collect(Collectors.joining(",")));
@@ -173,13 +198,6 @@ public class QbXipanService {
 			newOne.setQbXipan(0);
 			newOne.setPrice3m(0);
 		}
-	}
-
-	public static void main(String[] args) {
-		double cjl = 28915700 * 100.0 / 10000.0;// 交易(万股)=手x100/10000;
-		double wg = 4.39 * 10000;
-		double ch = CurrencyUitl.roundHalfUp(cjl / wg);
-		System.err.println(ch);
 	}
 
 	private boolean bigVolChk(TradeHistInfoDaliy chkday, double tot) {
