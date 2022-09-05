@@ -29,7 +29,7 @@ public class QbXipanService {
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 
-	// @javax.annotation.PostConstruct
+//	@javax.annotation.PostConstruct
 	public void test() {
 		String[] codes = { "002445", "002658", "002432", "000957", "603021" };
 		int[] dates = { 20220816, 20220822, 20211112, 20220516, 20220901 };
@@ -91,7 +91,7 @@ public class QbXipanService {
 			double tot = 0.0;
 			for (int j = 2; j < list.size(); j++) {
 				TradeHistInfoDaliy chkday = list.get(j);
-				if (chkday.getTodayChangeRate() >= 2.0) {// 1.上涨
+				if (chkday.getTodayChangeRate() >= 2.4) {// 1.上涨
 					// System.err.println(code + "========>" + chkday.getDate());
 					yd = true;
 					tot = 0.0;
@@ -161,29 +161,24 @@ public class QbXipanService {
 
 				// 连续4天下跌或者影线
 				if (isqb) {
-					int lastdate = volDate.get(volDate.size() - 1).getDate();
 					int inc = 0;
 					boolean incOk = false;
 					for (int i = list2.size() - 1; i >= 0; i--) {
 						TradeHistInfoDaliy t = list2.get(i);
-						if (t.getDate() > lastdate) {
-							if (t.getTodayChangeRate() < 0) {
-								inc++;
-							} else if (t.getOpen() >= t.getClosed() && t.getTodayChangeRate() < 1) {
-								inc++;
-							} else {
-								inc = 0;
-							}
+						if (t.getTodayChangeRate() < 0) {
+							inc++;
+						} else if (t.getOpen() >= t.getClosed() && t.getTodayChangeRate() < 1) {
+							inc++;
 						} else {
 							inc = 0;
 						}
 						if (inc >= 4) {
 							incOk = true;
-							System.err.println(t.getDate());
+//							System.err.println(t.getDate());
 						}
 					}
 					isqb = incOk;
-					System.err.println(incOk);
+//					System.err.println(incOk);
 				}
 
 				newOne.setXipan(xipan);
