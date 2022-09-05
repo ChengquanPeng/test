@@ -199,8 +199,13 @@ public class CodeModelKLineService {
 			newOne.setZyxingt(0);
 			qbXipanService.resetXiPan(newOne);
 		} else {
-			qbQxService.qixingQb(tradeDate, newOne, pool, isSamll, qx, szx, yds);
-			qbXipanService.xipanQb(tradeDate, newOne, isSamll);
+			try {
+				qbQxService.qixingQb(tradeDate, newOne, pool, isSamll, qx, szx, yds);
+				qbXipanService.xipanQb(tradeDate, newOne, isSamll);
+			} catch (Exception e) {
+				ErrorLogFileUitl.writeError(e, s.getCode(), tradeDate + "", "起爆");
+			}
+
 		}
 	}
 
