@@ -15,6 +15,7 @@ import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.ErrorLogFileUitl;
+import com.stable.utils.StringUtil;
 import com.stable.utils.TagUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.DaliyBasicInfo2;
@@ -31,8 +32,8 @@ public class QbXipanService {
 
 //	@javax.annotation.PostConstruct
 	public void test() {
-		String[] codes = { "002445", "002658", "002432", "000957", "603021" };
-		int[] dates = { 20220816, 20220822, 20211112, 20220516, 20220901 };
+		String[] codes = { "600130", "002445", "002658", "002432", "000957" };
+		int[] dates = { 20220831, 20220816, 20220822, 20211115, 20220516 };
 		for (int i = 0; i < codes.length; i++) {
 			String code = codes[i];
 			int date = dates[i];
@@ -52,7 +53,7 @@ public class QbXipanService {
 	}
 
 	List<TradeHistInfoDaliy> volDate = new LinkedList<TradeHistInfoDaliy>();
-	private int preDays = 3;
+	private int preDays = 4;
 
 	/** 起爆-Pre突破 */
 	public void xipanQb(int date, CodeBaseModel2 newOne, boolean isSamll) {
@@ -62,7 +63,7 @@ public class QbXipanService {
 		}
 		String code = newOne.getCode();
 		List<TradeHistInfoDaliy> tl = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, date,
-				EsQueryPageUtil.queryPage70, SortOrder.DESC);
+				EsQueryPageUtil.queryPage80, SortOrder.DESC);
 		List<TradeHistInfoDaliy> list = new LinkedList<TradeHistInfoDaliy>();
 		for (TradeHistInfoDaliy t : tl) {
 			list.add(t);
@@ -112,15 +113,15 @@ public class QbXipanService {
 
 					/** 放量的前的3天 */
 					if (yd) {
-						int ts = 0;// 保证有3天
+						int days = 0;// 保证有3天
 						for (int i = j + 1; i <= j + preDays; i++) {
 							if (i < sz) {
 								TradeHistInfoDaliy t = list.get(i);
 								tot += t.getVolume();
-								ts++;
+								days++;
 							}
 						}
-						if (ts == preDays && bigVolChk(chkday, tot)) {// 几乎倍量
+						if (days >= 3 && bigVolChk(chkday, tot, days)) {// 几乎倍量
 							// System.err.println(chkday.getVolume() + "|" + ((tot / 3) * 1.8));
 							volDate.add(chkday);
 						}
@@ -131,7 +132,8 @@ public class QbXipanService {
 			/** 如果最高的那天是第三天之前，且价格合适，则OK */
 			/** 以第三天作为分界线，找到最高的那天。 */
 			if (xipan > 0) {
-				List<TradeHistInfoDaliy> list2 = list.subList(0, 60);
+
+				List<TradeHistInfoDaliy> list2 = list;
 				TradeHistInfoDaliy last = list2.get(0);// 第一天
 				TradeHistInfoDaliy d3t = list2.get(2);// 第三天
 				TradeHistInfoDaliy high = list2.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh))
@@ -139,23 +141,45 @@ public class QbXipanService {
 
 				if (d3t.getDate() > high.getDate() && high.getHigh() > last.getClosed()
 						&& CurrencyUitl.cutProfit(last.getClosed(), high.getHigh()) <= 15) {// 15%以内冲新高
-					// 放量是接近最大的那个[3-60，去掉下跌的量]
-					List<TradeHistInfoDaliy> list3 = list5.stream()
+
+					// 1.1.找到第一个成交异动日
+					int firstVolDate = volDate.stream().sorted(Comparator.comparing(TradeHistInfoDaliy::getDate))
+							.collect(Collectors.toList()).get(0).getDate();// 突破中第一个日期
+					// 1.2.从第一个反昨日开始后的最低价格那天(反转日)：
+					int lowDate = list2.stream().filter(s -> s.getDate() >= firstVolDate)
+							.min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getDate();
+
+					// 1.3.找第一次放量日和最低价格日之间的所有上涨放量，且倒序排序[去掉下跌的量]，区间【第一个放量日和最低价格日之间】
+					List<TradeHistInfoDaliy> list3 = list2.stream()
+							.filter(s -> s.getDate() < lowDate && s.getTodayChangeRate() > 0.0)
 							.sorted(Comparator.comparing(TradeHistInfoDaliy::getVolume).reversed())
 							.collect(Collectors.toList());// 所有上涨date中最大的量
-					List<TradeHistInfoDaliy> list4 = volDate.stream()
-							.sorted(Comparator.comparing(TradeHistInfoDaliy::getVolume).reversed())
-							.collect(Collectors.toList());// 突破中最大的
 
-					if (list3.get(0).getDate() != list4.get(0).getDate()
-							&& list3.get(1).getDate() != list4.get(0).getDate()) {
+					// 1.4.异动日期中最大的量
+					int maxVolDate = volDate.stream()
+							.sorted(Comparator.comparing(TradeHistInfoDaliy::getVolume).reversed())
+							.collect(Collectors.toList()).get(0).getDate();// 突破中最大的量
+
+					// 1.5.判断：如果放量是接近最大的那个，第一或者第二放量，则OK，否则放弃。
+					if (list3.get(0).getDate() != maxVolDate && list3.get(1).getDate() != maxVolDate) {
 						// 最大的不是第一或者第二，没戏？
 						// System.err.println("Max:" + list4.get(0).getDate() + " -> " +
 						// list3.get(0).getDate() + ","
 						// + list3.get(1).getDate());
 					} else {
-						newOne.setPrice3m(high.getHigh());
-						isqb = true;
+
+						// 是否挖坑，
+						// 2.1找到放量日中，最低价格收盘价
+						double chkPrice = volDate.stream()
+								.sorted(Comparator.comparing(TradeHistInfoDaliy::getYesterdayPrice))
+								.collect(Collectors.toList()).get(0).getYesterdayPrice();// 突破中最小的昨日收盘价格
+						int cnt = list2.stream().filter(s -> s.getDate() > firstVolDate && s.getLow() < chkPrice)
+								.collect(Collectors.toList()).size();
+						// System.err.println("count=" + cnt);
+						if (cnt >= 4) {
+							newOne.setPrice3m(high.getHigh());
+							isqb = true;
+						}
 					}
 				}
 
@@ -181,21 +205,20 @@ public class QbXipanService {
 //					System.err.println(incOk);
 				}
 
-				newOne.setXipan(xipan);
-				newOne.setXipanHist(
-						volDate.stream().map(s -> String.valueOf(s.getDate())).collect(Collectors.joining(",")));
 			}
 		}
 
 		if (isqb) {
 			newOne.setQbXipan(1);
+			newOne.setXipan(volDate.size());
+			newOne.setXipanHist(
+					volDate.stream().map(s -> String.valueOf(s.getDate())).collect(Collectors.joining(",")));
 		} else {
-			newOne.setQbXipan(0);
-			newOne.setPrice3m(0);
+			resetXiPan(newOne);
 		}
 	}
 
-	private boolean bigVolChk(TradeHistInfoDaliy chkday, double tot) {
+	private boolean bigVolChk(TradeHistInfoDaliy chkday, double tot, int days) {
 		double def = 1.8;
 		double ch = 0.0;
 
@@ -222,11 +245,15 @@ public class QbXipanService {
 			}
 		}
 
-		return (chkday.getVolume() > ((tot / preDays) * def));
+		return (chkday.getVolume() > ((tot / days) * def));
 //		return (chkday.getVolume() > ((tot / preDays) * 1.8));
 	}
 
 	public void resetXiPan(CodeBaseModel2 newOne) {
+		if (newOne.getXipan() > 0) {
+			String jsHist = newOne.getXipanHist() + "洗盘" + ";" + newOne.getJsHist();
+			newOne.setJsHist(StringUtil.subString(jsHist, 100));
+		}
 		newOne.setXipan(0);
 		newOne.setXipanHist("");
 		newOne.setQbXipan(0);
