@@ -186,6 +186,10 @@ public class WebModelService {
 			days = 180;
 		} else if (timemonth == 5) {
 			days = 365;
+		} else if (timemonth == 6) {
+			days = 5;
+		} else if (timemonth == 7) {
+			days = 15;
 		}
 		if (days > 0) {
 			Date now = new Date();
