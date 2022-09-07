@@ -37,4 +37,7 @@ public class Constant {
 	public static final String LOGINED_URL_ADMIN = "admin";
 
 	public static final double YI_200 = 200;// 200亿
+	// 大宗
+	public final static double DZ_RATE = 4.5;// 大宗比例
+	public final static double DZ_WARNING_LINE = 3000.0;// 大宗金额：3千万
 }

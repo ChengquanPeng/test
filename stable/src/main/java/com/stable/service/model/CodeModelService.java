@@ -347,7 +347,7 @@ public class CodeModelService {
 		}
 		boolean db2 = TagUtil.isDibuSmall2(isSmallStock, newOne);// FinOK() > 0 && Zfjjup() >= 4 &&P5() > 45.0
 		// 底部大宗
-		if (db2 && newOne.getDzjyp365d() >= 4.5) {
+		if (db2 && newOne.getDzjyp365d() >= Constant.DZ_RATE) {
 			isOk1 = true;
 		}
 		// 小底-大宗

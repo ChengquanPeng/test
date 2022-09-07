@@ -18,7 +18,7 @@ public class DzjyYiTime extends EsBase {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@Field(type = FieldType.Text)
 	private String code;
@@ -32,7 +32,7 @@ public class DzjyYiTime extends EsBase {
 	@Field(type = FieldType.Double)
 	private double totalAmt60d;// 总额-60天
 	@Field(type = FieldType.Double)
-	private double p60d;// 流通占比-1年
+	private double p60d;// 流通占比（-60天）
 	@Field(type = FieldType.Double)
-	private double p365d;// 流通占比-60天
+	private double p365d;// 流通占比（-1年）
 }

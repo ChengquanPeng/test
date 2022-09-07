@@ -82,7 +82,7 @@ public class TradeCalService {
 				String cal_date = arr.getString(0);// 日历日期
 				String is_open = arr.getString(1);// 是否开市
 				String pretrade_date = arr.getString(2);// 上一个交易日
-				redisUtil.set(RedisConstant.RDS_TRADE_CAL_ + cal_date, pretrade_date, Duration.ofDays(92));
+				redisUtil.set(RedisConstant.RDS_TRADE_CAL_ + cal_date, pretrade_date, Duration.ofDays(2));
 
 				TradeCal tc = new TradeCal();
 				tc.setCal_date(Integer.valueOf(cal_date));

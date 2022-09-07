@@ -13,10 +13,12 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.stable.constant.Constant;
 import com.stable.es.dao.base.DzjyDao;
 import com.stable.es.dao.base.DzjyYiTimeDao;
 import com.stable.service.DzjyService;
 import com.stable.service.StockBasicService;
+import com.stable.service.TradeCalService;
 import com.stable.service.model.CodeModelService;
 import com.stable.service.model.WebModelService;
 import com.stable.service.model.prd.msg.MsgPushServer;
@@ -61,8 +63,8 @@ public class DzjySpider {
 	private WebModelService modelWebService;
 	@Autowired
 	private CodeModelService codeModelService;
-
-	private double warningLine = 3000.0;// 3千万
+	@Autowired
+	private TradeCalService tradeCalService;
 
 	public synchronized void byDaily(String dateYYYY_) {
 		// setp1.get code
@@ -98,10 +100,14 @@ public class DzjySpider {
 			}
 		}
 		// STEP3:计算-半年超1亿
-		exeDzjyYiTime();
+		exeDzjyYiTime(false);
 	}
 
-	private void exeDzjyYiTime() {
+	private void exeDzjyYiTime(boolean isWeek) {
+		int date = DateUtil.getTodayIntYYYYMMDD();
+		if (isWeek) {
+			date = tradeCalService.getPretradeDate(date);
+		}
 		StringBuffer sb = new StringBuffer();
 		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
@@ -113,7 +119,9 @@ public class DzjySpider {
 			// 频繁统计
 			DzjyYiTime t = dzjyService.halfOver1Yi(s, startDate, startDate2);// 12个月
 			l.add(t);
-			if (t.getTotalAmt60d() >= warningLine) {
+
+			if (t.getDate() >= date // 代表有最新的交易大宗触发
+					&& (t.getTotalAmt60d() >= Constant.DZ_WARNING_LINE || t.getP365d() >= Constant.DZ_RATE)) {
 				CodeBaseModel2 cbm = histMap.get(s.getCode());
 				if (cbm != null) {
 					boolean isSamll = codeModelService.isSmallStock(cbm.getMkv(), cbm.getActMkv());
@@ -225,7 +233,7 @@ public class DzjySpider {
 			if (dzl.size() > 0) {
 				dzjyDao.saveAll(dzl);
 			}
-			exeDzjyYiTime();
+			exeDzjyYiTime(true);
 			MsgPushServer.pushSystem1(date + " 东方财富-大宗交易-已完成-ALL");
 		} catch (Exception e) {
 			e.printStackTrace();

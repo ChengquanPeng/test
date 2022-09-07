@@ -65,7 +65,7 @@ public class DzjyService {
 				t.setTotalAmt(t.getTotalAmt() + d.getTval());
 			}
 			t.setAvgPrcie(CurrencyUitl.roundHalfUp(t.getTotalAmt() / num));
-			t.setDate(page.getContent().get(0).getDate());
+			t.setDate(page.getContent().get(0).getDate());// 最新大宗日期
 			if (s.getFloatShare() > 0) {
 				double unP5liutonggf = s.getFloatShare();
 				if (s.getCircZb() > 0) {// 除去5%以上的占比
