@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.monitor.RealtimeMonitoringService;
 import com.stable.spider.realtime.RealtimeCall;
+import com.stable.utils.DateUtil;
 
 @RestController
 public class RealtimeController {
@@ -36,7 +37,7 @@ public class RealtimeController {
 			}).start();
 		}
 
-		return "0：全部 | 1：新浪 | 2：163 | 目前source=" + s;
+		return DateUtil.getTodayYYYYMMDDHHMMSS() + ",0：全部 | 1：新浪 | 2：163 | 目前source=" + s;
 	}
 
 }
