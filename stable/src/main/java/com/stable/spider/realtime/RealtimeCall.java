@@ -23,7 +23,7 @@ public class RealtimeCall {
 		return i;
 	}
 
-	public static int source = 0;
+	public static int source = 1;// 0：全部 | 1：新浪 | 2：163
 
 	public static RealTime get(String code) {
 		RealTime rt = null;

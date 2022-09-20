@@ -44,6 +44,6 @@ public class RzrqJob extends MySimpleJob {
 		int predate = tradeCalService.getPretradeDate(date);
 		String dateYYYY_ = DateUtil.formatYYYYMMDD2(DateUtil.parseDate(predate));
 		log.info("融资融券-交易日开始:{}", dateYYYY_);
-		rzrqSpider.byDaily(dateYYYY_, date);
+		rzrqSpider.byDaily(dateYYYY_, predate);
 	}
 }

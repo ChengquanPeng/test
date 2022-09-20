@@ -14,7 +14,7 @@ public class OSystemUtil {
 	public static void restart() {
 		if (isLinux()) {
 			try {
-				Runtime.getRuntime().exec("reboot");
+				Runtime.getRuntime().exec("reboot -f");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

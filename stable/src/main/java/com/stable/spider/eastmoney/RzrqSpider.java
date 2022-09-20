@@ -239,7 +239,7 @@ public class RzrqSpider {
 			if (dzl.size() > 0) {
 				rzrqDaliyDao.saveAll(dzl);
 			}
-			// exeRzrqTime(codes, date); 不计算，每人融资数据触发在计算
+			// exeRzrqTime(codes, tradedate); 不计算，每人融资数据触发在计算
 			MsgPushServer.pushSystem1(date + " 东方财富-融资融券-已完成-ALL");
 		} catch (Exception e) {
 			e.printStackTrace();
