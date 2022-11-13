@@ -17,7 +17,7 @@ public class FinYjkb extends EsBase {
 	private static final long serialVersionUID = 2305594280230790359L;
 	@Id
 	private String id;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String code;
 	@Field(type = FieldType.Integer)
 	private int date; // 报告日期

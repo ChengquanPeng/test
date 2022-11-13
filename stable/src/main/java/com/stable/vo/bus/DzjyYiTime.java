@@ -20,7 +20,7 @@ public class DzjyYiTime extends EsBase {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String code;
 	// 日期date
 	@Field(type = FieldType.Integer)

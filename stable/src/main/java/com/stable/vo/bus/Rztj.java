@@ -27,6 +27,6 @@ public class Rztj extends EsBase {
 	private double avgAmt;// 20天均额
 	@Field(type = FieldType.Integer)
 	private int validDate = 0;// 有效期
-	@Field(type = FieldType.Double)
+	@Field(type = FieldType.Integer)
 	private int valid = 0;// 是否有效
 }

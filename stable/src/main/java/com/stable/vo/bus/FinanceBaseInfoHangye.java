@@ -17,7 +17,7 @@ public class FinanceBaseInfoHangye extends EsBase {
 	private static final long serialVersionUID = 2305594280230790360L;
 	@Id
 	private String id;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String code;
 	private int year;// 年
 	@Field(type = FieldType.Integer)

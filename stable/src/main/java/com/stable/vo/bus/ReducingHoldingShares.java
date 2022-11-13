@@ -28,7 +28,7 @@ public class ReducingHoldingShares extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int type;// 1.股东减持,2.增减持计划,3.高管减持,4.其他
 
-	@Field(type = FieldType.Integer)
+	@Field(type = FieldType.Double)
 	private double wg;// 万股
 
 	@Field(type = FieldType.Text)

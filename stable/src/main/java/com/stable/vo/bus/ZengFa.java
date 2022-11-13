@@ -25,9 +25,9 @@ public class ZengFa extends EsBase {
 	private int status;// 1开始，2完成，3作废
 	@Field(type = FieldType.Keyword)
 	private String statusDesc;// 进度
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String issueClz;// 发行类型
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String issueType;// 发行方式
 
 	// 日期

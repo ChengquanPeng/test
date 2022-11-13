@@ -20,7 +20,7 @@ public class DaliyBasicInfo2 extends EsBase {
 	private static final long serialVersionUID = 7543493371847034850L;
 	@Id
 	private String id;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String code;
 	// 日期date
 	@Field(type = FieldType.Integer)

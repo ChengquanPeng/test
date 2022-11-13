@@ -23,7 +23,7 @@ public class Dzjy extends EsBase {
 	// 日期date
 	@Field(type = FieldType.Integer)
 	private int date = 0;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String code;
 	@Field(type = FieldType.Double)
 	private double price;// 价格

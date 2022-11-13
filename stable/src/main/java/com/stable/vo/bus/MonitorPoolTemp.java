@@ -39,11 +39,11 @@ public class MonitorPoolTemp extends EsBase {
 	private int offline = 0;// 收盘
 	@Field(type = FieldType.Double)
 	private double upPrice = 0;// 高于某价格
-	@Field(type = FieldType.Integer)
+	@Field(type = FieldType.Double)
 	private double downPrice = 0;// 低于某价格
 	@Field(type = FieldType.Double)
 	private double upTodayChange = 0;// 高于某涨幅
-	@Field(type = FieldType.Integer)
+	@Field(type = FieldType.Double)
 	private double downTodayChange = 0;// 低于某涨幅
 	@Field(type = FieldType.Integer)
 	private int ykb = 0;// 快预报(0不预警，1不亏，2亏损）

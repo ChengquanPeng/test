@@ -22,7 +22,7 @@ public class TradeHistInfoDaliy extends EsBase {
 	// code+date
 	@Id
 	private String id;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String code;
 	// 日期date yyyymmdd
 	@Field(type = FieldType.Integer)

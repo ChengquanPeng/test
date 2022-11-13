@@ -204,7 +204,7 @@ public class CodeBaseModel2 extends EsBase {
 
 	@Id
 	private String id;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String code;
 	@Field(type = FieldType.Integer)
 	protected int date;

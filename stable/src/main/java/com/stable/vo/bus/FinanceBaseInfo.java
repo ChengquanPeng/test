@@ -17,7 +17,7 @@ public class FinanceBaseInfo extends EsBase {
 	private static final long serialVersionUID = 2305594280230790359L;
 	@Id
 	private String id;
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Keyword)
 	private String code;
 	@Field(type = FieldType.Integer)
 	private int date; // 报告期20220331
@@ -101,13 +101,13 @@ public class FinanceBaseInfo extends EsBase {
 	private double goodWillRatioNetAsset; // 商誉净利润占比（净资产）
 	@Field(type = FieldType.Double)
 	private double inventoryRatio; // 存货净资产占比 // 存货资产占比（净资产）
-	@Field(type = FieldType.Double)
+	@Field(type = FieldType.Integer)
 	private int fundNotOk = 1;// 是否资金紧张:资金紧张: 货币资金-流动负债, <=0
-	@Field(type = FieldType.Double)
+	@Field(type = FieldType.Integer)
 	private int fundNotOk2 = 0;// interestPay
-	@Field(type = FieldType.Double)
+	@Field(type = FieldType.Integer)
 	private int fundNotOk3 = 0;// 疑似财务三高
-	@Field(type = FieldType.Double)
+	@Field(type = FieldType.Integer)
 	private int bustUpRisks = 1;// 是否有破产风险：应付账款:欠供应/合作商的钱，如果现金流解决不了应付账款，净资产低于应付账款就会破产清算
 	@Field(type = FieldType.Double)
 	private double taxPayable;// 应交税费
