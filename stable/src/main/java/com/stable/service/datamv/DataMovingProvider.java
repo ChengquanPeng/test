@@ -20,7 +20,7 @@ public class DataMovingProvider {
 		tableName = tableName.trim();
 		Dw dw = new Dw();
 		dw.setTableName(tableName);
-		ElasticsearchRepository dao = dataMovingNewer.tableMap.get(tableName);
+		ElasticsearchRepository dao = dataMovingNewer.daoMap.get(tableName);
 		if (dao != null) {
 			if (pageNum <= 1) {
 				dw.setTableSize(dao.count());
@@ -35,7 +35,6 @@ public class DataMovingProvider {
 				dw.setBatchSize(dw.getTableData().size());
 			}
 		}
-
 		return dw;
 	}
 

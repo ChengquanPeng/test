@@ -17,14 +17,18 @@ public class OnlineCodeGen {
 	public OnlineCodeGen(RunModelService runModelService) {
 		Runnable rtt2 = new Runnable() {
 			public void run() {
-				runModelService.printModelHtml();// 启动时重新生成一遍
+				try {
+					runModelService.printModelHtml();// 启动时重新生成一遍
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				while (isRunning) {
 					try {
 						Thread.sleep(WAIT_MIN);
-					} catch (InterruptedException e) {
+						runModelService.printOnlineHtml(warningCode);
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					runModelService.printOnlineHtml(warningCode);
 				}
 				log.info("OnlineCodeGen end");
 			}
