@@ -49,6 +49,18 @@ public class DeleteDataService {
 	@Autowired
 	private EsDaliyBasicInfoDao esDaliyBasicInfoDao;
 
+//	@javax.annotation.PostConstruct
+//	public void testAll() throws Exception {
+//		new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				deleteData();
+//				log.info("done");
+//			}
+//
+//		}).start();
+//	}
+
 	public void deleteData() {
 		// 概念未更新
 		deleteInvaildCodeConcept();

@@ -83,13 +83,15 @@ public class RzrqSpider {
 		log.info("STEP3:done");
 	}
 
-//	@javax.annotation.PostConstruct
-//	public void test() {
+	@javax.annotation.PostConstruct
+	public void test() {
 //		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
-//		int date = 20220714;
-//		exeRzrqTime(histMap.keySet(), date);
-//		System.exit(0);
-//	}
+		Set<String> codes = new HashSet<>();
+		codes.add("002029");
+		int date = 20221114;
+		exeRzrqTime(codes, date);
+		System.exit(0);
+	}
 
 	private double checkLine = 40.0;// 低于40%
 	private double plan2VaildLine = 30.0;// 超过平均数30%认为有效
@@ -115,12 +117,11 @@ public class RzrqSpider {
 				// 方案1:突然拉升的融资融券，散户没有时间买入,200亿以下
 				// 2：融资满足条件
 				// 3:涨幅在checkLine以下
-				if (sort1ModeService.xyIs30DayTodayPriceOk(code, date, checkLine, EsQueryPageUtil.queryPage30)) {
-					cbm.setRzrqRate(rzrqService.plan2(code, startDate));
-				}
+				cbm.setRzrqRate(rzrqService.plan2(code, startDate));
 			}
 
-			if (cbm.getRzrqRate() >= plan2VaildLine) {
+			if (cbm.getRzrqRate() >= plan2VaildLine
+					&& sort1ModeService.xyIs30DayTodayPriceOk(code, date, checkLine, EsQueryPageUtil.queryPage30)) {
 				if (cbm.getShooting3() == 0) {
 					shootNotice3.append(stockBasicService.getCodeName2(code)).append(",");
 				}

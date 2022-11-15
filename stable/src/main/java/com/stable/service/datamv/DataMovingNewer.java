@@ -161,7 +161,7 @@ public class DataMovingNewer implements InitializingBean {
 	}
 
 	// TODO
-	@javax.annotation.PostConstruct
+//	@javax.annotation.PostConstruct
 	public void testAll() throws Exception {
 		log.info("每月-开始同步日历");
 		tradeCalService.josSynTradeCal();
