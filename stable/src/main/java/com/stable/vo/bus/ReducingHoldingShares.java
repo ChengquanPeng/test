@@ -20,7 +20,7 @@ public class ReducingHoldingShares extends EsBase {
 	private String id;// code+date
 
 	@Field(type = FieldType.Keyword)
-	private String code;// 日期date
+	private String code;// code
 
 	@Field(type = FieldType.Integer)
 	private int date = 0;// 日期date

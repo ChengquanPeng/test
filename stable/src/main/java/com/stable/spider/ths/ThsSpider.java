@@ -11,20 +11,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Component;
 
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.EsCodeConceptDao;
 import com.stable.es.dao.base.EsConceptDao;
 import com.stable.service.TradeCalService;
@@ -509,40 +501,5 @@ public class ThsSpider {
 		int c = list.size();
 		saveConcept(list);
 		log.info("dofetchThs884xxx size:{}", c);
-	}
-
-	// 超过30天未更新,则删除
-	public void deleteInvaildCodeConcept() {
-		Pageable pageable = PageRequest.of(EsQueryPageUtil.queryPage9999.getPageNum(),
-				EsQueryPageUtil.queryPage9999.getPageSize());
-		int lastupdateTime = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -30));
-		log.info("deleteAll invaild lte=" + lastupdateTime);
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.rangeQuery("updateTime").lte(lastupdateTime));
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
-
-		Page<CodeConcept> page = esCodeConceptDao.search(sq);
-		if (page != null && !page.isEmpty() && page.getContent().size() > 0) {
-			log.info("deleteAll CodeConcept size=" + page.getContent().size());
-			esCodeConceptDao.deleteAll(page.getContent());
-		} else {
-			log.info("deleteAll CodeConcept size=0");
-		}
-		log.info("deleteAll done CodeConcept ");
-
-		BoolQueryBuilder bqb2 = QueryBuilders.boolQuery();
-		bqb2.must(QueryBuilders.rangeQuery("updateDate").lte(lastupdateTime));
-		NativeSearchQueryBuilder queryBuilder2 = new NativeSearchQueryBuilder();
-		SearchQuery sq2 = queryBuilder2.withQuery(bqb2).withPageable(pageable).build();
-
-		Page<Concept> page2 = esConceptDao.search(sq2);
-		if (page2 != null && !page2.isEmpty() && page2.getContent().size() > 0) {
-			log.info("2Concept deleteAll size=" + page2.getContent().size());
-			esConceptDao.deleteAll(page2.getContent());
-		} else {
-			log.info("2Concept deleteAll size=0");
-		}
-		log.info("2Concept deleteAll done");
 	}
 }

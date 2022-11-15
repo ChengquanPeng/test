@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.service.ChipsZfService;
+import com.stable.service.DeleteDataService;
 import com.stable.service.FinanceService;
 import com.stable.service.ZhiYaService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.spider.ths.ThsEventSpider;
-import com.stable.spider.ths.ThsSpider;
 import com.stable.utils.DateUtil;
 
 import lombok.extern.log4j.Log4j2;
@@ -33,7 +33,7 @@ public class EveryDayJob extends MySimpleJob {
 	@Autowired
 	private ChipsZfService chipsZfService;
 	@Autowired
-	private ThsSpider thsSpider;
+	private DeleteDataService deleteDataService;
 	@Autowired
 	private ZhiYaService zhiYaService;
 	@Autowired
@@ -60,8 +60,8 @@ public class EveryDayJob extends MySimpleJob {
 		monitorPoolService.deleteTsMoni();
 		log.info("定增扩展属性");
 		chipsZfService.jobZengFaExt(true);
-		log.info("无效概念清除");
-		thsSpider.deleteInvaildCodeConcept();
+		log.info("无效概念无效数据");
+		deleteDataService.deleteData();
 //		log.info("过期文件的删除");
 //		SpringConfig efc = SpringUtil.getBean(SpringConfig.class);
 //		FileDeleteUitl.deletePastDateFile(efc.getModelImageFloder());

@@ -110,6 +110,7 @@ public class RunModelService {
 		plateService.getPlateStat();
 		ThreadsUtil.sleepRandomSecBetween15And30();
 		printModelHtml();
+		log.info("RunModelService Done");
 	}
 
 	public void printModelHtml() {

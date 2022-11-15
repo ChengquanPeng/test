@@ -54,6 +54,7 @@ public class ThsEventSpider {
 	private String urlbase = "https://basic.10jqka.com.cn/%s/event.html#stockpage?t=%s";
 	private String host = "http://basic.10jqka.com.cn/";
 	private Map<String, String> header;
+	private int endDate2 = 0;
 
 	public void byWeb() {
 		new Thread(new Runnable() {
@@ -75,6 +76,8 @@ public class ThsEventSpider {
 	}
 
 	private synchronized void dofetchInner2() {
+		int sysdate = DateUtil.getTodayIntYYYYMMDD();
+		endDate2 = DateUtil.addDate(sysdate, -1000);
 		if (header == null) {
 			header = new HashMap<String, String>();
 		}
@@ -115,6 +118,7 @@ public class ThsEventSpider {
 		log.info("同花顺-近期重要事件-done");
 	}
 
+	// 增减持
 	private void dofetchInner3(String code, List<ReducingHoldingShares> list0, List<BuyBackInfo> list2) {
 		int trytime = 0;
 		boolean fetched = false;
@@ -183,7 +187,9 @@ public class ThsEventSpider {
 		}
 		bb.setDesc(desc.substring(0, endi));
 		bb.setType(type);
-		list.add(bb);
+		if (bb.getDate() > endDate2) {
+			list.add(bb);
+		}
 //		System.err.println(bb);
 	}
 
@@ -193,9 +199,13 @@ public class ThsEventSpider {
 		if (desc.contains(JC_NO)) {
 			return;
 		}
+		int date1 = DateUtil.convertDate2(td1.trim());
+		if (date1 < endDate2) {
+			return;
+		}
 		ReducingHoldingShares rhs = new ReducingHoldingShares();
 		rhs.setCode(code);
-		rhs.setDate(DateUtil.convertDate2(td1.trim()));
+		rhs.setDate(date1);
 		rhs.setId(code + rhs.getDate());
 
 		int endi = desc.length();

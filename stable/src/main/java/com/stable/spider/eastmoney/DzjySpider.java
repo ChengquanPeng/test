@@ -65,8 +65,10 @@ public class DzjySpider {
 	private CodeModelService codeModelService;
 	@Autowired
 	private TradeCalService tradeCalService;
+	private int endDate = 0;
 
 	public synchronized void byDaily(String dateYYYY_) {
+		endDate = DateUtil.addDate(DateUtil.getTodayIntYYYYMMDD(), -720);
 		// setp1.get code
 		Set<String> codes = new HashSet<String>();
 		int page = 1;
@@ -201,7 +203,9 @@ public class DzjySpider {
 			dzjy.setDailyRank(data.getIntValue("DAILY_RANK"));
 			dzjy.setId();
 			log.info(dzjy);
-			list.add(dzjy);
+			if (dzjy.getDate() >= endDate) {
+				list.add(dzjy);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -210,6 +214,7 @@ public class DzjySpider {
 	public synchronized void dofetchInnerByAll() {
 		try {
 			int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
+			endDate = DateUtil.addDate(date, -720);
 			List<Dzjy> dzl = new LinkedList<Dzjy>();
 			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 			int c = 0;

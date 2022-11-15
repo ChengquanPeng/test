@@ -59,6 +59,7 @@ import com.stable.vo.bus.Jiejin;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.ReducingHoldingShares;
 import com.stable.vo.bus.RzrqDaliy;
+import com.stable.vo.bus.Rztj;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
@@ -98,9 +99,9 @@ public class DataMovingNewer implements InitializingBean {
 		daoMap.put("ZengFa", SpringUtil.getBean(ZengFaDao.class));
 		clzMap.put("ZengFa", ZengFa.class);
 		daoMap.put("Rztj", SpringUtil.getBean(RztjDao.class));
-		clzMap.put("Rztj", ZhiYa.class);
-		daoMap.put("RzrqDaliy", SpringUtil.getBean(RzrqDaliyDao.class));
-		clzMap.put("RzrqDaliy", RzrqDaliy.class);
+		clzMap.put("Rztj", Rztj.class);
+//		daoMap.put("RzrqDaliy", SpringUtil.getBean(RzrqDaliyDao.class));
+//		clzMap.put("RzrqDaliy", RzrqDaliy.class);
 		daoMap.put("MonitorPoolTemp", SpringUtil.getBean(MonitorPoolUserDao.class));
 		clzMap.put("MonitorPoolTemp", MonitorPoolTemp.class);
 		daoMap.put("Jiejin", SpringUtil.getBean(JiejinDao.class));
@@ -131,11 +132,13 @@ public class DataMovingNewer implements InitializingBean {
 		clzMap.put("BonusHist", BonusHist.class);
 		daoMap.put("DaliyBasicInfo2", SpringUtil.getBean(EsDaliyBasicInfoDao.class));
 		clzMap.put("DaliyBasicInfo2", DaliyBasicInfo2.class);
-		
-		daoMap.put("TradeHistInfoDaliy", SpringUtil.getBean(EsTradeHistInfoDaliyDao.class));
-		clzMap.put("TradeHistInfoDaliy", TradeHistInfoDaliy.class);
-		daoMap.put("TradeHistInfoDaliyNofq", SpringUtil.getBean(EsTradeHistInfoDaliyNofqDao.class));
-		clzMap.put("TradeHistInfoDaliyNofq", TradeHistInfoDaliyNofq.class);
+
+		// daoMap.put("TradeHistInfoDaliy",
+		// SpringUtil.getBean(EsTradeHistInfoDaliyDao.class));
+		// clzMap.put("TradeHistInfoDaliy", TradeHistInfoDaliy.class);
+		// daoMap.put("TradeHistInfoDaliyNofq",
+		// SpringUtil.getBean(EsTradeHistInfoDaliyNofqDao.class));
+		// clzMap.put("TradeHistInfoDaliyNofq", TradeHistInfoDaliyNofq.class);
 		daoMap.put("FinYjkb", SpringUtil.getBean(EsFinYjkbDao.class));
 		clzMap.put("FinYjkb", FinYjkb.class);
 		daoMap.put("FinYjyg", SpringUtil.getBean(EsFinYjygDao.class));
@@ -157,6 +160,7 @@ public class DataMovingNewer implements InitializingBean {
 		return dataMovingProvider.getData(tableName, pageNum, pageSize);
 	}
 
+	// TODO
 	@javax.annotation.PostConstruct
 	public void testAll() throws Exception {
 		log.info("每月-开始同步日历");

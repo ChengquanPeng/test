@@ -34,8 +34,12 @@ public class JiejinSpider {
 	private StockBasicService stockBasicService;
 	@Autowired
 	private JiejinDao jiejinDao;
+	private int endDate = 0;
+	private int sysdate = 0;
 
 	public void dofetch() {
+		sysdate = DateUtil.getTodayIntYYYYMMDD();
+		endDate = DateUtil.addDate(sysdate, -365);
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -94,8 +98,11 @@ public class JiejinSpider {
 					} catch (Exception e) {
 					}
 					jj.setId(jj.getCode() + jj.getDate());
+					jj.setSysdate(sysdate);
 					log.info(jj);
-					savelist.add(jj);
+					if (jj.getDate() >= endDate) {
+						savelist.add(jj);
+					}
 				}
 				return;
 			} catch (Exception e) {

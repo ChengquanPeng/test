@@ -44,6 +44,7 @@ public class ThsJiejinSpider {
 
 	private String host = "http://basic.10jqka.com.cn";
 	private Map<String, String> header;
+	private int endDate = 0;
 
 	public void byJob() {
 		dofetch();
@@ -66,6 +67,7 @@ public class ThsJiejinSpider {
 				header.put("Upgrade-Insecure-Requests", "1");
 			}
 			int sysdate = DateUtil.getTodayIntYYYYMMDD();
+			endDate = DateUtil.addDate(sysdate, -365);
 			List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithOutSort();
 			List<Jiejin> savelist = new ArrayList<Jiejin>();
 			int c = 0;
@@ -138,7 +140,9 @@ public class ThsJiejinSpider {
 					jj.setId(jj.getCode() + jj.getDate());
 					jj.setSysdate(sysdate);
 //					System.err.println(jj);
-					savelist.add(jj);
+					if (jj.getDate() > endDate) {
+						savelist.add(jj);
+					}
 				}
 				fetched = true;
 			} catch (Exception e2) {

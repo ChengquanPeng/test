@@ -56,8 +56,10 @@ public class RzrqSpider {
 	private RzrqDaliyDao rzrqDaliyDao;
 	@Autowired
 	private Sort1ModeService sort1ModeService;
+	private int endDate = 0;
 
 	public synchronized void byDaily(String dateYYYY_, int date) {
+		endDate = DateUtil.addDate(date, -365);
 		Set<String> codes = new HashSet<String>();
 		// setp1.get code
 		List<RzrqDaliy> l = new LinkedList<RzrqDaliy>();
@@ -197,7 +199,10 @@ public class RzrqSpider {
 			rzrq.setMr(data.getDouble("RZMRE"));
 			rzrq.setMc(data.getDouble("RZCHE"));
 			rzrq.setJmr(data.getDouble("RZJME"));
-			list.add(rzrq);
+
+			if (rzrq.getDate() >= endDate) {// 批处理，根据code获取历史的时候生效
+				list.add(rzrq);
+			}
 			return rzrq;
 //			String ye = CurrencyUitl.covertToString(data.getDouble("RZYE"));
 //			String mr = CurrencyUitl.covertToString(data.getDouble("RZMRE"));
@@ -214,6 +219,7 @@ public class RzrqSpider {
 	public synchronized void dofetchInnerByAll() {
 		try {
 			int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
+			endDate = DateUtil.addDate(date, -365);
 			List<RzrqDaliy> dzl = new LinkedList<RzrqDaliy>();
 			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 			int c = 0;
