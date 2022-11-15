@@ -83,15 +83,15 @@ public class RzrqSpider {
 		log.info("STEP3:done");
 	}
 
-	@javax.annotation.PostConstruct
-	public void test() {
-//		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
-		Set<String> codes = new HashSet<>();
-		codes.add("002029");
-		int date = 20221114;
-		exeRzrqTime(codes, date);
-		System.exit(0);
-	}
+//	@javax.annotation.PostConstruct
+//	public void test() {
+////		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
+//		Set<String> codes = new HashSet<>();
+//		codes.add("002029");
+//		int date = 20221114;
+//		exeRzrqTime(codes, date);
+//		System.exit(0);
+//	}
 
 	private double checkLine = 40.0;// 低于40%
 	private double plan2VaildLine = 30.0;// 超过平均数30%认为有效
