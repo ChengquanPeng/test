@@ -35,6 +35,7 @@ public class CodeModelController {
 		JsonResult r = new JsonResult();
 		try {
 			UserInfo l = (UserInfo) req.getSession().getAttribute(Constant.SESSION_USER);
+			mr.setCode(mr.getCode().trim());
 			r.setResult(modelWebService.getListForWeb(mr, querypage, l.getId()));
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
