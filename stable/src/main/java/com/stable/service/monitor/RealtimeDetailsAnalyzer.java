@@ -20,7 +20,7 @@ import lombok.extern.log4j.Log4j2;
 public class RealtimeDetailsAnalyzer implements Runnable {
 	private ConceptService conceptService;
 	public static final long ONE_MIN = 1 * 60 * 1000;// 1MIN
-	private static final long FIVE_MIN = 5 * 60 * 1000;// 5MIN
+	private static final long FIVE_MIN = 3 * 60 * 1000;// 5MIN
 	private static final long TEN_MIN = 10 * 60 * 1000;// 10MIN
 	private long WAIT_MIN = FIVE_MIN;
 	public String code;
