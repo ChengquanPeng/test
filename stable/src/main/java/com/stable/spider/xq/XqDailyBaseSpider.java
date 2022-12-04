@@ -232,12 +232,28 @@ public class XqDailyBaseSpider {
 							try {
 								b.setTotalShare(Double.valueOf(s.split(SPLIT)[1].replace(CurrencyUitl.YI, "")));
 							} catch (Exception e) {
+								try {
+									String w = s.split(SPLIT)[1].replace(CurrencyUitl.YI, "");
+									if (w.contains(CurrencyUitl.WAN)) {
+										b.setTotalShare(Double.valueOf(w.replace(CurrencyUitl.WAN, "")) * 10000);
+									}
+								} catch (Exception e2) {
+
+								}
 							}
 						} else if (s.contains(F8)) {// "floatShare";
 							// System.err.println(s.split(SPLIT)[1]);
 							try {
 								b.setFloatShare(Double.valueOf(s.split(SPLIT)[1].replace(CurrencyUitl.YI, "")));
 							} catch (Exception e) {
+								try {
+									String w = s.split(SPLIT)[1].replace(CurrencyUitl.YI, "");
+									if (w.contains(CurrencyUitl.WAN)) {
+										b.setFloatShare(Double.valueOf(w.replace(CurrencyUitl.WAN, "")) * 10000);
+									}
+								} catch (Exception e2) {
+
+								}
 							}
 						} else {
 						}
@@ -268,7 +284,7 @@ public class XqDailyBaseSpider {
 		XqDailyBaseSpider x = new XqDailyBaseSpider();
 		x.htmlunitSpider = new HtmlunitSpider();
 		DaliyBasicInfo2 b = new DaliyBasicInfo2();
-		b.setCode("600519");
+		b.setCode("603860");
 		System.err.println(x.dofetch(b, DateUtil.getTodayYYYYMMDD()));
 		System.err.println(b);
 	}
