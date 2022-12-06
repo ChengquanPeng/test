@@ -28,7 +28,7 @@ public class TushareSpider {
 	private RestTemplate restTemplate;
 	// private final String api = "http://api.tushare.pro";
 	@Value("${tushare.api}")
-	private String api = "http://api.waditu.com";
+	private String api = "http://api.tushare.pro";
 
 	/**
 	 * 格式化成tushare API所需格式
