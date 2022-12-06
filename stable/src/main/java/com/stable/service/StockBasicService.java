@@ -101,6 +101,7 @@ public class StockBasicService {
 		if (!db.isPresent()) {
 			StockBaseInfo sb = new StockBaseInfo();
 			sb.setCode(NO);
+			sb.setName(NO);
 			return sb;
 		}
 		return db.get();
