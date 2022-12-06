@@ -34,7 +34,7 @@ public class EveryWorkingDayJob extends MySimpleJob {
 //	private void a() {
 //		new Thread(new Runnable() {
 //			public void run() {
-//				line1();
+//				start();
 //			}
 //		}).start();
 //	}
