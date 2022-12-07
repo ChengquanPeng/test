@@ -728,8 +728,9 @@ public class DaliyTradeHistroyService {
 //	@javax.annotation.PostConstruct
 	public void genImgStart() {
 		String code = "603797";
+		int days = 3;
 		String filePath = "E:/" + code + ".jpg";
-		images(code, DateUtil.getTodayIntYYYYMMDD(), 4, filePath);
+		images(code, DateUtil.getTodayIntYYYYMMDD(), days, filePath);
 		System.exit(0);
 	}
 
@@ -776,6 +777,7 @@ public class DaliyTradeHistroyService {
 				bars.add(0, id);
 				System.err.println(id);
 			}
+			// 有两根重叠的现象是因为交易日期的问题。
 			CandlesTickChart.strt(filePath, stockBasicService.getCodeName2(code), bars, allNonTradedays);
 			// ImageUtil.generateImages(filePath, data);
 			// System.exit(0);
