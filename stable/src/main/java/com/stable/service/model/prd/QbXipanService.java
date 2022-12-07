@@ -229,7 +229,11 @@ public class QbXipanService {
 			try {
 				DaliyBasicInfo2 db = daliyBasicHistroyService.queryByCodeAndDate(chkday.getCode(), chkday.getDate());
 				double cjl = chkday.getVolume() * 100.0 / 10000.0;// 交易(万股)=手x100/10000;
-				double wg = db.getTotalShare() * 10000;
+				double totalshare = db.getTotalShare();
+				if (totalshare <= 0) {
+					totalshare = stockBasicService.getCode(chkday.getCode()).getTotalShare();
+				}
+				double wg = totalshare * 10000;
 				ch = CurrencyUitl.roundHalfUp(cjl / wg);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, chkday.getCode(), chkday.getDate(), "");

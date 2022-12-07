@@ -725,12 +725,17 @@ public class DaliyTradeHistroyService {
 		return queryLastfq(code, 0);
 	}
 
-	// @javax.annotation.PostConstruct
-	public void images() {
+//	@javax.annotation.PostConstruct
+	public void genImgStart() {
+		String code = "603797";
+		String filePath = "E:/" + code + ".jpg";
+		images(code, DateUtil.getTodayIntYYYYMMDD(), 4, filePath);
+		System.exit(0);
+	}
+
+	public void images(String code, int endDate, int days, String filePath) {
 		try {
-			String code = "600881";
-			int endDate = 20220610;
-			String filePath = "E:/" + code + ".jpg";
+			// String filePath = "E:/" + code + ".jpg";
 			List<TradeHistInfoDaliy> t = this.queryListByCodeQfq(code, 0, endDate, EsQueryPageUtil.queryPage120,
 					SortOrder.DESC);
 
@@ -758,7 +763,7 @@ public class DaliyTradeHistroyService {
 				}
 			}
 
-			for (int i = 0; i < 14; i++) {
+			for (int i = 0; i < days; i++) {
 				TradeHistInfoDaliy la = bars.get(0);
 				TradeHistInfoDaliy id = new TradeHistInfoDaliy();
 
@@ -773,6 +778,7 @@ public class DaliyTradeHistroyService {
 			}
 			CandlesTickChart.strt(filePath, stockBasicService.getCodeName2(code), bars, allNonTradedays);
 			// ImageUtil.generateImages(filePath, data);
+			// System.exit(0);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

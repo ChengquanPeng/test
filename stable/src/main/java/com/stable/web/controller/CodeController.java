@@ -1,6 +1,12 @@
 package com.stable.web.controller;
 
+import java.io.PrintWriter;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,11 +16,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
+import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.WebModelService;
 import com.stable.spider.eastmoney.EastmoneySpider;
 import com.stable.utils.CurrencyUitl;
+import com.stable.utils.DateUtil;
 import com.stable.utils.TagUtil;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.ForeignCapitalSum;
@@ -34,6 +42,10 @@ public class CodeController {
 	private ChipsZfService chipsZfService;
 	@Autowired
 	private FinanceService financeService;
+	@Autowired
+	private DaliyTradeHistroyService daliyTradeHistroyService;
+	@Value("${html.folder}")
+	private String htmlFolder;
 
 	/**
 	 * 个股当前状态
@@ -188,5 +200,42 @@ public class CodeController {
 		StringBuffer ykbm = new StringBuffer("");
 		financeService.getyjkb(code, fbi.getYear(), fbi.getQuarter(), ykbm);
 		model.addAttribute("kb", ykbm.toString());
+	}
+
+	/**
+	 * 图片
+	 */
+	@RequestMapping(value = "/genImg/{code}", method = RequestMethod.GET)
+	public void genImg(@PathVariable(value = "code") String code, String endDate, int days,
+			HttpServletResponse response) {
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html;charset=utf-8");
+
+		boolean isOk = false;
+		int date = DateUtil.getTodayIntYYYYMMDD();
+		String filepath = htmlFolder + code + ".jpg";
+		try {
+			if (StringUtils.isNotBlank(endDate)) {
+				date = Integer.valueOf(endDate);
+			}
+			daliyTradeHistroyService.images(code, date, days, filepath);
+			isOk = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		try {
+			PrintWriter w = response.getWriter();
+
+			if (isOk) {
+				w.write("<a href='http://183.56.196.175:9999/html/" + code + ".jpg'>code:" + code + ",endDate=" + date
+						+ ",days=" + days + ",now=" + System.currentTimeMillis());
+				w.write("</a>");
+			} else {
+				w.write(code + ",生成失败");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
