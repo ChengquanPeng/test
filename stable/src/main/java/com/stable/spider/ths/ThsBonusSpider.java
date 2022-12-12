@@ -406,15 +406,21 @@ public class ThsBonusSpider {
 	}
 
 	public static void main(String[] args) {
-//		ThsBonusSpider ts = new ThsBonusSpider();
-//		ts.htmlunitSpider = new HtmlunitSpider();
-//		List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
-//		List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
-//		List<FenHong> fhl = new LinkedList<FenHong>();
-//		List<BonusHist> bhl = new LinkedList<BonusHist>();
-//		ts.dofetchBonusInner(DateUtil.getTodayIntYYYYMMDD(), "002282", zfdl, zfsl, fhl, bhl);
-		BonusHist bh = new BonusHist();
-		bh.setRptYear("2020年报");
-		System.err.println(bh.getRptYear().endsWith("年报"));
+		ThsBonusSpider ts = new ThsBonusSpider();
+		ts.htmlunitSpider = new HtmlunitSpider();
+		List<ZengFaDetail> zfdl = new LinkedList<ZengFaDetail>();
+		List<ZengFaSummary> zfsl = new LinkedList<ZengFaSummary>();
+		List<FenHong> fhl = new LinkedList<FenHong>();
+		List<BonusHist> bhl = new LinkedList<BonusHist>();
+		List<ZengFa> zfl = new LinkedList<ZengFa>();
+		int oneWeekDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -7));// 一周之前
+		ts.dofetchBonusInner(DateUtil.getTodayIntYYYYMMDD(), "601228", zfdl, zfsl, fhl, bhl, zfl, oneWeekDate);
+		System.err.println(zfdl.size());
+		if (zfdl.size() > 0) {
+			System.err.println(zfdl.get(0));
+		}
+//		BonusHist bh = new BonusHist();
+//		bh.setRptYear("2020年报");
+//		System.err.println(bh.getRptYear().endsWith("年报"));
 	}
 }
