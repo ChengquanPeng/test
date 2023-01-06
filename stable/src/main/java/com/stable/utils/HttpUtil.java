@@ -1,17 +1,21 @@
 package com.stable.utils;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 
 import com.alibaba.fastjson.JSON;
@@ -23,12 +27,32 @@ public class HttpUtil {
 	private static final String AUTHORIZATION = "Authorization";
 	private static final String AUTHORIZATION_VALUE = "Basic bm9hdXRoOm5vYXV0aA==";
 	static final String UTF_8 = "UTF-8";
+	private static PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+
+	private static final CloseableHttpClient httpclient;
+	private static final HttpGet httpget;
+	private static final HttpPost httpPost;
+
+	static {
+		int tot = 500;
+		connectionManager.setMaxTotal(tot);
+		connectionManager.setDefaultMaxPerRoute(10);
+		System.setProperty("http.maxConnections", tot + "");
+		System.setProperty("http.keepAlive", "true");
+
+		// 创建http客户端
+		httpclient = HttpClients.custom().useSystemProperties().setConnectionManager(connectionManager)
+				.setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))
+				.setDefaultRequestConfig(RequestConfig.custom().build()).build();
+		// 初始化httpGet
+		httpget = new HttpGet();
+		httpPost = new HttpPost();
+	}
 
 	public static JSONObject doGet(String url) {
-		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
-		HttpGet httpget = new HttpGet(url);
 		JSONObject jsonObj = null;
 		try {
+			httpget.setURI(URI.create(url));
 			HttpResponse response = httpclient.execute(httpget);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
@@ -43,9 +67,8 @@ public class HttpUtil {
 	}
 
 	public static String doGet2(String url) {
-		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
-		HttpGet httpget = new HttpGet(url);
 		try {
+			httpget.setURI(URI.create(url));
 			HttpResponse response = httpclient.execute(httpget);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
@@ -58,9 +81,8 @@ public class HttpUtil {
 	}
 
 	public static String doGet2(String url, Map<String, String> header) {
-		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
-		HttpGet httpget = new HttpGet(url);
 		try {
+			httpget.setURI(URI.create(url));
 			if (header != null) {
 				header.keySet().forEach(key -> {
 					httpget.setHeader(key, header.get(key));
@@ -110,8 +132,7 @@ public class HttpUtil {
 	}
 
 	public static JSONObject doGet3(String url, Map<String, String> header) {
-		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
-		HttpGet httpget = new HttpGet(url);
+		httpget.setURI(URI.create(url));
 		JSONObject jsonObj = null;
 		try {
 			if (header != null) {
@@ -133,8 +154,7 @@ public class HttpUtil {
 	}
 
 	public static String doGet3_1(String url, Map<String, String> header) {
-		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
-		HttpGet httpget = new HttpGet(url);
+		httpget.setURI(URI.create(url));
 		try {
 			if (header != null) {
 				header.keySet().forEach(key -> {
@@ -154,8 +174,7 @@ public class HttpUtil {
 	}
 
 	public static JSONObject doPost(String url) {
-		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
-		HttpPost httpPost = new HttpPost(url);
+		httpPost.setURI(URI.create(url));
 		JSONObject jsonObj = null;
 		try {
 			httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
@@ -173,8 +192,7 @@ public class HttpUtil {
 	}
 
 	public static JSONObject doPost(String url, String json) {
-		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
-		HttpPost httpPost = new HttpPost(url);
+		httpPost.setURI(URI.create(url));
 		JSONObject jsonObj = null;
 		try {
 			httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
@@ -193,8 +211,7 @@ public class HttpUtil {
 	}
 
 	public static String doPost2(String url, String json) {
-		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
-		HttpPost httpPost = new HttpPost(url);
+		httpPost.setURI(URI.create(url));
 		try {
 			httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
 			httpPost.setEntity(new StringEntity(json, UTF_8));
