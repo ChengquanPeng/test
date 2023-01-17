@@ -30,8 +30,6 @@ public class HttpUtil {
 	private static PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
 
 	private static final CloseableHttpClient httpclient;
-	private static final HttpGet httpget;
-	private static final HttpPost httpPost;
 
 	static {
 		int tot = 500;
@@ -45,13 +43,12 @@ public class HttpUtil {
 				.setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))
 				.setDefaultRequestConfig(RequestConfig.custom().build()).build();
 		// 初始化httpGet
-		httpget = new HttpGet();
-		httpPost = new HttpPost();
 	}
 
 	public static JSONObject doGet(String url) {
 		JSONObject jsonObj = null;
 		try {
+			HttpGet httpget = new HttpGet();
 			httpget.setURI(URI.create(url));
 			HttpResponse response = httpclient.execute(httpget);
 			HttpEntity entity = response.getEntity();
@@ -68,6 +65,7 @@ public class HttpUtil {
 
 	public static String doGet2(String url) {
 		try {
+			HttpGet httpget = new HttpGet();
 			httpget.setURI(URI.create(url));
 			HttpResponse response = httpclient.execute(httpget);
 			HttpEntity entity = response.getEntity();
@@ -82,6 +80,7 @@ public class HttpUtil {
 
 	public static String doGet2(String url, Map<String, String> header) {
 		try {
+			HttpGet httpget = new HttpGet();
 			httpget.setURI(URI.create(url));
 			if (header != null) {
 				header.keySet().forEach(key -> {
@@ -132,6 +131,7 @@ public class HttpUtil {
 	}
 
 	public static JSONObject doGet3(String url, Map<String, String> header) {
+		HttpGet httpget = new HttpGet();
 		httpget.setURI(URI.create(url));
 		JSONObject jsonObj = null;
 		try {
@@ -154,6 +154,7 @@ public class HttpUtil {
 	}
 
 	public static String doGet3_1(String url, Map<String, String> header) {
+		HttpGet httpget = new HttpGet();
 		httpget.setURI(URI.create(url));
 		try {
 			if (header != null) {
@@ -174,6 +175,7 @@ public class HttpUtil {
 	}
 
 	public static JSONObject doPost(String url) {
+		HttpPost httpPost = new HttpPost();
 		httpPost.setURI(URI.create(url));
 		JSONObject jsonObj = null;
 		try {
@@ -192,6 +194,7 @@ public class HttpUtil {
 	}
 
 	public static JSONObject doPost(String url, String json) {
+		HttpPost httpPost = new HttpPost();
 		httpPost.setURI(URI.create(url));
 		JSONObject jsonObj = null;
 		try {
@@ -211,6 +214,7 @@ public class HttpUtil {
 	}
 
 	public static String doPost2(String url, String json) {
+		HttpPost httpPost = new HttpPost();
 		httpPost.setURI(URI.create(url));
 		try {
 			httpPost.setHeader(CONTENT_TYPE, APPLICATION_JSON);
