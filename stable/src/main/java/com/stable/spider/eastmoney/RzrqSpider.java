@@ -104,6 +104,7 @@ public class RzrqSpider {
 		List<CodeBaseModel2> update = new LinkedList<CodeBaseModel2>();
 		StringBuffer shootNotice3 = new StringBuffer();
 		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
+		boolean isY1 = false;
 		for (String code : codes) {
 			CodeBaseModel2 cbm = histMap.get(code);
 			if (cbm == null) {
@@ -113,14 +114,15 @@ public class RzrqSpider {
 			}
 			cbm.setRzrqRate(0);
 
+			isY1 = false;
 			if (TagUtil.isDibu11(cbm) && cbm.getMkv() <= 200.0 && date > cbm.getShooting30()) {
 				// 方案1:突然拉升的融资融券，散户没有时间买入,200亿以下
 				// 2：融资满足条件
 				// 3:涨幅在checkLine以下
-				cbm.setRzrqRate(rzrqService.plan2(code, startDate));
+				isY1 = rzrqService.plan2(code, startDate, cbm);
 			}
 
-			if (cbm.getRzrqRate() >= plan2VaildLine
+			if (isY1 && cbm.getRzrqRate() >= plan2VaildLine
 					&& sort1ModeService.xyIs30DayTodayPriceOk(code, date, checkLine, EsQueryPageUtil.queryPage30)) {
 				if (cbm.getShooting3() == 0) {
 					shootNotice3.append(stockBasicService.getCodeName2(code)).append(",");

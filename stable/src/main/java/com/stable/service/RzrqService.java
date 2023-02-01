@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.RzrqDaliyDao;
 import com.stable.utils.CurrencyUitl;
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.RzrqDaliy;
 
 /**
@@ -31,7 +32,8 @@ public class RzrqService {
 	Pageable pageable60 = PageRequest.of(EsQueryPageUtil.queryPage60.getPageNum(),
 			EsQueryPageUtil.queryPage60.getPageSize());
 
-	public double plan2(String code, int startDate) {
+	public boolean plan2(String code, int startDate, CodeBaseModel2 cbm) {
+		cbm.setRzrqRate(0.0);
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.rangeQuery("date").gte(startDate));
@@ -62,8 +64,12 @@ public class RzrqService {
 			}
 			double r2 = t2 / 20;
 
-			return CurrencyUitl.cutProfit(CurrencyUitl.roundHalfUp(r2), CurrencyUitl.roundHalfUp(r1));
+			cbm.setRzrqRate(CurrencyUitl.cutProfit(CurrencyUitl.roundHalfUp(r2), CurrencyUitl.roundHalfUp(r1)));
+			if (page.getContent().get(0).getBalance() >= CurrencyUitl.YI_N_DOUBLE) {
+				// 超过1亿
+				return true;
+			}
 		}
-		return 0.0;
+		return false;
 	}
 }
