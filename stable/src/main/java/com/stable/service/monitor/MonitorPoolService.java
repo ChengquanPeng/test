@@ -1,6 +1,5 @@
 package com.stable.service.monitor;
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,7 +83,7 @@ public class MonitorPoolService {
 	@Autowired
 	private ConceptService conceptService;
 	@Autowired
-	private DaliyTradeHistroyService daliyTradeHistroyService;
+	DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private ThsBonusSpider thsBonusSpider;
 	@Autowired
@@ -595,31 +594,32 @@ public class MonitorPoolService {
 
 	// 买点:地量
 	public void jobBuyLowVolWarning() {
-		List<UserInfo> ulist = userService.getUserListForMonitorS1();
-		for (UserInfo u : ulist) {
-			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 1, 0);
-			if (list != null) {
-				StringBuffer sb = new StringBuffer();
-				Integer today = DateUtil.getTodayIntYYYYMMDD();
-				for (MonitorPoolTemp mp : list) {
-					mp.setBuyLowVol(60);// 理论是上面的参数，临时默认60,TODO 1年后去掉本行
-					EsQueryPageReq req = new EsQueryPageReq(mp.getBuyLowVol());
-					List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(mp.getCode(),
-							0, today, req, SortOrder.DESC);
-					TradeHistInfoDaliyNofq tday = l2.get(0);
-					double l = l2.stream().min(Comparator.comparingDouble(TradeHistInfoDaliyNofq::getVolume)).get()
-							.getVolume();
-					double factor = CurrencyUitl.topPriceN(l, 1.03);
-					if (tday.getVolume() <= factor) {
-						sb.append(stockBasicService.getCodeName2(mp.getCode())).append("->").append(mp.getBuyLowVol())
-								.append("天").append(Constant.HTML_LINE);
-					}
-				}
-				if (sb.length() > 0) {
-					MsgPushServer.pushSystemHtmlT2("流动性地量", sb.toString(), u);
-				}
-			}
-		}
+		// 暂时取消
+//		List<UserInfo> ulist = userService.getUserListForMonitorS1();
+//		for (UserInfo u : ulist) {
+//			List<MonitorPoolTemp> list = getList(u.getId(), "", 0, 0, 0, 0, EsQueryPageUtil.queryPage9999, "", 0, 1, 0);
+//			if (list != null) {
+//				StringBuffer sb = new StringBuffer();
+//				Integer today = DateUtil.getTodayIntYYYYMMDD();
+//				for (MonitorPoolTemp mp : list) {
+//					mp.setBuyLowVol(60);// 理论是上面的参数，临时默认60,TODO 1年后去掉本行
+//					EsQueryPageReq req = new EsQueryPageReq(mp.getBuyLowVol());
+//					List<TradeHistInfoDaliyNofq> l2 = daliyTradeHistroyService.queryListByCodeWithLastNofq(mp.getCode(),
+//							0, today, req, SortOrder.DESC);
+//					TradeHistInfoDaliyNofq tday = l2.get(0);
+//					double l = l2.stream().min(java.util.Comparator.comparingDouble(TradeHistInfoDaliyNofq::getVolume)).get()
+//							.getVolume();
+//					double factor = CurrencyUitl.topPriceN(l, 1.03);
+//					if (tday.getVolume() <= factor) {
+//						sb.append(stockBasicService.getCodeName2(mp.getCode())).append("->").append(mp.getBuyLowVol())
+//								.append("天").append(Constant.HTML_LINE);
+//					}
+//				}
+//				if (sb.length() > 0) {
+//					MsgPushServer.pushSystemHtmlT2("流动性地量", sb.toString(), u);
+//				}
+//			}
+//		}
 	}
 
 	// 大宗交易
