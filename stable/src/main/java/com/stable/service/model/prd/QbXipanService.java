@@ -160,13 +160,18 @@ public class QbXipanService {
 							.sorted(Comparator.comparing(TradeHistInfoDaliy::getVolume).reversed())
 							.collect(Collectors.toList()).get(0).getDate();// 突破中最大的量
 
+					boolean isNotOK = true;
 					// 1.5.判断：如果放量是接近最大的那个，第一或者第二放量，则OK，否则放弃。
-					if (list3.get(0).getDate() != maxVolDate && list3.get(1).getDate() != maxVolDate) {
+					if (list3.size() > 0) {
 						// 最大的不是第一或者第二，没戏？
-						// System.err.println("Max:" + list4.get(0).getDate() + " -> " +
-						// list3.get(0).getDate() + ","
-						// + list3.get(1).getDate());
-					} else {
+						isNotOK = list3.get(0).getDate() != maxVolDate;
+						if (isNotOK && list3.size() > 1) {
+							isNotOK = list3.get(1).getDate() != maxVolDate;
+						}
+					}
+					// if (list3.get(0).getDate() != maxVolDate && list3.get(1).getDate() !=
+					// maxVolDate) {
+					if (!isNotOK) {
 
 						// 是否挖坑，
 						// 2.1找到放量日中，最低价格收盘价
