@@ -59,10 +59,11 @@ public class WxPushUtil {
 
 	private final static boolean pushMsg(int contentType, String content, String singleId, boolean showErrorLog) {
 		try {
+			content = content + env + DateUtil.getTodayYYYYMMDDHHMMSS();
 			Message message = new Message();
 			message.setAppToken(appToken);
 			message.setContentType(contentType);
-			message.setContent(content + env + DateUtil.getTodayYYYYMMDDHHMMSS());
+			message.setContent(content);
 			message.setUid(singleId);
 //			if (StringUtils.isNotBlank(singleId)) {
 //				
@@ -74,7 +75,7 @@ public class WxPushUtil {
 			List<MessageResult> lresult = result.getData();
 			// log.info("result:{}", lresult);
 			MessageResult mr = lresult.get(0);
-			log.info("微信推送内容:{},状态:{}", content, mr.getStatus());
+			log.info("微信推送内容:{},状态:{},Thread:{}", content, mr.getStatus(), Thread.currentThread().getId());
 			return true;
 		} catch (Exception e) {
 			if (showErrorLog) {

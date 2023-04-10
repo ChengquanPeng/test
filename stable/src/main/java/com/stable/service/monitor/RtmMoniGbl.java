@@ -26,6 +26,10 @@ public class RtmMoniGbl {
 	// 公共信息
 	public CodeBaseModelResp base;
 	public double price3m;
+	
+	public void addUser() {
+		
+	}
 
 	public RtmMoniGbl(CodeBaseModelResp resp) {
 		this.base = resp;
@@ -43,7 +47,7 @@ public class RtmMoniGbl {
 		if (u.getUserId() == Constant.MY_ID) {
 			return base.getBuyRea() + Constant.HTML_LINE + base.getZfjjInfo() + base.getRengong();
 		} else {
-			return u.getMsg();
+			return u.getMsg() == null ? "" : u.getMsg();
 		}
 	}
 }
