@@ -117,6 +117,7 @@ public class CodeModelService {
 
 	public int tradeDate = 0;
 	private int pre1Year = 0;// 一年以前
+	private int pre2Year = 0;// 一年以前
 	private int pre3Year = 0;// 三年以前
 	private int pre4Year = 0;// 四年以前
 	private double yzdzamt = 0.45 * WebModelService.WAN;
@@ -124,6 +125,7 @@ public class CodeModelService {
 	private synchronized void runByJobv2(int t) {
 		tradeDate = t;
 		pre1Year = DateUtil.getPreYear(tradeDate);
+		pre2Year = DateUtil.getPreYear(tradeDate, 2);
 		pre3Year = DateUtil.getPreYear(tradeDate, 3);
 		pre4Year = DateUtil.getPreYear(tradeDate, 4);
 
@@ -516,7 +518,8 @@ public class CodeModelService {
 		// 财务
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(code, tradeDate,
 				EsQueryPageUtil.queryPage8);
-		if (fbis == null || fbis.size() < EsQueryPageUtil.queryPage8.getPageSize()) {
+		if ((fbis == null || fbis.size() < EsQueryPageUtil.queryPage8.getPageSize())
+				&& stockBasicService.onlinePreYearChk(code, pre2Year)) {
 			ErrorLogFileUitl.writeError(
 					new RuntimeException("无最新财务数据,或者少于条数：" + EsQueryPageUtil.queryPage8.getPageSize()), code,
 					tradeDate + "", "Code Model错误");
