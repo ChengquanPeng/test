@@ -31,7 +31,7 @@ public class SendEamilService implements InitializingBean {
 
 	private String fromName;
 
-	public boolean pushSystemT1(String title, String content, String... toId) {
+	public synchronized boolean pushSystemT1(String title, String content, String... toId) {
 		try {
 			for (String u : toId) {
 				log.info(u);
@@ -51,7 +51,7 @@ public class SendEamilService implements InitializingBean {
 		return true;
 	}
 
-	public boolean pushSystemHtmlT2(String title, String content, String... toId) {
+	public synchronized boolean pushSystemHtmlT2(String title, String content, String... toId) {
 		MimeMessage mailMessage = javaMailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(mailMessage);// 需要借助Helper类
 		try {

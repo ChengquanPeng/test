@@ -582,6 +582,8 @@ public class WebModelService {
 			field = "bossInc";
 		} else if (orderBy == 21) {// 洗盘次数
 			field = "xipan";
+		} else if (orderBy == 22) {// 市净率
+			field = "pb";
 		}
 
 		FieldSortBuilder sort = SortBuilders.fieldSort(field).unmappedType("integer").order(order);

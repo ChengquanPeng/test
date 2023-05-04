@@ -4,7 +4,6 @@ package com.stable.service.model;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.sort.SortOrder;
@@ -31,6 +30,7 @@ import com.stable.utils.TagUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPoolTemp;
+import com.stable.vo.bus.OnlineMsg;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.http.req.ModelReq;
@@ -132,7 +132,7 @@ public class RunModelService {
 		printHtml(qbList, genListTe, xp);
 	}
 
-	public void printOnlineHtml(Map<String, String> warningCode) {
+	public void printOnlineHtml(List<OnlineMsg> list) {
 		String htmlnamet = "online.html";
 		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
 		StringBuffer sb = new StringBuffer();
@@ -142,16 +142,17 @@ public class RunModelService {
 		sb.append("<br/><table border='1' cellspacing='0' cellpadding='0'>");
 		// head
 		sb.append("<tr><th>序号</th><th>代码</th><th>推送消息</th><th>涨幅</th><th>股价</th></tr>");
-		if (warningCode != null && warningCode.size() > 0) {
-			int i = 0;
-			for (String code : warningCode.keySet()) {
+		int size = list.size();
+		if (size > 0) {
+			for (int j = 0; j < size; j++) {
+				OnlineMsg om = list.get(j);
+				String code = om.getCode();
 				RealTime rt = RealtimeCall.get(code);
-				sb.append("<tr><td>").append(i + 1).append("</td>");
+				sb.append("<tr><td>").append(om.getIndex()).append("</td>");
 				sb.append("<td>").append(stockBasicService.getCodeName2(code)).append("</td>");
-				sb.append("<td>").append(warningCode.get(code)).append("</td>");
+				sb.append("<td>").append(om.getTitle()).append("</td>");
 				sb.append("<td>").append(CurrencyUitl.cutProfit(rt.getYesterday(), rt.getNow())).append("%</td>");
 				sb.append("<td>").append(rt.getNow()).append("</td></tr>");
-				i++;
 			}
 		} else {
 			sb.append("<tr><td>无数据...</td></tr>");

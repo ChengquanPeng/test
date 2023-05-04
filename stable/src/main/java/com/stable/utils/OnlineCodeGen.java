@@ -1,16 +1,19 @@
 package com.stable.utils;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.stable.service.model.RunModelService;
+import com.stable.vo.bus.OnlineMsg;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class OnlineCodeGen {
-	private static final long WAIT_MIN = 30 * 60 * 1000;// 30MIN
-	Map<String, String> warningCode = new ConcurrentHashMap<String, String>();
+	private static final long WAIT_MIN = 6 * 60 * 1000;// 6MIN
 	public boolean isRunning = true;
 	public static boolean x7Chk = false;
 
@@ -25,7 +28,7 @@ public class OnlineCodeGen {
 				while (isRunning) {
 					try {
 						Thread.sleep(WAIT_MIN);
-						runModelService.printOnlineHtml(warningCode);
+						runModelService.printOnlineHtml(list);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -36,12 +39,23 @@ public class OnlineCodeGen {
 		new Thread(rtt2).start();
 	}
 
-	public void genMsg(String code, String title) {
-		String t = warningCode.get(code);
+	int index = 1;
+	List<OnlineMsg> list = Collections.synchronizedList(new LinkedList<>());
+	Map<String, OnlineMsg> warningCode = new ConcurrentHashMap<String, OnlineMsg>();
+
+	public synchronized void genMsg(String code, String title) {
+		OnlineMsg t = warningCode.get(code);
 		if (t != null) {
-			title = t + " , " + title;
+			title = t.getTitle() + " , " + title;
+		} else {
+			t = new OnlineMsg();
+			t.setCode(code);
+			t.setIndex(index);
+			t.setTitle(title);
+			index++;
+			list.add(t);
 		}
-		warningCode.put(code, title);
+		warningCode.put(code, t);
 	}
 
 	public void stop() {
