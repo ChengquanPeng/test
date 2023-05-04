@@ -361,7 +361,7 @@ public class TagUtil {
 		// 大宗
 		if (dh.getDzjy365d() > 0) {
 			sb5.append("1年内大宗:").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WebModelService.WAN))
-					.append("(占比:").append(dh.getDzjyp365d()).append("%,均价:").append(dh.getDzjyAvgPrice()).append(")");
+					.append("(除5%占比:").append(dh.getDzjyp365d()).append("%,均价:").append(dh.getDzjyAvgPrice()).append(")");
 			if (dh.getTagDzPriceLow() > 0) {
 				sb5.append(",低于均价:").append(dh.getTagDzPriceLow()).append("%");
 			}
