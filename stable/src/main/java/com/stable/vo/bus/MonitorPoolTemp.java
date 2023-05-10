@@ -104,4 +104,15 @@ public class MonitorPoolTemp extends EsBase {
 		}
 		return sb.toString();
 	}
+
+	public void reset0() {
+		if (this.monitor == 0) {
+			this.ykb = 0;
+			this.zfdone = 0;
+			this.holderNum = 0;
+			this.buyLowVol = 0;
+			this.dzjy = 0;
+			this.listenerGg = 0;
+		}
+	}
 }

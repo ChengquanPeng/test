@@ -427,6 +427,7 @@ public class CodeModelService {
 			newOne.setMoni(pool.getMonitor());
 		} else {
 			newOne.setMoni(0);
+			pool.reset0();// 重置监听
 		}
 		// 同步备注
 		pool.setRemark(newOne.getBuyRea());
