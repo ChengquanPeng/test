@@ -117,8 +117,8 @@
 			<div class="mg">
 				技术面:&nbsp;&nbsp;&nbsp;&nbsp;起爆:<input type="checkbox" id="qb" />&nbsp;&nbsp;大旗形:<input
 					type="checkbox" id="dibuqixing" />&nbsp;&nbsp;小旗形:<input
-					type="checkbox" id="dibuqixing2" />&nbsp;&nbsp; 洗盘起爆:<input
-					type="checkbox" id="qbXipan" />&nbsp;&nbsp; 洗盘:<input
+					type="checkbox" id="dibuqixing2" />&nbsp;&nbsp; N型洗盘:<input
+					type="checkbox" id="nxipan" />&nbsp;&nbsp; v1洗盘:<input
 					type="checkbox" id="xipan" />&nbsp;&nbsp;中阳十字星:<input
 					type="checkbox" id="zyxing" />&nbsp;&nbsp;成交异动:<input
 					type="checkbox" id="breakingVol" />&nbsp;&nbsp;K线攻击形态:<input
@@ -291,7 +291,7 @@
 									param.finBoss = 0;
 									param.finSusBoss = 0;
 									param.breakingVol = 0;
-									param.qbXipan = 0;
+									param.nxipan = 0;
 									param.xipan = 0;
 
 									if (document.getElementById("breakingVol").checked) {
@@ -318,8 +318,8 @@
 									if (document.getElementById("zyxing").checked) {
 										param.zyxing = 1;
 									}
-									if (document.getElementById("qbXipan").checked) {
-										param.qbXipan = 1;
+									if (document.getElementById("nxipan").checked) {
+										param.nxipan = 1;
 									}
 									if (document.getElementById("xipan").checked) {
 										param.xipan = 1;

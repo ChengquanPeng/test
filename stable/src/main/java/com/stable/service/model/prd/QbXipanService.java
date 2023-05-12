@@ -46,7 +46,7 @@ public class QbXipanService {
 			newOne.setHolderNumP5(50);
 			System.err.println("==========" + stockBasicService.getCodeName2(code) + "==========");
 			xipanQb(date, newOne, true);
-			System.err.println("Res ==========> " + (newOne.getQbXipan() > 0) + ",CNT:" + newOne.getXipan() + ","
+			System.err.println("Res ==========> " + (newOne.getXipan() > 0) + ",CNT:" + newOne.getXipan() + ","
 					+ newOne.getXipanHist());
 		}
 		System.exit(0);
@@ -70,7 +70,7 @@ public class QbXipanService {
 		}
 
 		List<TradeHistInfoDaliy> list5 = list.subList(3, 60).stream().filter(s -> s.getTodayChangeRate() > 0.0)
-				.collect(Collectors.toList());
+				.collect(Collectors.toList());// 去掉最新的2天
 		List<TradeHistInfoDaliy> lt1 = list5.stream().filter(s -> s.getTodayChangeRate() >= 5.0)
 				.collect(Collectors.toList());
 		List<TradeHistInfoDaliy> lt2 = list5.stream().filter(s -> s.getTodayChangeRate() >= 9.8)
@@ -214,7 +214,6 @@ public class QbXipanService {
 		}
 
 		if (isqb) {
-			newOne.setQbXipan(1);
 			newOne.setXipan(volDate.size());
 			newOne.setXipanHist(
 					volDate.stream().map(s -> String.valueOf(s.getDate())).collect(Collectors.joining(",")));
@@ -265,7 +264,6 @@ public class QbXipanService {
 		}
 		newOne.setXipan(0);
 		newOne.setXipanHist("");
-		newOne.setQbXipan(0);
 		newOne.setPrice3m(0);
 	}
 }

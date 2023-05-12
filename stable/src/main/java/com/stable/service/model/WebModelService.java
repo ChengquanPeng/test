@@ -461,8 +461,8 @@ public class WebModelService {
 		if (mr.getXipan() == 1) {// 洗盘次数
 			bqb.must(QueryBuilders.rangeQuery("xipan").gte(1));
 		}
-		if (mr.getQbXipan() == 1) {// 洗盘起爆
-			bqb.must(QueryBuilders.matchPhraseQuery("qbXipan", 1));
+		if (mr.getNxipan() == 1) {// 洗盘起爆
+			bqb.must(QueryBuilders.matchPhraseQuery("nxipan", 1));
 		}
 
 		if (StringUtils.isNotBlank(mr.getZfStatus())) {

@@ -144,11 +144,7 @@ public class TagUtil {
 			s = "小7";
 		}
 		if (p1.getXipan() > 0) {
-			s += "-洗盘";
-			if (p1.getQbXipan() > 0) {
-				s += "起爆";
-			}
-			s += ":" + p1.getXipan();
+			s += "-v1洗盘:" + p1.getXipan();
 		}
 		if (p1.getZyxing() > 0) {
 			s += "-10";
@@ -173,7 +169,7 @@ public class TagUtil {
 	public static String tagInfo(CodeBaseModel2 dh) {
 		StringBuffer tag = new StringBuffer("");
 		tag.append("<font color='red'>");
-		if (dh.getQb() > 0 || dh.getQbXipan() > 0) {
+		if (dh.getQb() > 0 || dh.getXipan() > 0) {
 			tag.append("起飞->");
 		}
 		if (dh.getDibuQixing() > 0) {
@@ -183,7 +179,7 @@ public class TagUtil {
 			tag.append("小旗形").append(dh.getDibuQixing2()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
 		}
 		if (dh.getXipan() > 0) {
-			tag.append("洗盘:").append(dh.getXipan()).append(",").append(dh.getXipanHist()).append(Constant.HTML_LINE);
+			tag.append("v1洗盘:").append(dh.getXipan()).append(",").append(dh.getXipanHist()).append(Constant.HTML_LINE);
 		}
 		if (dh.getZyxing() > 0) {
 			tag.append("中阳十字星").append(Constant.HTML_LINE);

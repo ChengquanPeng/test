@@ -77,5 +77,5 @@ public class ModelReq {
 	int bossInc;
 	double bossVal = 0;
 	int xipan = 0;
-	int qbXipan = 0;
+	int nxipan = 0;
 }

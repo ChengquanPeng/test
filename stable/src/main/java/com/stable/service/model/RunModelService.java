@@ -125,7 +125,7 @@ public class RunModelService {
 		List<CodeBaseModel2> genListTe = webModelService.getList(mr2, EsQueryPageUtil.queryPage9999);
 
 		ModelReq mr3 = new ModelReq();
-		mr3.setQbXipan(1);
+		mr3.setXipan(1);
 		mr3.setPls(3);
 		List<CodeBaseModel2> xp = webModelService.getList(mr3, EsQueryPageUtil.queryPage9999);
 

@@ -80,9 +80,9 @@ public class CodeBaseModel2 extends EsBase {
 	private int breakingVol = 0;// 放量
 
 	@Field(type = FieldType.Integer)
-	private int qbXipan = 0;// 洗盘起爆
+	private int nxipan = 0;// v1洗盘次数
 	@Field(type = FieldType.Integer)
-	private int xipan = 0;// 洗盘次数
+	private int xipan = 0;// v1洗盘次数
 	@Field(type = FieldType.Text)
 	private String xipanHist;// 洗盘历史
 
