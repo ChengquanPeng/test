@@ -16,6 +16,7 @@ import com.stable.service.StockBasicService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.prd.V1XipanService;
+import com.stable.service.model.prd.NxService;
 import com.stable.service.model.prd.QxService;
 import com.stable.service.model.prd.msg.BizPushService;
 import com.stable.service.monitor.MonitorPoolService;
@@ -58,7 +59,9 @@ public class CodeModelKLineService {
 	@Autowired
 	private BizPushService bizPushService;
 	@Autowired
-	private V1XipanService qbXipanService;
+	private V1XipanService v1XipanService;
+	@Autowired
+	private NxService nxService;
 
 	public synchronized void runKLineModel1(int date) {
 //		if (!tradeCalService.isOpen(date)) {
@@ -197,11 +200,13 @@ public class CodeModelKLineService {
 			qbQxService.setQxRes(newOne, pool, true, true);
 			qbQxService.setSzxRes(newOne, pool);
 			newOne.setZyxingt(0);
-			qbXipanService.resetXiPan(newOne);
+			v1XipanService.resetXiPan(newOne);
+			nxService.resetNxiPan(newOne);
 		} else {
 			try {
 				qbQxService.qixingQb(tradeDate, newOne, pool, isSamll, qx, szx, yds);
-				qbXipanService.xipanQb(tradeDate, newOne, isSamll);
+				v1XipanService.xipanQb(tradeDate, newOne, isSamll);
+				nxService.nxipan(tradeDate, newOne, mkv);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), tradeDate + "", "起爆");
 			}

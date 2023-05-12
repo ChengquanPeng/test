@@ -28,6 +28,23 @@ public class TagUtil {
 		return true;
 	}
 
+	public static boolean stockRangeNx(CodeBaseModel2 cbm, double mkv) {
+		// 1.排除的
+		if (cbm.getPls() == 2) {
+			return false;
+		}
+		// 2.200亿市值以下
+		if (TagUtil.mkvChk(mkv, cbm.getActMkv(), 200) && isDibu21(cbm) && cbm.getHolderNumP5() > 0
+				&& cbm.getHolderNumP5() > 30.0) {
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean mkvChk(double mkv, double actMkv, double limitAck) {
+		return (mkv <= limitAck || actMkv <= limitAck);
+	}
+
 	// 底部2-1
 	public static boolean isDibu21(CodeBaseModel2 cbm) {
 		return cbm.getZfjjup() >= 2 && cbm.getZfjjupStable() >= 1;
@@ -357,7 +374,8 @@ public class TagUtil {
 		// 大宗
 		if (dh.getDzjy365d() > 0) {
 			sb5.append("1年内大宗:").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WebModelService.WAN))
-					.append("(除5%占比:").append(dh.getDzjyp365d()).append("%,均价:").append(dh.getDzjyAvgPrice()).append(")");
+					.append("(除5%占比:").append(dh.getDzjyp365d()).append("%,均价:").append(dh.getDzjyAvgPrice())
+					.append(")");
 			if (dh.getTagDzPriceLow() > 0) {
 				sb5.append(",低于均价:").append(dh.getTagDzPriceLow()).append("%");
 			}

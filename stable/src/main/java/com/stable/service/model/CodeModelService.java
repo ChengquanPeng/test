@@ -435,7 +435,7 @@ public class CodeModelService {
 
 	// 小市值股票(流通市值小于70亿，5%以下的流通小于50亿)
 	public boolean isSmallStock(double mkv, double actMkv) {
-		return (mkv <= smallStocklimit || actMkv <= smallStocklimitAck);
+		return TagUtil.mkvChk(mkv, actMkv, smallStocklimitAck);
 	}
 
 	// 周末计算-至少N年未大涨?
