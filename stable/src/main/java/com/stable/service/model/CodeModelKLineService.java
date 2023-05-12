@@ -15,8 +15,8 @@ import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
-import com.stable.service.model.prd.QbXipanService;
-import com.stable.service.model.prd.QbQxService;
+import com.stable.service.model.prd.V1XipanService;
+import com.stable.service.model.prd.QxService;
 import com.stable.service.model.prd.msg.BizPushService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
@@ -52,13 +52,13 @@ public class CodeModelKLineService {
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
 	@Autowired
-	private QbQxService qbQxService;
+	private QxService qbQxService;
 	@Autowired
 	private CodeModelService codeModelService;
 	@Autowired
 	private BizPushService bizPushService;
 	@Autowired
-	private QbXipanService qbXipanService;
+	private V1XipanService qbXipanService;
 
 	public synchronized void runKLineModel1(int date) {
 //		if (!tradeCalService.isOpen(date)) {

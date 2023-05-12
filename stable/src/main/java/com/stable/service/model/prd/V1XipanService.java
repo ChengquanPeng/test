@@ -22,7 +22,7 @@ import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 
 @Service
-public class QbXipanService {
+public class V1XipanService {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
