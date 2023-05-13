@@ -129,7 +129,12 @@ public class RunModelService {
 		mr3.setPls(3);
 		List<CodeBaseModel2> xp = webModelService.getList(mr3, EsQueryPageUtil.queryPage9999);
 
-		printHtml(qbList, genListTe, xp);
+		ModelReq mr4 = new ModelReq();
+		mr4.setNxipan(1);
+		mr4.setPls(3);
+		List<CodeBaseModel2> nxp = webModelService.getList(mr4, EsQueryPageUtil.queryPage9999);
+
+		printHtml(qbList, genListTe, xp, nxp);
 	}
 
 	public void printOnlineHtml(List<OnlineMsg> list) {
@@ -157,12 +162,13 @@ public class RunModelService {
 		} else {
 			sb.append("<tr><td>无数据...</td></tr>");
 		}
-		fw.writeLine(sb.toString());
 		sb.append("</table>");// end
+		fw.writeLine(sb.toString());
 		fw.close();
 	}
 
-	private void printHtml(List<CodeBaseModel2> qbList, List<CodeBaseModel2> genListTe, List<CodeBaseModel2> xp) {
+	private void printHtml(List<CodeBaseModel2> qbList, List<CodeBaseModel2> genListTe, List<CodeBaseModel2> xp,
+			List<CodeBaseModel2> nxp) {
 		String htmlnamet = "qf.html";
 		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
 		StringBuffer sb = new StringBuffer();
@@ -179,11 +185,11 @@ public class RunModelService {
 		sb.append(this.getHtml(genListTe, true));
 		fw.writeLine(sb.toString());
 
-		List<CodeBaseModel2> ren = new LinkedList<CodeBaseModel2>();
-		List<CodeBaseModel2> dq = new LinkedList<CodeBaseModel2>();
-		List<CodeBaseModel2> xq = new LinkedList<CodeBaseModel2>();
-		List<CodeBaseModel2> dpiao = new LinkedList<CodeBaseModel2>();
-		List<CodeBaseModel2> other = new LinkedList<CodeBaseModel2>();
+		List<CodeBaseModel2> ren = new LinkedList<CodeBaseModel2>();// 人工
+		List<CodeBaseModel2> dq = new LinkedList<CodeBaseModel2>();// 大旗形
+		List<CodeBaseModel2> xq = new LinkedList<CodeBaseModel2>();// 小旗形
+		List<CodeBaseModel2> dpiao = new LinkedList<CodeBaseModel2>();// 底部未涨大票
+		List<CodeBaseModel2> other = new LinkedList<CodeBaseModel2>();// 其他
 		List<CodeBaseModel2> all = new LinkedList<CodeBaseModel2>();
 
 		for (CodeBaseModel2 c : qbList) {
@@ -202,17 +208,19 @@ public class RunModelService {
 		all.addAll(ren);
 		all.addAll(dq);
 		all.addAll(xq);
-		all.addAll(other);
 		all.addAll(dpiao);
+		all.addAll(other);
 
 		sb = new StringBuffer();
-		sb.append(this.getHtml(all, false));
+		sb.append(this.getHtml(nxp, false));// N型洗盘
 		fw.writeLine(sb.toString());
 
 		sb = new StringBuffer();
-		sb.append(this.getHtml(xp, false));
+		sb.append(this.getHtml(all, false));// 其他
 		fw.writeLine(sb.toString());
 
+		sb = new StringBuffer();
+		sb.append(this.getHtml(xp, false));// v1洗盘
 		sb.append("</table>");// end
 		fw.writeLine(sb.toString());
 		fw.close();

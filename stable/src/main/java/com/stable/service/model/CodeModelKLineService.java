@@ -15,10 +15,9 @@ import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
-import com.stable.service.model.prd.V1XipanService;
 import com.stable.service.model.prd.NxService;
 import com.stable.service.model.prd.QxService;
-import com.stable.service.model.prd.msg.BizPushService;
+import com.stable.service.model.prd.V1XipanService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -57,8 +56,6 @@ public class CodeModelKLineService {
 	@Autowired
 	private CodeModelService codeModelService;
 	@Autowired
-	private BizPushService bizPushService;
-	@Autowired
 	private V1XipanService v1XipanService;
 	@Autowired
 	private NxService nxService;
@@ -94,15 +91,15 @@ public class CodeModelKLineService {
 		if (poolList.size() > 0) {
 			monitorPoolDao.saveAll(poolList);
 		}
-		if (szx.length() > 0) {
-			// bizPushService.PushS2("今日十字星", szx.toString());
-		}
-		if (qx.length() > 0) {
-			bizPushService.PushS2("今日最新旗形", qx.toString());
-		}
-		if (yds.length() > 0) {
-			// MsgPushServer.pushSystemT1("今日成交量异动:", yds.toString());
-		}
+		// if (szx.length() > 0) {
+		// bizPushService.PushS2("今日十字星", szx.toString());
+		// }
+		// if (qx.length() > 0) {
+		// bizPushService.PushS2("今日最新旗形", qx.toString());
+		// }
+		// if (yds.length() > 0) {
+		// MsgPushServer.pushSystemT1("今日成交量异动:", yds.toString());
+		// }
 
 		log.info("KLine基本完成");
 	}
