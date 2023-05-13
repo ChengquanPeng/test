@@ -93,7 +93,7 @@ public class NxService {
 				} else {
 
 					// 连续洗盘N天
-					if (inc >= 3) {
+					if (inc >= 4) {
 						datesXi.add(datet);
 						incstr.add(datet + ":" + inc);
 						// System.err.println(incstr.getLast());
