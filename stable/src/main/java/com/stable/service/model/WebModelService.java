@@ -458,10 +458,10 @@ public class WebModelService {
 		if (mr.getBreakingVol() == 1) {// 成交量异动
 			bqb.must(QueryBuilders.rangeQuery("breakingVol").gte(1));
 		}
-		if (mr.getXipan() == 1) {// 洗盘次数
+		if (mr.getXipan() == 1) {// v1洗盘+次数
 			bqb.must(QueryBuilders.rangeQuery("xipan").gte(1));
 		}
-		if (mr.getNxipan() == 1) {// 洗盘起爆
+		if (mr.getNxipan() == 1) {// N型洗盘
 			bqb.must(QueryBuilders.matchPhraseQuery("nxipan", 1));
 		}
 

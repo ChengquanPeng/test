@@ -163,6 +163,9 @@ public class TagUtil {
 		if (p1.getXipan() > 0) {
 			s += "-v1洗盘:" + p1.getXipan();
 		}
+		if (p1.getNxipan() > 0) {
+			s += "-N型洗盘:" + p1.getNxipan();
+		}
 		if (p1.getZyxing() > 0) {
 			s += "-10";
 		}
@@ -186,8 +189,11 @@ public class TagUtil {
 	public static String tagInfo(CodeBaseModel2 dh) {
 		StringBuffer tag = new StringBuffer("");
 		tag.append("<font color='red'>");
-		if (dh.getQb() > 0 || dh.getXipan() > 0) {
+		if (dh.getQb() > 0 || dh.getXipan() > 0 || dh.getNxipan() > 0) {
 			tag.append("起飞->");
+		}
+		if (dh.getNxipan() > 0) {
+			tag.append("N型洗盘:").append(dh.getNxipanHist()).append(Constant.HTML_LINE);
 		}
 		if (dh.getDibuQixing() > 0) {
 			tag.append("大旗形").append(dh.getDibuQixing()).append(dh.getQixingStr()).append(Constant.HTML_LINE);

@@ -51,7 +51,6 @@ public class NxService {
 
 	/** 起爆-Pre突破 */
 	public void nxipan(int date, CodeBaseModel2 newOne, double mkv) {
-		// TODO TagUtil.stockRange(isSamll, newOne)
 		if (!TagUtil.stockRangeNx(newOne, mkv)) {
 			this.resetNxiPan(newOne);
 			return;
@@ -131,9 +130,10 @@ public class NxService {
 		}
 		if (isqb) {
 			newOne.setNxipan(1);
-			// TODO
-			System.err.println(datesLa.stream().map(s -> String.valueOf(s)).collect(Collectors.joining(",")) + "|"
-					+ incstr.stream().map(s -> s).collect(Collectors.joining(",")));
+			String s1 = datesLa.stream().map(s -> String.valueOf(s)).collect(Collectors.joining(",")) + "|"
+					+ incstr.stream().map(s -> s).collect(Collectors.joining(","));
+			newOne.setNxipanHist(s1);
+			//System.err.println(s1);
 		} else {
 			resetNxiPan(newOne);
 		}
@@ -141,6 +141,7 @@ public class NxService {
 
 	public void resetNxiPan(CodeBaseModel2 newOne) {
 		newOne.setNxipan(0);
+		newOne.setNxipanHist("");
 		// newOne.setPrice3m(0);
 	}
 }
