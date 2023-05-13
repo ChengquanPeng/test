@@ -46,8 +46,8 @@ public class NxService {
 		System.exit(0);
 	}
 
-	List<Integer> datesXi = new LinkedList<Integer>();
-	List<Integer> datesLa = new LinkedList<Integer>();
+	LinkedList<Integer> datesXi = new LinkedList<Integer>();
+	LinkedList<Integer> datesLa = new LinkedList<Integer>();
 	LinkedList<String> incstr = new LinkedList<String>();
 
 	/** 起爆-Pre突破 */
@@ -83,6 +83,7 @@ public class NxService {
 			datesXi.clear();
 			datesLa.clear();
 			incstr.clear();
+			// -找出连续下跌3、4天的洗盘票
 			for (int i = list.size() - 1; i >= 0; i--) {
 				TradeHistInfoDaliy t = list.get(i);
 				if (t.getTodayChangeRate() < 0) {
@@ -91,7 +92,8 @@ public class NxService {
 					inc++;
 				} else {
 
-					if (inc >= 4) {
+					// 连续洗盘N天
+					if (inc >= 3) {
 						datesXi.add(datet);
 						incstr.add(datet + ":" + inc);
 						// System.err.println(incstr.getLast());
@@ -102,6 +104,8 @@ public class NxService {
 					datet = t.getDate();
 				}
 			}
+
+			// -找出连续3天上涨超过15%的拉伸票
 			List<TradeHistInfoDaliy> rates = new LinkedList<TradeHistInfoDaliy>();
 			for (int i = list.size() - 1; i >= 0; i--) {
 				rates.add(list.get(i));
@@ -114,20 +118,38 @@ public class NxService {
 						int la = rates.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
 								.getDate();
 						// System.err.println(la);
-						datesLa.add(la);
-					}
-				}
-
-				if (datesLa.size() > 0) {
-					for (int lad : datesLa) {
-						for (int xid : datesXi) {
-							if (lad <= xid) {
-								isqb = true;
-							}
+						if (!datesLa.contains(la)) {
+							datesLa.add(la);
 						}
 					}
 				}
 			}
+			// -找出拉伸后有洗盘的情况
+			// int chkLadate = 0;
+			// int chkXidate = 0;
+			if (datesLa.size() > 0) {
+				for (int k = datesLa.size() - 1; k >= 0; k--) {// 最后拉升开始匹配
+					int lad = datesLa.get(k);
+					// System.err.println("chk:" + lad);
+					for (int xid : datesXi) {
+						// System.err.println("xid:" + xid);
+						if (lad <= xid) {
+							isqb = true;
+							// chkLadate = lad;
+							// chkXidate = xid;
+							break;
+						}
+					}
+					if (isqb) {
+						break;
+					}
+				}
+			}
+			// 洗盘不超过最高
+			// if (isqb) {
+			// System.err.println("chkLadate:" + chkLadate);
+			// System.err.println("chkXidate:" + chkXidate);
+			// }
 		}
 		if (isqb) {
 			newOne.setNxipan(1);

@@ -269,20 +269,22 @@ public class CodeModelKLineService {
 	public void test() {
 		new Thread(new Runnable() {
 			public void run() {
-				tradeDate = 20230512;
+				int tradeDate1 = 20230512;
+				int pre1Year1 = DateUtil.getPreYear(tradeDate1);
 				List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
 				Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
 				List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
 				for (StockBaseInfo s : codelist) {
 					try {
-						if (stockBasicService.onlinePreYearChk(s.getCode(), pre1Year)) {
+						log.info("KLine init:{}", s.getCode());
+						if (stockBasicService.onlinePreYearChk(s.getCode(), pre1Year1)) {
 							CodeBaseModel2 newOne = histMap.get(s.getCode());
 							if (newOne == null) {
 								newOne = new CodeBaseModel2();
 								newOne.setId(s.getCode());
 								newOne.setCode(s.getCode());
 							}
-							nxService.nxipan(tradeDate, newOne);
+							nxService.nxipan(tradeDate1, newOne);
 							if (newOne.getNxipan() == 1) {
 								listLast.add(newOne);
 							}
@@ -294,6 +296,7 @@ public class CodeModelKLineService {
 				if (listLast.size() > 0) {
 					codeBaseModel2Dao.saveAll(listLast);
 				}
+				log.info("done init:{}", listLast.size());
 			}
 		}).start();
 	}
