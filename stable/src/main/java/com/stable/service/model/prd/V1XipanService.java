@@ -263,6 +263,10 @@ public class V1XipanService {
 		}
 		newOne.setXipan(0);
 		newOne.setXipanHist("");
-		newOne.setPrice3m(0);
+
+		// V1XipanService 可能存在了设置，所以先判断
+		if (newOne.getNxipan() <= 0) {
+			newOne.setPrice3m(0);
+		}
 	}
 }

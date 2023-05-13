@@ -157,6 +157,10 @@ public class NxService {
 					+ incstr.stream().map(s -> s).collect(Collectors.joining(","));
 			newOne.setNxipanHist(s1);
 			// System.err.println(s1);
+			if (newOne.getPrice3m() <= 0) {
+				newOne.setPrice3m(
+						list5.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get().getHigh());
+			}
 		} else {
 			resetNxiPan(newOne);
 		}
@@ -165,6 +169,10 @@ public class NxService {
 	public void resetNxiPan(CodeBaseModel2 newOne) {
 		newOne.setNxipan(0);
 		newOne.setNxipanHist("");
-		// newOne.setPrice3m(0);
+
+		// V1XipanService 可能存在了设置，所以先判断
+		if (newOne.getXipan() <= 0) {
+			newOne.setPrice3m(0);
+		}
 	}
 }
