@@ -172,7 +172,6 @@ public class V1XipanService {
 					// if (list3.get(0).getDate() != maxVolDate && list3.get(1).getDate() !=
 					// maxVolDate) {
 					if (!isNotOK) {
-
 						// 是否挖坑，
 						// 2.1找到放量日中，最低价格收盘价
 						double chkPrice = volDate.stream()
