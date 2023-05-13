@@ -26,14 +26,18 @@ public class RtmMoniGbl {
 	// 公共信息
 	public CodeBaseModelResp base;
 	public double price3m;
-	
+	public double price3mYellow;
+
 	public void addUser() {
-		
+
 	}
 
 	public RtmMoniGbl(CodeBaseModelResp resp) {
 		this.base = resp;
 		this.price3m = resp.getPrice3m();
+		if (price3m > 0) {
+			price3mYellow = CurrencyUitl.roundHalfUp((orig.getShotPointPrice() * 0.96));
+		}
 	}
 
 	public void setServiceAndPrew(BizPushService bizs, MonitorPoolTemp orig) {

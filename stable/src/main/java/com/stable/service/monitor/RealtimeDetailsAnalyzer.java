@@ -36,6 +36,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean burstPointCheckSzx = false;// 十字星
 	private boolean burstPointCheckRg = false;// 人工
 	private boolean highPriceGot = false;
+	private boolean highPriceGotYellow = false;
 
 	public void stop() {
 		isRunning = false;
@@ -155,10 +156,15 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						ocg.genMsg(code, title2);
 					}
 					// 洗盘突破3个月
+
 					if (rt.getHigh() > rtm.price3m && !highPriceGot && rtm.price3m > 0) {
 						String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase())
-								+ "][洗盘突破-新高(3month)]! ";
+								+ "][洗盘突破-新高(3month)] ";
 						highPriceGot = rtm.bizPushService.PushS2(title2, getBaseInfo());
+						ocg.genMsg(code, title2);
+					} else if (rt.getHigh() > rtm.price3mYellow && !highPriceGotYellow && rtm.price3mYellow > 0) {
+						String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "] 准备突破  ";
+						highPriceGotYellow = rtm.bizPushService.PushS2(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
 					}
 
