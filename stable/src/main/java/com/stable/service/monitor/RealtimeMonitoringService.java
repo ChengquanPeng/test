@@ -80,7 +80,6 @@ public class RealtimeMonitoringService {
 		}
 		OnlineCodeGen ocg = new OnlineCodeGen(runModelService);
 		try {
-
 			HashMap<String, RtmMoniGbl> allmap = new HashMap<String, RtmMoniGbl>();
 			// 起爆点监听
 			Set<MonitorPoolTemp> tl2 = monitorPoolService.getMyQibao();
@@ -135,6 +134,7 @@ public class RealtimeMonitoringService {
 			List<RealtimeDetailsAnalyzer> list = new LinkedList<RealtimeDetailsAnalyzer>();
 			int failtt = 0;
 			if (allmap.size() > 0) {
+				bizPushService.initUser();
 				// ====启动监听线程====
 				map = new ConcurrentHashMap<String, RealtimeDetailsAnalyzer>();
 				for (String code : allmap.keySet()) {
@@ -176,6 +176,7 @@ public class RealtimeMonitoringService {
 				t.stop();
 			}
 			ocg.stop();
+			bizPushService.removeUser();
 
 			// 停止线程
 			// prd1m.stop();

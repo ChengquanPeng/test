@@ -132,13 +132,13 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						if (rt.getHigh() >= rtm.getOrig().getShotPointPrice()) {
 							String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]突破买点:"
 									+ rtm.getOrig().getShotPointPrice();
-							burstPointCheckTop = rtm.bizPushService.PushS2(title2, getBaseInfo());
+							burstPointCheckTop = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 							ocg.genMsg(code, title2);
 						} else if (OnlineCodeGen.x7Chk && !burstPointCheckTopPrew
 								&& rt.getHigh() >= rtm.warningYellow) {
 							String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]准备突破买点:"
 									+ rtm.getOrig().getShotPointPrice() + "现价:" + rt.getBuy1();
-							burstPointCheckTopPrew = rtm.bizPushService.PushS2(title2, getBaseInfo());
+							burstPointCheckTopPrew = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 							ocg.genMsg(code, title2);
 						}
 					}
@@ -146,13 +146,13 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 							&& rt.getHigh() >= rtm.getOrig().getShotPointPriceSzx()) {
 						String title2 = codeName + rtm.you + " [" + TagUtil.getXiPan(rtm.getBase()) + "]突破买点:"
 								+ rtm.getOrig().getShotPointPriceSzx();
-						burstPointCheckSzx = rtm.bizPushService.PushS2(title2, getBaseInfo());
+						burstPointCheckSzx = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
 					}
 					if (!burstPointCheckRg && rtm.getOrig().getRgqbPrice() > 0
 							&& rt.getHigh() >= rtm.getOrig().getRgqbPrice()) {
 						String title2 = codeName + rtm.you + " 人工买点:" + rtm.getOrig().getRgqbPrice();
-						burstPointCheckRg = rtm.bizPushService.PushS2(title2, getBaseInfo());
+						burstPointCheckRg = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
 					}
 					// 洗盘突破3个月
@@ -160,11 +160,11 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					if (rt.getHigh() > rtm.price3m && !highPriceGot && rtm.price3m > 0) {
 						String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase())
 								+ "][洗盘突破-新高(3month)] ";
-						highPriceGot = rtm.bizPushService.PushS2(title2, getBaseInfo());
+						highPriceGot = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
 					} else if (rt.getHigh() > rtm.price3mYellow && !highPriceGotYellow && rtm.price3mYellow > 0) {
 						String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "] 准备突破  ";
-						highPriceGotYellow = rtm.bizPushService.PushS2(title2, getBaseInfo());
+						highPriceGotYellow = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
 					}
 

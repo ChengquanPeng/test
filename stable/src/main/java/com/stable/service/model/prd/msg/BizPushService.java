@@ -1,5 +1,6 @@
 package com.stable.service.model.prd.msg;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,21 @@ public class BizPushService {
 	@Autowired
 	private UserService userService;
 
-	public boolean PushS2(String title, String msg) {
-		List<UserInfo> users = userService.getUserListForMonitorS2();
+	List<UserInfo> users = new LinkedList<UserInfo>();
+
+	public void initUser() {
+		users = userService.getUserListForMonitorS2();
+	}
+
+	public void removeUser() {
+		users = new LinkedList<UserInfo>();
+	}
+
+	public boolean pushS2Realtime(String title, String msg) {
+		return MsgPushServer.pushSystemHtmlBatch(title, msg, userService.getUserListForMonitorS2());
+	}
+
+	public boolean pushS2ForTradeTime(String title, String msg) {
 		return MsgPushServer.pushSystemHtmlBatch(title, msg, users);
 	}
 

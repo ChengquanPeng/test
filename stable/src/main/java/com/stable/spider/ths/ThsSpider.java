@@ -278,7 +278,7 @@ public class ThsSpider {
 			saveConcept(list);
 		}
 		if (newGn.length() > 0) {
-			bizPushService.PushS2("同花顺获取到新概念:" + newGn.toString(), "");
+			bizPushService.pushS2Realtime("同花顺获取到新概念:" + newGn.toString(), "");
 		}
 		log.info("同花顺板块同步成功,同步概念[" + cntList + "],概念相关股票[" + cntCodelist + "]"
 				+ (newGn.length() > 0 ? ",获取到新概念:" + newGn.toString() : ""));
