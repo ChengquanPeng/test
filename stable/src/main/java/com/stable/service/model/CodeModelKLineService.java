@@ -134,29 +134,7 @@ public class CodeModelKLineService {
 			newOne.setCode(code);
 		}
 		listLast.add(newOne);
-		// 最新收盘情况
-		DaliyBasicInfo2 lastTrade = daliyBasicHistroyService.queryLastest(code, 0, 0);
-		if (lastTrade == null) {
-			lastTrade = new DaliyBasicInfo2();
-		}
-		double mkv = lastTrade.getCircMarketVal();// 流通市值
-		newOne.setPb(lastTrade.getPb());// 市盈率ttm
-		newOne.setPettm(lastTrade.getPeTtm());// 市盈率ttm
 
-		if (mkv <= 0) {
-			ErrorLogFileUitl.writeError(null, code + "," + s.getName() + ",无最新流通市值mkv", tradeDate + "", "");
-			DaliyBasicInfo2 ltt = daliyBasicHistroyService.queryLastest(code, 0, 1);
-			if (ltt != null) {
-				mkv = ltt.getCircMarketVal();
-			}
-		}
-		// 市值-死筹计算
-		newOne.setMkv(mkv);
-		if (mkv > 0 && s.getCircZb() > 0) {// 5%以下的流通股份
-			newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (100 - s.getCircZb()) / 100)));
-		} else {
-			newOne.setActMkv(mkv);
-		}
 		// N年未大涨
 		noup(online4Year, newOne, s.getList_date());
 		// ==============技术面-量价==============
@@ -183,8 +161,8 @@ public class CodeModelKLineService {
 		// sortModel(newOne, tradeDate);
 		// 攻击形态
 		sort0Service.attackAndW(newOne, tradeDate);
-
-		boolean isSamll = codeModelService.isSmallStock(mkv, newOne.getActMkv());
+		this.cutMkv(newOne, s);
+		boolean isSamll = codeModelService.isSmallStock(newOne.getMkv(), newOne.getActMkv());
 		// 底部优质大票
 		if (TagUtil.isDibuOKBig(isSamll, newOne)) {
 			if (s.getName().contains("银行") || s.getName().contains("证券")) {
@@ -206,7 +184,7 @@ public class CodeModelKLineService {
 			try {
 				qbQxService.qixingQb(tradeDate, newOne, pool, isSamll, qx, szx, yds);
 				v1XipanService.xipanQb(tradeDate, newOne, isSamll);
-				nxService.nxipan(tradeDate, newOne, mkv);
+				nxService.nxipan(tradeDate, newOne);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), tradeDate + "", "起爆");
 			}
@@ -260,4 +238,63 @@ public class CodeModelKLineService {
 		return false;
 	}
 
+	private void cutMkv(CodeBaseModel2 newOne, StockBaseInfo s) {
+		String code = newOne.getCode();
+		// 最新收盘情况
+		DaliyBasicInfo2 lastTrade = daliyBasicHistroyService.queryLastest(code, 0, 0);
+		if (lastTrade == null) {
+			lastTrade = new DaliyBasicInfo2();
+		}
+		double mkv = lastTrade.getCircMarketVal();// 流通市值
+		newOne.setPb(lastTrade.getPb());// 市盈率ttm
+		newOne.setPettm(lastTrade.getPeTtm());// 市盈率ttm
+
+		if (mkv <= 0) {
+			ErrorLogFileUitl.writeError(null, code + "," + s.getName() + ",无最新流通市值mkv", tradeDate + "", "");
+			DaliyBasicInfo2 ltt = daliyBasicHistroyService.queryLastest(code, 0, 1);
+			if (ltt != null) {
+				mkv = ltt.getCircMarketVal();
+			}
+		}
+		// 市值-死筹计算
+		newOne.setMkv(mkv);
+		if (mkv > 0 && s.getCircZb() > 0) {// 5%以下的流通股份
+			newOne.setActMkv(CurrencyUitl.roundHalfUp(Double.valueOf(mkv * (100 - s.getCircZb()) / 100)));
+		} else {
+			newOne.setActMkv(mkv);
+		}
+	}
+
+//	@javax.annotation.PostConstruct
+	public void test() {
+		new Thread(new Runnable() {
+			public void run() {
+				tradeDate = 20230512;
+				List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
+				Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
+				List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
+				for (StockBaseInfo s : codelist) {
+					try {
+						if (stockBasicService.onlinePreYearChk(s.getCode(), pre1Year)) {
+							CodeBaseModel2 newOne = histMap.get(s.getCode());
+							if (newOne == null) {
+								newOne = new CodeBaseModel2();
+								newOne.setId(s.getCode());
+								newOne.setCode(s.getCode());
+							}
+							nxService.nxipan(tradeDate, newOne);
+							if (newOne.getNxipan() == 1) {
+								listLast.add(newOne);
+							}
+						}
+					} catch (Exception e) {
+						ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
+					}
+				}
+				if (listLast.size() > 0) {
+					codeBaseModel2Dao.saveAll(listLast);
+				}
+			}
+		}).start();
+	}
 }

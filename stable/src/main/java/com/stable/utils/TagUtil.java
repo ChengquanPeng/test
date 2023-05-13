@@ -28,13 +28,13 @@ public class TagUtil {
 		return true;
 	}
 
-	public static boolean stockRangeNx(CodeBaseModel2 cbm, double mkv) {
+	public static boolean stockRangeNx(CodeBaseModel2 cbm) {
 		// 1.排除的
 		if (cbm.getPls() == 2) {
 			return false;
 		}
 		// 2.200亿市值以下
-		if (TagUtil.mkvChk(mkv, cbm.getActMkv(), 200) && isDibu21(cbm) && cbm.getHolderNumP5() > 0
+		if (TagUtil.mkvChk(cbm.getMkv(), cbm.getActMkv(), 200) && isDibu21(cbm) && cbm.getHolderNumP5() > 0
 				&& cbm.getHolderNumP5() > 30.0) {
 			return true;
 		}

@@ -23,7 +23,7 @@ public class NxService {
 	@Autowired
 	private StockBasicService stockBasicService;
 
-	// @javax.annotation.PostConstruct
+//	@javax.annotation.PostConstruct
 	public void test() {
 		String[] codes = { "600072", "002593" };
 		int[] dates = { 20230424, 20220726 };
@@ -38,8 +38,9 @@ public class NxService {
 			newOne.setCode(code);
 			newOne.setPls(1);
 			newOne.setHolderNumP5(50);
+			newOne.setActMkv(100);
 			System.err.println("==========" + stockBasicService.getCodeName2(code) + "==========");
-			nxipan(date, newOne, 100);
+			nxipan(date, newOne);
 			System.err.println(code + " ==========> " + (newOne.getNxipan() > 0));
 		}
 		System.exit(0);
@@ -50,8 +51,8 @@ public class NxService {
 	LinkedList<String> incstr = new LinkedList<String>();
 
 	/** 起爆-Pre突破 */
-	public void nxipan(int date, CodeBaseModel2 newOne, double mkv) {
-		if (!TagUtil.stockRangeNx(newOne, mkv)) {
+	public void nxipan(int date, CodeBaseModel2 newOne) {
+		if (!TagUtil.stockRangeNx(newOne)) {
 			this.resetNxiPan(newOne);
 			return;
 		}
@@ -133,7 +134,7 @@ public class NxService {
 			String s1 = datesLa.stream().map(s -> String.valueOf(s)).collect(Collectors.joining(",")) + "|"
 					+ incstr.stream().map(s -> s).collect(Collectors.joining(","));
 			newOne.setNxipanHist(s1);
-			//System.err.println(s1);
+			// System.err.println(s1);
 		} else {
 			resetNxiPan(newOne);
 		}
