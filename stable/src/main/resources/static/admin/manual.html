@@ -430,8 +430,6 @@ table {
 				$('#' + id).html("<font color='#FF0000'>X</font>");
 			}
 		}
-		$('#backtohome').attr("href", "/web/admin/index.html?code=" + code);
-		$('#backtohome').html("返回主页:" + code);
 	</script>
 	<script type="text/javascript">
 		function dianwo() {
@@ -461,8 +459,7 @@ table {
 			});
 		}
 		var qc = getQueryVariable("code");
-		$
-				.ajax({
+		$.ajax({
 					url : "/web/model/chips", //访问地址--action地址
 					//url : "http://127.0.0.1:8081/web/monitorPool/byCode", //访问地址--action地址
 					type : "get", //提交方式
@@ -579,6 +576,9 @@ table {
 						$('#plst').html(reData.result.plst);
 					}
 				});
+		
+		$('#backtohome').attr("href", "/web/admin/index.html?code=" + qc);
+		$('#backtohome').html("返回主页:" + qc);
 	</script>
 </body>
 </html>
