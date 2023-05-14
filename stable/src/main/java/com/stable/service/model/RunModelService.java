@@ -246,7 +246,7 @@ public class RunModelService {
 				sb.append("<tr><td>").append(i + 1).append("</td>");
 
 				// 简称-代码
-				sb.append("<td><a target='_blank' href='/web/code/" + code + "'><font color='black'>")
+				sb.append("<td><a target='_blank' href='/web/admin/manual.html?code=" + code + "#pls'><font color='black'>")
 						.append(sbsb.getName()).append("<br/>").append(code).append("</font>");
 				if (p1.getPls() == 1) {
 					sb.append(rg);
