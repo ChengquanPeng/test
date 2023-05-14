@@ -377,7 +377,7 @@ table {
 							<option value="10">纯备注</option>
 					</select></td>
 					<td><span id="plst"></span></td>
-					<td></td>
+					<td><a target="_blank" id="backtohome"></a></td>
 				</tr>
 				<tr>
 					<td></td>
@@ -430,6 +430,8 @@ table {
 				$('#' + id).html("<font color='#FF0000'>X</font>");
 			}
 		}
+		$('#backtohome').attr("href", "/web/admin/index.html?code=" + code);
+		$('#backtohome').html("返回主页:" + code);
 	</script>
 	<script type="text/javascript">
 		function dianwo() {
