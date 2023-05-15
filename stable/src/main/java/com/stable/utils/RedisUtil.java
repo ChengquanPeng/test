@@ -21,12 +21,24 @@ public class RedisUtil {
 	/**
 	 * 设置key
 	 */
+	private void setPriv(String key, String value) {
+		redisTemplate.opsForValue().set(key, value);
+	}
+
+	private void setPriv(String key, Object value, Duration timeout) {
+		this.set(key, getjsonstirng(value), timeout);
+	}
+
 	public void set(String key, Object value) {
-		this.set(key, getjsonstirng(value), Duration.ofDays(365));// 默认365天
+		if (key.startsWith("RDS_DIVIDEND_LAST_DAY")) {
+			this.setPriv(key, getjsonstirng(value));// 比较特殊
+		} else {
+			this.setPriv(key, getjsonstirng(value), Duration.ofDays(30));// 默认30天
+		}
 	}
 
 	public void set(String key, Object value, Duration timeout) {
-		this.set(key, getjsonstirng(value), timeout);
+		this.setPriv(key, getjsonstirng(value), timeout);
 	}
 
 	/**
