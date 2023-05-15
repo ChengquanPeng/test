@@ -36,7 +36,7 @@ public class RtmMoniGbl {
 		this.base = resp;
 		this.price3m = resp.getPrice3m();
 		if (price3m > 0) {
-			price3mYellow = CurrencyUitl.roundHalfUp((orig.getShotPointPrice() * 0.96));
+			price3mYellow = CurrencyUitl.roundHalfUp(price3m * 0.96);
 		}
 	}
 
