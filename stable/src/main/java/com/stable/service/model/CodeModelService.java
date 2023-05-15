@@ -1,6 +1,7 @@
 
 package com.stable.service.model;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -130,9 +131,9 @@ public class CodeModelService {
 		pre4Year = DateUtil.getPreYear(tradeDate, 4);
 
 		// 基本面
-		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
 		Map<String, MonitorPoolTemp> poolMap = monitorPoolService.getMonitorPoolMap();
+		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
 		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();
 		// 到期提醒
 		StringBuffer sbc = new StringBuffer();
@@ -1213,6 +1214,39 @@ public class CodeModelService {
 		if (newOne.getBaseBlue() > 0) {
 			newOne.setBaseBlueDesc(sb3.toString());
 		}
+	}
+
+	public void cleanOfflineCode() {
+		Map<String, MonitorPoolTemp> poolMap = monitorPoolService.getMonitorPoolMap();
+		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
+		List<StockBaseInfo> list = this.stockBasicService.getAllOnStatusListWithSort();
+		Map<String, StockBaseInfo> map = new HashMap<String, StockBaseInfo>();
+		if (list != null) {
+			for (StockBaseInfo c : list) {
+				map.put(c.getCode(), c);
+			}
+		}
+
+		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
+		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();
+		for (CodeBaseModel2 cbm : histMap.values()) {
+			if (!map.containsKey(cbm.getCode())) {
+				listLast.add(cbm);
+			}
+		}
+		for (MonitorPoolTemp cbm : poolMap.values()) {
+			if (!map.containsKey(cbm.getCode())) {
+				poolList.add(cbm);
+			}
+		}
+		if (listLast.size() > 0) {
+			codeBaseModel2Dao.deleteAll(listLast);
+		}
+		log.info("codeBaseModel2Dao:" + listLast.size());
+		if (poolList.size() > 0) {
+			monitorPoolDao.deleteAll(poolList);
+		}
+		log.info("monitorPoolDao:" + poolList.size());
 	}
 //
 //	private void findBigBoss2(String code, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis) {

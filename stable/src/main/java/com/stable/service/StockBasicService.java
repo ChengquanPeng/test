@@ -139,7 +139,9 @@ public class StockBasicService {
 								Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
 								while (it.hasNext()) {
 									StockBaseInfo e = it.next();
-									if ("L".equals(e.getList_status()) && (e.getUpdBatchNo() == null
+									if ("D".equals(e.getList_status()) || "off".equals(e.getList_status())) {
+										removelist.add(e);
+									} else if ("L".equals(e.getList_status()) && (e.getUpdBatchNo() == null
 											|| e.getUpdBatchNo().longValue() != batchNo.longValue())) {
 										removelist.add(e);
 										e.setList_status("off");// 已退市
@@ -147,7 +149,10 @@ public class StockBasicService {
 									}
 								}
 								if (removelist.size() > 0) {
-									esStockBaseInfoDao.saveAll(removelist);
+									for (StockBaseInfo s : removelist) {
+										redisUtil.del(s.getCode());
+									}
+									esStockBaseInfoDao.deleteAll(removelist);
 								}
 							}
 							log.info("同步股票列表[end],cnt=" + cnt);
@@ -240,18 +245,18 @@ public class StockBasicService {
 		return getAllOnStatusListWithSort(true);
 	}
 
-	public synchronized List<StockBaseInfo> getAllList() {
-		List<StockBaseInfo> listt = new LinkedList<StockBaseInfo>();
-		Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
-		while (it.hasNext()) {
-			StockBaseInfo e = it.next();
-			if (isHuShenCode(e.getCode())) {// 排除4,8开头的
-				// list.add(e);
-				listt.add(e);
-			}
-		}
-		return listt;
-	}
+//	public synchronized List<StockBaseInfo> getAllList() {
+//		List<StockBaseInfo> listt = new LinkedList<StockBaseInfo>();
+//		Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
+//		while (it.hasNext()) {
+//			StockBaseInfo e = it.next();
+//			if (isHuShenCode(e.getCode())) {// 排除4,8开头的
+//				// list.add(e);
+//				listt.add(e);
+//			}
+//		}
+//		return listt;
+//	}
 
 	private synchronized List<StockBaseInfo> getAllOnStatusListWithSort(boolean issort) {
 		if (LOCAL_ALL_ONLINE_LIST.isEmpty()) {
