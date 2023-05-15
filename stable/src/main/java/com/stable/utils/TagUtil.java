@@ -164,7 +164,7 @@ public class TagUtil {
 			s += "-v1洗盘:" + p1.getXipan();
 		}
 		if (p1.getNxipan() > 0) {
-			s += "-N型洗盘:" + p1.getNxipan();
+			s += "-N型洗盘";
 		}
 		if (p1.getZyxing() > 0) {
 			s += "-10";
