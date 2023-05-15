@@ -128,6 +128,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 
 				// 起爆点
 				if (isQibao) {
+					// 大小旗形
 					if (!burstPointCheckTop && rtm.getOrig().getShotPointPrice() > 0) {
 						if (rt.getHigh() >= rtm.getOrig().getShotPointPrice()) {
 							String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]突破买点:"
@@ -142,6 +143,15 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 							ocg.genMsg(code, title2);
 						}
 					}
+					// 旗形底部买点
+//					if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
+//					&& rt.getLow() <= qibao.getOrig().getShotPointPriceLow5()) {
+//				burstPointCheckLow = true;
+//				qibao.bizPushService
+//						.PushS2(codeName + " 接近旗形底部买点[:" + qibao.getOrig().getShotPointPriceLow() + "-"
+//								+ qibao.getOrig().getShotPointPriceLow5() + "]");
+//			}
+					// 十字星
 					if (!burstPointCheckSzx && rtm.getOrig().getShotPointPriceSzx() > 0
 							&& rt.getHigh() >= rtm.getOrig().getShotPointPriceSzx()) {
 						String title2 = codeName + rtm.you + " [" + TagUtil.getXiPan(rtm.getBase()) + "]突破买点:"
@@ -149,15 +159,15 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						burstPointCheckSzx = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
 					}
+					// 人工
 					if (!burstPointCheckRg && rtm.getOrig().getRgqbPrice() > 0
 							&& rt.getHigh() >= rtm.getOrig().getRgqbPrice()) {
 						String title2 = codeName + rtm.you + " 人工买点:" + rtm.getOrig().getRgqbPrice();
 						burstPointCheckRg = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
 					}
-					// 洗盘突破3个月
-
-					if (rt.getHigh() > rtm.price3m && !highPriceGot && rtm.price3m > 0) {
+					// 洗盘：突破3个月
+					if (rt.getHigh() > rtm.getOrig().getXpPrice() && !highPriceGot && rtm.getOrig().getXpPrice() > 0) {
 						String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase())
 								+ "][洗盘突破-新高(3month)] ";
 						highPriceGot = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
@@ -167,14 +177,6 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						highPriceGotYellow = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
 					}
-
-//					if (!burstPointCheckLow && qibao.getOrig().getShotPointPriceLow() <= rt.getLow()
-//							&& rt.getLow() <= qibao.getOrig().getShotPointPriceLow5()) {
-//						burstPointCheckLow = true;
-//						qibao.bizPushService
-//								.PushS2(codeName + " 接近旗形底部买点[:" + qibao.getOrig().getShotPointPriceLow() + "-"
-//										+ qibao.getOrig().getShotPointPriceLow5() + "]");
-//					}
 				}
 
 				for (RtmMoniUser r : rtm.getListu()) {

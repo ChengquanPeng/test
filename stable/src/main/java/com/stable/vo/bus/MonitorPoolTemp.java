@@ -76,6 +76,8 @@ public class MonitorPoolTemp extends EsBase {
 	private double shotPointPriceSzx = 0;// 十字星-股价预警
 	@Field(type = FieldType.Double)
 	private double rgqbPrice = 0;// 人工起爆预警
+	@Field(type = FieldType.Double)
+	private double xpPrice = 0;// 洗盘起爆预警
 
 	@Field(type = FieldType.Integer)
 	private int updatedate;

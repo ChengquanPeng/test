@@ -17,7 +17,7 @@ import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 
 @Service
-public class NxService {
+public class V2NXipanService {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired

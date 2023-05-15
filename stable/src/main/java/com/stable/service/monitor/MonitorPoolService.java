@@ -319,7 +319,7 @@ public class MonitorPoolService {
 		// 4.洗盘起爆
 		BoolQueryBuilder bqb4 = QueryBuilders.boolQuery();
 		bqb4.must(QueryBuilders.matchPhraseQuery("userId", Constant.MY_ID));
-		bqb4.must(QueryBuilders.rangeQuery("qbXipan").gt(0));
+		bqb4.must(QueryBuilders.rangeQuery("xpPrice").gt(0));
 		NativeSearchQueryBuilder queryBuilder4 = new NativeSearchQueryBuilder();
 		SearchQuery sq4 = queryBuilder4.withQuery(bqb4).withPageable(pageable).build();
 		Page<MonitorPoolTemp> page4 = monitorPoolDao.search(sq4);

@@ -15,7 +15,7 @@ import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
-import com.stable.service.model.prd.NxService;
+import com.stable.service.model.prd.V2NXipanService;
 import com.stable.service.model.prd.QxService;
 import com.stable.service.model.prd.V1XipanService;
 import com.stable.service.monitor.MonitorPoolService;
@@ -58,7 +58,7 @@ public class CodeModelKLineService {
 	@Autowired
 	private V1XipanService v1XipanService;
 	@Autowired
-	private NxService nxService;
+	private V2NXipanService nxService;
 
 	public synchronized void runKLineModel1(int date) {
 //		if (!tradeCalService.isOpen(date)) {
@@ -185,7 +185,9 @@ public class CodeModelKLineService {
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), tradeDate + "", "起爆");
 			}
-
+		}
+		if (newOne.getPrice3m() > 0) {
+			pool.setXpPrice(newOne.getPrice3m());
 		}
 	}
 

@@ -23,10 +23,9 @@ public class RtmMoniGbl {
 	public BizPushService bizPushService;
 	public double warningYellow = 0.0;
 	public String you = "";
+	public double price3mYellow;
 	// 公共信息
 	public CodeBaseModelResp base;
-	public double price3m;
-	public double price3mYellow;
 
 	public void addUser() {
 
@@ -34,16 +33,13 @@ public class RtmMoniGbl {
 
 	public RtmMoniGbl(CodeBaseModelResp resp) {
 		this.base = resp;
-		this.price3m = resp.getPrice3m();
-		if (price3m > 0) {
-			price3mYellow = CurrencyUitl.roundHalfUp(price3m * 0.96);
-		}
 	}
 
 	public void setServiceAndPrew(BizPushService bizs, MonitorPoolTemp orig) {
 		this.orig = orig;
 		this.bizPushService = bizs;
 		warningYellow = CurrencyUitl.roundHalfUp((orig.getShotPointPrice() * 0.98));
+		price3mYellow = CurrencyUitl.roundHalfUp(orig.getXpPrice() * 0.97);
 		you = TagUtil.getTag(base);
 	}
 
