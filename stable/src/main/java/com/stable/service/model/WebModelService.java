@@ -439,21 +439,14 @@ public class WebModelService {
 		if (mr.getCompnayType() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("compnayType", 1));
 		}
-
-		if (mr.getQb() == 1) {// 起爆
-			bqb.must(QueryBuilders.matchPhraseQuery("qb", 1));
-		}
 		if (mr.getDibuqixing() == 1) {// 底部旗形
 			bqb.must(QueryBuilders.rangeQuery("dibuQixing").gte(1));
 		}
 		if (mr.getDibuqixing2() == 1) {// 旗形
 			bqb.must(QueryBuilders.rangeQuery("dibuQixing2").gte(1));
 		}
-		if (mr.getZyxing() == 1) {// 中阳带星
+		if (mr.getZyxing() > 0) {// 中阳带星
 			bqb.must(QueryBuilders.rangeQuery("zyxing").gte(1));
-		}
-		if (mr.getZyxingt() == 1) {// 中阳带星
-			bqb.must(QueryBuilders.matchPhraseQuery("zyxingt", 1));
 		}
 		if (mr.getBreakingVol() == 1) {// 成交量异动
 			bqb.must(QueryBuilders.rangeQuery("breakingVol").gte(1));

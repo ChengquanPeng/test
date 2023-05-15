@@ -189,7 +189,8 @@ public class TagUtil {
 	public static String tagInfo(CodeBaseModel2 dh) {
 		StringBuffer tag = new StringBuffer("");
 		tag.append("<font color='red'>");
-		if (dh.getQb() > 0 || dh.getXipan() > 0 || dh.getNxipan() > 0) {
+		if (dh.getDibuQixing() > 0 || dh.getDibuQixing2() > 0 || dh.getZyxing() > 0 || dh.getXipan() > 0
+				|| dh.getNxipan() > 0) {
 			tag.append("起飞->");
 		}
 		if (dh.getNxipan() > 0) {

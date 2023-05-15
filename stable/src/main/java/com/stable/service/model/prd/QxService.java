@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
-import com.stable.service.StockBasicService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.StringUtil;
@@ -27,8 +26,6 @@ import lombok.extern.log4j.Log4j2;
 public class QxService {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
-	@Autowired
-	private StockBasicService stockBasicService;
 
 //	@javax.annotation.PostConstruct
 //	public void test() {
@@ -73,38 +70,21 @@ public class QxService {
 //		System.exit(0);
 //	}
 
-	/** 起爆 */
-	public void qixingQb(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx,
-			StringBuffer szx, StringBuffer yds) {
-		/** 大小旗形 */
-		qx(date, newOne, pool, isSamll, qx, yds);
-		/** 中阳十字星 */
-		szx(date, newOne, pool, isSamll, szx);
-
-		/** 是否在起爆位 */
-		if (newOne.getDibuQixing() > 0 || newOne.getDibuQixing2() > 0 || newOne.getZyxing() > 0) {
-			newOne.setQb(1);
-		} else {
-			newOne.setQb(0);
-		}
-	}
-
-	private void qx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer qx,
-			StringBuffer yds) {
+	public void qx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll) {
 		if (!TagUtil.stockRange(isSamll, newOne)) {
 			setQxRes(newOne, pool, true, true);
 			return;
 		}
 		/** 起爆点,底部旗形1：大旗形 **/
-		qx1(date, newOne, pool, qx, yds);
+		qx1(date, newOne, pool);
 		if (newOne.getDibuQixing() == 0) {
 			/** 起爆点,底部旗形2：小旗形 **/
-			qx2(date, newOne, pool, qx);
+			qx2(date, newOne, pool);
 		}
 	}
 
 	/** 起爆点,底部旗形1：大旗形 **/
-	private void qx1(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, StringBuffer qx, StringBuffer yds) {
+	private void qx1(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool) {
 		List<TradeHistInfoDaliy> list = null;
 		if (newOne.getDibuQixing() == 0) {
 			list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0, date,
@@ -143,7 +123,6 @@ public class QxService {
 			}
 		}
 		if (breakingVol > 0 && newOne.getBreakingVol() != breakingVol) {
-			yds.append(stockBasicService.getCodeName2(newOne.getCode())).append(",");
 			String jsHist = "成交异动" + breakingVol + ";" + newOne.getJsHist();
 			newOne.setJsHist(StringUtil.subString(jsHist, 100));
 		}
@@ -163,9 +142,6 @@ public class QxService {
 		}
 		boolean dibq1 = dibuPreChk(newOne, res, true);// 2.是否底部旗形(旗形过滤)：1.在底部旗形，2.旗形前没怎么涨,3.是否更优的旗形:进一步判断底部旗形
 		if (dibq1) {
-			if (newOne.getDibuQixing() == 0) {
-				qx.append(stockBasicService.getCodeName2(newOne.getCode())).append(",");
-			}
 			pool.setShotPointDate(res.getDate());
 			newOne.setQixingStr(res.ex());
 			newOne.setQixing(res.getDate());
@@ -176,7 +152,7 @@ public class QxService {
 	}
 
 	/** 起爆点,底部旗形2：小旗形 **/
-	private void qx2(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, StringBuffer qx) {
+	private void qx2(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool) {
 		List<TradeHistInfoDaliy> list = null;
 		if (newOne.getDibuQixing2() == 0) {
 			list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0, date,
@@ -211,117 +187,12 @@ public class QxService {
 
 		boolean dibq2 = dibuPreChk(newOne, res, true);// 2.是否底部旗形(旗形过滤)：1.在底部旗形，2.旗形前没怎么涨,3.是否更优的旗形:进一步判断底部旗形
 		if (dibq2) {
-			if (newOne.getDibuQixing2() == 0) {
-				qx.append(stockBasicService.getCodeName2(newOne.getCode())).append(",");
-			}
 			pool.setShotPointDate(res.getDate());
 			newOne.setQixingStr(res.ex());
 			newOne.setQixing(res.getDate());
 			newOne.setDibuQixing2(res.getDate());
 		} else {
 			setQxRes(newOne, pool, false, true);
-		}
-	}
-
-	private void szx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer szx) {
-		szx1(date, newOne, pool, isSamll, szx);
-		szx2(date, newOne, pool);
-	}
-
-	/** 特别处理:最强逻辑十字星 */
-	private void szx2(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool) {
-		// 人工,大宗,大票定增,做小做底+业绩不错
-		if (newOne.getPls() == 1 || newOne.getShooting1() == 1 || newOne.getShooting2() == 1
-				|| (newOne.getShooting7() == 1 && TagUtil.isFinPerfect(newOne))) {
-
-			List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0,
-					date, EsQueryPageUtil.queryPage30, SortOrder.DESC);
-			// 起爆点：中阳线,第二天十字星或者小影线
-			// 1. 第一天,,第二天十字星或者小影线
-			// 2.前5天涨幅低于2%
-			TradeHistInfoDaliy d2tian = list.get(0);
-			TradeHistInfoDaliy chk = list.get(1);
-			TradeHistInfoDaliy preChk = list.get(2);
-			boolean isOk = false;
-			// 1.放量对比前日
-			if (chk.getVolume() > preChk.getVolume() * 1.45) {
-				// 2.中阳线,3-6个点,不是上影线,实体阳性-不能高开
-				if ((3.0 <= chk.getTodayChangeRate() && chk.getTodayChangeRate() <= 6.5)
-						&& !LineAvgPrice.isShangYingXian(chk)) {// 第一天中阳线,3-6个点
-					// 3.收影线或者10字星
-					if ((d2tian.getOpen() >= d2tian.getClosed()
-							|| CurrencyUitl.cutProfit(d2tian.getOpen(), d2tian.getClosed()) <= 0.99)
-							&& chk.getVolume() > d2tian.getVolume()) {// 第二天缩量,十字星或者小影线
-						boolean preChkOk = true;
-						// 阳线要收实体
-						if (chk.getOpen() > chk.getYesterdayPrice()
-								&& CurrencyUitl.cutProfit(chk.getYesterdayPrice(), chk.getOpen()) > 1.1) {
-							preChkOk = false;
-						}
-						isOk = preChkOk;
-					}
-				}
-			}
-			if (isOk) {
-				newOne.setZyxingt(1);
-			} else {
-				newOne.setZyxingt(0);
-			}
-		} else {
-			newOne.setZyxingt(0);
-		}
-	}
-
-	private void szx1(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, StringBuffer szx) {
-		// 人工或者底部优质票
-		if (newOne.getPls() != 1 && newOne.getShooting7() != 1) {
-			setSzxRes(newOne, pool);
-			return;
-		}
-		List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0, date,
-				EsQueryPageUtil.queryPage30, SortOrder.DESC);
-		// 起爆点：中阳线,第二天十字星或者小影线
-		// 1. 第一天,,第二天十字星或者小影线
-		// 2.前5天涨幅低于2%
-		TradeHistInfoDaliy d2tian = list.get(0);
-		TradeHistInfoDaliy chk = list.get(1);
-		TradeHistInfoDaliy preChk = list.get(2);
-		boolean isOk = false;
-		// 1.放量对比前日
-		if (chk.getVolume() > preChk.getVolume() * 1.8) {
-			// 2.中阳线,3-6个点,不是上影线,实体阳性-不能高开
-			if ((3.0 <= chk.getTodayChangeRate() && chk.getTodayChangeRate() <= 6.5)
-					&& !LineAvgPrice.isShangYingXian(chk)) {// 第一天中阳线,3-6个点
-				// 3.收影线或者10字星
-				if ((d2tian.getOpen() >= d2tian.getClosed()
-						|| CurrencyUitl.cutProfit(d2tian.getOpen(), d2tian.getClosed()) <= 0.99)
-						&& chk.getVolume() > d2tian.getVolume()) {// 第二天缩量,十字星或者小影线
-					boolean preChkOk = true;
-					// 2. 5天涨幅低于3%
-					for (int i = 2; i <= 6; i++) {
-						TradeHistInfoDaliy t = list.get(i);
-						if (t.getTodayChangeRate() > 3) {
-							preChkOk = false;
-							break;
-						}
-					}
-					// 阳线要收实体
-					if (chk.getOpen() > chk.getYesterdayPrice()
-							&& CurrencyUitl.cutProfit(chk.getYesterdayPrice(), chk.getOpen()) > 1.1) {
-						preChkOk = false;
-					}
-					isOk = preChkOk;
-				}
-			}
-		}
-
-		if (isOk) {
-			double moniHigh = (chk.getHigh() > d2tian.getHigh()) ? chk.getHigh() : d2tian.getHigh();
-			szx.append(stockBasicService.getCodeName2(newOne.getCode())).append(",");
-			newOne.setZyxing(chk.getDate());
-			pool.setShotPointPriceSzx(moniHigh);
-		} else {
-			setSzxRes(newOne, pool);
 		}
 	}
 

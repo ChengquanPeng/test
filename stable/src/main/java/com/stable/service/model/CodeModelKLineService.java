@@ -15,9 +15,10 @@ import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
-import com.stable.service.model.prd.V2NXipanService;
 import com.stable.service.model.prd.QxService;
+import com.stable.service.model.prd.SzxService;
 import com.stable.service.model.prd.V1XipanService;
+import com.stable.service.model.prd.V2NXipanService;
 import com.stable.service.monitor.MonitorPoolService;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
@@ -59,6 +60,8 @@ public class CodeModelKLineService {
 	private V1XipanService v1XipanService;
 	@Autowired
 	private V2NXipanService nxService;
+	@Autowired
+	private SzxService szxService;
 
 	public synchronized void runKLineModel1(int date) {
 //		if (!tradeCalService.isOpen(date)) {
@@ -74,13 +77,13 @@ public class CodeModelKLineService {
 
 		Map<String, MonitorPoolTemp> poolMap = monitorPoolService.getMonitorPoolMap();
 		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();
-		StringBuffer qx = new StringBuffer();
-		StringBuffer szx = new StringBuffer();
-		StringBuffer yds = new StringBuffer();
+//		StringBuffer qx = new StringBuffer();
+//		StringBuffer szx = new StringBuffer();
+//		StringBuffer yds = new StringBuffer();
 
 		for (StockBaseInfo s : codelist) {
 			try {
-				this.processingByCode(s, poolMap, poolList, listLast, histMap, qx, szx, yds);
+				this.processingByCode(s, poolMap, poolList, listLast, histMap);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -109,8 +112,7 @@ public class CodeModelKLineService {
 	private int pre4Year = 0;// 四年以前
 
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
-			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, StringBuffer qx, StringBuffer szx,
-			StringBuffer yds) {
+			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap) {
 		String code = s.getCode();
 		// 监听池
 		MonitorPoolTemp pool = this.codeModelService.getPool(code, poolMap, poolList);
@@ -174,12 +176,13 @@ public class CodeModelKLineService {
 		if (stTuiShi(newOne)) {
 			qbQxService.setQxRes(newOne, pool, true, true);
 			qbQxService.setSzxRes(newOne, pool);
-			newOne.setZyxingt(0);
+			szxService.setSzxRes(newOne, pool);
 			v1XipanService.resetXiPan(newOne);
 			nxService.resetNxiPan(newOne);
 		} else {
 			try {
-				qbQxService.qixingQb(tradeDate, newOne, pool, isSamll, qx, szx, yds);
+				qbQxService.qx(tradeDate, newOne, pool, isSamll);
+				szxService.szx(tradeDate, newOne, pool, isSamll);
 				v1XipanService.xipanQb(tradeDate, newOne, isSamll);
 				nxService.nxipan(tradeDate, newOne);
 			} catch (Exception e) {

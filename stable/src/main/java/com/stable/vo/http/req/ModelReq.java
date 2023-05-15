@@ -60,11 +60,11 @@ public class ModelReq {
 	String gdrs;
 	String gdrsp;
 
-	int qb = 0;
 	int zyxing = 0;// 中阳带星
-	int zyxingt = 0;// 中阳带星
 	int dibuqixing = 0;
 	int dibuqixing2 = 0;
+	int xipan = 0;
+	int nxipan = 0;
 	int breakingVol = 0;
 
 	// 财务
@@ -76,6 +76,4 @@ public class ModelReq {
 	int financeInc = 0;
 	int bossInc;
 	double bossVal = 0;
-	int xipan = 0;
-	int nxipan = 0;
 }

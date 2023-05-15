@@ -114,27 +114,33 @@ public class RunModelService {
 	}
 
 	public void printModelHtml() {
+		// 大旗形
 		ModelReq mr = new ModelReq();
-		mr.setQb(1);
+		mr.setDibuqixing(1);//
 		mr.setPls(3);
-		List<CodeBaseModel2> qbList = webModelService.getList(mr, EsQueryPageUtil.queryPage9999);
-
+		List<CodeBaseModel2> dqx = webModelService.getList(mr, EsQueryPageUtil.queryPage9999);
+		// 小旗型
+		ModelReq mr22 = new ModelReq();
+		mr22.setDibuqixing2(1);
+		mr22.setPls(3);
+		List<CodeBaseModel2> xqx = webModelService.getList(mr22, EsQueryPageUtil.queryPage9999);
+		// 十字星
 		ModelReq mr2 = new ModelReq();
-		mr2.setZyxingt(1);
+		mr2.setZyxing(1);
 		mr2.setPls(3);
 		List<CodeBaseModel2> genListTe = webModelService.getList(mr2, EsQueryPageUtil.queryPage9999);
-
+		// V1-洗盘
 		ModelReq mr3 = new ModelReq();
 		mr3.setXipan(1);
 		mr3.setPls(3);
 		List<CodeBaseModel2> xp = webModelService.getList(mr3, EsQueryPageUtil.queryPage9999);
-
+		// N-洗盘
 		ModelReq mr4 = new ModelReq();
 		mr4.setNxipan(1);
 		mr4.setPls(3);
 		List<CodeBaseModel2> nxp = webModelService.getList(mr4, EsQueryPageUtil.queryPage9999);
 
-		printHtml(qbList, genListTe, xp, nxp);
+		printHtml(dqx, xqx, genListTe, xp, nxp);
 	}
 
 	public void printOnlineHtml(List<OnlineMsg> list) {
@@ -167,8 +173,8 @@ public class RunModelService {
 		fw.close();
 	}
 
-	private void printHtml(List<CodeBaseModel2> qbList, List<CodeBaseModel2> genListTe, List<CodeBaseModel2> xp,
-			List<CodeBaseModel2> nxp) {
+	private void printHtml(List<CodeBaseModel2> dqx, List<CodeBaseModel2> xqx, List<CodeBaseModel2> genListTe,
+			List<CodeBaseModel2> xp, List<CodeBaseModel2> nxp) {
 		String htmlnamet = "qf.html";
 		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
 		StringBuffer sb = new StringBuffer();
@@ -188,15 +194,28 @@ public class RunModelService {
 		List<CodeBaseModel2> ren = new LinkedList<CodeBaseModel2>();// 人工
 		List<CodeBaseModel2> dq = new LinkedList<CodeBaseModel2>();// 大旗形
 		List<CodeBaseModel2> xq = new LinkedList<CodeBaseModel2>();// 小旗形
-		List<CodeBaseModel2> dpiao = new LinkedList<CodeBaseModel2>();// 底部未涨大票
+		List<CodeBaseModel2> dapiao = new LinkedList<CodeBaseModel2>();// 底部未涨大票
 		List<CodeBaseModel2> other = new LinkedList<CodeBaseModel2>();// 其他
 		List<CodeBaseModel2> all = new LinkedList<CodeBaseModel2>();
 
-		for (CodeBaseModel2 c : qbList) {
+		for (CodeBaseModel2 c : dqx) {
 			if (c.getPls() == 1) {
 				ren.add(c);
 			} else if (c.getShooting11() > 0) {
-				dpiao.add(c);
+				dapiao.add(c);
+			} else if (c.getDibuQixing() > 0) {
+				dq.add(c);
+			} else if (c.getDibuQixing2() > 0) {
+				xq.add(c);
+			} else {
+				other.add(c);
+			}
+		}
+		for (CodeBaseModel2 c : xqx) {
+			if (c.getPls() == 1) {
+				ren.add(c);
+			} else if (c.getShooting11() > 0) {
+				dapiao.add(c);
 			} else if (c.getDibuQixing() > 0) {
 				dq.add(c);
 			} else if (c.getDibuQixing2() > 0) {
@@ -208,7 +227,7 @@ public class RunModelService {
 		all.addAll(ren);
 		all.addAll(dq);
 		all.addAll(xq);
-		all.addAll(dpiao);
+		all.addAll(dapiao);
 		all.addAll(other);
 
 		sb = new StringBuffer();
@@ -246,8 +265,9 @@ public class RunModelService {
 				sb.append("<tr><td>").append(i + 1).append("</td>");
 
 				// 简称-代码
-				sb.append("<td><a target='_blank' href='/web/admin/manual.html?code=" + code + "#pls'><font color='black'>")
-						.append(sbsb.getName()).append("<br/>").append(code).append("</font>");
+				sb.append("<td><a target='_blank' href='/web/admin/manual.html?code=" + code
+						+ "#pls'><font color='black'>").append(sbsb.getName()).append("<br/>").append(code)
+						.append("</font>");
 				if (p1.getPls() == 1) {
 					sb.append(rg);
 				}

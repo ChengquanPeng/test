@@ -54,24 +54,16 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int shootingw = 0;// 行情指标w:横盘w
 
-	@Field(type = FieldType.Integer)
-	private int qb = 0;// 处于起爆
 	@Field(type = FieldType.Long)
 	private int qixing = 0;// 旗形
 	@Field(type = FieldType.Text)
 	private String qixingStr;// 旗形恶心走势
 	@Field(type = FieldType.Integer)
-	private int dibuQixing = 0;// 旗形
+	private int dibuQixing = 0;// 大旗形
 	@Field(type = FieldType.Integer)
-	private int dibuQixing2 = 0;// 旗形2
+	private int dibuQixing2 = 0;// 小旗形
 	@Field(type = FieldType.Long)
 	private int zyxing = 0;// 中阳带星
-	@Field(type = FieldType.Integer)
-	private int zyxingt = 0;// 中阳带星(T)
-	@Field(type = FieldType.Integer)
-	private int dibuQixingV2 = 0;// 旗形
-	@Field(type = FieldType.Integer)
-	private int dibuQixingV22 = 0;// 旗形2
 	@Field(type = FieldType.Integer)
 	private int prd1 = 0;// 产品1
 	@Field(type = FieldType.Text)
