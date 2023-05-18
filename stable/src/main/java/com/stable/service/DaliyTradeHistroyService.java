@@ -143,47 +143,53 @@ public class DaliyTradeHistroyService {
 				// 1.保存记录
 				TradeHistInfoDaliy d = new TradeHistInfoDaliy(array.getJSONArray(i));
 				String code = d.getCode();
-				int qfqDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
-				d.setQfqDate(qfqDate);
-				list.add(d);
-				TradeHistInfoDaliyNofq nofq = new TradeHistInfoDaliyNofq(array.getJSONArray(i));
-				listNofq.add(nofq);
-				if (isJob) {
-					DaliyBasicInfo2 dalyb = new DaliyBasicInfo2(array.getJSONArray(i));
-					daliybasicList.add(dalyb);
-				}
+				try {
+					int qfqDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
+					d.setQfqDate(qfqDate);
+					list.add(d);
+					TradeHistInfoDaliyNofq nofq = new TradeHistInfoDaliyNofq(array.getJSONArray(i));
+					listNofq.add(nofq);
+					if (isJob) {
+						DaliyBasicInfo2 dalyb = new DaliyBasicInfo2(array.getJSONArray(i));
+						daliybasicList.add(dalyb);
+					}
 
-				// 2.是否需要更新缺失记录
-
-				String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
-				if (StringUtils.isBlank(yyyymmdd) || (!preDate.equals(yyyymmdd) && !yyyymmdd.equals(today)
-						&& Integer.valueOf(yyyymmdd) < Integer.valueOf(today))) {//
-					log.info("代码code:{}重新获取记录->redis-last:{},preDate:{},today:{}", code, yyyymmdd, preDate, today);
-					String json = redisUtil.get(d.getCode());
-					// 第一次上市或者除权
-					StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-					if (base != null) {
-						TasksWorker2nd.add(new TasksWorker2ndRunnable() {
-							public void running() {
-								try {
-									spiderDaliyTradeHistoryInfoFromIPOCenter(code, today, 0);
-									spiderDaliyTradeHistoryInfoFromIPOCenterNofq(code, 0);
-								} catch (Exception e) {
-									MsgPushServer.pushSystem1("重新获取前后复权出错：" + code);
-								} finally {
-									cnt.countDown();
+					// 2.是否需要更新缺失记录
+					String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
+					if (StringUtils.isBlank(yyyymmdd) || (!preDate.equals(yyyymmdd) && !yyyymmdd.equals(today)
+							&& Integer.valueOf(yyyymmdd) < Integer.valueOf(today))) {//
+						log.info("代码code:{}重新获取记录->redis-last:{},preDate:{},today:{},index={}", code, yyyymmdd, preDate,
+								today, i);
+						String json = redisUtil.get(d.getCode());
+						// 第一次上市或者除权
+						StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
+						if (base != null) {
+							TasksWorker2nd.add(new TasksWorker2ndRunnable() {
+								public void running() {
+									try {
+										spiderDaliyTradeHistoryInfoFromIPOCenter(code, today, 0);
+										spiderDaliyTradeHistoryInfoFromIPOCenterNofq(code, 0);
+									} catch (Exception e) {
+										MsgPushServer.pushSystem1("重新获取前后复权出错：" + code);
+									} finally {
+										cnt.countDown();
+									}
 								}
-							}
-						});
+							});
+						} else {
+							log.info("代码code:{} 未获取到StockBaseInfo", code);
+							cnt.countDown();
+						}
 					} else {
-						log.info("代码code:{} 未获取到StockBaseInfo", code);
+						log.info("代码:{},不需要重新更新记录,上个交易日期 preDate:{},上次更新日期:{},最后更新日期:{},index={}", code, preDate,
+								yyyymmdd, today, i);
+						redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+						priceLifeService.checkAndSetPrice(d);
 						cnt.countDown();
 					}
-				} else {
-					log.info("代码:{},不需要重新更新记录,上个交易日期 preDate:{},上次更新日期:{},最后更新日期:{},index={}", code, preDate, yyyymmdd,
-							today, i);
-					redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
-					priceLifeService.checkAndSetPrice(d);
+				} catch (Exception e) {
+					e.printStackTrace();
+					MsgPushServer.pushSystem1("前复权qfq获取异常==>代码:" + code);
 					cnt.countDown();
 				}
 			}
