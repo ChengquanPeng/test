@@ -26,7 +26,11 @@ public class RedisUtil {
 	}
 
 	private void setPriv(String key, Object value, Duration timeout) {
-		this.set(key, getjsonstirng(value), timeout);
+		redisTemplate.opsForValue().set(key, getjsonstirng(value), timeout);
+	}
+
+	public void set(String key, String value, Duration timeout) {
+		redisTemplate.opsForValue().set(key, value, timeout);
 	}
 
 	public void set(String key, Object value) {
