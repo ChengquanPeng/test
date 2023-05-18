@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.stable.constant.RedisConstant;
 
 @Component
 public class RedisUtil {
@@ -169,7 +170,7 @@ public class RedisUtil {
 	 * @param value
 	 */
 	public void set(String key, String value) {
-		if (key.startsWith("RDS_DIVIDEND_LAST_DAY")) {
+		if (key.startsWith(RedisConstant.RDS_DIVIDEND_LAST_DAY_)) {// 前复权
 			redisTemplate.opsForValue().set(key, value);
 		} else {
 			redisTemplate.opsForValue().set(key, value, Duration.ofDays(30));// 默认30天
