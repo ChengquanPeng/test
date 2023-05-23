@@ -83,7 +83,6 @@ public class RealtimeMonitoringService {
 			HashMap<String, RtmMoniGbl> allmap = new HashMap<String, RtmMoniGbl>();
 			// 起爆点监听
 			Set<MonitorPoolTemp> tl2 = monitorPoolService.getMyQibao();
-			int x7 = 0;
 			if (tl2 != null) {
 				UserInfo my = new UserInfo();
 				my.setId(Constant.MY_ID);
@@ -93,16 +92,8 @@ public class RealtimeMonitoringService {
 						RtmMoniGbl rmt = new RtmMoniGbl(cr);
 						rmt.setServiceAndPrew(bizPushService, t);
 						allmap.put(t.getCode(), rmt);
-						if (cr.getDibuQixing2() > 0) {
-							x7++;
-						}
 					}
 				}
-			}
-			if (x7 > 5) {
-				OnlineCodeGen.x7Chk = false;
-			} else {
-				OnlineCodeGen.x7Chk = true;
 			}
 			// 获取监听列表-常规
 			List<UserInfo> ulist = userService.getUserListForMonitorS1();

@@ -15,7 +15,6 @@ import lombok.extern.log4j.Log4j2;
 public class OnlineCodeGen {
 	private static final long WAIT_MIN = 6 * 60 * 1000;// 6MIN
 	public boolean isRunning = true;
-	public static boolean x7Chk = false;
 
 	public OnlineCodeGen(RunModelService runModelService) {
 		Runnable rtt2 = new Runnable() {

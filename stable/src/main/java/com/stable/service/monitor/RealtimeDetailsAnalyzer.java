@@ -31,12 +31,10 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean chkCodeClosed = false;
 	private OnlineCodeGen ocg;
 
-	private boolean burstPointCheckTopPrew = false;// 突破前1%
 	private boolean burstPointCheckTop = false;// 突破
 	private boolean burstPointCheckSzx = false;// 十字星
 	private boolean burstPointCheckRg = false;// 人工
 	private boolean highPriceGot = false;
-	private boolean highPriceGotYellow = false;
 
 	public void stop() {
 		isRunning = false;
@@ -135,11 +133,10 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 									+ rtm.getOrig().getShotPointPrice();
 							burstPointCheckTop = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 							ocg.genMsg(code, title2);
-						} else if (OnlineCodeGen.x7Chk && !burstPointCheckTopPrew
-								&& rt.getHigh() >= rtm.warningYellow) {
+						} else if (rtm.warningYellowChk && rt.getHigh() >= rtm.warningYellow && rtm.warningYellow > 0) {
 							String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]准备突破买点:"
 									+ rtm.getOrig().getShotPointPrice() + "现价:" + rt.getBuy1();
-							burstPointCheckTopPrew = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
+							rtm.warningYellowChk = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 							ocg.genMsg(code, title2);
 						}
 					}
@@ -172,9 +169,9 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 								+ "][洗盘突破-新高(3month)] ";
 						highPriceGot = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
-					} else if (rt.getHigh() > rtm.price3mYellow && !highPriceGotYellow && rtm.price3mYellow > 0) {
+					} else if (rtm.price3mYellowChk && rt.getHigh() > rtm.price3mYellow && rtm.price3mYellow > 0) {
 						String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "] 准备突破  ";
-						highPriceGotYellow = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
+						rtm.price3mYellowChk = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
 					}
 				}
