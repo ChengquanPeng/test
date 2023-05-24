@@ -90,7 +90,7 @@ public class JobController {
 	public ResponseEntity<JsonResult> stocklist() {
 		JsonResult r = new JsonResult();
 		try {
-			stockBasicService.jobSynStockList();
+			stockBasicService.jobSynStockListV2();
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

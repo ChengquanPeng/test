@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.service.DaliyTradeHistroyService;
-import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.utils.DateUtil;
@@ -19,13 +18,9 @@ public class EveryWorkingDayJob extends MySimpleJob {
 	@Autowired
 	private DaliyTradeHistroyService tradeHistroyService;
 	@Autowired
-	private StockBasicService stockBasicService;
-	@Autowired
 	private TradeCalService tradeCalService;
 
 	public synchronized void start() {
-		log.info("1.同步股票列表");
-		stockBasicService.jobSynStockList(true);
 		line1();
 		log.info("EveryWorkingDayJob end");
 	}

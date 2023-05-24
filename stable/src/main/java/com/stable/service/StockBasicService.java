@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Semaphore;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -20,7 +19,6 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.stable.constant.Constant;
 import com.stable.enums.RunCycleEnum;
@@ -28,7 +26,7 @@ import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.prd.msg.MsgPushServer;
-import com.stable.spider.tushare.TushareSpider;
+import com.stable.spider.eastmoney.StockListSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
@@ -46,22 +44,19 @@ public class StockBasicService {
 
 	private static final String NO = "no";
 	@Autowired
-	private TushareSpider tushareSpider;
-	@Autowired
 	private EsStockBaseInfoDao esStockBaseInfoDao;
 	@Autowired
 	private RedisUtil redisUtil;
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
+	@Autowired
+	private StockListSpider stockListSpider;
 
 	// @Autowired
 	// private DbStockBaseInfoDao dbStockBaseInfoDao;
 
 	private ConcurrentHashMap<String, String> CODE_NAME_MAP_LOCAL_HASH = new ConcurrentHashMap<String, String>();
 	private List<StockBaseInfo> LOCAL_ALL_ONLINE_LIST = new CopyOnWriteArrayList<StockBaseInfo>();
-
-	// 只初始化一次，历史数据包含已下市股票
-	private boolean initedOneTime = true;
 
 	public String getCodeName2(String code) {
 		return getCodeName(code) + "(" + code + ")";
@@ -72,20 +67,9 @@ public class StockBasicService {
 		if (name == null) {
 			loadAllNameFromDbToLocalHash();
 			name = CODE_NAME_MAP_LOCAL_HASH.get(code);
-			if (name == null) {
-				try {
-					if (initedOneTime) {
-						this.jobSynStockList().get();
-						initedOneTime = false;
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				name = CODE_NAME_MAP_LOCAL_HASH.get(code);
-				if (StringUtils.isBlank(name)) {
-					log.warn("未找到code={},新股或者已退市", code);
-					return code;
-				}
+			if (StringUtils.isBlank(name)) {
+				log.warn("未找到code={},新股或者已退市", code);
+				return code;
 			}
 		}
 		return name;
@@ -107,56 +91,39 @@ public class StockBasicService {
 		return db.get();
 	}
 
-	private final Semaphore semap = new Semaphore(1);
-
-	public ListenableFuture<Object> jobSynStockList(boolean isJob) {
-		try {
-			semap.acquire();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+	public ListenableFuture<Object> jobSynStockListV2() {
 		return TasksWorker.getInstance().getService()
 				.submit(new MyCallable(RunLogBizTypeEnum.STOCK_LIST, RunCycleEnum.WEEK) {
 					public Object mycall() {
 						try {
-							Long batchNo = System.currentTimeMillis();
 							log.info("同步股票列表[started]");
-							JSONArray array = tushareSpider.getStockCodeList();
 							// System.err.println(array.toJSONString());
-							List<StockBaseInfo> list = new LinkedList<StockBaseInfo>();
-							for (int i = 0; i < array.size(); i++) {
-								StockBaseInfo base = new StockBaseInfo(array.getJSONArray(i), batchNo);
-								synBaseStockInfo(base, false);
-								list.add(base);
-							}
+							List<StockBaseInfo> list = stockListSpider.getStockList();
 							int cnt = 0;
-							if (list != null) {
+							if (list != null && list.size() > 0) {
 								esStockBaseInfoDao.saveAll(list);
 								cnt = list.size();
+								LOCAL_ALL_ONLINE_LIST = new CopyOnWriteArrayList<StockBaseInfo>();// 清空缓存
+							} else {
+								MsgPushServer.pushSystem1("同步股票列表异常,获取0条数据");
 							}
-							List<StockBaseInfo> removelist = new LinkedList<StockBaseInfo>();
-							if (isJob) {
-								Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
-								while (it.hasNext()) {
-									StockBaseInfo e = it.next();
-									if ("D".equals(e.getList_status()) || "off".equals(e.getList_status())) {
-										removelist.add(e);
-									} else if ("L".equals(e.getList_status()) && (e.getUpdBatchNo() == null
-											|| e.getUpdBatchNo().longValue() != batchNo.longValue())) {
-										removelist.add(e);
-										e.setList_status("off");// 已退市
-										log.info("删除异常股票:{}", e);
-									}
-								}
-								if (removelist.size() > 0) {
-									for (StockBaseInfo s : removelist) {
-										redisUtil.del(s.getCode());
-									}
-									esStockBaseInfoDao.deleteAll(removelist);
-								}
-							}
+//							List<StockBaseInfo> removelist = new LinkedList<StockBaseInfo>();
+//							if (isJob) {
+//								Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
+//								while (it.hasNext()) {
+//									StockBaseInfo e = it.next();
+//									if ("D".equals(e.getList_status()) || "off".equals(e.getList_status())) {
+//										removelist.add(e);// 已退市
+//									}
+//								}
+//								if (removelist.size() > 0) {
+//									for (StockBaseInfo s : removelist) {
+//										redisUtil.del(s.getCode());
+//									}
+//									esStockBaseInfoDao.deleteAll(removelist);
+//								}
+//							}
 							log.info("同步股票列表[end],cnt=" + cnt);
-							LOCAL_ALL_ONLINE_LIST = new CopyOnWriteArrayList<StockBaseInfo>();// 清空缓存
 							// WxPushUtil.pushSystem1("同步股票列表完成！记录条数=[" + cnt + "],异常股票数:" +
 							// removelist.size());
 							return null;
@@ -164,15 +131,9 @@ public class StockBasicService {
 							e.printStackTrace();
 							MsgPushServer.pushSystem1("同步股票列表异常");
 							throw e;
-						} finally {
-							semap.release();
 						}
 					}
 				});
-	}
-
-	public ListenableFuture<Object> jobSynStockList() {
-		return jobSynStockList(false);
 	}
 
 	public void synDwcfCompanyType(String code, int dfcwCompnayType) {
