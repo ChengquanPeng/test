@@ -61,7 +61,7 @@ public class ThsPlateSpider {
 					eastmoneyCompanySpider.getCompanyInfo(b);
 				}
 				if (updateAll || updateCache) {
-					stockBasicService.synBaseStockInfo(b, true);
+					stockBasicService.synBaseStockInfo(b);
 					upded++;
 				}
 				c++;

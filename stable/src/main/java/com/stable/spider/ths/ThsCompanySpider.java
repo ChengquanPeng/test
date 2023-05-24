@@ -82,7 +82,7 @@ public class ThsCompanySpider {
 				} else {
 					s.setCompnayType(0);
 				}
-				stockBasicService.synBaseStockInfo(s, true);
+				stockBasicService.synBaseStockInfo(s);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, "", "", "");
 			}

@@ -109,7 +109,7 @@ public class XqDailyBaseSpider {
 								base.setTotalMarketVal(b.getTotalMarketVal());
 								base.setCircMarketVal(b.getCircMarketVal());
 							}
-							stockBasicService.synBaseStockInfo(base, true);
+							stockBasicService.synBaseStockInfo(base);
 						}
 					} catch (Exception e) {
 						e.printStackTrace();

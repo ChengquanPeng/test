@@ -60,7 +60,7 @@ public class EveryDayMorningJob extends MySimpleJob {
 
 		/** 周六 */
 		if (week == Calendar.SATURDAY) {
-			log.info("周六,同花顺, 增发&分紅");
+			log.info("周六,同花顺, 增发&分紅 & 公司名字(退、ST)");
 			thsBonusSpider.byJob();// 同花顺, 增发&分紅
 		}
 

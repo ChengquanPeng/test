@@ -12,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.stable.utils.DateUtil;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.spi.req.StockDaliyReq;
 
@@ -70,37 +69,6 @@ public class TushareSpider {
 	}
 
 	/**
-	 * 返回已上市的A股代码
-	 * 
-	 * @return TS代码,股票代码,股票名称,所在地域,所属行业,股票全称,市场类型 （主板/中小板/创业板）,上市状态： L上市 D退市
-	 *         P暂停上市,上市日期
-	 */
-	private final String stock_basic_fields = "ts_code,symbol,name,area,industry,fullname,enname,market,exchange,curr_type,list_status,list_date,delist_date,is_hs";
-
-	public JSONArray getStockCodeList() {
-		for (int j = 0; j < 3; j++) {
-			try {
-				return getStockCodeListProxy();
-			} catch (Exception e) {
-				ThreadsUtil.sleepRandomSecBetween5And15();
-			}
-		}
-		throw new RuntimeException("getStockCodeList exception");
-	}
-
-	private JSONArray getStockCodeListProxy() {
-		JSONObject json = new JSONObject();
-		json.put("api_name", "stock_basic");
-		// 只取上市的
-//		json.put("params", JSON.parse("{'list_status':'L'}"));
-		json.put("fields", stock_basic_fields);
-		String result = post(json);
-		JSONObject datas = JSON.parseObject(result);
-		JSONArray items = datas.getJSONObject("data").getJSONArray("items");
-		return items;
-	}
-
-	/**
 	 * 日线行情
 	 * 
 	 * @param ts_code    ts代码
@@ -114,10 +82,11 @@ public class TushareSpider {
 		try {
 
 			TushareSpider tushareSpider = new TushareSpider();
-			String today = DateUtil.getTodayYYYYMMDD();
-			tushareSpider.tuToken = "f7b8fb50ce43ba5e6e3a45f9ff24539e13319b3ab5e7a1824d032cc6";
+			String today = "20230523";
+			tushareSpider.tuToken = "2daca7eae236547999666447c27869984817c650a0db32fb6a6e1dcb";
 			tushareSpider.restTemplate = new RestTemplate();
 			JSONArray array = tushareSpider.getStockDaliyTrade(null, today, null, null);
+//			JSONArray array = tushareSpider.getStockCodeList();
 			System.err.println(array);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -170,42 +139,5 @@ public class TushareSpider {
 		} finally {
 			ThreadsUtil.tuShareSleepRandom();
 		}
-	}
-
-	/**
-	 * 交易日历
-	 * 
-	 * @param ts_code    ts代码
-	 * @param start_date 开始日期 (格式：YYYYMMDD)
-	 * @param end_date   结束日期 (格式：YYYYMMDD)
-	 * @return
-	 */
-	private final String trade_cal_fields = "cal_date,is_open,pretrade_date";
-
-	private JSONArray getTradeCalProxy(String start_date, String end_date) {
-		try {
-			JSONObject json = new JSONObject();
-			json.put("api_name", "trade_cal");
-			json.put("params", JSON.parse("{'start_date':'" + start_date + "','end_date':'" + end_date + "'}"));
-			json.put("fields", trade_cal_fields);
-
-			String result = post(json);
-			JSONObject datas = JSON.parseObject(result);
-			JSONArray items = datas.getJSONObject("data").getJSONArray("items");
-			return items;
-		} finally {
-			ThreadsUtil.tuShareSleepRandom();
-		}
-	}
-
-	public JSONArray getTradeCal(String start_date, String end_date) {
-		for (int j = 0; j < 3; j++) {
-			try {
-				return getTradeCalProxy(start_date, end_date);
-			} catch (Exception e) {
-				ThreadsUtil.sleepRandomSecBetween5And15();
-			}
-		}
-		throw new RuntimeException("getTradeCal exception");
 	}
 }

@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -124,10 +125,11 @@ public class ThsBonusSpider {
 			List<BonusHist> bhl = new LinkedList<BonusHist>();
 			List<ZengFa> zfl = new LinkedList<ZengFa>();
 			List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
+			Map<String, String> names = new HashMap<String, String>();
 			int c = 0;
 			for (StockBaseInfo s : codelist) {
 				try {
-					dofetchBonusInner(date, s.getCode(), zfdl, zfsl, fhl, bhl, zfl, oneWeekDate);
+					dofetchBonusInner(date, s.getCode(), zfdl, zfsl, fhl, bhl, zfl, oneWeekDate, names);
 				} catch (Exception e) {
 					ErrorLogFileUitl.writeError(e, "", "", "");
 				}
@@ -143,8 +145,14 @@ public class ThsBonusSpider {
 //				}
 //				WxPushUtil.pushSystem1(sb.toString());
 //			}
+			if (names.size() > 0) {
+				for (String code : names.keySet()) {
+					stockBasicService.synName(code, names.get(code));
+				}
+			}
 			log.info("分红&增发抓包同花顺已完成");
 //			WxPushUtil.pushSystem1(date + " 分红&增发抓包同花顺已完成");
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "同花顺分红&增发异常运行异常..", "", "");
@@ -176,7 +184,7 @@ public class ThsBonusSpider {
 	}
 
 	public void dofetchBonusInner(int sysdate, String code, List<ZengFaDetail> zfdl, List<ZengFaSummary> zfsl,
-			List<FenHong> fhl, List<BonusHist> bhl, List<ZengFa> zfl, int oneWeekDate) {
+			List<FenHong> fhl, List<BonusHist> bhl, List<ZengFa> zfl, int oneWeekDate, Map<String, String> names) {
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(urlbase, code, System.currentTimeMillis());
@@ -187,6 +195,20 @@ public class ThsBonusSpider {
 				header.put("Referer", host + code + "/");
 				HtmlPage page = htmlunitSpider.getHtmlPageFromUrlWithoutJs(url, header);
 				HtmlElement body = page.getBody();
+
+				// 公司名字(退市xx,STxx)
+				try {
+					HtmlElement bonuslist = body.getElementsByAttribute("div", "class", "code fl").get(0);
+					DomElement name = bonuslist.getFirstElementChild();
+//					System.err.println(name.asText().trim());
+					String namestr = name.asText().trim();
+					if (StringUtils.isNotBlank(namestr)) {
+						names.put(code, namestr);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
 				// 分红历史
 				try {
 					HtmlElement bonuslist = body.getElementsByAttribute("table", "id", "bonus_table").get(0);
@@ -414,7 +436,8 @@ public class ThsBonusSpider {
 		List<BonusHist> bhl = new LinkedList<BonusHist>();
 		List<ZengFa> zfl = new LinkedList<ZengFa>();
 		int oneWeekDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -7));// 一周之前
-		ts.dofetchBonusInner(DateUtil.getTodayIntYYYYMMDD(), "601228", zfdl, zfsl, fhl, bhl, zfl, oneWeekDate);
+		ts.dofetchBonusInner(DateUtil.getTodayIntYYYYMMDD(), "000620", zfdl, zfsl, fhl, bhl, zfl, oneWeekDate,
+				new HashMap<String, String>());
 		System.err.println(zfdl.size());
 		if (zfdl.size() > 0) {
 			System.err.println(zfdl.get(0));

@@ -6,8 +6,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -55,24 +53,17 @@ public class StockBasicService {
 	// @Autowired
 	// private DbStockBaseInfoDao dbStockBaseInfoDao;
 
-	private ConcurrentHashMap<String, String> CODE_NAME_MAP_LOCAL_HASH = new ConcurrentHashMap<String, String>();
-	private List<StockBaseInfo> LOCAL_ALL_ONLINE_LIST = new CopyOnWriteArrayList<StockBaseInfo>();
-
 	public String getCodeName2(String code) {
 		return getCodeName(code) + "(" + code + ")";
 	}
 
 	public String getCodeName(String code) {
-		String name = CODE_NAME_MAP_LOCAL_HASH.get(code);
+		StockBaseInfo name = getCode(code);
 		if (name == null) {
-			loadAllNameFromDbToLocalHash();
-			name = CODE_NAME_MAP_LOCAL_HASH.get(code);
-			if (StringUtils.isBlank(name)) {
-				log.warn("未找到code={},新股或者已退市", code);
-				return code;
-			}
+			log.warn("未找到code={},新股或者已退市", code);
+			return code;
 		}
-		return name;
+		return name.getName();
 	}
 
 	public StockBaseInfo getCode(String code) {
@@ -103,7 +94,6 @@ public class StockBasicService {
 							if (list != null && list.size() > 0) {
 								esStockBaseInfoDao.saveAll(list);
 								cnt = list.size();
-								LOCAL_ALL_ONLINE_LIST = new CopyOnWriteArrayList<StockBaseInfo>();// 清空缓存
 							} else {
 								MsgPushServer.pushSystem1("同步股票列表异常,获取0条数据");
 							}
@@ -142,6 +132,12 @@ public class StockBasicService {
 		save(b);
 	}
 
+	public void synName(String code, String name) {
+		StockBaseInfo b = this.getCode(code);
+		b.setName(name);
+		save(b);
+	}
+
 	public void synBaseStockInfoCircZb(String code, double circZb) {
 		if (circZb > 0) {
 			StockBaseInfo b = this.getCode(code);
@@ -157,38 +153,9 @@ public class StockBasicService {
 		}
 	}
 
-	public void synBaseStockInfo(StockBaseInfo base, boolean fromNotTushare) {
-		if (!fromNotTushare) {// 以下字段来自同花顺,雪球,东方财富,需要进行同步
-			StockBaseInfo old = getCode(base.getCode());
-			base.setThsIndustry(old.getThsIndustry());
-			base.setThsLightspot(old.getThsLightspot());
-			base.setThsMainBiz(old.getThsMainBiz());
-			base.setOldName(old.getOldName());
-			base.setWebSite(old.getWebSite());
-			base.setFinalControl(old.getFinalControl());
-			base.setCompnayType(old.getCompnayType());
-			base.setFloatShare(old.getFloatShare());
-			base.setTotalShare(old.getTotalShare());
-			base.setCircZb(old.getCircZb());
-			base.setHolderName(old.getHolderName());
-			base.setDfcwCompnayType(old.getDfcwCompnayType());
-			base.setTotalMarketVal(old.getTotalMarketVal());
-			base.setCircMarketVal(old.getCircMarketVal());
-		}
-		if (fromNotTushare) {// 非tushare需要更新，tushare batch 统一更新
-			save(base);
-		}
-		redisUtil.set(base.getCode(), base);
-		CODE_NAME_MAP_LOCAL_HASH.put(base.getCode(), base.getName());
+	public void synBaseStockInfo(StockBaseInfo base) {
+		save(base);
 		log.info("syn stock code:{}", base);
-	}
-
-	private void loadAllNameFromDbToLocalHash() {
-		Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
-		while (it.hasNext()) {
-			StockBaseInfo e = it.next();
-			CODE_NAME_MAP_LOCAL_HASH.put(e.getCode(), e.getName());
-		}
 	}
 
 	public synchronized void recashToRedis() {
@@ -220,27 +187,20 @@ public class StockBasicService {
 //	}
 
 	private synchronized List<StockBaseInfo> getAllOnStatusListWithSort(boolean issort) {
-		if (LOCAL_ALL_ONLINE_LIST.isEmpty()) {
-			log.info("LOCAL_ALL_ONLINE_LIST.isEmpty()");
-			Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
-			// List<StockBaseInfo> list = new LinkedList<StockBaseInfo>();
-			while (it.hasNext()) {
-				StockBaseInfo e = it.next();
-				// list_status='L'
-				if (Constant.CODE_ON_STATUS.equals(e.getList_status()) && isHuShenCode(e.getCode())) {// 排除4,8开头的
-					// list.add(e);
-					LOCAL_ALL_ONLINE_LIST.add(e);
-				}
-			}
-			log.info("LOCAL_ALL_ONLINE_LIST.size():" + LOCAL_ALL_ONLINE_LIST.size());
-		}
 		List<StockBaseInfo> copy = new LinkedList<StockBaseInfo>();
-		copy.addAll(LOCAL_ALL_ONLINE_LIST);
+		Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
+		// List<StockBaseInfo> list = new LinkedList<StockBaseInfo>();
+		while (it.hasNext()) {
+			StockBaseInfo e = it.next();
+			// list_status='L'
+			if (Constant.CODE_ON_STATUS.equals(e.getList_status()) && isHuShenCode(e.getCode())) {// 排除4,8开头的
+				copy.add(e);
+			}
+		}
 		if (issort) {
 			Collections.sort(copy, sort);
 		}
 		return copy;
-		// return dbStockBaseInfoDao.getListWithOnStauts();
 	}
 
 	// 沪深股票，0，6，3开头的
