@@ -13,6 +13,7 @@ public class DateUtil {
 	public static final String YYYY_MM_DD2 = "yyyy-MM-dd";
 	public static final String YYYY_MM_DD3 = "yyyy/MM/dd HH:mm:ss";
 	public static final String YYYY_MM_DD3_HHMMSS = "yyyyMMdd HH:mm:ss";
+	public static final String YYYY_MM = "yyyy-MM";
 
 	public static String convertDate(String yyyyMMdd) {
 		try {
@@ -226,6 +227,10 @@ public class DateUtil {
 
 	public static int getYear(int date) {
 		return Integer.valueOf(String.valueOf(date).substring(0, 4));
+	}
+
+	public static int getMonth(int date) {
+		return Integer.valueOf(String.valueOf(date).substring(4, 6));
 	}
 
 	public static int getJidu(int date) {

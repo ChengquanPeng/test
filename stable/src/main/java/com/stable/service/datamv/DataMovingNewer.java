@@ -38,7 +38,6 @@ import com.stable.es.dao.base.ZengFaDetailDao;
 import com.stable.es.dao.base.ZengFaExtDao;
 import com.stable.es.dao.base.ZengFaSummaryDao;
 import com.stable.es.dao.base.ZhiYaDao;
-import com.stable.service.TradeCalService;
 import com.stable.utils.HttpUtil;
 import com.stable.utils.SpringUtil;
 import com.stable.vo.bus.BonusHist;
@@ -74,9 +73,6 @@ import lombok.extern.log4j.Log4j2;
 @SuppressWarnings("rawtypes")
 @Log4j2
 public class DataMovingNewer implements InitializingBean {
-
-	@Autowired
-	private TradeCalService tradeCalService;
 
 	public Map<String, ElasticsearchRepository> daoMap = new HashMap<String, ElasticsearchRepository>();
 	public Map<String, Class> clzMap = new HashMap<String, Class>();
@@ -162,7 +158,6 @@ public class DataMovingNewer implements InitializingBean {
 //	@javax.annotation.PostConstruct
 	public void testAll() throws Exception {
 		log.info("每月-开始同步日历");
-		tradeCalService.josSynTradeCal();
 		new Thread(new Runnable() {
 			@Override
 			public void run() {

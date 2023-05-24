@@ -7,12 +7,14 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
+@ToString
 @Document(indexName = "trade_cal")
 public class TradeCal extends EsBase {
-	
+
 	/**
 	 * 
 	 */
@@ -22,6 +24,8 @@ public class TradeCal extends EsBase {
 	private int cal_date;
 	@Field(type = FieldType.Integer)
 	private int is_open = 1;
+	// @Field(type = FieldType.Integer)
+	// private int pretrade_date;
 	@Field(type = FieldType.Integer)
-	private int pretrade_date;
+	private int update_time;
 }

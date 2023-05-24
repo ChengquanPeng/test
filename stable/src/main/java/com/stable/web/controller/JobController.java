@@ -70,10 +70,10 @@ public class JobController {
 	 * 手动同步交易日历
 	 */
 	@RequestMapping(value = "/tradecal", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> tradecal(int startdate, int enddate) {
+	public ResponseEntity<JsonResult> tradecal() {
 		JsonResult r = new JsonResult();
 		try {
-			tradeCalService.josSynTradeCal2(startdate + "", enddate + "");
+			tradeCalService.josSynTradeCal();
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
