@@ -4,7 +4,7 @@ public class RedisConstant {
 	// 日交易
 	public static final String RDS_TRADE_HIST_LAST_DAY_ = "RDS_TRADE_HIST_LAST_DAY_";
 	// 交易日历
-	public static final String RDS_TRADE_CAL_ = "RDS_TRADE_CAL_";
+//	public static final String RDS_TRADE_CAL_ = "RDS_TRADE_CAL_";
 	// 价格
 	public static final String RDS_PRICE_LIFE = "RDS_PRICE_LIFE_";
 	// 价值指数
