@@ -1,14 +1,21 @@
 package com.stable.service;
 
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
-
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -17,10 +24,8 @@ import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsTradeCalDao;
 import com.stable.job.MyCallable;
-import com.stable.spider.tushare.TushareSpider;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HttpUtil;
-import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
 import com.stable.vo.bus.TradeCal;
 
@@ -35,15 +40,11 @@ import lombok.extern.log4j.Log4j2;
 public class TradeCalService {
 
 	@Autowired
-	private TushareSpider tushareSpider;
-	@Autowired
-	private RedisUtil redisUtil;
-	@Autowired
 	private EsTradeCalDao calDao;
 
 	private static String url = "http://www.szse.cn/api/report/exchange/onepersistenthour/monthList?month=%s&random=%s";
 
-	@PostConstruct
+//	@PostConstruct
 	public void josSynTradeCal() {
 		TasksWorker.getInstance().getService().submit(new MyCallable(RunLogBizTypeEnum.TRADE_CAL, RunCycleEnum.MONTH) {
 			public Object mycall() {
@@ -93,7 +94,6 @@ public class TradeCalService {
 		if (list.size() > 0) {
 			calDao.saveAll(list);
 		}
-		System.exit(0);
 	}
 
 	private static String getFormatMonth(int m) {
@@ -112,10 +112,38 @@ public class TradeCalService {
 	}
 
 	public String getPretradeDate(String date) {
-		return "";
+		return "" + getPretradeDate(Integer.valueOf(date));
 	}
 
 	public int getPretradeDate(int d) {
-		return 0;
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.rangeQuery("cal_date").lt(d));
+		bqb.must(QueryBuilders.matchPhraseQuery("is_open", 1));
+		FieldSortBuilder sort = SortBuilders.fieldSort("cal_date").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		NativeSearchQueryBuilder builder = queryBuilder.withQuery(bqb);
+		Pageable pageable = PageRequest.of(0, 1);
+		builder.withPageable(pageable).withSort(sort);
+		SearchQuery sq = builder.build();
+		Page<TradeCal> page = calDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0).getCal_date();
+		}
+		throw new RuntimeException("未找到" + d + "的上一个交易日");
+	}
+
+//	@javax.annotation.PostConstruct
+	public void test() {
+		JSONObject result = HttpUtil.doGet(String.format(url, "2023-05", Math.random()));
+		JSONArray data = (JSONArray) result.get("data");
+
+		for (int i = 0; i < data.size(); i++) {
+			JSONObject row = data.getJSONObject(i);
+			TradeCal tc = new TradeCal();
+			tc.setCal_date(DateUtil.convertDate2(row.getString("jyrq")));// 日期
+			System.err.println(tc.getCal_date() + " -> " + getPretradeDate(tc.getCal_date()));
+		}
+		System.exit(0);
 	}
 }
