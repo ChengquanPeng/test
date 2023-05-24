@@ -3,6 +3,7 @@ package com.stable.service.monitor;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,6 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.MonitorType;
 import com.stable.enums.ZfStatus;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
-import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.es.dao.base.MonitorPoolUserDao;
 import com.stable.service.ChipsService;
 import com.stable.service.ChipsZfService;
@@ -55,7 +55,6 @@ import com.stable.vo.bus.FinYjyg;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.bus.HolderNum;
 import com.stable.vo.bus.MonitorPoolTemp;
-import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.bus.ZengFa;
@@ -94,8 +93,6 @@ public class MonitorPoolService {
 	private UserService userService;
 	@Autowired
 	private FinanceService financeService;
-	@Autowired
-	private EsStockBaseInfoDao esStockBaseInfoDao;
 
 //	@javax.annotation.PostConstruct
 //	public void init() {
@@ -472,7 +469,7 @@ public class MonitorPoolService {
 				List<ZengFa> zfl = new LinkedList<ZengFa>();
 				// 抓包
 				for (MonitorPoolTemp mp : list) {
-					thsBonusSpider.dofetchBonusInner(sysdate, mp.getCode(), zfdl, zfsl, fhl, bhl, zfl, 0);
+					thsBonusSpider.dofetchBonusInner(sysdate, mp.getCode(), zfdl, zfsl, fhl, bhl, zfl, 0, null);
 				}
 				thsBonusSpider.saveAll(zfdl, zfsl, fhl, bhl);
 				// 预警
@@ -812,18 +809,30 @@ public class MonitorPoolService {
 		}
 	}
 
-	// 删除退市监听
+	// 删除退市数据：监听，模型
 	public void deleteTsMoni() {
-		List<StockBaseInfo> l = this.stockBasicService.tssc();
-		if (l != null) {
-			for (StockBaseInfo s : l) {
-				s.setTssc(1);
-				List<MonitorPoolTemp> lt = this.getMonitorPool(s.getCode());
-				if (lt != null) {
-					monitorPoolDao.deleteAll(lt);
-				}
+		Iterator<MonitorPoolTemp> it2 = monitorPoolDao.findAll().iterator();
+		List<MonitorPoolTemp> removelist2 = new LinkedList<MonitorPoolTemp>();
+		while (it2.hasNext()) {
+			MonitorPoolTemp e = it2.next();
+			if (!Constant.CODE_ON_STATUS.equals(this.stockBasicService.getCode(e.getCode()).getList_status())) {
+				removelist2.add(e);// 已退市
 			}
-			esStockBaseInfoDao.saveAll(l);
+		}
+		if (removelist2.size() > 0) {
+			monitorPoolDao.deleteAll(removelist2);
+		}
+
+		Iterator<CodeBaseModel2> it = codeBaseModel2Dao.findAll().iterator();
+		List<CodeBaseModel2> removelist1 = new LinkedList<CodeBaseModel2>();
+		while (it.hasNext()) {
+			CodeBaseModel2 e = it.next();
+			if (!Constant.CODE_ON_STATUS.equals(this.stockBasicService.getCode(e.getCode()).getList_status())) {
+				removelist1.add(e);// 已退市
+			}
+		}
+		if (removelist1.size() > 0) {
+			codeBaseModel2Dao.deleteAll(removelist1);
 		}
 	}
 

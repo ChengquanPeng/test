@@ -198,12 +198,14 @@ public class ThsBonusSpider {
 
 				// 公司名字(退市xx,STxx)
 				try {
-					HtmlElement bonuslist = body.getElementsByAttribute("div", "class", "code fl").get(0);
-					DomElement name = bonuslist.getFirstElementChild();
+					if (names != null) {
+						HtmlElement bonuslist = body.getElementsByAttribute("div", "class", "code fl").get(0);
+						DomElement name = bonuslist.getFirstElementChild();
 //					System.err.println(name.asText().trim());
-					String namestr = name.asText().trim();
-					if (StringUtils.isNotBlank(namestr)) {
-						names.put(code, namestr);
+						String namestr = name.asText().trim();
+						if (StringUtils.isNotBlank(namestr)) {
+							names.put(code, namestr);
+						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();

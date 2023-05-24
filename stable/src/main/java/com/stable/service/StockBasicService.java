@@ -8,12 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
@@ -97,25 +92,7 @@ public class StockBasicService {
 							} else {
 								MsgPushServer.pushSystem1("同步股票列表异常,获取0条数据");
 							}
-//							List<StockBaseInfo> removelist = new LinkedList<StockBaseInfo>();
-//							if (isJob) {
-//								Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
-//								while (it.hasNext()) {
-//									StockBaseInfo e = it.next();
-//									if ("D".equals(e.getList_status()) || "off".equals(e.getList_status())) {
-//										removelist.add(e);// 已退市
-//									}
-//								}
-//								if (removelist.size() > 0) {
-//									for (StockBaseInfo s : removelist) {
-//										redisUtil.del(s.getCode());
-//									}
-//									esStockBaseInfoDao.deleteAll(removelist);
-//								}
-//							}
 							log.info("同步股票列表[end],cnt=" + cnt);
-							// WxPushUtil.pushSystem1("同步股票列表完成！记录条数=[" + cnt + "],异常股票数:" +
-							// removelist.size());
 							return null;
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -136,6 +113,25 @@ public class StockBasicService {
 		StockBaseInfo b = this.getCode(code);
 		b.setName(name);
 		save(b);
+	}
+
+	private String tui = "退";
+
+	public void deleteTuiShi() {
+		List<StockBaseInfo> removelist = new LinkedList<StockBaseInfo>();
+		Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
+		while (it.hasNext()) {
+			StockBaseInfo e = it.next();
+			if (e.getName().startsWith(tui) || e.getName().endsWith(tui)) {
+				removelist.add(e);// 已退市
+			}
+		}
+		if (removelist.size() > 0) {
+			for (StockBaseInfo s : removelist) {
+				redisUtil.del(s.getCode());
+			}
+			esStockBaseInfoDao.deleteAll(removelist);
+		}
 	}
 
 	public void synBaseStockInfoCircZb(String code, double circZb) {
@@ -229,20 +225,6 @@ public class StockBasicService {
 			return false;
 		}
 		return true;
-	}
-
-	public List<StockBaseInfo> tssc() {
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.matchPhraseQuery("list_status", "off"));
-		bqb.must(QueryBuilders.matchPhraseQuery("tssc", 0));
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).build();
-
-		Page<StockBaseInfo> page = esStockBaseInfoDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent();
-		}
-		return null;
 	}
 
 	public boolean xiaoshizhi(StockBaseInfo s) {
