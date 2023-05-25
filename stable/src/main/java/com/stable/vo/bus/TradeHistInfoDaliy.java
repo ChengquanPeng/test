@@ -58,7 +58,7 @@ public class TradeHistInfoDaliy extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int qfqDate;
 
-	// 今日涨跌幅
+//	 换手率
 	@Field(type = FieldType.Double)
 	private double changeHands;
 

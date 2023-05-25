@@ -129,12 +129,12 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					// 大小旗形
 					if (!burstPointCheckTop && rtm.getOrig().getShotPointPrice() > 0) {
 						if (rt.getHigh() >= rtm.getOrig().getShotPointPrice()) {
-							String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]突破买点:"
+							String title2 = codeName + rtm.you + TagUtil.getXiPan(rtm.getBase()) + " 突破买点:"
 									+ rtm.getOrig().getShotPointPrice();
 							burstPointCheckTop = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 							ocg.genMsg(code, title2);
 						} else if (rtm.warningYellowChk && rt.getHigh() >= rtm.warningYellow && rtm.warningYellow > 0) {
-							String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "]准备突破买点:"
+							String title2 = codeName + rtm.you + TagUtil.getXiPan(rtm.getBase()) + " 准备突破买点:"
 									+ rtm.getOrig().getShotPointPrice() + "现价:" + rt.getBuy1();
 							rtm.warningYellowChk = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 							ocg.genMsg(code, title2);
@@ -151,7 +151,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					// 十字星
 					if (!burstPointCheckSzx && rtm.getOrig().getShotPointPriceSzx() > 0
 							&& rt.getHigh() >= rtm.getOrig().getShotPointPriceSzx()) {
-						String title2 = codeName + rtm.you + " [" + TagUtil.getXiPan(rtm.getBase()) + "]突破买点:"
+						String title2 = codeName + rtm.you + TagUtil.getXiPan(rtm.getBase()) + " 突破买点:"
 								+ rtm.getOrig().getShotPointPriceSzx();
 						burstPointCheckSzx = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
@@ -165,12 +165,11 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					}
 					// 洗盘：突破3个月
 					if (rt.getHigh() > rtm.getOrig().getXpPrice() && !highPriceGot && rtm.getOrig().getXpPrice() > 0) {
-						String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase())
-								+ "][洗盘突破-新高(3month)] ";
+						String title2 = codeName + rtm.you + TagUtil.getXiPan(rtm.getBase()) + " [洗盘突破-新高(3month)] ";
 						highPriceGot = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
 					} else if (rtm.price3mYellowChk && rt.getHigh() > rtm.price3mYellow && rtm.price3mYellow > 0) {
-						String title2 = codeName + rtm.you + "[" + TagUtil.getXiPan(rtm.getBase()) + "] 准备突破  ";
+						String title2 = codeName + rtm.you + TagUtil.getXiPan(rtm.getBase()) + " 准备突破  ";
 						rtm.price3mYellowChk = rtm.bizPushService.pushS2ForTradeTime(title2, getBaseInfo());
 						ocg.genMsg(code, title2);
 					}

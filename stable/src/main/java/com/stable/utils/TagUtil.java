@@ -169,6 +169,9 @@ public class TagUtil {
 		if (p1.getZyxing() > 0) {
 			s += "-10";
 		}
+		if (!s.equals("")) {
+			s = "[" + s + "]";
+		}
 		return s;
 	}
 
