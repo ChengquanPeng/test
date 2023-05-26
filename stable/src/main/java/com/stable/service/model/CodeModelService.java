@@ -120,7 +120,6 @@ public class CodeModelService {
 	private int pre1Year = 0;// 一年以前
 	private int pre2Year = 0;// 一年以前
 	private int pre3Year = 0;// 三年以前
-	private int pre4Year = 0;// 四年以前
 	private double yzdzamt = 0.45 * WebModelService.WAN;
 
 	private synchronized void runByJobv2(int t) {
@@ -128,7 +127,6 @@ public class CodeModelService {
 		pre1Year = DateUtil.getPreYear(tradeDate);
 		pre2Year = DateUtil.getPreYear(tradeDate, 2);
 		pre3Year = DateUtil.getPreYear(tradeDate, 3);
-		pre4Year = DateUtil.getPreYear(tradeDate, 4);
 
 		// 基本面
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
@@ -249,7 +247,7 @@ public class CodeModelService {
 			pool.setUpTodayChange(0);
 //			pool.setShotPointCheck(0);
 		}
-		boolean online4Year = stockBasicService.onlinePreYearChk(code, pre4Year);
+		boolean online4Year = stockBasicService.onlinePreYearChk(code, pre3Year);
 
 		// 以下是系统指标，没有4年直接退出
 		if (!online4Year) {// 4年以下，退出
@@ -559,7 +557,7 @@ public class CodeModelService {
 	}
 
 	private void holderNum(CodeBaseModel2 newOne) {
-		HolderAnalyse ha = chipsService.holderNumAnalyse(newOne.getCode(), pre4Year);// 4年股东人数分析
+		HolderAnalyse ha = chipsService.holderNumAnalyse(newOne.getCode(), pre3Year);// 4年股东人数分析
 		newOne.setHolderNum(ha.getAnaRes());
 		newOne.setHolderDate(ha.getDate());
 		newOne.setAvgNum(ha.getAvgNum());// 除开5%股东的人均流通持股

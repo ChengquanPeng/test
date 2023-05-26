@@ -70,7 +70,7 @@ public class CodeModelKLineService {
 		tradeDate = date;
 		codeModelService.tradeDate = date;
 		pre1Year = DateUtil.getPreYear(tradeDate);
-		pre4Year = DateUtil.getPreYear(tradeDate, 4);
+		pre3Year = DateUtil.getPreYear(tradeDate, 3);
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
 		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
 		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
@@ -109,7 +109,7 @@ public class CodeModelKLineService {
 
 	private int tradeDate = 0;
 	private int pre1Year = 0;// 一年以前
-	private int pre4Year = 0;// 四年以前
+	private int pre3Year = 0;// 三年以前
 
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
 			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap) {
@@ -125,7 +125,7 @@ public class CodeModelKLineService {
 			listLast.add(tone);
 			return;
 		}
-		boolean online4Year = stockBasicService.onlinePreYearChk(code, pre4Year);
+		boolean online3Year = stockBasicService.onlinePreYearChk(code, pre3Year);
 		CodeBaseModel2 newOne = histMap.get(s.getCode());
 		if (newOne == null) {
 			newOne = new CodeBaseModel2();
@@ -135,7 +135,7 @@ public class CodeModelKLineService {
 		listLast.add(newOne);
 
 		// N年未大涨
-		noup(online4Year, newOne, s.getList_date());
+		noup(online3Year, newOne, s.getList_date());
 		// ==============技术面-量价==============
 		// 3个月新高
 //		year1(newOne, lastTrade);
