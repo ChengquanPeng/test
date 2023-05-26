@@ -39,6 +39,7 @@ import lombok.extern.log4j.Log4j2;
 @Component
 @Log4j2
 public class DailyFetch {
+	private static final String STOP_2 = "--";
 	@Autowired
 	private RedisUtil redisUtil;
 	@Autowired
@@ -275,11 +276,25 @@ public class DailyFetch {
 							try {
 								td.setHigh(Double.valueOf(s.split(SPLIT)[1]));
 							} catch (Exception e) {
-								// 停牌标志
+								// 有->停牌标志
 								List<HtmlElement> list = body.getElementsByAttribute("div", "class", "stock-flag");
 								if (list != null && list.size() > 0) {
 									log.info("{} 今日停牌", code);
 									return null;// 成功-停牌
+								}
+								// 无:停牌标志:临时停牌
+								if (s.split(SPLIT)[1].trim().equals(STOP_2)) {
+									HtmlElement stockChange = body
+											.getElementsByAttribute("div", "class", "stock-change").get(0);
+									String[] ss = stockChange.asText().trim().replace(JIA, "").replace(JIAN, "")
+											.replace(BFH, "").split(" ");
+									td.setTodayChange(Double.valueOf(ss[0]));
+									td.setTodayChangeRate(Double.valueOf(ss[1]));
+
+									if (td.getTodayChange() == 0.0 && td.getTodayChangeRate() == 0.0) {
+										log.info("{} 今日停牌", code);
+										return null;// 成功-停牌
+									}
 								}
 							}
 
@@ -447,7 +462,7 @@ public class DailyFetch {
 	public static void main(String[] args) {
 		DailyFetch x = new DailyFetch();
 		x.htmlunitSpider = new HtmlunitSpider();
-		String code = "600665";
+		String code = "600242";
 		List<TradeHistInfoDaliy> listtd = new LinkedList<TradeHistInfoDaliy>();
 		List<TradeHistInfoDaliyNofq> listNofq = new LinkedList<TradeHistInfoDaliyNofq>();
 		List<DaliyBasicInfo2> daliybasicList = new LinkedList<DaliyBasicInfo2>();
