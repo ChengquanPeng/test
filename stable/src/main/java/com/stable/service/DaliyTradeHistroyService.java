@@ -7,8 +7,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -26,8 +24,6 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
@@ -36,9 +32,9 @@ import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
 import com.stable.job.MyCallable;
-import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.tushare.TushareSpider;
+import com.stable.spider.xq.DailyFetch;
 import com.stable.spider.xq.XqDailyBaseSpider;
 import com.stable.utils.CandlesTickChart;
 import com.stable.utils.CurrencyUitl;
@@ -46,10 +42,7 @@ import com.stable.utils.DateUtil;
 import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
-import com.stable.utils.TasksWorker2nd;
-import com.stable.utils.TasksWorker2ndRunnable;
 import com.stable.utils.ThreadsUtil;
-import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
@@ -87,6 +80,9 @@ public class DaliyTradeHistroyService {
 	private XqDailyBaseSpider xqDailyBaseSpider;
 //	@Autowired
 //	private TickService tickService;
+	@Autowired
+	private DailyFetch dailyFetch;
+	
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -122,7 +118,11 @@ public class DaliyTradeHistroyService {
 			return result;
 		}
 	}
-
+	private synchronized int spiderTodayDaliyTrade(boolean isJob, String today, boolean warning) {
+		dailyFetch.fetchAllHushenCodes();
+		return 0;
+	}
+/*
 	private synchronized int spiderTodayDaliyTrade(boolean isJob, String today, boolean warning) {
 		try {
 			JSONArray array = tushareSpider.getStockDaliyTrade(null, today, null, null);
@@ -228,7 +228,7 @@ public class DaliyTradeHistroyService {
 		return 0;
 
 	}
-
+*/
 	// 路由，优先eastmoney
 	public boolean spiderDaliyTradeHistoryInfoFromIPOCenter(String code, String today, int fortimes) {
 		priceLifeService.removePriceLifeCache(code);
@@ -245,7 +245,7 @@ public class DaliyTradeHistroyService {
 	}
 
 	// 路由，优先eastmoney
-	private boolean spiderDaliyTradeHistoryInfoFromIPOCenterNofq(String code, int fortimes) {
+	public boolean spiderDaliyTradeHistoryInfoFromIPOCenterNofq(String code, int fortimes) {
 		if (spiderDaliyTradeHistoryInfoFromIPOEastMoneyNofq(code, fortimes)) {
 			return true;
 		}
