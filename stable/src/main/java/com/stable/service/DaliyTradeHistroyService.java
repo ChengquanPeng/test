@@ -16,7 +16,6 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,21 +27,15 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.constant.RedisConstant;
 import com.stable.enums.RunCycleEnum;
 import com.stable.enums.RunLogBizTypeEnum;
-import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
 import com.stable.job.MyCallable;
-import com.stable.spider.eastmoney.EastmoneyQfqSpider;
-import com.stable.spider.tushare.TushareSpider;
 import com.stable.spider.xq.DailyFetch;
-import com.stable.spider.xq.XqDailyBaseSpider;
 import com.stable.utils.CandlesTickChart;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
-import com.stable.utils.PythonCallUtil;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
-import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 import com.stable.vo.bus.TradeHistInfoDaliyNofq;
@@ -61,28 +54,15 @@ public class DaliyTradeHistroyService {
 	@Autowired
 	private StockBasicService stockBasicService;
 	@Autowired
-	private TushareSpider tushareSpider;
-	@Autowired
 	private RedisUtil redisUtil;
 	@Autowired
 	private EsTradeHistInfoDaliyDao esTradeHistInfoDaliyDao;
 	@Autowired
 	private EsTradeHistInfoDaliyNofqDao esTradeHistInfoDaliyNofqDao;
 	@Autowired
-	private EsDaliyBasicInfoDao esDaliyBasicInfoDao;
-	@Value("${python.file.market.hist.daily}")
-	private String pythonFileName;
-	@Autowired
-	private TradeCalService tradeCalService;
-	@Autowired
 	private PriceLifeService priceLifeService;
 	@Autowired
-	private XqDailyBaseSpider xqDailyBaseSpider;
-//	@Autowired
-//	private TickService tickService;
-	@Autowired
 	private DailyFetch dailyFetch;
-	
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -91,10 +71,9 @@ public class DaliyTradeHistroyService {
 		TasksWorker.getInstance().getService()
 				.submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.MANUAL, code) {
 					public Object mycall() {
-						String today = DateUtil.getTodayYYYYMMDD();
 						redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
 						log.info("日期前复权：{}重新获取记录", code);
-						spiderDaliyTradeHistoryInfoFromIPOCenter(code, today, 0);
+						dailyFetch.fetchByCodeAll(code, DateUtil.getTodayBefor7DayYYYYMMDD());
 						return null;
 					}
 				});
@@ -118,297 +97,68 @@ public class DaliyTradeHistroyService {
 			return result;
 		}
 	}
+
 	private synchronized int spiderTodayDaliyTrade(boolean isJob, String today, boolean warning) {
 		dailyFetch.fetchAllHushenCodes();
 		return 0;
 	}
-/*
-	private synchronized int spiderTodayDaliyTrade(boolean isJob, String today, boolean warning) {
-		try {
-			JSONArray array = tushareSpider.getStockDaliyTrade(null, today, null, null);
-			if (array == null || array.size() <= 0) {
-				log.warn("未获取到日交易记录,tushare,code={}");
-				if (tradeCalService.isOpen(Integer.valueOf(today))) {
-					MsgPushServer.pushSystem1("未获取到日交易记录,tushare,日期=" + today);
-				}
-				return 0;
-			}
-			log.info("获取到日交易记录条数={}", array.size());
-			String preDate = tradeCalService.getPretradeDate(today);
-			CountDownLatch cnt = new CountDownLatch(array.size());
-			List<TradeHistInfoDaliy> list = new LinkedList<TradeHistInfoDaliy>();
-			List<TradeHistInfoDaliyNofq> listNofq = new LinkedList<TradeHistInfoDaliyNofq>();
-			List<DaliyBasicInfo2> daliybasicList = new LinkedList<DaliyBasicInfo2>();
-			for (int i = 0; i < array.size(); i++) {
-				// 1.保存记录
-				TradeHistInfoDaliy d = new TradeHistInfoDaliy(array.getJSONArray(i));
-				String code = d.getCode();
-				try {
-					int qfqDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
-					d.setQfqDate(qfqDate);
-					list.add(d);
-					TradeHistInfoDaliyNofq nofq = new TradeHistInfoDaliyNofq(array.getJSONArray(i));
-					listNofq.add(nofq);
-					if (isJob) {
-						DaliyBasicInfo2 dalyb = new DaliyBasicInfo2(array.getJSONArray(i));
-						daliybasicList.add(dalyb);
-					}
 
-					// 2.是否需要更新缺失记录
-					String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
-					if (StringUtils.isBlank(yyyymmdd) || (!preDate.equals(yyyymmdd) && !yyyymmdd.equals(today)
-							&& Integer.valueOf(yyyymmdd) < Integer.valueOf(today))) {//
-						log.info("代码code:{}重新获取记录->redis-last:{},preDate:{},today:{},index={}", code, yyyymmdd, preDate,
-								today, i);
-						String json = redisUtil.get(d.getCode());
-						// 第一次上市或者除权
-						StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-						if (base != null) {
-							TasksWorker2nd.add(new TasksWorker2ndRunnable() {
-								public void running() {
-									try {
-										spiderDaliyTradeHistoryInfoFromIPOCenter(code, today, 0);
-										spiderDaliyTradeHistoryInfoFromIPOCenterNofq(code, 0);
-									} catch (Exception e) {
-										MsgPushServer.pushSystem1("重新获取前后复权出错：" + code);
-									} finally {
-										cnt.countDown();
-									}
-								}
-							});
-						} else {
-							log.info("代码code:{} 未获取到StockBaseInfo", code);
-							cnt.countDown();
-						}
-					} else {
-						log.info("代码:{},不需要重新更新记录,上个交易日期 preDate:{},上次更新日期:{},最后更新日期:{},index={}", code, preDate,
-								yyyymmdd, today, i);
-						redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
-						priceLifeService.checkAndSetPrice(d);
-						cnt.countDown();
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					MsgPushServer.pushSystem1("前复权qfq获取异常==>代码:" + code);
-					cnt.countDown();
-				}
-			}
-			try {
-				if (!cnt.await(12, TimeUnit.HOURS)) {
-					MsgPushServer.pushSystem1("前复权qfq获取超时异常==>日期:" + today);
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			if (daliybasicList.size() > 0) {
-				esDaliyBasicInfoDao.saveAll(daliybasicList);
-			}
-			if (listNofq.size() > 0) {
-				esTradeHistInfoDaliyNofqDao.saveAll(listNofq);
-			}
-			if (list.size() > 0) {
-				esTradeHistInfoDaliyDao.saveAll(list);
-			}
-			// 定时任务
-			ThreadsUtil.sleepRandomSecBetween15And30();
-			if (isJob) {
-				if (daliybasicList.size() > 0) {
-					// tickService.genTickEveryDay(daliybasicList, dddd);
-					xqDailyBaseSpider.fetchAll(daliybasicList, listNofq);
-				}
-			}
-			return list.size();
-		} catch (Exception e) {
-			e.printStackTrace();
-			log.error(e.getMessage(), e);
-			if (warning) {
-				MsgPushServer.pushSystem1("前复权qfq获取异常，获取日期:" + today);
-			}
-		}
-		return 0;
-
-	}
-*/
-	// 路由，优先eastmoney
-	public boolean spiderDaliyTradeHistoryInfoFromIPOCenter(String code, String today, int fortimes) {
-		priceLifeService.removePriceLifeCache(code);
-		if (spiderDaliyTradeHistoryInfoFromIPOEastMoney(code, fortimes)) {
-			redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
-			return true;
-		}
-		throw new RuntimeException(code + " " + today + " 日交易获取前复权错误");
-//		if (spiderDaliyTradeHistoryInfoFromIPOTushare(code, startDate, today, fortimes)) {
-//			redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
-//			return true;
-//		}
-//		return false;
-	}
-
-	// 路由，优先eastmoney
-	public boolean spiderDaliyTradeHistoryInfoFromIPOCenterNofq(String code, int fortimes) {
-		if (spiderDaliyTradeHistoryInfoFromIPOEastMoneyNofq(code, fortimes)) {
-			return true;
-		}
-		throw new RuntimeException(code + " 日交易获取No复权错误");
-//		if (spiderDaliyTradeHistoryInfoFromIPOTushareNofq(code, startDate, today, fortimes)) {
-//			return true;
-//		}
-//		return false;
-	}
-
-	private boolean spiderDaliyTradeHistoryInfoFromIPOEastMoney(String code, int fortimes) {
-		if (fortimes >= 3) {
-			log.warn("EastMoeny 超过最大次数：code：{}，fortimes：{}", code, fortimes);
-			return false;
-		}
-		fortimes++;
-		List<TradeHistInfoDaliy> list = null;
-		try {
-			list = EastmoneyQfqSpider.getQfq(code);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		if (list == null || list.size() <= 0) {
-			return spiderDaliyTradeHistoryInfoFromIPOEastMoney(code, fortimes);
-		} else {
-			esTradeHistInfoDaliyDao.saveAll(list);
-		}
-		return true;
-	}
-
-	private boolean spiderDaliyTradeHistoryInfoFromIPOEastMoneyNofq(String code, int fortimes) {
-		if (fortimes >= 3) {
-			log.warn("EastMoeny 超过最大次数：code：{}，fortimes：{}", code, fortimes);
-			return false;
-		}
-		fortimes++;
-		List<TradeHistInfoDaliyNofq> list = null;
-		try {
-			list = EastmoneyQfqSpider.getWithOutfq(code);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		if (list == null || list.size() <= 0) {
-			return spiderDaliyTradeHistoryInfoFromIPOEastMoneyNofq(code, fortimes);
-		} else {
-			esTradeHistInfoDaliyNofqDao.saveAll(list);
-		}
-		return true;
-	}
-
-	@SuppressWarnings("unused")
-	private boolean spiderDaliyTradeHistoryInfoFromIPOTushareNofq(String code, String startDate, String today,
-			int fortimes) {
-		if (fortimes >= 10) {
-			log.warn("Tushare 超过最大次数：code：{}，startDate：{}，endDate：{}，fortimes：{}", code, startDate, today, fortimes);
-			return false;
-		}
-		fortimes++;
-		ThreadsUtil.sleepRandomSecBetween1And30();
-//		MarketHistroyVo mh = new MarketHistroyVo();
-//		mh.setTs_code(TushareSpider.formatCode(code));
-//		mh.setAdj("qfq");
-//		mh.setStart_date(startDate);
-//		mh.setEnd_date(endDate);
-//		mh.setFreq("D");
-
-//		code=sys.argv[1]
-//		sdate=sys.argv[2]
-//		edate=sys.argv[3]
-//		padj=sys.argv[4]
-//		pfreq=sys.argv[5]
-		String params = TushareSpider.formatCode(code) + " " + startDate + " " + today + " None D";
-		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
-		if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
-			log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，未获取到数据 params：{}", code, params);
-			if (lines != null && !lines.isEmpty()) {
-				log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
-			}
-			return false;
-		}
-		log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，获取到数据 条数：szie:{}，", code, lines.size() - 1);
-		TradeHistInfoDaliyNofq last = null;
-		List<TradeHistInfoDaliyNofq> list = new LinkedList<TradeHistInfoDaliyNofq>();
-		for (String line : lines) {
-			TradeHistInfoDaliyNofq d = this.getTradeHistInfoDaliyNofq(line);
-			if (d != null) {
-				list.add(d);
-				// this.tradeHistDaliy.save(d);
-				last = d;
-				if (list.size() > 2000) {
-					esTradeHistInfoDaliyNofqDao.saveAll(list);
-					list = new LinkedList<TradeHistInfoDaliyNofq>();
-				}
-			}
-		}
-		if (list.size() > 0) {
-			esTradeHistInfoDaliyNofqDao.saveAll(list);
-		}
-		log.warn("不复权-spiderDaliyTradeHistoryInfoFromIPO：code：{}，上市日期startDate：{}，本批当前日期last：{}", code, startDate,
-				last);
-		if (last != null && !startDate.equals(last.getDate() + "")) {
-			return spiderDaliyTradeHistoryInfoFromIPOTushareNofq(code, startDate, last.getDate() + "", fortimes);
-		}
-		return true;
-	}
-
-	@SuppressWarnings("unused")
-	private boolean spiderDaliyTradeHistoryInfoFromIPOTushare(String code, String startDate, String today,
-			int fortimes) {
-		if (fortimes >= 10) {
-			log.warn("Tushare 超过最大次数：code：{}，startDate：{}，endDate：{}，fortimes：{}", code, startDate, today, fortimes);
-			return false;
-		}
-		fortimes++;
-		ThreadsUtil.sleepRandomSecBetween1And30();
-//		MarketHistroyVo mh = new MarketHistroyVo();
-//		mh.setTs_code(TushareSpider.formatCode(code));
-//		mh.setAdj("qfq");
-//		mh.setStart_date(startDate);
-//		mh.setEnd_date(endDate);
-//		mh.setFreq("D");
-
-//		code=sys.argv[1]
-//		sdate=sys.argv[2]
-//		edate=sys.argv[3]
-//		padj=sys.argv[4]
-//		pfreq=sys.argv[5]
-		String params = TushareSpider.formatCode(code) + " " + startDate + " " + today + " qfq D";
-		List<String> lines = PythonCallUtil.callPythonScript(pythonFileName, params);
-		if (lines == null || lines.isEmpty() || lines.get(0).startsWith(PythonCallUtil.EXCEPT)) {
-			log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，未获取到数据 params：{}", code, params);
-			if (lines != null && !lines.isEmpty()) {
-				log.error("Python 错误：code：{}，PythonCallUtil.EXCEPT：{}", code, lines.get(0));
-			}
-			return false;
-		}
-		int qfqDate = Integer.valueOf(DateUtil.getTodayYYYYMMDD());
-		log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，获取到数据 条数：szie:{}，", code, lines.size() - 1);
-		TradeHistInfoDaliy last = null;
-		List<TradeHistInfoDaliy> list = new LinkedList<TradeHistInfoDaliy>();
-		for (String line : lines) {
-			TradeHistInfoDaliy d = this.getTradeHistInfoDaliy(line);
-			if (d != null) {
-				d.setQfqDate(qfqDate);
-				list.add(d);
-				// this.tradeHistDaliy.save(d);
-				last = d;
-				if (list.size() > 2000) {
-					esTradeHistInfoDaliyDao.saveAll(list);
-					list = new LinkedList<TradeHistInfoDaliy>();
-				}
-			}
-		}
-		if (list.size() > 0) {
-			esTradeHistInfoDaliyDao.saveAll(list);
-		}
-		log.warn("spiderDaliyTradeHistoryInfoFromIPO：code：{}，上市日期startDate：{}，本批当前日期last：{}", code, startDate, last);
-		if (last != null && !startDate.equals(last.getDate() + "")) {
-			return spiderDaliyTradeHistoryInfoFromIPOTushare(code, startDate, last.getDate() + "", fortimes);
-		}
-		return true;
-	}
-
+	/*
+	 * private synchronized int spiderTodayDaliyTrade(boolean isJob, String today,
+	 * boolean warning) { try { JSONArray array =
+	 * tushareSpider.getStockDaliyTrade(null, today, null, null); if (array == null
+	 * || array.size() <= 0) { log.warn("未获取到日交易记录,tushare,code={}"); if
+	 * (tradeCalService.isOpen(Integer.valueOf(today))) {
+	 * MsgPushServer.pushSystem1("未获取到日交易记录,tushare,日期=" + today); } return 0; }
+	 * log.info("获取到日交易记录条数={}", array.size()); String preDate =
+	 * tradeCalService.getPretradeDate(today); CountDownLatch cnt = new
+	 * CountDownLatch(array.size()); List<TradeHistInfoDaliy> list = new
+	 * LinkedList<TradeHistInfoDaliy>(); List<TradeHistInfoDaliyNofq> listNofq = new
+	 * LinkedList<TradeHistInfoDaliyNofq>(); List<DaliyBasicInfo2> daliybasicList =
+	 * new LinkedList<DaliyBasicInfo2>(); for (int i = 0; i < array.size(); i++) {
+	 * // 1.保存记录 TradeHistInfoDaliy d = new
+	 * TradeHistInfoDaliy(array.getJSONArray(i)); String code = d.getCode(); try {
+	 * int qfqDate =
+	 * Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code,
+	 * "0")); d.setQfqDate(qfqDate); list.add(d); TradeHistInfoDaliyNofq nofq = new
+	 * TradeHistInfoDaliyNofq(array.getJSONArray(i)); listNofq.add(nofq); if (isJob)
+	 * { DaliyBasicInfo2 dalyb = new DaliyBasicInfo2(array.getJSONArray(i));
+	 * daliybasicList.add(dalyb); }
+	 * 
+	 * // 2.是否需要更新缺失记录 String yyyymmdd =
+	 * redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code); if
+	 * (StringUtils.isBlank(yyyymmdd) || (!preDate.equals(yyyymmdd) &&
+	 * !yyyymmdd.equals(today) && Integer.valueOf(yyyymmdd) <
+	 * Integer.valueOf(today))) {//
+	 * log.info("代码code:{}重新获取记录->redis-last:{},preDate:{},today:{},index={}", code,
+	 * yyyymmdd, preDate, today, i); String json = redisUtil.get(d.getCode()); //
+	 * 第一次上市或者除权 StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
+	 * if (base != null) { TasksWorker2nd.add(new TasksWorker2ndRunnable() { public
+	 * void running() { try { spiderDaliyTradeHistoryInfoFromIPOCenter(code, today,
+	 * 0); spiderDaliyTradeHistoryInfoFromIPOCenterNofq(code, 0); } catch (Exception
+	 * e) { MsgPushServer.pushSystem1("重新获取前后复权出错：" + code); } finally {
+	 * cnt.countDown(); } } }); } else { log.info("代码code:{} 未获取到StockBaseInfo",
+	 * code); cnt.countDown(); } } else {
+	 * log.info("代码:{},不需要重新更新记录,上个交易日期 preDate:{},上次更新日期:{},最后更新日期:{},index={}",
+	 * code, preDate, yyyymmdd, today, i);
+	 * redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+	 * priceLifeService.checkAndSetPrice(d); cnt.countDown(); } } catch (Exception
+	 * e) { e.printStackTrace(); MsgPushServer.pushSystem1("前复权qfq获取异常==>代码:" +
+	 * code); cnt.countDown(); } } try { if (!cnt.await(12, TimeUnit.HOURS)) {
+	 * MsgPushServer.pushSystem1("前复权qfq获取超时异常==>日期:" + today); } } catch
+	 * (InterruptedException e) { e.printStackTrace(); } if (daliybasicList.size() >
+	 * 0) { esDaliyBasicInfoDao.saveAll(daliybasicList); } if (listNofq.size() > 0)
+	 * { esTradeHistInfoDaliyNofqDao.saveAll(listNofq); } if (list.size() > 0) {
+	 * esTradeHistInfoDaliyDao.saveAll(list); } // 定时任务
+	 * ThreadsUtil.sleepRandomSecBetween15And30(); if (isJob) { if
+	 * (daliybasicList.size() > 0) { // tickService.genTickEveryDay(daliybasicList,
+	 * dddd); xqDailyBaseSpider.fetchAll(daliybasicList, listNofq); } } return
+	 * list.size(); } catch (Exception e) { e.printStackTrace();
+	 * log.error(e.getMessage(), e); if (warning) {
+	 * MsgPushServer.pushSystem1("前复权qfq获取异常，获取日期:" + today); } } return 0;
+	 * 
+	 * }
+	 */
 	public List<DaliyTradeHistResp> queryListByCodeByWebPage(String code, EsQueryPageReq queryPage) {
 		List<DaliyTradeHistResp> res = new LinkedList<DaliyTradeHistResp>();
 		List<TradeHistInfoDaliy> list = this.queryListByCodeQfq(code, 0, 0, queryPage, SortOrder.DESC);
@@ -475,7 +225,7 @@ public class DaliyTradeHistroyService {
 					queryPage.getPageSize(), s.toString());
 //			new Exception().printStackTrace();
 			String today = DateUtil.getTodayYYYYMMDD();
-			if (spiderDaliyTradeHistoryInfoFromIPOCenter(code, today, 0)) {
+			if (dailyFetch.spiderDaliyTradeHistoryInfoFromIPOCenter(code, today, 0)) {
 				return queryListByCodeQfq(code, startDate, endDate, queryPage, s);
 			}
 			return null;
@@ -552,7 +302,7 @@ public class DaliyTradeHistroyService {
 			log.info("needFetch Nofq code={},startDate={},endDate={},queryPage={},SortOrder={}", code, startDate,
 					endDate, queryPage.getPageSize(), s.toString());
 //			new Exception().printStackTrace();
-			if (spiderDaliyTradeHistoryInfoFromIPOCenterNofq(code, 0)) {
+			if (dailyFetch.spiderDaliyTradeHistoryInfoFromIPOCenterNofq(code, 0)) {
 				return queryListByCodeNofq(code, startDate, endDate, queryPage, s);
 			}
 			return null;
@@ -586,71 +336,6 @@ public class DaliyTradeHistroyService {
 			return page.getContent();
 		}
 		return null;
-	}
-
-	private TradeHistInfoDaliyNofq getTradeHistInfoDaliyNofq(String line) {
-		if (StringUtils.isBlank(line)) {
-			return null;
-		}
-		try {
-			TradeHistInfoDaliyNofq d = new TradeHistInfoDaliyNofq();
-			String str = line.trim().substring(1);
-			String[] fv = str.split(",");
-			d.setCode(TushareSpider.removets(fv[0]));
-			d.setDate(Integer.valueOf(fv[1]));
-			d.setOpen(Double.valueOf(fv[2]));
-			d.setHigh(Double.valueOf(fv[3]));
-			d.setLow(Double.valueOf(fv[4]));
-			d.setClosed(Double.valueOf(fv[5]));
-			d.setYesterdayPrice(Double.valueOf(fv[6]));
-			d.setTodayChange(Double.valueOf(fv[7]));
-			d.setTodayChangeRate(Double.valueOf(fv[8]));
-			d.setVolume(Double.valueOf(fv[9]));
-			try {
-				d.setAmt(Double.valueOf(fv[10]));
-			} catch (NumberFormatException e) {
-				d.setAmt(Double.valueOf(0));
-			}
-			d.setId();
-			return d;
-		} catch (Exception e) {
-			// ErrorLogFileUitl.writeError(e, "日K数据错误", "原始数据", line);
-			log.info("日K数据错误,原始数据:" + line);
-			return null;
-//			throw new RuntimeException(e);
-		}
-	}
-
-	private TradeHistInfoDaliy getTradeHistInfoDaliy(String line) {
-		if (StringUtils.isBlank(line)) {
-			return null;
-		}
-		try {
-			TradeHistInfoDaliy d = new TradeHistInfoDaliy();
-			String str = line.trim().substring(1);
-			String[] fv = str.split(",");
-			d.setCode(TushareSpider.removets(fv[0]));
-			d.setDate(Integer.valueOf(fv[1]));
-			d.setOpen(Double.valueOf(fv[2]));
-			d.setHigh(Double.valueOf(fv[3]));
-			d.setLow(Double.valueOf(fv[4]));
-			d.setClosed(Double.valueOf(fv[5]));
-			d.setYesterdayPrice(Double.valueOf(fv[6]));
-			d.setTodayChange(Double.valueOf(fv[7]));
-			d.setTodayChangeRate(Double.valueOf(fv[8]));
-			d.setVolume(Double.valueOf(fv[9]));
-			try {
-				d.setAmt(Double.valueOf(fv[10]));
-			} catch (NumberFormatException e) {
-				d.setAmt(Double.valueOf(0));
-			}
-			d.setId();
-			return d;
-		} catch (Exception e) {
-			// ErrorLogFileUitl.writeError(e, "日K数据错误", "原始数据", line);
-			log.info("日K数据错误,原始数据:" + line);
-			return null;
-		}
 	}
 
 	/**
@@ -791,56 +476,4 @@ public class DaliyTradeHistroyService {
 			e.printStackTrace();
 		}
 	}
-
-//	public void deleteData() {
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				Pageable pageable = PageRequest.of(0, 2000);
-//				log.info("删除过期数据");
-//				// 复权
-//				while (true) {
-//					BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-//					bqb.must(QueryBuilders.rangeQuery("date").lte(Constant.END_DATE));
-//					NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-//					SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
-//					try {
-//						List<TradeHistInfoDaliy> list = esTradeHistInfoDaliyDao.search(sq).getContent();
-//						if (list != null && list.size() > 0) {
-//							esTradeHistInfoDaliyDao.deleteAll(list);
-//							log.info("TradeHistInfoDaliy size:" + list.size());
-//						} else {
-//							log.info("TradeHistInfoDaliy null");
-//							break;
-//						}
-//					} catch (Exception e) {
-//						e.printStackTrace();
-//						break;
-//					}
-//				}
-//				log.info("复权 TradeHistInfoDaliy done");
-//				// 不复权
-//				while (true) {
-//					BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-//					bqb.must(QueryBuilders.rangeQuery("date").lte(Constant.END_DATE));
-//					NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-//					SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
-//					try {
-//						List<TradeHistInfoDaliyNofq> list = esTradeHistInfoDaliyNofqDao.search(sq).getContent();
-//						if (list != null && list.size() > 0) {
-//							esTradeHistInfoDaliyNofqDao.deleteAll(list);
-//							log.info("TradeHistInfoDaliyNofq size:" + list.size());
-//						} else {
-//							log.info("TradeHistInfoDaliyNofq null");
-//							break;
-//						}
-//					} catch (Exception e) {
-//						e.printStackTrace();
-//						break;
-//					}
-//				}
-//				log.info("不复权 TradeHistInfoDaliyNofq done");
-//			}
-//		}).start();
-//	}
 }

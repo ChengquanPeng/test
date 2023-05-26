@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSON;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -18,19 +17,17 @@ import com.stable.constant.RedisConstant;
 import com.stable.es.dao.base.EsDaliyBasicInfoDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
-import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.RunModelService;
 import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.service.monitor.MonitorPoolService;
+import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.RedisUtil;
-import com.stable.utils.TasksWorker2nd;
-import com.stable.utils.TasksWorker2ndRunnable;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.StockBaseInfo;
@@ -60,8 +57,6 @@ public class DailyFetch {
 	private TradeCalService tradeCalService;
 	@Autowired
 	private PriceLifeService priceLifeService;
-	@Autowired
-	private DaliyTradeHistroyService daliyTradeHistroyService;
 	@Autowired
 	private RunModelService runModelService;
 	@Autowired
@@ -105,48 +100,32 @@ public class DailyFetch {
 		List<StockBaseInfo> codes = stockBasicService.getAllOnStatusListWithOutSort();
 		CountDownLatch cnt = new CountDownLatch(codes.size());
 		String preDate = tradeCalService.getPretradeDate(today);
+		TradeHistInfoDaliy td = null;
 		for (int k = 0; k < codes.size(); k++) {
 			StockBaseInfo b = codes.get(k);
-
 			String code = b.getCode();
 			try {
-				// 2.是否需要更新缺失记录
+				// 是否需要更新缺失记录
 				String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
 				if (StringUtils.isBlank(yyyymmdd) || (!preDate.equals(yyyymmdd) && !yyyymmdd.equals(today)
 						&& Integer.valueOf(yyyymmdd) < Integer.valueOf(today))) {//
 					log.info("代码code:{}重新获取记录->redis-last:{},preDate:{},today:{},index={}", code, yyyymmdd, preDate,
 							today, k);
-					String json = redisUtil.get(code);
-					// 第一次上市或者除权
-					StockBaseInfo base = JSON.parseObject(json, StockBaseInfo.class);
-					if (base != null) {
-						TasksWorker2nd.add(new TasksWorker2ndRunnable() {
-							public void running() {
-								try {
-									daliyTradeHistroyService.spiderDaliyTradeHistoryInfoFromIPOCenter(code, today, 0);
-									daliyTradeHistroyService.spiderDaliyTradeHistoryInfoFromIPOCenterNofq(code, 0);
-								} catch (Exception e) {
-									MsgPushServer.pushSystem1("重新获取前后复权出错：" + code);
-								} finally {
-									cnt.countDown();
-								}
-							}
-						});
-					} else {
-						log.info("代码code:{} 未获取到StockBaseInfo", code);
-						cnt.countDown();
-					}
+					fetchByCodeAll(code, today);
+					td = dofetch(b.getCode(), date, list, listNofq, daliybasicList);
 				} else {
 					log.info("代码:{},不需要重新更新记录,上个交易日期 preDate:{},上次更新日期:{},最后更新日期:{},index={}", code, preDate, yyyymmdd,
 							today, k);
-					redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
-					TradeHistInfoDaliy td = dofetch(b.getCode(), date, list, listNofq, daliybasicList);
+					td = dofetch(b.getCode(), date, list, listNofq, daliybasicList);
+				}
+				if (td != null) {
 					priceLifeService.checkAndSetPrice(td);
-					cnt.countDown();
+					redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				MsgPushServer.pushSystem1("前复权qfq获取异常==>代码:" + code);
+			} finally {
 				cnt.countDown();
 			}
 		}
@@ -183,7 +162,7 @@ public class DailyFetch {
 		}).start();
 	}
 
-	private TradeHistInfoDaliy dofetch(String code, int date, List<TradeHistInfoDaliy> listtd,
+	private synchronized TradeHistInfoDaliy dofetch(String code, int date, List<TradeHistInfoDaliy> listtd,
 			List<TradeHistInfoDaliyNofq> listNofq, List<DaliyBasicInfo2> daliybasicList) {
 
 		DaliyBasicInfo2 b = new DaliyBasicInfo2(code, date);
@@ -379,6 +358,90 @@ public class DailyFetch {
 			}
 		} while (!fetched);
 		return null;// 失败
+	}
+
+	// 重新覆盖抓取，所有的前复权和不复权记录
+	public synchronized void fetchByCodeAll(String code, String today) {
+		spiderDaliyTradeHistoryInfoFromIPOCenter(code, today, 0);
+		spiderDaliyTradeHistoryInfoFromIPOCenterNofq(code, 0);
+	}
+
+	public synchronized void fetchByCode(String code) {
+		String today = DateUtil.getTodayYYYYMMDD();
+		String preDate = tradeCalService.getPretradeDate(today);
+
+		List<TradeHistInfoDaliy> listtd = new LinkedList<TradeHistInfoDaliy>();
+		List<TradeHistInfoDaliyNofq> listNofq = new LinkedList<TradeHistInfoDaliyNofq>();
+		List<DaliyBasicInfo2> daliybasicList = new LinkedList<DaliyBasicInfo2>();
+		dofetch(code, Integer.valueOf(preDate), listtd, listNofq, daliybasicList);
+		if (daliybasicList.size() > 0) {
+			esDaliyBasicInfoDao.saveAll(daliybasicList);
+		}
+		if (listNofq.size() > 0) {
+			esTradeHistInfoDaliyNofqDao.saveAll(listNofq);
+		}
+		if (listtd.size() > 0) {
+			esTradeHistInfoDaliyDao.saveAll(listtd);
+		}
+		log.info("代码code:{}重新获取记录-> 重新获取完成", code);
+	}
+
+	// 路由，优先eastmoney
+	public boolean spiderDaliyTradeHistoryInfoFromIPOCenter(String code, String today, int fortimes) {
+		priceLifeService.removePriceLifeCache(code);
+		if (spiderDaliyTradeHistoryInfoFromIPOEastMoney(code, fortimes)) {
+			redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
+			return true;
+		}
+		throw new RuntimeException(code + " " + today + " 日交易获取前复权错误");
+	}
+
+	// 路由，优先eastmoney
+	public boolean spiderDaliyTradeHistoryInfoFromIPOCenterNofq(String code, int fortimes) {
+		if (spiderDaliyTradeHistoryInfoFromIPOEastMoneyNofq(code, fortimes)) {
+			return true;
+		}
+		throw new RuntimeException(code + " 日交易获取No复权错误");
+	}
+
+	private boolean spiderDaliyTradeHistoryInfoFromIPOEastMoney(String code, int fortimes) {
+		if (fortimes >= 3) {
+			log.warn("EastMoeny 超过最大次数：code：{}，fortimes：{}", code, fortimes);
+			return false;
+		}
+		fortimes++;
+		List<TradeHistInfoDaliy> list = null;
+		try {
+			list = EastmoneyQfqSpider.getQfq(code);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (list == null || list.size() <= 0) {
+			return spiderDaliyTradeHistoryInfoFromIPOEastMoney(code, fortimes);
+		} else {
+			esTradeHistInfoDaliyDao.saveAll(list);
+		}
+		return true;
+	}
+
+	private boolean spiderDaliyTradeHistoryInfoFromIPOEastMoneyNofq(String code, int fortimes) {
+		if (fortimes >= 3) {
+			log.warn("EastMoeny 超过最大次数：code：{}，fortimes：{}", code, fortimes);
+			return false;
+		}
+		fortimes++;
+		List<TradeHistInfoDaliyNofq> list = null;
+		try {
+			list = EastmoneyQfqSpider.getWithOutfq(code);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (list == null || list.size() <= 0) {
+			return spiderDaliyTradeHistoryInfoFromIPOEastMoneyNofq(code, fortimes);
+		} else {
+			esTradeHistInfoDaliyNofqDao.saveAll(list);
+		}
+		return true;
 	}
 
 	public static void main(String[] args) {
