@@ -99,8 +99,13 @@ public class DaliyTradeHistroyService {
 	}
 
 	private synchronized int spiderTodayDaliyTrade(boolean isJob, String today, boolean warning) {
-		dailyFetch.fetchAllHushenCodes();
-		return 0;
+		try {
+			dailyFetch.fetchAllHushenCodes();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		return 1;
 	}
 
 	/*

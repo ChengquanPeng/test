@@ -10,6 +10,7 @@ public class Constant {
 		ParserConfig.getGlobalInstance().addAccept("com.stable.vo");
 	}
 	public static final String CODE_ON_STATUS = "L";
+	public static final String CODE_STATUS_W = "W";
 	public static final String SESSION_USER = "USER";
 	public static final String EMPTY_STRING = "";
 	public static final String EMPTY_STRING2 = "''";
