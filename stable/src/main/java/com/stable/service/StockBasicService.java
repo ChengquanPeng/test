@@ -35,7 +35,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class StockBasicService {
 
-	private static final String NO = "no";
+	public static final String NO = "no";
 	@Autowired
 	private EsStockBaseInfoDao esStockBaseInfoDao;
 	@Autowired
@@ -81,26 +81,36 @@ public class StockBasicService {
 		return TasksWorker.getInstance().getService()
 				.submit(new MyCallable(RunLogBizTypeEnum.STOCK_LIST, RunCycleEnum.WEEK) {
 					public Object mycall() {
-						try {
-							log.info("同步股票列表[started]");
-							// System.err.println(array.toJSONString());
-							List<StockBaseInfo> list = stockListSpider.getStockList();
-							int cnt = 0;
-							if (list != null && list.size() > 0) {
-								esStockBaseInfoDao.saveAll(list);
-								cnt = list.size();
-							} else {
-								MsgPushServer.pushSystem1("同步股票列表异常,获取0条数据");
-							}
-							log.info("同步股票列表[end],cnt=" + cnt);
-							return null;
-						} catch (Exception e) {
-							e.printStackTrace();
-							MsgPushServer.pushSystem1("同步股票列表异常");
-							throw e;
-						}
+						jobSynStockListV2Dir();
+						return null;
 					}
 				});
+	}
+
+	public void jobSynStockListV2Dir() {
+		try {
+			log.info("同步股票列表[started]");
+			// System.err.println(array.toJSONString());
+			List<StockBaseInfo> list = stockListSpider.getStockList();
+			int cnt = 0;
+			if (list != null && list.size() > 0) {
+				saveAll(list);
+				cnt = list.size();
+			} else {
+				MsgPushServer.pushSystem1("同步股票列表异常,获取0条数据");
+			}
+			log.info("同步股票列表[end],cnt=" + cnt);
+		} catch (Exception e) {
+			e.printStackTrace();
+			MsgPushServer.pushSystem1("同步股票列表异常");
+			throw e;
+		}
+	}
+
+	public void saveAll(List<StockBaseInfo> list) {
+		if (list != null && list.size() > 0) {
+			esStockBaseInfoDao.saveAll(list);
+		}
 	}
 
 	public void synDwcfCompanyType(String code, int dfcwCompnayType) {
@@ -122,7 +132,7 @@ public class StockBasicService {
 		Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
 		while (it.hasNext()) {
 			StockBaseInfo e = it.next();
-			if (e.getName().startsWith(tui) || e.getName().endsWith(tui)) {
+			if (isTuiShi(e.getName())) {
 				removelist.add(e);// 已退市
 			}
 		}
@@ -132,6 +142,10 @@ public class StockBasicService {
 			}
 			esStockBaseInfoDao.deleteAll(removelist);
 		}
+	}
+
+	public boolean isTuiShi(String name) {
+		return (name.startsWith(tui) || name.endsWith(tui));
 	}
 
 	public void synBaseStockInfoCircZb(String code, double circZb) {
@@ -245,5 +259,31 @@ public class StockBasicService {
 		}
 		// 默认true
 		return true;
+	}
+
+	public String getMaketcode(String s) {
+		if (s.contains("上海")) {
+			return "1";
+		}
+		if (s.contains("深圳")) {
+			return "2";
+		}
+		if (s.contains("北京")) {
+			return "3";
+		}
+		return "0";
+	}
+
+	public String getMaketcode2(String s) {
+		if (s.contains("sh")) {
+			return "1";
+		}
+		if (s.contains("sz")) {
+			return "2";
+		}
+		if (s.contains("bj")) {
+			return "3";
+		}
+		return "0";
 	}
 }
