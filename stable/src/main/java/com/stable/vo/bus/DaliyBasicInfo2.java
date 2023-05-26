@@ -25,33 +25,9 @@ public class DaliyBasicInfo2 extends EsBase {
 	// 日期date
 	@Field(type = FieldType.Integer)
 	private int date;
-	// 开盘价
-	@Field(type = FieldType.Double)
-	private double open;
-	// 最高价
-	@Field(type = FieldType.Double)
-	private double high;
 	// 收盘价
 	@Field(type = FieldType.Double)
 	private double closed;
-	// 最低价
-	@Field(type = FieldType.Double)
-	private double low;
-	// 交易量(手)
-	@Field(type = FieldType.Double)
-	private double volume;
-	// 交易金额(千元)
-	@Field(type = FieldType.Double)
-	private double amt;
-	// 昨收
-	@Field(type = FieldType.Double)
-	private double yesterdayPrice;
-	// 今日涨跌额
-	@Field(type = FieldType.Double)
-	private double todayChange;
-	// 今日涨跌幅
-	@Field(type = FieldType.Double)
-	private double todayChangeRate;
 
 	// 每日指标
 	@Field(type = FieldType.Double)
@@ -80,20 +56,26 @@ public class DaliyBasicInfo2 extends EsBase {
 		String tscode = arr.getString(i++);// ts_code
 		this.code = TushareSpider.removets(tscode);
 		this.date = Integer.valueOf(arr.getString(i++));
-		this.open = Double.valueOf(arr.getString(i++));
-		this.high = Double.valueOf(arr.getString(i++));
-		this.low = Double.valueOf(arr.getString(i++));
+		arr.getString(i++);// this.open = Double.valueOf();
+		arr.getString(i++);// this.high = Double.valueOf(arr.getString(i++));
+		arr.getString(i++);// this.low = Double.valueOf(arr.getString(i++));
 		this.closed = Double.valueOf(arr.getString(i++));
-		this.yesterdayPrice = Double.valueOf(arr.getString(i++));// pre_close
-		this.todayChange = Double.valueOf(arr.getString(i++));// change
-		this.todayChangeRate = Double.valueOf(arr.getString(i++));// pct_chg
-		this.volume = Double.valueOf((Double.valueOf(arr.getString(i++)) * 100)).longValue();// 成交量 （手）
-		this.amt = Double.valueOf((Double.valueOf(arr.getString(i++)) * 1000)).longValue();// 成交额 （千元）
+		// this.yesterdayPrice = Double.valueOf(arr.getString(i++));// pre_close
+		// this.todayChange = Double.valueOf(arr.getString(i++));// change
+//		this.todayChangeRate = Double.valueOf(arr.getString(i++));// pct_chg
+//		this.volume = Double.valueOf((Double.valueOf(arr.getString(i++)) * 100)).longValue();// 成交量 （手）
+//		this.amt = Double.valueOf((Double.valueOf(arr.getString(i++)) * 1000)).longValue();// 成交额 （千元）
 		setId();
 
 	}
 
 	private void setId() {
 		this.id = code + date;
+	}
+
+	public DaliyBasicInfo2(String c, int d) {
+		this.code = c;
+		this.date = d;
+		setId();
 	}
 }

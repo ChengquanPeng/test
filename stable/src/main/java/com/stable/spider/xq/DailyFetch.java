@@ -1,6 +1,7 @@
 package com.stable.spider.xq;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +10,16 @@ import org.springframework.stereotype.Component;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.stable.service.StockBasicService;
 import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.DaliyBasicInfo2;
+import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
+import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -25,6 +29,9 @@ public class DailyFetch {
 	private static final String SPLIT = "：";
 	@Autowired
 	private HtmlunitSpider htmlunitSpider;
+	@Autowired
+	private StockBasicService stockBasicService;
+
 	// https://xueqiu.com/S/SH600109
 	// https://xueqiu.com/S/SZ000001
 	private String BASE_URL = "https://xueqiu.com/S/%s";
@@ -53,14 +60,27 @@ public class DailyFetch {
 	// 今日涨跌额
 	// 今日涨跌幅
 
-	private void dofetch(DaliyBasicInfo2 b, String today) {
-		int date = Integer.valueOf(today);
+	public synchronized void fetchAllHushenCodes() {
+		int date = DateUtil.getTodayIntYYYYMMDD();
+		List<TradeHistInfoDaliy> list = new LinkedList<TradeHistInfoDaliy>();
+		List<TradeHistInfoDaliyNofq> listNofq = new LinkedList<TradeHistInfoDaliyNofq>();
+		List<DaliyBasicInfo2> daliybasicList = new LinkedList<DaliyBasicInfo2>();
+
+		List<StockBaseInfo> codes = stockBasicService.getAllOnStatusListWithOutSort();
+		for (StockBaseInfo b : codes) {
+			dofetch(b.getCode(), date, list, listNofq, daliybasicList);
+		}
+	}
+
+	private void dofetch(String code, int date, List<TradeHistInfoDaliy> listtd, List<TradeHistInfoDaliyNofq> listNofq,
+			List<DaliyBasicInfo2> daliybasicList) {
+
+		DaliyBasicInfo2 b = new DaliyBasicInfo2(code, date);
 		b.setPe(-1);
 		b.setPed(-1);
 		b.setPeTtm(-1);
 		b.setPb(-1);
 
-		String code = b.getCode();
 		int trytime = 0;
 		boolean fetched = false;
 		String url = String.format(BASE_URL, XqDailyBaseSpider.formatCode2(code));
@@ -191,6 +211,9 @@ public class DailyFetch {
 								td.setVolume(
 										Double.valueOf(s.split(SPLIT)[1].replace(CurrencyUitl.YI, "").replace(SHOU, ""))
 												* 100 * 10000 * 10000);
+							} else {// 只有手
+								td.setVolume(Double.valueOf(
+										s.split(SPLIT)[1].replace(CurrencyUitl.WAN, "").replace(SHOU, "")) * 100);
 							}
 							// System.err.println(Double.valueOf(td.getVolume()).longValue());
 						} else if (s.startsWith(D6)) {// "成交额" //元
@@ -206,24 +229,33 @@ public class DailyFetch {
 						}
 					}
 				}
-				td.setQfqDate(date);
-				td.setDate(date);
-				td.setCode(code);
-				td.setId();
-				if (td.getHigh() > 0 || td.getLow() > 0 || td.getOpen() > 0) {
-					// 收盘
-					HtmlElement stockCurrent = body.getElementsByAttribute("div", "class", "stock-current").get(0);
-					td.setClosed(Double.valueOf(stockCurrent.asText().trim().replace(DOL, "")));
 
-					// 涨跌幅额
-					HtmlElement stockChange = body.getElementsByAttribute("div", "class", "stock-change").get(0);
-					String[] ss = stockChange.asText().trim().replace(JIA, "").replace(JIAN, "").replace(BFH, "")
-							.split(" ");
-					td.setTodayChange(Double.valueOf(ss[0]));
-					td.setTodayChangeRate(Double.valueOf(ss[1]));
-				}
-				System.err.println(td);
 				if (b.getPb() != 0.0d) {
+
+					td.setQfqDate(date);
+					td.setDate(date);
+					td.setCode(code);
+					td.setId();
+					if (td.getHigh() > 0 && td.getLow() > 0 && td.getOpen() > 0) {
+						// 收盘
+						HtmlElement stockCurrent = body.getElementsByAttribute("div", "class", "stock-current").get(0);
+						td.setClosed(Double.valueOf(stockCurrent.asText().trim().replace(DOL, "")));
+
+						// 涨跌幅额
+						HtmlElement stockChange = body.getElementsByAttribute("div", "class", "stock-change").get(0);
+						String[] ss = stockChange.asText().trim().replace(JIA, "").replace(JIAN, "").replace(BFH, "")
+								.split(" ");
+						td.setTodayChange(Double.valueOf(ss[0]));
+						td.setTodayChangeRate(Double.valueOf(ss[1]));
+
+						b.setClosed(td.getClosed());
+
+						listtd.add(td);
+						listNofq.add(new TradeHistInfoDaliyNofq(td));
+						daliybasicList.add(b);
+					} else {
+						MsgPushServer.pushSystem1("雪球获取日交易异常？" + code + ",url=" + url);
+					}
 					return;// 成功-正常
 				}
 				// System.err.println(boardInfos.asText());
@@ -246,9 +278,13 @@ public class DailyFetch {
 	public static void main(String[] args) {
 		DailyFetch x = new DailyFetch();
 		x.htmlunitSpider = new HtmlunitSpider();
-		DaliyBasicInfo2 b = new DaliyBasicInfo2();
-		b.setCode("600530");
-		x.dofetch(b, DateUtil.getTodayYYYYMMDD());
-		System.err.println(b);
+		String code = "600665";
+		List<TradeHistInfoDaliy> listtd = new LinkedList<TradeHistInfoDaliy>();
+		List<TradeHistInfoDaliyNofq> listNofq = new LinkedList<TradeHistInfoDaliyNofq>();
+		List<DaliyBasicInfo2> daliybasicList = new LinkedList<DaliyBasicInfo2>();
+		x.dofetch(code, DateUtil.getTodayIntYYYYMMDD(), listtd, listNofq, daliybasicList);
+		System.err.println(listtd.get(0));
+		System.err.println(listNofq.get(0));
+		System.err.println(daliybasicList.get(0));
 	}
 }

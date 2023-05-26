@@ -62,6 +62,22 @@ public class TradeHistInfoDaliyNofq extends EsBase {
 
 	}
 
+	public TradeHistInfoDaliyNofq(TradeHistInfoDaliy td) {
+		this.code = td.getCode();
+		this.date = td.getDate();
+		this.open = td.getOpen();
+		this.high = td.getHigh();
+		this.low = td.getLow();
+		this.closed = td.getClosed();
+		this.yesterdayPrice = td.getYesterdayPrice();
+		this.todayChange = td.getTodayChange();
+		this.todayChangeRate = td.getTodayChangeRate();
+		this.volume = td.getVolume();
+		this.amt = td.getAmt();
+		this.changeHands = td.getChangeHands();
+		setId();
+	}
+
 	public TradeHistInfoDaliyNofq(JSONArray arr) {
 		int i = 0;
 		String tscode = arr.getString(i++);// ts_code
