@@ -1,5 +1,6 @@
 package com.stable.spider.eastmoney;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,12 +11,17 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.stable.constant.Constant;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
+import com.stable.utils.HtmlunitSpider;
 import com.stable.utils.HttpUtil;
+import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.StockBaseInfo;
 
 @Component
@@ -42,8 +48,13 @@ public class StockListSpider {
 				base.setCode(row.getString("SECURITY_CODE"));
 				base.setName(row.getString("SECURITY_NAME"));
 				base.setList_date(getListDate(row.getString("LISTING_DATE")));
+				if ("0".equals(base.getList_date())) {
+					base.setList_status(Constant.CODE_STATUS_W);
+				} else {
+					base.setList_status(Constant.CODE_ON_STATUS);
+				}
 				base.setMarket(stockBasicService.getMaketcode(row.getString("TRADE_MARKET")));
-				base.setList_status(Constant.CODE_ON_STATUS);
+
 				// System.err.println(base);
 				list.add(base);
 			}
@@ -62,4 +73,60 @@ public class StockListSpider {
 		return "0";
 	}
 
+	private String urlths = "https://data.10jqka.com.cn/market/zdfph/field/zdf/order/desc/ajax/1/free/1/page/%d/free/1/";
+	@Autowired
+	private HtmlunitSpider htmlunitSpider;// = new HtmlunitSpider();
+
+	public void getSynStockList() {
+		boolean fetchedAll = false;
+		int pageNum = 99;
+		do {
+			boolean fetched = false;
+			int trytime = 0;
+			do {
+				ThreadsUtil.sleepRandomSecBetween1And2();
+				HtmlPage page = null;
+				HtmlElement body = null;
+				try {
+					String ut = String.format(urlths, pageNum);
+					System.err.println(ut);
+					page = htmlunitSpider.getHtmlPageFromUrl(ut);
+					body = page.getBody();
+					Iterator<HtmlElement> trs = body.getElementsByTagName("tr").iterator();
+					int index = 1;
+					while (trs.hasNext()) {
+						if (index == 1 || index == 2) {
+							continue;// header 跳过
+						}
+						Iterator<DomElement> tds = trs.next().getChildElements().iterator();
+						String indexd = tds.next().asText();
+						String code = tds.next().asText();
+						String name = tds.next().asText();
+						System.err.println(indexd + " " + code + " " + name);
+						index++;
+					}
+					fetched = true;
+				} catch (Exception e) {
+					e.printStackTrace();
+					trytime++;
+					ThreadsUtil.sleepRandomSecBetween1And5(trytime * 10);
+					if (trytime >= 3) {
+						fetched = true;
+						MsgPushServer.pushSystem1("同花顺同步股票错误,url=" + urlths);
+					}
+				}
+			} while (!fetched);
+			pageNum++;
+
+			fetchedAll = true;
+		} while (!fetchedAll);
+	}
+
+	public static void main(String[] args) {
+		StockListSpider ss = new StockListSpider();
+		ss.htmlunitSpider = new HtmlunitSpider();
+		ss.getSynStockList();
+//		System.err.println(HttpUtil
+//				.doGet2("https://data.10jqka.com.cn/market/zdfph/field/zdf/order/desc/ajax/1/free/1/page/1/free/1/"));
+	}
 }
