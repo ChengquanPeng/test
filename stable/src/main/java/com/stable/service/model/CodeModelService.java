@@ -1247,6 +1247,8 @@ public class CodeModelService {
 			monitorPoolDao.deleteAll(poolList);
 		}
 		log.info("monitorPoolDao:" + poolList.size());
+
+		stockBasicService.deleteTuiShi();
 	}
 //
 //	private void findBigBoss2(String code, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis) {

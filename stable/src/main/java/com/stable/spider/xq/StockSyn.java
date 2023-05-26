@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -17,9 +16,11 @@ import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.HttpUtil;
 import com.stable.vo.bus.StockBaseInfo;
 
-@Service
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 public class StockSyn {
-	private String url = "https://ig507.com/data/base/gplist?";
+	private String url = "";// TODO
 
 	@Autowired
 	private StockBasicService stockBasicService;
@@ -48,16 +49,18 @@ public class StockSyn {
 				} else {
 					t = stockBasicService.getCode(code);
 					if (t.getCode().equals(StockBasicService.NO)) {// 非退市股票，但是本系统不存在
-						MsgPushServer.pushSystem1("发现新未同步的股票：" + code + name);
+						// MsgPushServer.pushSystem1("发现新未同步的股票：" + code + name);
+						log.info("发现新未同步的股票：" + code + name);
+						System.err.println("发现新未同步的股票：" + code + name);
 
 						StockBaseInfo base = new StockBaseInfo();
 						base.setCode(row.getString("SECURITY_CODE"));
 						base.setName(row.getString("SECURITY_NAME"));
 						base.setList_date(date);
-						base.setMarket(stockBasicService.getMaketcode(row.getString("TRADE_MARKET")));
+						base.setMarket(stockBasicService.getMaketcode2(row.getString("jys")));
 						base.setList_status(Constant.CODE_ON_STATUS);
 						// System.err.println(base);
-						list.add(base);
+						// list.add(base);
 					}
 				}
 			}

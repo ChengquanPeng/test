@@ -7,7 +7,6 @@ import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
-import com.stable.spider.xq.StockSyn;
 import com.stable.utils.ThreadsUtil;
 
 import lombok.extern.log4j.Log4j2;
@@ -26,8 +25,6 @@ public class EveryWeekMonJob extends MySimpleJob {
 	private CodeModelService codeModelService;
 	@Autowired
 	private StockBasicService stockBasicService;
-	@Autowired
-	private StockSyn stockSyn;
 
 	@Override
 	public void myexecute(ShardingContext sc) {
@@ -35,9 +32,9 @@ public class EveryWeekMonJob extends MySimpleJob {
 		stockBasicService.jobSynStockListV2Dir();
 		ThreadsUtil.sleepRandomSecBetween15And30();
 
-		log.info("沪深A股，股票池检查");
-		stockSyn.stockListChk();
-		ThreadsUtil.sleepRandomSecBetween15And30();
+//		log.info("沪深A股，股票池检查");
+//		stockSyn.stockListChk();
+//		ThreadsUtil.sleepRandomSecBetween15And30();
 
 		log.info("删除退市数据");
 		codeModelService.cleanOfflineCode();

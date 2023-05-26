@@ -134,6 +134,7 @@ public class StockBasicService {
 			StockBaseInfo e = it.next();
 			if (isTuiShi(e.getName())) {
 				removelist.add(e);// 已退市
+				log.info("删除退市股票：" + e.getCode() + " " + e.getName());
 			}
 		}
 		if (removelist.size() > 0) {
@@ -141,6 +142,8 @@ public class StockBasicService {
 				redisUtil.del(s.getCode());
 			}
 			esStockBaseInfoDao.deleteAll(removelist);
+
+			log.info("退市股票数量：" + removelist.size());
 		}
 	}
 
