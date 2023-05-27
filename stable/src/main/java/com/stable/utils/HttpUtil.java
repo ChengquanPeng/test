@@ -2,13 +2,17 @@ package com.stable.utils;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -16,6 +20,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import com.alibaba.fastjson.JSON;
@@ -230,4 +235,27 @@ public class HttpUtil {
 		return "";
 	}
 
+	public static String doPost3(String url, Map<String, String> params) {
+		HttpPost httpPost = new HttpPost();
+		httpPost.setURI(URI.create(url));
+		try {
+			if (params != null && params.size() > 0) {
+				List<NameValuePair> list = new ArrayList<>();
+				for (String name : params.keySet()) {
+//					httpPost.getParams().setParameter(name, params.get(name));
+//					httpclient.getParams().setParameter(name, params.get(name));
+					list.add(new BasicNameValuePair(name, params.get(name)));
+				}
+				httpPost.setEntity(new UrlEncodedFormEntity(list));
+			}
+			HttpResponse response = httpclient.execute(httpPost);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				return EntityUtils.toString(entity, UTF_8);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
 }

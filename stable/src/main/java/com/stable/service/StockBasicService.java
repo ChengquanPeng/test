@@ -278,13 +278,13 @@ public class StockBasicService {
 	}
 
 	public String getMaketcode2(String s) {
-		if (s.contains("sh")) {
+		if (s.contains("SH")) {
 			return "1";
 		}
-		if (s.contains("sz")) {
+		if (s.contains("SZ")) {
 			return "2";
 		}
-		if (s.contains("bj")) {
+		if (s.contains("BJ")) {
 			return "3";
 		}
 		return "0";

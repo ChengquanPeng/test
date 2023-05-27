@@ -66,7 +66,7 @@ public class DailyFetch {
 	// https://xueqiu.com/S/SH600109
 	// https://xueqiu.com/S/SZ000001
 	private String BASE_URL = "https://xueqiu.com/S/%s";
-	private String SHOU = "手";
+	public static final String SHOU = "手";
 	private String BFH = "%";
 	private String DOL = "¥";
 	private String JIA = "+";
