@@ -19,7 +19,7 @@ import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsStockBaseInfoDao;
 import com.stable.job.MyCallable;
 import com.stable.service.model.prd.msg.MsgPushServer;
-import com.stable.spider.eastmoney.StockListSpider;
+import com.stable.spider.xq.StockListSpider;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.RedisUtil;
 import com.stable.utils.TasksWorker;
@@ -91,9 +91,21 @@ public class StockBasicService {
 		try {
 			log.info("同步股票列表[started]");
 			// System.err.println(array.toJSONString());
-			List<StockBaseInfo> list = stockListSpider.getStockList();
+			List<StockBaseInfo> list = stockListSpider.getStockList();// 零时数据
 			int cnt = 0;
 			if (list != null && list.size() > 0) {
+
+				for (StockBaseInfo t : list) {
+					StockBaseInfo update = this.getCode(t.getCode());
+					update.setCode(t.getCode());
+					update.setName(t.getName());
+					update.setList_date(t.getList_date());
+					update.setList_status(t.getList_status());
+					update.setMarket(t.getMarket());
+					
+					save(update);
+				}
+
 				saveAll(list);
 				cnt = list.size();
 			} else {

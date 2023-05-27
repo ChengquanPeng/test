@@ -7,6 +7,7 @@ import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.prd.msg.MsgPushServer;
+import com.stable.spider.xq.ZXStockSyn;
 import com.stable.utils.DateUtil;
 
 import lombok.extern.log4j.Log4j2;
@@ -20,7 +21,11 @@ public class EveryWorkingDayJob extends MySimpleJob {
 	@Autowired
 	private TradeCalService tradeCalService;
 
+	@Autowired
+	private ZXStockSyn zxStockSyn;
+
 	public synchronized void start() {
+
 		line1();
 		log.info("EveryWorkingDayJob end");
 	}
@@ -49,6 +54,8 @@ public class EveryWorkingDayJob extends MySimpleJob {
 			if (result == 0) {
 				MsgPushServer.pushSystem1("异常执行Seq1=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:0,以后的链条不会被执行");
 			}
+			log.info("股票chk");
+			zxStockSyn.stockListChk();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

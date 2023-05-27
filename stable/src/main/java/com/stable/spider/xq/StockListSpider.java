@@ -1,4 +1,4 @@
-package com.stable.spider.eastmoney;
+package com.stable.spider.xq;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -54,7 +54,6 @@ public class StockListSpider {
 					base.setList_status(Constant.CODE_ON_STATUS);
 				}
 				base.setMarket(stockBasicService.getMaketcode(row.getString("TRADE_MARKET")));
-
 				// System.err.println(base);
 				list.add(base);
 			}

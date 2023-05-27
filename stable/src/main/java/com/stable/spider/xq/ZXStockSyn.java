@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +45,6 @@ public class ZXStockSyn implements InitializingBean {
 		}
 	}
 
-	@PostConstruct
 	public void stockListChk() {
 		try {
 			List<StockBaseInfo> list = new LinkedList<StockBaseInfo>();
@@ -89,17 +86,10 @@ public class ZXStockSyn implements InitializingBean {
 					} else {
 						t = stockBasicService.getCode(code);
 						if (t.getCode().equals(StockBasicService.NO)) {// 非退市股票，但是本系统不存在
-							// MsgPushServer.pushSystem1("发现新未同步的股票：" + code + name);
-							// log.info("发现新未同步的股票：" + code + name);
-							// System.err.println("发现新未同步的股票：" + code + name);
-
 							if (!exlist.contains(code)) {
 								StockBaseInfo base = new StockBaseInfo();
 								base.setCode(code);
 								base.setName(name);
-//								base.setList_date(date);
-//								base.setMarket(stockBasicService.getMaketcode2(row.getString(3)));
-//								base.setList_status(Constant.CODE_ON_STATUS);
 								list.add(base);
 							}
 						}
