@@ -140,6 +140,22 @@ public class RunModelService {
 		mr4.setPls(3);
 		List<CodeBaseModel2> nxp = webModelService.getList(mr4, EsQueryPageUtil.queryPage9999);
 
+		if (dqx == null) {
+			dqx = new LinkedList<>();
+		}
+		if (xqx == null) {
+			xqx = new LinkedList<>();
+		}
+		if (genListTe == null) {
+			genListTe = new LinkedList<>();
+		}
+		if (xp == null) {
+			xp = new LinkedList<>();
+		}
+		if (nxp == null) {
+			nxp = new LinkedList<>();
+		}
+
 		printHtml(dqx, xqx, genListTe, xp, nxp);
 	}
 
