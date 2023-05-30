@@ -227,6 +227,20 @@ public class StockBasicService {
 		}
 		return copy;
 	}
+	
+	public synchronized List<StockBaseInfo> nonHhuShen() {
+		List<StockBaseInfo> copy = new LinkedList<StockBaseInfo>();
+		Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
+		// List<StockBaseInfo> list = new LinkedList<StockBaseInfo>();
+		while (it.hasNext()) {
+			StockBaseInfo e = it.next();
+			// list_status='L'
+			if (!isHuShenCode(e.getCode())) {// 排除4,8开头的
+				copy.add(e);
+			}
+		}
+		return copy;
+	} 
 
 	// 沪深股票，0，6，3开头的
 	public boolean isHuShenCode(String code) {

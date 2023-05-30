@@ -1225,16 +1225,26 @@ public class CodeModelService {
 			}
 		}
 
+		List<StockBaseInfo> noolist = this.stockBasicService.nonHhuShen();
+		Map<String, StockBaseInfo> map2 = new HashMap<String, StockBaseInfo>();
+		if (noolist != null) {
+			for (StockBaseInfo c : noolist) {
+				map2.put(c.getCode(), c);
+			}
+		}
+
 		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
 		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();
 		for (CodeBaseModel2 cbm : histMap.values()) {
-			if (!map.containsKey(cbm.getCode())) {
+			if (!map.containsKey(cbm.getCode()) || map2.containsKey(cbm.getCode())) {
 				listLast.add(cbm);
+				log.info("删除 model: " + cbm.getCode());
 			}
 		}
 		for (MonitorPoolTemp cbm : poolMap.values()) {
-			if (!map.containsKey(cbm.getCode())) {
+			if (!map.containsKey(cbm.getCode()) || map2.containsKey(cbm.getCode())) {
 				poolList.add(cbm);
+				log.info("删除监听: " + cbm.getCode());
 			}
 		}
 		if (listLast.size() > 0) {
