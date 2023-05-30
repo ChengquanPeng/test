@@ -81,19 +81,17 @@ public class ZXStockSyn implements InitializingBean {
 					if (stockBasicService.isHuShenCode(code)) {
 						// 是否退市股票
 						if (stockBasicService.isTuiShi(name)) {
-							if (!stockBasicService.isTuiShi(t.getName())) {// 同步数据显示已经退市，但本系统不是退市，则更新
+							if (!stockBasicService.isTuiShi(name)) {// 同步数据显示已经退市，但本系统不是退市，则更新
 								stockBasicService.synName(code, name);
 							}
-						} else {
-							{// 非退市股票
-								t = stockBasicService.getCode(code);
-								if (t.getCode().equals(StockBasicService.NO)) {// 非退市股票，但是本系统不存在
-									if (!exlist.contains(code)) {
-										StockBaseInfo base = new StockBaseInfo();
-										base.setCode(code);
-										base.setName(name);
-										list.add(base);
-									}
+						} else {// 非退市股票
+							t = stockBasicService.getCode(code);
+							if (t.getCode().equals(StockBasicService.NO)) {// 非退市股票，但是本系统不存在
+								if (!exlist.contains(code)) {
+									StockBaseInfo base = new StockBaseInfo();
+									base.setCode(code);
+									base.setName(name);
+									list.add(base);
 								}
 							}
 						}
@@ -119,8 +117,8 @@ public class ZXStockSyn implements InitializingBean {
 				sb.append(base.getCode()).append(Constant.DOU_HAO);
 			}
 			if (sb.length() > 0) {
-				log.info("发现新未同步的股票: " + sb);
-				MsgPushServer.pushSystem1("发现新未同步的股票: " + sb);
+				log.info("发现新未同步的股票,需要手工同步（未实现）: " + sb);
+				MsgPushServer.pushSystem1("发现新未同步的股票,需要手工同步（未实现）: " + sb);
 			} else {
 				log.info("股票池check正常");
 			}
