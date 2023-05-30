@@ -78,19 +78,23 @@ public class ZXStockSyn implements InitializingBean {
 					JSONArray row = data.getJSONArray(i);
 					name = row.getString(2);
 					code = row.getString(4);
-					// 是否退市股票
-					if (stockBasicService.isTuiShi(name)) {
-						if (!stockBasicService.isTuiShi(t.getName())) {// 同步数据显示已经退市，但本系统不是退市，则更新
-							stockBasicService.synName(code, name);
-						}
-					} else {
-						t = stockBasicService.getCode(code);
-						if (t.getCode().equals(StockBasicService.NO)) {// 非退市股票，但是本系统不存在
-							if (!exlist.contains(code)) {
-								StockBaseInfo base = new StockBaseInfo();
-								base.setCode(code);
-								base.setName(name);
-								list.add(base);
+					if (stockBasicService.isHuShenCode(code)) {
+						// 是否退市股票
+						if (stockBasicService.isTuiShi(name)) {
+							if (!stockBasicService.isTuiShi(t.getName())) {// 同步数据显示已经退市，但本系统不是退市，则更新
+								stockBasicService.synName(code, name);
+							}
+						} else {
+							{// 非退市股票
+								t = stockBasicService.getCode(code);
+								if (t.getCode().equals(StockBasicService.NO)) {// 非退市股票，但是本系统不存在
+									if (!exlist.contains(code)) {
+										StockBaseInfo base = new StockBaseInfo();
+										base.setCode(code);
+										base.setName(name);
+										list.add(base);
+									}
+								}
 							}
 						}
 					}

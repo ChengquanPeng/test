@@ -46,16 +46,19 @@ public class StockListSpider {
 				JSONObject row = data.getJSONObject(i);
 				StockBaseInfo base = new StockBaseInfo();
 				base.setCode(row.getString("SECURITY_CODE"));
-				base.setName(row.getString("SECURITY_NAME"));
-				base.setList_date(getListDate(row.getString("LISTING_DATE")));
-				if ("0".equals(base.getList_date())) {
-					base.setList_status(Constant.CODE_STATUS_W);
-				} else {
-					base.setList_status(Constant.CODE_ON_STATUS);
+
+				if (stockBasicService.isHuShenCode(base.getCode())) {
+					base.setName(row.getString("SECURITY_NAME"));
+					base.setList_date(getListDate(row.getString("LISTING_DATE")));
+					if ("0".equals(base.getList_date())) {
+						base.setList_status(Constant.CODE_STATUS_W);
+					} else {
+						base.setList_status(Constant.CODE_ON_STATUS);
+					}
+					base.setMarket(stockBasicService.getMaketcode(row.getString("TRADE_MARKET")));
+					// System.err.println(base);
+					list.add(base);
 				}
-				base.setMarket(stockBasicService.getMaketcode(row.getString("TRADE_MARKET")));
-				// System.err.println(base);
-				list.add(base);
 			}
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, "新股同步异常", "", "");
