@@ -1,7 +1,6 @@
 
 package com.stable.service.model;
 
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -88,6 +87,7 @@ public class RunModelService {
 		}
 		log.info("Actually processing request date={}", date);
 		tradeDate = date;
+		stockBasicService.recashToRedis();
 
 		if (isweekend) {
 			// 周末,先跑基本面在跑技术面
@@ -97,7 +97,7 @@ public class RunModelService {
 		} else {
 			codeModelKLineService.runKLineModel1(date);
 			ThreadsUtil.sleepRandomSecBetween15And30();
-			String dateYYYY_ = DateUtil.formatYYYYMMDD2(new Date());
+			String dateYYYY_ = DateUtil.formatYYYYMMDD2(DateUtil.parseDate(date));
 			log.info("大宗交易");
 			emDzjySpider.byDaily(dateYYYY_);
 			log.info("大宗交易-预警");
