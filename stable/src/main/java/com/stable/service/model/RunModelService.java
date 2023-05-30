@@ -71,10 +71,20 @@ public class RunModelService {
 	public void test() {
 		new Thread(new Runnable() {
 			public void run() {
-				int date = 20220901;
-				codeModelKLineService.runKLineModel1(date);
+				int date = 20230529;
+//				codeModelKLineService.runKLineModel1(date);
 //				ThreadsUtil.sleepRandomSecBetween15And30();
 //				codeModelService.runModel1(date, false);
+//				ThreadsUtil.sleepRandomSecBetween15And30();
+				log.info("大宗交易-预警");
+//				monitorPoolService.jobDzjyWarning();
+				ThreadsUtil.sleepRandomSecBetween15And30();
+				codeModelService.runModel1(date, false);
+				ThreadsUtil.sleepRandomSecBetween15And30();
+				plateService.getPlateStat();
+				ThreadsUtil.sleepRandomSecBetween15And30();
+				printModelHtml();
+				log.info("RunModelService Done");
 				System.err.println("runModel1 done");
 			}
 		}).start();
