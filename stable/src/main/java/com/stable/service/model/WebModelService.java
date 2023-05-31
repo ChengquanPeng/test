@@ -155,7 +155,7 @@ public class WebModelService {
 
 	public void addPlsManual(long userId, ModelManulReq req) {
 		int timemonth = req.getTimemonth();
-		if (timemonth == 10) {
+		if (timemonth == -1) {
 			String code = req.getCode();
 			CodeBaseModel2 model = getLastOneByCode2(code);
 			model.setBuyRea(req.getBuyRea().trim() + " " + DateUtil.formatYYYYMMDD2(new Date()));
@@ -164,38 +164,17 @@ public class WebModelService {
 		}
 		int pls = req.getPls();
 
-		int date = -1;
-		if (timemonth == 9) {// 归0
-			pls = 0;
-			date = 0;
-		}
-
 		if (pls != 0 && pls != 1 && pls != 2) {
 			throw new RuntimeException("i != 0 && i != 1 && i != 2 ? ");
 		}
-
-		/** === start ===时间 */
-		int days = 0;
-		if (timemonth == 1) {
-			days = 30;
-		} else if (timemonth == 2) {
-			days = 60;
-		} else if (timemonth == 3) {
-			days = 90;
-		} else if (timemonth == 4) {
-			days = 180;
-		} else if (timemonth == 5) {
-			days = 365;
-		} else if (timemonth == 6) {
-			days = 5;
-		} else if (timemonth == 7) {
-			days = 15;
-		}
-		if (days > 0) {
+		int date = -1;
+		if (timemonth == -2) {// 归0
+			pls = 0;
+			date = 0;
+		} else {
 			Date now = new Date();
-			date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, days));
+			date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, timemonth));
 		}
-		/** === end ===时间 */
 
 		String code = req.getCode();
 		CodeBaseModel2 model = getLastOneByCode2(code);
@@ -247,21 +226,9 @@ public class WebModelService {
 	}
 
 	public void rzrqm(String code, int timemonth) {
-		int days = 0;
-		if (timemonth == 1) {
-			days = 30;
-		} else if (timemonth == 2) {
-			days = 60;
-		} else if (timemonth == 3) {
-			days = 90;
-		} else if (timemonth == 4) {
-			days = 180;
-		} else if (timemonth == 5) {
-			days = 365;
-		}
-		if (days > 0) {
+		if (timemonth > 0) {
 			Date now = new Date();
-			int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, days));
+			int date = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(now, timemonth));
 			CodeBaseModel2 model = getLastOneByCode2(code);
 			model.setShooting30(date);
 			model.setShooting3(0);

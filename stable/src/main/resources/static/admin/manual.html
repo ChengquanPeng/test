@@ -366,15 +366,15 @@ table {
 							<option value="1">确定</option>
 							<option value="2">排除</option>
 					</select>时间：<select id="timemonth">
-							<option value="6">5天</option>
-							<option value="7">15天</option>
-							<option value="5">1年</option>
-							<option value="1">1个月</option>
-							<option value="2">2个月</option>
-							<option value="3">3个月</option>
-							<option value="4">半年</option>
-							<option value="9">归0</option>
-							<option value="10">纯备注</option>
+							<option value="7">7天</option>
+							<option value="15">15天</option>
+							<option value="365">1年</option>
+							<option value="30">1个月</option>
+							<option value="60">2个月</option>
+							<option value="90">3个月</option>
+							<option value="180">半年</option>
+							<option value="-2">归0</option>
+							<option value="-1">纯备注</option>
 					</select></td>
 					<td><span id="plst"></span></td>
 					<td><a target="_blank" id="backtohome"></a></td>
@@ -459,7 +459,8 @@ table {
 			});
 		}
 		var qc = getQueryVariable("code");
-		$.ajax({
+		$
+				.ajax({
 					url : "/web/model/chips", //访问地址--action地址
 					//url : "http://127.0.0.1:8081/web/monitorPool/byCode", //访问地址--action地址
 					type : "get", //提交方式
@@ -576,7 +577,7 @@ table {
 						$('#plst').html(reData.result.plst);
 					}
 				});
-		
+
 		$('#backtohome').attr("href", "/web/admin/index.html?code=" + qc);
 		$('#backtohome').html("返回主页:" + qc);
 	</script>
