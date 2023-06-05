@@ -191,6 +191,8 @@ public class CodeModelKLineService {
 		}
 		if (newOne.getPrice3m() > 0) {
 			pool.setXpPrice(newOne.getPrice3m());
+		} else {
+			pool.setXpPrice(0);
 		}
 	}
 
