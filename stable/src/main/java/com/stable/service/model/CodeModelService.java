@@ -377,7 +377,7 @@ public class CodeModelService {
 		newOne.setReduceLastPlanDate(rhss.getLastPlanDate());// 最新减持计划时间（大股东）
 
 		// 系统指标->自动化监听:底部优质小票，底部大票定增，底部小票大宗，底部小票定增，底部小票减持
-		if (isOk1 || isOk2 || isOk6 || isOk7 || isOk8) {
+		if (newOne.getPls() != 2 && (isOk1 || isOk2 || isOk6 || isOk7 || isOk8)) {
 			int motp = 0;
 			if (isOk7) {
 				motp = MonitorType.SmallLow.getCode();
