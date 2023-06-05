@@ -3,8 +3,10 @@ package com.stable.service;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.Concept;
 import com.stable.vo.bus.FinanceBaseInfo;
 import com.stable.vo.http.req.ModelReq;
+import com.stable.vo.http.resp.PlateJJ;
 import com.stable.vo.http.resp.PlateResp;
 import com.stable.vo.http.resp.PlateStat;
 
@@ -367,5 +370,92 @@ public class PlateService {
 				return o2.getRd() - o1.getRd() > 0 ? 1 : -1;
 			}
 		});
+	}
+
+	private Map<String, FinanceBaseInfo> localm = new HashMap<String, FinanceBaseInfo>();
+
+//	@javax.annotation.PostConstruct
+	public void genjj() {
+		int limit = 200;
+		List<Concept> list = conceptService.getConceptList(limit);
+		List<PlateJJ> res = new LinkedList<PlateJJ>();
+
+		for (Concept cp : list) {
+			if (cp.getCnt() > 0 && !cp.getAliasCode2().equals(cp.getName())
+					&& !"885869|885582|885905|885907|885906".contains(cp.getAliasCode2())) {
+
+				List<String> codes = conceptService.listCodesByAliasCode(cp.getAliasCode2(),
+						EsQueryPageUtil.queryPage9999);
+				if (codes != null) {
+					int total = 0;
+					int yup = 0;
+					int lup = 0;
+					for (String code : codes) {
+						FinanceBaseInfo f = localm.get(code);
+						if (f == null) {
+							f = financeService.getLastFinaceReport(code);
+						}
+						if (f != null) {
+							total++;
+							if (f.getYyzsrtbzz() > 0) {
+								yup++;
+							}
+							if (f.getGsjlrtbzz() > 0) {
+								lup++;
+							}
+							localm.put(code, f);
+						}
+					}
+
+					if (total > 0) {
+						PlateJJ jj = new PlateJJ();
+						jj.setCode(cp.getAliasCode2());
+						jj.setCodeName(cp.getName());
+						jj.setTotal(total);
+						jj.setYup(yup);
+						jj.setLup(lup);
+						jj.exs();
+						res.add(jj);
+						System.err.println(jj);
+					}
+				}
+			}
+		}
+		System.err.println("营收排名");
+		Collections.sort(res, new Comparator<PlateJJ>() {
+			@Override
+			public int compare(PlateJJ o1, PlateJJ o2) {
+				if (o1.getY() == o2.getY()) {
+					return 0;
+				}
+				return o2.getY() - o1.getY() > 0 ? 1 : -1;
+			}
+		});
+		int k = 1;
+		for (PlateJJ jj : res) {
+			System.err.println(k + " " + jj.getCode() + " " + jj.getCodeName() + " " + jj.getY() + "% " + " "
+					+ jj.getL() + "% " + jj.getYup() + "/" + jj.getTotal());
+			k++;
+		}
+		System.err.println("=====================");
+		System.err.println("归属净利排名");
+		Collections.sort(res, new Comparator<PlateJJ>() {
+			@Override
+			public int compare(PlateJJ o1, PlateJJ o2) {
+				if (o1.getL() == o2.getL()) {
+					return 0;
+				}
+				return o2.getL() - o1.getL() > 0 ? 1 : -1;
+			}
+		});
+		k = 1;
+		for (PlateJJ jj : res) {
+			System.err.println(k + " " + jj.getCode() + " " + jj.getCodeName() + " " + jj.getL() + "% " + " "
+					+ jj.getY() + "% " + jj.getYup() + "/" + jj.getTotal());
+			k++;
+		}
+		System.err.println("=====================");
+		localm.clear();
+		System.exit(0);
 	}
 }

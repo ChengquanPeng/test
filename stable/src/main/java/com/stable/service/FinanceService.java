@@ -289,7 +289,7 @@ public class FinanceService {
 		FieldSortBuilder sort = SortBuilders.fieldSort("annDate").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable1).build();
 
 		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
 		if (page != null && !page.isEmpty()) {
@@ -340,6 +340,7 @@ public class FinanceService {
 	}
 
 	Pageable pageable4 = PageRequest.of(0, 4);
+	Pageable pageable1 = PageRequest.of(0, 1);
 
 	/**
 	 * 最近4个季度
@@ -366,7 +367,7 @@ public class FinanceService {
 		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).build();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable1).build();
 
 		Page<FinanceBaseInfo> page = esFinanceBaseInfoDao.search(sq);
 		if (page != null && !page.isEmpty()) {
