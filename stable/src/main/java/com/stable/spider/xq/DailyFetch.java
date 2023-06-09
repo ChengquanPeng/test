@@ -93,6 +93,7 @@ public class DailyFetch {
 
 	public synchronized void fetchAllHushenCodes() {
 		int date = DateUtil.getTodayIntYYYYMMDD();
+		int pre1Year = DateUtil.getPreYear(date);
 		String today = DateUtil.getTodayYYYYMMDD();
 		List<TradeHistInfoDaliy> list = new LinkedList<TradeHistInfoDaliy>();
 		List<TradeHistInfoDaliyNofq> listNofq = new LinkedList<TradeHistInfoDaliyNofq>();
@@ -106,6 +107,11 @@ public class DailyFetch {
 			StockBaseInfo b = codes.get(k);
 			String code = b.getCode();
 			try {
+				if (!stockBasicService.onlinePreYearChk(code, pre1Year)) {
+					log.info("未超过一年,code:" + code);
+					continue;
+				}
+
 				// 是否需要更新缺失记录
 				String yyyymmdd = redisUtil.get(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code);
 				if (StringUtils.isBlank(yyyymmdd) || (!preDate.equals(yyyymmdd) && !yyyymmdd.equals(today)

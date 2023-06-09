@@ -9,6 +9,7 @@ import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.spider.eastmoney.DzjySpider;
 import com.stable.spider.ths.ThsJiejinSpider;
 import com.stable.spider.ths.ThsPlateSpider;
+import com.stable.spider.xq.ZXStockSyn;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -24,6 +25,8 @@ public class EveryMonthJob extends MySimpleJob {
 	private ThsJiejinSpider thsJiejinSpider;
 	@Autowired
 	private ThsPlateSpider thsPlateSpider;
+	@Autowired
+	private ZXStockSyn zxStockSyn;
 
 	public synchronized void myexecute(ShardingContext sc) {
 		log.info("每月-开始同步日历");
@@ -34,6 +37,8 @@ public class EveryMonthJob extends MySimpleJob {
 		thsJiejinSpider.byJob();// 同花顺, 解禁
 		log.info("同花顺-亮点，主营 fetchAll=true");
 		thsPlateSpider.fetchAll(true);// 同花顺-亮点，主营 多线程
+		log.info("股票chk");
+		zxStockSyn.stockListChk();
 		MsgPushServer.pushSystem1("每月任务EveryMonthJob 已完成调用");
 	}
 }

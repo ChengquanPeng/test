@@ -102,7 +102,7 @@ public class StockBasicService {
 					update.setList_date(t.getList_date());
 					update.setList_status(t.getList_status());
 					update.setMarket(t.getMarket());
-					
+
 					save(update);
 				}
 
@@ -114,7 +114,7 @@ public class StockBasicService {
 			log.info("同步股票列表[end],cnt=" + cnt);
 		} catch (Exception e) {
 			e.printStackTrace();
-			MsgPushServer.pushSystem1("同步股票列表异常");
+			MsgPushServer.pushSystem1("同步新股股票列表异常");
 			throw e;
 		}
 	}
@@ -227,7 +227,7 @@ public class StockBasicService {
 		}
 		return copy;
 	}
-	
+
 	public synchronized List<StockBaseInfo> nonHhuShen() {
 		List<StockBaseInfo> copy = new LinkedList<StockBaseInfo>();
 		Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
@@ -240,7 +240,7 @@ public class StockBasicService {
 			}
 		}
 		return copy;
-	} 
+	}
 
 	// 沪深股票，0，6，3开头的
 	public boolean isHuShenCode(String code) {
@@ -255,7 +255,7 @@ public class StockBasicService {
 	};
 
 	/**
-	 * 半年
+	 * 上市年限检查-是否超过N年
 	 */
 	public boolean onlinePreYearChk(String code, int preYearChk) {
 		String json = redisUtil.get(code);
