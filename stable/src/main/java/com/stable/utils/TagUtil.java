@@ -406,12 +406,14 @@ public class TagUtil {
 		return sb5.toString();
 	}
 
-	private static String gdrsChao5 = "<span style='background-color:red;'>股东人数过多</span>";
+	private static String gdrsChao5_base = "股东人数过多";
+	private static final String gdrsChao5_mail = "<span style='background-color:red;'>" + gdrsChao5_base + "</span>";
+	public static final String gdrsChao5_wx = "[" + gdrsChao5_base + "]";
 
 	// 小股票股东人数超4.8w
 	public static String warningXiaopiaoGdrs(CodeBaseModel2 dh) {
 		if (dh.getLastNum() >= Constant.WAN_5 && (dh.getMkv() > 0 && dh.getMkv() <= 55)) {
-			return gdrsChao5;
+			return gdrsChao5_mail;
 		}
 		return "";
 	}

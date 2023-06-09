@@ -72,22 +72,23 @@ public class MsgPushServer {
 	/** --单个客户推送-- */
 
 	/** --多个客户推送-- */
-	public final static boolean pushHtmlToBatchUser(String title, String content, List<UserInfo> users) {
+	public final static boolean pushHtmlToBatchUser(String mailTitle, String wxTitle, String content,
+			List<UserInfo> users) {
 		List<String> l = new LinkedList<String>();
 		for (UserInfo user : users) {
 			int r = getPushWay(user);
 			if (r == 9) {
 				l.add(user.getQqmail());
-				WxPushUtil.pushSystemHtmlT2(title + content, user.getWxpush());
+				WxPushUtil.pushSystemHtmlT2(wxTitle + content, user.getWxpush());
 			} else if (r == 2) {
 				l.add(user.getQqmail());
 			} else {
-				WxPushUtil.pushSystemHtmlT2(title + content, user.getWxpush());
+				WxPushUtil.pushSystemHtmlT2(wxTitle + content, user.getWxpush());
 			}
 		}
 		if (l.size() > 0) {
 			String[] us = new String[l.size()];
-			email.pushSystemHtmlT2(title, content, l.toArray(us));
+			email.pushSystemHtmlT2(mailTitle, content, l.toArray(us));
 		}
 		return true;
 	}
