@@ -99,9 +99,9 @@ public class TagUtil {
 	public static String getTag(CodeBaseModel2 cbm) {
 		String you = "";
 		if (cbm.getShooting7() > 0) {
-			you = "[小底]";
+			you = "[标小]";
 		} else {
-			you = "[普]";
+			you = "[普小]";
 		}
 		if (cbm.getShooting11() > 0) {
 			you += "[大]";
@@ -117,35 +117,35 @@ public class TagUtil {
 		// --中长--
 		if (dh.getShooting6661() > 0 || dh.getShooting6662() > 0) {
 			if (dh.getShooting6661() > 0) {
-				s += "底部小票模式-大宗" + splitor;
+				s += "标小模式-大宗" + splitor;
 			}
 			if (dh.getShooting6662() > 0) {
-				s += "底部小票模式-减持" + splitor;
+				s += "标小模式-减持" + splitor;
 			}
 
 		} else if (dh.getShooting7() > 0) {
-			s += "底部小票模式" + splitor;
+			s += "标小模式" + splitor;
 		} else if (dh.getShooting9() > 0) {
-			s += "底部小票" + splitor;
+			s += "普小" + splitor;
 		}
 		if (dh.getShooting2() > 0) {
 			s += "拉升定增-大额|国资，拿筹洗盘动作?" + splitor;
 		}
 		if (dh.getShooting1() > 0) {
-			s += "底部小票大宗-占流通筹码超5%" + splitor;
+			s += "标小大宗-占流通筹码超5%" + splitor;
 		}
 		if (dh.getShooting6() > 0) {
-			s += "底部小票减持" + splitor;
+			s += "标小减持" + splitor;
 		}
 		if (dh.getShooting8() > 0) {
-			s += "底部小票定增-" + dh.getZfjjupStable() + "年未涨" + splitor;
+			s += "标小定增-" + dh.getZfjjupStable() + "年未涨" + splitor;
 		}
 		if (dh.getShooting4() > 0) {
-			s += "底部股东人数大幅减少" + dh.getHolderNum() + "%" + splitor;
+			s += "股东人数大幅减少" + dh.getHolderNum() + "%" + splitor;
 		}
 		// --短线--
 		if (dh.getShooting3() > 0) {
-			s += "底部融资余额飙升-主力融资买入?" + splitor;
+			s += "融资余额飙升-主力融资买入?" + splitor;
 		}
 		if (dh.getShooting5() > 0) {
 			s += "股价极速拉升:妖股?龙抬头?(短线2)" + splitor;
@@ -197,13 +197,13 @@ public class TagUtil {
 			tag.append("起飞->");
 		}
 		if (dh.getNxipan() > 0) {
-			tag.append("N型洗盘:").append(dh.getNxipanHist()).append(Constant.HTML_LINE);
+			tag.append("N型:").append(dh.getNxipanHist()).append(Constant.HTML_LINE);
 		}
 		if (dh.getDibuQixing() > 0) {
-			tag.append("大旗形").append(dh.getDibuQixing()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
+			tag.append("大7").append(dh.getDibuQixing()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
 		}
 		if (dh.getDibuQixing2() > 0) {
-			tag.append("小旗形").append(dh.getDibuQixing2()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
+			tag.append("小7").append(dh.getDibuQixing2()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
 		}
 		if (dh.getXipan() > 0) {
 			tag.append("v1洗盘:").append(dh.getXipan()).append(",").append(dh.getXipanHist()).append(Constant.HTML_LINE);

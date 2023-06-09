@@ -206,7 +206,7 @@ public class RunModelService {
 		StringBuffer sb = new StringBuffer();
 		// 更新时间
 		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("，<br/>特别十字星：人工,大宗,大票定增,做小做底+业绩不错")
-				.append("<br/>确：大宗超5%，小底-大宗，小底-减持").append("<br/>十字星：K线形态，前期有洗盘[002752]，或者阴跌后[山东路桥，中国化学]</div>");
+				.append("<br/>确：大宗超5%，标小-大宗，标小-减持").append("<br/>十字星：K线形态，前期有洗盘[002752]，或者阴跌后[山东路桥，中国化学]</div>");
 		// table
 		sb.append("<br/><table border='1' cellspacing='0' cellpadding='0'>");
 		// head

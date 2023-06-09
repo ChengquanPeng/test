@@ -163,10 +163,10 @@ public class CodeModelService {
 			MsgPushServer.pushSystemT1("人工pls==1已到期:", sbc.toString());
 		}
 		if (xddz.length() > 0) {
-			MsgPushServer.pushSystemT1("最新小底-大宗:", xddz.toString());
+			MsgPushServer.pushSystemT1("最新标小-大宗:", xddz.toString());
 		}
 		if (xdjc.length() > 0) {
-			MsgPushServer.pushSystemT1("最新小底-减持:", xdjc.toString());
+			MsgPushServer.pushSystemT1("最新标小-减持:", xdjc.toString());
 		}
 		if (yjm1.length() > 0 || yjm2.length() > 0) {
 			String mt = "";
@@ -352,7 +352,7 @@ public class CodeModelService {
 		if (db2 && newOne.getDzjyp365d() >= Constant.DZ_RATE) {
 			isOk1 = true;
 		}
-		// 小底-大宗
+		// 标准小票-大宗
 		if (newOne.getPls() != 2 && isOk7 && newOne.getDzjy365d() >= yzdzamt) {
 			if (newOne.getShooting6661() == 0) {
 				xddz.append(stockBasicService.getCodeName2(code)).append(",");
@@ -362,7 +362,7 @@ public class CodeModelService {
 			newOne.setShooting6661(0);
 		}
 
-		// 小底-减持
+		// 标准小票-减持
 		if (newOne.getPls() != 2 && isOk7 && rhss.getLastPlanDate() > 0
 				&& rhss.getLastPlanDate() >= newOne.getReduceLastPlanDate()) {// 大于等于是保持6662=1
 			newOne.setShooting6662(1);
