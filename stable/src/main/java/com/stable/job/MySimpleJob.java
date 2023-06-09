@@ -21,7 +21,7 @@ public abstract class MySimpleJob implements SimpleJob {
 			this.myexecute(shardingContext);
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, "执行job异常", "", "");
-			MsgPushServer.pushSystem1("执行job异常:MySimpleJob");
+			MsgPushServer.pushToSystem("执行job异常:MySimpleJob");
 		}
 	}
 

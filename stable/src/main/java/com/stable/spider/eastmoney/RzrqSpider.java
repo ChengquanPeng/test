@@ -142,9 +142,9 @@ public class RzrqSpider {
 			codeBaseModel2Dao.saveAll(update);
 		}
 		if (shootNotice3.length() > 0) {
-			MsgPushServer.pushSystem1("行情指标3：融资，股价，成交量平稳增长?:" + shootNotice3.toString());
+			MsgPushServer.pushToSystem("行情指标3：融资，股价，成交量平稳增长?:" + shootNotice3.toString());
 		} else {
-			MsgPushServer.pushSystem1("行情指标3：融资暴涨今日无");
+			MsgPushServer.pushToSystem("行情指标3：融资暴涨今日无");
 		}
 	}
 
@@ -174,7 +174,7 @@ public class RzrqSpider {
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 			}
 		} while (trytime <= 10);
-		MsgPushServer.pushSystem1("东方财富-融资融券(每日)-抓包出错,date=" + d);
+		MsgPushServer.pushToSystem("东方财富-融资融券(每日)-抓包出错,date=" + d);
 		return pages;
 	}
 
@@ -249,11 +249,11 @@ public class RzrqSpider {
 				rzrqDaliyDao.saveAll(dzl);
 			}
 			// exeRzrqTime(codes, tradedate); 不计算，每人融资数据触发在计算
-			MsgPushServer.pushSystem1(date + " 东方财富-融资融券-已完成-ALL");
+			MsgPushServer.pushToSystem(date + " 东方财富-融资融券-已完成-ALL");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "东方财富-融资融券-运行异常..", "", "");
-			MsgPushServer.pushSystem1("东方财富-融资融券-运行异常");
+			MsgPushServer.pushToSystem("东方财富-融资融券-运行异常");
 		}
 	}
 
@@ -289,7 +289,7 @@ public class RzrqSpider {
 				} catch (Exception e) {
 					e.printStackTrace();
 					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
-					MsgPushServer.pushSystem1("东方财富-融资融券-抓包出错,code=" + code + ",page=" + runPage);
+					MsgPushServer.pushToSystem("东方财富-融资融券-抓包出错,code=" + code + ",page=" + runPage);
 					return;
 				}
 			} while (trytime <= 10);

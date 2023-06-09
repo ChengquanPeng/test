@@ -155,7 +155,7 @@ public class ThsSpider {
 			getGnList(isFirday, map);
 		} catch (Exception e) {
 			e.printStackTrace();
-			MsgPushServer.pushSystem1("同花顺板块出错");
+			MsgPushServer.pushToSystem("同花顺板块出错");
 			map = null;
 		}
 		return map;
@@ -246,7 +246,7 @@ public class ThsSpider {
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 				if (trytime >= 10) {
 					e.printStackTrace();
-					MsgPushServer.pushSystem1("同花顺概念-列表抓包出错,url=" + url);
+					MsgPushServer.pushToSystem("同花顺概念-列表抓包出错,url=" + url);
 					if (list.size() > 0) {
 						cntList += list.size();
 						saveConcept(list);
@@ -304,7 +304,7 @@ public class ThsSpider {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			MsgPushServer.pushSystem1("同花顺概念-成分股抓包出错,url=" + cp.getHref());
+			MsgPushServer.pushToSystem("同花顺概念-成分股抓包出错,url=" + cp.getHref());
 			throw new RuntimeException(e);
 		} finally {
 			htmlunitSpider.close();
@@ -364,7 +364,7 @@ public class ThsSpider {
 				if (trytime >= 10) {
 					e.printStackTrace();
 					log.info(page.asText());
-					MsgPushServer.pushSystem1("同花顺行业概念-成分股抓包出错,url=" + url);
+					MsgPushServer.pushToSystem("同花顺行业概念-成分股抓包出错,url=" + url);
 					// throw new RuntimeException(e);
 				}
 			} finally {
@@ -451,7 +451,7 @@ public class ThsSpider {
 					trytime++;
 					if (trytime >= 5) {
 						fetched = true;
-						MsgPushServer.pushSystem1("同花顺-行业抓包出错，url=" + url);
+						MsgPushServer.pushToSystem("同花顺-行业抓包出错，url=" + url);
 					}
 				}
 			} while (!fetched);

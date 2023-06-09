@@ -113,7 +113,7 @@ public class XqDailyBaseSpider {
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
-						MsgPushServer.pushSystem1("雪球=>每日指标-市盈率记录抓包出错,code=" + b.getCode());
+						MsgPushServer.pushToSystem("雪球=>每日指标-市盈率记录抓包出错,code=" + b.getCode());
 					}
 				} else {
 					s--;
@@ -129,7 +129,7 @@ public class XqDailyBaseSpider {
 //			}).start();
 			log.info("雪球=>每日指标-市盈率完成,期望数:{" + s + "},实际成功数:" + upd.size());
 			if (upd.size() != s) {
-				MsgPushServer.pushSystem1("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + s + "},实际成功数:" + upd.size());
+				MsgPushServer.pushToSystem("雪球=>每日指标-市盈率记录抓包不完整,期望数:{" + s + "},实际成功数:" + upd.size());
 			}
 
 			ThreadsUtil.sleepRandomSecBetween15And30();
@@ -146,7 +146,7 @@ public class XqDailyBaseSpider {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			MsgPushServer.pushSystem1("雪球=>每日指标-市盈率记录抓包出错");
+			MsgPushServer.pushToSystem("雪球=>每日指标-市盈率记录抓包出错");
 		}
 	}
 
@@ -273,7 +273,7 @@ public class XqDailyBaseSpider {
 			ThreadsUtil.sleepRandomSecBetween1And5(trytime);
 			if (trytime >= 10) {
 				fetched = true;
-				MsgPushServer.pushSystem1("雪球每日信息出错(pe,pe-ttm),code=" + code + ",url=" + url);
+				MsgPushServer.pushToSystem("雪球每日信息出错(pe,pe-ttm),code=" + code + ",url=" + url);
 			}
 		} while (!fetched);
 		return false;

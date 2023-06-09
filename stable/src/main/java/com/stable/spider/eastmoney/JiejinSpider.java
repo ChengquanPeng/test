@@ -59,10 +59,10 @@ public class JiejinSpider {
 					if (savelist.size() > 0) {
 						jiejinDao.saveAll(savelist);
 					}
-					MsgPushServer.pushSystem1("东方财富-抓包解禁完成");
+					MsgPushServer.pushToSystem("东方财富-抓包解禁完成");
 				} catch (Exception e) {
 					e.printStackTrace();
-					MsgPushServer.pushSystem1("东方财富-抓包解禁出错-抓包出错");
+					MsgPushServer.pushToSystem("东方财富-抓包解禁出错-抓包出错");
 				}
 			}
 		}).start();
@@ -110,7 +110,7 @@ public class JiejinSpider {
 				e.printStackTrace();
 			}
 		} while (trytime <= 10);
-		MsgPushServer.pushSystem1("东方财富-解禁-抓包出错,code=" + code);
+		MsgPushServer.pushToSystem("东方财富-解禁-抓包出错,code=" + code);
 	}
 
 	public static void main(String[] args) {

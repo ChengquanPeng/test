@@ -46,7 +46,7 @@ public class MyApplicationRunner implements ApplicationRunner {
 			// printUrl();
 			return;
 		}
-		MsgPushServer.pushSystem1("系统正常启动");
+		MsgPushServer.pushToSystem("系统正常启动");
 
 		new Thread(new Runnable() {
 			@Override

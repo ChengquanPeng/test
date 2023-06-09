@@ -63,7 +63,7 @@ public class LoginController {
 			// 登录KEY
 			redisUtil.set(RedisConstant.RDS_LOGIN_KEY_ + phone, str, Duration.ofMinutes(10));
 
-			if (MsgPushServer.pushSystemT1(str, " 动态码", ui)) {
+			if (MsgPushServer.pushTextToUser(str, " 动态码", ui)) {
 				r.setResult("动态码已发送，请查看微信消息，有效期10分钟");
 				r.setStatus(JsonResult.OK);
 			} else {

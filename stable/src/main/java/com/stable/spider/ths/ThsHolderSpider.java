@@ -80,7 +80,7 @@ public class ThsHolderSpider {
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "同花顺股东人数异常运行异常..", "", "");
-			MsgPushServer.pushSystem1("同花顺股东人数异常运行异常");
+			MsgPushServer.pushToSystem("同花顺股东人数异常运行异常");
 		}
 	}
 
@@ -178,7 +178,7 @@ public class ThsHolderSpider {
 			esHolderNumDao.saveAll(hns);
 		}
 		log.info("所有股东人数/股东研究抓包同花顺已完成-重新计算");
-		MsgPushServer.pushSystem1("所有股东人数/股东研究抓包同花顺已完成-重新计算");
+		MsgPushServer.pushToSystem("所有股东人数/股东研究抓包同花顺已完成-重新计算");
 	}
 
 	private HolderNum cutAvgPrcent(String code, Double top10Zb, List<HolderNum> hns) {
@@ -322,7 +322,7 @@ public class ThsHolderSpider {
 				if (trytime >= 10) {
 					fetched = true;
 					e2.printStackTrace();
-					MsgPushServer.pushSystem1("同花顺-股东获取出错,url=" + url);
+					MsgPushServer.pushToSystem("同花顺-股东获取出错,url=" + url);
 				}
 			} finally {
 				htmlunitSpider.close();

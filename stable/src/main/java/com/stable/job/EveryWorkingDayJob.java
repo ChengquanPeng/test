@@ -39,7 +39,7 @@ public class EveryWorkingDayJob extends MySimpleJob {
 		String today = DateUtil.getTodayYYYYMMDD();
 		if (!tradeCalService.isOpen(Integer.valueOf(today))) {
 			log.info("非交易日");
-			MsgPushServer.pushSystem1(today + " 非交易日 ,Seq1=>Seq5流水任务不会执行");
+			MsgPushServer.pushToSystem(today + " 非交易日 ,Seq1=>Seq5流水任务不会执行");
 			return;
 		}
 		try {
@@ -47,7 +47,7 @@ public class EveryWorkingDayJob extends MySimpleJob {
 			log.info("获取日交易(分红除权)");
 			int result = tradeHistroyService.spiderTodayDaliyTrade(true, today);
 			if (result == 0) {
-				MsgPushServer.pushSystem1("异常执行Seq1=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:0,以后的链条不会被执行");
+				MsgPushServer.pushToSystem("异常执行Seq1=>每日交易前复权，不复权，每日指标,日期=" + today + ",数量:0,以后的链条不会被执行");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

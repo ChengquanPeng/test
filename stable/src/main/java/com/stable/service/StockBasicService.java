@@ -109,12 +109,12 @@ public class StockBasicService {
 				saveAll(list);
 				cnt = list.size();
 			} else {
-				MsgPushServer.pushSystem1("同步股票列表异常,获取0条数据");
+				MsgPushServer.pushToSystem("同步股票列表异常,获取0条数据");
 			}
 			log.info("同步股票列表[end],cnt=" + cnt);
 		} catch (Exception e) {
 			e.printStackTrace();
-			MsgPushServer.pushSystem1("同步新股股票列表异常");
+			MsgPushServer.pushToSystem("同步新股股票列表异常");
 			throw e;
 		}
 	}

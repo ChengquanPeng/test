@@ -62,7 +62,7 @@ public class StockListSpider {
 			}
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, "新股同步异常", "", "");
-			MsgPushServer.pushSystem1("新股同步异常");
+			MsgPushServer.pushToSystem("新股同步异常");
 			e.printStackTrace();
 		}
 		return list;
@@ -114,7 +114,7 @@ public class StockListSpider {
 					ThreadsUtil.sleepRandomSecBetween1And5(trytime * 10);
 					if (trytime >= 3) {
 						fetched = true;
-						MsgPushServer.pushSystem1("同花顺同步股票错误,url=" + urlths);
+						MsgPushServer.pushToSystem("同花顺同步股票错误,url=" + urlths);
 					}
 				}
 			} while (!fetched);

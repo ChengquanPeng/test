@@ -88,7 +88,7 @@ public class ThsJiejinSpider {
 			log.info("同花顺-抓包解禁-完成");
 		} catch (Exception e) {
 			e.printStackTrace();
-			MsgPushServer.pushSystem1("同花顺-抓包解禁出错-抓包出错");
+			MsgPushServer.pushToSystem("同花顺-抓包解禁出错-抓包出错");
 		}
 	}
 
@@ -156,7 +156,7 @@ public class ThsJiejinSpider {
 				if (trytime >= 10) {
 					fetched = true;
 					e2.printStackTrace();
-					MsgPushServer.pushSystem1("同花顺-解禁获取出错,url=" + url);
+					MsgPushServer.pushToSystem("同花顺-解禁获取出错,url=" + url);
 				}
 			} finally {
 				htmlunitSpider.close();

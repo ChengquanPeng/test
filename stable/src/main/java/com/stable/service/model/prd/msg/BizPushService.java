@@ -29,11 +29,11 @@ public class BizPushService {
 	}
 
 	public boolean pushS2Realtime(String title, String msg) {
-		return MsgPushServer.pushSystemHtmlBatch(title, msg, userService.getUserListForMonitorS2());
+		return MsgPushServer.pushHtmlToBatchUser(title, msg, userService.getUserListForMonitorS2());
 	}
 
 	public boolean pushS2ForTradeTime(String title, String msg) {
-		return MsgPushServer.pushSystemHtmlBatch(title, msg, users);
+		return MsgPushServer.pushHtmlToBatchUser(title, msg, users);
 	}
 
 }

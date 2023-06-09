@@ -71,7 +71,7 @@ public class IgoodstockSpider {
 			log.info("igoodstock-外资:done,size:{}", upd.size());
 		} catch (Exception e) {
 			e.printStackTrace();
-			MsgPushServer.pushSystem1("igoodstock-外资-抓包异常");
+			MsgPushServer.pushToSystem("igoodstock-外资-抓包异常");
 		}
 	}
 
@@ -102,7 +102,7 @@ public class IgoodstockSpider {
 			}
 			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 		} while (trytime <= 10);
-		MsgPushServer.pushSystem1("igoodstock-外资-抓包出错,code=" + code);
+		MsgPushServer.pushToSystem("igoodstock-外资-抓包出错,code=" + code);
 		return null;
 	}
 

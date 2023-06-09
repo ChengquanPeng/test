@@ -39,6 +39,6 @@ public class EveryMonthJob extends MySimpleJob {
 		thsPlateSpider.fetchAll(true);// 同花顺-亮点，主营 多线程
 		log.info("股票chk");
 		zxStockSyn.stockListChk();
-		MsgPushServer.pushSystem1("每月任务EveryMonthJob 已完成调用");
+		MsgPushServer.pushToSystem("每月任务EveryMonthJob 已完成调用");
 	}
 }

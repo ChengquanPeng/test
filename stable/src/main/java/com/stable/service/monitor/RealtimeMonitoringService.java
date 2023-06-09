@@ -143,7 +143,7 @@ public class RealtimeMonitoringService {
 					}
 				}
 			}
-			MsgPushServer.pushSystemT1("实时监听", "监听总数:[" + allmap.size() + "],牛熊环境开启:[" + getMonisort1() + "],短线实际总数["
+			MsgPushServer.pushToSystem("实时监听", "监听总数:[" + allmap.size() + "],牛熊环境开启:[" + getMonisort1() + "],短线实际总数["
 					+ list.size() + "],监听失败[" + failtt + "]");
 
 			// ====产品1：三五天 => 买点 === 卖点 ====

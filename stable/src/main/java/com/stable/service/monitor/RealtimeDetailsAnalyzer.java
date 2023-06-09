@@ -84,7 +84,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 			if (srt.getOpen() == 0.0) {
 				log.info("source={} 今日停牌,{}", srt.getSource(), codeName);
 				for (RtmMoniUser r : rtm.getListu()) {
-					MsgPushServer.pushSystemT1(codeName + "今日停牌" + srt.getSource(), rtm.getMsg(r.getOrig()),
+					MsgPushServer.pushTextToUser(codeName + "今日停牌" + srt.getSource(), rtm.getMsg(r.getOrig()),
 							r.getUser());
 				}
 				return;
@@ -188,7 +188,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					}
 					// 发送
 					if (!title.equals("")) {
-						MsgPushServer.pushSystemT1(codeName + " " + title, rtm.getMsg(r.getOrig()), r.getUser());
+						MsgPushServer.pushTextToUser(codeName + " " + title, rtm.getMsg(r.getOrig()), r.getUser());
 
 						if (r.getOrig().getUserId() == Constant.MY_ID) {
 							ocg.genMsg(code, title);
@@ -199,7 +199,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 				Thread.sleep(WAIT_MIN);
 			} catch (Exception e) {
 				if (!isPushedException) {
-					MsgPushServer.pushSystemT1(code + " 监听异常！", "");
+					MsgPushServer.pushToSystem(code + " 监听异常！", "");
 					isPushedException = true;
 					e.printStackTrace();
 				}

@@ -138,7 +138,7 @@ public class DzjySpider {
 			dzjyYiTimeDao.saveAll(l);
 		}
 		if (sb.length() > 0) {
-			MsgPushServer.pushSystemT1(DateUtil.getTodayYYYYMMDD() + " 大宗交易异动列表:", sb.toString());
+			MsgPushServer.pushToSystem(DateUtil.getTodayYYYYMMDD() + " 大宗交易异动列表:", sb.toString());
 		}
 	}
 
@@ -167,7 +167,7 @@ public class DzjySpider {
 				ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 			}
 		} while (trytime <= 10);
-		MsgPushServer.pushSystem1("东方财富-大宗交易(每日)-抓包出错,date=" + d);
+		MsgPushServer.pushToSystem("东方财富-大宗交易(每日)-抓包出错,date=" + d);
 		return pages;
 
 	}
@@ -239,11 +239,11 @@ public class DzjySpider {
 				dzjyDao.saveAll(dzl);
 			}
 			exeDzjyYiTime(true);
-			MsgPushServer.pushSystem1(date + " 东方财富-大宗交易-已完成-ALL");
+			MsgPushServer.pushToSystem(date + " 东方财富-大宗交易-已完成-ALL");
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "东方财富-大宗交易-运行异常..", "", "");
-			MsgPushServer.pushSystem1("东方财富-大宗交易-运行异常");
+			MsgPushServer.pushToSystem("东方财富-大宗交易-运行异常");
 		}
 	}
 
@@ -276,7 +276,7 @@ public class DzjySpider {
 				} catch (Exception e) {
 					e.printStackTrace();
 					ThreadsUtil.sleepRandomSecBetween15And30(trytime);
-					MsgPushServer.pushSystem1("东方财富-大宗交易-抓包出错,code=" + code + ",page=" + runPage);
+					MsgPushServer.pushToSystem("东方财富-大宗交易-抓包出错,code=" + code + ",page=" + runPage);
 					return;
 				}
 			} while (trytime <= 10);

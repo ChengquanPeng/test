@@ -118,7 +118,7 @@ public class ZXStockSyn implements InitializingBean {
 			}
 			if (sb.length() > 0) {
 				log.info("发现新未同步的股票,需要手工同步（未实现）: " + sb);
-				MsgPushServer.pushSystem1("发现新未同步的股票,需要手工同步（未实现）: " + sb);
+				MsgPushServer.pushToSystem("发现新未同步的股票,需要手工同步（未实现）: " + sb);
 			} else {
 				log.info("股票池check正常");
 			}
@@ -126,7 +126,7 @@ public class ZXStockSyn implements InitializingBean {
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "所有同步异常", "", "");
-			MsgPushServer.pushSystem1("所有同步异常");
+			MsgPushServer.pushToSystem("所有同步异常");
 		}
 	}
 

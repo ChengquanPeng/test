@@ -42,7 +42,7 @@ public class TagUtil {
 	}
 
 	public static boolean mkvChk(double mkv, double actMkv, double limitAck) {
-		return (mkv <= limitAck || actMkv <= limitAck);
+		return ((mkv > 0 && mkv <= limitAck) || (actMkv > 0 && actMkv <= limitAck));
 	}
 
 	// 底部2-1
@@ -298,7 +298,7 @@ public class TagUtil {
 		}
 
 		sb5.append(",人均持股:").append(CurrencyUitl.covertToString(dh.getAvgNum()));
-		sb5.append(",变化:").append(dh.getHolderNum()).append("%");
+		sb5.append(",变化:").append(dh.getHolderNum()).append("% ").append(warningXiaopiaoGdrs(dh));
 		sb5.append(Constant.HTML_LINE).append(Constant.HTML_LINE);
 		// 行情-财务
 		if (dh.getZfjjup() > 0 || dh.getBousOK() > 0 || dh.getFinOK() > 0) {
@@ -404,5 +404,15 @@ public class TagUtil {
 			}
 		}
 		return sb5.toString();
+	}
+
+	private static String gdrsChao5 = "<span style='background-color:red;'>股东人数过多</span>";
+
+	// 小股票股东人数超4.8w
+	public static String warningXiaopiaoGdrs(CodeBaseModel2 dh) {
+		if (dh.getLastNum() >= Constant.WAN_5 && (dh.getMkv() > 0 && dh.getMkv() <= 55)) {
+			return gdrsChao5;
+		}
+		return "";
 	}
 }

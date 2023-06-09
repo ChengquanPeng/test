@@ -22,19 +22,19 @@ public class MsgPushServer {
 	}
 
 	/** --管理员推送-- */
-	public final static boolean pushSystem1(String content) {
+	public final static boolean pushToSystem(String content) {
 		email.pushSystemT1(content, content, email.myId);
 		WxPushUtil.pushSystemT1(content, WxPushUtil.myUid);
 		return true;
 	}
 
-	public final static boolean pushSystemT1(String title, String content) {
+	public final static boolean pushToSystem(String title, String content) {
 		email.pushSystemT1(title, content, email.myId);
 		WxPushUtil.pushSystemT1(title + content, WxPushUtil.myUid);
 		return true;
 	}
 
-	public final static boolean pushSystemHtmlT2(String title, String content) {
+	public final static boolean pushHtmlToSystem(String title, String content) {
 		email.pushSystemHtmlT2(title, content, email.myId);
 		WxPushUtil.pushSystemHtmlT2(title + content, WxPushUtil.myUid);
 		return true;
@@ -43,7 +43,7 @@ public class MsgPushServer {
 	/** --管理员推送-- */
 
 	/** --单个客户推送-- */
-	public final static boolean pushSystemT1(String title, String content, UserInfo user) {
+	public final static boolean pushTextToUser(String title, String content, UserInfo user) {
 		int r = getPushWay(user);
 		if (r == 9) {
 			email.pushSystemHtmlT2(title, content, user.getQqmail());
@@ -56,7 +56,7 @@ public class MsgPushServer {
 		}
 	}
 
-	public final static boolean pushSystemHtmlT2(String title, String content, UserInfo user) {
+	public final static boolean pushHtmlToUser(String title, String content, UserInfo user) {
 		int r = getPushWay(user);
 		if (r == 9) {
 			email.pushSystemHtmlT2(title, content, user.getQqmail());
@@ -72,7 +72,7 @@ public class MsgPushServer {
 	/** --单个客户推送-- */
 
 	/** --多个客户推送-- */
-	public final static boolean pushSystemHtmlBatch(String title, String content, List<UserInfo> users) {
+	public final static boolean pushHtmlToBatchUser(String title, String content, List<UserInfo> users) {
 		List<String> l = new LinkedList<String>();
 		for (UserInfo user : users) {
 			int r = getPushWay(user);

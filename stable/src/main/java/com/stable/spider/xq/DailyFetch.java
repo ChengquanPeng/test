@@ -131,7 +131,7 @@ public class DailyFetch {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				MsgPushServer.pushSystem1("前复权qfq获取异常==>代码:" + code);
+				MsgPushServer.pushToSystem("前复权qfq获取异常==>代码:" + code);
 			} finally {
 				cnt.countDown();
 			}
@@ -139,7 +139,7 @@ public class DailyFetch {
 
 		try {
 			if (!cnt.await(12, TimeUnit.HOURS)) {
-				MsgPushServer.pushSystem1("前复权qfq获取超时异常==>日期:" + today);
+				MsgPushServer.pushToSystem("前复权qfq获取超时异常==>日期:" + today);
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -375,7 +375,7 @@ public class DailyFetch {
 			ThreadsUtil.sleepRandomSecBetween1And5(trytime);
 			if (trytime >= 10) {
 				fetched = true;
-				MsgPushServer.pushSystem1("雪球每日信息出错(pe,pe-ttm),code=" + code + ",url=" + url);
+				MsgPushServer.pushToSystem("雪球每日信息出错(pe,pe-ttm),code=" + code + ",url=" + url);
 			}
 		} while (!fetched);
 		return null;// 失败

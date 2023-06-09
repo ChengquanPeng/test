@@ -79,7 +79,7 @@ public class EastmoneyZcfzbSpider {
 			}
 			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 		} while (trytime <= 10);
-		MsgPushServer.pushSystem1("东方财富-财务(资产负债表-dates)-抓包出错,code=" + code);
+		MsgPushServer.pushToSystem("东方财富-财务(资产负债表-dates)-抓包出错,code=" + code);
 		return null;
 	}
 
@@ -189,7 +189,7 @@ public class EastmoneyZcfzbSpider {
 			}
 			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 		} while (trytime <= 10);
-		MsgPushServer.pushSystem1("东方财富-财务(资产负债表)-抓包出错,code=" + code);
+		MsgPushServer.pushToSystem("东方财富-财务(资产负债表)-抓包出错,code=" + code);
 		return new HashMap<String, FinanceZcfzb>();
 	}
 
@@ -255,7 +255,7 @@ public class EastmoneyZcfzbSpider {
 			}
 			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 		} while (trytime <= 10);
-		MsgPushServer.pushSystem1("东方财富-财务(现金流量表)-抓包出错,code=" + code);
+		MsgPushServer.pushToSystem("东方财富-财务(现金流量表)-抓包出错,code=" + code);
 		return new HashMap<String, FinanceZcfzb>();
 	}
 }

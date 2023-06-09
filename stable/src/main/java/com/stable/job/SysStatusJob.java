@@ -27,7 +27,7 @@ public class SysStatusJob implements SimpleJob {
 			modelWebService.getLastOneByCode2("000001");
 		} catch (Exception e) {
 			e.printStackTrace();
-			MsgPushServer.pushSystem1("系统异常，正在重启...");
+			MsgPushServer.pushToSystem("系统异常，正在重启...");
 			OSystemUtil.restart();
 		}
 	}

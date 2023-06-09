@@ -479,14 +479,14 @@ public class MonitorPoolService {
 						mp.setZfdone(0);
 						mp.setZfdoneZjh(0);
 						toSave(mp);
-						MsgPushServer.pushSystemT1(stockBasicService.getCodeName2(mp.getCode()) + " 已完成增发",
+						MsgPushServer.pushTextToUser(stockBasicService.getCodeName2(mp.getCode()) + " 已完成增发",
 								"备注:" + mp.getRemark(), u);
 					} else {
 						if (mp.getZfdoneZjh() == 0 && zf != null
 								&& ZfStatus.ZF_ZJHHZ.getDesc().equals(zf.getStatusDesc())) {
 							mp.setZfdoneZjh(1);
 							toSave(mp);
-							MsgPushServer.pushSystemT1(stockBasicService.getCodeName2(mp.getCode()) + " 增发已通过证监会核准！",
+							MsgPushServer.pushTextToUser(stockBasicService.getCodeName2(mp.getCode()) + " 增发已通过证监会核准！",
 									"备注:" + mp.getRemark(), u);
 						}
 					}
@@ -516,7 +516,7 @@ public class MonitorPoolService {
 					}
 				}
 				if (annc.length() > 0) {
-					MsgPushServer.pushSystemT1("最新公告", annc.toString(), u);
+					MsgPushServer.pushTextToUser("最新公告", annc.toString(), u);
 				}
 			}
 		}
@@ -583,7 +583,7 @@ public class MonitorPoolService {
 					}
 				}
 				if (sb.length() > 0) {
-					MsgPushServer.pushSystemHtmlT2("股东人数", sb.toString(), u);
+					MsgPushServer.pushHtmlToUser("股东人数", sb.toString(), u);
 				}
 			}
 		}
@@ -642,7 +642,7 @@ public class MonitorPoolService {
 					for (String s : l) {
 						sb.append(stockBasicService.getCodeName2(s)).append(Constant.DOU_HAO);
 					}
-					MsgPushServer.pushSystemT1("关注票的大宗交易", sb.toString(), u);
+					MsgPushServer.pushTextToUser("关注票的大宗交易", sb.toString(), u);
 				}
 			}
 		}
@@ -691,7 +691,7 @@ public class MonitorPoolService {
 						s.append(a).append(Constant.HTML_LINE);
 					}
 					if (s.length() > 0) {
-						MsgPushServer.pushSystemHtmlT2("离线价格监听", s.toString(), u);
+						MsgPushServer.pushHtmlToUser("离线价格监听", s.toString(), u);
 					}
 				}
 			}
@@ -803,7 +803,7 @@ public class MonitorPoolService {
 				}
 
 				if (sssb.length() > 0) {
-					MsgPushServer.pushSystemHtmlT2("业绩快预报预警", sssb.toString(), u);
+					MsgPushServer.pushHtmlToUser("业绩快预报预警", sssb.toString(), u);
 				}
 			}
 		}

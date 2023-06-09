@@ -39,7 +39,7 @@ public abstract class MyCallable implements Callable<Object> {
 			public void run() {
 				try {
 					TimeUnit.HOURS.sleep(12);
-					MsgPushServer.pushSystem1(">>>执行超时异常<<< " + cycle.getName() + " " + biz.getBtypeName() + " 开始时间:"
+					MsgPushServer.pushToSystem(">>>执行超时异常<<< " + cycle.getName() + " " + biz.getBtypeName() + " 开始时间:"
 							+ starttime + " 结束时间：" + DateUtil.getTodayYYYYMMDDHHMMSS());
 				} catch (Exception e) {
 				}
@@ -66,7 +66,7 @@ public abstract class MyCallable implements Callable<Object> {
 
 	private void pushWx(int status, String startTime, String endTime) {
 		if (status == 2) {
-			MsgPushServer.pushSystem1(">>>异常<<< " + cycle.getName() + " " + biz.getBtypeName() + " 开始时间:" + startTime
+			MsgPushServer.pushToSystem(">>>异常<<< " + cycle.getName() + " " + biz.getBtypeName() + " 开始时间:" + startTime
 					+ " 结束时间：" + endTime);
 		}
 	}

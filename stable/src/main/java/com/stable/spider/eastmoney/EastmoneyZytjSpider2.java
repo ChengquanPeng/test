@@ -115,7 +115,7 @@ public class EastmoneyZytjSpider2 {
 				if (trytime >= 10) {
 					fetched = true;
 					e2.printStackTrace();
-					MsgPushServer.pushSystem1("东方财富-股东质押2获取出错,url=" + url);
+					MsgPushServer.pushToSystem("东方财富-股东质押2获取出错,url=" + url);
 				}
 			} finally {
 
@@ -180,7 +180,7 @@ public class EastmoneyZytjSpider2 {
 				if (trytime >= 10) {
 					fetched = true;
 					e2.printStackTrace();
-					MsgPushServer.pushSystem1("东方财富-股东质押T获取出错,url=" + url);
+					MsgPushServer.pushToSystem("东方财富-股东质押T获取出错,url=" + url);
 				}
 			} finally {
 

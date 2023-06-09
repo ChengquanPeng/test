@@ -156,7 +156,7 @@ public class ThsBonusSpider {
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "同花顺分红&增发异常运行异常..", "", "");
-			MsgPushServer.pushSystem1("同花顺分红&增发异常运行异常");
+			MsgPushServer.pushToSystem("同花顺分红&增发异常运行异常");
 		}
 	}
 
@@ -421,7 +421,7 @@ public class ThsBonusSpider {
 				if (trytime >= 10) {
 					fetched = true;
 					e2.printStackTrace();
-					MsgPushServer.pushSystem1("同花顺-分红&增发获取出错,url=" + url);
+					MsgPushServer.pushToSystem("同花顺-分红&增发获取出错,url=" + url);
 				}
 			} finally {
 				htmlunitSpider.close();

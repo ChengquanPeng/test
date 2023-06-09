@@ -68,12 +68,12 @@ public class ThsPlateSpider {
 				log.info("current index:{}", c);
 			}
 			if (needUpd > 0 && needUpd != upded) {
-				MsgPushServer.pushSystem1("同花顺-亮点，主营-抓包不完整，需要更新数={" + needUpd + "},实际更新数={" + upded + "}");
+				MsgPushServer.pushToSystem("同花顺-亮点，主营-抓包不完整，需要更新数={" + needUpd + "},实际更新数={" + upded + "}");
 			}
 			log.info("同花顺-亮点，主营,东方财富曾用名，网站完成");
 		} catch (Exception e) {
 			e.printStackTrace();
-			MsgPushServer.pushSystem1("同花顺-亮点，主营-抓包出错");
+			MsgPushServer.pushToSystem("同花顺-亮点，主营-抓包出错");
 		}
 
 	}
@@ -118,7 +118,7 @@ public class ThsPlateSpider {
 			ThreadsUtil.sleepRandomSecBetween15And30(trytime);
 			if (trytime >= 10) {
 				fetched = true;
-				MsgPushServer.pushSystem1("同花顺-亮点，主营出错出错code=" + code + ",url=" + url);
+				MsgPushServer.pushToSystem("同花顺-亮点，主营出错出错code=" + code + ",url=" + url);
 			}
 		} while (!fetched);
 		return false;

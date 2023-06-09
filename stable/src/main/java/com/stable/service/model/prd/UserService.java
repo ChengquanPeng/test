@@ -291,7 +291,7 @@ public class UserService {
 		}
 		if (all.size() > 0) {
 			for (UserInfo u : all) {
-				MsgPushServer.pushSystemHtmlT2(titlet, cenntt, u);
+				MsgPushServer.pushHtmlToUser(titlet, cenntt, u);
 			}
 		}
 	}

@@ -96,7 +96,7 @@ public class EastmoneySpider {
 		if (companyType == 0) {
 			companyType = getcompanyType(code);
 			if (companyType == 0) {
-				MsgPushServer.pushSystem1("东方财富-财务companyType-抓包出错,code=" + code);
+				MsgPushServer.pushToSystem("东方财富-财务companyType-抓包出错,code=" + code);
 				return null;
 			}
 		}

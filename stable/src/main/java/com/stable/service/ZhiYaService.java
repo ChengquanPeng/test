@@ -117,7 +117,7 @@ public class ZhiYaService {
 				}
 
 			} catch (Exception e) {
-				MsgPushServer.pushSystem1("质押抓包异常:" + code);
+				MsgPushServer.pushToSystem("质押抓包异常:" + code);
 				ErrorLogFileUitl.writeError(e, "质押", "", "");
 			}
 		}

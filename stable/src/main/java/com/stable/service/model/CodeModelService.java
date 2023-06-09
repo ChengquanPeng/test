@@ -112,7 +112,7 @@ public class CodeModelService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			ErrorLogFileUitl.writeError(e, "CodeModel模型运行异常", "", "");
-			MsgPushServer.pushSystem1("CodeModel模型运行异常..");
+			MsgPushServer.pushToSystem("CodeModel模型运行异常..");
 		}
 	}
 
@@ -160,13 +160,13 @@ public class CodeModelService {
 		}
 		log.info("CodeModel v2 模型执行完成");
 		if (sbc.length() > 0) {
-			MsgPushServer.pushSystemT1("人工pls==1已到期:", sbc.toString());
+			MsgPushServer.pushToSystem("人工pls==1已到期:", sbc.toString());
 		}
 		if (xddz.length() > 0) {
-			MsgPushServer.pushSystemT1("最新标小-大宗:", xddz.toString());
+			MsgPushServer.pushToSystem("最新标小-大宗:", xddz.toString());
 		}
 		if (xdjc.length() > 0) {
-			MsgPushServer.pushSystemT1("最新标小-减持:", xdjc.toString());
+			MsgPushServer.pushToSystem("最新标小-减持:", xdjc.toString());
 		}
 		if (yjm1.length() > 0 || yjm2.length() > 0) {
 			String mt = "";
@@ -176,7 +176,7 @@ public class CodeModelService {
 			if (yjm2.length() > 0) {
 				mt += "<br/> 疑似扣非业绩大牛:" + yjm2.toString();
 			}
-			MsgPushServer.pushSystemHtmlT2("扣非业绩大牛(最好是小票)", mt);
+			MsgPushServer.pushHtmlToSystem("扣非业绩大牛(最好是小票)", mt);
 		}
 	}
 

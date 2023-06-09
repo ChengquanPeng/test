@@ -78,7 +78,7 @@ public class ThsAnnSpider {
 						log.info("org:" + org);
 						// log.info("UnicodeToCN:" + UnicodeToCN);
 						fetched = true;
-						MsgPushServer.pushSystem1("同花顺-抓包公告出错-抓包出错code=" + code + ",url=" + url);
+						MsgPushServer.pushToSystem("同花顺-抓包公告出错-抓包出错code=" + code + ",url=" + url);
 					}
 				} finally {
 				}
