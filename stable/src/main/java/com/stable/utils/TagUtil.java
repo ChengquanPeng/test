@@ -124,21 +124,24 @@ public class TagUtil {
 			}
 
 		} else if (dh.getShooting7() > 0) {
-			s += "标小模式" + splitor;
+			s += "标小模式";
 		} else if (dh.getShooting9() > 0) {
-			s += "普小" + splitor;
+			s += "普小";
+		}
+		if (dh.getShooting1() > 0 || dh.getShooting6() > 0) {
+			if (dh.getShooting1() > 0) {
+				s += "-大宗-占流通筹码超5%";
+			}
+			if (dh.getShooting6() > 0) {
+				s += "-减持";
+			}
+		}
+		s += splitor;
+		if (dh.getShooting8() > 0) {
+			s += "标小定增-" + dh.getZfjjupStable() + "年未涨" + splitor;
 		}
 		if (dh.getShooting2() > 0) {
 			s += "拉升定增-大额|国资，拿筹洗盘动作?" + splitor;
-		}
-		if (dh.getShooting1() > 0) {
-			s += "大宗-占流通筹码超5%" + splitor;
-		}
-		if (dh.getShooting6() > 0) {
-			s += "减持" + splitor;
-		}
-		if (dh.getShooting8() > 0) {
-			s += "标小定增-" + dh.getZfjjupStable() + "年未涨" + splitor;
 		}
 		if (dh.getShooting4() > 0) {
 			s += "人数大幅减少" + dh.getHolderNum() + "%" + splitor;
