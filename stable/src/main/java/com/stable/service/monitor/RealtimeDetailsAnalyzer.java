@@ -219,7 +219,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 		String wxTitle = title2;
 		String tmp = TagUtil.warningXiaopiaoGdrs(rtm.base);
 		if (!tmp.equals("")) {
-			mailTitle = tmp + title2;
+			mailTitle = TagUtil.gdrsChao5_wx + title2;
 			wxTitle = TagUtil.gdrsChao5_wx + title2;
 		}
 		return rtm.bizPushService.pushS2ForTradeTime(mailTitle, wxTitle, getBaseInfo());

@@ -339,7 +339,7 @@ public class CodeModelService {
 						log.info("{} 小票,底部大宗超4.5%", code);
 					}
 
-					// 行情指标8：底部小票减持-业绩不能亏
+					// 行情指标6：底部小票减持-业绩不能亏
 					if (newOne.getReducZb() >= 2 && newOne.getFinOK() >= 1) {
 						log.info("{} 小票,减持%", code);
 						isOk6 = true;

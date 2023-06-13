@@ -289,6 +289,7 @@ public class WebModelService {
 			double rzrq1 = Double.valueOf(mr.getRzrq1());
 			if (rzrq1 > 0) {
 				bqb.must(QueryBuilders.rangeQuery("rzrqRate").lte(rzrq1));
+				bqb.must(QueryBuilders.rangeQuery("rzrqRate").gte(1));
 			}
 		}
 		if (StringUtils.isNotBlank(mr.getRzrq2())) {

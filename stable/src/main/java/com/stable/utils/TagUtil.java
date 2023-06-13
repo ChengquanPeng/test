@@ -132,20 +132,20 @@ public class TagUtil {
 			s += "拉升定增-大额|国资，拿筹洗盘动作?" + splitor;
 		}
 		if (dh.getShooting1() > 0) {
-			s += "标小大宗-占流通筹码超5%" + splitor;
+			s += "大宗-占流通筹码超5%" + splitor;
 		}
 		if (dh.getShooting6() > 0) {
-			s += "标小减持" + splitor;
+			s += "减持" + splitor;
 		}
 		if (dh.getShooting8() > 0) {
 			s += "标小定增-" + dh.getZfjjupStable() + "年未涨" + splitor;
 		}
 		if (dh.getShooting4() > 0) {
-			s += "股东人数大幅减少" + dh.getHolderNum() + "%" + splitor;
+			s += "人数大幅减少" + dh.getHolderNum() + "%" + splitor;
 		}
 		// --短线--
 		if (dh.getShooting3() > 0) {
-			s += "融资余额飙升-主力融资买入?" + splitor;
+			s += "融资飙升-主力融资买入?" + splitor;
 		}
 		if (dh.getShooting5() > 0) {
 			s += "股价极速拉升:妖股?龙抬头?(短线2)" + splitor;
@@ -406,7 +406,7 @@ public class TagUtil {
 		return sb5.toString();
 	}
 
-	private static String gdrsChao5_base = "股东人数过多";
+	private static String gdrsChao5_base = "散户多";
 	private static final String gdrsChao5_mail = "<span style='background-color:red;'>" + gdrsChao5_base + "</span>";
 	public static final String gdrsChao5_wx = "[" + gdrsChao5_base + "]";
 
