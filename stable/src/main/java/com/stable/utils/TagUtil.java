@@ -203,10 +203,10 @@ public class TagUtil {
 			tag.append("N型:").append(dh.getNxipanHist()).append(Constant.HTML_LINE);
 		}
 		if (dh.getDibuQixing() > 0) {
-			tag.append("大7").append(dh.getDibuQixing()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
+			tag.append("大7:").append(dh.getDibuQixing()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
 		}
 		if (dh.getDibuQixing2() > 0) {
-			tag.append("小7").append(dh.getDibuQixing2()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
+			tag.append("小7:").append(dh.getDibuQixing2()).append(dh.getQixingStr()).append(Constant.HTML_LINE);
 		}
 		if (dh.getXipan() > 0) {
 			tag.append("v1洗盘:").append(dh.getXipan()).append(",").append(dh.getXipanHist()).append(Constant.HTML_LINE);

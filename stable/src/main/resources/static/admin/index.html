@@ -58,7 +58,7 @@
 					type="text" id="financeInc" placeholder="连续N年" class="inputtext1" />
 			</div>
 			<div class="mg">
-				国企:<input type="checkbox" id="compnayType" />&nbsp;&nbsp; 几年未涨&gt;=<input
+				国资:<input type="checkbox" id="compnayType" />&nbsp;&nbsp; 几年未涨&gt;=<input
 					type="text" id="zfjjup" placeholder="数字" class="inputtext1" />&nbsp;&nbsp;
 				几年未涨stable&gt;=<input type="text" id="zfjjupStable"
 					class="inputtext1" placeholder="算法偏严" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -437,13 +437,12 @@
 												var v = value
 														+ "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+row.code+"/event.html#stockpage'>大事提醒</a>";
 												v += "&nbsp;&nbsp;<a target='_blank' href='/web/chips/reduce/list?code="
-														+ row.code
-														+ "'>减持历史</a>";
+														+ row.code + "'>减持</a>";
 												v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/dzjy/detail/"+row.code+".html'>大宗</a>";
 												v += "&nbsp;&nbsp;<a target='_blank' href='/web/comon/zengFa.html?code="
 														+ row.code
 														+ "&ustr="
-														+ ustr + "'>定增历史</a>";
+														+ ustr + "'>定增</a>";
 												if (row.shooting3 == 1
 														|| row.rzrqRate > 0) {
 													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资</a>";
@@ -460,7 +459,7 @@
 														+ ustr
 														+ "/addMonitor.html?code="
 														+ row.code
-														+ "'>更改监听</a>"
+														+ "'>监听</a>"
 														+ "&nbsp;&nbsp;<a target='_blank' href='/web/"
 														+ ustr
 														+ "/manual.html?code="
