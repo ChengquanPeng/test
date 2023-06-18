@@ -85,7 +85,10 @@ public class EastmoneyZytjSpider2 {
 						zyd.setTotalRatio(data.getDouble("PF_TSR"));// 占总股本比例
 					} catch (Exception e) {
 					}
-					zyd.setClosePrice(data.getDouble("CLOSE_FORWARD_ADJPRICE"));// 质押日收盘价(元)
+					try {
+						zyd.setClosePrice(data.getDouble("CLOSE_FORWARD_ADJPRICE"));// 质押日收盘价(元)
+					} catch (Exception e) {
+					}
 					try {
 						zyd.setOpenline(data.getDouble("OPENLINE"));// 预估平仓线
 					} catch (Exception e) {
