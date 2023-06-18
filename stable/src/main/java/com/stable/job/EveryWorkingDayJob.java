@@ -22,7 +22,6 @@ public class EveryWorkingDayJob extends MySimpleJob {
 
 	public synchronized void start() {
 		line1();
-		log.info("EveryWorkingDayJob end");
 	}
 
 //	@javax.annotation.PostConstruct
@@ -60,6 +59,8 @@ public class EveryWorkingDayJob extends MySimpleJob {
 
 	@Override
 	public void myexecute(ShardingContext sc) {
+		log.info("EveryWorkingDayJob start");
 		start();
+		log.info("EveryWorkingDayJob end");
 	}
 }

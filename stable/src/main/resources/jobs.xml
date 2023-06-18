@@ -38,8 +38,8 @@
 
 	<job:simple id="EveryWorkingDayJob"
 		class="com.stable.job.EveryWorkingDayJob"
-		registry-center-ref="regCenter" cron="0 01 18 ? * 2,3,4,5,6 *"
-		sharding-item-parameters="0=a" description="每周一到周五18点01(股票列表-日K-分时)"
+		registry-center-ref="regCenter" cron="0 45 15 ? * 2,3,4,5,6 *"
+		sharding-item-parameters="0=a" description="每周一到周五15点45(股票列表-日K-分时)"
 		sharding-total-count="1" overwrite="true" />
 
 	<job:simple id="EveryDayJob"
