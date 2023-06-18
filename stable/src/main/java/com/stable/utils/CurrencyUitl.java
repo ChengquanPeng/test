@@ -111,25 +111,6 @@ public class CurrencyUitl {
 		return l;
 	}
 
-	// 3%
-	public final static double topPrice3p(double preClosedPrice) {
-		preClosedPrice = preClosedPrice * 1.03;
-		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
-				.doubleValue();
-		return result;
-	}
-
-	/**
-	 * 涨停价格3
-	 */
-	public final static double topPrice(double preClosedPrice, boolean isST) {
-		if (isST) {
-			return topPriceN(preClosedPrice, 1.05);
-		} else {
-			return topPriceN(preClosedPrice, 1.105);
-		}
-	}
-
 	/**
 	 * 跌停价格
 	 */
@@ -142,6 +123,22 @@ public class CurrencyUitl {
 		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
 				.doubleValue();
 		return result;
+	}
+
+	// 3%
+	public final static double topPrice3p(double preClosedPrice) {
+		preClosedPrice = preClosedPrice * 1.03;
+		double result = new BigDecimal(new Double(preClosedPrice).toString()).setScale(2, BigDecimal.ROUND_HALF_UP)
+				.doubleValue();
+		return result;
+	}
+
+	public final static double topPrice(double preClosedPrice, boolean isST) {
+		if (isST) {
+			return topPriceN(preClosedPrice, 1.05);
+		} else {
+			return topPriceN(preClosedPrice, 1.10);
+		}
 	}
 
 	public final static double topPrice20(double preClosedPrice) {
