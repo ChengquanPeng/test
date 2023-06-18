@@ -818,7 +818,6 @@ public class FinanceService {
 
 	public void fetchFinances() {
 		int tradeDate = DateUtil.getTodayIntYYYYMMDD();
-		int pre6month = DateUtil.getPre6MONTH(tradeDate);
 		int pre1Year = DateUtil.getPreYear(tradeDate);
 		log.info("同步财务报告报告[started]");
 		List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
@@ -829,7 +828,7 @@ public class FinanceService {
 		for (int i = 0; i < list.size(); i++) {
 			StockBaseInfo s = list.get(i);
 			try {
-				if (spiderFinaceHistoryInfo(s.getCode(), rl, s.getDfcwCompnayType(), pre6month, i)) {
+				if (spiderFinaceHistoryInfo(s.getCode(), rl, s.getDfcwCompnayType(), pre1Year, i)) {
 					cnt++;
 				}
 			} catch (Exception e) {
