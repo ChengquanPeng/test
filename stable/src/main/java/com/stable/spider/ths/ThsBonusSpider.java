@@ -208,6 +208,7 @@ public class ThsBonusSpider {
 						}
 					}
 				} catch (Exception e) {
+					log.info("code=1=" + code);
 					e.printStackTrace();
 				}
 
@@ -222,7 +223,7 @@ public class ThsBonusSpider {
 							String rptYear = tds.next().asText();// 报告期
 							String rptDate = tds.next().asText();// 董事会日期
 							tds.next();// 股东大会预案公告日期
-							tds.next();// 实施公告日
+							String impldate = tds.next().asText();// 实施公告日
 							String detail = tds.next().asText();// 分红方案说明
 							String bookDate = tds.next().asText();// A股股权登记日
 							String dividendDate = tds.next().asText();// A股除权除息日
@@ -239,7 +240,11 @@ public class ThsBonusSpider {
 									bh.setBonusYes(1);
 								}
 								getYear(bh);
-								bh.setRptDate(DateUtil.convertDate2(rptDate.trim()));
+								try {
+									bh.setRptDate(DateUtil.convertDate2(rptDate.trim()));
+								} catch (Exception e) {
+									bh.setRptDate(DateUtil.convertDate2(impldate.trim()));
+								}
 								bh.setDetail(detail.trim());
 								bh.setId(code + bh.getRptDate());
 								try {
@@ -260,11 +265,13 @@ public class ThsBonusSpider {
 								bhl.add(bh);
 							}
 						} catch (Exception e) {
+							log.info("code=2=" + code);
 							e.printStackTrace();
 						}
 					}
 
 				} catch (Exception e) {
+					log.info("code=3=" + code);
 					e.printStackTrace();
 				}
 				// System.err.println(body.asText());
@@ -345,7 +352,7 @@ public class ThsBonusSpider {
 								String s4 = tr3.getLastElementChild().asText().replaceAll(" ", "").split("：")[1];
 								zf.setZjhDate(DateUtil.convertDate2(s4));
 							} catch (Exception e) {
-								// e.printStackTrace();
+//								 e.printStackTrace();
 							}
 							tr.next();// 预案发行价格&发审委公告日
 							tr.next();// 预案发行数量&股东大会公告日
@@ -410,6 +417,7 @@ public class ThsBonusSpider {
 //				System.err.println(fh.toString());
 					fhl.add(fh);
 				} catch (Exception e) {
+					log.info("code=5=" + code);
 					e.printStackTrace();
 				}
 				return;
