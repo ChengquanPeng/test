@@ -27,10 +27,6 @@ public class ImageUtil extends ApplicationFrame {
 	private static final int width = 1024;
 	private static final int height = 512;
 
-	public static void main(String[] args) {
-
-	}
-
 	public static void generateImages(String filePath, List<ImageData> data) {
 		new ImageUtil(filePath, data);
 	}

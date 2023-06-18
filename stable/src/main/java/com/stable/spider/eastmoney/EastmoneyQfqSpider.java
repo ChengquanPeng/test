@@ -109,7 +109,15 @@ public class EastmoneyQfqSpider {
 	public static void main(String[] args) {
 //		String code = "000001";
 		String code = "603336";
-		List<TradeHistInfoDaliyNofq> l = getWithOutfq(code);
+		List<TradeHistInfoDaliy> l = getQfq(code);
 		System.err.println(l.get(l.size() - 1));
+		int i = 0;
+		for (TradeHistInfoDaliy td : l) {
+			System.err.println(td);
+			i++;
+			if (i > 10) {
+				break;
+			}
+		}
 	}
 }

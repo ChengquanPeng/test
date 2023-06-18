@@ -362,6 +362,27 @@ public class DateUtil {
 		return Integer.valueOf(formatYYYYMMDD(py));
 	}
 
+	public static boolean isWeekend(int yyyyMMdd) {
+		return isWeekend(parseDate(yyyyMMdd));
+	}
+
+	public static boolean isWeekend(Date date) {
+		// 创建Calendar类实例
+		Calendar instance = Calendar.getInstance();
+		// 根据指定日期获取周几
+		instance.setTime(date);
+		// 因为数组下标从0开始，而返回的是数组的内容，是数组{1,2,3,4,5,6,7}中用1~7来表示
+		int week = instance.get(Calendar.DAY_OF_WEEK);
+		// 周日的编号是1，周六的编号是7
+		if (week == Calendar.SUNDAY || week == Calendar.SATURDAY) {
+			// 是周六日返回true
+			return true;
+		} else {
+			// 不是周六日返回false
+			return false;
+		}
+	}
+
 	public static void main(String[] args) {
 //		System.err.println(getNext2Year(20200501));
 //		System.err.println(getPre2Year(20200421));

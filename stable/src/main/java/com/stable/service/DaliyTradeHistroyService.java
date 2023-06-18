@@ -30,6 +30,7 @@ import com.stable.enums.RunLogBizTypeEnum;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyDao;
 import com.stable.es.dao.base.EsTradeHistInfoDaliyNofqDao;
 import com.stable.job.MyCallable;
+import com.stable.spider.eastmoney.EastmoneyQfqSpider;
 import com.stable.spider.xq.DailyFetch;
 import com.stable.utils.CandlesTickChart;
 import com.stable.utils.CurrencyUitl;
@@ -421,21 +422,39 @@ public class DaliyTradeHistroyService {
 		return queryLastfq(code, 0);
 	}
 
+	public static void main(String[] args) {
+		new DaliyTradeHistroyService().imagesLocal();
+	}
+
 //	@javax.annotation.PostConstruct
-	public void genImgStart() {
-		String code = "603797";
-		int days = 3;
-		String filePath = "E:/" + code + ".jpg";
-		images(code, DateUtil.getTodayIntYYYYMMDD(), days, filePath);
+	public void imagesLocal() {
+		String code = "300154";
+		int days = 5;
+		String filePath = "C:/Users/roy/Desktop/" + code + ".jpg";
+		List<TradeHistInfoDaliy> all = EastmoneyQfqSpider.getQfq(code);
+		List<TradeHistInfoDaliy> t = new LinkedList<>();
+		int i = 0;
+		for (int j = all.size() - 1; j > 0; j--) {
+			TradeHistInfoDaliy td = all.get(j);
+			// System.err.println(td);
+			t.add(td);
+			i++;
+			if (i >= 120) {
+				break;
+			}
+		}
+		images(code, code, DateUtil.getTodayIntYYYYMMDD(), days, filePath, t);
 		System.exit(0);
 	}
 
-	public void images(String code, int endDate, int days, String filePath) {
-		try {
-			// String filePath = "E:/" + code + ".jpg";
-			List<TradeHistInfoDaliy> t = this.queryListByCodeQfq(code, 0, endDate, EsQueryPageUtil.queryPage120,
-					SortOrder.DESC);
+	public void imagesServer(String code, int endDate, int days, String filePath) {
+		List<TradeHistInfoDaliy> t = this.queryListByCodeQfq(code, 0, endDate, EsQueryPageUtil.queryPage120,
+				SortOrder.DESC);
+		images(code, stockBasicService.getCodeName2(code), endDate, days, filePath, t);
+	}
 
+	private void images(String code, String title, int endDate, int days, String filePath, List<TradeHistInfoDaliy> t) {
+		try {
 			List<TradeHistInfoDaliy> bars = new LinkedList<TradeHistInfoDaliy>();
 			bars.addAll(t);
 
@@ -464,7 +483,14 @@ public class DaliyTradeHistroyService {
 				TradeHistInfoDaliy la = bars.get(0);
 				TradeHistInfoDaliy id = new TradeHistInfoDaliy();
 
-				id.setDate(DateUtil.addDate(la.getDate(), 1));
+				int tmp2 = DateUtil.addDate(la.getDate(), 1);
+				if (DateUtil.isWeekend(tmp2)) {
+					tmp2 = DateUtil.addDate(tmp2, 1);
+				}
+				if (DateUtil.isWeekend(tmp2)) {
+					tmp2 = DateUtil.addDate(tmp2, 1);
+				}
+				id.setDate(tmp2);
 				id.setOpen(la.getClosed());
 				id.setClosed(CurrencyUitl.topPrice(la.getClosed(), false));
 				id.setHigh(id.getClosed());
@@ -474,7 +500,7 @@ public class DaliyTradeHistroyService {
 				System.err.println(id);
 			}
 			// 有两根重叠的现象是因为交易日期的问题。
-			CandlesTickChart.strt(filePath, stockBasicService.getCodeName2(code), bars, allNonTradedays);
+			CandlesTickChart.strt(filePath, title, bars, allNonTradedays);
 			// ImageUtil.generateImages(filePath, data);
 			// System.exit(0);
 		} catch (Exception e) {

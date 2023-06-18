@@ -218,7 +218,7 @@ public class CodeController {
 			if (StringUtils.isNotBlank(endDate)) {
 				date = Integer.valueOf(endDate);
 			}
-			daliyTradeHistroyService.images(code, date, days, filepath);
+			daliyTradeHistroyService.imagesServer(code, date, days, filepath);
 			isOk = true;
 		} catch (Exception e) {
 			e.printStackTrace();
