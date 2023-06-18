@@ -7,6 +7,7 @@ import com.dangdang.ddframe.job.api.ShardingContext;
 import com.stable.service.FinanceService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.CodeModelService;
+import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.utils.ThreadsUtil;
 
 import lombok.extern.log4j.Log4j2;
@@ -42,5 +43,6 @@ public class EveryWeekMonJob extends MySimpleJob {
 
 		log.info("同步股票报告及模型相关");
 		financeService.byJob();
+		MsgPushServer.pushToSystem("周日任务已完成调用");
 	}
 }
