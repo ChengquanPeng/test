@@ -77,7 +77,7 @@ public class TradeHistroyController {
 	}
 
 	/**
-	 * 获取（前复权）日交易(任务job缓存)
+	 * 获取（前复权）日交易(任务job失败)
 	 */
 	@RequestMapping(value = "/qfq/fetchall", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> fetchall() {
