@@ -124,6 +124,11 @@ public class RunModelService {
 	}
 
 	public void printModelHtml() {
+		// 十字星
+		ModelReq mr2 = new ModelReq();
+		mr2.setZyxing(1);
+		mr2.setPls(3);
+		List<CodeBaseModel2> genListTe = webModelService.getList(mr2, EsQueryPageUtil.queryPage9999);
 		// 大旗形
 		ModelReq mr = new ModelReq();
 		mr.setDibuqixing(1);//
@@ -134,11 +139,6 @@ public class RunModelService {
 		mr22.setDibuqixing2(1);
 		mr22.setPls(3);
 		List<CodeBaseModel2> xqx = webModelService.getList(mr22, EsQueryPageUtil.queryPage9999);
-		// 十字星
-		ModelReq mr2 = new ModelReq();
-		mr2.setZyxing(1);
-		mr2.setPls(3);
-		List<CodeBaseModel2> genListTe = webModelService.getList(mr2, EsQueryPageUtil.queryPage9999);
 		// V1-洗盘
 		ModelReq mr3 = new ModelReq();
 		mr3.setXipan(1);
@@ -150,72 +150,21 @@ public class RunModelService {
 		mr4.setPls(3);
 		List<CodeBaseModel2> nxp = webModelService.getList(mr4, EsQueryPageUtil.queryPage9999);
 
+		if (genListTe == null) {
+			genListTe = new LinkedList<>();
+		}
+		if (nxp == null) {
+			nxp = new LinkedList<>();
+		}
 		if (dqx == null) {
 			dqx = new LinkedList<>();
 		}
 		if (xqx == null) {
 			xqx = new LinkedList<>();
 		}
-		if (genListTe == null) {
-			genListTe = new LinkedList<>();
-		}
 		if (xp == null) {
 			xp = new LinkedList<>();
 		}
-		if (nxp == null) {
-			nxp = new LinkedList<>();
-		}
-
-		printHtml(dqx, xqx, genListTe, xp, nxp);
-	}
-
-	public void printOnlineHtml(List<OnlineMsg> list) {
-		String htmlnamet = "online.html";
-		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
-		StringBuffer sb = new StringBuffer();
-		// 更新时间
-		sb.append("<div>在线监听-更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("</div>");
-		// table
-		sb.append("<br/><table border='1' cellspacing='0' cellpadding='0'>");
-		// head
-		sb.append("<tr><th>序号</th><th>代码</th><th>推送消息</th><th>涨幅</th><th>股价</th></tr>");
-		int size = list.size();
-		if (size > 0) {
-			for (int j = 0; j < size; j++) {
-				OnlineMsg om = list.get(j);
-				String code = om.getCode();
-				RealTime rt = RealtimeCall.get(code);
-				sb.append("<tr><td>").append(om.getIndex()).append("</td>");
-				sb.append("<td>").append(stockBasicService.getCodeName2(code)).append("</td>");
-				sb.append("<td>").append(om.getTitle()).append("</td>");
-				sb.append("<td>").append(CurrencyUitl.cutProfit(rt.getYesterday(), rt.getNow())).append("%</td>");
-				sb.append("<td>").append(rt.getNow()).append("</td></tr>");
-			}
-		} else {
-			sb.append("<tr><td>无数据...</td></tr>");
-		}
-		sb.append("</table>");// end
-		fw.writeLine(sb.toString());
-		fw.close();
-	}
-
-	private void printHtml(List<CodeBaseModel2> dqx, List<CodeBaseModel2> xqx, List<CodeBaseModel2> genListTe,
-			List<CodeBaseModel2> xp, List<CodeBaseModel2> nxp) {
-		String htmlnamet = "qf.html";
-		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
-		StringBuffer sb = new StringBuffer();
-		// 更新时间
-		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("，<br/>特别十字星：人工,大宗,大票定增,做小做底+业绩不错")
-				.append("<br/>确：大宗超5%，标小-大宗，标小-减持").append("<br/>十字星：K线形态，前期有洗盘[002752]，或者阴跌后[山东路桥，中国化学]</div>");
-		// table
-		sb.append("<br/><table border='1' cellspacing='0' cellpadding='0'>");
-		// head
-		sb.append(
-				"<tr><th>序号</th><th>简称-代码</th><th>逻辑模型</th><th>底部类型</th><th>K线形态</th><th>特征</th><th>买点</th><th>备注</th><th>板块概念</th></tr>");
-		fw.writeLine(sb.toString());
-		sb = new StringBuffer();
-		sb.append(this.getHtml(genListTe, true));
-		fw.writeLine(sb.toString());
 
 		List<CodeBaseModel2> ren = new LinkedList<CodeBaseModel2>();// 人工
 		List<CodeBaseModel2> dq = new LinkedList<CodeBaseModel2>();// 大旗形
@@ -250,22 +199,74 @@ public class RunModelService {
 				other.add(c);
 			}
 		}
-		all.addAll(ren);
-		all.addAll(dq);
-		all.addAll(xq);
-		all.addAll(dapiao);
-		all.addAll(other);
+		add(all, ren);
+		add(all, nxp);
+		add(all, dq);
+		add(all, xq);
+		add(all, xp);
+		add(all, dapiao);
+		add(all, other);
 
+		printHtml(genListTe, all);
+	}
+
+	private void add(List<CodeBaseModel2> all, List<CodeBaseModel2> sub) {
+		for (CodeBaseModel2 c : sub) {
+			if (!all.contains(c)) {
+				all.add(c);
+			}
+		}
+	}
+
+	public void printOnlineHtml(List<OnlineMsg> list) {
+		String htmlnamet = "online.html";
+		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
+		StringBuffer sb = new StringBuffer();
+		// 更新时间
+		sb.append("<div>在线监听-更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("</div>");
+		// table
+		sb.append("<br/><table border='1' cellspacing='0' cellpadding='0'>");
+		// head
+		sb.append("<tr><th>序号</th><th>代码</th><th>推送消息</th><th>涨幅</th><th>股价</th></tr>");
+		int size = list.size();
+		if (size > 0) {
+			for (int j = 0; j < size; j++) {
+				OnlineMsg om = list.get(j);
+				String code = om.getCode();
+				RealTime rt = RealtimeCall.get(code);
+				sb.append("<tr><td>").append(om.getIndex()).append("</td>");
+				sb.append("<td>").append(stockBasicService.getCodeName2(code)).append("</td>");
+				sb.append("<td>").append(om.getTitle()).append("</td>");
+				sb.append("<td>").append(CurrencyUitl.cutProfit(rt.getYesterday(), rt.getNow())).append("%</td>");
+				sb.append("<td>").append(rt.getNow()).append("</td></tr>");
+			}
+		} else {
+			sb.append("<tr><td>无数据...</td></tr>");
+		}
+		sb.append("</table>");// end
+		fw.writeLine(sb.toString());
+		fw.close();
+	}
+
+	private void printHtml(List<CodeBaseModel2> genListTe, List<CodeBaseModel2> all) {
+		String htmlnamet = "qf.html";
+		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
+		StringBuffer sb = new StringBuffer();
+		// 更新时间
+		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("，<br/>特别十字星：人工,大宗,大票定增,做小做底+业绩不错")
+				.append("<br/>确：大宗超5%，标小-大宗，标小-减持").append("<br/>十字星：K线形态，前期有洗盘[002752]，或者阴跌后[山东路桥，中国化学]</div>");
+		// table
+		sb.append("<br/><table border='1' cellspacing='0' cellpadding='0'>");
+		// head
+		sb.append(
+				"<tr><th>序号</th><th>简称-代码</th><th>逻辑模型</th><th>底部类型</th><th>K线形态</th><th>特征</th><th>买点</th><th>备注</th><th>板块概念</th></tr>");
+		fw.writeLine(sb.toString());
 		sb = new StringBuffer();
-		sb.append(this.getHtml(nxp, false));// N型洗盘
+		sb.append(this.getHtml(genListTe, true));// 特别十字星
 		fw.writeLine(sb.toString());
 
 		sb = new StringBuffer();
-		sb.append(this.getHtml(all, false));// 其他
-		fw.writeLine(sb.toString());
-
-		sb = new StringBuffer();
-		sb.append(this.getHtml(xp, false));// v1洗盘
+		sb.append(this.getHtml(all, false));// all:人工，大旗形，小旗形，v1洗盘，大票，其他
 		sb.append("</table>");// end
 		fw.writeLine(sb.toString());
 		fw.close();
@@ -288,10 +289,10 @@ public class RunModelService {
 				StockBaseInfo sbsb = stockBasicService.getCode(code);
 
 				// 序号
-				sb.append("<tr><td>").append(i + 1).append("</td>");
+				sb.append("<tr>").append(this.getSinaUrl(i + 1, code));
 
 				// 简称-代码
-				sb.append("<td><a target='_blank' href='/web/admin/manual.html?code=" + code
+				sb.append("<td><a target='_blank' href='/web/admin/manual.html?scf=qf&code=" + code
 						+ "#pls'><font color='black'>").append(sbsb.getName()).append("<br/>").append(code)
 						.append("</font>");
 				if (p1.getPls() == 1) {
@@ -370,7 +371,7 @@ public class RunModelService {
 				}
 				sb.append("<td>").append(line).append("</td>");
 				// 备注
-				sb.append("<td>").append(p1.getBuyRea()).append("</td>");
+				sb.append("<td>").append(p1.getBuyRea() == null ? "" : p1.getBuyRea()).append("</td>");
 				// 板块概念
 				sb.append("<td>").append(sbsb.getThsIndustry()).append("|")
 						.append(TagUtil.getGn(conceptService.getCodeConcept(code))).append("</td>");// CD2
@@ -397,7 +398,7 @@ public class RunModelService {
 				String code = p1.getCode();
 				StockBaseInfo sbsb = stockBasicService.getCode(code);
 				// 序号
-				sb.append("<tr><td>").append(i + 1).append("</td>");
+				sb.append("<tr>").append(this.getSinaUrl(i + 1, code));
 				// 简称-代码
 				sb.append("<td><a href='http://quote.eastmoney.com/" + EastmoneySpider.formatCode2(code)
 						+ ".html' target='_blank'>").append(sbsb.getName()).append("--").append(code)
@@ -451,5 +452,14 @@ public class RunModelService {
 			return true;
 		}
 		return false;
+	}
+
+	private String getSinaUrl(int index, String code) {
+		String t = "sz";
+		if (code.startsWith("6")) {
+			t = "sh";
+		}
+		return "<td><a target='_blank' href='https://finance.sina.com.cn/realstock/company/" + t + code + "/nc.shtml'>"
+				+ index + "</a></td>";
 	}
 }

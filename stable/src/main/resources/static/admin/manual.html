@@ -580,6 +580,12 @@ table {
 
 		$('#backtohome').attr("href", "/web/admin/index.html?code=" + qc);
 		$('#backtohome').html("返回主页:" + qc);
+		
+		var scf = getQueryVariable("scf");
+		if (scf) {
+			$("#pls").val(2);
+			$("#timemonth").val(30);
+		}
 	</script>
 </body>
 </html>
