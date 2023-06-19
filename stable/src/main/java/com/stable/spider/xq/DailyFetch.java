@@ -91,10 +91,9 @@ public class DailyFetch {
 	// 今日涨跌额
 	// 今日涨跌幅
 
-	public synchronized void fetchAllHushenCodes() {
+	public synchronized void fetchAllHushenCodes(String today) {
 		int date = DateUtil.getTodayIntYYYYMMDD();
 		int pre1Year = DateUtil.getPreYear(date);
-		String today = DateUtil.getTodayYYYYMMDD();
 		List<TradeHistInfoDaliy> list = new LinkedList<TradeHistInfoDaliy>();
 		List<TradeHistInfoDaliyNofq> listNofq = new LinkedList<TradeHistInfoDaliyNofq>();
 		List<DaliyBasicInfo2> daliybasicList = new LinkedList<DaliyBasicInfo2>();
@@ -411,7 +410,6 @@ public class DailyFetch {
 	public boolean spiderDaliyTradeHistoryInfoFromIPOCenter(String code, String today, int fortimes) {
 		priceLifeService.removePriceLifeCache(code);
 		if (spiderDaliyTradeHistoryInfoFromIPOEastMoney(code, fortimes)) {
-			redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, today);
 			return true;
 		}
 		throw new RuntimeException(code + " " + today + " 日交易获取前复权错误");
@@ -441,6 +439,8 @@ public class DailyFetch {
 			return spiderDaliyTradeHistoryInfoFromIPOEastMoney(code, fortimes);
 		} else {
 			esTradeHistInfoDaliyDao.saveAll(list);
+			String date = list.get(list.size() - 1).getDate() + "";
+			redisUtil.set(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + code, date);
 		}
 		return true;
 	}

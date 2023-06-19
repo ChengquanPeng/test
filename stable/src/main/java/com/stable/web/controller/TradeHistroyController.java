@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.DaliyTradeHistroyService;
+import com.stable.service.TradeCalService;
+import com.stable.utils.DateUtil;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
@@ -20,6 +22,8 @@ public class TradeHistroyController {
 	private DaliyTradeHistroyService tradeHistroyService;
 	@Autowired
 	private DaliyBasicHistroyService daliyBasicHistroyService;
+	@Autowired
+	private TradeCalService tradeCalService;
 
 	/**
 	 * 根据code重新获取历史记录-每日指标
@@ -76,10 +80,14 @@ public class TradeHistroyController {
 	 * 获取（前复权）日交易(任务job缓存)
 	 */
 	@RequestMapping(value = "/qfq/fetchall", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> fetchall(String date) {
+	public ResponseEntity<JsonResult> fetchall() {
 		JsonResult r = new JsonResult();
 		try {
-			tradeHistroyService.spiderTodayDaliyTrade(false, date);
+			int date = DateUtil.getTodayIntYYYYMMDD();
+			if (!tradeCalService.isOpen(date)) {
+				date = tradeCalService.getPretradeDate(date);
+			}
+			tradeHistroyService.spiderTodayDaliyTrade(false, date + "");
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());
@@ -93,10 +101,10 @@ public class TradeHistroyController {
 	 * 重新获取（前复权）日交易
 	 */
 	@RequestMapping(value = "/qfq/fetchallDirect", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> fetchallDirect(String date) {
+	public ResponseEntity<JsonResult> fetchallDirect() {
 		JsonResult r = new JsonResult();
 		try {
-			tradeHistroyService.spiderAllDirect(date);
+			tradeHistroyService.spiderAllDirect();
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setResult(e.getClass().getName() + ":" + e.getMessage());

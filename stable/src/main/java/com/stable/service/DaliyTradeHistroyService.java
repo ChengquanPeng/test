@@ -64,6 +64,8 @@ public class DaliyTradeHistroyService {
 	private PriceLifeService priceLifeService;
 	@Autowired
 	private DailyFetch dailyFetch;
+	@Autowired
+	private TradeCalService tradeCalService;
 
 	/**
 	 * 手动获取日交易记录（所有）
@@ -101,7 +103,7 @@ public class DaliyTradeHistroyService {
 
 	private synchronized int spiderTodayDaliyTrade(boolean isJob, String today, boolean warning) {
 		try {
-			dailyFetch.fetchAllHushenCodes();
+			dailyFetch.fetchAllHushenCodes(today);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return 0;
@@ -347,16 +349,20 @@ public class DaliyTradeHistroyService {
 	/**
 	 * 手动*全部历史
 	 */
-	public void spiderAllDirect(String date) {
-		TasksWorker.getInstance().getService().submit(
-				new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.MANUAL, "手动*全部历史,日交易,date=" + date) {
+	public void spiderAllDirect() {
+		TasksWorker.getInstance().getService()
+				.submit(new MyCallable(RunLogBizTypeEnum.TRADE_HISTROY, RunCycleEnum.MANUAL, "手动*全部历史,日交易,date=") {
 					public Object mycall() {
 						log.info("手动*全部历史,日交易[started]");
 						List<StockBaseInfo> list = stockBasicService.getAllOnStatusListWithSort();
 						for (StockBaseInfo s : list) {
 							redisUtil.del(RedisConstant.RDS_TRADE_HIST_LAST_DAY_ + s.getCode());
 						}
-						spiderTodayDaliyTrade(false, date);
+						int date = DateUtil.getTodayIntYYYYMMDD();
+						if (!tradeCalService.isOpen(date)) {
+							date = tradeCalService.getPretradeDate(date);
+						}
+						spiderTodayDaliyTrade(false, date + "");
 						log.info("手动*全部历史,日交易[end]");
 						return null;
 					}
@@ -428,7 +434,7 @@ public class DaliyTradeHistroyService {
 
 //	@javax.annotation.PostConstruct
 	public void imagesLocal() {
-		String code = "300154";
+		String code = "300414";
 		int days = 5;
 		String filePath = "C:/Users/roy/Desktop/" + code + ".jpg";
 		List<TradeHistInfoDaliy> all = EastmoneyQfqSpider.getQfq(code);
