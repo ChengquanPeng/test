@@ -199,9 +199,9 @@ public class RzrqSpider {
 			rzrq.setId();
 
 			rzrq.setBalance(data.getDouble("RZYE"));
-			rzrq.setMr(data.getDouble("RZMRE"));
-			rzrq.setMc(data.getDouble("RZCHE"));
-			rzrq.setJmr(data.getDouble("RZJME"));
+			// rzrq.setMr(data.getDouble("RZMRE"));
+			// rzrq.setMc(data.getDouble("RZCHE")); 卖出
+			// rzrq.setJmr(data.getDouble("RZJME"));
 
 			if (rzrq.getDate() >= endDate) {// 批处理，根据code获取历史的时候生效
 				list.add(rzrq);

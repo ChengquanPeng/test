@@ -24,12 +24,12 @@ public class RzrqDaliy extends EsBase {
 	private String code;
 	@Field(type = FieldType.Double)
 	private double balance;// 融资余额
-	@Field(type = FieldType.Double)
-	private double mr;// 买入额
-	@Field(type = FieldType.Double)
-	private double mc;// 买入额
-	@Field(type = FieldType.Double)
-	private double jmr;// 净买入
+//	@Field(type = FieldType.Double)
+//	private double mr;// 买入额
+//	@Field(type = FieldType.Double)
+//	private double mc;// 卖出额
+//	@Field(type = FieldType.Double)
+//	private double jmr;// 净买入
 
 	public void setId() {
 		id = code + date;
