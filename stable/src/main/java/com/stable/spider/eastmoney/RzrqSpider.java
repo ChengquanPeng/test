@@ -108,9 +108,7 @@ public class RzrqSpider {
 		for (String code : codes) {
 			CodeBaseModel2 cbm = histMap.get(code);
 			if (cbm == null) {
-				cbm = new CodeBaseModel2();
-				cbm.setId(code);
-				cbm.setCode(code);
+				continue;
 			}
 			cbm.setRzrqRate(0);
 
