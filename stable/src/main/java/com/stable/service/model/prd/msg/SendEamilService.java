@@ -75,7 +75,7 @@ public class SendEamilService implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		fromName = "底部炒家" + "<" + fromId + ">";
+		fromName = "严格操作" + "<" + fromId + ">";
 	}
 
 }
