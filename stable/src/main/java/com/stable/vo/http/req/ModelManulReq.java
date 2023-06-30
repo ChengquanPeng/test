@@ -8,4 +8,5 @@ public class ModelManulReq {
 	int pls;
 	int timemonth;
 	private String buyRea; // 买入理由
+	int dzjyBreaks;
 }

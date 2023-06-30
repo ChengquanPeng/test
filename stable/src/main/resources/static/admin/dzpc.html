@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>大宗排除标记</title>
+
+<!-- Bootstrap core CSS -->
+<link href="/web/libs/bootstrap/4.0/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="/web/libs/bootstrap/4.0/css/dashboard.css" rel="stylesheet">
+<style type="text/css">
+body {
+	margin: 0px;
+}
+
+.zhezhao {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	background: #000;
+	width: 100%;
+	height: 100%;
+	opacity: 0.5;
+}
+
+.tankuang {
+	position: relative;
+	background: #fff;
+	width: 30%;
+	height: 30%;
+	border-radius: 5px;
+	margin: 5% auto;
+}
+
+#header {
+	height: 40px;
+}
+
+#header-right {
+	position: absolute;
+	width: 25px;
+	height: 25px;
+	border-radius: 5px;
+	background: red;
+	color: #fff;
+	right: 5px;
+	top: 5px;
+	text-align: center;
+}
+
+.input-group {
+	margin-left: 120px;
+}
+
+table, table tr th, table tr td {
+	border: 1px solid #C0C0C0;
+}
+
+table {
+	min-height: 25px;
+	line-height: 25px;
+	text-align: left;
+	border-collapse: collapse;
+	padding: 1px;
+	font-size: 13px;
+}
+</style>
+</head>
+<body>
+	<div id="header"></div>
+	<div class="container-fluid">
+		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
+			<table>
+				<tr>
+					<td>代码</td>
+					<td><span id="code"></span>&nbsp;</td>
+				<tr>
+					<td>结果</td>
+					<td>人工：<select id="dzjyBreaks">
+							<option value="1">小票突然大宗--确定</option>
+							<option value="0">小票突然大宗--排除</option>
+					</select></td>
+				</tr>
+			</table>
+
+			<br />
+			<div class="input-group">
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button" id="queryAction"
+						onclick="dianwo()">提交</button>
+				</span>
+			</div>
+		</div>
+
+		<div id="rptList" style="width: 100%; hight: 100%; float: left；">
+			<table class="table table-hover" id="cusTable">
+			</table>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="/web/libs/js/jquery-3.1.1.slim.min.js"
+		integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/js/tether.min.js"
+		integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+		crossorigin="anonymous"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap.min.js"></script>
+	<script src="/web/libs/js/common.js"></script>
+	<script src="/web/libs/js/jquery.js"></script>
+	<script src="/web/libs/js/dashboard/index.js"></script>
+	<script src="/web/libs/bootstrap/4.0/js/bootstrap-table.js"></script>
+	<script src="/web/libs/js/dashboard/basedata.js"></script>
+	<script type="text/javascript">
+		addActiveHeaderMen("base_data");
+		$('#cusTable').bootstrapTable('destroy');
+	</script>
+	<script type="text/javascript">
+		function dianwo() {
+			$.ajax({
+				url : "/web/model/dzpc", //访问地址--action地址
+				type : "post", //提交方式
+				data : {
+					code : $('#code').html(),
+					dzjyBreaks : $('#dzjyBreaks').val()
+				}, //提交给服务器的数据
+				success : function(reData) { //回调函数的处理方式
+					if ("OK" == reData.status) {
+						alert("成功");
+						window.close();
+					} else {
+						alert("失败:" + reData.result);
+					}
+				}
+			});
+		}
+		var qc = getQueryVariable("code");
+		$('#code').html(qc);
+	</script>
+</body>
+</html>

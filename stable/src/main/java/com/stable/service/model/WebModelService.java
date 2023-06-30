@@ -236,6 +236,12 @@ public class WebModelService {
 		}
 	}
 
+	public void dapc(String code, int dzjyBreaks) {
+		CodeBaseModel2 model = getLastOneByCode2(code);
+		model.setDzjyBreaks(dzjyBreaks);
+		codeBaseModel2Dao.save(model);
+	}
+
 	public List<CodeBaseModel2> getList(ModelReq mr, EsQueryPageReq querypage) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		if (StringUtils.isNotBlank(mr.getCode())) {
@@ -332,6 +338,9 @@ public class WebModelService {
 				bqb.must(QueryBuilders.matchPhraseQuery("tagHighZyChance", 1));// 高质押机会
 			}
 		}
+		if (mr.getDzjyBreaks() > 0) {
+			bqb.must(QueryBuilders.matchPhraseQuery("dzjyBreaks", mr.getDzjyBreaks()));
+		}
 		if (mr.getShooting1() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting1", 1));
 		}
@@ -393,9 +402,6 @@ public class WebModelService {
 		}
 		if (mr.getZfself() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfself", 1));
-		}
-		if (mr.getDzjyRct() == 1) {
-			bqb.must(QueryBuilders.matchPhraseQuery("dzjyRct", 1));
 		}
 
 		if (mr.getZfbuy() == 1) {

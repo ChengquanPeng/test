@@ -24,7 +24,6 @@ public class ModelReq {
 	int tagIndex;
 
 	String zfPriceLow;
-	int dzjyRct;
 
 	int compnayType;
 
@@ -76,4 +75,5 @@ public class ModelReq {
 	int financeInc = 0;
 	int bossInc;
 	double bossVal = 0;
+	int dzjyBreaks = 0;
 }

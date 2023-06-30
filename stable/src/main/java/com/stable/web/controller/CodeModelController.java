@@ -104,13 +104,29 @@ public class CodeModelController {
 	}
 
 	/**
-	 * 人工
+	 * 人工-融资融券
 	 */
 	@RequestMapping(value = "/rzrqm")
 	public ResponseEntity<JsonResult> rzrqm(ModelManulReq r1) {
 		JsonResult r = new JsonResult();
 		try {
 			modelWebService.rzrqm(r1.getCode(), r1.getTimemonth());
+			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setStatus(JsonResult.FAIL);
+			r.setResult(e.getMessage());
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * 人工-小票突然大宗
+	 */
+	@RequestMapping(value = "/dzpc")
+	public ResponseEntity<JsonResult> dzjyBreaks(ModelManulReq r1) {
+		JsonResult r = new JsonResult();
+		try {
+			modelWebService.dapc(r1.getCode(), r1.getDzjyBreaks());
 			r.setStatus(JsonResult.OK);
 		} catch (Exception e) {
 			r.setStatus(JsonResult.FAIL);

@@ -137,6 +137,12 @@ public class TagUtil {
 			}
 		}
 		s += splitor;
+		if (dh.getDzjyBreaks() == 1) {
+			s += " [突然大宗]";
+		} else if (dh.getDzjyBreaks() == 2) {
+			s += " [突然大宗?]";
+		}
+		s += splitor;
 		if (dh.getShooting8() > 0) {
 			s += "标小定增-" + dh.getZfjjupStable() + "年未涨" + splitor;
 		}
@@ -386,11 +392,6 @@ public class TagUtil {
 		}
 		// 大宗
 		if (dh.getDzjy365d() > 0) {
-			if (dh.getDzjyBreaks() == 1) {
-				sb5.append(" [突然大宗]  ,");
-			} else if (dh.getDzjyBreaks() == 2) {
-				sb5.append(" [突然大宗?]  ,");
-			}
 			sb5.append("1年内大宗:").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WebModelService.WAN))
 					.append("(除5%占比:").append(dh.getDzjyp365d()).append("%,均价:").append(dh.getDzjyAvgPrice())
 					.append(")");
