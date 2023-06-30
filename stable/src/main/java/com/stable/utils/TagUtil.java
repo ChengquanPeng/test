@@ -386,12 +386,14 @@ public class TagUtil {
 		}
 		// 大宗
 		if (dh.getDzjy365d() > 0) {
+			if (dh.getDzjyBreaks() == 1) {
+				sb5.append(" [突然大宗]  ,");
+			} else if (dh.getDzjyBreaks() == 2) {
+				sb5.append(" [突然大宗?]  ,");
+			}
 			sb5.append("1年内大宗:").append(CurrencyUitl.covertToString(dh.getDzjy365d() * WebModelService.WAN))
 					.append("(除5%占比:").append(dh.getDzjyp365d()).append("%,均价:").append(dh.getDzjyAvgPrice())
 					.append(")");
-			if (dh.getTagDzPriceLow() > 0) {
-				sb5.append(",低于均价:").append(dh.getTagDzPriceLow()).append("%");
-			}
 			if (dh.getDzjy60d() > 0) {
 				sb5.append(",2月:").append(CurrencyUitl.covertToString(dh.getDzjy60d() * WebModelService.WAN))
 						.append("(").append(dh.getDzjyp60d()).append("%)");

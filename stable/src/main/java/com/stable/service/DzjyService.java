@@ -17,6 +17,7 @@ import com.stable.constant.EsQueryPageUtil;
 import com.stable.es.dao.base.DzjyDao;
 import com.stable.es.dao.base.DzjyYiTimeDao;
 import com.stable.utils.CurrencyUitl;
+import com.stable.utils.DateUtil;
 import com.stable.vo.bus.Dzjy;
 import com.stable.vo.bus.DzjyYiTime;
 import com.stable.vo.bus.StockBaseInfo;
@@ -114,6 +115,31 @@ public class DzjyService {
 			return page.getContent().get(0);
 		}
 		return new DzjyYiTime();
+	}
+
+	public boolean chkDzjyV2(String code, int chkDate) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("date").gte(chkDate));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).withSort(sort).build();
+
+		Page<Dzjy> page = dzjyDao.search(sq);
+		if (page != null && !page.isEmpty() && page.getContent().size() > 1) {
+
+			int date1 = 0;
+			int date2 = 0;
+			for (int i = 1; i < page.getContent().size(); i++) {
+				date1 = page.getContent().get(i - 1).getDate();
+				date2 = page.getContent().get(i).getDate();
+
+				if (DateUtil.differentDays(date1, date2) >= 360) {// 间隔一年
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }

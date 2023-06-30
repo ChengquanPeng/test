@@ -349,7 +349,8 @@ public class CodeModelService {
 		}
 		boolean db2 = TagUtil.isDibuSmall2(isSmallStock, newOne);// FinOK() > 0 && Zfjjup() >= 4 &&P5() > 45.0
 		// 底部大宗
-		if (db2 && newOne.getDzjyp365d() >= Constant.DZ_RATE) {
+		if (db2 && (newOne.getDzjyp365d() >= Constant.DZ_RATE
+				|| newOne.getDzjy365d() >= Constant.DZ_WARNING_LINE_YEAR)) {
 			isOk1 = true;
 		}
 		// 标准小票-大宗
@@ -548,12 +549,6 @@ public class CodeModelService {
 		newOne.setDzjy365d(dz.getTotalAmt());
 		newOne.setDzjyp365d(dz.getP365d());
 		newOne.setDzjyp60d(dz.getP60d());
-		// 低于大宗增发价
-		newOne.setTagDzPriceLow(0);
-		if (newOne.getDzjyRct() == 1 && dz.getAvgPrcie() > lastTrade.getClosed()) {
-			newOne.setTagDzPriceLow(
-					Double.valueOf(CurrencyUitl.cutProfit(lastTrade.getClosed(), dz.getAvgPrcie())).intValue());
-		}
 	}
 
 	private void holderNum(CodeBaseModel2 newOne) {

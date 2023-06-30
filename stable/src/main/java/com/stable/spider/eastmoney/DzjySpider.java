@@ -115,6 +115,7 @@ public class DzjySpider {
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 		ThreadsUtil.sleepRandomSecBetween15And30();
 		List<DzjyYiTime> l = new LinkedList<DzjyYiTime>();
+		int dzv2chk = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -720));// 24个月
 		int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));// 12个月
 		int startDate2 = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -60));// 2个月
 		for (StockBaseInfo s : codelist) {
@@ -123,12 +124,15 @@ public class DzjySpider {
 			l.add(t);
 
 			if (t.getDate() >= date // 代表有最新的交易大宗触发
-					&& (t.getTotalAmt60d() >= Constant.DZ_WARNING_LINE || t.getP365d() >= Constant.DZ_RATE)) {
+					&& (t.getTotalAmt() >= Constant.DZ_WARNING_LINE_YEAR || t.getP365d() >= Constant.DZ_RATE)) {
 				CodeBaseModel2 cbm = histMap.get(s.getCode());
 				if (cbm != null) {
 					boolean isSamll = codeModelService.isSmallStock(cbm.getMkv(), cbm.getActMkv());
 					if (TagUtil.stockRange(isSamll, cbm)) {
 						sb.append(stockBasicService.getCodeName2(s.getCode())).append(",");
+					}
+					if (cbm.getDzjyBreaks() == 0 && dzjyService.chkDzjyV2(cbm.getCode(), dzv2chk)) {
+						cbm.setDzjyBreaks(2);
 					}
 				}
 			}

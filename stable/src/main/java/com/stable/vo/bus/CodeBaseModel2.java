@@ -141,8 +141,6 @@ public class CodeBaseModel2 extends EsBase {
 	private long avgNum;// 除开5%股东的人均流通持股
 	@Field(type = FieldType.Integer)
 	private int holderDate;
-	@Field(type = FieldType.Integer)
-	private int dzjyRct = 0; // 最近1年大宗交易频繁
 	@Field(type = FieldType.Double)
 	private double dzjyAvgPrice = 0; // 最近1年大宗交易均价
 	@Field(type = FieldType.Double)
@@ -154,7 +152,7 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Double)
 	private double dzjyp365d;// 占比-60天
 	@Field(type = FieldType.Integer)
-	private int tagDzPriceLow = 0;// 低于大宗均价
+	private int dzjyBreaks = 0;// 是否突然大宗
 	// 增发和大宗情况
 	// 增发(最近的增发，包含正在增发）
 	@Field(type = FieldType.Integer)

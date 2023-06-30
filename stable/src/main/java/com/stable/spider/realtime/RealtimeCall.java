@@ -14,7 +14,7 @@ public class RealtimeCall {
 
 	public static int max = Integer.MAX_VALUE - 100000;
 
-	private static int getIndex() {
+	public static int getIndex() {
 		int i = index % 2;
 		index++;
 		if (index >= max) {// 并发问题会导致在index++越界
@@ -43,7 +43,7 @@ public class RealtimeCall {
 		return list.get(0).get(code);
 	}
 
-	private static RealTime getRealTimeCycle(String code) {
+	public static RealTime getRealTimeCycle(String code) {
 		for (int i = 0; i < list.size(); i++) {
 			RealTime rt = list.get(i).get(code);
 			if (rt != null) {
