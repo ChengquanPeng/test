@@ -70,7 +70,7 @@ public class DailyFetch {
 	private String BFH = "%";
 	private String DOL = "¥";
 	private String JIA = "+";
-	private String JIAN = "-";
+//	private String JIAN = "-";
 
 	private String F1 = "市盈率(静)";
 	private String F2 = "市盈率(动)";
@@ -291,8 +291,8 @@ public class DailyFetch {
 								if (s.split(SPLIT)[1].trim().equals(STOP_2)) {
 									HtmlElement stockChange = body
 											.getElementsByAttribute("div", "class", "stock-change").get(0);
-									String[] ss = stockChange.asText().trim().replace(JIA, "").replace(JIAN, "")
-											.replace(BFH, "").split(" ");
+									String[] ss = stockChange.asText().trim().replace(JIA, "").replace(BFH, "")
+											.split(" ");
 									td.setTodayChange(Double.valueOf(ss[0]));
 									td.setTodayChangeRate(Double.valueOf(ss[1]));
 
@@ -349,8 +349,7 @@ public class DailyFetch {
 				if (td.getClosed() > 0 && td.getHigh() > 0 && td.getLow() > 0 && td.getOpen() > 0) {
 					// 涨跌幅额
 					HtmlElement stockChange = body.getElementsByAttribute("div", "class", "stock-change").get(0);
-					String[] ss = stockChange.asText().trim().replace(JIA, "").replace(JIAN, "").replace(BFH, "")
-							.split(" ");
+					String[] ss = stockChange.asText().trim().replace(JIA, "").replace(BFH, "").split(" ");
 					td.setTodayChange(Double.valueOf(ss[0]));
 					td.setTodayChangeRate(Double.valueOf(ss[1]));
 					int qfqDate = Integer.valueOf(redisUtil.get(RedisConstant.RDS_DIVIDEND_LAST_DAY_ + code, "0"));
@@ -377,6 +376,7 @@ public class DailyFetch {
 				MsgPushServer.pushToSystem("雪球每日信息出错(pe,pe-ttm),code=" + code + ",url=" + url);
 			}
 		} while (!fetched);
+		log.info("{} 失败", code);
 		return null;// 失败
 	}
 
@@ -468,7 +468,7 @@ public class DailyFetch {
 	public static void main(String[] args) {
 		DailyFetch x = new DailyFetch();
 		x.htmlunitSpider = new HtmlunitSpider();
-		String code = "600242";
+		String code = "002113";
 		List<TradeHistInfoDaliy> listtd = new LinkedList<TradeHistInfoDaliy>();
 		List<TradeHistInfoDaliyNofq> listNofq = new LinkedList<TradeHistInfoDaliyNofq>();
 		List<DaliyBasicInfo2> daliybasicList = new LinkedList<DaliyBasicInfo2>();
