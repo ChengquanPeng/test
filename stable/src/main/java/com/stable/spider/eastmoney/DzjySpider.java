@@ -110,14 +110,16 @@ public class DzjySpider {
 		if (isWeek) {
 			date = tradeCalService.getPretradeDate(date);
 		}
+		Date t1 = new Date();
 		StringBuffer sb = new StringBuffer();
 		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithOutSort();
 		ThreadsUtil.sleepRandomSecBetween15And30();
 		List<DzjyYiTime> l = new LinkedList<DzjyYiTime>();
-		int dzv2chk = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -720));// 24个月
-		int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -370));// 12个月
-		int startDate2 = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -60));// 2个月
+		int dzv2chk2Y = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(t1, -720));// 24个月
+		int dzv2chk1Y = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(t1, -365));// 24个月
+		int startDate = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(t1, -370));// 12个月
+		int startDate2 = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(t1, -60));// 2个月
 		for (StockBaseInfo s : codelist) {
 			// 频繁统计
 			DzjyYiTime t = dzjyService.halfOver1Yi(s, startDate, startDate2);// 12个月
@@ -130,9 +132,10 @@ public class DzjySpider {
 					boolean isSamll = codeModelService.isSmallStock(cbm.getMkv(), cbm.getActMkv());
 					if (TagUtil.stockRange(isSamll, cbm)) {
 						sb.append(stockBasicService.getCodeName2(s.getCode())).append(",");
-					}
-					if (cbm.getDzjyBreaks() == 0 && dzjyService.chkDzjyV2(cbm.getCode(), dzv2chk)) {
-						cbm.setDzjyBreaks(2);
+						if (cbm.getDzjyBreaks() == 0 && dzjyService.chkDzjyV2(cbm.getCode(), dzv2chk2Y, dzv2chk1Y)) {
+							cbm.setDzjyBreaks(2);
+							modelWebService.toSave(cbm);
+						}
 					}
 				}
 			}
