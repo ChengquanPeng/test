@@ -121,8 +121,9 @@ public class DzjyService {
 		return new DzjyYiTime();
 	}
 
-	// chkDate之前的数据
-	public boolean chkDzjyV2(String code, int chkDate) {
+	// chkDate之前的数据-查询日期（2年内）
+	// endDate截止日期（1年内）
+	public boolean chkDzjyV2(String code, int chkDate, int endDate) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
 		bqb.must(QueryBuilders.rangeQuery("date").gte(chkDate));
@@ -148,10 +149,12 @@ public class DzjyService {
 					}
 				}
 
-				// 最后一条数据在检查一遍
+				// 如果最小日期是一年之内的，则最后一条数据在检查一遍
 				int minDate = list.get(list.size() - 1).getDate();
-				int lastChkDate = chkDzjyV2Ext(code, minDate);
-				return DateUtil.differentDays(lastChkDate, minDate) >= 360;
+				if (minDate >= endDate) {
+					int lastChkDate = chkDzjyV2Ext(code, minDate);
+					return DateUtil.differentDays(lastChkDate, minDate) >= 360;
+				}
 			}
 		}
 		return false;
