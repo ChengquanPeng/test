@@ -1,5 +1,7 @@
 package com.stable.service;
 
+import java.util.List;
+
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -35,6 +37,8 @@ public class DzjyService {
 	private DzjyYiTimeDao dzjyYiTimeDao;
 	Pageable pageable = PageRequest.of(EsQueryPageUtil.queryPage9999.getPageNum(),
 			EsQueryPageUtil.queryPage9999.getPageSize());
+	Pageable pageable1 = PageRequest.of(EsQueryPageUtil.queryPage1.getPageNum(),
+			EsQueryPageUtil.queryPage1.getPageSize());
 
 	/**
 	 * 一段时间内的交易额
@@ -117,6 +121,7 @@ public class DzjyService {
 		return new DzjyYiTime();
 	}
 
+	// chkDate之前的数据
 	public boolean chkDzjyV2(String code, int chkDate) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
@@ -126,20 +131,45 @@ public class DzjyService {
 		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).withSort(sort).build();
 
 		Page<Dzjy> page = dzjyDao.search(sq);
-		if (page != null && !page.isEmpty() && page.getContent().size() > 1) {
+		if (page != null && !page.isEmpty()) {
+			List<Dzjy> list = page.getContent();
+			if (list.size() > 0) {
+				if (list.size() > 1) {
+					int date1 = 0;
+					int date2 = 0;
 
-			int date1 = 0;
-			int date2 = 0;
-			for (int i = 1; i < page.getContent().size(); i++) {
-				date1 = page.getContent().get(i - 1).getDate();
-				date2 = page.getContent().get(i).getDate();
+					for (int i = 1; i < list.size(); i++) {
+						date1 = list.get(i - 1).getDate();
+						date2 = list.get(i).getDate();
 
-				if (DateUtil.differentDays(date1, date2) >= 360) {// 间隔一年
-					return true;
+						if (DateUtil.differentDays(date1, date2) >= 360) {// 间隔一年
+							return true;
+						}
+					}
 				}
+
+				// 最后一条数据在检查一遍
+				int minDate = list.get(list.size() - 1).getDate();
+				int lastChkDate = chkDzjyV2Ext(code, minDate);
+				return DateUtil.differentDays(lastChkDate, minDate) >= 360;
 			}
 		}
 		return false;
 	}
 
+	// minDate之前的数据
+	public int chkDzjyV2Ext(String code, int minDate) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.matchPhraseQuery("code", code));
+		bqb.must(QueryBuilders.rangeQuery("date").lt(minDate));
+		FieldSortBuilder sort = SortBuilders.fieldSort("date").unmappedType("integer").order(SortOrder.DESC);
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable1).withSort(sort).build();
+
+		Page<Dzjy> page = dzjyDao.search(sq);
+		if (page != null && !page.isEmpty() && page.getContent().size() > 0) {
+			return page.getContent().get(0).getDate();
+		}
+		return 20120101;
+	}
 }

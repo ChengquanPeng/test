@@ -224,6 +224,10 @@ public class WebModelService {
 
 		codeBaseModel2Dao.save(model);
 	}
+	
+	public void toSave(CodeBaseModel2 model) {
+		codeBaseModel2Dao.save(model);
+	}
 
 	public void rzrqm(String code, int timemonth) {
 		if (timemonth > 0) {
