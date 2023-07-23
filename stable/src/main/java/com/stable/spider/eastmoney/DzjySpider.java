@@ -125,8 +125,8 @@ public class DzjySpider {
 			DzjyYiTime t = dzjyService.halfOver1Yi(s, startDate, startDate2);// 12个月
 			l.add(t);
 
-			if (t.getDate() >= date // 代表有最新的交易大宗触发
-					&& (t.getTotalAmt() >= Constant.DZ_WARNING_LINE_YEAR || t.getP365d() >= Constant.DZ_RATE)) {
+			if ((isWeek || t.getDate() >= date) // 1.周末或者代表有最新的交易大宗触发
+					&& (t.getTotalAmt() >= Constant.DZ_WARNING_LINE_YEAR || t.getP365d() >= Constant.DZ_RATE)) {// 2.满足大宗比例或者金额线
 				CodeBaseModel2 cbm = histMap.get(s.getCode());
 				if (cbm != null) {
 					boolean isSamll = codeModelService.isSmallStock(cbm.getMkv(), cbm.getActMkv());
