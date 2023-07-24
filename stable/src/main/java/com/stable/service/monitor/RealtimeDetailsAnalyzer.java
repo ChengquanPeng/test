@@ -133,7 +133,8 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 									+ rtm.getOrig().getShotPointPrice();
 							burstPointCheckTop = pushMsg(title2);
 							ocg.genMsg(code, title2);
-						} else if (rtm.warningYellowChk && rt.getHigh() >= rtm.warningYellow && rtm.warningYellow > 0) {
+						} else if (!rtm.warningYellowChk && rt.getHigh() >= rtm.warningYellow
+								&& rtm.warningYellow > 0) {
 							String title2 = codeName + rtm.you + TagUtil.getXiPan(rtm.getBase()) + " 准备突破买点:"
 									+ rtm.getOrig().getShotPointPrice() + "现价:" + rt.getBuy1();
 							rtm.warningYellowChk = pushMsg(title2);
@@ -168,7 +169,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 						String title2 = codeName + rtm.you + TagUtil.getXiPan(rtm.getBase()) + " [洗盘突破-新高(3month)] ";
 						highPriceGot = pushMsg(title2);
 						ocg.genMsg(code, title2);
-					} else if (rtm.price3mYellowChk && rt.getHigh() > rtm.price3mYellow && rtm.price3mYellow > 0) {
+					} else if (!rtm.price3mYellowChk && rt.getHigh() > rtm.price3mYellow && rtm.price3mYellow > 0) {
 						String title2 = codeName + rtm.you + TagUtil.getXiPan(rtm.getBase()) + " 准备突破  ";
 						rtm.price3mYellowChk = pushMsg(title2);
 						ocg.genMsg(code, title2);
