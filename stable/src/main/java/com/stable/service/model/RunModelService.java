@@ -234,8 +234,12 @@ public class RunModelService {
 				OnlineMsg om = list.get(j);
 				String code = om.getCode();
 				RealTime rt = RealtimeCall.get(code);
+				StockBaseInfo sbsb = stockBasicService.getCode(code);
 				sb.append("<tr><td>").append(om.getIndex()).append("</td>");
-				sb.append("<td>").append(stockBasicService.getCodeName2(code)).append("</td>");
+				sb.append("<td><font color='black'><a target='_blank' href='/web/admin/manual.html?scf=qf&code=" + code
+						+ "#pls'>").append(sbsb.getName())
+						.append("</a> <a target='_blank' href='/web/admin/index.html?code=" + code + "'>(").append(code)
+						.append(")</a></font></td>");
 				sb.append("<td>").append(om.getTitle()).append("</td>");
 				sb.append("<td>").append(CurrencyUitl.cutProfit(rt.getYesterday(), rt.getNow())).append("%</td>");
 				sb.append("<td>").append(rt.getNow()).append("</td></tr>");
@@ -292,9 +296,10 @@ public class RunModelService {
 				sb.append("<tr>").append(this.getSinaUrl(i + 1, code));
 
 				// 简称-代码
-				sb.append("<td><a target='_blank' href='/web/admin/manual.html?scf=qf&code=" + code
-						+ "#pls'><font color='black'>").append(sbsb.getName()).append("<br/>").append(code)
-						.append("</font>");
+				sb.append("<td><font color='black'><a target='_blank' href='/web/admin/manual.html?scf=qf&code=" + code
+						+ "#pls'>").append(sbsb.getName())
+						.append("</a><br/><a target='_blank' href='/web/admin/index.html?code=" + code + "'>")
+						.append(code).append("</font>");
 				if (p1.getPls() == 1) {
 					sb.append(rg);
 				}
