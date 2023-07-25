@@ -418,7 +418,7 @@ public class TagUtil {
 
 	// 小股票股东人数超4.8w
 	public static String warningXiaopiaoGdrs(CodeBaseModel2 dh) {
-		if (dh.getLastNum() >= Constant.WAN_5 && (dh.getMkv() > 0 && dh.getMkv() <= 55)) {
+		if (dh.getLastNum() >= Constant.WAN_5 && (dh.getMkv() > 0 && dh.getMkv() <= 100.0)) {
 			return gdrsChao5_mail;
 		}
 		return "";
