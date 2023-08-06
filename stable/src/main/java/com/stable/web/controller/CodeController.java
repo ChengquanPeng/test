@@ -228,7 +228,7 @@ public class CodeController {
 			PrintWriter w = response.getWriter();
 
 			if (isOk) {
-				w.write("<a href='http://183.56.196.175:9999/html/" + code + ".jpg'>code:" + code + ",endDate=" + date
+				w.write("<a href='https://183.56.196.175:9999/html/" + code + ".jpg'>code:" + code + ",endDate=" + date
 						+ ",days=" + days + ",now=" + System.currentTimeMillis());
 				w.write("</a>");
 			} else {
