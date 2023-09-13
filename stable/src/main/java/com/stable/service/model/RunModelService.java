@@ -1,8 +1,10 @@
 
 package com.stable.service.model;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.sort.SortOrder;
@@ -172,6 +174,7 @@ public class RunModelService {
 		List<CodeBaseModel2> dapiao = new LinkedList<CodeBaseModel2>();// 底部未涨大票
 		List<CodeBaseModel2> other = new LinkedList<CodeBaseModel2>();// 其他
 		List<CodeBaseModel2> all = new LinkedList<CodeBaseModel2>();
+		Set<String> qucong = new HashSet<String>();
 
 		for (CodeBaseModel2 c : dqx) {
 			if (c.getPls() == 1) {
@@ -199,21 +202,22 @@ public class RunModelService {
 				other.add(c);
 			}
 		}
-		add(all, ren);
-		add(all, nxp);
-		add(all, dq);
-		add(all, xq);
-		add(all, xp);
-		add(all, dapiao);
-		add(all, other);
+		qucong(qucong, all, ren);
+		qucong(qucong, all, nxp);
+		qucong(qucong, all, dq);
+		qucong(qucong, all, xq);
+		qucong(qucong, all, xp);
+		qucong(qucong, all, dapiao);
+		qucong(qucong, all, other);
 
 		printHtml(genListTe, all);
 	}
 
-	private void add(List<CodeBaseModel2> all, List<CodeBaseModel2> sub) {
+	private void qucong(Set<String> qucong, List<CodeBaseModel2> all, List<CodeBaseModel2> sub) {
 		for (CodeBaseModel2 c : sub) {
-			if (!all.contains(c)) {
+			if (!qucong.contains(c.getCode())) {
 				all.add(c);
+				qucong.add(c.getCode());
 			}
 		}
 	}
