@@ -239,18 +239,13 @@ public class CodeModelService {
 			if (newOne.getPls() == 1) {
 				sbc.append(stockBasicService.getCodeName2(code)).append(",");
 			}
+			newOne.setBuyRea(newOne.getBuyRea() + " 人工确定到期:" + newOne.getPlst());
 			newOne.setPls(0);
 			newOne.setPlst(0);
 		}
-
 		// 增发自动监听-重置
-		if (newOne.getPls() == 0 && (pool.getMonitor() == MonitorType.NO.getCode()
-				|| pool.getMonitor() > MonitorType.MANUAL.getCode())) {// 自动监听归0
-			pool.setMonitor(MonitorType.NO.getCode());
-			pool.setRealtime(0);
-			pool.setOffline(0);
-			pool.setUpTodayChange(0);
-//			pool.setShotPointCheck(0);
+		if (newOne.getPls() == 0) {
+			this.monitorPoolService.reset(pool);
 		}
 		boolean online4Year = stockBasicService.onlinePreYearChk(code, pre3Year);
 

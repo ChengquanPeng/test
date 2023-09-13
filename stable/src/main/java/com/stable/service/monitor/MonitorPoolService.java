@@ -155,6 +155,24 @@ public class MonitorPoolService {
 		}
 	}
 
+	public void reset(MonitorPoolTemp pool) {
+		pool.setMonitor(MonitorType.NO.getCode());
+		pool.setUpTodayChange(0);
+		pool.setDownTodayChange(0);
+		pool.setRealtime(0);
+		pool.setOffline(0);
+		pool.setDzjy(0);
+		pool.setHolderNum(0);
+		pool.setYkb(0);
+		pool.setZfdone(0);
+		pool.setZfdoneZjh(0);
+		pool.setListenerGg(0);// 监听公告
+		pool.setBuyLowVol(0);
+		pool.setUpPrice(0);
+		pool.setDownPrice(0);
+		pool.setRgqbPrice(0);
+	}
+
 	// 加入监听
 	public void addMonitor(long userId, String code, int monitor, int realtime, int offline, double upPrice,
 			double downPrice, double upTodayChange, double downTodayChange, String remark, int ykb, int zfdone,

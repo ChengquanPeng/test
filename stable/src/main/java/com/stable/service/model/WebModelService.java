@@ -181,21 +181,7 @@ public class WebModelService {
 		String remark = req.getBuyRea().trim() + " " + DateUtil.formatYYYYMMDD2(new Date());
 		MonitorPoolTemp pool = monitorPoolService.getMonitorPoolById(userId, code);
 		if (pls == 2 || pls == 0) {// 2不在池子
-			pool.setMonitor(MonitorType.NO.getCode());
-			pool.setUpTodayChange(0);
-			pool.setDownTodayChange(0);
-			pool.setRealtime(0);
-			pool.setOffline(0);
-			pool.setDzjy(0);
-			pool.setHolderNum(0);
-			pool.setYkb(0);
-			pool.setZfdone(0);
-			pool.setZfdoneZjh(0);
-			pool.setListenerGg(0);// 监听公告
-			pool.setBuyLowVol(0);
-			pool.setUpPrice(0);
-			pool.setDownPrice(0);
-			pool.setRgqbPrice(0);
+			this.monitorPoolService.reset(pool);
 			remark += " 归0或排除";
 			monitorPoolService.toSave(pool);
 		} else if (pls == 1 && model.getPls() != 1) {// 1不在池子，且原来不等于1
@@ -204,11 +190,7 @@ public class WebModelService {
 			pool.setRealtime(1);
 			int dt = DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), -1));
 			pool.setDzjy(dt);
-			pool.setHolderNum(dt);
-			pool.setYkb(dt);
 			pool.setZfdone(1);
-			pool.setBuyLowVol(60);
-
 			monitorPoolService.toSave(pool);
 		}
 

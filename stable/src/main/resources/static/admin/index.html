@@ -95,9 +95,9 @@
 						<option value="1">人工确定</option>
 						<option value="2">未确定</option>
 						<option value="3">未确定+已确定</option>
-					</select> &nbsp;&nbsp; 1年交易金额&gt;=<input type="text"
-						class="inputtext1" id="totalAmt" placeholder="可小数,亿">&nbsp;&nbsp;
-					2月交易金额&gt;=<input type="text" class="inputtext1" id="totalAmt60d"
+					</select> &nbsp;&nbsp; 1年交易金额&gt;=<input type="text" class="inputtext1"
+						id="totalAmt" placeholder="可小数,亿">&nbsp;&nbsp; 2月交易金额&gt;=<input
+						type="text" class="inputtext1" id="totalAmt60d"
 						placeholder="可小数,亿">
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					股东人数&lt;=<input type="text" class="inputtext1" id="gdrs"
@@ -442,28 +442,25 @@
 											formatter : function(value, row,
 													index) {
 												var v = value
-														+ "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+row.code+"/event.html#stockpage'>大事提醒</a>";
-												v += "&nbsp;&nbsp;<a target='_blank' href='/web/chips/reduce/list?code="
+														+ "<br/><a target='_blank' href='/web/chips/reduce/list?code="
 														+ row.code + "'>减持</a>";
-												v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/dzjy/detail/"+row.code+".html'>大宗</a>";
+												v += v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/dzjy/detail/"+row.code+".html'>大宗</a>";
+												v += "&nbsp;&nbsp;<a target='_blank' href='/web/admin/dzpc.html?code="
+														+ row.code
+														+ "'>大宗排除</a>";
+												v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资</a>";
+												v += "&nbsp;&nbsp;<a target='_blank' href='/web/admin/rzrqm.html?code="
+														+ row.code
+														+ "'>融资排除</a>";
 												v += "&nbsp;&nbsp;<a target='_blank' href='/web/comon/zengFa.html?code="
 														+ row.code
 														+ "&ustr="
 														+ ustr + "'>定增</a>";
-												if (row.shooting3 == 1
-														|| row.rzrqRate > 0) {
-													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/rzrq/detail/"+row.code+".html'>融资</a>";
-													v += "&nbsp;&nbsp;<a target='_blank' href='/web/admin/rzrqm.html?code="
-															+ row.code
-															+ "'>融资排除</a>";
-												}
 												if (row.tagHighZyChance == 1) {
 													v += "&nbsp;&nbsp;<a target='_blank' href='https://data.eastmoney.com/gpzy/detail/"+row.code+".html'>质押</a>";
 												}
-												v += "<br/><a target='_blank' href='http://data.eastmoney.com/notices/stock/"+row.code+".html'>公告</a>";
-												v += "&nbsp;&nbsp;<a target='_blank' href='/web/admin/dzpc.html?code="
-														+ row.code
-														+ "'>大宗排除</a>";
+												v += "<br/><a target='_blank' href='https://basic.10jqka.com.cn/"+row.code+"/event.html#stockpage'>大事提醒</a>";
+												v += "&nbsp;&nbsp;<a target='_blank' href='http://data.eastmoney.com/notices/stock/"+row.code+".html'>公告</a>";
 
 												var ckl = "&nbsp;&nbsp;<a target='_blank' href='/web/"
 														+ ustr
