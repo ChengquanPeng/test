@@ -210,6 +210,11 @@ public class CodeModelService {
 		if (!onlineYear) {// 不买卖新股
 			return;
 		}
+		// 突然大宗有效期重置
+		if (newOne.getDzjyBreaksDate() >= tradeDate) {
+			newOne.setDzjyBreaksDate(0);
+			newOne.setDzjyBreaks(0);
+		}
 		// 监听池
 		MonitorPoolTemp pool = getPool(code, poolMap, poolList);
 		// 最新收盘情况

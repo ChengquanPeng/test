@@ -153,6 +153,8 @@ public class CodeBaseModel2 extends EsBase {
 	private double dzjyp365d;// 占比-60天
 	@Field(type = FieldType.Integer)
 	private int dzjyBreaks = 0;// 是否突然大宗
+	@Field(type = FieldType.Integer)
+	private int dzjyBreaksDate = 0;// 过期时间
 	// 增发和大宗情况
 	// 增发(最近的增发，包含正在增发）
 	@Field(type = FieldType.Integer)

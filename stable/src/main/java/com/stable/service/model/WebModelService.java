@@ -224,7 +224,7 @@ public class WebModelService {
 
 		codeBaseModel2Dao.save(model);
 	}
-	
+
 	public void toSave(CodeBaseModel2 model) {
 		codeBaseModel2Dao.save(model);
 	}
@@ -243,6 +243,7 @@ public class WebModelService {
 	public void dapc(String code, int dzjyBreaks) {
 		CodeBaseModel2 model = getLastOneByCode2(code);
 		model.setDzjyBreaks(dzjyBreaks);
+		model.setDzjyBreaksDate(DateUtil.addDate(DateUtil.getTodayIntYYYYMMDD(), 90));// 3个月有效
 		codeBaseModel2Dao.save(model);
 	}
 
@@ -343,7 +344,11 @@ public class WebModelService {
 			}
 		}
 		if (mr.getDzjyBreaks() > 0) {
-			bqb.must(QueryBuilders.matchPhraseQuery("dzjyBreaks", mr.getDzjyBreaks()));
+			if (mr.getDzjyBreaks() == 3) {
+				bqb.must(QueryBuilders.rangeQuery("dzjyBreaks").gte(1));// 1&2
+			} else {
+				bqb.must(QueryBuilders.matchPhraseQuery("dzjyBreaks", mr.getDzjyBreaks()));
+			}
 		}
 		if (mr.getShooting1() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting1", 1));
