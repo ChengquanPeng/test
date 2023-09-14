@@ -211,7 +211,7 @@ public class CodeModelService {
 			return;
 		}
 		// 突然大宗有效期重置
-		if (newOne.getDzjyBreaksDate() >= tradeDate) {
+		if (tradeDate >= newOne.getDzjyBreaksDate()) {
 			newOne.setDzjyBreaksDate(0);
 			newOne.setDzjyBreaks(0);
 		}
