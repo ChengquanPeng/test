@@ -75,7 +75,8 @@ table {
 </head>
 <body>
 	<div id="header"></div>
-	<div class="container-fluid">
+	<div class="container-fluid"
+		style="width: 100%; align-items: center; display: flex; justify-content: center;">
 		<div class="row col-sm-9 offset-sm-3 col-md-12 offset-md-0 pt-3">
 			<table>
 				<tr>
@@ -83,10 +84,10 @@ table {
 					<td><span id="code"></span>&nbsp;</td>
 				<tr>
 					<td>结果</td>
-					<td>人工：<select id="dzjyBreaks">
-							<option value="0">小票突然大宗--排除</option>
-							<option value="1">小票突然大宗--确定</option>
-					</select></td>
+					<td>人工：<input type="radio" name="dzjyBreaks" value="3"
+						checked="checked">小票突然大宗--排除 <input type="radio"
+						name="dzjyBreaks" value="1">小票突然大宗--确定
+					</td>
 				</tr>
 			</table>
 
@@ -126,12 +127,13 @@ table {
 	</script>
 	<script type="text/javascript">
 		function dianwo() {
+			var ab = $('input:radio:checked').val();
 			$.ajax({
 				url : "/web/model/dzpc", //访问地址--action地址
 				type : "post", //提交方式
 				data : {
 					code : $('#code').html(),
-					dzjyBreaks : $('#dzjyBreaks').val()
+					dzjyBreaks : ab
 				}, //提交给服务器的数据
 				success : function(reData) { //回调函数的处理方式
 					if ("OK" == reData.status) {
