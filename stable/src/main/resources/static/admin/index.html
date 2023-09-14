@@ -238,7 +238,6 @@
 
 									param.mkv = $('#mkv').val();
 									param.mkv2 = $('#mkv2').val();
-									param.pls = $('#pls').val();
 									param.rzrq1 = $('#rzrq1').val();
 									param.rzrq2 = $('#rzrq2').val();
 
@@ -393,7 +392,10 @@
 									if (document.getElementById("shooting9").checked) {
 										param.shooting9 = 1;
 									}
-
+									param.pls = $('#pls').val();
+									if (param.code != "") {
+										param.pls = -1;//如果是code查询，则不限制
+									}
 									return param;
 								},
 								columns : [
