@@ -103,7 +103,7 @@ public class WebModelService {
 			if (dh.getPls() == 0) {
 				sb6.append("人工: 未确定");
 			} else if (dh.getPls() == 1) {
-				sb6.append("人工: 已确定");
+				sb6.append("人工: 已确定 ").append(dh.getPlst());
 			} else if (dh.getPls() == 2) {
 				sb6.append("人工: 已排除 ").append(dh.getPlst());
 			}
@@ -178,11 +178,10 @@ public class WebModelService {
 
 		String code = req.getCode();
 		CodeBaseModel2 model = getLastOneByCode2(code);
-		String remark = req.getBuyRea().trim() + " " + DateUtil.formatYYYYMMDD2(new Date());
+		String remark = req.getBuyRea().trim();
 		MonitorPoolTemp pool = monitorPoolService.getMonitorPoolById(userId, code);
 		if (pls == 2 || pls == 0) {// 2不在池子
 			this.monitorPoolService.reset(pool);
-			remark += " 归0或排除";
 			monitorPoolService.toSave(pool);
 		} else if (pls == 1 && model.getPls() != 1) {// 1不在池子，且原来不等于1
 			pool.setMonitor(MonitorType.MANUAL.getCode());

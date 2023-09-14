@@ -361,11 +361,11 @@ table {
 				<tr>
 					<td></td>
 					<td>结果</td>
-					<td><select id="pls">
+					<td><select id="pls" onchange="changeme1()">
 							<option value="0">-</option>
 							<option value="1">确定</option>
 							<option value="2">排除</option>
-					</select>时间：<select id="timemonth">
+					</select>时间：<select id="timemonth" onchange="changeme1()">
 							<option value="7">7天</option>
 							<option value="15">15天</option>
 							<option value="30">1个月</option>
@@ -432,6 +432,15 @@ table {
 		}
 	</script>
 	<script type="text/javascript">
+		function changeme1() {
+			if ($('#timemonth').val() == -2) {
+				var endDate = formatDate(new Date(), 'yyyyMMdd');
+				$('#buyRea').val($('#buyRea').val() + " " + endDate + "归0");
+			} else if ($('#pls').val() == 2) {
+				var endDate = formatDate(new Date(), 'yyyyMMdd');
+				$('#buyRea').val($('#buyRea').val() + " " + endDate + "排除");
+			}
+		}
 		function dianwo() {
 			if ($('#pls').val() == 0 && $('#timemonth').val() != -1
 					&& $('#timemonth').val() != -2) {
@@ -580,7 +589,7 @@ table {
 
 		$('#backtohome').attr("href", "/web/admin/index.html?code=" + qc);
 		$('#backtohome').html("返回主页:" + qc);
-		
+
 		var scf = getQueryVariable("scf");
 		if (scf) {
 			$("#pls").val(2);

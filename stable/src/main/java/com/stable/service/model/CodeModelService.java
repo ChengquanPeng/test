@@ -238,8 +238,8 @@ public class CodeModelService {
 		if (newOne.getPlst() < tradeDate) {
 			if (newOne.getPls() == 1) {
 				sbc.append(stockBasicService.getCodeName2(code)).append(",");
+				newOne.setBuyRea(newOne.getBuyRea() + " 人工确定到期:" + newOne.getPlst());
 			}
-			newOne.setBuyRea(newOne.getBuyRea() + " 人工确定到期:" + newOne.getPlst());
 			newOne.setPls(0);
 			newOne.setPlst(0);
 		}
