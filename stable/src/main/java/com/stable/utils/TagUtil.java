@@ -294,8 +294,16 @@ public class TagUtil {
 		}
 		// 基本面-筹码
 		sb5.append("流通:").append(dh.getMkv()).append("亿,");
-		sb5.append("除5%活筹:").append(dh.getActMkv()).append("亿,");
-		sb5.append("5%股东:").append(dh.getHolderNumP5()).append("%");
+		sb5.append("除5%活筹:");
+		boolean t1 = dh.getActMkv() >= Constant.YI_30;
+		if (t1) {
+			sb5.append("<span style='background-color:yellow;'>");
+		}
+		sb5.append(dh.getActMkv()).append("亿");
+		if (t1) {
+			sb5.append("</span>");
+		}
+		sb5.append(",5%股东:").append(dh.getHolderNumP5()).append("%");
 		sb5.append(",股东人数:");
 		boolean t = dh.getLastNum() >= Constant.WAN_5;
 		if (t) {
@@ -413,7 +421,7 @@ public class TagUtil {
 	}
 
 	private static String gdrsChao5_base = "散户多";
-	private static final String gdrsChao5_mail = "<span style='background-color:red;'>" + gdrsChao5_base + "</span>";
+	private static final String gdrsChao5_mail = "<span style='background-color:yellow;'>" + gdrsChao5_base + "</span>";
 	public static final String gdrsChao5_wx = "[" + gdrsChao5_base + "]";
 
 	// 小股票股东人数超4.8w

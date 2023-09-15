@@ -31,6 +31,7 @@ public class Constant {
 
 	public static final double WAN_10 = 10 * 10000;// 10万
 	public static final double WAN_5 = 5 * 10000;// 5万
+	public static final double YI_30 = 30.0;// 30亿
 
 	public static final long MY_ID = 10000;// 我的ID
 
