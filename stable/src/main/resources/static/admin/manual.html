@@ -467,6 +467,7 @@ table {
 				}
 			});
 		}
+		var scf = getQueryVariable("scf");
 		var qc = getQueryVariable("code");
 		$
 				.ajax({
@@ -482,6 +483,10 @@ table {
 						$('#code').html(code);
 						$('#codeName').html(reData.result.codeName);
 						$('#buyRea').val(reData.result.buyRea);
+						if (scf) {
+							$("#pls").val(2);
+							$("#timemonth").val(7).change();
+						}
 						//基本面
 						$('#base1').attr("href",
 								"http://basic.10jqka.com.cn/" + code);
@@ -589,12 +594,6 @@ table {
 
 		$('#backtohome').attr("href", "/web/admin/index.html?code=" + qc);
 		$('#backtohome').html("返回主页:" + qc);
-
-		var scf = getQueryVariable("scf");
-		if (scf) {
-			$("#pls").val(2);
-			$("#timemonth").val(7);
-		}
 	</script>
 </body>
 </html>
