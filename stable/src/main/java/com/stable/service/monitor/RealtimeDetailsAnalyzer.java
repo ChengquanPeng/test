@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.stable.constant.Constant;
+import com.stable.enums.MonitorType;
 import com.stable.service.ConceptService;
 import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.spider.realtime.RealTime;
@@ -183,7 +184,7 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					if (isOk) {
 						if (r.waitSend) {
 							String st = MonitoringUitl.okMsg(r.getOrig(), rt);
-							title = st;
+							title = MonitorType.getCodeName(r.getOrig().getMonitor()) + " " + st;
 							r.waitSend = false;
 						}
 					}
