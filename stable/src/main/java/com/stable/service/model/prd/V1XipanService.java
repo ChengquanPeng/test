@@ -45,7 +45,7 @@ public class V1XipanService {
 			newOne.setPls(1);
 			newOne.setHolderNumP5(50);
 			System.err.println("==========" + stockBasicService.getCodeName2(code) + "==========");
-			xipanQb(date, newOne, true);
+			xipanQb(date, newOne, true, 0);
 			System.err.println("Res ==========> " + (newOne.getXipan() > 0) + ",CNT:" + newOne.getXipan() + ","
 					+ newOne.getXipanHist());
 		}
@@ -56,7 +56,7 @@ public class V1XipanService {
 	private int preDays = 4;
 
 	/** 起爆-Pre突破 */
-	public void xipanQb(int date, CodeBaseModel2 newOne, boolean isSamll) {
+	public void xipanQb(int date, CodeBaseModel2 newOne, boolean isSamll, int nextTadeDate) {
 		if (!(TagUtil.stockRange(isSamll, newOne) && newOne.getHolderNumP5() > 0 && newOne.getHolderNumP5() > 21.0)) {
 			this.resetXiPan(newOne);
 			return;
@@ -213,6 +213,9 @@ public class V1XipanService {
 		}
 
 		if (isqb) {
+			if (newOne.getTipV1xipan() == 0) {
+				newOne.setTipV1xipan(nextTadeDate);
+			}
 			newOne.setXipan(volDate.size());
 			newOne.setXipanHist(
 					volDate.stream().map(s -> String.valueOf(s.getDate())).collect(Collectors.joining(",")));
@@ -263,6 +266,7 @@ public class V1XipanService {
 		}
 		newOne.setXipan(0);
 		newOne.setXipanHist("");
+		newOne.setTipV1xipan(0);
 
 		// V1XipanService 可能存在了设置，所以先判断
 		if (newOne.getNxipan() <= 0) {

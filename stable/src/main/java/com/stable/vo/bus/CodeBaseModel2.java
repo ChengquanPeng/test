@@ -197,6 +197,13 @@ public class CodeBaseModel2 extends EsBase {
 	@Field(type = FieldType.Integer)
 	private int susWhiteHors; // // 交易面疑似白马
 
+	@Field(type = FieldType.Integer)
+	private int tipQixing = 0;
+	@Field(type = FieldType.Integer)
+	private int tipNxing = 0;
+	@Field(type = FieldType.Integer)
+	private int tipV1xipan = 0;
+
 	@Id
 	private String id;
 	@Field(type = FieldType.Keyword)

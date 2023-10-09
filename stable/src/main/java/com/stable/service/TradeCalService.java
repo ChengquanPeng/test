@@ -115,6 +115,24 @@ public class TradeCalService {
 		return "" + getPretradeDate(Integer.valueOf(date));
 	}
 
+	public int getNextDate(int d) {
+		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+		bqb.must(QueryBuilders.rangeQuery("cal_date").gt(d));
+		bqb.must(QueryBuilders.matchPhraseQuery("is_open", 1));
+		FieldSortBuilder sort = SortBuilders.fieldSort("cal_date").unmappedType("integer").order(SortOrder.DESC);
+
+		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+		NativeSearchQueryBuilder builder = queryBuilder.withQuery(bqb);
+		Pageable pageable = PageRequest.of(0, 1);
+		builder.withPageable(pageable).withSort(sort);
+		SearchQuery sq = builder.build();
+		Page<TradeCal> page = calDao.search(sq);
+		if (page != null && !page.isEmpty()) {
+			return page.getContent().get(0).getCal_date();
+		}
+		throw new RuntimeException("未找到" + d + "的下一个交易日");
+	}
+
 	public int getPretradeDate(int d) {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.rangeQuery("cal_date").lt(d));

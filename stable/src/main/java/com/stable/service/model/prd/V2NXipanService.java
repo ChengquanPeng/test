@@ -40,7 +40,7 @@ public class V2NXipanService {
 			newOne.setHolderNumP5(50);
 			newOne.setActMkv(100);
 			System.err.println("==========" + stockBasicService.getCodeName2(code) + "==========");
-			nxipan(date, newOne);
+			nxipan(date, newOne, 0);
 			System.err.println(code + " ==========> " + (newOne.getNxipan() > 0));
 		}
 		System.exit(0);
@@ -51,7 +51,7 @@ public class V2NXipanService {
 	LinkedList<String> incstr = new LinkedList<String>();
 
 	/** 起爆-Pre突破 */
-	public void nxipan(int date, CodeBaseModel2 newOne) {
+	public void nxipan(int date, CodeBaseModel2 newOne, int nextTadeDate) {
 		if (!TagUtil.stockRangeNx(newOne)) {
 			this.resetNxiPan(newOne);
 			return;
@@ -152,6 +152,9 @@ public class V2NXipanService {
 			// }
 		}
 		if (isqb) {
+			if (newOne.getTipNxing() == 0) {
+				newOne.setTipNxing(nextTadeDate);
+			}
 			newOne.setNxipan(1);
 			String s1 = datesLa.stream().map(s -> String.valueOf(s)).collect(Collectors.joining(",")) + "|"
 					+ incstr.stream().map(s -> s).collect(Collectors.joining(","));
@@ -168,6 +171,7 @@ public class V2NXipanService {
 
 	public void resetNxiPan(CodeBaseModel2 newOne) {
 		newOne.setNxipan(0);
+		newOne.setTipNxing(0);
 		newOne.setNxipanHist("");
 
 		// V1XipanService 可能存在了设置，所以先判断

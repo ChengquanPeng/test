@@ -13,6 +13,7 @@ import com.stable.es.dao.base.MonitorPoolUserDao;
 import com.stable.service.DaliyBasicHistroyService;
 import com.stable.service.PriceLifeService;
 import com.stable.service.StockBasicService;
+import com.stable.service.TradeCalService;
 import com.stable.service.model.data.AvgService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.service.model.prd.QxService;
@@ -62,6 +63,8 @@ public class CodeModelKLineService {
 	private V2NXipanService nxService;
 	@Autowired
 	private SzxService szxService;
+	@Autowired
+	private TradeCalService tradeCalService;
 
 	public synchronized void runKLineModel1(int date) {
 //		if (!tradeCalService.isOpen(date)) {
@@ -71,6 +74,7 @@ public class CodeModelKLineService {
 		codeModelService.tradeDate = date;
 		pre1Year = DateUtil.getPreYear(tradeDate);
 		pre3Year = DateUtil.getPreYear(tradeDate, 3);
+		nextTadeDate = tradeCalService.getNextDate(tradeDate);
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
 		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
 		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
@@ -110,6 +114,8 @@ public class CodeModelKLineService {
 	private int tradeDate = 0;
 	private int pre1Year = 0;// 一年以前
 	private int pre3Year = 0;// 三年以前
+
+	private int nextTadeDate = 0;
 
 	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
 			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap) {
@@ -181,10 +187,10 @@ public class CodeModelKLineService {
 			nxService.resetNxiPan(newOne);
 		} else {
 			try {
-				qbQxService.qx(tradeDate, newOne, pool, isSamll);
+				qbQxService.qx(tradeDate, newOne, pool, isSamll, nextTadeDate);
 				szxService.szx(tradeDate, newOne, pool, isSamll);
-				v1XipanService.xipanQb(tradeDate, newOne, isSamll);
-				nxService.nxipan(tradeDate, newOne);
+				v1XipanService.xipanQb(tradeDate, newOne, isSamll, nextTadeDate);
+				nxService.nxipan(tradeDate, newOne, nextTadeDate);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), tradeDate + "", "起爆");
 			}
@@ -288,7 +294,7 @@ public class CodeModelKLineService {
 								newOne.setId(s.getCode());
 								newOne.setCode(s.getCode());
 							}
-							nxService.nxipan(tradeDate1, newOne);
+							nxService.nxipan(tradeDate1, newOne, nextTadeDate);
 							if (newOne.getNxipan() == 1) {
 								listLast.add(newOne);
 							}

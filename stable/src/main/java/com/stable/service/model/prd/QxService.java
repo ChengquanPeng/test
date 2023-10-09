@@ -70,21 +70,21 @@ public class QxService {
 //		System.exit(0);
 //	}
 
-	public void qx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll) {
+	public void qx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, int nextTadeDate) {
 		if (!TagUtil.stockRange(isSamll, newOne)) {
 			setQxRes(newOne, pool, true, true);
 			return;
 		}
 		/** 起爆点,底部旗形1：大旗形 **/
-		qx1(date, newOne, pool);
+		qx1(date, newOne, pool, nextTadeDate);
 		if (newOne.getDibuQixing() == 0) {
 			/** 起爆点,底部旗形2：小旗形 **/
-			qx2(date, newOne, pool);
+			qx2(date, newOne, pool, nextTadeDate);
 		}
 	}
 
 	/** 起爆点,底部旗形1：大旗形 **/
-	private void qx1(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool) {
+	private void qx1(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, int nextTadeDate) {
 		List<TradeHistInfoDaliy> list = null;
 		if (newOne.getDibuQixing() == 0) {
 			list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0, date,
@@ -146,13 +146,16 @@ public class QxService {
 			newOne.setQixingStr(res.ex());
 			newOne.setQixing(res.getDate());
 			newOne.setDibuQixing(res.getDate());
+			if (newOne.getTipQixing() == 0) {
+				newOne.setTipQixing(nextTadeDate);
+			}
 		} else {
 			setQxRes(newOne, pool, true, false);
 		}
 	}
 
 	/** 起爆点,底部旗形2：小旗形 **/
-	private void qx2(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool) {
+	private void qx2(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, int nextTadeDate) {
 		List<TradeHistInfoDaliy> list = null;
 		if (newOne.getDibuQixing2() == 0) {
 			list = daliyTradeHistroyService.queryListByCodeWithLastQfq(newOne.getCode(), 0, date,
@@ -191,6 +194,9 @@ public class QxService {
 			newOne.setQixingStr(res.ex());
 			newOne.setQixing(res.getDate());
 			newOne.setDibuQixing2(res.getDate());
+			if (newOne.getTipQixing() == 0) {
+				newOne.setTipQixing(nextTadeDate);
+			}
 		} else {
 			setQxRes(newOne, pool, false, true);
 		}
@@ -493,6 +499,7 @@ public class QxService {
 			newOne.setDibuQixing2(0);
 		}
 		if (newOne.getDibuQixing() == 0 && newOne.getDibuQixing2() == 0) {
+			newOne.setTipQixing(0);
 			newOne.setQixing(0);
 			newOne.setQixingStr("");
 			pool.setShotPointDate(0);

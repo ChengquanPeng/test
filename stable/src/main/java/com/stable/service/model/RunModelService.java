@@ -173,7 +173,6 @@ public class RunModelService {
 		List<CodeBaseModel2> xq = new LinkedList<CodeBaseModel2>();// 小旗形
 		List<CodeBaseModel2> dapiao = new LinkedList<CodeBaseModel2>();// 底部未涨大票
 		List<CodeBaseModel2> other = new LinkedList<CodeBaseModel2>();// 其他
-		List<CodeBaseModel2> all = new LinkedList<CodeBaseModel2>();
 		Set<String> qucong = new HashSet<String>();
 
 		for (CodeBaseModel2 c : dqx) {
@@ -202,6 +201,8 @@ public class RunModelService {
 				other.add(c);
 			}
 		}
+
+		List<CodeBaseModel2> all = new LinkedList<CodeBaseModel2>();
 		qucong(qucong, all, ren);
 		qucong(qucong, all, nxp);
 		qucong(qucong, all, dq);
@@ -217,6 +218,17 @@ public class RunModelService {
 		for (CodeBaseModel2 c : sub) {
 			if (!qucong.contains(c.getCode())) {
 				all.add(c);
+				if (tradeDate > 0) {
+					if (tradeDate > c.getTipNxing()) {
+						c.setTipNxing(0);// 临时方案
+					}
+					if (tradeDate > c.getTipQixing()) {
+						c.setTipQixing(0);// 临时方案
+					}
+					if (tradeDate > c.getTipV1xipan()) {
+						c.setTipV1xipan(0);// 临时方案
+					}
+				}
 				qucong.add(c.getCode());
 			}
 		}
@@ -287,6 +299,7 @@ public class RunModelService {
 		String line2 = "";
 		String dz = "<font color='red'>[确]</font>";
 		String rg = "<font color='blue'>[人]</font>";
+		String neg = "<font color='blue'>[新]</font>";
 		if (genListTe != null && genListTe.size() > 0) {
 			for (int i = 0; i < genListTe.size(); i++) {
 				line = "";
@@ -306,6 +319,9 @@ public class RunModelService {
 						.append(code).append("</font>");
 				if (p1.getPls() == 1) {
 					sb.append(rg);
+				}
+				if (p1.getTipNxing() > 0 || p1.getTipQixing() > 0 || p1.getTipV1xipan() > 0) {
+					sb.append(neg);
 				}
 				if (p1.getShooting2() > 0 || p1.getShooting6661() > 0) {
 					sb.append(dz);
