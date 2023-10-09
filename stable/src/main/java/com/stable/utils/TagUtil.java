@@ -33,8 +33,8 @@ public class TagUtil {
 		if (cbm.getPls() == 2) {
 			return false;
 		}
-		// 2.200亿市值以下
-		if (TagUtil.mkvChk(cbm.getMkv(), cbm.getActMkv(), 200) && isDibu21(cbm) && cbm.getHolderNumP5() > 0
+		// 2.100亿市值以下
+		if (TagUtil.mkvChk(cbm.getMkv(), cbm.getActMkv(), 100) && isDibu21(cbm) && cbm.getHolderNumP5() > 0
 				&& cbm.getHolderNumP5() > 30.0) {
 			return true;
 		}

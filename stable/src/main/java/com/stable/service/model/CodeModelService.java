@@ -63,7 +63,6 @@ public class CodeModelService {
 	private static final long ZF_20YI = 20 * 100000000l;
 	@Value("${small.stock.limit}")
 	private double smallStocklimit;
-	private double smallStocklimitAck = 50;// 50亿
 
 	@Autowired
 	private StockBasicService stockBasicService;
@@ -435,7 +434,7 @@ public class CodeModelService {
 
 	// 小市值股票(流通市值小于70亿，5%以下的流通小于50亿)
 	public boolean isSmallStock(double mkv, double actMkv) {
-		return TagUtil.mkvChk(mkv, actMkv, smallStocklimitAck);
+		return TagUtil.mkvChk(mkv, actMkv, smallStocklimit);
 	}
 
 	// 周末计算-至少N年未大涨?
