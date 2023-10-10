@@ -314,9 +314,7 @@ public class RunModelService {
 
 				// 简称-代码
 				sb.append("<td><font color='black'><a target='_blank' href='/web/admin/manual.html?scf=qf&code=" + code
-						+ "#pls'>").append(sbsb.getName())
-						.append("</a><br/><a target='_blank' href='/web/admin/index.html?code=" + code + "'>")
-						.append(code).append("</font>");
+						+ "#pls'>").append(sbsb.getName()).append("</a></font>&nbps;");
 				if (p1.getPls() == 1) {
 					sb.append(rg);
 				}
@@ -326,6 +324,9 @@ public class RunModelService {
 				if (p1.getShooting2() > 0 || p1.getShooting6661() > 0) {
 					sb.append(dz);
 				}
+				sb.append("<br/><font color='black'><a target='_blank' href='/web/admin/index.html?code=" + code + "'>")
+						.append(code).append("</font>");
+
 				sb.append("</a></td>");
 				// 逻辑
 				sb.append("<td>").append(TagUtil.getSystemPoint(p1, Constant.HTML_LINE));
