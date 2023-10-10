@@ -314,7 +314,7 @@ public class RunModelService {
 
 				// 简称-代码
 				sb.append("<td><font color='black'><a target='_blank' href='/web/admin/manual.html?scf=qf&code=" + code
-						+ "#pls'>").append(sbsb.getName()).append("</a></font>&nbps;");
+						+ "#pls'>").append(sbsb.getName()).append("</a></font>&nbsp;");
 				if (p1.getPls() == 1) {
 					sb.append(rg);
 				}
