@@ -119,7 +119,7 @@ public class TradeCalService {
 		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 		bqb.must(QueryBuilders.rangeQuery("cal_date").gt(d));
 		bqb.must(QueryBuilders.matchPhraseQuery("is_open", 1));
-		FieldSortBuilder sort = SortBuilders.fieldSort("cal_date").unmappedType("integer").order(SortOrder.DESC);
+		FieldSortBuilder sort = SortBuilders.fieldSort("cal_date").unmappedType("integer").order(SortOrder.ASC);
 
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		NativeSearchQueryBuilder builder = queryBuilder.withQuery(bqb);
@@ -153,15 +153,9 @@ public class TradeCalService {
 
 //	@javax.annotation.PostConstruct
 	public void test() {
-		JSONObject result = HttpUtil.doGet(String.format(url, "2023-05", Math.random()));
-		JSONArray data = (JSONArray) result.get("data");
-
-		for (int i = 0; i < data.size(); i++) {
-			JSONObject row = data.getJSONObject(i);
-			TradeCal tc = new TradeCal();
-			tc.setCal_date(DateUtil.convertDate2(row.getString("jyrq")));// 日期
-			System.err.println(tc.getCal_date() + " -> " + getPretradeDate(tc.getCal_date()));
-		}
+		System.err.println(getNextDate(20231016));
+		System.err.println(getNextDate(20231017));
+		System.err.println(getNextDate(20231001));
 		System.exit(0);
 	}
 }
