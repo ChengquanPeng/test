@@ -333,9 +333,10 @@ public class CodeModelService {
 					}
 
 					// 行情指标1：底部小票大宗：超活筹5%,董监高机构代减持?
-					if (newOne.getDzjyp365d() >= 4.5) {// 大宗超过4.5%
+					if (newOne.getDzjyp365d() >= 4.5 && newOne.getDzjy365d() >= Constant.DZ_WARNING_LINE_YEAR) {
+						// 大宗超过4.5% && 1个亿
 						isOk1 = true;
-						log.info("{} 小票,底部大宗超4.5%", code);
+						log.info("{} 小票,底部大宗超4.5% && 1个亿", code);
 					}
 
 					// 行情指标6：底部小票减持-业绩不能亏
