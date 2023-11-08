@@ -34,6 +34,7 @@ import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.OnlineMsg;
 import com.stable.vo.bus.StockBaseInfo;
 import com.stable.vo.bus.TradeHistInfoDaliy;
+import com.stable.vo.bus.TradeHistInfoDaliyNofq;
 import com.stable.vo.http.req.ModelReq;
 
 import lombok.extern.log4j.Log4j2;
@@ -168,6 +169,12 @@ public class RunModelService {
 		if (xp == null) {
 			xp = new LinkedList<>();
 		}
+		List<CodeBaseModel2> listT1 = new LinkedList<CodeBaseModel2>();
+		fetchT1(listT1, dqx);
+		fetchT1(listT1, xqx);
+		fetchT1(listT1, xp);
+		fetchT1(listT1, nxp);
+		printHtmlT1(listT1);
 
 		List<CodeBaseModel2> ren = new LinkedList<CodeBaseModel2>();// 人工
 		List<CodeBaseModel2> dq = new LinkedList<CodeBaseModel2>();// 大旗形
@@ -213,6 +220,42 @@ public class RunModelService {
 		qucong(qucong, all, other);
 
 		printHtml(genListTe, all);
+	}
+
+	@Autowired
+	private DaliyTradeHistroyService tradeHistroyService;
+
+	private void fetchT1(List<CodeBaseModel2> listT1, List<CodeBaseModel2> t) {
+		for (CodeBaseModel2 c : t) {
+			if (c.getDibuQixing() > 0 || c.getDibuQixing2() > 0 || c.getXipan() > 0 || c.getNxipan() > 0) {
+				String code = c.getCode();
+				MonitorPoolTemp cp = monitorPoolService.getMonitorPoolById(Constant.MY_ID, code);
+				TradeHistInfoDaliyNofq last = tradeHistroyService.queryLastNofq(code);
+				if (CurrencyUitl.topPrice(last.getClosed(), false) >= cp.getShotPointPrice()) {
+					listT1.add(c);
+				}
+			}
+		}
+	}
+
+	private void printHtmlT1(List<CodeBaseModel2> listT1) {
+		String htmlnamet = "t1.html";
+		FileWriteUitl fw = new FileWriteUitl(htmlFolder + htmlnamet, true);
+		StringBuffer sb = new StringBuffer();
+		// 更新时间
+		sb.append("<div>更新时间:").append(DateUtil.getTodayYYYYMMDDHHMMSS()).append("，<br/>特别十字星：人工,大宗,大票定增,做小做底+业绩不错")
+				.append("<br/>确：大宗超5%，标小-大宗，标小-减持").append("<br/>十字星：K线形态，前期有洗盘[002752]，或者阴跌后[山东路桥，中国化学]</div>");
+		// table
+		sb.append("<br/><table border='1' cellspacing='0' cellpadding='0'>");
+		// head
+		sb.append(
+				"<tr><th>序号</th><th>简称-代码</th><th>逻辑模型</th><th>底部类型</th><th>K线形态</th><th>特征</th><th>买点</th><th>备注</th><th>板块概念</th></tr>");
+		fw.writeLine(sb.toString());
+		sb = new StringBuffer();
+		sb.append(this.getHtml(listT1, false));// all:人工，大旗形，小旗形，v1洗盘，大票，其他
+		sb.append("</table>");// end
+		fw.writeLine(sb.toString());
+		fw.close();
 	}
 
 	private void qucong(Set<String> qucong, List<CodeBaseModel2> all, List<CodeBaseModel2> sub) {
