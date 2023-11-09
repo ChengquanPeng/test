@@ -174,6 +174,7 @@ public class RunModelService {
 		fetchT1(listT1, xqx);
 		fetchT1(listT1, xp);
 		fetchT1(listT1, nxp);
+		qucong(listT1, false);
 		printHtmlT1(listT1);
 
 		List<CodeBaseModel2> ren = new LinkedList<CodeBaseModel2>();// 人工
@@ -181,7 +182,6 @@ public class RunModelService {
 		List<CodeBaseModel2> xq = new LinkedList<CodeBaseModel2>();// 小旗形
 		List<CodeBaseModel2> dapiao = new LinkedList<CodeBaseModel2>();// 底部未涨大票
 		List<CodeBaseModel2> other = new LinkedList<CodeBaseModel2>();// 其他
-		Set<String> qucong = new HashSet<String>();
 
 		for (CodeBaseModel2 c : dqx) {
 			if (c.getPls() == 1) {
@@ -211,13 +211,14 @@ public class RunModelService {
 		}
 
 		List<CodeBaseModel2> all = new LinkedList<CodeBaseModel2>();
-		qucong(qucong, all, ren);
-		qucong(qucong, all, nxp);
-		qucong(qucong, all, dq);
-		qucong(qucong, all, xq);
-		qucong(qucong, all, xp);
-		qucong(qucong, all, dapiao);
-		qucong(qucong, all, other);
+		all.addAll(ren);
+		all.addAll(nxp);
+		all.addAll(dq);
+		all.addAll(xq);
+		all.addAll(xp);
+		all.addAll(dapiao);
+		all.addAll(other);
+		qucong(all, true);
 
 		printHtml(genListTe, all);
 	}
@@ -258,11 +259,13 @@ public class RunModelService {
 		fw.close();
 	}
 
-	private void qucong(Set<String> qucong, List<CodeBaseModel2> all, List<CodeBaseModel2> sub) {
-		for (CodeBaseModel2 c : sub) {
+	private List<CodeBaseModel2> qucong(List<CodeBaseModel2> all, boolean rest) {
+		List<CodeBaseModel2> res = new LinkedList<CodeBaseModel2>();
+		Set<String> qucong = new HashSet<String>();
+		for (CodeBaseModel2 c : all) {
 			if (!qucong.contains(c.getCode())) {
-				all.add(c);
-				if (tradeDate > 0) {
+				res.add(c);
+				if (rest && tradeDate > 0) {
 					if (tradeDate > c.getTipNxing()) {
 						c.setTipNxing(0);// 临时方案
 					}
@@ -276,6 +279,7 @@ public class RunModelService {
 				qucong.add(c.getCode());
 			}
 		}
+		return res;
 	}
 
 	public void printOnlineHtml(List<OnlineMsg> list) {
