@@ -232,7 +232,7 @@ public class RunModelService {
 				String code = c.getCode();
 				MonitorPoolTemp cp = monitorPoolService.getMonitorPoolById(Constant.MY_ID, code);
 				TradeHistInfoDaliyNofq last = tradeHistroyService.queryLastNofq(code);
-				if (CurrencyUitl.topPrice(last.getClosed(), false) >= cp.getShotPointPrice()) {
+				if (CurrencyUitl.topPriceN(last.getClosed(), 1.05) >= cp.getShotPointPrice()) {
 					listT1.add(c);
 				}
 			}
