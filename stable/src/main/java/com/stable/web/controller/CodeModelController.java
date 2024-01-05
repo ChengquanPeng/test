@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stable.constant.Constant;
+import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
 import com.stable.service.model.RunModelService;
 import com.stable.service.model.WebModelService;
@@ -29,6 +30,8 @@ public class CodeModelController {
 	private RunModelService runModelService;
 	@Autowired
 	private TradeCalService tradeCalService;
+	@Autowired
+	private StockBasicService stockBasicService;
 
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	public ResponseEntity<JsonResult> codemodellist(ModelReq mr, EsQueryPageReq querypage, HttpServletRequest req) {
@@ -96,6 +99,35 @@ public class CodeModelController {
 			CodeBaseModelResp cbm = modelWebService.getLastOneByCodeResp(code, true);
 			r.setResult(cbm);
 			r.setStatus(JsonResult.OK);
+		} catch (Exception e) {
+			r.setStatus(JsonResult.FAIL);
+			r.setResult(e.getMessage());
+		}
+		return ResponseEntity.ok(r);
+	}
+
+	/**
+	 * chips
+	 */
+	@RequestMapping(value = "/tushi")
+	public ResponseEntity<JsonResult> tushi(String code, String tushi) {
+		JsonResult r = new JsonResult();
+		try {
+			r.setResult("失败了哦");
+			r.setStatus(JsonResult.FAIL);
+
+			if (!"1".equals(tushi)) {
+				r.setResult("tushi=1 ?");
+			} else {
+				String name = stockBasicService.getCode(code).getName();
+				if (!stockBasicService.isTuiShi(name)) {// 同步数据显示已经退市，但本系统不是退市，则更新
+					stockBasicService.synName(code, "手动退");
+					r.setResult("成功");
+					r.setStatus(JsonResult.OK);
+				}else {
+					r.setResult(name);
+				}
+			}
 		} catch (Exception e) {
 			r.setStatus(JsonResult.FAIL);
 			r.setResult(e.getMessage());

@@ -54,18 +54,8 @@ public class ZXStockSyn implements InitializingBean {
 			int MAXCOUNT = 0;
 			int end = 0;
 			do {
-				Map<String, String> p = new HashMap<String, String>();
-				p.put("c.funcno", "21000");
-				p.put("c.version", "1");
-				p.put("c.sort", "1");
-				p.put("c.order", "1");
-				p.put("c.type", "0:2:9:18");
-				p.put("c.field", "1:2:22:23:24:3:8:16:21:31");
-				p.put("c.rowOfPage", pageSize + "");
-				p.put("c.curPage", curPage + "");
-				String rlt1 = HttpUtil.doPost3(url, p);
 				log.info("page =" + curPage);
-
+				String rlt1 = this.getUrl(pageSize, curPage);
 				JSONObject arlt = JSON.parseObject(rlt1);
 				MAXCOUNT = Integer.valueOf(arlt.getString("MAXCOUNT"));
 				String rlst2 = arlt.getString("BINDATA");
@@ -130,7 +120,66 @@ public class ZXStockSyn implements InitializingBean {
 		}
 	}
 
+	private String getUrl(int pageSize, int curPage) {
+		Map<String, String> p = new HashMap<String, String>();
+		p.put("c.funcno", "21000");
+		p.put("c.version", "1");
+		p.put("c.sort", "1");
+		p.put("c.order", "1");
+		p.put("c.type", "0:2:9:18");
+		p.put("c.field", "1:2:22:23:24:3:8:16:21:31");
+		p.put("c.rowOfPage", pageSize + "");
+		p.put("c.curPage", curPage + "");
+		return HttpUtil.doPost3(url, p);
+	}
+
+	public void test() {
+		boolean fetchAll = false;
+		int curPage = 1;
+		int pageSize = 3000;
+		int MAXCOUNT = 0;
+		int end = 0;
+
+		boolean tb = true;
+		String code = null;
+		String name = null;
+		do {
+
+			log.info("page =" + curPage);
+			String rlt1 = this.getUrl(pageSize, curPage);
+			JSONObject arlt = JSON.parseObject(rlt1);
+			MAXCOUNT = Integer.valueOf(arlt.getString("MAXCOUNT"));
+			end = MAXCOUNT / pageSize;
+			if (MAXCOUNT % pageSize != 0) {
+				end++;
+			}
+			if (tb) {
+				String rlst2 = arlt.getString("BINDATA");
+				JSONArray data = JSON.parseObject(rlst2).getJSONArray("results");
+
+				for (int i = 0; i < data.size(); i++) {
+					JSONArray row = data.getJSONArray(i);
+					name = row.getString(2);
+					code = row.getString(4);
+					
+					if("000666".equals(code)) {
+						System.err.println(code);
+						System.err.println(name);
+					}
+				}
+			}
+			log.info("end=" + end + "当前page=" + curPage + ",pageSize=" + pageSize + ",MAXCOUNT=" + MAXCOUNT);
+			if (curPage >= end) {
+				fetchAll = true;
+				log.info("已完成");
+				break;
+			}
+			curPage++;
+			ThreadsUtil.sleepRandomSecBetween1And5();
+		} while (!fetchAll);
+	}
+
 	public static void main(String[] args) {
-		new ZXStockSyn().stockListChk();
+		new ZXStockSyn().test();
 	}
 }
