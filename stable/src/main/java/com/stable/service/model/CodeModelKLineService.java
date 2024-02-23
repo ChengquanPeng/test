@@ -25,6 +25,7 @@ import com.stable.utils.CurrencyUitl;
 import com.stable.utils.DateUtil;
 import com.stable.utils.ErrorLogFileUitl;
 import com.stable.utils.TagUtil;
+import com.stable.utils.ThreadsUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.MonitorPoolTemp;
@@ -273,6 +274,22 @@ public class CodeModelKLineService {
 		} else {
 			newOne.setActMkv(mkv);
 		}
+	}
+
+//	@javax.annotation.PostConstruct
+	public void rerun() {
+		System.err.println("======== start1 ========");
+		new Thread(new Runnable() {
+			public void run() {
+				System.err.println("======== start2 ========");
+				int date = 20240222;
+				runKLineModel1(date);
+				System.err.println("======== end ========");
+				ThreadsUtil.sleepRandomSecBetween5And15Ths();
+				System.err.println("======== start3 ========");
+				System.exit(0);
+			}
+		}).start();
 	}
 
 //	@javax.annotation.PostConstruct
