@@ -403,7 +403,7 @@ public class CodeModelService {
 			// 自动监听
 			if (newOne.getPls() == 0) {// 未确定的自动监听，// 0不确定，1确定，2排除
 				pool.setMonitor(motp);
-				pool.setRealtime(1);
+				// pool.setRealtime(1);
 				pool.setOffline(1);
 				pool.setUpTodayChange(5);
 				if (isOk2 || isOk1) {// 确定性高
