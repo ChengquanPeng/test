@@ -38,17 +38,15 @@ public class QxService {
 //		 000017-20220526
 //		 600798-20201113
 //		 600187-002144
-	// 小旗形
+//	 小旗形
 //	 	 000582-20220331
-	// 大旗形
+//	 大旗形
 //		String[] codes = { "002612", "002900", "600789", "000678", "000025", "000017", "600798" };
 //		int[] dates = { 20200529, 20210315, 20200115, 20220610, 20220519, 20220526, 20201113 };
-	// 小旗形
+//	 小旗形
 //		String[] codes = { "000582", "000563", "601515" };
 //		int[] dates = { 20220331, 20220701, 20220701 };
-//		 十字星
-//		String[] codes = { "002752", "000498", "601117" };
-//		int[] dates = { 20211115, 20220105, 20210608 };
+
 //		String[] codes = { "603289" };
 //		int[] dates = { 20220707 };
 //		for (int i = 0; i < codes.length; i++) {
@@ -61,11 +59,10 @@ public class QxService {
 //			newOne.setCode(code);
 //			newOne.setPls(1);
 //			MonitorPoolTemp pool = new MonitorPoolTemp();
-//			qibao(date, newOne, pool, true, new StringBuffer(), new StringBuffer());
+//			qx(date, newOne, pool, true, 0);
 //			System.err.println(
 //					code + "=====" + "Qixing:" + newOne.getQixing() + ",大旗形:" + newOne.getDibuQixing() + ",小旗形:"
 //							+ newOne.getDibuQixing2() + ",十字星:" + newOne.getZyxing() + ",EX:" + newOne.getQixingStr());
-//			System.err.println(pool);
 //		}
 //		System.exit(0);
 //	}
@@ -140,7 +137,7 @@ public class QxService {
 				}
 			}
 		}
-		boolean dibq1 = dibuPreChk(newOne, res, true);// 2.是否底部旗形(旗形过滤)：1.在底部旗形，2.旗形前没怎么涨,3.是否更优的旗形:进一步判断底部旗形
+		boolean dibq1 = dibuPreChk(newOne, res);// 2.是否底部旗形(旗形过滤)：1.在底部旗形，2.旗形前没怎么涨,3.是否更优的旗形:进一步判断底部旗形
 		if (dibq1) {
 			pool.setShotPointDate(res.getDate());
 			newOne.setQixingStr(res.ex());
@@ -188,7 +185,7 @@ public class QxService {
 			d2tian = chk;
 		}
 
-		boolean dibq2 = dibuPreChk(newOne, res, true);// 2.是否底部旗形(旗形过滤)：1.在底部旗形，2.旗形前没怎么涨,3.是否更优的旗形:进一步判断底部旗形
+		boolean dibq2 = dibuPreChk(newOne, res);// 2.是否底部旗形(旗形过滤)：1.在底部旗形，2.旗形前没怎么涨,3.是否更优的旗形:进一步判断底部旗形
 		if (dibq2) {
 			pool.setShotPointDate(res.getDate());
 			newOne.setQixingStr(res.ex());
@@ -203,7 +200,7 @@ public class QxService {
 	}
 
 	// CHK Date 之前的验证
-	private boolean dibuPreChk(CodeBaseModel2 newOne, QiBaoInfo res, boolean isQx) {
+	private boolean dibuPreChk(CodeBaseModel2 newOne, QiBaoInfo res) {
 		if (res == null) {
 			return false;
 		}
@@ -245,7 +242,6 @@ public class QxService {
 		List<TradeHistInfoDaliy> tmpl = new LinkedList<TradeHistInfoDaliy>();
 		List<TradeHistInfoDaliy> tmpl2 = new LinkedList<TradeHistInfoDaliy>();
 		for (int i = list2.size() - 1; i >= 0; i--) {
-
 			// 10个交易日超过35%的
 			TradeHistInfoDaliy t = list2.get(i);
 			if (tmpl2.size() <= 10) {
@@ -291,33 +287,42 @@ public class QxService {
 			}
 		}
 
-		if (isQx) {
-			// 前10个交易
-			int up4 = 0;
-			for (int i = 1; i <= 10; i++) {// 排除大涨的哪天
-				TradeHistInfoDaliy nf = list.get(i);
-				if (nf.getTodayChangeRate() >= 7.5) {// 大涨直接排除
-					log.info("之前已经大涨7%");
-					return false;
-				}
-				// 上涨趋势前上涨，量大于这天，不要
-				if (nf.getLow() < res.getLow() && nf.getTodayChangeRate() > 0 && nf.getVolume() > res.getVol()) {
-					log.info("之前已经上涨放量");
-					return false;
-				}
-				if (nf.getTodayChangeRate() >= 4) {// 涨幅超过4个点，++
-					up4++;
-				}
-			}
-			// 前面几个交易日波动必须小于4个点（只允许1-2次）
-			if (up4 <= 1) {
-				return true;
-			}
-			log.info("前面几个交易日波动4%超1");
+		// 排除3：半年内已经拉大幅下跌的。
+		// 1.之前没有《连续25个交易日》跌幅超过50%的
+		List<TradeHistInfoDaliy> tmpl3 = list2.subList(0, 20);
+
+		TradeHistInfoDaliy topDate = tmpl3.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+		TradeHistInfoDaliy lowDate = tmpl3.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
+
+		// 25个交易日超过80%短期大幅震荡不要
+		if (CurrencyUitl.cutProfit(lowDate.getLow(), topDate.getHigh()) >= 48) {
+			log.info("20个交易日超过48%");
 			return false;
-		} else {
+		}
+
+		// 前10个交易
+		int up4 = 0;
+		for (int i = 1; i <= 10; i++) {// 排除大涨的哪天
+			TradeHistInfoDaliy nf = list.get(i);
+			if (nf.getTodayChangeRate() >= 7.5) {// 大涨直接排除
+				log.info("之前已经大涨7%");
+				return false;
+			}
+			// 上涨趋势前上涨，量大于这天，不要
+			if (nf.getLow() < res.getLow() && nf.getTodayChangeRate() > 0 && nf.getVolume() > res.getVol()) {
+				log.info("之前已经上涨放量");
+				return false;
+			}
+			if (nf.getTodayChangeRate() >= 4) {// 涨幅超过4个点，++
+				up4++;
+			}
+		}
+		// 前面几个交易日波动必须小于4个点（只允许1-2次）
+		if (up4 <= 1) {
 			return true;
 		}
+		log.info("前面几个交易日波动4%超1");
+		return false;
 	}
 
 	/**
