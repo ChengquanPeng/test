@@ -86,23 +86,23 @@ public class MonitorPoolTemp extends EsBase {
 
 	public String getMsg() {
 		StringBuffer sb = new StringBuffer();
-		if (realtime == 1) {
-			sb.append("在线监听,");
-		}
-		if (offline == 1) {
-			sb.append("离线监听,");
-		}
+//		if (realtime == 1) {
+//			sb.append("在线监听,");
+//		}
+//		if (offline == 1) {
+//			sb.append("离线监听,");
+//		}
 		if (upPrice > 0) {
-			sb.append("股价上涨到" + upPrice + ",");
+			sb.append("监听股价上涨到" + upPrice + ",");
 		}
 		if (upTodayChange > 0) {
-			sb.append("涨幅" + upTodayChange + "%,");
+			sb.append("监听涨幅" + upTodayChange + "%,");
 		}
 		if (downPrice > 0) {
-			sb.append("股价下跌到" + downPrice + ",");
+			sb.append("监听股价下跌到" + downPrice + ",");
 		}
 		if (downTodayChange > 0) {
-			sb.append("跌幅" + downTodayChange + "%,");
+			sb.append("监听跌幅" + downTodayChange + "%,");
 		}
 		return sb.toString();
 	}
