@@ -18,6 +18,7 @@ import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.FinanceService;
+import com.stable.service.MyUrlService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.WebModelService;
 import com.stable.spider.eastmoney.EastmoneySpider;
@@ -228,8 +229,8 @@ public class CodeController {
 			PrintWriter w = response.getWriter();
 
 			if (isOk) {
-				w.write("<a href='https://183.56.196.175:9999/html/" + code + ".jpg'>code:" + code + ",endDate=" + date
-						+ ",days=" + days + ",now=" + System.currentTimeMillis());
+				w.write("<a href='" + myUrlService.getUrl1_Pic(code) + "'>code:" + code + ",endDate=" + date + ",days="
+						+ days + ",now=" + System.currentTimeMillis());
 				w.write("</a>");
 			} else {
 				w.write(code + ",生成失败");
@@ -238,4 +239,7 @@ public class CodeController {
 			e.printStackTrace();
 		}
 	}
+
+	@Autowired
+	private MyUrlService myUrlService;
 }

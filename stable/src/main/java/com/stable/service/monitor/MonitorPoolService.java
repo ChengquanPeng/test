@@ -35,6 +35,7 @@ import com.stable.service.ChipsZfService;
 import com.stable.service.ConceptService;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.FinanceService;
+import com.stable.service.MyUrlService;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.WebModelService;
 import com.stable.service.model.prd.UserService;
@@ -93,6 +94,8 @@ public class MonitorPoolService {
 	private UserService userService;
 	@Autowired
 	private FinanceService financeService;
+	@Autowired
+	private MyUrlService myUrlService;
 
 //	@javax.annotation.PostConstruct
 //	public void init() {
@@ -677,15 +680,17 @@ public class MonitorPoolService {
 					List<String> ZengFaAuto = new LinkedList<String>();
 					List<String> Other = new LinkedList<String>();
 					for (MonitorPoolTemp cp : list) {
+						String code = cp.getCode();
 						if (cp.getDownPrice() <= 0 && cp.getDownTodayChange() <= 0 && cp.getUpPrice() <= 0
 								&& cp.getUpTodayChange() <= 0) {
-							log.info("{} 没有离线价格监听", cp.getCode());
+							log.info("{} 没有离线价格监听", code);
 							continue;
 						}
-						TradeHistInfoDaliyNofq d = map.get(cp.getCode());
+						TradeHistInfoDaliyNofq d = map.get(code);
 						if (d != null) {
 							if (MonitoringUitl.isOk(cp, d.getTodayChangeRate(), d.getHigh(), d.getLow())) {
-								String s = stockBasicService.getCodeName2(cp.getCode()) + " "
+								String s = "<a target='_blank' href='" + myUrlService.getUrl2_manual(code) + "'>"
+										+ stockBasicService.getCodeName2(code) + "</a> "
 										+ MonitorType.getCodeName(cp.getMonitor()) + " " //
 										+ cp.getMsg() //
 										+ " 今日涨幅:" + d.getTodayChangeRate() + "% 收盘价:" + d.getClosed()//
