@@ -26,6 +26,7 @@ public class Constant {
 	public static final String AUTO_MONITOR = "Auto-Monitor:";
 
 	public static final String TUI_SHI = "退";
+	public static final String ST = "ST";
 
 	public static final int END_DATE = 20140101;// 6年
 

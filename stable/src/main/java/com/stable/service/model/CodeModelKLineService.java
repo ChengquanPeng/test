@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.stable.constant.Constant;
 import com.stable.es.dao.base.EsCodeBaseModel2Dao;
 import com.stable.es.dao.base.MonitorPoolUserDao;
 import com.stable.service.DaliyBasicHistroyService;
@@ -141,6 +140,19 @@ public class CodeModelKLineService {
 		}
 		listLast.add(newOne);
 
+		// 排除3:排除退市股票&ST
+		if (stockBasicService.is_ST_And_TuiShi(s.getName(), code)) {
+			qbQxService.setQxRes(newOne, pool, true, true);
+			qbQxService.setSzxRes(newOne, pool);
+			szxService.setSzxRes(newOne, pool);
+			v1XipanService.resetXiPan(newOne);
+			nxService.resetNxiPan(newOne);
+			pool.setXpPrice(0);
+			newOne.setShooting11(0);
+			newOne.setShootingw(0);
+			return;
+		}
+
 		// N年未大涨
 		noup(online3Year, newOne, s.getList_date());
 		// ==============技术面-量价==============
@@ -180,22 +192,15 @@ public class CodeModelKLineService {
 			newOne.setShooting11(0);
 		}
 		// 起爆点
-		if (stTuiShi(newOne)) {
-			qbQxService.setQxRes(newOne, pool, true, true);
-			qbQxService.setSzxRes(newOne, pool);
-			szxService.setSzxRes(newOne, pool);
-			v1XipanService.resetXiPan(newOne);
-			nxService.resetNxiPan(newOne);
-		} else {
-			try {
-				qbQxService.qx(tradeDate, newOne, pool, isSamll, nextTadeDate);
-				szxService.szx(tradeDate, newOne, pool, isSamll);
-				v1XipanService.xipanQb(tradeDate, newOne, isSamll, nextTadeDate);
-				nxService.nxipan(tradeDate, newOne, nextTadeDate);
-			} catch (Exception e) {
-				ErrorLogFileUitl.writeError(e, s.getCode(), tradeDate + "", "起爆");
-			}
+		try {
+			qbQxService.qx(tradeDate, newOne, pool, isSamll, nextTadeDate);
+			szxService.szx(tradeDate, newOne, pool, isSamll);
+			v1XipanService.xipanQb(tradeDate, newOne, isSamll, nextTadeDate);
+			nxService.nxipan(tradeDate, newOne, nextTadeDate);
+		} catch (Exception e) {
+			ErrorLogFileUitl.writeError(e, s.getCode(), tradeDate + "", "起爆");
 		}
+
 		if (newOne.getPrice3m() > 0) {
 			pool.setXpPrice(newOne.getPrice3m());
 		} else {
@@ -239,16 +244,6 @@ public class CodeModelKLineService {
 		}
 	}
 
-	// 排除3:排除退市股票&ST
-	public boolean stTuiShi(CodeBaseModel2 newOne) {
-		String name = stockBasicService.getCodeName(newOne.getCode());
-		if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI) || name.contains("ST")) {
-			log.info("ST或退市,{},{}", newOne.getCode(), name);
-			return true;
-		}
-		return false;
-	}
-
 	private void cutMkv(CodeBaseModel2 newOne, StockBaseInfo s) {
 		String code = newOne.getCode();
 		// 最新收盘情况
@@ -282,7 +277,7 @@ public class CodeModelKLineService {
 		new Thread(new Runnable() {
 			public void run() {
 				System.err.println("======== start2 ========");
-				int date = 20240222;
+				int date = 20240223;
 				runKLineModel1(date);
 				System.err.println("======== end ========");
 				ThreadsUtil.sleepRandomSecBetween5And15Ths();

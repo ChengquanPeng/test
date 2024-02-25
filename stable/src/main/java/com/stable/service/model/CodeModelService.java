@@ -206,7 +206,12 @@ public class CodeModelService {
 		newOne.setDate(tradeDate);
 		listLast.add(newOne);
 		boolean onlineYear = stockBasicService.onlinePreYearChk(code, pre1Year);
-		if (!onlineYear) {// 不买卖新股
+		// 不买卖新股
+		if (!onlineYear) {
+			return;
+		}
+		// -退市股票-
+		if (stockBasicService.isTuiShi(s.getName())) {
 			return;
 		}
 		// 突然大宗有效期重置
@@ -246,10 +251,10 @@ public class CodeModelService {
 		if (newOne.getPls() == 0) {
 			this.monitorPoolService.reset(pool);
 		}
-		boolean online4Year = stockBasicService.onlinePreYearChk(code, pre3Year);
+		boolean online3Year = stockBasicService.onlinePreYearChk(code, pre3Year);
 
-		// 以下是系统指标，没有4年直接退出
-		if (!online4Year) {// 4年以下，退出
+		// 以下是系统指标，没有3年直接退出
+		if (!online3Year) {// 3年以下，退出
 			return;
 		}
 

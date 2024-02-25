@@ -137,8 +137,6 @@ public class StockBasicService {
 		save(b);
 	}
 
-	private String tui = "退";
-
 	public void deleteTuiShi() {
 		List<StockBaseInfo> removelist = new LinkedList<StockBaseInfo>();
 		Iterator<StockBaseInfo> it = esStockBaseInfoDao.findAll().iterator();
@@ -160,7 +158,16 @@ public class StockBasicService {
 	}
 
 	public boolean isTuiShi(String name) {
-		return (name.startsWith(tui) || name.endsWith(tui));
+		return (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI));
+	}
+
+	// 排除3:排除退市股票&ST
+	public boolean is_ST_And_TuiShi(String name, String code) {
+		if (name.startsWith(Constant.TUI_SHI) || name.endsWith(Constant.TUI_SHI) || name.contains(Constant.ST)) {
+			log.info("ST或退市,{},{}", code, name);
+			return true;
+		}
+		return false;
 	}
 
 	public void synBaseStockInfoCircZb(String code, double circZb) {

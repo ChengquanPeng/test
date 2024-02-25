@@ -8,6 +8,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.stable.constant.Constant;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.enums.MonitorType;
 import com.stable.service.DaliyTradeHistroyService;
@@ -33,7 +34,7 @@ public class Sort1ModeService {
 			double maxPrice = this.daIs30DayTodayPriceOk(cbm.getCode(), date, sort1checkLine);
 			if (maxPrice > 0.0) {// OK
 				String name = stockBasicService.getCodeName2(cbm.getCode());
-				if (!name.contains("ST")) {
+				if (!name.contains(Constant.ST)) {
 					cbm.setShooting5(DateUtil.formatYYYYMMDDReturnInt(DateUtil.addDate(new Date(), 30)));// 30天,一定要尽快新高
 					if (mp.getMonitor() == MonitorType.NO.getCode() && cbm.getPls() != 2) {
 						mp.setUpPrice(maxPrice);
