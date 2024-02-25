@@ -334,7 +334,7 @@ public class MonitorPoolService {
 			List<MonitorPoolTemp> t2 = page21.getContent();
 			listall.addAll(t2);
 		}
-		// 4.洗盘起爆
+		// 4.洗盘起爆:V1 & N型  -> Price3m -> pool.setXpPrice(newOne.getPrice3m());
 		BoolQueryBuilder bqb4 = QueryBuilders.boolQuery();
 		bqb4.must(QueryBuilders.matchPhraseQuery("userId", Constant.MY_ID));
 		bqb4.must(QueryBuilders.rangeQuery("xpPrice").gt(0));

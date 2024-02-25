@@ -16,7 +16,10 @@ import com.stable.utils.TagUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 
+import lombok.extern.log4j.Log4j2;
+
 @Service
+@Log4j2
 public class V2NXipanService {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
@@ -27,6 +30,8 @@ public class V2NXipanService {
 	public void test() {
 		String[] codes = { "600072", "002593" };
 		int[] dates = { 20230424, 20220726 };
+//		String[] codes = { "600072", "002593", "002445", "603608" };
+//		int[] dates = { 20230424, 20220726, 20240222, 20240222 };
 
 		for (int i = 0; i < codes.length; i++) {
 			String code = codes[i];
@@ -70,8 +75,9 @@ public class V2NXipanService {
 		List<TradeHistInfoDaliy> lt2 = list5.stream().filter(s -> s.getTodayChangeRate() >= 9.8)
 				.collect(Collectors.toList());
 
-		boolean isqb = false;
 		boolean chk1 = false;
+		boolean chk2 = false;
+		boolean isqb = false;
 		// 5.0%以上不能超过5天，涨停10%不能超过3天
 		if (lt1.size() < 5 || lt2.size() < 3) {
 			chk1 = true;
@@ -134,13 +140,13 @@ public class V2NXipanService {
 					for (int xid : datesXi) {
 						// System.err.println("xid:" + xid);
 						if (lad <= xid) {
-							isqb = true;
+							chk2 = true;
 							// chkLadate = lad;
 							// chkXidate = xid;
 							break;
 						}
 					}
-					if (isqb) {
+					if (chk2) {
 						break;
 					}
 				}
@@ -151,6 +157,16 @@ public class V2NXipanService {
 			// System.err.println("chkXidate:" + chkXidate);
 			// }
 		}
+
+		if (chk2) {
+			List<TradeHistInfoDaliy> list_asc = new LinkedList<TradeHistInfoDaliy>();
+			// 翻转顺序，为正序。
+			for (int i = list.size(); i > 0; i--) {
+				list_asc.add(list.get(i - 1));
+			}
+			isqb = isDanyanBuPo(list_asc);
+		}
+
 		if (isqb) {
 			if (newOne.getTipNxing() == 0) {
 				newOne.setTipNxing(nextTadeDate);
@@ -166,6 +182,90 @@ public class V2NXipanService {
 			}
 		} else {
 			resetNxiPan(newOne);
+		}
+	}
+
+	// 是否丹阳不破
+	private boolean isDanyanBuPo(List<TradeHistInfoDaliy> list) {
+		for (int k = datesLa.size() - 1; k >= 0; k--) {// 最后拉升开始匹配
+			int lad = datesLa.get(k);
+			// System.err.println("chk:" + lad);
+			for (int xid : datesXi) {
+				// System.err.println("xid:" + xid);
+				if (lad <= xid) {
+					if (!getLa3DaysMinClosedPriceChk(lad, list)) {
+						// 丹阳不破检查不合格。
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	private boolean getLa3DaysMinClosedPriceChk(int chkDate, List<TradeHistInfoDaliy> list) {
+//		List<TradeHistInfoDaliy> t = LList<TradeHistInfoDaliy>();
+		List<TradeHistInfoDaliy> befor = null;
+		List<TradeHistInfoDaliy> aft = null;
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i).getDate() == chkDate) {
+				if (i <= 2) {
+					befor = list.subList(0, i + 1);
+				} else {
+					befor = list.subList(i - 2, i + 1);
+				}
+				aft = list.subList(i + 1, list.size());
+			}
+		}
+		if (befor != null) {
+			double min = befor.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get().getLow();
+			int inc = 0;
+			for (TradeHistInfoDaliy t : aft) {
+				if (min > t.getClosed()) {
+					inc++;
+				}
+			}
+			if (inc >= 3) {
+				log.info("N型丹阳不破，破了" + inc + "次,chkDate=" + chkDate + ",minPrice=" + min);// 返回false
+				return false;
+			}
+			return true;// 无丹阳不破
+		}
+		return false;
+	}
+
+	public static void main(String[] args) {
+
+		List<Integer> list = new LinkedList<>();
+		for (int i = 0; i < 20; i++) {
+			list.add(i);
+		}
+		int chkDate = 20;
+		List<Integer> res = null;
+		List<Integer> aft = null;
+//			List<TradeHistInfoDaliy> t = LList<TradeHistInfoDaliy>();
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i) == chkDate) {
+				if (i <= 2) {
+					res = list.subList(0, i + 1);
+				} else {
+					res = list.subList(i - 2, i + 1);
+				}
+
+				aft = list.subList(i + 1, list.size());
+			}
+		}
+
+		if (res != null) {
+			for (int i = 0; i < res.size(); i++) {
+				System.err.println(res.get(i));
+			}
+			System.err.println("===========");
+			for (int i = 0; i < aft.size(); i++) {
+				System.err.println(aft.get(i));
+			}
+		} else {
+			System.err.println("res is null");
 		}
 	}
 
