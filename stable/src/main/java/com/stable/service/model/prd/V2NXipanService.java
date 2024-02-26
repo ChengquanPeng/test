@@ -240,6 +240,12 @@ public class V2NXipanService {
 		for (int i = 0; i < 20; i++) {
 			list.add(i);
 		}
+		
+		List<Integer> t1 = list.subList(1, 11);
+		for (int i = 0; i < t1.size(); i++) {
+			System.err.println(t1.get(i));
+		}
+		System.err.println("===========");
 		int chkDate = 20;
 		List<Integer> res = null;
 		List<Integer> aft = null;

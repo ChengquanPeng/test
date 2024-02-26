@@ -28,7 +28,7 @@ public class QxService {
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 
 //	@javax.annotation.PostConstruct
-//	public void test() {
+	public void test() {
 //		 大旗形
 //		 002612-20200529
 //		 002900-20210315
@@ -41,31 +41,32 @@ public class QxService {
 //	 小旗形
 //	 	 000582-20220331
 //	 大旗形
-//		String[] codes = { "002612", "002900", "600789", "000678", "000025", "000017", "600798" };
-//		int[] dates = { 20200529, 20210315, 20200115, 20220610, 20220519, 20220526, 20201113 };
+//		String[] codes = { "002612", "600789", "000678", "000025", "000017", "600798", "002900" };
+//		int[] dates = { 20200529, 20200115, 20220610, 20220519, 20220526, 20201113, 20210315 };
+
 //	 小旗形
 //		String[] codes = { "000582", "000563", "601515" };
 //		int[] dates = { 20220331, 20220701, 20220701 };
 
-//		String[] codes = { "603289" };
-//		int[] dates = { 20220707 };
-//		for (int i = 0; i < codes.length; i++) {
-//			String code = codes[i];
-//			int date = dates[i];
-//
-//			CodeBaseModel2 newOne = new CodeBaseModel2();
-//			newOne.setZfjjup(2);
-//			newOne.setZfjjupStable(1);
-//			newOne.setCode(code);
-//			newOne.setPls(1);
-//			MonitorPoolTemp pool = new MonitorPoolTemp();
-//			qx(date, newOne, pool, true, 0);
-//			System.err.println(
-//					code + "=====" + "Qixing:" + newOne.getQixing() + ",大旗形:" + newOne.getDibuQixing() + ",小旗形:"
-//							+ newOne.getDibuQixing2() + ",十字星:" + newOne.getZyxing() + ",EX:" + newOne.getQixingStr());
-//		}
-//		System.exit(0);
-//	}
+		String[] codes = { "600217" };
+		int[] dates = { 20240223 };
+		for (int i = 0; i < codes.length; i++) {
+			String code = codes[i];
+			int date = dates[i];
+
+			CodeBaseModel2 newOne = new CodeBaseModel2();
+			newOne.setZfjjup(2);
+			newOne.setZfjjupStable(1);
+			newOne.setCode(code);
+			newOne.setPls(1);
+			MonitorPoolTemp pool = new MonitorPoolTemp();
+			qx(date, newOne, pool, true, 0);
+			System.err.println(
+					code + "=====" + "Qixing:" + newOne.getQixing() + ",大旗形:" + newOne.getDibuQixing() + ",小旗形:"
+							+ newOne.getDibuQixing2() + ",十字星:" + newOne.getZyxing() + ",EX:" + newOne.getQixingStr());
+		}
+		System.exit(0);
+	}
 
 	public void qx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, int nextTadeDate) {
 		if (!TagUtil.stockRange(isSamll, newOne)) {
@@ -287,14 +288,27 @@ public class QxService {
 			}
 		}
 
+		// 排除4：前面8个交易日（本来是2周）的最高价，没有现在高,
+		List<TradeHistInfoDaliy> tmpl4 = list2.subList(0, 9);// 9为"哈三联,北湾港湾"特别设置,实际检查日期为前面8天(0是当天chkdate，最高价可能是当天.)
+		TradeHistInfoDaliy topDate4 = tmpl4.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+		// 最高价超过当前价
+		if (topDate4.getHigh() > res.getPrice()) {
+			log.info("topDate1-10,date=" + topDate4.getDate() + ",high price:" + topDate4.getHigh() + ",chk price:"
+					+ res.getPrice());
+			log.info("10个交易日最高价超过当前最高价。（下跌反弹不算）");
+			return false;
+		}
+
 		// 排除3：半年内已经拉大幅下跌的。
 		// 1.之前没有《连续25个交易日》跌幅超过50%的
 		List<TradeHistInfoDaliy> tmpl3 = list2.subList(0, 20);
-
 		TradeHistInfoDaliy topDate = tmpl3.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
 		TradeHistInfoDaliy lowDate = tmpl3.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
 
 		// 25个交易日超过80%短期大幅震荡不要
+//		log.info("lowDate.getLow" + lowDate.getDate() + "|" + lowDate.getLow() + "," + "topDate.getHigh:"
+//				+ topDate.getDate() + "|" + topDate.getHigh() + ",%:"
+//				+ CurrencyUitl.cutProfit(lowDate.getLow(), topDate.getHigh()));
 		if (CurrencyUitl.cutProfit(lowDate.getLow(), topDate.getHigh()) >= 48) {
 			log.info("20个交易日超过48%");
 			return false;
