@@ -12,9 +12,12 @@ import org.springframework.stereotype.Service;
 import com.stable.constant.EsQueryPageUtil;
 import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.StockBasicService;
+import com.stable.service.model.WebModelService;
+import com.stable.utils.CurrencyUitl;
 import com.stable.utils.TagUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.TradeHistInfoDaliy;
+import com.stable.vo.http.req.ModelReq;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -26,13 +29,18 @@ public class V2NXipanService {
 	@Autowired
 	private StockBasicService stockBasicService;
 
+	@Autowired
+	private WebModelService webModelService;
+
 //	@javax.annotation.PostConstruct
 	public void test() {
-		String[] codes = { "600072", "002593" };
-		int[] dates = { 20230424, 20220726 };
-//		String[] codes = { "600072", "002593", "002445", "603608" };
-//		int[] dates = { 20230424, 20220726, 20240222, 20240222 };
-
+		String[] codes1 = { "600072", "002593", "300238" };
+		int[] dates1 = { 20230424, 20220726, 20230510 };
+//		String[] codes1 = { "600072", "002593", "002445", "603608" };
+//		int[] dates1 = { 20230424, 20220726, 20240222, 20240222 };
+//		String[] codes1 = { "300238" };
+//		int[] dates1 = { 20230510 };
+		fortestingOnly(codes1, dates1);
 		for (int i = 0; i < codes.length; i++) {
 			String code = codes[i];
 			int date = dates[i];
@@ -44,15 +52,45 @@ public class V2NXipanService {
 			newOne.setPls(1);
 			newOne.setHolderNumP5(50);
 			newOne.setActMkv(100);
-			System.err.println("==========" + stockBasicService.getCodeName2(code) + "==========");
+//			System.err.println("==========" +  + "==========");
 			nxipan(date, newOne, 0);
-			System.err.println(code + " ==========> " + (newOne.getNxipan() > 0));
+			System.err.println(stockBasicService.getCodeName2(code) + " ==========> " + (newOne.getNxipan() > 0));
 		}
 		System.exit(0);
 	}
 
+	String[] codes = { "600072", "002593", "300238" };
+	int[] dates = { 20230424, 20220726, 20230510 };
+
+	private void fortestingOnly(String[] c, int[] d) {
+		ModelReq mr = new ModelReq();
+		mr.setNxipan(1);
+		List<CodeBaseModel2> list = new LinkedList<CodeBaseModel2>();
+		list = webModelService.getList(mr, EsQueryPageUtil.queryPage9999);
+		System.err.println("list:size:" + list.size());
+		if (list != null && list.size() > 0) {
+			String[] t1 = new String[c.length + list.size()];
+			int[] t2 = new int[t1.length];
+			for (int i = 0; i < c.length; i++) {
+				t1[i] = c[i];
+			}
+			for (int i = 0; i < d.length; i++) {
+				t2[i] = d[i];
+			}
+
+			for (int i = c.length; i < list.size() + c.length; i++) {
+				t1[i] = list.get(i - c.length).getCode();
+				t2[i] = 20240308;
+			}
+
+			codes = t1;
+			dates = t2;
+		}
+	}
+
 	LinkedList<Integer> datesXi = new LinkedList<Integer>();
 	LinkedList<Integer> datesLa = new LinkedList<Integer>();
+	LinkedList<Double> datesLaPrice = new LinkedList<Double>();
 	LinkedList<String> incstr = new LinkedList<String>();
 
 	/** 起爆-Pre突破 */
@@ -88,6 +126,7 @@ public class V2NXipanService {
 			int datet = 0;
 			datesXi.clear();
 			datesLa.clear();
+			datesLaPrice.clear();
 			incstr.clear();
 			// -找出连续下跌3、4天的洗盘票
 			for (int i = list.size() - 1; i >= 0; i--) {
@@ -98,8 +137,8 @@ public class V2NXipanService {
 					inc++;
 				} else {
 
-					// 连续洗盘N天
-					if (inc >= 4) {
+					// 连续洗盘3天
+					if (inc >= 3) {
 						datesXi.add(datet);
 						incstr.add(datet + ":" + inc);
 						// System.err.println(incstr.getLast());
@@ -121,11 +160,13 @@ public class V2NXipanService {
 				}
 				if (rates.size() == 3) {
 					if (rates.stream().mapToDouble(TradeHistInfoDaliy::getTodayChangeRate).sum() > 15) {
-						int la = rates.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get()
-								.getDate();
+						TradeHistInfoDaliy td = rates.stream()
+								.max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh)).get();
+						int la = td.getDate();
 						// System.err.println(la);
 						if (!datesLa.contains(la)) {
 							datesLa.add(la);
+							datesLaPrice.add(td.getHigh());
 						}
 					}
 				}
@@ -133,12 +174,12 @@ public class V2NXipanService {
 			// -找出拉伸后有洗盘的情况
 			// int chkLadate = 0;
 			// int chkXidate = 0;
+
 			if (datesLa.size() > 0) {
 				for (int k = datesLa.size() - 1; k >= 0; k--) {// 最后拉升开始匹配
 					int lad = datesLa.get(k);
-					// System.err.println("chk:" + lad);
 					for (int xid : datesXi) {
-						// System.err.println("xid:" + xid);
+						// System.err.println("lad:" + lad + " ,xid:" + xid);
 						if (lad <= xid) {
 							chk2 = true;
 							// chkLadate = lad;
@@ -151,11 +192,6 @@ public class V2NXipanService {
 					}
 				}
 			}
-			// 洗盘不超过最高
-			// if (isqb) {
-			// System.err.println("chkLadate:" + chkLadate);
-			// System.err.println("chkXidate:" + chkXidate);
-			// }
 		}
 
 		if (chk2) {
@@ -164,7 +200,11 @@ public class V2NXipanService {
 			for (int i = list.size(); i > 0; i--) {
 				list_asc.add(list.get(i - 1));
 			}
-			isqb = isDanyanBuPo(list_asc);
+			boolean t = isDanyanBuPo(list_asc);
+
+			if (t) {
+				isqb = predibuChk(code);
+			}
 		}
 
 		if (isqb) {
@@ -183,6 +223,41 @@ public class V2NXipanService {
 		} else {
 			resetNxiPan(newOne);
 		}
+	}
+
+	private boolean predibuChk(String code) {
+		// 排除3：半年内已经拉大幅下跌的。
+		// 1.之前没有《连续20个交易日》振幅（涨/跌）超过45%的
+		for (int k = datesLa.size() - 1; k >= 0; k--) {
+			int la = datesLa.get(k);
+			List<TradeHistInfoDaliy> list = daliyTradeHistroyService.queryListByCodeWithLastQfq(code, 0, la,
+					EsQueryPageUtil.queryPage60, SortOrder.DESC);
+			List<TradeHistInfoDaliy> list2 = list.subList(0, 20);
+
+			// 排除3：半年内已经拉大幅下跌的。
+			// 1.之前没有《连续25个交易日》跌幅超过50%的
+			TradeHistInfoDaliy topDate = list2.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh))
+					.get();
+			TradeHistInfoDaliy lowDate = list2.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow))
+					.get();
+
+			if (CurrencyUitl.cutProfit(lowDate.getLow(), topDate.getHigh()) >= 48) {
+				log.info("20个交易日振幅(涨/跌)超过48%");
+				return false;
+			}
+			// 排除4：前面45个交易日（2个月）的最高价，没有现在高。
+			List<TradeHistInfoDaliy> tmpl4 = list.subList(0, 45);
+			TradeHistInfoDaliy topDate4 = tmpl4.stream().max(Comparator.comparingDouble(TradeHistInfoDaliy::getHigh))
+					.get();
+			// 最高价超过当前价
+			if (topDate4.getHigh() > datesLaPrice.get(k)) {
+				log.info("topDate1-10,date=" + topDate4.getDate() + ",high price:" + topDate4.getHigh() + ",chk price:"
+						+ datesLaPrice.get(k));
+				log.info("前面45个交易日（2个月）的最高价，没有现在高。（下跌反弹不算）");
+				return false;
+			}
+		}
+		return true;
 	}
 
 	// 是否丹阳不破
@@ -240,7 +315,7 @@ public class V2NXipanService {
 		for (int i = 0; i < 20; i++) {
 			list.add(i);
 		}
-		
+
 		List<Integer> t1 = list.subList(1, 11);
 		for (int i = 0; i < t1.size(); i++) {
 			System.err.println(t1.get(i));
