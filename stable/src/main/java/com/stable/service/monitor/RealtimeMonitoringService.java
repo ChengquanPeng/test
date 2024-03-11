@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.stable.constant.Constant;
-import com.stable.constant.RedisConstant;
 import com.stable.service.ConceptService;
 import com.stable.service.StockBasicService;
 import com.stable.service.TradeCalService;
@@ -24,7 +23,6 @@ import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.spider.tick.TencentTickReal;
 import com.stable.utils.DateUtil;
 import com.stable.utils.OnlineCodeGen;
-import com.stable.utils.RedisUtil;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.resp.CodeBaseModelResp;
@@ -50,8 +48,6 @@ public class RealtimeMonitoringService {
 //	private Prd1Service prd1Service;
 //	@Autowired
 //	private TickService tickService;
-	@Autowired
-	private RedisUtil redisUtil;
 	@Autowired
 	private UserService userService;
 	@Autowired
@@ -98,7 +94,7 @@ public class RealtimeMonitoringService {
 			// 获取监听列表-常规
 			List<UserInfo> ulist = userService.getUserListForMonitorS1();
 			for (UserInfo u : ulist) {
-				List<MonitorPoolTemp> tl = monitorPoolService.getPoolListForMonitor(u.getId(), 1, 0, getMonisort1());
+				List<MonitorPoolTemp> tl = monitorPoolService.getPoolListForMonitor(u.getId(), 1, 0);
 				if (tl != null) {
 					for (MonitorPoolTemp t : tl) {
 						if (t.getDownPrice() <= 0 && t.getDownTodayChange() <= 0 && t.getUpPrice() <= 0
@@ -143,8 +139,8 @@ public class RealtimeMonitoringService {
 					}
 				}
 			}
-			MsgPushServer.pushToSystem("实时监听", "监听总数:[" + allmap.size() + "],牛熊环境开启:[" + getMonisort1() + "],短线实际总数["
-					+ list.size() + "],监听失败[" + failtt + "]");
+			MsgPushServer.pushToSystem("实时监听",
+					"监听总数:[" + allmap.size() + "],短线实际总数[" + list.size() + "],监听失败[" + failtt + "]");
 
 			// ====产品1：三五天 => 买点 === 卖点 ====
 			TencentTickReal.tradeDate = idate;
@@ -204,9 +200,5 @@ public class RealtimeMonitoringService {
 				map.get(code).stop();
 			}
 		}
-	}
-
-	private boolean getMonisort1() {
-		return redisUtil.get(RedisConstant.MONI_SORT1, 1) == 1;
 	}
 }

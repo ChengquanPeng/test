@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public enum MonitorType {
 	NO(0, "无"), MANUAL(3, "人工"), Reduce(6, "底部小票减持"), PreZengFa(7, "底部大票定增"), ZengFaAuto(8, "底部小票定增"),
-	SORT1(11, "短线2:确定极速拉升带小平台新高？"), DZJY(41, "底部小票大宗"), SmallLow(40, "底部优质小票");
+	DZJY(41, "底部小票大宗"), SmallLow(40, "底部优质小票");
 	private int code;
 	private String desc;
 

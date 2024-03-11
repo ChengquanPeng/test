@@ -334,7 +334,7 @@ public class MonitorPoolService {
 			List<MonitorPoolTemp> t2 = page21.getContent();
 			listall.addAll(t2);
 		}
-		// 4.洗盘起爆:V1 & N型  -> Price3m -> pool.setXpPrice(newOne.getPrice3m());
+		// 4.洗盘起爆:V1 & N型 -> Price3m -> pool.setXpPrice(newOne.getPrice3m());
 		BoolQueryBuilder bqb4 = QueryBuilders.boolQuery();
 		bqb4.must(QueryBuilders.matchPhraseQuery("userId", Constant.MY_ID));
 		bqb4.must(QueryBuilders.rangeQuery("xpPrice").gt(0));
@@ -363,7 +363,7 @@ public class MonitorPoolService {
 	/**
 	 * 监听列表-实时
 	 */
-	public List<MonitorPoolTemp> getPoolListForMonitor(long userId, int realtime, int offline, boolean sort1) {
+	public List<MonitorPoolTemp> getPoolListForMonitor(long userId, int realtime, int offline) {
 		int pageNum = EsQueryPageUtil.queryPage9999.getPageNum();
 		int size = EsQueryPageUtil.queryPage9999.getPageSize();
 		log.info("queryPage pageNum={},size={}", pageNum, size);
@@ -380,9 +380,7 @@ public class MonitorPoolService {
 		if (userId > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("userId", userId));
 		}
-		if (sort1) {// 熊市开关
-			bqb.mustNot(QueryBuilders.matchPhraseQuery("monitor", MonitorType.SORT1.getCode()));
-		}
+
 		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
 		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
 
@@ -675,7 +673,7 @@ public class MonitorPoolService {
 			Map<String, TradeHistInfoDaliyNofq> map = this.getPoolMap2(listNofq);
 			List<UserInfo> ulist = userService.getUserListForMonitorS1();
 			for (UserInfo u : ulist) {
-				List<MonitorPoolTemp> list = this.getPoolListForMonitor(u.getId(), 0, 1, false);
+				List<MonitorPoolTemp> list = this.getPoolListForMonitor(u.getId(), 0, 1);
 				if (list != null) {
 					List<String> ZengFaAuto = new LinkedList<String>();
 					List<String> Other = new LinkedList<String>();
