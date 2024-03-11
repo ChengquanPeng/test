@@ -129,8 +129,7 @@
 					type="checkbox" id="zyxing" />&nbsp;&nbsp;
 				</font>成交异动:<input type="checkbox" id="breakingVol" />&nbsp;&nbsp;K线攻击形态:<input
 					type="checkbox" id="kline" />&nbsp;&nbsp;接近1年新高:<input
-					type="checkbox" id="pre1Year" />&nbsp;&nbsp;股价极速拉升(妖股?龙抬头?):<input
-					type="checkbox" id="shooting5" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;白马走势(大票):<input
+					type="checkbox" id="pre1Year" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;白马走势(大票):<input
 					type="checkbox" id="whiteHors" />
 			</div>
 
@@ -143,15 +142,15 @@
 						<option value="1">拉升吸筹?</option>
 						<option value="4">高质押机会</option>
 					</select>&nbsp;&nbsp; 排序：<select id="gsort">
+						<option value="12" selected="selected">大宗占比</option>
+						<option value="19">小票未涨stable</option>
+						<option value="7">小票未涨</option>
 						<option value="9">人均持股</option>
 						<option value="3">资产收益率ttm</option>
 						<option value="6">大股东持股</option>
-						<option value="7">小票未涨</option>
-						<option value="19">小票未涨stable</option>
 						<option value="8">低于增发价</option>
 						<option value="10">大宗2月</option>
 						<option value="11">大宗1年</option>
-						<option value="12" selected="selected">大宗占比</option>
 						<option value="13">持股人数变化</option>
 						<option value="14">减持占比</option>
 						<option value="15">旗形倒序</option>
@@ -371,10 +370,6 @@
 									param.shooting4 = 0;
 									if (document.getElementById("shooting4").checked) {
 										param.shooting4 = 1;
-									}
-									param.shooting5 = 0;
-									if (document.getElementById("shooting5").checked) {
-										param.shooting5 = 1;
 									}
 									param.shooting6 = 0;
 									if (document.getElementById("shooting6").checked) {

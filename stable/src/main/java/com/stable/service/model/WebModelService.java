@@ -343,9 +343,6 @@ public class WebModelService {
 		if (mr.getShooting4() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting4", 1));
 		}
-		if (mr.getShooting5() == 1) {
-			bqb.must(QueryBuilders.rangeQuery("shooting5").gte(1));// 这是一个时间值
-		}
 		if (mr.getShooting6661() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shooting6661", 1));
 		}
@@ -370,15 +367,6 @@ public class WebModelService {
 		}
 		if ("1".equals(mr.getKline())) {
 			bqb.must(QueryBuilders.matchPhraseQuery("shootingw", 1));
-		}
-		if (1 == mr.getShooting51()) {
-			bqb.must(QueryBuilders.matchPhraseQuery("shooting51", 1));
-		}
-		if (1 == mr.getShooting52()) {
-			bqb.must(QueryBuilders.matchPhraseQuery("shooting52", 1));
-		}
-		if (1 == mr.getShooting53()) {
-			bqb.must(QueryBuilders.matchPhraseQuery("shooting53", 1));
 		}
 		if (mr.getWhiteHors() == 1) {
 			bqb.must(QueryBuilders.matchPhraseQuery("susWhiteHors", 1));// 白马走势(大票)

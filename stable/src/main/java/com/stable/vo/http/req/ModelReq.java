@@ -40,14 +40,10 @@ public class ModelReq {
 	int shooting2;
 	int shooting3;
 	int shooting4;
-	int shooting5;
 	int shooting6;
 	int shooting7;
 	int shooting8;
 	int shooting9;
-	int shooting51 = 0;
-	int shooting52 = 0;
-	int shooting53 = 0;
 	int whiteHors = 0;
 	int shooting6661;
 	int shooting6662;

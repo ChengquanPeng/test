@@ -156,9 +156,6 @@ public class TagUtil {
 		if (dh.getShooting3() > 0) {
 			s += "融资飙升-主力融资买入?" + splitor;
 		}
-		if (dh.getShooting5() > 0) {
-			s += "股价极速拉升:妖股?龙抬头?(短线2)" + splitor;
-		}
 		return s;
 	}
 
