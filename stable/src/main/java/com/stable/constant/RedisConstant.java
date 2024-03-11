@@ -16,8 +16,6 @@ public class RedisConstant {
 	// CHIPS_SORT：最后检查成功日期
 	public static final String RDS_CHIPS_SORT_OK_DT_ = "RDS_CHIPS_SORT_OK_DT_";
 
-	public static final String MONI_SORT1 = "MONI_SORT1";
-
 	// 登录key
 	public static final String RDS_LOGIN_KEY_ = "RDS_LOGIN_KEY_";
 	// 登录失败次数
