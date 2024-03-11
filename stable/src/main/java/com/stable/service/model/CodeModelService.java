@@ -96,11 +96,12 @@ public class CodeModelService {
 //	@javax.annotation.PostConstruct
 //	public void test() {
 //		new Thread(new Runnable() {
-//
 //			@Override
-//			public void run() {
-//				runModel1(20220822, false);
+//	@		public void run() {
+////	@			runModel1(20220822, false);
+//				runByCode("603190", 20240311);
 //				System.err.println("runModel1 done");
+//				System.exit(0);
 //			}
 //		}).start();
 //	}
@@ -121,15 +122,20 @@ public class CodeModelService {
 	private int pre3Year = 0;// 三年以前
 	private double yzdzamt = 0.45 * WebModelService.WAN;
 
-	private synchronized void runByJobv2(int t) {
+	private void initDate(int t) {
 		tradeDate = t;
 		pre1Year = DateUtil.getPreYear(tradeDate);
 		pre2Year = DateUtil.getPreYear(tradeDate, 2);
 		pre3Year = DateUtil.getPreYear(tradeDate, 3);
+	}
 
+	private synchronized void runByJobv2(int t) {
+		this.initDate(t);
 		// 基本面
 		List<StockBaseInfo> codelist = stockBasicService.getAllOnStatusListWithSort();
 		Map<String, MonitorPoolTemp> poolMap = monitorPoolService.getMonitorPoolMap();
+		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
+
 		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
 		List<MonitorPoolTemp> poolList = new LinkedList<MonitorPoolTemp>();
 		// 到期提醒
@@ -143,10 +149,13 @@ public class CodeModelService {
 		// 疑似扣非大牛
 		StringBuffer yjm2 = new StringBuffer();
 
-		Map<String, CodeBaseModel2> histMap = modelWebService.getALLForMap();
+		String code = null;
 		for (StockBaseInfo s : codelist) {
 			try {
-				this.processingByCode(s, poolMap, poolList, listLast, histMap, sbc, xddz, xdjc, yjm1, yjm2);
+				// 监听池
+				code = s.getCode();
+				this.processingByCode(s, getPool(code, poolMap, poolList), listLast, histMap, sbc, xddz, xdjc, yjm1,
+						yjm2);
 			} catch (Exception e) {
 				ErrorLogFileUitl.writeError(e, s.getCode(), "", "");
 			}
@@ -179,22 +188,26 @@ public class CodeModelService {
 		}
 	}
 
-	public MonitorPoolTemp getPool(String code, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList) {
-		MonitorPoolTemp pool = poolMap.get(code);
-		if (pool == null) {
-			pool = new MonitorPoolTemp();
-			pool.setCode(code);
-			pool.setUserId(Constant.MY_ID);
-			pool.setId(monitorPoolService.getId(pool.getUserId(), code));
+	public synchronized void runByCode(String code, int t) {
+		this.initDate(t);
+		// 监听池
+		MonitorPoolTemp pool = getPool(code);
+		StockBaseInfo s = stockBasicService.getCode(code);
+		Map<String, CodeBaseModel2> histMap = new HashMap<String, CodeBaseModel2>();
+		histMap.put(code, this.modelWebService.getLastOneByCode2(code));
+		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
+		this.processingByCode(s, pool, listLast, histMap, new StringBuffer(), new StringBuffer(), new StringBuffer(),
+				new StringBuffer(), new StringBuffer());
+		if (listLast.size() > 0) {
+			codeBaseModel2Dao.saveAll(listLast);
 		}
-		pool.setUpdatedate(tradeDate);
-		poolList.add(pool);
-		return pool;
+		monitorPoolDao.save(pool);
+		log.info("CodeModel v2 模型执行完成 for code:" + code);
 	}
 
-	private void processingByCode(StockBaseInfo s, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList,
-			List<CodeBaseModel2> listLast, Map<String, CodeBaseModel2> histMap, StringBuffer sbc, StringBuffer xddz,
-			StringBuffer xdjc, StringBuffer yjm1, StringBuffer yjm2) {
+	private void processingByCode(StockBaseInfo s, MonitorPoolTemp pool, List<CodeBaseModel2> listLast,
+			Map<String, CodeBaseModel2> histMap, StringBuffer sbc, StringBuffer xddz, StringBuffer xdjc,
+			StringBuffer yjm1, StringBuffer yjm2) {
 		String code = s.getCode();
 		// 股票池
 		CodeBaseModel2 newOne = histMap.get(s.getCode());
@@ -219,8 +232,7 @@ public class CodeModelService {
 			newOne.setDzjyBreaksDate(0);
 			newOne.setDzjyBreaks(0);
 		}
-		// 监听池
-		MonitorPoolTemp pool = getPool(code, poolMap, poolList);
+
 		// 最新收盘情况
 		DaliyBasicInfo2 lastTrade = daliyBasicHistroyService.queryLastest(code, 0, 0);
 		if (lastTrade == null) {
@@ -708,7 +720,7 @@ public class CodeModelService {
 		newOne.setCurrQuarter(fbi.getQuarter());
 		// 业绩暴涨,至少超1亿吧
 		newOne.setFinDbl(0);
-		if (fa.getCurrYear().getGsjlr() >= CurrencyUitl.YI_N_DOUBLE) {
+		if (fa.getCurrYear().getGsjlr() >= CurrencyUitl.YI_N_DOUBLE && fa.getPrevYear() != null) {
 			if (fa.getPrevYear().getGsjlr() > 0) {
 				double a = CurrencyUitl
 						.roundHalfUp(fa.getCurrYear().getGsjlr() / Double.valueOf(fa.getPrevYear().getGsjlr()));
@@ -1257,6 +1269,31 @@ public class CodeModelService {
 		log.info("monitorPoolDao:" + poolList.size());
 
 		stockBasicService.deleteTuiShi();
+	}
+
+	public MonitorPoolTemp getPool(String code, Map<String, MonitorPoolTemp> poolMap, List<MonitorPoolTemp> poolList) {
+		MonitorPoolTemp pool = poolMap.get(code);
+		if (pool == null) {
+			pool = new MonitorPoolTemp();
+			pool.setCode(code);
+			pool.setUserId(Constant.MY_ID);
+			pool.setId(monitorPoolService.getId(pool.getUserId(), code));
+		}
+		pool.setUpdatedate(tradeDate);
+		poolList.add(pool);
+		return pool;
+	}
+
+	public MonitorPoolTemp getPool(String code) {
+		MonitorPoolTemp pool = monitorPoolService.getMonitorPoolById(Constant.MY_ID, code);
+		if (pool == null) {
+			pool = new MonitorPoolTemp();
+			pool.setCode(code);
+			pool.setUserId(Constant.MY_ID);
+			pool.setId(monitorPoolService.getId(pool.getUserId(), code));
+		}
+		pool.setUpdatedate(tradeDate);
+		return pool;
 	}
 //
 //	private void findBigBoss2(String code, CodeBaseModel2 newOne, List<FinanceBaseInfo> fbis) {
