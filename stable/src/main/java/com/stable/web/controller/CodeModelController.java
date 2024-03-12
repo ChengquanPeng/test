@@ -1,6 +1,9 @@
 package com.stable.web.controller;
 
+import java.io.PrintWriter;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +17,7 @@ import com.stable.service.TradeCalService;
 import com.stable.service.model.RunModelService;
 import com.stable.service.model.WebModelService;
 import com.stable.utils.DateUtil;
+import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.UserInfo;
 import com.stable.vo.http.JsonResult;
 import com.stable.vo.http.req.ModelManulReq;
@@ -21,8 +25,11 @@ import com.stable.vo.http.req.ModelReq;
 import com.stable.vo.http.resp.CodeBaseModelResp;
 import com.stable.vo.spi.req.EsQueryPageReq;
 
+import lombok.extern.log4j.Log4j2;
+
 @RequestMapping("/model")
 @RestController
+@Log4j2
 public class CodeModelController {
 	@Autowired
 	private WebModelService modelWebService;
@@ -52,8 +59,8 @@ public class CodeModelController {
 	/**
 	 * 执行模型（基本面)
 	 */
-	@RequestMapping(value = "/coderun", method = RequestMethod.GET)
-	public ResponseEntity<JsonResult> coderun() {
+	@RequestMapping(value = "/runModel", method = RequestMethod.GET)
+	public ResponseEntity<JsonResult> runModel() {
 		JsonResult r = new JsonResult();
 		try {
 			int date = DateUtil.getTodayIntYYYYMMDD();
@@ -67,6 +74,25 @@ public class CodeModelController {
 			e.printStackTrace();
 		}
 		return ResponseEntity.ok(r);
+	}
+
+	@RequestMapping(value = "/runCode", method = RequestMethod.GET)
+	public void runModel(String code, String date, HttpServletResponse response) {
+		log.info("RunModelService code:" + code + ",date=" + date);
+		runModelService.runModelForCode(code, date);
+		CodeBaseModel2 cbm = this.modelWebService.getLastOneByCode2(code);
+		String msg = stockBasicService.getCodeName2(code);
+		msg += Constant.HTML_LINE + "大7: " + (cbm.getDibuQixing() > 0 ? cbm.getDibuQixing() : "否");
+		msg += Constant.HTML_LINE + "小7: " + (cbm.getDibuQixing2() > 0 ? cbm.getDibuQixing2() : "否");
+		msg += Constant.HTML_LINE + "N型: " + (cbm.getNxipan() > 0 ? cbm.getNxipan() : "否");
+		msg += Constant.HTML_LINE + "v1洗盘: " + (cbm.getXipan() > 0 ? cbm.getXipan() : "否");
+		msg += Constant.HTML_LINE + "十字星: " + (cbm.getZyxing() > 0 ? cbm.getZyxing() : "否");
+		try {
+			PrintWriter w = response.getWriter();
+			w.write(msg);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -124,7 +150,7 @@ public class CodeModelController {
 					stockBasicService.synName(code, "手动退");
 					r.setResult("成功");
 					r.setStatus(JsonResult.OK);
-				}else {
+				} else {
 					r.setResult(name);
 				}
 			}

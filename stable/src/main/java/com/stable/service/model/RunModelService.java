@@ -1,6 +1,7 @@
 
 package com.stable.service.model;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,10 +65,8 @@ public class RunModelService {
 	private String htmlFolder;
 	@Value("${tick.folder}")
 	private String tickFolder;
-
 	@Autowired
 	private MonitorPoolService monitorPoolService;
-
 	private int tradeDate;
 
 //	@javax.annotation.PostConstruct
@@ -92,6 +91,37 @@ public class RunModelService {
 				System.err.println("runModel1 done");
 			}
 		}).start();
+	}
+
+	public synchronized void runModelForCode(String code, String date) {
+		int today = DateUtil.getTodayIntYYYYMMDD();
+		int t = 0;
+		if (StringUtils.isNotBlank(date)) {
+			t = Integer.valueOf(date);
+		} else {
+			t = today;
+		}
+//		int lastTradeDay = 0;
+		if (t == today) {
+			if (tradeCalService.isOpen(t)) {
+				long now = new Date().getTime();
+				long oktime = DateUtil.parseTodayYYYYMMDDHHMMSS(t + " 19:03:00").getTime();
+				if (now >= oktime) {// 超过当天7点
+
+				} else {
+					t = tradeCalService.getPretradeDate(t);
+				}
+
+			} else {
+				t = tradeCalService.getPretradeDate(t);
+			}
+//			lastTradeDay = t;
+		} else {
+//			lastTradeDay = tradeCalService.getPretradeDate(today);
+			// t保持不变，为前端传入
+		}
+		codeModelKLineService.runByCode(code, t);
+		// codeModelService.runByCode(code, lastTradeDay);
 	}
 
 	public synchronized void runModel(int date, boolean isweekend) {

@@ -96,6 +96,7 @@ public class V2NXipanService {
 	/** 起爆-Pre突破 */
 	public void nxipan(int date, CodeBaseModel2 newOne, int nextTadeDate) {
 		if (!TagUtil.stockRangeNx(newOne)) {
+			log.info("不在stockRange Nx范围:" + newOne.getCode());
 			this.resetNxiPan(newOne);
 			return;
 		}
@@ -192,6 +193,8 @@ public class V2NXipanService {
 					}
 				}
 			}
+		} else {
+			log.info("Nx chk1 is false:" + code);
 		}
 
 		if (chk2) {
@@ -205,6 +208,8 @@ public class V2NXipanService {
 			if (t) {
 				isqb = predibuChk(code);
 			}
+		} else {
+			log.info("Nx 拉升匹配洗盘失败:" + code);
 		}
 
 		if (isqb) {
@@ -242,7 +247,7 @@ public class V2NXipanService {
 					.get();
 
 			if (CurrencyUitl.cutProfit(lowDate.getLow(), topDate.getHigh()) >= 48) {
-				log.info("20个交易日振幅(涨/跌)超过48%");
+				log.info("Nx 20个交易日振幅(涨/跌)超过48%");
 				return false;
 			}
 			// 排除4：前面45个交易日（2个月）的最高价，没有现在高。
@@ -253,7 +258,7 @@ public class V2NXipanService {
 			if (topDate4.getHigh() > datesLaPrice.get(k)) {
 				log.info("topDate1-10,date=" + topDate4.getDate() + ",high price:" + topDate4.getHigh() + ",chk price:"
 						+ datesLaPrice.get(k));
-				log.info("前面45个交易日（2个月）的最高价，没有现在高。（下跌反弹不算）");
+				log.info("Nx 前面45个交易日（2个月）的最高价，没有现在高。（下跌反弹不算）");
 				return false;
 			}
 		}
@@ -270,6 +275,7 @@ public class V2NXipanService {
 				if (lad <= xid) {
 					if (!getLa3DaysMinClosedPriceChk(lad, list)) {
 						// 丹阳不破检查不合格。
+						log.info("Nx 丹阳不破-破了");
 						return false;
 					}
 				}
@@ -301,7 +307,7 @@ public class V2NXipanService {
 				}
 			}
 			if (inc >= 3) {
-				log.info("N型丹阳不破，破了" + inc + "次,chkDate=" + chkDate + ",minPrice=" + min);// 返回false
+				log.info("Nx 丹阳不破，破了" + inc + "次,chkDate=" + chkDate + ",minPrice=" + min);// 返回false
 				return false;
 			}
 			return true;// 无丹阳不破

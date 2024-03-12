@@ -198,10 +198,10 @@ public class CodeModelService {
 		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
 		this.processingByCode(s, pool, listLast, histMap, new StringBuffer(), new StringBuffer(), new StringBuffer(),
 				new StringBuffer(), new StringBuffer());
-		if (listLast.size() > 0) {
-			codeBaseModel2Dao.saveAll(listLast);
-		}
-		monitorPoolDao.save(pool);
+//		if (listLast.size() > 0) {
+//			codeBaseModel2Dao.saveAll(listLast);
+//		}
+//		monitorPoolDao.save(pool);
 		log.info("CodeModel v2 模型执行完成 for code:" + code);
 	}
 

@@ -71,6 +71,7 @@ public class QxService {
 	public void qx(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll, int nextTadeDate) {
 		if (!TagUtil.stockRange(isSamll, newOne)) {
 			setQxRes(newOne, pool, true, true);
+			log.info("不在stockRange Qx范围:" + newOne.getCode());
 			return;
 		}
 		/** 起爆点,底部旗形1：大旗形 **/
@@ -203,6 +204,7 @@ public class QxService {
 	// CHK Date 之前的验证
 	private boolean dibuPreChk(CodeBaseModel2 newOne, QiBaoInfo res) {
 		if (res == null) {
+			log.info("Qx QiBaoInfo is null");
 			return false;
 		}
 		// 排除1:拉高后的旗形：旗形日前<1>个月涨幅低于15%
@@ -217,7 +219,7 @@ public class QxService {
 		}
 		if (low < res.getYesterdayPrice()) {
 			if (CurrencyUitl.cutProfit(low, res.getYesterdayPrice()) > res.getChkRate()) {// 本身已经大涨了，之前就不能涨太多
-				log.info("本身已经大涨了，之前就不能涨太多1");
+				log.info("Qx 本身已经大涨了，之前就不能涨太多1");
 				return false;// 涨幅太大
 			}
 		}
@@ -230,7 +232,7 @@ public class QxService {
 		}
 		if (low < res.getYesterdayPrice()) {
 			if (CurrencyUitl.cutProfit(low, res.getYesterdayPrice()) > 20) {// 本身已经大涨了，之前就不能涨太多
-				log.info("本身已经大涨了，之前就不能涨太多2");
+				log.info("Qx 本身已经大涨了，之前就不能涨太多2");
 				return false;// 涨幅太大
 			}
 		}
@@ -260,7 +262,7 @@ public class QxService {
 				if (topDate.getDate() > lowDate.getDate()) {
 					if (CurrencyUitl.cutProfit(lowDate.getLow(), topDate.getHigh()) >= 35) {
 						// 有的是K线是挖坑，有的是拉高，拉高收货回踩后的旗形可能会错过，比如002864
-						log.info("10个交易日超过35%," + lowDate.getDate() + "-" + topDate.getDate());
+						log.info("Qx 10个交易日超过35%," + lowDate.getDate() + "-" + topDate.getDate());
 						return false;
 					}
 				}
@@ -281,7 +283,7 @@ public class QxService {
 				// 上涨趋势
 				if (topDate.getDate() > lowDate.getDate()) {
 					if (CurrencyUitl.cutProfit(lowDate.getLow(), topDate.getHigh()) >= 50) {
-						log.info("20个交易日超过50%");
+						log.info("Qx 20个交易日超过50%");
 						return false;
 					}
 				}
@@ -295,7 +297,7 @@ public class QxService {
 		if (topDate4.getHigh() > res.getPrice()) {
 			log.info("topDate1-10,date=" + topDate4.getDate() + ",high price:" + topDate4.getHigh() + ",chk price:"
 					+ res.getPrice());
-			log.info("10个交易日最高价超过当前最高价。（下跌反弹不算）");
+			log.info("Qx 10个交易日最高价超过当前最高价。（下跌反弹不算）");
 			return false;
 		}
 
@@ -306,7 +308,7 @@ public class QxService {
 		TradeHistInfoDaliy lowDate = tmpl3.stream().min(Comparator.comparingDouble(TradeHistInfoDaliy::getLow)).get();
 
 		if (CurrencyUitl.cutProfit(lowDate.getLow(), topDate.getHigh()) >= 48) {
-			log.info("20个交易日振幅(涨/跌)超过48%");
+			log.info("Qx 20个交易日振幅(涨/跌)超过48%");
 			return false;
 		}
 
@@ -315,12 +317,12 @@ public class QxService {
 		for (int i = 1; i <= 10; i++) {// 排除大涨的哪天
 			TradeHistInfoDaliy nf = list.get(i);
 			if (nf.getTodayChangeRate() >= 7.5) {// 大涨直接排除
-				log.info("之前已经大涨7%");
+				log.info("Qx 之前已经大涨7%");
 				return false;
 			}
 			// 上涨趋势前上涨，量大于这天，不要
 			if (nf.getLow() < res.getLow() && nf.getTodayChangeRate() > 0 && nf.getVolume() > res.getVol()) {
-				log.info("之前已经上涨放量");
+				log.info("Qx 之前已经上涨放量");
 				return false;
 			}
 			if (nf.getTodayChangeRate() >= 4) {// 涨幅超过4个点，++
@@ -331,7 +333,7 @@ public class QxService {
 		if (up4 <= 1) {
 			return true;
 		}
-		log.info("前面几个交易日波动4%超1");
+		log.info("Qx 前面几个交易日波动4%超1");
 		return false;
 	}
 
@@ -348,7 +350,7 @@ public class QxService {
 				if (nf.getClosed() < chk.getYesterdayPrice()) {// 单阳不破:已经破掉
 					tims++;
 					if (tims > 1) {
-						log.info(chk.getDate() + "=====>单阳不破:已经破掉(只能破一次)" + nf.getDate());
+						log.info(chk.getDate() + "Qx 单阳不破:已经破掉(只能破一次)" + nf.getDate());
 						return null;
 					}
 				}
@@ -382,15 +384,15 @@ public class QxService {
 									// 3天下跌13.5%以上
 									chkrateupdate = true;// 之前涨幅不能超过默认15,这个宽幅震荡可以20
 								} else {
-									log.info("=====>非十字星或上影线1");
+									log.info("Qx 非十字星或上影线1");
 									return null;
 								}
 							} else {
-								log.info("=====>非十字星或上影线2");
+								log.info("Qx 非十字星或上影线2");
 								return null;
 							}
 						} else {
-							log.info("=====>非十字星或上影线3");
+							log.info("Qx 非十字星或上影线3");
 							return null;
 						}
 					}
@@ -417,7 +419,7 @@ public class QxService {
 				return qi;
 			}
 		}
-		log.info("=====>默认false");
+		log.info("Qx =====>默认false");
 		return null;
 	}
 
@@ -450,7 +452,7 @@ public class QxService {
 				if (nf.getClosed() < chk.getYesterdayPrice()) {// 单阳不破:已经破掉
 					tims++;
 					if (tims > 1) {
-						log.info("=====>单阳不破:已经破掉(只能破一次)");
+						log.info("Qx 2 单阳不破:已经破掉(只能破一次)");
 						return null;
 					}
 				}
@@ -475,7 +477,7 @@ public class QxService {
 				return qi;
 			}
 		}
-		log.info("=====>默认false");
+		log.info("Qx 2=====>默认false");
 		return null;
 	}
 
@@ -486,7 +488,7 @@ public class QxService {
 			if (t.getHigh() > high) {
 				tims++;
 				if (tims > 1) {
-					log.info("=====>超过最高");
+					log.info("Qx =====>超过最高");
 					return false;
 				}
 			}
@@ -494,7 +496,7 @@ public class QxService {
 		if (tims <= 1) {
 			return true;
 		}
-		log.info("=====>超过最高2");
+		log.info("Qx =====>超过最高2");
 		return false;
 	}
 

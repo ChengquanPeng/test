@@ -116,11 +116,11 @@ public class CodeModelKLineService {
 		histMap.put(code, this.modelWebService.getLastOneByCode2(code));
 		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
 		this.processingByCode(s, pool, listLast, histMap);
-		if (listLast.size() > 0) {
-			codeBaseModel2Dao.saveAll(listLast);
-			log.info(listLast.get(0).toString());
-		}
-		monitorPoolDao.save(pool);
+//		if (listLast.size() > 0) {
+//			codeBaseModel2Dao.saveAll(listLast);
+//			log.info(listLast.get(0).toString());
+//		}
+//		monitorPoolDao.save(pool);
 		log.info("KLine基本完成 for code:" + code);
 	}
 
@@ -161,6 +161,7 @@ public class CodeModelKLineService {
 			pool.setXpPrice(0);
 			newOne.setShooting11(0);
 			newOne.setShootingw(0);
+			log.info("排除退市股票&ST:" + code);
 			return;
 		}
 

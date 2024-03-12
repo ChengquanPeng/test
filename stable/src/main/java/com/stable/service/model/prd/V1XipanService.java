@@ -21,7 +21,10 @@ import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.DaliyBasicInfo2;
 import com.stable.vo.bus.TradeHistInfoDaliy;
 
+import lombok.extern.log4j.Log4j2;
+
 @Service
+@Log4j2
 public class V1XipanService {
 	@Autowired
 	private DaliyTradeHistroyService daliyTradeHistroyService;
@@ -59,6 +62,7 @@ public class V1XipanService {
 	public void xipanQb(int date, CodeBaseModel2 newOne, boolean isSamll, int nextTadeDate) {
 		if (!(TagUtil.stockRange(isSamll, newOne) && newOne.getHolderNumP5() > 0 && newOne.getHolderNumP5() > 21.0)) {
 			this.resetXiPan(newOne);
+			log.info("不在stockRange xipanQb范围:" + newOne.getCode());
 			return;
 		}
 		String code = newOne.getCode();
