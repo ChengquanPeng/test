@@ -7,21 +7,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.stable.es.dao.base.EsFinYjkbDao;
-import com.stable.es.dao.base.EsFinYjygDao;
 import com.stable.service.StockBasicService;
 import com.stable.service.model.prd.msg.MsgPushServer;
 import com.stable.utils.CurrencyUitl;
@@ -40,14 +31,15 @@ import lombok.extern.log4j.Log4j2;
 @Component
 @Log4j2
 public class EastmoneySpider {
-	@Autowired
-	private EsFinYjygDao esFinYjygDao;
-	@Autowired
-	private EsFinYjkbDao esFinYjkbDao;
+//	@Autowired
+//	private EsFinYjygDao esFinYjygDao;
+//	@Autowired
+//	private EsFinYjkbDao esFinYjkbDao;
 	@Autowired
 	private HtmlunitSpider htmlunitSpider;
 	@Autowired
 	private StockBasicService stockBasicService;
+	private static final String json_start_str = "jQuery112305639221168014836_1710170016428(";
 
 	public static int formatCode(String code) {
 		if (code.startsWith("6")) {
@@ -363,15 +355,16 @@ public class EastmoneySpider {
 		return list;
 	}
 
-	private JSONObject getHttpRest(String url1, String start) {
+	private JSONObject getHttpRest(String url) {
 		int i = 0;
 		while (true) {
 			try {
-				String result = HttpUtil.doGet2(url1);
-				result = result.substring(start.length());
-				result = result.substring(0, result.length() - 1);
-				JSONObject objects = JSON.parseObject(result);
-				return objects;
+				String result = HttpUtil.doGet2(url);
+				System.err.println(result);
+				result = result.substring(json_start_str.length(), result.length() - 2);
+				System.err.println(result);
+				JSONObject object = JSON.parseObject(result);
+				return object;
 			} catch (Exception e) {
 				e.printStackTrace();
 				i++;
@@ -384,7 +377,7 @@ public class EastmoneySpider {
 	}
 
 	private void getYjkbByPage(String date1, List<FinYjkb> list) {
-		removeKb(date1);
+//		removeKb(date1);
 		// String last = redisUtil.get(RedisConstant.RDS_FIN_KUAIBAO_ + date1);
 		// last = last == null ? "" : last;
 //		String lastFromPage = null;
@@ -397,7 +390,8 @@ public class EastmoneySpider {
 		do {
 			ThreadsUtil.sleepRandomSecBetween1And5();
 			String url1 = getYjkbUrl(date1, page);
-			JSONObject objects = getHttpRest(url1, "var BEzQbtii=");
+			log.info(url1);
+			JSONObject objects = getHttpRest(url1);
 
 			if (objects.getBooleanValue("success")) {
 				JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
@@ -408,7 +402,7 @@ public class EastmoneySpider {
 
 				for (int i = 0; i < datas.size(); i++) {
 					JSONObject data = datas.getJSONObject(i);
-					String date = data.getString("REPORT_DATE"); // 报告期
+					String date = data.getString("REPORTDATE"); // 报告期
 					String anndate = data.getString("NOTICE_DATE"); // 公告日期
 					FinYjkb fy = new FinYjkb();
 					String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
@@ -436,7 +430,7 @@ public class EastmoneySpider {
 					} catch (Exception e) {
 					}
 					try {
-						fy.setJlrtbzz(CurrencyUitl.roundHalfUp(data.getDoubleValue("JLRTBZCL")));// 业绩增长
+						fy.setJlrtbzz(CurrencyUitl.roundHalfUp(data.getDoubleValue("SJLTZ")));// 业绩增长
 					} catch (Exception e) {
 					}
 					try {
@@ -488,13 +482,13 @@ public class EastmoneySpider {
 	}
 
 	private String getYjkbUrl(String date, int page) {
-		return "http://datacenter.eastmoney.com/api/data/get?type=RPT_FCI_PERFORMANCEE&sty=ALL&p=" + page
-				+ "&ps=5000&st=UPDATE_DATE,SECURITY_CODE&sr=-1,-1&var=BEzQbtii&filter=(REPORT_DATE=%27" + date
-				+ "%27)&rt=" + System.currentTimeMillis();
+		return "https://datacenter-web.eastmoney.com/api/data/v1/get?callback=jQuery112305684190316332096_1710215833764&sortColumns=UPDATE_DATE%2CSECURITY_CODE&sortTypes=-1%2C-1&pageSize=5000&pageNumber="
+				+ page + "&reportName=RPT_LICO_FN_CPD&columns=ALL&filter=(REPORTDATE%3D%27" + date + "%27)&rt="
+				+ System.currentTimeMillis();
 	}
 
 	private void getYjygByPage(String date1, List<FinYjyg> list) {
-		removeYg(date1);
+//		removeYg(date1); 2024-03-11 注释
 //		String last = redisUtil.get(RedisConstant.RDS_FIN_YUGAO_ + date1);
 //		last = last == null ? "" : last;
 //		String lastFromPage = null;
@@ -506,16 +500,17 @@ public class EastmoneySpider {
 		do {
 			ThreadsUtil.sleepRandomSecBetween1And5();
 			String url1 = getYjygUrl(date1, page);
-			JSONObject objects = getHttpRest(url1, "var MRtZkjmw=");
+			log.info(url1);
+			JSONObject objects = getHttpRest(url1);
 			if (objects.getBooleanValue("success")) {
-				JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
 				if (tot_count <= 0) {
 					tot_count = objects.getJSONObject("result").getIntValue("count");
 					log.info(date1 + " 预告页面获取到总数:" + tot_count);
 				}
+				JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
 				for (int i = 0; i < datas.size(); i++) {
 					JSONObject data = datas.getJSONObject(i);
-					String date = data.getString("REPORTDATE"); // 报告期
+					String date = data.getString("REPORT_DATE"); // 报告期
 					String anndate = data.getString("NOTICE_DATE"); // 公告日期
 					FinYjyg fy = new FinYjyg();
 					String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
@@ -539,15 +534,16 @@ public class EastmoneySpider {
 					fy.setAnnDate(Integer.parseInt(
 							DateUtil.formatYYYYMMDD(DateUtil.parseDate(anndate, DateUtil.YYYY_MM_DD_HH_MM_SS))));
 					try {
-						fy.setType(data.getString("FORECASTTYPE"));// 类型
+						fy.setType(data.getString("PREDICT_TYPE"));// 类型
 					} catch (Exception e) {
 					}
 					try {
-						fy.setJlr(data.getLong("FORECASTL"));// 业绩范围：FORECASTL-FORECASTT
+						fy.setJlr(data.getLong("PREDICT_AMT_LOWER"));// 业绩范围：PREDICT_AMT_LOWER-PREDICT_AMT_UPPER
 					} catch (Exception e) {
 					}
 					try {
-						fy.setJlrtbzz(data.getDoubleValue("INCREASET"));// 业绩变动幅度 INCREASET-FORECASTCONTENT
+						fy.setJlrtbzz(data.getDoubleValue("PREDICT_RATIO_LOWER"));// 业绩变动幅度
+																					// PREDICT_RATIO_LOWER-PREDICT_RATIO_UPPER
 					} catch (Exception e) {
 					}
 					fy.setId();
@@ -591,70 +587,70 @@ public class EastmoneySpider {
 	}
 
 	private String getYjygUrl(String date, int page) {
-		return "http://datacenter.eastmoney.com/api/data/get?type=RPT_PUBLIC_OP_PREDICT&sty=ALL&p=" + page
-				+ "&ps=5000&st=NOTICE_DATE,SECURITY_CODE&sr=-1,-1&var=MRtZkjmw&filter=(REPORTDATE=%27" + date
-				+ "%27)(IsLatest=%22T%22)&rt=" + System.currentTimeMillis();
+		return "https://datacenter-web.eastmoney.com/api/data/v1/get?callback=jQuery112305639221168014836_1710170016428&sortColumns=NOTICE_DATE%2CSECURITY_CODE&sortTypes=-1%2C-1&pageSize=5000&pageNumber="
+				+ page + "&reportName=RPT_PUBLIC_OP_NEWPREDICT&columns=ALL&filter=(REPORT_DATE%3D%27" + date
+				+ "%27)&rt=" + System.currentTimeMillis();
 	}
 
-	private void removeKb(String date1) {
-		int date = DateUtil.convertDate2(date1);
-		int year = DateUtil.getYear(date);
-		int jidu = DateUtil.getJidu(date);
+//	private void removeKb(String date1) {
+//		int date = DateUtil.convertDate2(date1);
+//		int year = DateUtil.getYear(date);
+//		int jidu = DateUtil.getJidu(date);
+//
+//		List<FinYjkb> kbs = getLastFinaceKbByReportDate(year, jidu);
+//		if (kbs != null && kbs.size() > 0) {
+//			for (FinYjkb kb : kbs) {
+//				kb.setIsValid(0);
+//			}
+//			esFinYjkbDao.saveAll(kbs);
+//		}
+//	}
 
-		List<FinYjkb> kbs = getLastFinaceKbByReportDate(year, jidu);
-		if (kbs != null && kbs.size() > 0) {
-			for (FinYjkb kb : kbs) {
-				kb.setIsValid(0);
-			}
-			esFinYjkbDao.saveAll(kbs);
-		}
-	}
+//	public void removeYg(String date1) {
+//		int date = DateUtil.convertDate2(date1);
+//		int year = DateUtil.getYear(date);
+//		int jidu = DateUtil.getJidu(date);
+//
+//		List<FinYjyg> kbs = getLastFinaceYgByReportDate(year, jidu);
+//		if (kbs != null && kbs.size() > 0) {
+//			for (FinYjyg kb : kbs) {
+//				kb.setIsValid(0);
+//			}
+//			esFinYjygDao.saveAll(kbs);
+//		}
+//	}
 
-	private void removeYg(String date1) {
-		int date = DateUtil.convertDate2(date1);
-		int year = DateUtil.getYear(date);
-		int jidu = DateUtil.getJidu(date);
+//	Pageable pageable = PageRequest.of(0, 9999);
 
-		List<FinYjyg> kbs = getLastFinaceYgByReportDate(year, jidu);
-		if (kbs != null && kbs.size() > 0) {
-			for (FinYjyg kb : kbs) {
-				kb.setIsValid(0);
-			}
-			esFinYjygDao.saveAll(kbs);
-		}
-	}
+//	private List<FinYjkb> getLastFinaceKbByReportDate(int year, int jidu) {
+//		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+//		bqb.must(QueryBuilders.rangeQuery("year").gt(year));
+//		bqb.must(QueryBuilders.rangeQuery("quarter").gt(jidu));
+//
+//		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+//		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+//
+//		Page<FinYjkb> page = esFinYjkbDao.search(sq);
+//		if (page != null && !page.isEmpty()) {
+//			return page.getContent();
+//		}
+//		return null;
+//	}
 
-	Pageable pageable = PageRequest.of(0, 9999);
-
-	private List<FinYjkb> getLastFinaceKbByReportDate(int year, int jidu) {
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.rangeQuery("year").gt(year));
-		bqb.must(QueryBuilders.rangeQuery("quarter").gt(jidu));
-
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
-
-		Page<FinYjkb> page = esFinYjkbDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent();
-		}
-		return null;
-	}
-
-	public List<FinYjyg> getLastFinaceYgByReportDate(int year, int jidu) {
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-		bqb.must(QueryBuilders.rangeQuery("year").gt(year));
-		bqb.must(QueryBuilders.rangeQuery("quarter").gt(jidu));
-
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
-
-		Page<FinYjyg> page = esFinYjygDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			return page.getContent();
-		}
-		return null;
-	}
+//	public List<FinYjyg> getLastFinaceYgByReportDate(int year, int jidu) {
+//		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+//		bqb.must(QueryBuilders.rangeQuery("year").gt(year));
+//		bqb.must(QueryBuilders.rangeQuery("quarter").gt(jidu));
+//
+//		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+//		SearchQuery sq = queryBuilder.withQuery(bqb).withPageable(pageable).build();
+//
+//		Page<FinYjyg> page = esFinYjygDao.search(sq);
+//		if (page != null && !page.isEmpty()) {
+//			return page.getContent();
+//		}
+//		return null;
+//	}
 
 	private String urlbase = "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=%s";
 
@@ -714,8 +710,10 @@ public class EastmoneySpider {
 	public static void main(String[] args) {
 		EastmoneySpider es = new EastmoneySpider();
 		es.htmlunitSpider = new HtmlunitSpider();
-		String code = "002895";
-		int beforeChkDate = 99999999;
+
+//		es.getYjkbByPage("2023-12-31", new LinkedList<FinYjkb>());
+//		String code = "002895";
+//		int beforeChkDate = 99999999;
 //		List<FinanceBaseInfoPage> l = es.getNewFinanceAnalysis(code, 4);
 //		for (FinanceBaseInfoPage f : l) {
 //			System.err.println(f);
@@ -724,10 +722,10 @@ public class EastmoneySpider {
 //		EastmoneySpider es = new EastmoneySpider();
 //		es.getFinYjkb();
 		// 公司类型：1券商，2保险,3银行，4企业
-		List<FinanceBaseInfoPage> l = es.getNewFinanceAnalysis(code, 4, beforeChkDate);
-		for (FinanceBaseInfoPage r : l) {
-			System.err.println(r);
-		}
+//		List<FinanceBaseInfoPage> l = es.getNewFinanceAnalysis(code, 4, beforeChkDate);
+//		for (FinanceBaseInfoPage r : l) {
+//			System.err.println(r);
+//		}
 //		System.err.println(es.getcompanyType(code));
 		// System.err.println(YearQuarter(2021, 1));
 	}
