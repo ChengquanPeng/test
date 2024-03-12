@@ -66,8 +66,8 @@ public class CodeBaseModel2 extends EsBase {
 	private int prd1 = 0;// 产品1
 	@Field(type = FieldType.Text)
 	private String jsHist;// 技术面历史
-	@Field(type = FieldType.Integer)
-	private int breakingVol = 0;// 放量
+//	@Field(type = FieldType.Integer)
+//	private int breakingVol = 0;// 放量
 
 	@Field(type = FieldType.Integer)
 	private int nxipan = 0;// N型洗盘
