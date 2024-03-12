@@ -93,7 +93,7 @@ public class RunModelService {
 		}).start();
 	}
 
-	public synchronized void runModelForCode(String code, String date) {
+	public synchronized CodeBaseModel2 runModelForCode(String code, String date) {
 		int today = DateUtil.getTodayIntYYYYMMDD();
 		int t = 0;
 		if (StringUtils.isNotBlank(date)) {
@@ -120,7 +120,7 @@ public class RunModelService {
 //			lastTradeDay = tradeCalService.getPretradeDate(today);
 			// t保持不变，为前端传入
 		}
-		codeModelKLineService.runByCode(code, t);
+		return codeModelKLineService.runByCode(code, t);
 		// codeModelService.runByCode(code, lastTradeDay);
 	}
 

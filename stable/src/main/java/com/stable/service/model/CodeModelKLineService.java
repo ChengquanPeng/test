@@ -1,6 +1,5 @@
 package com.stable.service.model;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -107,21 +106,39 @@ public class CodeModelKLineService {
 		log.info("KLine基本完成");
 	}
 
-	public synchronized void runByCode(String code, int t) {
+	public synchronized CodeBaseModel2 runByCode(String code, int t) {
 		this.initDate(t);
 		// 监听池
-		MonitorPoolTemp pool = codeModelService.getPool(code);
-		StockBaseInfo s = stockBasicService.getCode(code);
-		Map<String, CodeBaseModel2> histMap = new HashMap<String, CodeBaseModel2>();
-		histMap.put(code, this.modelWebService.getLastOneByCode2(code));
-		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
-		this.processingByCode(s, pool, listLast, histMap);
+//		MonitorPoolTemp pool = codeModelService.getPool(code);
+//		StockBaseInfo s = stockBasicService.getCode(code);
+//		Map<String, CodeBaseModel2> histMap = new HashMap<String, CodeBaseModel2>();
+//		histMap.put(code, this.modelWebService.getLastOneByCode2(code));
+//		List<CodeBaseModel2> listLast = new LinkedList<CodeBaseModel2>();
+//		this.processingByCode(s, pool, listLast, histMap);
 //		if (listLast.size() > 0) {
 //			codeBaseModel2Dao.saveAll(listLast);
 //			log.info(listLast.get(0).toString());
 //		}
 //		monitorPoolDao.save(pool);
-		log.info("KLine基本完成 for code:" + code);
+
+		try {
+			CodeBaseModel2 newOne = this.modelWebService.getLastOneByCode2(code);
+			MonitorPoolTemp pool = new MonitorPoolTemp();
+			boolean isSamll = true;
+			newOne.setActMkv(10);
+			newOne.setMkv(10);
+			newOne.setZfjjup(2);
+			newOne.setZfjjupStable(2);
+			qbQxService.qx(tradeDate, newOne, pool, isSamll, nextTadeDate);
+			szxService.szx(tradeDate, newOne, pool, isSamll);
+			v1XipanService.xipanQb(tradeDate, newOne, isSamll, nextTadeDate);
+			nxService.nxipan(tradeDate, newOne, nextTadeDate);
+			log.info("KLine基本完成 for code:" + code);
+			return newOne;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new CodeBaseModel2();
+		}
 	}
 
 	private int tradeDate = 0;

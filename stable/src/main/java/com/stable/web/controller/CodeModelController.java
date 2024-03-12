@@ -79,8 +79,7 @@ public class CodeModelController {
 	@RequestMapping(value = "/runCode", method = RequestMethod.GET)
 	public void runModel(String code, String date, HttpServletResponse response) {
 		log.info("RunModelService code:" + code + ",date=" + date);
-		runModelService.runModelForCode(code, date);
-		CodeBaseModel2 cbm = this.modelWebService.getLastOneByCode2(code);
+		CodeBaseModel2 cbm = runModelService.runModelForCode(code, date);
 		String msg = stockBasicService.getCodeName2(code);
 		msg += Constant.HTML_LINE + "大7: " + (cbm.getDibuQixing() > 0 ? cbm.getDibuQixing() : "否");
 		msg += Constant.HTML_LINE + "小7: " + (cbm.getDibuQixing2() > 0 ? cbm.getDibuQixing2() : "否");
@@ -88,6 +87,8 @@ public class CodeModelController {
 		msg += Constant.HTML_LINE + "v1洗盘: " + (cbm.getXipan() > 0 ? cbm.getXipan() : "否");
 		msg += Constant.HTML_LINE + "十字星: " + (cbm.getZyxing() > 0 ? cbm.getZyxing() : "否");
 		try {
+			response.setCharacterEncoding("UTF-8");
+			response.setContentType("text/html;charset=utf-8");
 			PrintWriter w = response.getWriter();
 			w.write(msg);
 		} catch (Exception e) {
