@@ -360,9 +360,9 @@ public class EastmoneySpider {
 		while (true) {
 			try {
 				String result = HttpUtil.doGet2(url);
-				System.err.println(result);
+//				System.err.println(result);
 				result = result.substring(json_start_str.length(), result.length() - 2);
-				System.err.println(result);
+//				System.err.println(result);
 				JSONObject object = JSON.parseObject(result);
 				return object;
 			} catch (Exception e) {
