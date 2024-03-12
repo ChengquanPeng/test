@@ -447,7 +447,13 @@ public class MonitorPoolService {
 			bqb.must(QueryBuilders.rangeQuery("xjl").gt(0));
 		}
 		if (monitoreq > 0) {
-			bqb.must(QueryBuilders.matchPhraseQuery("monitor", monitoreq));
+			if (monitoreq == 98) {// 在线监听
+				bqb.must(QueryBuilders.matchPhraseQuery("realtime", 1));
+			} else if (monitoreq == 97) {// 离线监听
+				bqb.must(QueryBuilders.matchPhraseQuery("offline", 1));
+			} else {// 监听类型
+				bqb.must(QueryBuilders.matchPhraseQuery("monitor", monitoreq));
+			}
 		}
 		if (zfdone > 0) {
 			bqb.must(QueryBuilders.matchPhraseQuery("zfdone", zfdone));
