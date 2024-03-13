@@ -536,11 +536,16 @@ public class CodeModelService {
 		// 财务
 		List<FinanceBaseInfo> fbis = financeService.getFinacesReportByLteDate(code, tradeDate,
 				EsQueryPageUtil.queryPage8);
-		if ((fbis == null || fbis.size() < EsQueryPageUtil.queryPage8.getPageSize())
-				&& stockBasicService.onlinePreYearChk(code, pre2Year)) {
-			ErrorLogFileUitl.writeError(
-					new RuntimeException("无最新财务数据,或者少于条数：" + EsQueryPageUtil.queryPage8.getPageSize()), code,
-					tradeDate + "", "Code Model错误");
+		if ((fbis == null || fbis.size() < EsQueryPageUtil.queryPage8.getPageSize())) {
+			if (stockBasicService.onlinePreYearChk(code, pre2Year)) {
+				ErrorLogFileUitl.writeError(
+						new RuntimeException("无最新财务数据,或者少于条数：" + EsQueryPageUtil.queryPage8.getPageSize()), code,
+						tradeDate + "", "Code Model错误,上市超过2年");
+			} else {
+				ErrorLogFileUitl.writeError(
+						new RuntimeException("无最新财务数据,或者少于条数：" + EsQueryPageUtil.queryPage8.getPageSize()), code,
+						tradeDate + "", "Code Model错误,上市未超过2年");
+			}
 			return;
 		}
 		// 基本面-红蓝绿
