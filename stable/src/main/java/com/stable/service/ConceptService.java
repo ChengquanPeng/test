@@ -159,35 +159,38 @@ public class ConceptService {
 	/**
 	 * 根据板块/概率获取相关股票
 	 */
-	public List<String> listCodesByAliasCode(String aliasCode, EsQueryPageReq querypage) {
-		BoolQueryBuilder bqb = QueryBuilders.boolQuery();
-//		Concept cp = getConceptId(aliasCode);
-//		if (cp == null) {
-//			return null;
-//		}
-//		String conceptId = cp.getId();
-//		if (StringUtils.isNotBlank(conceptId)) {
-//			bqb.must(QueryBuilders.matchPhraseQuery("conceptId", conceptId));
-//		} else {
-//			return null;
-//		}
-		// 后面可以直接查询整个，不需要转换
-		bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", aliasCode));
-		FieldSortBuilder sort = SortBuilders.fieldSort("code").unmappedType("integer").order(SortOrder.DESC);
-		NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
-		Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
-		SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
-
-		Page<CodeConcept> page = esCodeConceptDao.search(sq);
-		if (page != null && !page.isEmpty()) {
-			List<CodeConcept> list = page.getContent();
-			List<String> codes = new LinkedList<String>();
-			for (CodeConcept cc : list) {
-				codes.add(cc.getCode());
+	public List<String> listCodesByAliasCode(String aliasCodes, EsQueryPageReq querypage) {
+		String[] t = aliasCodes.split(",");
+		List<String> finalCodes = null;
+		for (String aliasCode : t) {// 多个概念查询，如：又是黄金，又是国企，又是白银等概念
+			BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+			// 后面可以直接查询整个，不需要转换
+			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", aliasCode));
+			if (finalCodes != null) {
+				if (finalCodes.size() > 0) {// 没数据，直接返回，有数据则继续过滤
+					bqb.must(QueryBuilders.termsQuery("code", finalCodes));
+				} else {
+					return finalCodes;
+				}
 			}
-			return codes;
+			FieldSortBuilder sort = SortBuilders.fieldSort("code").unmappedType("integer").order(SortOrder.DESC);
+			NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+			Pageable pageable = PageRequest.of(querypage.getPageNum(), querypage.getPageSize());
+			SearchQuery sq = queryBuilder.withQuery(bqb).withSort(sort).withPageable(pageable).build();
+
+			Page<CodeConcept> page = esCodeConceptDao.search(sq);
+			if (page != null && !page.isEmpty()) {
+				List<CodeConcept> list = page.getContent();
+				List<String> codes = new LinkedList<String>();
+				for (CodeConcept cc : list) {
+					codes.add(cc.getCode());
+				}
+				finalCodes = codes;
+			} else {
+				return null;// 没数据，直接返回
+			}
+			log.info("no records listCodeBy aliasCode:{}", aliasCode);
 		}
-		log.info("no records listCodeBy aliasCode:{}", aliasCode);
-		return null;
+		return finalCodes;
 	}
 }
