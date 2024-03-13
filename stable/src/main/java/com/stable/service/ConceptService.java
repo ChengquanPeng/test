@@ -163,6 +163,9 @@ public class ConceptService {
 		String[] t = aliasCodes.split(",");
 		List<String> finalCodes = null;
 		for (String aliasCode : t) {// 多个概念查询，如：又是黄金，又是国企，又是白银等概念
+			if (StringUtils.isBlank(aliasCode)) {
+				continue;
+			}
 			BoolQueryBuilder bqb = QueryBuilders.boolQuery();
 			// 后面可以直接查询整个，不需要转换
 			bqb.must(QueryBuilders.matchPhraseQuery("aliasCode", aliasCode));
