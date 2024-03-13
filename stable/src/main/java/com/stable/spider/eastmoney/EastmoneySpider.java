@@ -81,7 +81,7 @@ public class EastmoneySpider {
 	// 4.资产负债表zcfzbAjaxNew 返回5条记录
 	// 5.利润表lrbAjaxNew 返回5条记录
 	// 6.现金流xjllbAjaxNew 返回5条记录
-	static final int FETCH_CNT = 5;// 所以默认返回5条
+	static final int FETCH_CNT = 5;// 所以默认返回5条（利润表，资产负债表，现金流）
 
 	// companyType:1券商，2保险,3银行，4企业
 	public List<FinanceBaseInfoPage> getNewFinanceAnalysis(String code, int companyType, int beforeChkDate) {
@@ -103,7 +103,7 @@ public class EastmoneySpider {
 			trytime++;
 			try {
 				List<FinanceBaseInfoPage> list = new ArrayList<FinanceBaseInfoPage>();
-				String url = String.format(financeUrl, 0, formatCode2(code));
+				String url = String.format(financeUrl, 0, formatCode2(code));// 0按报告期、1=年报
 				String result = HttpUtil.doGet2(url);
 				JSONObject jsonobj = JSON.parseObject(result);
 				JSONArray objects = jsonobj.getJSONArray("data");

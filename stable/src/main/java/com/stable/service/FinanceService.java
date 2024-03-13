@@ -104,7 +104,7 @@ public class FinanceService {
 	private boolean spiderFinaceHistoryInfo(String code, List<FinanceBaseInfo> list, int companyType, int beforeChkDate,
 			int index) {
 		try {
-			List<FinanceBaseInfoPage> datas = eastmoneySpider.getNewFinanceAnalysis(code, companyType, beforeChkDate);// 0按报告期、1=年报
+			List<FinanceBaseInfoPage> datas = eastmoneySpider.getNewFinanceAnalysis(code, companyType, beforeChkDate);
 			if (datas == null) {
 				log.warn("{},上市未满1年，不需要从df抓取到Finane记录,code={}", index, code);
 				// WxPushUtil.pushSystem1("未从东方财富抓取到Finane记录,code=" + code);
@@ -119,6 +119,7 @@ public class FinanceService {
 			log.warn("{},季度-从df抓取到Finane记录{}条,code={}", index, datas.size(), code);
 			// 数据无误的则加入
 			for (FinanceBaseInfoPage p : datas) {
+				// 缺数据时可以放开这个条件。正常不能放开：因为资产负债表等只返回5条，错误数据会覆盖之前的正确数据
 				if (p.isDataOk()) {
 					FinanceBaseInfo f = new FinanceBaseInfo();
 					BeanCopy.copy(p, f);
