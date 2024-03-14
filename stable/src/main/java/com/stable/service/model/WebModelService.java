@@ -400,9 +400,6 @@ public class WebModelService {
 		if (mr.getZyxing() > 0) {// 中阳带星
 			bqb.must(QueryBuilders.rangeQuery("zyxing").gte(1));
 		}
-		if (mr.getBreakingVol() == 1) {// 成交量异动
-			bqb.must(QueryBuilders.rangeQuery("breakingVol").gte(1));
-		}
 		if (mr.getXipan() == 1) {// v1洗盘+次数
 			bqb.must(QueryBuilders.rangeQuery("xipan").gte(1));
 		}

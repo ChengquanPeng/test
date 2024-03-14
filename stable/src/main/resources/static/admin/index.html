@@ -127,7 +127,7 @@
 					type="checkbox" id="nxipan" />&nbsp;&nbsp; v1洗盘:<input
 					type="checkbox" id="xipan" />&nbsp;&nbsp;中阳十字星:<input
 					type="checkbox" id="zyxing" />&nbsp;&nbsp;
-				</font>成交异动:<input type="checkbox" id="breakingVol" />&nbsp;&nbsp;K线攻击形态:<input
+				</font>K线攻击形态:<input
 					type="checkbox" id="kline" />&nbsp;&nbsp;接近1年新高:<input
 					type="checkbox" id="pre1Year" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;白马走势(大票):<input
 					type="checkbox" id="whiteHors" />
@@ -294,13 +294,9 @@
 									param.finDbl = 0;
 									param.finBoss = 0;
 									param.finSusBoss = 0;
-									param.breakingVol = 0;
 									param.nxipan = 0;
 									param.xipan = 0;
 
-									if (document.getElementById("breakingVol").checked) {
-										param.breakingVol = 1;
-									}
 									if (document.getElementById("finBoss").checked) {
 										param.finBoss = 1;
 									}

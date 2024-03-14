@@ -60,7 +60,6 @@ public class ModelReq {
 	int dibuqixing2 = 0;
 	int xipan = 0;
 	int nxipan = 0;
-	int breakingVol = 0;
 
 	// 财务
 	int bousOK;
