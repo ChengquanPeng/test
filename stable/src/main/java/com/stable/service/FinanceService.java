@@ -407,7 +407,7 @@ public class FinanceService {
 		// 最新的年报不能亏损
 		if (fa.getCurrYear().getKfjlr() > 0) {
 			// 首先看： 快报，预告，需要计算。然后人工校验
-			if (yi != null && yi.getYgjlr() > 0) {
+			if (yi != null && yi.getYgjlr() > 0 && yi.getYgjlrtbzz() > 0) {// 预告要增长
 				// 需要计算
 				long currKf = yi.getYgjlr();// 包含整个季度的
 				// 非1季度
@@ -488,6 +488,7 @@ public class FinanceService {
 			y.setYear(yjkb.getYear());
 			y.setQuarter(yjkb.getQuarter());
 			y.setYgjlr(yjkb.getJlr());
+			y.setYgjlrtbzz(yjkb.getJlrtbzz());
 			return y;
 		}
 		// 业绩预告(类似天气预报,可能不准)
@@ -501,6 +502,7 @@ public class FinanceService {
 			y.setYear(yjyg.getYear());
 			y.setQuarter(yjyg.getQuarter());
 			y.setYgjlr(yjyg.getJlr());
+			y.setYgjlrtbzz(yjyg.getJlrtbzz());
 			return y;
 		}
 		return null;

@@ -510,9 +510,20 @@ public class EastmoneySpider {
 				JSONArray datas = objects.getJSONObject("result").getJSONArray("data");
 				for (int i = 0; i < datas.size(); i++) {
 					JSONObject data = datas.getJSONObject(i);
+//					"003",每股收益
+//					"004",归属于上市公司股东的净利润"
+//					"005",扣除非经常性损益后的净利润"
+//					"006",营业收入"
+//					"007",非经常性损益"
+//					"008",扣除后营业收入"
+
+					if (!"004".equals(data.getString("PREDICT_FINANCE_CODE"))) {
+						continue;
+					}
+					FinYjyg fy = new FinYjyg();
+					fy.setCode(data.getString("SECURITY_CODE"));
 					String date = data.getString("REPORT_DATE"); // 报告期
 					String anndate = data.getString("NOTICE_DATE"); // 公告日期
-					FinYjyg fy = new FinYjyg();
 					String datestr = DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS));
 					int y = Integer.valueOf(datestr.substring(0, 4));
 					int m = Integer.valueOf(datestr.substring(4, 6));
@@ -528,7 +539,7 @@ public class EastmoneySpider {
 					}
 					fy.setYear(y);
 					fy.setQuarter(quarter);
-					fy.setCode(data.getString("SECURITY_CODE"));
+
 					fy.setDate(Integer
 							.parseInt(DateUtil.formatYYYYMMDD(DateUtil.parseDate(date, DateUtil.YYYY_MM_DD_HH_MM_SS))));
 					fy.setAnnDate(Integer.parseInt(
@@ -711,7 +722,7 @@ public class EastmoneySpider {
 		EastmoneySpider es = new EastmoneySpider();
 		es.htmlunitSpider = new HtmlunitSpider();
 
-//		es.getYjkbByPage("2023-12-31", new LinkedList<FinYjkb>());
+		es.getYjygByPage("2023-12-31", new LinkedList<FinYjyg>());
 //		String code = "002895";
 //		int beforeChkDate = 99999999;
 //		List<FinanceBaseInfoPage> l = es.getNewFinanceAnalysis(code, 4);

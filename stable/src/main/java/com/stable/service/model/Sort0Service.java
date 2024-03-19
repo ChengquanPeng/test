@@ -28,7 +28,6 @@ public class Sort0Service {
 	private DaliyTradeHistroyService daliyTradeHistroyService;
 
 	public void attackAndW(CodeBaseModel2 newOne, int date) {
-
 		if (attackAndW(newOne.getCode(), date)) {
 			newOne.setShootingw(1);
 		} else {

@@ -97,9 +97,9 @@ public class CodeModelService {
 //	public void test() {
 //		new Thread(new Runnable() {
 //			@Override
-//	@		public void run() {
+//			public void run() {
 ////	@			runModel1(20220822, false);
-//				runByCode("603190", 20240311);
+//				runByCode("000912", 20240319);
 //				System.err.println("runModel1 done");
 //				System.exit(0);
 //			}
@@ -1187,7 +1187,8 @@ public class CodeModelService {
 
 		int yjn = 0;
 		// 股票范围：5%持股30以上，底部未涨
-		if (newOne.getHolderNumP5() > 30.0 && (TagUtil.isDibu11(newOne) || newOne.getZfjjup() >= 4)) {
+		if (fa.getCurrJidu().getKfjlrtbzz() > 0 // 至少当季扣非同比增长
+				&& newOne.getHolderNumP5() > 30.0 && (TagUtil.isDibu11(newOne) || newOne.getZfjjup() >= 4)) {
 			yjn = financeService.finBigBoss(yi, fa, fbis, newOne);
 		}
 		if (yjn == 0) {
