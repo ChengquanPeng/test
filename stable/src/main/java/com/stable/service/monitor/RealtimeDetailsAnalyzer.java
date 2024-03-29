@@ -19,6 +19,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class RealtimeDetailsAnalyzer implements Runnable {
+	private static final String NO_BUY = "不买";
 	private ConceptService conceptService;
 	public static final long ONE_MIN = 1 * 60 * 1000;// 1MIN
 	private static final long FIVE_MIN = 3 * 60 * 1000;// 5MIN
@@ -190,6 +191,9 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 					}
 					// 发送
 					if (!title.equals("")) {
+						if (rtm.getBase().getBuyRea().contains(NO_BUY)) {
+							title = "[不买！！！] " + title;
+						}
 						MsgPushServer.pushTextToUser(codeName + " " + title, rtm.getMsg(r.getOrig()), r.getUser());
 
 						if (r.getOrig().getUserId() == Constant.MY_ID) {
