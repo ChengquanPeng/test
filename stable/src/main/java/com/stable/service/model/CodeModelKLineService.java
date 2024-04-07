@@ -223,9 +223,9 @@ public class CodeModelKLineService {
 		// 起爆点
 		try {
 			qbQxService.qx(tradeDate, newOne, pool, isSamll, nextTadeDate);
-			szxService.szx(tradeDate, newOne, pool, isSamll);
 			v1XipanService.xipanQb(tradeDate, newOne, isSamll, nextTadeDate);
 			nxService.nxipan(tradeDate, newOne, nextTadeDate);
+			szxService.szx(tradeDate, newOne, pool, isSamll);
 		} catch (Exception e) {
 			ErrorLogFileUitl.writeError(e, s.getCode(), tradeDate + "", "起爆");
 		}

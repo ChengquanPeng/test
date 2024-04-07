@@ -11,7 +11,6 @@ import com.stable.service.DaliyTradeHistroyService;
 import com.stable.service.model.data.LineAvgPrice;
 import com.stable.utils.CurrencyUitl;
 import com.stable.utils.StringUtil;
-import com.stable.utils.TagUtil;
 import com.stable.vo.bus.CodeBaseModel2;
 import com.stable.vo.bus.MonitorPoolTemp;
 import com.stable.vo.bus.TradeHistInfoDaliy;
@@ -92,7 +91,7 @@ public class SzxService {
 					newOne.setZyxing(chk.getDate());
 				}
 			}
-		}
+
 	}
 
 	private void szx1(int date, CodeBaseModel2 newOne, MonitorPoolTemp pool, boolean isSamll) {
