@@ -13,11 +13,13 @@ public class StringUtil {
 	 */
 
 	public static String stringInsertByInterval(String original, String insertString, int interval) {
-		if (original == null)
+		if (original == null) {
 			return "";
+		}
 		Integer len = original.length();
-		if (interval >= len)
+		if (interval >= len) {
 			return original;
+		}
 
 		String rtnString = original;
 		if (original.length() > interval) {

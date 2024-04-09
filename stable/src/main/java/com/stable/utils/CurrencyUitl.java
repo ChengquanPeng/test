@@ -30,7 +30,7 @@ public class CurrencyUitl {
 
 	public final static Long covertToLong(String str) {
 		if (StringUtils.isBlank(str) || str.contains(Constant.NULL) || str.contains(Constant.FALSE)) {
-			return 0l;
+			return 0L;
 		}
 		// System.err.println("STR:" + str);
 		str = str.trim().replaceAll(" ", "").replaceAll(YUAN, Constant.EMPTY_STRING);
@@ -57,10 +57,10 @@ public class CurrencyUitl {
 		} else if (l > 10000) {
 			BigDecimal b = new BigDecimal(l);
 			return b.divide(WAN_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + WAN;
-		} else if (l < -100000000l) {
+		} else if (l < -100000000L) {
 			BigDecimal b = new BigDecimal(l);
 			return b.divide(YI_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + YI;
-		} else if (l < -10000l) {
+		} else if (l < -10000L) {
 			BigDecimal b = new BigDecimal(l);
 			return b.divide(WAN_N).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() + WAN;
 		}

@@ -68,7 +68,7 @@ public class ThsBonusSpider {
 	private BonusHistDao bonusHistDao;
 	@Autowired
 	private ChipsZfService chipsZfService;
-	private final long highMoney = 4000000000l;// 40亿
+	private final long highMoney = 4000000000L;// 40亿
 
 //1、先由董事会作出决议：方案
 //2、提请股东大会批准 

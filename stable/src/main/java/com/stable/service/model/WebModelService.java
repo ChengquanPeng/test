@@ -457,14 +457,14 @@ public class WebModelService {
 		if (StringUtils.isNotBlank(mr.getZfYjAmt())) {
 			Long zfYjAmt = Long.valueOf(mr.getZfYjAmt());
 			if (zfYjAmt > 0) {
-				bqb.must(QueryBuilders.rangeQuery("zfYjAmt").lte(zfYjAmt * 100000000l));
+				bqb.must(QueryBuilders.rangeQuery("zfYjAmt").lte(zfYjAmt * 100000000L));
 			}
 		}
 		// 大于等于
 		if (StringUtils.isNotBlank(mr.getZfYjAmt2())) {
 			Long zfYjAmt = Long.valueOf(mr.getZfYjAmt2());
 			if (zfYjAmt > 0) {
-				bqb.must(QueryBuilders.rangeQuery("zfYjAmt").gte(zfYjAmt * 100000000l));
+				bqb.must(QueryBuilders.rangeQuery("zfYjAmt").gte(zfYjAmt * 100000000L));
 			}
 		}
 		// 股东人数
