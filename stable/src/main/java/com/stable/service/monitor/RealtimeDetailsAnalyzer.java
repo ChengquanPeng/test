@@ -221,6 +221,9 @@ public class RealtimeDetailsAnalyzer implements Runnable {
 	private boolean isPushedException = false;
 
 	private boolean pushMsg(String title2) {
+		if (rtm.getBase().getBuyRea().contains(NO_BUY)) {
+			title2 = "[不买！！！] " + title2;
+		}
 		String mailTitle = title2;
 		String wxTitle = title2;
 		String tmp = TagUtil.warningXiaopiaoGdrs(rtm.base);
